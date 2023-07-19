@@ -152,7 +152,8 @@ public final class EciesPublicKey extends HybridPublicKey {
       EciesParameters parameters, Bytes publicPointBytes, @Nullable Integer idRequirement)
       throws GeneralSecurityException {
     validateIdRequirement(parameters.getVariant(), idRequirement);
-    validatePublicPoint(parameters.getCurveType(), parameters.getPointFormat(), publicPointBytes);
+    validatePublicPoint(
+        parameters.getCurveType(), parameters.getNistCurvePointFormat(), publicPointBytes);
 
     Bytes prefix = createOutputPrefix(parameters.getVariant(), idRequirement);
 

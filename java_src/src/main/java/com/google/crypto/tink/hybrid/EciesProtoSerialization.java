@@ -36,6 +36,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
+import javax.annotation.Nullable;
 
 /** Methods to serialize and parse {@link EciesParameters} objects. */
 @AccessesPartialKey
@@ -134,10 +135,15 @@ final class EciesProtoSerialization {
       throw new GeneralSecurityException("Parsing EciesParameters failed: ", e);
     }
 
+    @Nullable EciesParameters.PointFormat pointFormat = parameters.getNistCurvePointFormat();
+    // Null only for X25519 in which case we want compressed.
+    if (pointFormat == null) {
+      pointFormat = EciesParameters.PointFormat.COMPRESSED;
+    }
     return com.google.crypto.tink.proto.EciesAeadHkdfParams.newBuilder()
         .setKemParams(kemProtoParams)
         .setDemParams(demProtoParams)
-        .setEcPointFormat(POINT_FORMAT_CONVERTER.toProtoEnum(parameters.getPointFormat()))
+        .setEcPointFormat(POINT_FORMAT_CONVERTER.toProtoEnum(pointFormat))
         .build();
   }
 
@@ -146,15 +152,20 @@ final class EciesProtoSerialization {
       throws GeneralSecurityException {
     com.google.crypto.tink.proto.KeyTemplate aeadKeyTemplate =
         protoParams.getDemParams().getAeadDem();
-    return EciesParameters.builder()
-        .setVariant(VARIANT_CONVERTER.fromProtoEnum(outputPrefixType))
-        .setCurveType(CURVE_TYPE_CONVERTER.fromProtoEnum(protoParams.getKemParams().getCurveType()))
-        .setHashType(
-            HASH_TYPE_CONVERTER.fromProtoEnum(protoParams.getKemParams().getHkdfHashType()))
-        .setPointFormat(POINT_FORMAT_CONVERTER.fromProtoEnum(protoParams.getEcPointFormat()))
-        .setDemParameters(TinkProtoParametersFormat.parse(aeadKeyTemplate.toByteArray()))
-        .setSalt(Bytes.copyFrom(protoParams.getKemParams().getHkdfSalt().toByteArray()))
-        .build();
+    EciesParameters.Builder builder =
+        EciesParameters.builder()
+            .setVariant(VARIANT_CONVERTER.fromProtoEnum(outputPrefixType))
+            .setCurveType(
+                CURVE_TYPE_CONVERTER.fromProtoEnum(protoParams.getKemParams().getCurveType()))
+            .setHashType(
+                HASH_TYPE_CONVERTER.fromProtoEnum(protoParams.getKemParams().getHkdfHashType()))
+            .setDemParameters(TinkProtoParametersFormat.parse(aeadKeyTemplate.toByteArray()))
+            .setSalt(Bytes.copyFrom(protoParams.getKemParams().getHkdfSalt().toByteArray()));
+    if (!protoParams.getKemParams().getCurveType().equals(EllipticCurveType.CURVE25519)) {
+      builder.setNistCurvePointFormat(
+          POINT_FORMAT_CONVERTER.fromProtoEnum(protoParams.getEcPointFormat()));
+    }
+    return builder.build();
   }
 
   private static ProtoParametersSerialization serializeParameters(EciesParameters parameters)

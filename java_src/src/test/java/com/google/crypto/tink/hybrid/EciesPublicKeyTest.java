@@ -100,7 +100,7 @@ public final class EciesPublicKeyTest {
         EciesParameters.builder()
             .setHashType(EciesParameters.HashType.SHA256)
             .setCurveType(EciesParameters.CurveType.NIST_P256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
@@ -141,7 +141,7 @@ public final class EciesPublicKeyTest {
         EciesParameters.builder()
             .setHashType(EciesParameters.HashType.SHA256)
             .setCurveType(nistCurveMapping.curveType)
-            .setPointFormat(pointFormatMapping.pointFormat)
+            .setNistCurvePointFormat(pointFormatMapping.pointFormat)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
@@ -169,7 +169,6 @@ public final class EciesPublicKeyTest {
         EciesParameters.builder()
             .setHashType(EciesParameters.HashType.SHA256)
             .setCurveType(EciesParameters.CurveType.X25519)
-            .setPointFormat(EciesParameters.PointFormat.COMPRESSED)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
@@ -193,7 +192,7 @@ public final class EciesPublicKeyTest {
         EciesParameters.builder()
             .setHashType(EciesParameters.HashType.SHA256)
             .setCurveType(nistCurveMapping.curveType)
-            .setPointFormat(pointFormatMapping.pointFormat)
+            .setNistCurvePointFormat(pointFormatMapping.pointFormat)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
@@ -225,7 +224,6 @@ public final class EciesPublicKeyTest {
         EciesParameters.builder()
             .setHashType(EciesParameters.HashType.SHA256)
             .setCurveType(EciesParameters.CurveType.X25519)
-            .setPointFormat(EciesParameters.PointFormat.COMPRESSED)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
@@ -265,7 +263,7 @@ public final class EciesPublicKeyTest {
         EciesParameters.builder()
             .setHashType(EciesParameters.HashType.SHA256)
             .setCurveType(nistCurveMapping.curveType)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
@@ -290,7 +288,6 @@ public final class EciesPublicKeyTest {
         EciesParameters.builder()
             .setHashType(EciesParameters.HashType.SHA256)
             .setCurveType(EciesParameters.CurveType.X25519)
-            .setPointFormat(EciesParameters.PointFormat.COMPRESSED)
             .setDemParameters(XChaCha20Poly1305Parameters.create());
     Bytes publicKeyBytes = Bytes.copyFrom(X25519.publicFromPrivate(X25519.generatePrivateKey()));
 
@@ -318,7 +315,6 @@ public final class EciesPublicKeyTest {
         EciesParameters.builder()
             .setHashType(EciesParameters.HashType.SHA256)
             .setCurveType(EciesParameters.CurveType.X25519)
-            .setPointFormat(EciesParameters.PointFormat.COMPRESSED)
             .setDemParameters(XChaCha20Poly1305Parameters.create());
     Bytes publicPointBytes = Bytes.copyFrom(X25519.publicFromPrivate(X25519.generatePrivateKey()));
 
@@ -351,7 +347,25 @@ public final class EciesPublicKeyTest {
         EciesParameters.builder()
             .setHashType(EciesParameters.HashType.SHA256)
             .setCurveType(EciesParameters.CurveType.X25519)
-            .setPointFormat(EciesParameters.PointFormat.COMPRESSED)
+            .setVariant(EciesParameters.Variant.NO_PREFIX)
+            .setDemParameters(XChaCha20Poly1305Parameters.create())
+            .build();
+    Bytes publicPointBytes = Bytes.copyFrom(X25519.publicFromPrivate(X25519.generatePrivateKey()));
+
+    EciesPublicKey publicKey1 =
+        EciesPublicKey.create(params, publicPointBytes, /* idRequirement= */ null);
+    EciesPublicKey publicKey2 =
+        EciesPublicKey.create(params, publicPointBytes, /* idRequirement= */ null);
+
+    assertThat(publicKey1.equalsKey(publicKey2)).isTrue();
+  }
+
+  @Test
+  public void sameKeys_nist_areEqual() throws Exception {
+    EciesParameters params =
+        EciesParameters.builder()
+            .setHashType(EciesParameters.HashType.SHA256)
+            .setCurveType(EciesParameters.CurveType.X25519)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
@@ -371,7 +385,6 @@ public final class EciesPublicKeyTest {
         EciesParameters.builder()
             .setHashType(EciesParameters.HashType.SHA256)
             .setCurveType(EciesParameters.CurveType.X25519)
-            .setPointFormat(EciesParameters.PointFormat.COMPRESSED)
             .setDemParameters(XChaCha20Poly1305Parameters.create());
     Bytes publicKeyBytes = Bytes.copyFrom(X25519.publicFromPrivate(X25519.generatePrivateKey()));
 
@@ -391,7 +404,6 @@ public final class EciesPublicKeyTest {
         EciesParameters.builder()
             .setHashType(EciesParameters.HashType.SHA256)
             .setCurveType(EciesParameters.CurveType.X25519)
-            .setPointFormat(EciesParameters.PointFormat.COMPRESSED)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
@@ -414,7 +426,6 @@ public final class EciesPublicKeyTest {
         EciesParameters.builder()
             .setHashType(EciesParameters.HashType.SHA256)
             .setCurveType(EciesParameters.CurveType.X25519)
-            .setPointFormat(EciesParameters.PointFormat.COMPRESSED)
             .setDemParameters(XChaCha20Poly1305Parameters.create());
     Bytes publicKeyBytes = Bytes.copyFrom(X25519.publicFromPrivate(X25519.generatePrivateKey()));
 

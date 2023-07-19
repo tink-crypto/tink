@@ -94,7 +94,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(curveType)
             .setHashType(hashType)
-            .setPointFormat(pointFormat)
+            .setNistCurvePointFormat(pointFormat)
             .setVariant(variant)
             .setDemParameters(aesGcmParameters)
             .setSalt(SALT)
@@ -103,7 +103,7 @@ public final class EciesParametersTest {
     assertThat(params.getVariant()).isEqualTo(variant);
     assertThat(params.getCurveType()).isEqualTo(curveType);
     assertThat(params.getHashType()).isEqualTo(hashType);
-    assertThat(params.getPointFormat()).isEqualTo(pointFormat);
+    assertThat(params.getNistCurvePointFormat()).isEqualTo(pointFormat);
     assertThat(params.getDemParameters()).isEqualTo(aesGcmParameters);
     assertThat(params.getSalt()).isEqualTo(SALT);
   }
@@ -124,7 +124,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P521)
             .setHashType(EciesParameters.HashType.SHA512)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setVariant(EciesParameters.Variant.TINK)
             .setDemParameters(aesCtrHmacAeadParameters)
             .setSalt(SALT)
@@ -141,7 +141,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.COMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.COMPRESSED)
             .setVariant(EciesParameters.Variant.CRUNCHY)
             .setDemParameters(xChaCha20Poly1305Parameters)
             .setSalt(SALT)
@@ -158,7 +158,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
             .setDemParameters(aesSivParameters)
             .setSalt(SALT)
@@ -178,27 +178,26 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.X25519)
             .setHashType(hashType)
-            .setPointFormat(EciesParameters.PointFormat.COMPRESSED)
             .setVariant(variant)
             .setDemParameters(xChaCha20Poly1305Parameters)
             .setSalt(SALT)
             .build();
 
     assertThat(params.getCurveType()).isEqualTo(EciesParameters.CurveType.X25519);
-    assertThat(params.getPointFormat()).isEqualTo(EciesParameters.PointFormat.COMPRESSED);
+    assertThat(params.getNistCurvePointFormat()).isEqualTo(null);
     assertThat(params.getHashType()).isEqualTo(hashType);
     assertThat(params.getVariant()).isEqualTo(variant);
   }
 
-  @Theory
-  public void buildWithX25519Uncompressed_fails() throws Exception {
+  @Test
+  public void buildWithX25519NistCurveSet_fails() throws Exception {
     Parameters xChaCha20Poly1305Parameters = XChaCha20Poly1305Parameters.create();
 
     EciesParameters.Builder builder =
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.X25519)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.COMPRESSED)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
             .setDemParameters(xChaCha20Poly1305Parameters)
             .setSalt(SALT);
@@ -212,7 +211,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
@@ -226,7 +225,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .setSalt(Bytes.copyFrom("".getBytes(UTF_8)))
@@ -241,7 +240,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .setSalt(Bytes.copyFrom("Some Salt".getBytes(UTF_8)))
@@ -258,7 +257,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
             .setDemParameters(demParameters)
             .setSalt(SALT)
@@ -272,7 +271,7 @@ public final class EciesParametersTest {
     EciesParameters.Builder builder =
         EciesParameters.builder()
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
             .setDemParameters(XChaCha20Poly1305Parameters.create());
 
@@ -284,7 +283,7 @@ public final class EciesParametersTest {
     EciesParameters.Builder builder =
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
             .setDemParameters(XChaCha20Poly1305Parameters.create());
 
@@ -309,7 +308,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setHashType(EciesParameters.HashType.SHA256)
             .setCurveType(EciesParameters.CurveType.NIST_P256)
-            .setPointFormat(EciesParameters.PointFormat.COMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.COMPRESSED)
             .setVariant(EciesParameters.Variant.NO_PREFIX);
 
     assertThrows(GeneralSecurityException.class, builder::build);
@@ -323,7 +322,7 @@ public final class EciesParametersTest {
             EciesParameters.builder()
                 .setHashType(EciesParameters.HashType.SHA256)
                 .setCurveType(EciesParameters.CurveType.NIST_P256)
-                .setPointFormat(EciesParameters.PointFormat.COMPRESSED)
+                .setNistCurvePointFormat(EciesParameters.PointFormat.COMPRESSED)
                 .setVariant(EciesParameters.Variant.NO_PREFIX)
                 .setDemParameters(ChaCha20Poly1305Parameters.create())
                 .build());
@@ -337,7 +336,7 @@ public final class EciesParametersTest {
             EciesParameters.builder()
                 .setHashType(EciesParameters.HashType.SHA256)
                 .setCurveType(EciesParameters.CurveType.NIST_P256)
-                .setPointFormat(EciesParameters.PointFormat.COMPRESSED)
+                .setNistCurvePointFormat(EciesParameters.PointFormat.COMPRESSED)
                 .setVariant(EciesParameters.Variant.NO_PREFIX)
                 .setDemParameters(
                     XChaCha20Poly1305Parameters.create(XChaCha20Poly1305Parameters.Variant.TINK))
@@ -350,7 +349,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setHashType(EciesParameters.HashType.SHA256)
             .setCurveType(EciesParameters.CurveType.NIST_P256)
-            .setPointFormat(EciesParameters.PointFormat.COMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.COMPRESSED)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .setVariant(null);
 
@@ -363,7 +362,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
@@ -377,7 +376,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setVariant(EciesParameters.Variant.TINK)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
@@ -392,7 +391,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setVariant(EciesParameters.Variant.CRUNCHY)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
@@ -406,7 +405,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .setSalt(SALT)
@@ -415,7 +414,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .setSalt(SALT)
@@ -431,7 +430,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setVariant(EciesParameters.Variant.CRUNCHY)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
@@ -440,7 +439,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setVariant(EciesParameters.Variant.TINK)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
@@ -455,7 +454,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
 
@@ -463,7 +462,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P521)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
 
@@ -477,7 +476,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
 
@@ -485,7 +484,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA512)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
 
@@ -499,7 +498,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.COMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.COMPRESSED)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
 
@@ -507,7 +506,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
 
@@ -521,7 +520,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setDemParameters(AesSivParameters.builder().setKeySizeBytes(32).build())
             .build();
 
@@ -529,7 +528,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
 
@@ -543,7 +542,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .setSalt(SALT)
             .build();
@@ -552,7 +551,7 @@ public final class EciesParametersTest {
         EciesParameters.builder()
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
-            .setPointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .setSalt(Bytes.copyFrom("".getBytes(UTF_8)))
             .build();
