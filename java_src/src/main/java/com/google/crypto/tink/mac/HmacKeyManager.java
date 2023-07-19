@@ -88,9 +88,11 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
   private static final PrimitiveConstructor<com.google.crypto.tink.mac.HmacKey, ChunkedMac>
       CHUNKED_MAC_PRIMITIVE_CONSTRUCTOR =
           PrimitiveConstructor.create(
-              ChunkedHmacImpl::new,
-              com.google.crypto.tink.mac.HmacKey.class,
-              ChunkedMac.class);
+              ChunkedHmacImpl::new, com.google.crypto.tink.mac.HmacKey.class, ChunkedMac.class);
+  private static final PrimitiveConstructor<com.google.crypto.tink.mac.HmacKey, Mac>
+      MAC_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              PrfMac::create, com.google.crypto.tink.mac.HmacKey.class, Mac.class);
 
   @Override
   public String getKeyType() {
@@ -243,6 +245,8 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
     HmacProtoSerialization.register();
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(CHUNKED_MAC_PRIMITIVE_CONSTRUCTOR);
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(MAC_PRIMITIVE_CONSTRUCTOR);
   }
 
   /**
