@@ -26,8 +26,6 @@ from tink import jwt
 
 FLAGS = flags.FLAGS
 
-_PUBLIC_KEYSET_PATH = flags.DEFINE_string(
-    'public_keyset_path', None, 'Path to public keyset in Tink JSON format.')
 _PUBLIC_JWK_SET_PATH = flags.DEFINE_string(
     'public_jwk_set_path', None, 'Path to public keyset in JWK set format.')
 _AUDIENCE = flags.DEFINE_string('audience', None,
@@ -42,28 +40,13 @@ def main(argv):
   # Initialise Tink
   jwt.register_jwt_signature()
 
-  # Read the keyset into a KeysetHandle
-  if _PUBLIC_KEYSET_PATH.present:
-    with open(_PUBLIC_KEYSET_PATH.value, 'rt') as public_keyset_file:
-      try:
-        text = public_keyset_file.read()
-        keyset_handle = tink.read_no_secret_keyset_handle(
-            tink.JsonKeysetReader(text))
-      except tink.TinkError as e:
-        logging.exception('Error reading public keyset: %s', e)
-        return 1
-  elif _PUBLIC_JWK_SET_PATH.present:
-    with open(_PUBLIC_JWK_SET_PATH.value, 'rt') as public_jwk_set_file:
-      try:
-        text = public_jwk_set_file.read()
-        keyset_handle = jwt.jwk_set_to_public_keyset_handle(text)
-      except tink.TinkError as e:
-        logging.exception('Error reading public JWK set: %s', e)
-        return 1
-  else:
-    logging.exception(
-        'Either --public_keyset_path or --public_jwk_set_path must be set')
-    return 1
+  with open(_PUBLIC_JWK_SET_PATH.value, 'rt') as public_jwk_set_file:
+    try:
+      text = public_jwk_set_file.read()
+      keyset_handle = jwt.jwk_set_to_public_keyset_handle(text)
+    except tink.TinkError as e:
+      logging.exception('Error reading public JWK set: %s', e)
+      return 1
 
   now = datetime.datetime.now(tz=datetime.timezone.utc)
   try:

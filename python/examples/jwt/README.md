@@ -40,18 +40,10 @@ $ ./bazel-bin/jwt/jwt_sign \
     --audience "audience" --token_path token_file.txt
 ```
 
-Verify the token using the public keyset:
-
-```shell
-$ ./bazel-bin/jwt/jwt_verify \
-    --public_keyset_path public_jwk_set.json \
-    --audience "audience" --token_path token_file.txt
-```
-
-You can also convert the public keyset into
+You can convert the public keyset into
 [JWK Set](https://datatracker.ietf.org/doc/html/rfc7517#section-5) format. This
 is useful if you want to share the public keyset with someone who is not using
-Tink. Note that this functionality was added after the release v1.6.1.
+Tink. Note that this functionality was added after the release v1.7.0.
 
 ```shell
 $ touch public_jwk_set.json
@@ -61,7 +53,7 @@ $ ./bazel-bin/jwt/jwt_generate_public_jwk_set \
     --public_jwk_set_path public_jwk_set.json
 ```
 
-You can also verify a token using a public keyset given in JWK Set format:
+You can verify a token using a public keyset given in JWK Set format:
 
 ```shell
 $ ./bazel-bin/jwt/jwt_verify \
