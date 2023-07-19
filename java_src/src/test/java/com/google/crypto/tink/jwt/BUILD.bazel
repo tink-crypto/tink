@@ -499,3 +499,14 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "JwtRsaSsaPkcs1ParametersTest",
+    size = "small",
+    srcs = ["JwtRsaSsaPkcs1ParametersTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pkcs1_parameters",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

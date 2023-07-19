@@ -1125,3 +1125,21 @@ java_library(
         "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
+
+android_library(
+    name = "jwt_rsa_ssa_pkcs1_parameters-android",
+    srcs = ["JwtRsaSsaPkcs1Parameters.java"],
+    deps = [
+        ":jwt_signature_parameters-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "jwt_rsa_ssa_pkcs1_parameters",
+    srcs = ["JwtRsaSsaPkcs1Parameters.java"],
+    deps = [
+        ":jwt_signature_parameters",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
