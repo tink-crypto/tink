@@ -99,7 +99,7 @@ public final class KeysetManager {
    */
   @CanIgnoreReturnValue
   public synchronized KeysetManager add(KeyTemplate keyTemplate) throws GeneralSecurityException {
-    addNewKey(keyTemplate.getProto(), false);
+    addNewKey(keyTemplate.getProtoMaybeThrow(), false);
     return this;
   }
 
