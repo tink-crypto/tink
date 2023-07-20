@@ -524,7 +524,7 @@ public final class Registry {
   }
 
   /**
-   * Convenience method for generating a new {@link KeyData} for the specified {@code template}.
+   * Generates a new {@link KeyData} for the specified {@code template}.
    *
    * <p>It looks up a {@link KeyManager} identified by {@code keyTemplate.type_url}, and calls
    * {@link KeyManager#newKeyData}.
@@ -544,8 +544,8 @@ public final class Registry {
     }
   }
 
-    /**
-   * Convenience method for generating a new {@link KeyData} for the specified {@code template}.
+  /**
+   * Generates a new {@link KeyData} for the specified {@code template}.
    *
    * <p>It looks up a {@link KeyManager} identified by {@code keyTemplate.type_url}, and calls
    * {@link KeyManager#newKeyData}.
@@ -560,7 +560,7 @@ public final class Registry {
   }
 
   /**
-   * Convenience method for generating a new key for the specified {@code keyTemplate}.
+   * Generates a new key for the specified {@code keyTemplate}.
    *
    * <p>It looks up a {@link KeyManager} identified by {@code keyTemplate.type_url}, and calls
    * {@link KeyManager#newKey} with {@code keyTemplate} as the parameter.
@@ -581,7 +581,7 @@ public final class Registry {
   }
 
   /**
-   * Convenience method for generating a new key for the specified {@code format}.
+   * Generates a new key for the specified {@code format}.
    *
    * <p>It looks up a {@link KeyManager} identified by {@code keyTemplate.type_url}, and calls
    * {@link KeyManager#newKey} with {@code format} as the parameter.
@@ -601,8 +601,8 @@ public final class Registry {
   }
 
   /**
-   * Method to derive a key, using the given {@code keyTemplate}, with the randomness as provided by
-   * the second argument.
+   * Derives a key, using the given {@code keyTemplate}, with the randomness as provided by the
+   * second argument.
    *
    * <p>This method is on purpose not in the public interface. Calling it twice using different key
    * templates and the same randomness can completely destroy any security in a system, so we
@@ -623,8 +623,7 @@ public final class Registry {
   }
 
   /**
-   * Convenience method for extracting the public key data from the private key given in {@code
-   * serializedPrivateKey}.
+   * Extracts the public key data from the private key given in {@code serializedPrivateKey}.
    *
    * <p>It looks up a {@link PrivateKeyManager} identified by {@code typeUrl}, and calls {@link
    * PrivateKeyManager#getPublicKeyData} with {@code serializedPrivateKey} as the parameter.
@@ -642,7 +641,7 @@ public final class Registry {
   }
 
   /**
-   * Convenience method for creating a new primitive for the key given in {@code proto}.
+   * Creates a new primitive for the key given in {@code proto}.
    *
    * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls {@link
    * KeyManager#getPrimitive} with {@code key} as the parameter.
@@ -659,7 +658,7 @@ public final class Registry {
   }
 
   /**
-   * Convenience method for creating a new primitive for the key given in {@code key}.
+   * Creates a new primitive for the key given in {@code key}.
    *
    * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls {@link
    * KeyManager#getPrimitive} with {@code key} as the parameter.
@@ -675,7 +674,7 @@ public final class Registry {
   }
 
   /**
-   * Convenience method for creating a new primitive for the key given in {@code proto}.
+   * Creates a new primitive for the key given in {@code proto}.
    *
    * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls {@link
    * KeyManager#getPrimitive} with {@code serializedKey} as the parameter.
@@ -692,7 +691,7 @@ public final class Registry {
   }
 
   /**
-   * Convenience method for creating a new primitive for the key given in {@code serializedKey}.
+   * Creates a new primitive for the key given in {@code serializedKey}.
    *
    * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls {@link
    * KeyManager#getPrimitive} with {@code serialized} as the parameter.
@@ -707,7 +706,7 @@ public final class Registry {
   }
 
   /**
-   * Convenience method for creating a new primitive for the key given in {@code serializedKey}.
+   * Creates a new primitive for the key given in {@code serializedKey}.
    *
    * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls {@link
    * KeyManager#getPrimitive} with {@code serialized} as the parameter.
@@ -723,7 +722,7 @@ public final class Registry {
   }
 
   /**
-   * Convenience method for creating a new primitive for the key given in {@code serializedKey}.
+   * Creates a new primitive for the key given in {@code serializedKey}.
    *
    * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls {@link
    * KeyManager#getPrimitive} with {@code serialized} as the parameter.
@@ -736,7 +735,7 @@ public final class Registry {
   }
 
   /**
-   * Convenience method for creating a new primitive for the key given in {@code keyData}.
+   * Creates a new primitive for the key given in {@code keyData}.
    *
    * <p>It looks up a {@link KeyManager} identified by {@code keyData.type_url}, and calls {@link
    * KeyManager#getPrimitive} with {@code keyData.value} as the parameter.
@@ -751,7 +750,7 @@ public final class Registry {
   }
 
   /**
-   * Convenience method for creating a new primitive for the key given in {@code keyData}.
+   * Creates a new primitive for the key given in {@code keyData}.
    *
    * <p>It looks up a {@link KeyManager} identified by {@code keyData.type_url}, and calls {@link
    * KeyManager#getPrimitive} with {@code keyData.value} as the parameter.
@@ -799,6 +798,7 @@ public final class Registry {
   static synchronized Map<String, KeyTemplate> keyTemplateMap() {
     return Collections.unmodifiableMap(keyTemplateMap);
   }
+
   /**
    * Returns the input primitive required when creating a {@code wrappedPrimitive}.
    *
