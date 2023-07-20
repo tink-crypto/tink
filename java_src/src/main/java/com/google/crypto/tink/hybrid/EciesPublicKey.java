@@ -18,6 +18,7 @@ package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Key;
+import com.google.crypto.tink.internal.EllipticCurvesUtil;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
@@ -33,17 +34,27 @@ import javax.annotation.Nullable;
 @Immutable
 public final class EciesPublicKey extends HybridPublicKey {
   private final EciesParameters parameters;
-  private final Bytes publicPointBytes;
+
+  /** Exactly one of nistPublicPoint and x25519PublicPointBytes is non-null. */
+  @SuppressWarnings("Immutable") // ECPoint is immutable
+  @Nullable
+  private final ECPoint nistPublicPoint;
+
+  /** Exactly one of nistPublicPoint and x25519PublicPointBytes is non-null. */
+  @Nullable private final Bytes x25519PublicPointBytes;
+
   private final Bytes outputPrefix;
   @Nullable private final Integer idRequirement;
 
   private EciesPublicKey(
       EciesParameters parameters,
-      Bytes publicPointBytes,
+      @Nullable ECPoint nistPublicPoint,
+      @Nullable Bytes x25519PublicPointBytes,
       Bytes outputPrefix,
       @Nullable Integer idRequirement) {
     this.parameters = parameters;
-    this.publicPointBytes = publicPointBytes;
+    this.nistPublicPoint = nistPublicPoint;
+    this.x25519PublicPointBytes = x25519PublicPointBytes;
     this.outputPrefix = outputPrefix;
     this.idRequirement = idRequirement;
   }
@@ -73,47 +84,6 @@ public final class EciesPublicKey extends HybridPublicKey {
     throw new IllegalArgumentException("Unable to determine NIST curve type for " + curveType);
   }
 
-  private static EllipticCurves.PointFormatType getPointFormatType(
-      EciesParameters.PointFormat pointFormat) {
-    if (pointFormat == EciesParameters.PointFormat.COMPRESSED) {
-      return EllipticCurves.PointFormatType.COMPRESSED;
-    }
-    if (pointFormat == EciesParameters.PointFormat.UNCOMPRESSED) {
-      return EllipticCurves.PointFormatType.UNCOMPRESSED;
-    }
-    if (pointFormat == EciesParameters.PointFormat.LEGACY_UNCOMPRESSED) {
-      return EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED;
-    }
-
-    throw new IllegalArgumentException("Unable to determine point format type for " + pointFormat);
-  }
-
-  private static void validatePublicPoint(
-      EciesParameters.CurveType curveType,
-      EciesParameters.PointFormat pointFormat,
-      Bytes publicPointBytes)
-      throws GeneralSecurityException {
-    /*
-     * Every 32-byte string is accepted as a Curve25519 public key. See also:
-     * https://cr.yp.to/ecdh/curve25519-20060209.pdf
-     */
-    if (curveType == EciesParameters.CurveType.X25519) {
-      if (publicPointBytes.size() != 32) {
-        throw new GeneralSecurityException(
-            "Encoded public point byte length for X25519 curve must be 32");
-      }
-      return;
-    }
-
-    // Validation for Nist Curve public points.
-    EllipticCurve curve = getParameterSpecNistCurve(curveType);
-    EllipticCurves.PointFormatType pointFormatType = getPointFormatType(pointFormat);
-
-    // This checks if the point is on the curve and if the encoding has the proper length.
-    ECPoint unused =
-        EllipticCurves.pointDecode(curve, pointFormatType, publicPointBytes.toByteArray());
-  }
-
   private static Bytes createOutputPrefix(
       EciesParameters.Variant variant, @Nullable Integer idRequirement) {
     if (variant == EciesParameters.Variant.NO_PREFIX) {
@@ -133,13 +103,10 @@ public final class EciesPublicKey extends HybridPublicKey {
   }
 
   /**
-   * Creates a new ECIES public key.
+   * Creates a new ECIES public key using Curve25519.
    *
    * @param parameters ECIES parameters for the public key
-   * @param publicPointBytes public point coordinates in bytes. For the NIST curves, the public
-   *     point is encoded using the Elliptic-Curve-Point-to-Octet-String conversion according to
-   *     https://secg.org/sec1-v2.pdf. For X25519, the encoding is just the identity function, since
-   *     these curves already use fixed-length byte strings for public keys.
+   * @param publicPointBytes public point coordinates in bytes.
    * @param idRequirement key id requirement, which must be null for {@code NO_PREFIX} variant and
    *     non-null for all other variants
    */
@@ -148,30 +115,76 @@ public final class EciesPublicKey extends HybridPublicKey {
       link = "https://developers.google.com/tink/design/access_control#accessing_partial_keys",
       allowedOnPath = ".*Test\\.java",
       allowlistAnnotations = {AccessesPartialKey.class})
-  public static EciesPublicKey create(
+  public static EciesPublicKey createForCurveX25519(
       EciesParameters parameters, Bytes publicPointBytes, @Nullable Integer idRequirement)
       throws GeneralSecurityException {
+    if (!parameters.getCurveType().equals(EciesParameters.CurveType.X25519)) {
+      throw new GeneralSecurityException(
+          "createForCurveX25519 may only be called with parameters for curve X25519");
+    }
     validateIdRequirement(parameters.getVariant(), idRequirement);
-    validatePublicPoint(
-        parameters.getCurveType(), parameters.getNistCurvePointFormat(), publicPointBytes);
+    if (publicPointBytes.size() != 32) {
+      throw new GeneralSecurityException(
+          "Encoded public point byte length for X25519 curve must be 32");
+    }
 
     Bytes prefix = createOutputPrefix(parameters.getVariant(), idRequirement);
 
-    return new EciesPublicKey(parameters, publicPointBytes, prefix, idRequirement);
+    return new EciesPublicKey(parameters, null, publicPointBytes, prefix, idRequirement);
   }
 
   /**
-   * Returns the underlying public point coordinates as {@code Bytes}, using the
-   * Octet-String-to-Elliptic-Curve-Point conversion according to https://secg.org/sec1-v2.pdf (for
-   * the NIST curves). For X25519, the decoding is just the identity function.
+   * Creates a new ECIES public key using a NIST Curve.
+   *
+   * @param parameters ECIES parameters for the public key
+   * @param publicPoint public point as a {@code ECPoint}.
+   * @param idRequirement key id requirement, which must be null for {@code NO_PREFIX} variant and
+   *     non-null for all other variants
+   */
+  public static EciesPublicKey createForNistCurve(
+      EciesParameters parameters, ECPoint publicPoint, @Nullable Integer idRequirement)
+      throws GeneralSecurityException {
+    if (parameters.getCurveType().equals(EciesParameters.CurveType.X25519)) {
+      throw new GeneralSecurityException(
+          "createForNistCurve may only be called with parameters for NIST curve");
+    }
+    validateIdRequirement(parameters.getVariant(), idRequirement);
+    EllipticCurvesUtil.checkPointOnCurve(
+        publicPoint, getParameterSpecNistCurve(parameters.getCurveType()));
+
+    Bytes prefix = createOutputPrefix(parameters.getVariant(), idRequirement);
+
+    return new EciesPublicKey(parameters, publicPoint, null, prefix, idRequirement);
+  }
+
+  /**
+   * Returns the underlying public point as byte array in case the curve is X25519.
+   *
+   * <p>Returns null For NIST curves.
    */
   @RestrictedApi(
       explanation = "Accessing parts of keys can produce unexpected incompatibilities, annotate the function with @AccessesPartialKey",
       link = "https://developers.google.com/tink/design/access_control#accessing_partial_keys",
       allowedOnPath = ".*Test\\.java",
       allowlistAnnotations = {AccessesPartialKey.class})
-  public Bytes getPublicPointBytes() {
-    return publicPointBytes;
+  @Nullable
+  public ECPoint getNistCurvePoint() {
+    return nistPublicPoint;
+  }
+
+  /**
+   * Returns the underlying public point as EC Point in case the curve is a NIST curve.
+   *
+   * <p>Returns null for X25519 curves.
+   */
+  @RestrictedApi(
+      explanation = "Accessing parts of keys can produce unexpected incompatibilities, annotate the function with @AccessesPartialKey",
+      link = "https://developers.google.com/tink/design/access_control#accessing_partial_keys",
+      allowedOnPath = ".*Test\\.java",
+      allowlistAnnotations = {AccessesPartialKey.class})
+  @Nullable
+  public Bytes getX25519CurvePointBytes() {
+    return x25519PublicPointBytes;
   }
 
   @Override
@@ -198,7 +211,8 @@ public final class EciesPublicKey extends HybridPublicKey {
     EciesPublicKey other = (EciesPublicKey) o;
     // Since outputPrefix is a function of parameters, we can ignore it here.
     return parameters.equals(other.parameters)
-        && publicPointBytes.equals(other.publicPointBytes)
+        && Objects.equals(x25519PublicPointBytes, other.x25519PublicPointBytes)
+        && Objects.equals(nistPublicPoint, other.nistPublicPoint)
         && Objects.equals(idRequirement, other.idRequirement);
   }
 }

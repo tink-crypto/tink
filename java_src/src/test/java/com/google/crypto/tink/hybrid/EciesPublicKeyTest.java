@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.aead.XChaCha20Poly1305Parameters;
-import com.google.crypto.tink.internal.BigIntegerEncoding;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.X25519;
 import com.google.crypto.tink.util.Bytes;
@@ -31,7 +30,6 @@ import java.security.KeyPair;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
-import java.security.spec.EllipticCurve;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.FromDataPoints;
@@ -62,27 +60,12 @@ public final class EciesPublicKeyTest {
             EciesParameters.CurveType.NIST_P521, EllipticCurves.CurveType.NIST_P521)
       };
 
-  private static final class PointFormatMapping {
-    final EciesParameters.PointFormat pointFormat;
-    final EllipticCurves.PointFormatType ecPointFormatType;
-
-    PointFormatMapping(
-        EciesParameters.PointFormat pointFormat, EllipticCurves.PointFormatType ecPointFormatType) {
-      this.pointFormat = pointFormat;
-      this.ecPointFormatType = ecPointFormatType;
-    }
-  }
-
-  @DataPoints("pointFormatsMapping")
-  public static final PointFormatMapping[] POINT_FORMATS =
-      new PointFormatMapping[] {
-        new PointFormatMapping(
-            EciesParameters.PointFormat.UNCOMPRESSED, EllipticCurves.PointFormatType.UNCOMPRESSED),
-        new PointFormatMapping(
-            EciesParameters.PointFormat.COMPRESSED, EllipticCurves.PointFormatType.COMPRESSED),
-        new PointFormatMapping(
-            EciesParameters.PointFormat.LEGACY_UNCOMPRESSED,
-            EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED)
+  @DataPoints("pointFormats")
+  public static final EciesParameters.PointFormat[] POINT_FORMATS =
+      new EciesParameters.PointFormat[] {
+        EciesParameters.PointFormat.UNCOMPRESSED,
+        EciesParameters.PointFormat.COMPRESSED,
+        EciesParameters.PointFormat.LEGACY_UNCOMPRESSED,
       };
 
   @Test
@@ -105,17 +88,10 @@ public final class EciesPublicKeyTest {
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
 
-    // Encode the ecPublicKey to bytes using the Elliptic-Curve-Point-to-Octet-String conversion.
-    Bytes publicPointBytes =
-        Bytes.copyFrom(
-            EllipticCurves.pointEncode(
-                EllipticCurves.CurveType.NIST_P256,
-                EllipticCurves.PointFormatType.UNCOMPRESSED,
-                ecPublicKey.getW()));
-
     // Create EciesPublicKey using the bytes from the ecPublicKey.
     EciesPublicKey publicKey =
-        EciesPublicKey.create(parameters, publicPointBytes, /* idRequirement= */ null);
+        EciesPublicKey.createForNistCurve(
+            parameters, ecPublicKey.getW(), /* idRequirement= */ null);
 
     // Convert EciesPublicKey back into a ECPublicKey.
     KeyFactory keyFactory = KeyFactory.getInstance("EC");
@@ -123,10 +99,7 @@ public final class EciesPublicKeyTest {
         (ECPublicKey)
             keyFactory.generatePublic(
                 new ECPublicKeySpec(
-                    EllipticCurves.pointDecode(
-                        EllipticCurves.CurveType.NIST_P256,
-                        EllipticCurves.PointFormatType.UNCOMPRESSED,
-                        publicKey.getPublicPointBytes().toByteArray()),
+                    publicKey.getNistCurvePoint(),
                     EllipticCurves.getCurveSpec(EllipticCurves.CurveType.NIST_P256)));
     assertThat(ecPublicKey2.getW()).isEqualTo(ecPublicKey.getW());
     assertThat(ecPublicKey2.getParams().getCurve()).isEqualTo(ecPublicKey.getParams().getCurve());
@@ -135,32 +108,47 @@ public final class EciesPublicKeyTest {
   @Theory
   public void createNistCurvePublicKey_hasCorrectParameters(
       @FromDataPoints("nistCurvesMapping") NistCurveMapping nistCurveMapping,
-      @FromDataPoints("pointFormatsMapping") PointFormatMapping pointFormatMapping)
+      @FromDataPoints("pointFormats") EciesParameters.PointFormat pointFormat)
       throws Exception {
     EciesParameters params =
         EciesParameters.builder()
             .setHashType(EciesParameters.HashType.SHA256)
             .setCurveType(nistCurveMapping.curveType)
-            .setNistCurvePointFormat(pointFormatMapping.pointFormat)
+            .setNistCurvePointFormat(pointFormat)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
     ECPublicKey ecPublicKey =
         (ECPublicKey) EllipticCurves.generateKeyPair(nistCurveMapping.ecNistCurve).getPublic();
-    Bytes publicPointBytes =
-        Bytes.copyFrom(
-            EllipticCurves.pointEncode(
-                nistCurveMapping.ecNistCurve,
-                pointFormatMapping.ecPointFormatType,
-                ecPublicKey.getW()));
 
     EciesPublicKey publicKey =
-        EciesPublicKey.create(params, publicPointBytes, /* idRequirement= */ null);
+        EciesPublicKey.createForNistCurve(params, ecPublicKey.getW(), /* idRequirement= */ null);
 
-    assertThat(publicKey.getPublicPointBytes()).isEqualTo(publicPointBytes);
+    assertThat(publicKey.getX25519CurvePointBytes()).isEqualTo(null);
+    assertThat(publicKey.getNistCurvePoint()).isEqualTo(ecPublicKey.getW());
     assertThat(publicKey.getOutputPrefix()).isEqualTo(Bytes.copyFrom(new byte[] {}));
     assertThat(publicKey.getParameters()).isEqualTo(params);
     assertThat(publicKey.getIdRequirementOrNull()).isEqualTo(null);
+  }
+
+  @Test
+  public void callCreateForNistCurveWithX25519Params_throws() throws Exception {
+    EciesParameters parameters =
+        EciesParameters.builder()
+            .setHashType(EciesParameters.HashType.SHA256)
+            .setCurveType(EciesParameters.CurveType.X25519)
+            .setVariant(EciesParameters.Variant.NO_PREFIX)
+            .setDemParameters(XChaCha20Poly1305Parameters.create())
+            .build();
+    ECPublicKey ecPublicKey =
+        (ECPublicKey)
+            EllipticCurves.generateKeyPair(EllipticCurves.CurveType.NIST_P256).getPublic();
+
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            EciesPublicKey.createForNistCurve(
+                parameters, ecPublicKey.getW(), /* idRequirement= */ null));
   }
 
   @Test
@@ -175,47 +163,32 @@ public final class EciesPublicKeyTest {
     Bytes publicPointBytes = Bytes.copyFrom(X25519.publicFromPrivate(X25519.generatePrivateKey()));
 
     EciesPublicKey publicKey =
-        EciesPublicKey.create(params, publicPointBytes, /* idRequirement= */ null);
+        EciesPublicKey.createForCurveX25519(params, publicPointBytes, /* idRequirement= */ null);
 
-    assertThat(publicKey.getPublicPointBytes()).isEqualTo(publicPointBytes);
+    assertThat(publicKey.getX25519CurvePointBytes()).isEqualTo(publicPointBytes);
+    assertThat(publicKey.getNistCurvePoint()).isEqualTo(null);
     assertThat(publicKey.getOutputPrefix()).isEqualTo(Bytes.copyFrom(new byte[] {}));
     assertThat(publicKey.getParameters()).isEqualTo(params);
     assertThat(publicKey.getIdRequirementOrNull()).isEqualTo(null);
   }
 
-  @Theory
-  public void createNistCurvePublicKey_withWrongKeyLength_fails(
-      @FromDataPoints("nistCurvesMapping") NistCurveMapping nistCurveMapping,
-      @FromDataPoints("pointFormatsMapping") PointFormatMapping pointFormatMapping)
-      throws Exception {
-    EciesParameters params =
+  @Test
+  public void callCreateForCurve25519WithNistParams_throws() throws Exception {
+    EciesParameters parameters =
         EciesParameters.builder()
             .setHashType(EciesParameters.HashType.SHA256)
-            .setCurveType(nistCurveMapping.curveType)
-            .setNistCurvePointFormat(pointFormatMapping.pointFormat)
+            .setCurveType(EciesParameters.CurveType.NIST_P256)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
             .setDemParameters(XChaCha20Poly1305Parameters.create())
             .build();
-    ECPublicKey ecPublicKey =
-        (ECPublicKey) EllipticCurves.generateKeyPair(nistCurveMapping.ecNistCurve).getPublic();
-    Bytes publicKeyBytes =
-        Bytes.copyFrom(
-            EllipticCurves.pointEncode(
-                nistCurveMapping.ecNistCurve,
-                pointFormatMapping.ecPointFormatType,
-                ecPublicKey.getW()));
-    Bytes tooShort = Bytes.copyFrom(publicKeyBytes.toByteArray(), 0, publicKeyBytes.size() - 1);
-    byte[] tooLongBytes = new byte[publicKeyBytes.size() + 1];
-    System.arraycopy(publicKeyBytes.toByteArray(), 0, tooLongBytes, 0, publicKeyBytes.size());
-    Bytes tooLong = Bytes.copyFrom(tooLongBytes);
+    Bytes publicPointBytes = Bytes.copyFrom(X25519.publicFromPrivate(X25519.generatePrivateKey()));
 
     assertThrows(
         GeneralSecurityException.class,
-        () -> EciesPublicKey.create(params, tooShort, /* idRequirement= */ null));
-
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> EciesPublicKey.create(params, tooLong, /* idRequirement= */ null));
+        () ->
+            EciesPublicKey.createForCurveX25519(
+                parameters, publicPointBytes, /* idRequirement= */ null));
   }
 
   @Test
@@ -235,25 +208,11 @@ public final class EciesPublicKeyTest {
 
     assertThrows(
         GeneralSecurityException.class,
-        () -> EciesPublicKey.create(params, tooShort, /* idRequirement= */ null));
+        () -> EciesPublicKey.createForCurveX25519(params, tooShort, /* idRequirement= */ null));
 
     assertThrows(
         GeneralSecurityException.class,
-        () -> EciesPublicKey.create(params, tooLong, /* idRequirement= */ null));
-  }
-
-  /** Copied from {@link EllipticCurves#pointEncode} to bypass point validation. */
-  private static byte[] encodeUncompressedPoint(EllipticCurve curve, ECPoint point)
-      throws GeneralSecurityException {
-    int coordinateSize = EllipticCurves.fieldSizeInBytes(curve);
-    byte[] encoded = new byte[2 * coordinateSize + 1];
-    byte[] x = BigIntegerEncoding.toBigEndianBytes(point.getAffineX());
-    byte[] y = BigIntegerEncoding.toBigEndianBytes(point.getAffineY());
-    // Order of System.arraycopy is important because x,y can have leading 0's.
-    System.arraycopy(y, 0, encoded, 1 + 2 * coordinateSize - y.length, y.length);
-    System.arraycopy(x, 0, encoded, 1 + coordinateSize - x.length, x.length);
-    encoded[0] = 4;
-    return encoded;
+        () -> EciesPublicKey.createForCurveX25519(params, tooLong, /* idRequirement= */ null));
   }
 
   @Theory
@@ -272,14 +231,9 @@ public final class EciesPublicKeyTest {
     ECPoint point = ecPublicKey.getW();
     ECPoint badPoint = new ECPoint(point.getAffineX(), point.getAffineY().subtract(BigInteger.ONE));
 
-    Bytes publicPointBytes =
-        Bytes.copyFrom(
-            encodeUncompressedPoint(
-                EllipticCurves.getCurveSpec(nistCurveMapping.ecNistCurve).getCurve(), badPoint));
-
     assertThrows(
         GeneralSecurityException.class,
-        () -> EciesPublicKey.create(params, publicPointBytes, /* idRequirement= */ null));
+        () -> EciesPublicKey.createForNistCurve(params, badPoint, /* idRequirement= */ null));
   }
 
   @Test
@@ -295,18 +249,24 @@ public final class EciesPublicKeyTest {
         paramsBuilder.setVariant(EciesParameters.Variant.NO_PREFIX).build();
     assertThrows(
         GeneralSecurityException.class,
-        () -> EciesPublicKey.create(noPrefixParams, publicKeyBytes, /* idRequirement= */ 123));
+        () ->
+            EciesPublicKey.createForCurveX25519(
+                noPrefixParams, publicKeyBytes, /* idRequirement= */ 123));
 
     EciesParameters tinkParams = paramsBuilder.setVariant(EciesParameters.Variant.TINK).build();
     assertThrows(
         GeneralSecurityException.class,
-        () -> EciesPublicKey.create(tinkParams, publicKeyBytes, /* idRequirement= */ null));
+        () ->
+            EciesPublicKey.createForCurveX25519(
+                tinkParams, publicKeyBytes, /* idRequirement= */ null));
 
     EciesParameters crunchyParams =
         paramsBuilder.setVariant(EciesParameters.Variant.CRUNCHY).build();
     assertThrows(
         GeneralSecurityException.class,
-        () -> EciesPublicKey.create(crunchyParams, publicKeyBytes, /* idRequirement= */ null));
+        () ->
+            EciesPublicKey.createForCurveX25519(
+                crunchyParams, publicKeyBytes, /* idRequirement= */ null));
   }
 
   @Test
@@ -321,13 +281,15 @@ public final class EciesPublicKeyTest {
     EciesParameters noPrefixParams =
         paramsBuilder.setVariant(EciesParameters.Variant.NO_PREFIX).build();
     EciesPublicKey noPrefixPublicKey =
-        EciesPublicKey.create(noPrefixParams, publicPointBytes, /* idRequirement= */ null);
+        EciesPublicKey.createForCurveX25519(
+            noPrefixParams, publicPointBytes, /* idRequirement= */ null);
     assertThat(noPrefixPublicKey.getIdRequirementOrNull()).isEqualTo(null);
     assertThat(noPrefixPublicKey.getOutputPrefix()).isEqualTo(Bytes.copyFrom(new byte[] {}));
 
     EciesParameters tinkParams = paramsBuilder.setVariant(EciesParameters.Variant.TINK).build();
     EciesPublicKey tinkPublicKey =
-        EciesPublicKey.create(tinkParams, publicPointBytes, /* idRequirement= */ 0x02030405);
+        EciesPublicKey.createForCurveX25519(
+            tinkParams, publicPointBytes, /* idRequirement= */ 0x02030405);
     assertThat(tinkPublicKey.getIdRequirementOrNull()).isEqualTo(0x02030405);
     assertThat(tinkPublicKey.getOutputPrefix())
         .isEqualTo(Bytes.copyFrom(new byte[] {0x01, 0x02, 0x03, 0x04, 0x05}));
@@ -335,7 +297,8 @@ public final class EciesPublicKeyTest {
     EciesParameters crunchyParams =
         paramsBuilder.setVariant(EciesParameters.Variant.CRUNCHY).build();
     EciesPublicKey crunchyPublicKey =
-        EciesPublicKey.create(crunchyParams, publicPointBytes, /* idRequirement= */ 0x01020304);
+        EciesPublicKey.createForCurveX25519(
+            crunchyParams, publicPointBytes, /* idRequirement= */ 0x01020304);
     assertThat(crunchyPublicKey.getIdRequirementOrNull()).isEqualTo(0x01020304);
     assertThat(crunchyPublicKey.getOutputPrefix())
         .isEqualTo(Bytes.copyFrom(new byte[] {0x00, 0x01, 0x02, 0x03, 0x04}));
@@ -353,9 +316,9 @@ public final class EciesPublicKeyTest {
     Bytes publicPointBytes = Bytes.copyFrom(X25519.publicFromPrivate(X25519.generatePrivateKey()));
 
     EciesPublicKey publicKey1 =
-        EciesPublicKey.create(params, publicPointBytes, /* idRequirement= */ null);
+        EciesPublicKey.createForCurveX25519(params, publicPointBytes, /* idRequirement= */ null);
     EciesPublicKey publicKey2 =
-        EciesPublicKey.create(params, publicPointBytes, /* idRequirement= */ null);
+        EciesPublicKey.createForCurveX25519(params, publicPointBytes, /* idRequirement= */ null);
 
     assertThat(publicKey1.equalsKey(publicKey2)).isTrue();
   }
@@ -372,9 +335,9 @@ public final class EciesPublicKeyTest {
     Bytes publicPointBytes = Bytes.copyFrom(X25519.publicFromPrivate(X25519.generatePrivateKey()));
 
     EciesPublicKey publicKey1 =
-        EciesPublicKey.create(params, publicPointBytes, /* idRequirement= */ null);
+        EciesPublicKey.createForCurveX25519(params, publicPointBytes, /* idRequirement= */ null);
     EciesPublicKey publicKey2 =
-        EciesPublicKey.create(params, publicPointBytes, /* idRequirement= */ null);
+        EciesPublicKey.createForCurveX25519(params, publicPointBytes, /* idRequirement= */ null);
 
     assertThat(publicKey1.equalsKey(publicKey2)).isTrue();
   }
@@ -390,10 +353,10 @@ public final class EciesPublicKeyTest {
 
     EciesParameters params1 = paramsBuilder.setVariant(EciesParameters.Variant.TINK).build();
     EciesPublicKey publicKey1 =
-        EciesPublicKey.create(params1, publicKeyBytes, /* idRequirement= */ 123);
+        EciesPublicKey.createForCurveX25519(params1, publicKeyBytes, /* idRequirement= */ 123);
     EciesParameters params2 = paramsBuilder.setVariant(EciesParameters.Variant.CRUNCHY).build();
     EciesPublicKey publicKey2 =
-        EciesPublicKey.create(params2, publicKeyBytes, /* idRequirement= */ 123);
+        EciesPublicKey.createForCurveX25519(params2, publicKeyBytes, /* idRequirement= */ 123);
 
     assertThat(publicKey1.equalsKey(publicKey2)).isFalse();
   }
@@ -413,9 +376,9 @@ public final class EciesPublicKeyTest {
     Bytes publicKeyBytes2 = Bytes.copyFrom(buf2);
 
     EciesPublicKey publicKey1 =
-        EciesPublicKey.create(params, publicKeyBytes1, /* idRequirement= */ null);
+        EciesPublicKey.createForCurveX25519(params, publicKeyBytes1, /* idRequirement= */ null);
     EciesPublicKey publicKey2 =
-        EciesPublicKey.create(params, publicKeyBytes2, /* idRequirement= */ null);
+        EciesPublicKey.createForCurveX25519(params, publicKeyBytes2, /* idRequirement= */ null);
 
     assertThat(publicKey1.equalsKey(publicKey2)).isFalse();
   }
@@ -431,10 +394,10 @@ public final class EciesPublicKeyTest {
 
     EciesParameters params1 = paramsBuilder.setVariant(EciesParameters.Variant.TINK).build();
     EciesPublicKey publicKey1 =
-        EciesPublicKey.create(params1, publicKeyBytes, /* idRequirement= */ 123);
+        EciesPublicKey.createForCurveX25519(params1, publicKeyBytes, /* idRequirement= */ 123);
     EciesParameters params2 = paramsBuilder.setVariant(EciesParameters.Variant.TINK).build();
     EciesPublicKey publicKey2 =
-        EciesPublicKey.create(params2, publicKeyBytes, /* idRequirement= */ 456);
+        EciesPublicKey.createForCurveX25519(params2, publicKeyBytes, /* idRequirement= */ 456);
 
     assertThat(publicKey1.equalsKey(publicKey2)).isFalse();
   }
