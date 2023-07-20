@@ -486,9 +486,10 @@ public final class Registry {
   }
 
   /**
-   * @return a {@link KeyManager} for the given {@code typeUrl} (if found).
-   * @deprecated Use {@code getKeyManager(typeUrl, Primitive.class)} or {@code getUntypedKeyManager
-   *     typeUrl} instead.
+   * Returns a {@link KeyManager} for the given {@code typeUrl} (if found).
+   *
+   * @deprecated KeyManagers should not be used directly. Use {@code newKeyData} or {@code
+   *     getPrimitive} instead.
    */
   @Deprecated
   public static <P> KeyManager<P> getKeyManager(String typeUrl)
@@ -498,14 +499,27 @@ public final class Registry {
     return result;
   }
 
-  /** Returns a {@link KeyManager} for the given {@code typeUrl} (if found). */
+  /**
+   * Returns a {@link KeyManager} for the given {@code typeUrl} (if found).
+   *
+   * @deprecated KeyManagers should not be used directly. Use {@code newKeyData} or {@code
+   *     getPrimitive} instead.
+   */
+  @Deprecated
   public static <P> KeyManager<P> getKeyManager(String typeUrl, Class<P> primitiveClass)
       throws GeneralSecurityException {
     return keyManagerRegistry.get().getKeyManager(typeUrl, primitiveClass);
   }
 
-  /** Returns a {@link KeyManager} for the given {@code typeUrl} (if found). */
-  public static KeyManager<?> getUntypedKeyManager(String typeUrl) throws GeneralSecurityException {
+  /**
+   * Returns a {@link KeyManager} for the given {@code typeUrl} (if found).
+   *
+   * @deprecated KeyManagers should not be used directly. Use {@code newKeyData} or {@code
+   *     getPrimitive} instead.
+   */
+  @Deprecated
+  public static KeyManager<?> getUntypedKeyManager(String typeUrl)
+      throws GeneralSecurityException {
     return keyManagerRegistry.get().getUntypedKeyManager(typeUrl);
   }
 
@@ -521,7 +535,7 @@ public final class Registry {
    */
   public static synchronized KeyData newKeyData(
       com.google.crypto.tink.proto.KeyTemplate keyTemplate) throws GeneralSecurityException {
-    KeyManager<?> manager = getUntypedKeyManager(keyTemplate.getTypeUrl());
+    KeyManager<?> manager = keyManagerRegistry.get().getUntypedKeyManager(keyTemplate.getTypeUrl());
     if (newKeyAllowedMap.get(keyTemplate.getTypeUrl()).booleanValue()) {
       return manager.newKeyData(keyTemplate.getValue());
     } else {
