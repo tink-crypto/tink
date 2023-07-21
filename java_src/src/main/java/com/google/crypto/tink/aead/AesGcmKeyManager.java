@@ -16,8 +16,6 @@
 
 package com.google.crypto.tink.aead;
 
-import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
-
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Registry;
@@ -151,15 +149,7 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
    *     in older versions.
    */
   public static final KeyTemplate aes128GcmTemplate() {
-    return exceptionIsBug(
-        () ->
-            KeyTemplate.createFrom(
-                AesGcmParameters.builder()
-                    .setKeySizeBytes(16)
-                    .setIvSizeBytes(12)
-                    .setTagSizeBytes(16)
-                    .setVariant(AesGcmParameters.Variant.TINK)
-                    .build()));
+    return createKeyTemplate(16, KeyTemplate.OutputPrefixType.TINK);
   }
 
   /**
@@ -176,15 +166,7 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
    *     in older versions.
    */
   public static final KeyTemplate rawAes128GcmTemplate() {
-    return exceptionIsBug(
-        () ->
-            KeyTemplate.createFrom(
-                AesGcmParameters.builder()
-                    .setKeySizeBytes(16)
-                    .setIvSizeBytes(12)
-                    .setTagSizeBytes(16)
-                    .setVariant(AesGcmParameters.Variant.NO_PREFIX)
-                    .build()));
+    return createKeyTemplate(16, KeyTemplate.OutputPrefixType.RAW);
   }
 
   /**
@@ -199,15 +181,7 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
    *     in older versions.
    */
   public static final KeyTemplate aes256GcmTemplate() {
-    return exceptionIsBug(
-        () ->
-            KeyTemplate.createFrom(
-                AesGcmParameters.builder()
-                    .setKeySizeBytes(32)
-                    .setIvSizeBytes(12)
-                    .setTagSizeBytes(16)
-                    .setVariant(AesGcmParameters.Variant.TINK)
-                    .build()));
+    return createKeyTemplate(32, KeyTemplate.OutputPrefixType.TINK);
   }
 
   /**
@@ -224,15 +198,18 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
    *     in older versions.
    */
   public static final KeyTemplate rawAes256GcmTemplate() {
-    return exceptionIsBug(
-        () ->
-            KeyTemplate.createFrom(
-                AesGcmParameters.builder()
-                    .setKeySizeBytes(32)
-                    .setIvSizeBytes(12)
-                    .setTagSizeBytes(16)
-                    .setVariant(AesGcmParameters.Variant.NO_PREFIX)
-                    .build()));
+    return createKeyTemplate(32, KeyTemplate.OutputPrefixType.RAW);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} containing a {@link AesGcmKeyFormat} with some specified
+   *     parameters.
+   */
+  private static KeyTemplate createKeyTemplate(
+      int keySize, KeyTemplate.OutputPrefixType prefixType) {
+    AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder().setKeySize(keySize).build();
+    return KeyTemplate.create(
+        new AesGcmKeyManager().getKeyType(), format.toByteArray(), prefixType);
   }
 
   private static KeyFactory.KeyFormat<AesGcmKeyFormat> createKeyFormat(

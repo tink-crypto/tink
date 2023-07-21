@@ -16,8 +16,6 @@
 
 package com.google.crypto.tink.aead;
 
-import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
-
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Mac;
@@ -204,17 +202,7 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
    *     </ul>
    */
   public static final KeyTemplate aes128CtrHmacSha256Template() {
-    return exceptionIsBug(
-        () ->
-            KeyTemplate.createFrom(
-                AesCtrHmacAeadParameters.builder()
-                    .setAesKeySizeBytes(16)
-                    .setHmacKeySizeBytes(32)
-                    .setTagSizeBytes(16)
-                    .setIvSizeBytes(16)
-                    .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
-                    .setVariant(AesCtrHmacAeadParameters.Variant.TINK)
-                    .build()));
+    return createKeyTemplate(16, 16, 32, 16, HashType.SHA256);
   }
 
   /**
@@ -229,17 +217,21 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
    *     </ul>
    */
   public static final KeyTemplate aes256CtrHmacSha256Template() {
-    return exceptionIsBug(
-        () ->
-            KeyTemplate.createFrom(
-                AesCtrHmacAeadParameters.builder()
-                    .setAesKeySizeBytes(32)
-                    .setHmacKeySizeBytes(32)
-                    .setTagSizeBytes(32)
-                    .setIvSizeBytes(16)
-                    .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
-                    .setVariant(AesCtrHmacAeadParameters.Variant.TINK)
-                    .build()));
+    return createKeyTemplate(32, 16, 32, 32, HashType.SHA256);
+  }
+
+  /**
+   * @return a {@link KeyTemplate} containing a {@link AesCtrHmacAeadKeyFormat} with some specific
+   *     parameters.
+   */
+  private static KeyTemplate createKeyTemplate(
+      int aesKeySize, int ivSize, int hmacKeySize, int tagSize, HashType hashType) {
+    AesCtrHmacAeadKeyFormat format =
+        createKeyFormat(aesKeySize, ivSize, hmacKeySize, tagSize, hashType);
+    return KeyTemplate.create(
+        new AesCtrHmacAeadKeyManager().getKeyType(),
+        format.toByteArray(),
+        KeyTemplate.OutputPrefixType.TINK);
   }
 
   private static KeyFactory.KeyFormat<AesCtrHmacAeadKeyFormat> createKeyFormat(

@@ -21,12 +21,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -34,10 +32,6 @@ import org.junit.runners.JUnit4;
 /** Tests KeyTemplateProtoConverter. */
 @RunWith(JUnit4.class)
 public final class KeyTemplateProtoConverterTest {
-  @BeforeClass
-  public static void register() throws Exception {
-    AeadConfig.register();
-  }
 
   @Test
   public void toByteArrayFromByteArray_sameValues() throws Exception {

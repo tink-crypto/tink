@@ -9,7 +9,6 @@ java_test(
     deps = [
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
-        "//src/main/java/com/google/crypto/tink/aead:aead_config",
         "//src/main/java/com/google/crypto/tink/aead:aes_gcm_key_manager",
         "//src/main/java/com/google/crypto/tink/internal:key_template_proto_converter",
         "@maven//:com_google_protobuf_protobuf_java",
