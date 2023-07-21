@@ -524,3 +524,22 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "JwtRsaSsaPkcs1PrivateKeyTest",
+    size = "small",
+    srcs = ["JwtRsaSsaPkcs1PrivateKeyTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink/aead:cha_cha20_poly1305_key",
+        "//src/main/java/com/google/crypto/tink/internal:key_tester",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pkcs1_parameters",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pkcs1_private_key",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pkcs1_public_key",
+        "//src/main/java/com/google/crypto/tink/subtle:base64",
+        "//src/main/java/com/google/crypto/tink/util:secret_big_integer",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
