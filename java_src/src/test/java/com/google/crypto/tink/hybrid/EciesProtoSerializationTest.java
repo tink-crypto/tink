@@ -283,6 +283,24 @@ public final class EciesProtoSerializationTest {
                             .setOutputPrefixType(OutputPrefixType.RAW)
                             .build()))
                 .build()),
+        // CURVE25519 with UNCOMPRESSED.
+        ProtoParametersSerialization.create(
+            PRIVATE_TYPE_URL,
+            OutputPrefixType.TINK,
+            EciesAeadHkdfKeyFormat.newBuilder()
+                .setParams(
+                    createEciesProtoParams(
+                        EllipticCurveType.CURVE25519,
+                        HashType.SHA256,
+                        EcPointFormat.UNCOMPRESSED,
+                        ByteString.copyFrom(SALT.toByteArray()),
+                        KeyTemplate.newBuilder()
+                            .setTypeUrl(
+                                "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key")
+                            .setValue(DEM_KEY_FORMAT_PROTO.toByteString())
+                            .setOutputPrefixType(OutputPrefixType.RAW)
+                            .build()))
+                .build()),
         // Unknown HashType.
         ProtoParametersSerialization.create(
             PRIVATE_TYPE_URL,

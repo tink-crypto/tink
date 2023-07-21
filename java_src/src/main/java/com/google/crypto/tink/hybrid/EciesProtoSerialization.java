@@ -164,6 +164,10 @@ final class EciesProtoSerialization {
     if (!protoParams.getKemParams().getCurveType().equals(EllipticCurveType.CURVE25519)) {
       builder.setNistCurvePointFormat(
           POINT_FORMAT_CONVERTER.fromProtoEnum(protoParams.getEcPointFormat()));
+    } else {
+      if (!protoParams.getEcPointFormat().equals(EcPointFormat.COMPRESSED)) {
+        throw new GeneralSecurityException("For CURVE25519 EcPointFormat must be compressed");
+      }
     }
     return builder.build();
   }
