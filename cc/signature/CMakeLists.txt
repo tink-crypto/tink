@@ -371,6 +371,47 @@ tink_cc_library(
     tink::proto::tink_cc_proto
 )
 
+tink_cc_library(
+  NAME failing_signature
+  SRCS
+    failing_signature.cc
+    failing_signature.h
+  DEPS
+    absl::strings
+    tink::core::public_key_sign
+    tink::core::public_key_verify
+)
+
+tink_cc_library(
+  NAME signature_parameters
+  SRCS
+    signature_parameters.h
+  DEPS
+    tink::core::parameters
+)
+
+tink_cc_library(
+  NAME signature_public_key
+  SRCS
+    signature_public_key.h
+  DEPS
+    tink::signature::signature_parameters
+    absl::strings
+    tink::core::key
+)
+
+tink_cc_library(
+  NAME signature_private_key
+  SRCS
+    signature_private_key.h
+  DEPS
+    tink::signature::signature_parameters
+    tink::signature::signature_public_key
+    absl::strings
+    tink::core::key
+    tink::core::private_key
+)
+
 # tests
 
 tink_cc_test(
@@ -714,17 +755,6 @@ tink_cc_test(
     tink::proto::ecdsa_cc_proto
     tink::proto::rsa_ssa_pss_cc_proto
     tink::proto::tink_cc_proto
-)
-
-tink_cc_library(
-  NAME failing_signature
-  SRCS
-    failing_signature.cc
-    failing_signature.h
-  DEPS
-    absl::strings
-    tink::core::public_key_sign
-    tink::core::public_key_verify
 )
 
 tink_cc_test(

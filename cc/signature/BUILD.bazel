@@ -389,6 +389,49 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "failing_signature",
+    srcs = ["failing_signature.cc"],
+    hdrs = ["failing_signature.h"],
+    include_prefix = "tink/signature",
+    deps = [
+        "//:public_key_sign",
+        "//:public_key_verify",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "signature_parameters",
+    hdrs = ["signature_parameters.h"],
+    include_prefix = "tink/signature",
+    deps = ["//:parameters"],
+)
+
+cc_library(
+    name = "signature_public_key",
+    hdrs = ["signature_public_key.h"],
+    include_prefix = "tink/signature",
+    deps = [
+        ":signature_parameters",
+        "//:key",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "signature_private_key",
+    hdrs = ["signature_private_key.h"],
+    include_prefix = "tink/signature",
+    deps = [
+        ":signature_parameters",
+        ":signature_public_key",
+        "//:key",
+        "//:private_key",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -747,18 +790,6 @@ cc_test(
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_library(
-    name = "failing_signature",
-    srcs = ["failing_signature.cc"],
-    hdrs = ["failing_signature.h"],
-    include_prefix = "tink/signature",
-    deps = [
-        "//:public_key_sign",
-        "//:public_key_verify",
-        "@com_google_absl//absl/strings",
     ],
 )
 

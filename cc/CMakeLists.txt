@@ -652,6 +652,14 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME private_key
+  SRCS
+    private_key.h
+  DEPS
+    tink::core::key
+)
+
+tink_cc_library(
   NAME partial_key_access_token
   SRCS
     partial_key_access_token.h
@@ -696,6 +704,23 @@ tink_cc_library(
   NAME key_status
   SRCS
     key_status.h
+)
+
+tink_cc_library(
+  NAME configuration
+  SRCS
+    configuration.h
+  DEPS
+    tink::internal::key_type_info_store
+    tink::internal::keyset_wrapper_store
+)
+
+tink_cc_library(
+  NAME key_gen_configuration
+  SRCS
+    key_gen_configuration.h
+  DEPS
+    tink::internal::key_type_info_store
 )
 
 # tests
@@ -1052,21 +1077,4 @@ tink_cc_test(
     tink::signature::signature_key_templates
     tink::util::secret_data
     tink::util::test_matchers
-)
-
-tink_cc_library(
-  NAME configuration
-  SRCS
-    configuration.h
-  DEPS
-    tink::internal::key_type_info_store
-    tink::internal::keyset_wrapper_store
-)
-
-tink_cc_library(
-  NAME key_gen_configuration
-  SRCS
-    key_gen_configuration.h
-  DEPS
-    tink::internal::key_type_info_store
 )

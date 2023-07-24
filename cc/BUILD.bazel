@@ -702,6 +702,13 @@ cc_library(
 )
 
 cc_library(
+    name = "private_key",
+    hdrs = ["private_key.h"],
+    include_prefix = "tink",
+    deps = [":key"],
+)
+
+cc_library(
     name = "partial_key_access_token",
     hdrs = ["partial_key_access_token.h"],
     include_prefix = "tink",
@@ -747,6 +754,25 @@ cc_library(
     hdrs = ["key_status.h"],
     include_prefix = "tink",
     visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "configuration",
+    hdrs = ["configuration.h"],
+    include_prefix = "tink",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//internal:key_type_info_store",
+        "//internal:keyset_wrapper_store",
+    ],
+)
+
+cc_library(
+    name = "key_gen_configuration",
+    hdrs = ["key_gen_configuration.h"],
+    include_prefix = "tink",
+    visibility = ["//visibility:public"],
+    deps = ["//internal:key_type_info_store"],
 )
 
 # tests
@@ -1117,23 +1143,4 @@ cc_test(
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
-)
-
-cc_library(
-    name = "configuration",
-    hdrs = ["configuration.h"],
-    include_prefix = "tink",
-    visibility = ["//visibility:public"],
-    deps = [
-        "//internal:key_type_info_store",
-        "//internal:keyset_wrapper_store",
-    ],
-)
-
-cc_library(
-    name = "key_gen_configuration",
-    hdrs = ["key_gen_configuration.h"],
-    include_prefix = "tink",
-    visibility = ["//visibility:public"],
-    deps = ["//internal:key_type_info_store"],
 )
