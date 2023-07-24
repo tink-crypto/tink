@@ -24,8 +24,12 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.KmsClient;
+import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.mac.HmacKeyManager;
+import com.google.crypto.tink.subtle.Random;
+import com.google.crypto.tink.testing.FakeKmsClient;
 import java.security.GeneralSecurityException;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -50,6 +54,33 @@ public final class KmsEnvelopeAeadTest {
     return keysetHandle.getPrimitive(Aead.class);
   }
 
+  @DataPoints("dekParameters")
+  public static final AeadParameters[] DEK_PARAMETERS =
+      new AeadParameters[] {
+        PredefinedAeadParameters.AES128_GCM,
+        PredefinedAeadParameters.AES256_GCM,
+        PredefinedAeadParameters.AES128_EAX,
+        PredefinedAeadParameters.AES256_EAX,
+        PredefinedAeadParameters.AES128_CTR_HMAC_SHA256,
+        PredefinedAeadParameters.AES256_CTR_HMAC_SHA256,
+        PredefinedAeadParameters.CHACHA20_POLY1305,
+        PredefinedAeadParameters.XCHACHA20_POLY1305,
+      };
+
+  @Theory
+  public void createEncryptDecrypt_works(
+      @FromDataPoints("dekParameters") AeadParameters dekParameters) throws Exception {
+    Aead remoteAead = this.generateNewRemoteAead();
+    Aead envAead = KmsEnvelopeAead.create(dekParameters, remoteAead);
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] associatedData = "associatedData".getBytes(UTF_8);
+    byte[] ciphertext = envAead.encrypt(plaintext, associatedData);
+    assertThat(envAead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+
+    assertThat(envAead.decrypt(envAead.encrypt(plaintext, EMPTY_ADD), EMPTY_ADD))
+        .isEqualTo(plaintext);
+  }
+
   @DataPoints("tinkDekTemplates")
   public static final String[] TINK_DEK_TEMPLATES =
       new String[] {
@@ -65,10 +96,10 @@ public final class KmsEnvelopeAeadTest {
       };
 
   @Theory
-  public void encryptDecrypt_works(@FromDataPoints("tinkDekTemplates") String dekTemplateName)
-      throws Exception {
+  public void legacyConstructorEncryptDecrypt_works(
+      @FromDataPoints("tinkDekTemplates") String dekTemplateName) throws Exception {
     Aead remoteAead = this.generateNewRemoteAead();
-    KmsEnvelopeAead envAead =
+    Aead envAead =
         new KmsEnvelopeAead(
             KeyTemplateProtoConverter.toProto(KeyTemplates.get(dekTemplateName)), remoteAead);
     byte[] plaintext = "plaintext".getBytes(UTF_8);
@@ -94,9 +125,7 @@ public final class KmsEnvelopeAeadTest {
   @Test
   public void decryptWithInvalidAssociatedData_fails() throws GeneralSecurityException {
     Aead remoteAead =  this.generateNewRemoteAead();
-    KmsEnvelopeAead envAead =
-        new KmsEnvelopeAead(
-            KeyTemplateProtoConverter.toProto(KeyTemplates.get("AES128_EAX")), remoteAead);
+    Aead envAead = KmsEnvelopeAead.create(PredefinedAeadParameters.AES128_EAX, remoteAead);
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);
     byte[] ciphertext = envAead.encrypt(plaintext, associatedData);
@@ -109,9 +138,7 @@ public final class KmsEnvelopeAeadTest {
   @Test
   public void corruptedCiphertext_fails() throws GeneralSecurityException {
     Aead remoteAead =  this.generateNewRemoteAead();
-    KmsEnvelopeAead envAead =
-        new KmsEnvelopeAead(
-            KeyTemplateProtoConverter.toProto(KeyTemplates.get("AES128_EAX")), remoteAead);
+    Aead envAead = KmsEnvelopeAead.create(PredefinedAeadParameters.AES128_EAX, remoteAead);
     byte[] associatedData = "envelope_ad".getBytes(UTF_8);
     byte[] plaintext = "helloworld".getBytes(UTF_8);
     byte[] ciphertext = envAead.encrypt(plaintext, associatedData);
@@ -124,9 +151,7 @@ public final class KmsEnvelopeAeadTest {
   @Test
   public void corruptedDek_fails() throws GeneralSecurityException {
     Aead remoteAead =  this.generateNewRemoteAead();
-    KmsEnvelopeAead envAead =
-        new KmsEnvelopeAead(
-            KeyTemplateProtoConverter.toProto(KeyTemplates.get("AES128_EAX")), remoteAead);
+    Aead envAead = KmsEnvelopeAead.create(PredefinedAeadParameters.AES128_EAX, remoteAead);
     byte[] plaintext = "helloworld".getBytes(UTF_8);
     byte[] associatedData = "envelope_ad".getBytes(UTF_8);
     byte[] ciphertext = envAead.encrypt(plaintext, associatedData);
@@ -139,9 +164,7 @@ public final class KmsEnvelopeAeadTest {
   @Test
   public void ciphertextTooShort_fails() throws GeneralSecurityException {
     Aead remoteAead =  this.generateNewRemoteAead();
-    KmsEnvelopeAead envAead =
-        new KmsEnvelopeAead(
-            KeyTemplateProtoConverter.toProto(KeyTemplates.get("AES128_EAX")), remoteAead);
+    Aead envAead = KmsEnvelopeAead.create(PredefinedAeadParameters.AES128_EAX, remoteAead);
     assertThrows(
         GeneralSecurityException.class,
         () -> envAead.decrypt("foo".getBytes(UTF_8), "envelope_ad".getBytes(UTF_8)));
@@ -150,9 +173,7 @@ public final class KmsEnvelopeAeadTest {
   @Test
   public void malformedDekLength_fails() throws GeneralSecurityException {
     Aead remoteAead =  this.generateNewRemoteAead();
-    KmsEnvelopeAead envAead =
-        new KmsEnvelopeAead(
-            KeyTemplateProtoConverter.toProto(KeyTemplates.get("AES128_EAX")), remoteAead);
+    Aead envAead = KmsEnvelopeAead.create(PredefinedAeadParameters.AES128_EAX, remoteAead);
 
     byte[] plaintext = "helloworld".getBytes(UTF_8);
     byte[] associatedData = "envelope_ad".getBytes(UTF_8);
@@ -173,6 +194,53 @@ public final class KmsEnvelopeAeadTest {
     assertThrows(
         GeneralSecurityException.class,
         () -> envAead.decrypt(corruptedCiphertext2, associatedData));
+  }
+
+  @Test
+  public void create_isCompatibleWithOldConstructor() throws Exception {
+    String kekUri = FakeKmsClient.createFakeKeyUri();
+    Aead remoteAead = new FakeKmsClient().getAead(kekUri);
+
+    Aead aead1 =
+        new KmsEnvelopeAead(
+            KeyTemplateProtoConverter.toProto(
+                AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template()),
+            remoteAead);
+    Aead aead2 =
+        KmsEnvelopeAead.create(PredefinedAeadParameters.AES128_CTR_HMAC_SHA256, remoteAead);
+
+    byte[] plaintext = Random.randBytes(20);
+    byte[] associatedData = Random.randBytes(20);
+    assertThat(aead1.decrypt(aead2.encrypt(plaintext, associatedData), associatedData))
+        .isEqualTo(plaintext);
+    assertThat(aead2.decrypt(aead1.encrypt(plaintext, associatedData), associatedData))
+        .isEqualTo(plaintext);
+  }
+
+  @Test
+  public void create_isCompatibleWithKmsEnvelopeAeadKey() throws Exception {
+    String kekUri = FakeKmsClient.createFakeKeyUri();
+    KeyTemplate dekTemplate = AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template();
+
+    // Register kmsClient and create a keyset with a KmsEnvelopeAeadKey key.
+    KmsClient kmsClient1 = new FakeKmsClient(kekUri);
+    KmsClients.add(kmsClient1);
+    KeysetHandle handle1 =
+        KeysetHandle.generateNew(KmsEnvelopeAeadKeyManager.createKeyTemplate(kekUri, dekTemplate));
+    Aead aead1 = handle1.getPrimitive(Aead.class);
+
+    // Get Aead object from the kmsClient, and create the envelope AEAD without the registry.
+    Aead remoteAead = new FakeKmsClient().getAead(kekUri);
+    Aead aead2 =
+        KmsEnvelopeAead.create(PredefinedAeadParameters.AES128_CTR_HMAC_SHA256, remoteAead);
+
+    // Check that aead1 and aead2 implement the same primitive
+    byte[] plaintext = Random.randBytes(20);
+    byte[] associatedData = Random.randBytes(20);
+    assertThat(aead1.decrypt(aead2.encrypt(plaintext, associatedData), associatedData))
+        .isEqualTo(plaintext);
+    assertThat(aead2.decrypt(aead1.encrypt(plaintext, associatedData), associatedData))
+        .isEqualTo(plaintext);
   }
 }
 
