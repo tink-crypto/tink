@@ -48,8 +48,7 @@ class AesSivKey : public DeterministicAeadKey {
                                           PartialKeyAccessToken token);
 
   // Returns the underlying AES-SIV key.
-  util::StatusOr<RestrictedData> GetKeyBytes(
-      PartialKeyAccessToken token) const {
+  const RestrictedData& GetKeyBytes(PartialKeyAccessToken token) const {
     return key_bytes_;
   }
 
