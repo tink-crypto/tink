@@ -17,17 +17,16 @@ package envelopeaead;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.KeyTemplates;
-import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.aead.KmsEnvelopeAeadKeyManager;
+import com.google.crypto.tink.aead.KmsEnvelopeAead;
+import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
-import java.util.Optional;
 
 /**
  * A command-line utility for encrypting small files with envelope encryption.
@@ -67,25 +66,18 @@ public final class EnvelopeAeadExample {
     // Initialise Tink: register all AEAD key types with the Tink runtime
     AeadConfig.register();
 
-    // Read the GCP credentials and set up client
+    // Read the GCP credentials and create a remote AEAD object.
+    Aead remoteAead = null;
     try {
-      GcpKmsClient.register(Optional.of(kekUri), Optional.of(gcpCredentialFilename));
+      KmsClient kmsClient = new GcpKmsClient().withCredentials(gcpCredentialFilename);
+      remoteAead = kmsClient.getAead(kekUri);
     } catch (GeneralSecurityException ex) {
       System.err.println("Error initializing GCP client: " + ex);
       System.exit(1);
     }
 
     // Create envelope AEAD primitive using AES256 GCM for encrypting the data
-    Aead aead = null;
-    try {
-      KeysetHandle handle =
-          KeysetHandle.generateNew(
-              KmsEnvelopeAeadKeyManager.createKeyTemplate(kekUri, KeyTemplates.get("AES256_GCM")));
-      aead = handle.getPrimitive(Aead.class);
-    } catch (GeneralSecurityException ex) {
-      System.err.println("Error creating primitive: %s " + ex);
-      System.exit(1);
-    }
+    Aead aead = KmsEnvelopeAead.create(PredefinedAeadParameters.AES256_GCM, remoteAead);
 
     // Use the primitive to encrypt/decrypt files.
     if (MODE_ENCRYPT.equals(mode)) {
