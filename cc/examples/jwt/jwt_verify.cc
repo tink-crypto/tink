@@ -25,18 +25,20 @@
 #include "absl/flags/parse.h"
 #include "absl/log/check.h"
 #include "util/util.h"
+#include "tink/jwt/jwk_set_converter.h"
 #include "tink/jwt/jwt_public_key_verify.h"
 #include "tink/jwt/jwt_signature_config.h"
 #include "tink/jwt/jwt_validator.h"
 #include "tink/keyset_handle.h"
 #include "tink/util/status.h"
 
-ABSL_FLAG(std::string, keyset_filename, "", "Keyset file in JSON format");
+ABSL_FLAG(std::string, jwk_set_filename, "", "Path to the JWK set file");
 ABSL_FLAG(std::string, audience, "", "Expected audience in the token");
 ABSL_FLAG(std::string, token_filename, "", "Path to the token file");
 
 namespace {
 
+using ::crypto::tink::JwkSetToPublicKeysetHandle;
 using ::crypto::tink::JwtPublicKeyVerify;
 using ::crypto::tink::JwtValidator;
 using ::crypto::tink::KeysetHandle;
@@ -45,7 +47,7 @@ using ::crypto::tink::util::StatusOr;
 
 void ValidateParams() {
   // [START_EXCLUDE]
-  CHECK(!absl::GetFlag(FLAGS_keyset_filename).empty())
+  CHECK(!absl::GetFlag(FLAGS_jwk_set_filename).empty())
       << "Keyset file must be specified";
   CHECK(!absl::GetFlag(FLAGS_audience).empty())
       << "Expected audience in the token must be specified";
@@ -59,15 +61,17 @@ void ValidateParams() {
 namespace tink_cc_examples {
 
 // JWT verify example CLI implementation.
-Status JwtVerify(const std::string& keyset_filename, absl::string_view audience,
+Status JwtVerify(const std::string& jwk_set_filename,
+                 absl::string_view audience,
                  const std::string& token_filename) {
   Status result = crypto::tink::JwtSignatureRegister();
   if (!result.ok()) return result;
 
-  // Read the keyset from file.
+  // Read the JWK set from file and convert it.
+  StatusOr<std::string> jwk_set = ReadFile(jwk_set_filename);
+  if (!jwk_set.ok()) return jwk_set.status();
   StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
-      ReadJsonCleartextKeyset(keyset_filename);
-  if (!keyset_handle.ok()) return keyset_handle.status();
+      JwkSetToPublicKeysetHandle(*jwk_set);
 
   // Read the token.
   StatusOr<std::string> token = ReadFile(token_filename);
@@ -91,16 +95,16 @@ int main(int argc, char** argv) {
 
   ValidateParams();
 
-  std::string keyset_filename = absl::GetFlag(FLAGS_keyset_filename);
+  std::string jwk_set_filename = absl::GetFlag(FLAGS_jwk_set_filename);
   std::string audience = absl::GetFlag(FLAGS_audience);
   std::string token_filename = absl::GetFlag(FLAGS_token_filename);
 
-  std::clog << "Using keyset in " << keyset_filename << " to ";
+  std::clog << "Using keyset in " << jwk_set_filename << " to ";
   std::clog << " verify a token with expected audience '" << audience
             << std::endl;
 
   CHECK_OK(
-      tink_cc_examples::JwtVerify(keyset_filename, audience, token_filename));
+      tink_cc_examples::JwtVerify(jwk_set_filename, audience, token_filename));
   return 0;
 }
 // [END jwt-verify]

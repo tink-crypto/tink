@@ -23,9 +23,11 @@ set -euo pipefail
 : "${TEST_TMPDIR:=$(mktemp -d)}"
 
 readonly CLI_SIGN="$1"
-readonly CLI_VERIFY="$2"
-readonly PRIVATE_KEYSET_FILE="$3"
-readonly PUBLIC_KEYSET_FILE="$4"
+readonly GEN_PUBLIC_JWK_SET_CLI="$2"
+readonly CLI_VERIFY="$3"
+readonly PRIVATE_KEYSET_FILE="$4"
+readonly PUBLIC_KEYSET_FILE="$5"
+readonly PUBLIC_JWK_SET_FILE="${TEST_TMPDIR}/public_jwk_set.json"
 readonly TOKEN_FILE="${TEST_TMPDIR}/token.json"
 readonly TEST_NAME="TinkCcExamplesJwtSignatureTest"
 
@@ -117,9 +119,15 @@ test_command "${CLI_SIGN}" \
   --token_filename "${TOKEN_FILE}"
 assert_command_succeeded
 
+# Convert to JWK set.
+test_command "${GEN_PUBLIC_JWK_SET_CLI}" \
+  --public_keyset_filename "${PUBLIC_KEYSET_FILE}" \
+  --public_jwk_set_filename "${PUBLIC_JWK_SET_FILE}"
+assert_command_succeeded
+
 # Verify.
 test_command "${CLI_VERIFY}" \
-  --keyset_filename "${PUBLIC_KEYSET_FILE}" \
+  --jwk_set_filename "${PUBLIC_JWK_SET_FILE}" \
   --audience "${AUDIENCE}" \
   --token_filename "${TOKEN_FILE}"
 assert_command_succeeded
@@ -142,7 +150,7 @@ echo "modified" >> "${TOKEN_FILE}"
 
 # Verify.
 test_command "${CLI_VERIFY}" \
-  --keyset_filename "${PUBLIC_KEYSET_FILE}" \
+  --jwk_set_filename "${PUBLIC_JWK_SET_FILE}" \
   --audience "${AUDIENCE}" \
   --token_filename "${TOKEN_FILE}"
 assert_command_failed
@@ -165,7 +173,7 @@ readonly INVALID_AUDIENCE="invalid audience"
 
 # Verify.
 test_command "${CLI_VERIFY}" \
-  --keyset_filename "${PUBLIC_KEYSET_FILE}" \
+  --jwk_set_filename "${PUBLIC_JWK_SET_FILE}" \
   --audience "${INVALID_AUDIENCE}" \
   --token_filename "${TOKEN_FILE}"
 assert_command_failed
