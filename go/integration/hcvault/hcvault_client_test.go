@@ -21,9 +21,7 @@ import (
 	"log"
 
 	"github.com/google/tink/go/aead"
-	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/integration/hcvault"
-	"github.com/google/tink/go/keyset"
 )
 
 func Example() {
@@ -33,28 +31,28 @@ func Example() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	registry.RegisterKMSClient(vaultClient)
-
-	dek := aead.AES128CTRHMACSHA256KeyTemplate()
-	template, err := aead.CreateKMSEnvelopeAEADKeyTemplate(keyURI, dek)
+	kekAEAD, err := vaultClient.GetAEAD(keyURI)
 	if err != nil {
 		log.Fatal(err)
 	}
-	handle, err := keyset.NewHandle(template)
+	dekTemplate := aead.AES128CTRHMACSHA256KeyTemplate()
+	a := aead.NewKMSEnvelopeAEAD2(dekTemplate, kekAEAD)
 	if err != nil {
 		log.Fatal(err)
 	}
-	a, err := aead.New(handle)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ct, err := a.Encrypt([]byte("this data needs to be encrypted"), nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = a.Decrypt(ct, nil)
+	plaintext := []byte("plaintext")
+	associatedData := []byte("associatedData")
+
+	ciphertext, err := a.Encrypt(plaintext, associatedData)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = a.Decrypt(ciphertext, associatedData)
 	if err != nil {
 		log.Fatal(err)
 	}
