@@ -305,6 +305,7 @@ public final class JwtRsaSsaPkcs1SignKeyManager
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerAsymmetricKeyManagers(
         new JwtRsaSsaPkcs1SignKeyManager(), new JwtRsaSsaPkcs1VerifyKeyManager(), newKeyAllowed);
+    JwtRsaSsaPkcs1ProtoSerialization.register();
   }
 
 

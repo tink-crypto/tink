@@ -323,6 +323,29 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
   }
 
   @Test
+  public void createKeysetHandle_works() throws Exception {
+    if (TestUtil.isTsan()) {
+      // factory.createKey is too slow in Tsan.
+      return;
+    }
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("JWT_RS256_2048_F4"));
+    
+    com.google.crypto.tink.Key key = handle.getAt(0).getKey();
+    assertThat(key).isInstanceOf(com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey.class);
+    com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey jwtPrivateKey =
+        (com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey) key;
+
+    assertThat(jwtPrivateKey.getParameters())
+        .isEqualTo(
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(2048)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
+  }
+
+  @Test
   public void testTinkTemplatesAreTink() throws Exception {
     assertThat(getOutputPrefixType(KeyTemplates.get("JWT_RS256_2048_F4")))
         .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
@@ -718,7 +741,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
   }
 
   @Test
-  public void signWithTinkKeyAndCustomKid_fails() throws Exception {
+  public void getPrimitiveWithTinkKeyAndCustomKid_fails() throws Exception {
     if (TestUtil.isTsan()) {
       // creating keys is too slow in Tsan.
       // We do not use assume because Theories expects to find something which is not skipped.
@@ -729,8 +752,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     KeysetHandle handleWithKid =
         withCustomKid(handleWithoutKid, "Lorem ipsum dolor sit amet, consectetur adipiscing elit");
 
-    JwtPublicKeySign signerWithKid = handleWithKid.getPrimitive(JwtPublicKeySign.class);
-    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
-    assertThrows(JwtInvalidException.class, () -> signerWithKid.signAndEncode(rawToken));
+    assertThrows(
+        GeneralSecurityException.class, () -> handleWithKid.getPrimitive(JwtPublicKeySign.class));
   }
 }

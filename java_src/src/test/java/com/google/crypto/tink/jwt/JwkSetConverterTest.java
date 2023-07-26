@@ -940,9 +940,8 @@ public final class JwkSetConverterTest {
         "{\"keys\":[{\"kty\":\"RSA\","
             + "\"n\":\"AAAwOQ\","
             + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS256\",\"key_ops\":[\"verify\"]}]}";
-    KeysetHandle handle = JwkSetConverter.toPublicKeysetHandle(jwksString);
     assertThrows(
-        GeneralSecurityException.class, () -> handle.getPrimitive(JwtPublicKeyVerify.class));
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
 
     String psJwksString = jwksString.replace("RS256", "PS256");
     KeysetHandle psHandle = JwkSetConverter.toPublicKeysetHandle(psJwksString);
