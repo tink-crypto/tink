@@ -20,6 +20,7 @@ import static com.google.crypto.tink.internal.Util.toBytesFromPrintableAscii;
 
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.SecretKeyAccess;
+import com.google.crypto.tink.internal.EnumTypeProtoConverter;
 import com.google.crypto.tink.internal.KeyParser;
 import com.google.crypto.tink.internal.KeySerializer;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
@@ -47,6 +48,23 @@ import javax.annotation.Nullable;
 public final class HmacProtoSerialization {
   private static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.HmacKey";
   private static final Bytes TYPE_URL_BYTES = toBytesFromPrintableAscii(TYPE_URL);
+  private static final EnumTypeProtoConverter<OutputPrefixType, HmacParameters.Variant>
+      OUTPUT_PREFIX_TYPE_CONVERTER =
+          EnumTypeProtoConverter.<OutputPrefixType, HmacParameters.Variant>builder()
+              .add(OutputPrefixType.RAW, HmacParameters.Variant.NO_PREFIX)
+              .add(OutputPrefixType.TINK, HmacParameters.Variant.TINK)
+              .add(OutputPrefixType.LEGACY, HmacParameters.Variant.LEGACY)
+              .add(OutputPrefixType.CRUNCHY, HmacParameters.Variant.CRUNCHY)
+              .build();
+  private static final EnumTypeProtoConverter<HashType, HmacParameters.HashType>
+      HASH_TYPE_CONVERTER =
+          EnumTypeProtoConverter.<HashType, HmacParameters.HashType>builder()
+              .add(HashType.SHA1, HmacParameters.HashType.SHA1)
+              .add(HashType.SHA224, HmacParameters.HashType.SHA224)
+              .add(HashType.SHA256, HmacParameters.HashType.SHA256)
+              .add(HashType.SHA384, HmacParameters.HashType.SHA384)
+              .add(HashType.SHA512, HmacParameters.HashType.SHA512)
+              .build();
 
   private static final ParametersSerializer<HmacParameters, ProtoParametersSerialization>
       PARAMETERS_SERIALIZER =
@@ -69,84 +87,11 @@ public final class HmacProtoSerialization {
       KeyParser.create(
           HmacProtoSerialization::parseKey, TYPE_URL_BYTES, ProtoKeySerialization.class);
 
-  private static OutputPrefixType toProtoOutputPrefixType(HmacParameters.Variant variant)
-      throws GeneralSecurityException {
-    if (HmacParameters.Variant.TINK.equals(variant)) {
-      return OutputPrefixType.TINK;
-    }
-    if (HmacParameters.Variant.CRUNCHY.equals(variant)) {
-      return OutputPrefixType.CRUNCHY;
-    }
-    if (HmacParameters.Variant.NO_PREFIX.equals(variant)) {
-      return OutputPrefixType.RAW;
-    }
-    if (HmacParameters.Variant.LEGACY.equals(variant)) {
-      return OutputPrefixType.LEGACY;
-    }
-    throw new GeneralSecurityException("Unable to serialize variant: " + variant);
-  }
-
-  private static HashType toProtoHashType(HmacParameters.HashType hashType)
-      throws GeneralSecurityException {
-    if (HmacParameters.HashType.SHA1.equals(hashType)) {
-      return HashType.SHA1;
-    }
-    if (HmacParameters.HashType.SHA224.equals(hashType)) {
-      return HashType.SHA224;
-    }
-    if (HmacParameters.HashType.SHA256.equals(hashType)) {
-      return HashType.SHA256;
-    }
-    if (HmacParameters.HashType.SHA384.equals(hashType)) {
-      return HashType.SHA384;
-    }
-    if (HmacParameters.HashType.SHA512.equals(hashType)) {
-      return HashType.SHA512;
-    }
-    throw new GeneralSecurityException("Unable to serialize HashType " + hashType);
-  }
-
-  private static HmacParameters.HashType toHashType(HashType hashType)
-      throws GeneralSecurityException {
-    switch (hashType) {
-      case SHA1:
-        return HmacParameters.HashType.SHA1;
-      case SHA224:
-        return HmacParameters.HashType.SHA224;
-      case SHA256:
-        return HmacParameters.HashType.SHA256;
-      case SHA384:
-        return HmacParameters.HashType.SHA384;
-      case SHA512:
-        return HmacParameters.HashType.SHA512;
-      default:
-        throw new GeneralSecurityException(
-            "Unable to parse HashType: " + hashType.getNumber());
-    }
-  }
-
-  private static HmacParameters.Variant toVariant(OutputPrefixType outputPrefixType)
-      throws GeneralSecurityException {
-    switch (outputPrefixType) {
-      case TINK:
-        return HmacParameters.Variant.TINK;
-      case CRUNCHY:
-        return HmacParameters.Variant.CRUNCHY;
-      case LEGACY:
-        return HmacParameters.Variant.LEGACY;
-      case RAW:
-        return HmacParameters.Variant.NO_PREFIX;
-      default:
-        throw new GeneralSecurityException(
-            "Unable to parse OutputPrefixType: " + outputPrefixType.getNumber());
-    }
-  }
-
   private static com.google.crypto.tink.proto.HmacParams getProtoParams(HmacParameters parameters)
       throws GeneralSecurityException {
     return com.google.crypto.tink.proto.HmacParams.newBuilder()
         .setTagSize(parameters.getCryptographicTagSizeBytes())
-        .setHash(toProtoHashType(parameters.getHashType()))
+        .setHash(HASH_TYPE_CONVERTER.toProtoEnum(parameters.getHashType()))
         .build();
   }
 
@@ -161,7 +106,7 @@ public final class HmacProtoSerialization {
                     .setKeySize(parameters.getKeySizeBytes())
                     .build()
                     .toByteString())
-            .setOutputPrefixType(toProtoOutputPrefixType(parameters.getVariant()))
+            .setOutputPrefixType(OUTPUT_PREFIX_TYPE_CONVERTER.toProtoEnum(parameters.getVariant()))
             .build());
   }
 
@@ -177,7 +122,7 @@ public final class HmacProtoSerialization {
             .build()
             .toByteString(),
         KeyMaterialType.SYMMETRIC,
-        toProtoOutputPrefixType(key.getParameters().getVariant()),
+        OUTPUT_PREFIX_TYPE_CONVERTER.toProtoEnum(key.getParameters().getVariant()),
         key.getIdRequirementOrNull());
   }
 
@@ -203,8 +148,10 @@ public final class HmacProtoSerialization {
     return HmacParameters.builder()
         .setKeySizeBytes(format.getKeySize())
         .setTagSizeBytes(format.getParams().getTagSize())
-        .setHashType(toHashType(format.getParams().getHash()))
-        .setVariant(toVariant(serialization.getKeyTemplate().getOutputPrefixType()))
+        .setHashType(HASH_TYPE_CONVERTER.fromProtoEnum(format.getParams().getHash()))
+        .setVariant(
+            OUTPUT_PREFIX_TYPE_CONVERTER.fromProtoEnum(
+                serialization.getKeyTemplate().getOutputPrefixType()))
         .build();
   }
 
@@ -227,8 +174,9 @@ public final class HmacProtoSerialization {
           HmacParameters.builder()
               .setKeySizeBytes(protoKey.getKeyValue().size())
               .setTagSizeBytes(protoKey.getParams().getTagSize())
-              .setHashType(toHashType(protoKey.getParams().getHash()))
-              .setVariant(toVariant(serialization.getOutputPrefixType()))
+              .setHashType(HASH_TYPE_CONVERTER.fromProtoEnum(protoKey.getParams().getHash()))
+              .setVariant(
+                  OUTPUT_PREFIX_TYPE_CONVERTER.fromProtoEnum(serialization.getOutputPrefixType()))
               .build();
       return HmacKey.builder()
           .setParameters(parameters)
