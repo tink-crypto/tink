@@ -16,7 +16,6 @@
 import os
 
 from absl.testing import absltest
-import botocore
 
 import tink
 from tink import aead
@@ -26,11 +25,12 @@ from tink.integration.hcvault import _hcvault_kms_client
 from tink.testing import helper
 
 
-TOKEN = "" # Your auth token
+TOKEN = "hvs.LPUqFLiJZXO3Q8kNtCawP33i" # Your auth token
 
 BAD_TOKEN = "notavalidtoken"
 
-KEY_URI = ('hcvault://hcvault.corp.com:8200/transit/keys/key-1')
+#KEY_URI = ('hcvault://hcvault.corp.com:8200/transit/keys/key-1')
+KEY_URI = ('hcvault://10.10.18.215:8200/transit/keys/key-1')
 
 GCP_KEY_URI = ('gcp-kms://projects/tink-test-infrastructure/locations/global/'
                'keyRings/unit-and-integration-testing/cryptoKeys/aead-key')
@@ -47,7 +47,7 @@ class HcVaultAeadTest(absltest.TestCase):
     _kms_aead_key_manager.reset_kms_clients()
 
   def test_encrypt_decrypt(self):
-    vaultclient = hcvault.HcVaultClient(KEY_URI, TOKEN)
+    vaultclient = hcvault.HcVaultKmsClient(KEY_URI, TOKEN)
     vaultaead = vaultclient.get_aead(KEY_URI)
 
     plaintext = b'hello'
@@ -60,7 +60,7 @@ class HcVaultAeadTest(absltest.TestCase):
     self.assertEqual(plaintext, vaultaead.decrypt(ciphertext, b''))
 
   def test_corrupted_ciphertext(self):
-    vaultclient = hcvault.HcVaultClient(KEY_URI, TOKEN)
+    vaultclient = hcvault.HcVaultKmsClient(KEY_URI, TOKEN)
     vaultaead = vaultclient.get_aead(KEY_URI)
 
     plaintext = b'helloworld'
@@ -68,49 +68,36 @@ class HcVaultAeadTest(absltest.TestCase):
     self.assertEqual(plaintext, vaultaead.decrypt(ciphertext, b''))
 
     # Corrupt each byte once and check that decryption fails
-    # NOTE: Skipping two bytes as they are malleable
-    for byte_idx in [b for b in range(len(ciphertext)) if b not in [77, 123]]:
+    for byte_idx in [b for b in range(len(ciphertext))]:
       tmp_ciphertext = list(ciphertext)
-      tmp_ciphertext[byte_idx] ^= 1
+      tmp_ciphertext[byte_idx] ^= 2
       corrupted_ciphertext = bytes(tmp_ciphertext)
       with self.assertRaises(tink.TinkError):
         vaultaead.decrypt(corrupted_ciphertext, b'')
 
   def test_encrypt_with_bad_uri(self):
     with self.assertRaises(tink.TinkError):
-      vaultclient = hcvault.HcVaultClient(KEY_URI, TOKEN)
+      vaultclient = hcvault.HcVaultKmsClient(KEY_URI, TOKEN)
       vaultclient.get_aead(GCP_KEY_URI)
 
   def test_encrypt_with_bad_token(self):
-    vaultclient = hcvault.HcVaultClient(KEY_URI, BAD_TOKEN)
-    vaultaead = vaultclient.get_aead(KEY_URI)
-
-    plaintext = b'hello'
-    associated_data = b'world'
     with self.assertRaises(tink.TinkError):
+      vaultclient = hcvault.HcVaultKmsClient(KEY_URI, BAD_TOKEN)
+      vaultaead = vaultclient.get_aead(KEY_URI)
+
+      plaintext = b'hello'
+      associated_data = b'world'
       vaultaead.encrypt(plaintext, associated_data)
 
   def test_client_registration(self):
     # Register AWS KMS Client bound to KEY_URI.
-    hcvault.HcVaultClient.register_client(KEY_URI, TOKEN)
+    hcvault.HcVaultKmsClient.register_client(KEY_URI, TOKEN)
 
     # Create a keyset handle for KEY_URI and use it.
     handle = tink.new_keyset_handle(
         aead.aead_key_templates.create_kms_aead_key_template(KEY_URI)
     )
     vaultaead = handle.primitive(aead.Aead)
-    ciphertext = vaultaead.encrypt(b'plaintext', b'associated_data')
-    self.assertEqual(
-        b'plaintext', vaultaead.decrypt(ciphertext, b'associated_data')
-    )
-
-  def test_encrypt_with_default_credentials(self):
-    # If no credentials_path is provided, this path here is used by default.
-    os.environ['AWS_SHARED_CREDENTIALS_FILE'] = TOKEN
-
-    vaultclient = hcvault.HcVaultClient(key_uri=KEY_URI, credentials_path=None)
-    vaultaead = vaultclient.get_aead(KEY_URI)
-
     ciphertext = vaultaead.encrypt(b'plaintext', b'associated_data')
     self.assertEqual(
         b'plaintext', vaultaead.decrypt(ciphertext, b'associated_data')

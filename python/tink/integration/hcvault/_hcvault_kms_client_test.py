@@ -43,8 +43,10 @@ class HcVaultKmsClientTest(absltest.TestCase):
       hcvault.HcVaultKmsClient(GCP_KEY_URI, TOKEN)
 
   def test_client_empty_key_uri(self):
-    hcvault_client = hcvault.HcVaultKmsClient('', TOKEN)
-    self.assertEqual(hcvault_client.does_support(KEY_URI), False)
+    hcvault_client = hcvault.HcVaultKmsClient(KEY_URI, TOKEN)
+    self.assertEqual(hcvault_client.does_support(''), False)
+    with self.assertRaises(tink.TinkError):
+      hcvault_client = hcvault.HcVaultKmsClient('', TOKEN)
 
   def test_client_invalid_token(self):
     with self.assertRaises(ValueError):

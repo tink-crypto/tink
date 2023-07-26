@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""AWS KMS integration package."""
+"""Hashicorp Vault KMS integration package."""
 
 from tink.integration.hcvault import _hcvault_kms_client
 
