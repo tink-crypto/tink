@@ -540,6 +540,48 @@ public final class EciesProtoSerializationTest {
   }
 
   @Test
+  public void parsePublicKey_p256_legacy_equal() throws Exception {
+    String pointXHex = "700c48f77f56584c5cc632ca65640db91b6bacce3a4df6b42ce7cc838833d287";
+    String pointYHex = "db71e509e3fd9b060ddb20ba5c51dcc5948d46fbf640dfe0441782cab85fa4ac";
+    ECPoint someP256PublicPoint =
+        new ECPoint(new BigInteger(pointXHex, 16), new BigInteger(pointYHex, 16));
+
+    // Java object
+    EciesParameters parameters =
+        EciesParameters.builder()
+            .setCurveType(EciesParameters.CurveType.NIST_P256)
+            .setHashType(EciesParameters.HashType.SHA256)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.COMPRESSED)
+            .setVariant(EciesParameters.Variant.CRUNCHY)
+            .setDemParameters(DEM_PARAMETERS)
+            .setSalt(SALT)
+            .build();
+    EciesPublicKey publicKey =
+        EciesPublicKey.createForNistCurve(parameters, someP256PublicPoint, 101);
+
+    // Proto object
+    EciesAeadHkdfPublicKey protoPublicKey =
+        EciesAeadHkdfPublicKey.newBuilder()
+            .setVersion(0)
+            .setParams(validParamsForCurve(EllipticCurveType.NIST_P256))
+            .setX(ByteString.copyFrom(Hex.decode("00" + pointXHex)))
+            .setY(ByteString.copyFrom(Hex.decode("00" + pointYHex)))
+            .build();
+    ProtoKeySerialization serialization =
+        ProtoKeySerialization.create(
+            "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey",
+            protoPublicKey.toByteString(),
+            KeyMaterialType.ASYMMETRIC_PUBLIC,
+            OutputPrefixType.LEGACY,
+            /* idRequirement= */ 101);
+
+    // Comparison
+    Key parsed = registry.parseKey(serialization, /* access= */ null);
+    assertThat(parsed.getParameters()).isEqualTo(publicKey.getParameters());
+    assertThat(parsed.equalsKey(publicKey)).isTrue();
+  }
+
+  @Test
   public void serializeParsePublicKey_p384_tink_equal() throws Exception {
     String pointXHex =
         "a7c76b970c3b5fe8b05d2838ae04ab47697b9eaf52e764592efda27fe7513272"

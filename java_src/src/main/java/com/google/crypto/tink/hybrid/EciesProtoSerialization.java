@@ -87,6 +87,11 @@ final class EciesProtoSerialization {
           EnumTypeProtoConverter.<OutputPrefixType, EciesParameters.Variant>builder()
               .add(OutputPrefixType.RAW, EciesParameters.Variant.NO_PREFIX)
               .add(OutputPrefixType.TINK, EciesParameters.Variant.TINK)
+              .add(OutputPrefixType.LEGACY, EciesParameters.Variant.CRUNCHY)
+              // WARNING: The following mapping MUST be added last to ensure that
+              // {@code HpkeParameters.Variant.CRUNCHY} keys are correctly serialized to
+              // {@code OutputPrefixType.CRUNCHY} proto keys. Specifically, the most recent entry
+              // overrides that toProtoEnum mapping.
               .add(OutputPrefixType.CRUNCHY, EciesParameters.Variant.CRUNCHY)
               .build();
 
@@ -108,7 +113,7 @@ final class EciesProtoSerialization {
               .add(EllipticCurveType.NIST_P521, EciesParameters.CurveType.NIST_P521)
               .add(EllipticCurveType.CURVE25519, EciesParameters.CurveType.X25519)
               .build();
-  
+
   private static final EnumTypeProtoConverter<EcPointFormat, EciesParameters.PointFormat>
       POINT_FORMAT_CONVERTER =
           EnumTypeProtoConverter.<EcPointFormat, EciesParameters.PointFormat>builder()

@@ -101,6 +101,11 @@ final class HpkeProtoSerialization {
           EnumTypeProtoConverter.<OutputPrefixType, HpkeParameters.Variant>builder()
               .add(OutputPrefixType.RAW, HpkeParameters.Variant.NO_PREFIX)
               .add(OutputPrefixType.TINK, HpkeParameters.Variant.TINK)
+              .add(OutputPrefixType.LEGACY, HpkeParameters.Variant.CRUNCHY)
+              // WARNING: The following mapping MUST be added last to ensure that
+              // {@code HpkeParameters.Variant.CRUNCHY} keys are correctly serialized to
+              // {@code OutputPrefixType.CRUNCHY} proto keys. Specifically, the most recent entry
+              // overrides that toProtoEnum mapping.
               .add(OutputPrefixType.CRUNCHY, HpkeParameters.Variant.CRUNCHY)
               .build();
 

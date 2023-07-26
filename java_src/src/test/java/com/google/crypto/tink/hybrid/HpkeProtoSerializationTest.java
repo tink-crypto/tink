@@ -308,6 +308,40 @@ public final class HpkeProtoSerializationTest {
   }
 
   @Theory
+  public void parsePublicKey_withLegacyOutputPrefix(
+      @FromDataPoints("kems") KemTuple kemTuple,
+      @FromDataPoints("kdfs") KdfTuple kdfTuple,
+      @FromDataPoints("aeads") AeadTuple aeadTuple)
+      throws Exception {
+    HpkeParameters parameters =
+        HpkeParameters.builder()
+            .setKemId(kemTuple.kemId)
+            .setKdfId(kdfTuple.kdfId)
+            .setAeadId(aeadTuple.aeadId)
+            .setVariant(HpkeParameters.Variant.CRUNCHY)
+            .build();
+    HpkePublicKey publicKey =
+        HpkePublicKey.create(
+            parameters, Bytes.copyFrom(kemTuple.publicKey), /* idRequirement= */ 789);
+
+    HpkeParams protoParams =
+        createHpkeProtoParams(kemTuple.kemProto, kdfTuple.kdfProto, aeadTuple.aeadProto);
+    com.google.crypto.tink.proto.HpkePublicKey protoPublicKey =
+        createHpkeProtoPublicKey(/* version= */ 0, protoParams, kemTuple.publicKey);
+
+    ProtoKeySerialization serialization =
+        ProtoKeySerialization.create(
+            "type.googleapis.com/google.crypto.tink.HpkePublicKey",
+            protoPublicKey.toByteString(),
+            KeyMaterialType.ASYMMETRIC_PUBLIC,
+            OutputPrefixType.LEGACY,
+            /* idRequirement= */ 789);
+
+    Key parsed = registry.parseKey(serialization, /* access= */ null);
+    assertThat(parsed.equalsKey(publicKey)).isTrue();
+  }
+
+  @Theory
   public void serializeParsePrivateKey(
       @FromDataPoints("variants") VariantTuple variantTuple,
       @FromDataPoints("kems") KemTuple kemTuple,
@@ -352,6 +386,45 @@ public final class HpkeProtoSerializationTest {
 
     assertEqualWhenValueParsed(
         com.google.crypto.tink.proto.HpkePublicKey.parser(), serialized, serialization);
+  }
+
+  @Theory
+  public void parsePrivateKey_withLegacyOutputPrefix(
+      @FromDataPoints("kems") KemTuple kemTuple,
+      @FromDataPoints("kdfs") KdfTuple kdfTuple,
+      @FromDataPoints("aeads") AeadTuple aeadTuple)
+      throws Exception {
+    HpkeParameters parameters =
+        HpkeParameters.builder()
+            .setKemId(kemTuple.kemId)
+            .setKdfId(kdfTuple.kdfId)
+            .setAeadId(aeadTuple.aeadId)
+            .setVariant(HpkeParameters.Variant.CRUNCHY)
+            .build();
+    HpkePublicKey publicKey =
+        HpkePublicKey.create(
+            parameters, Bytes.copyFrom(kemTuple.publicKey), /* idRequirement= */ 789);
+    HpkePrivateKey privateKey =
+        HpkePrivateKey.create(
+            publicKey, SecretBytes.copyFrom(kemTuple.privateKey, InsecureSecretKeyAccess.get()));
+
+    HpkeParams protoParams =
+        createHpkeProtoParams(kemTuple.kemProto, kdfTuple.kdfProto, aeadTuple.aeadProto);
+    com.google.crypto.tink.proto.HpkePublicKey protoPublicKey =
+        createHpkeProtoPublicKey(/* version= */ 0, protoParams, kemTuple.publicKey);
+    com.google.crypto.tink.proto.HpkePrivateKey protoPrivateKey =
+        createHpkeProtoPrivateKey(/* version= */ 0, protoPublicKey, kemTuple.privateKey);
+
+    ProtoKeySerialization serialization =
+        ProtoKeySerialization.create(
+            "type.googleapis.com/google.crypto.tink.HpkePrivateKey",
+            protoPrivateKey.toByteString(),
+            KeyMaterialType.ASYMMETRIC_PRIVATE,
+            OutputPrefixType.LEGACY,
+            /* idRequirement= */ 789);
+
+    Key parsed = registry.parseKey(serialization, InsecureSecretKeyAccess.get());
+    assertThat(parsed.equalsKey(privateKey)).isTrue();
   }
 
   @Test
