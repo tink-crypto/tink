@@ -16,7 +16,6 @@
 
 import base64
 import urllib
-from urllib import parse, quote
 
 import hvac
 
@@ -33,32 +32,32 @@ class _HcVaultKmsAead(aead.Aead):
 
   def __init__(self, client: hvac.Client, key_uri: str) -> None:
     self.client = client
-    mount_path, key_name = self.get_endpoint_paths(key_uri)
+    mount_point, key_name = self.get_endpoint_paths(key_uri)
     self.key_name = key_name
-    self.mount_path = mount_path
+    self.mount_point = mount_point
 
   def encrypt(self, plaintext: bytes, associated_data: bytes) -> bytes:
     try:
       response = self.client.secrets.transit.encrypt_data(
           name=self.key_name,
-          plaintext=base64.urlsafe_b64encode(plaintext),
-          context=base64.urlsafe_b64encode(associated_data),
-          mount_path=self.mount_path,
+          plaintext=base64.urlsafe_b64encode(plaintext).decode(),
+          context=base64.urlsafe_b64encode(associated_data).decode(),
+          mount_point=self.mount_point,
       )
-      return response['data']['ciphertext']
-    except exceptions.ClientError as e:
+      return response['data']['ciphertext'].encode()
+    except Exception as e:
       raise tink.TinkError(e)
 
   def decrypt(self, ciphertext: bytes, associated_data: bytes) -> bytes:
     try:
       response = self.client.secrets.transit.decrypt_data(
           name=self.key_name,
-          ciphertext=ciphertext,
-          context=associated_data,
-          mount_path=self.mount_path,
+          ciphertext=ciphertext.decode(),
+          context=base64.urlsafe_b64encode(associated_data).decode(),
+          mount_point=self.mount_point,
       )
-      return response['data']['plaintext']
-    except exceptions.ClientError as e:
+      return base64.urlsafe_b64decode(response['data']['plaintext'])
+    except Exception as e:
       raise tink.TinkError(e)
     
   """
@@ -81,7 +80,7 @@ class _HcVaultKmsAead(aead.Aead):
     escaped_path = urllib.parse.quote(u.path)
     parts = escaped_path.split('/')
     parts = [x for x in parts if x]
-    return parts[:1], parts[-1:] # First entry i.e. "transit" and last entry i.e. "key-bar"
+    return parts[:1][0], parts[-1:][0] # First entry i.e. "transit" and last entry i.e. "key-bar"
 
 class HcVaultKmsClient(_kms_aead_key_manager.KmsClient):
   """Basic Hashicorp Vault client for AEAD."""
@@ -105,10 +104,10 @@ class HcVaultKmsClient(_kms_aead_key_manager.KmsClient):
       raise ValueError('no login token provided')
 
     parsed_uri = urllib.parse.urlparse(key_uri)
-    self.vault_url = f'{parsed_uri}://{parsed_uri.netloc}'
+    self.vault_url = f'http://{parsed_uri.netloc}'
     self.key_uri = parsed_uri.path
     self.token = token
-    self.client = hvac.Client(url=self.vault_url, token=self.token)
+    self.client = hvac.Client(url=self.vault_url, token=self.token, verify=False)
     if not self.client.is_authenticated():
       raise tink.TinkError('failed to authenticate with vault')
     
