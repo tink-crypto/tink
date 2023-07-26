@@ -1,0 +1,56 @@
+load("@rules_python//python:defs.bzl", "py_test")
+load("@tink_py_pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//:__subpackages__"])
+
+py_library(
+    name = "hcvault",
+    srcs = ["__init__.py"],
+    srcs_version = "PY3",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":_hcvault_kms_client",
+    ],
+)
+
+py_library(
+    name = "_hcvault_kms_client",
+    srcs = ["_hcvault_kms_client.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink:tink_python",
+        "//tink/aead",
+        "//tink/aead:_kms_aead_key_manager",
+        "//tink/core",
+        requirement("hvac"),
+    ],
+)
+
+py_test(
+    name = "_hcvault_kms_client_test",
+    srcs = ["_hcvault_kms_client_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":hcvault",
+        ":_hcvault_kms_client",
+        "//tink:tink_python",
+        "//tink/testing:helper",
+        requirement("absl-py"),
+    ],
+)
+
+py_test(
+    name = "_hcvault_kms_integration_test",
+    srcs = ["_hcvault_kms_integration_test.py"],
+    srcs_version = "PY3",
+    # This test require valid HashiCorp vault credentials so we set it as `manual`.
+    tags = ["manual"],
+    deps = [
+        ":hcvault",
+        "//tink:tink_python",
+        "//tink/aead",
+        "//tink/aead:_kms_aead_key_manager",
+        "//tink/testing:helper",
+        requirement("absl-py"),
+    ],
+)

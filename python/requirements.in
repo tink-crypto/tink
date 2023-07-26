@@ -6,3 +6,5 @@ boto3>=1.26.89
 google-auth>=2.16.2
 google-api-core>=2.11.0
 google-cloud-kms>=2.16.1
+# Hashicorp Vault KMS extension.
+hvac>=1.1.1
