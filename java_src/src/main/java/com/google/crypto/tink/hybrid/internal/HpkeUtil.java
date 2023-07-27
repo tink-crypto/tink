@@ -143,5 +143,37 @@ public final class HpkeUtil {
     }
   }
 
+  /** Lengths from 'Npk' column in https://www.rfc-editor.org/rfc/rfc9180.html#table-2. */
+  static int getEncodedPublicKeyLength(HpkeKem kem) throws GeneralSecurityException {
+    switch (kem) {
+      case DHKEM_X25519_HKDF_SHA256:
+        return 32;
+      case DHKEM_P256_HKDF_SHA256:
+        return 65;
+      case DHKEM_P384_HKDF_SHA384:
+        return 97;
+      case DHKEM_P521_HKDF_SHA512:
+        return 133;
+      default:
+        throw new GeneralSecurityException("Unrecognized HPKE KEM identifier");
+    }
+  }
+
+  /** Lengths from 'Nsk' column in https://www.rfc-editor.org/rfc/rfc9180.html#table-2. */
+  static int getEncodedPrivateKeyLength(HpkeKem kem) throws GeneralSecurityException {
+    switch (kem) {
+      case DHKEM_X25519_HKDF_SHA256:
+        return 32;
+      case DHKEM_P256_HKDF_SHA256:
+        return 32;
+      case DHKEM_P384_HKDF_SHA384:
+        return 48;
+      case DHKEM_P521_HKDF_SHA512:
+        return 66;
+      default:
+        throw new GeneralSecurityException("Unrecognized HPKE KEM identifier");
+    }
+  }
+
   private HpkeUtil() {}
 }

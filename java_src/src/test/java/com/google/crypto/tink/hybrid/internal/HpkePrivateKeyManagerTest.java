@@ -152,7 +152,11 @@ public final class HpkePrivateKeyManagerTest {
     assertThat(key.getVersion()).isEqualTo(manager.getVersion());
     assertThat(key.getPublicKey().getParams()).isEqualTo(format.getParams());
     assertThat(key.getPublicKey().getPublicKey()).isNotEmpty();
+    assertThat(key.getPublicKey().getPublicKey().toByteArray().length)
+        .isEqualTo(HpkeUtil.getEncodedPublicKeyLength(format.getParams().getKem()));
     assertThat(key.getPrivateKey()).isNotEmpty();
+    assertThat(key.getPrivateKey().toByteArray().length)
+        .isEqualTo(HpkeUtil.getEncodedPrivateKeyLength(format.getParams().getKem()));
   }
 
   @Theory
