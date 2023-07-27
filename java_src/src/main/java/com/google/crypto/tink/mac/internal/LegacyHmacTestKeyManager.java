@@ -41,7 +41,6 @@ import javax.crypto.spec.SecretKeySpec;
  */
 class LegacyHmacTestKeyManager implements KeyManager<Mac> {
   /** Type url that this manager does support. */
-  // public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.HmacKey";
   public static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.HmacKey";
   /** Current version of this key manager. Keys with version equal or smaller are supported. */
   private static final int VERSION = 0;
@@ -210,7 +209,6 @@ class LegacyHmacTestKeyManager implements KeyManager<Mac> {
 
   static void register() throws GeneralSecurityException {
     Registry.registerKeyManager(new LegacyHmacTestKeyManager(), true);
-    HmacProtoSerialization.register();
   }
 
   private static final class LegacyMacTestImpl implements Mac {

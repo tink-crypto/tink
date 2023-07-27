@@ -21,8 +21,12 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.PrimitiveSet;
+import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.internal.LegacyProtoKey;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.mac.HmacKey;
 import com.google.crypto.tink.mac.internal.HmacTestUtil.HmacTestVector;
@@ -37,9 +41,16 @@ import org.junit.runner.RunWith;
 
 @RunWith(Theories.class)
 public class LegacyFullMacTest {
+
   @BeforeClass
   public static void setUp() throws Exception {
     LegacyHmacTestKeyManager.register();
+    HmacProtoSerialization.register();
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(
+            PrimitiveConstructor.create(
+                LegacyFullMac::create, LegacyProtoKey.class, LegacyFullMac.class));
+    TestLegacyMacWrapper.register();
 
     hmacImplementationTestVectors =
         Arrays.copyOf(
@@ -56,8 +67,6 @@ public class LegacyFullMacTest {
   @DataPoints("failingHmacTestVectors")
   public static final HmacTestVector[] HMAC_FAILING_TEST_VECTORS =
       HmacTestUtil.CREATE_VERIFICATION_FAILS_FAST;
-
-  public static final String TYPE_URL = "LegacyHmacTestKey";
 
   @DataPoints("allHmacTestVectors")
   public static HmacTestVector[] hmacImplementationTestVectors;
@@ -94,5 +103,29 @@ public class LegacyFullMacTest {
         MutableSerializationRegistry.globalInstance()
             .serializeKey(hmacKey, ProtoKeySerialization.class, InsecureSecretKeyAccess.get()),
         InsecureSecretKeyAccess.get());
+  }
+
+  private static final class TestLegacyMacWrapper implements PrimitiveWrapper<LegacyFullMac, Mac> {
+    static final TestLegacyMacWrapper WRAPPER = new TestLegacyMacWrapper();
+
+    @Override
+    public LegacyFullMac wrap(PrimitiveSet<LegacyFullMac> primitiveSet)
+        throws GeneralSecurityException {
+      return primitiveSet.getPrimary().getFullPrimitive();
+    }
+
+    @Override
+    public Class<Mac> getPrimitiveClass() {
+      return Mac.class;
+    }
+
+    @Override
+    public Class<LegacyFullMac> getInputPrimitiveClass() {
+      return LegacyFullMac.class;
+    }
+
+    static void register() throws GeneralSecurityException {
+      MutablePrimitiveRegistry.globalInstance().registerPrimitiveWrapper(WRAPPER);
+    }
   }
 }
