@@ -432,6 +432,17 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "ed25519_parameters",
+    srcs = ["ed25519_parameters.cc"],
+    hdrs = ["ed25519_parameters.h"],
+    include_prefix = "tink/signature",
+    deps = [
+        ":signature_parameters",
+        "//util:statusor",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -800,6 +811,17 @@ cc_test(
         ":failing_signature",
         "//util:test_matchers",
         "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "ed25519_parameters_test",
+    srcs = ["ed25519_parameters_test.cc"],
+    deps = [
+        ":ed25519_parameters",
+        "//util:statusor",
+        "//util:test_matchers",
         "@com_google_googletest//:gtest_main",
     ],
 )

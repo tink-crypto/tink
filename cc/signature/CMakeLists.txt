@@ -412,6 +412,16 @@ tink_cc_library(
     tink::core::private_key
 )
 
+tink_cc_library(
+  NAME ed25519_parameters
+  SRCS
+    ed25519_parameters.cc
+    ed25519_parameters.h
+  DEPS
+    tink::signature::signature_parameters
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -765,5 +775,16 @@ tink_cc_test(
     tink::signature::failing_signature
     gmock
     absl::status
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME ed25519_parameters_test
+  SRCS
+    ed25519_parameters_test.cc
+  DEPS
+    tink::signature::ed25519_parameters
+    gmock
+    tink::util::statusor
     tink::util::test_matchers
 )
