@@ -15,6 +15,7 @@
 """A client for Hashicorp Vault."""
 
 import base64
+from typing import Optional, Tuple
 import urllib
 
 import hvac
@@ -85,12 +86,14 @@ class _HcVaultKmsAead(aead.Aead):
 class HcVaultKmsClient(_kms_aead_key_manager.KmsClient):
   """Basic Hashicorp Vault client for AEAD."""
 
-  def __init__(self, key_uri: str, token: str):
+  def __init__(self, key_uri: str, token: str, https=True, verify=True, client_certs: Tuple[str, str] = None, namespace: Optional[str] = None):
     """Creates a new HcVaultKmsClient that is bound to the key specified in 'key_uri'.
 
     Args:
       key_uri: The URI of the key the client should be bound to.
       token: The token used to auth with vault
+      https: Whether to connect via HTTPS or HTTP, default to HTTPS (can use HTTP for dev environments)
+      verify: Whether to verify the HTTPS cert, default behaviour is to verify but can be turned off for dev environments
 
     Raises:
       ValueError: If the path or credentials token is invalid.
@@ -104,10 +107,10 @@ class HcVaultKmsClient(_kms_aead_key_manager.KmsClient):
       raise ValueError('no login token provided')
 
     parsed_uri = urllib.parse.urlparse(key_uri)
-    self.vault_url = f'http://{parsed_uri.netloc}'
+    self.vault_url = f'{"http" if not https else "https"}://{parsed_uri.netloc}'
     self.key_uri = parsed_uri.path
     self.token = token
-    self.client = hvac.Client(url=self.vault_url, token=self.token, verify=False)
+    self.client = hvac.Client(url=self.vault_url, token=self.token, verify=verify, client_certs=client_certs, namespace=namespace)
     if not self.client.is_authenticated():
       raise tink.TinkError('failed to authenticate with vault')
     
@@ -143,8 +146,8 @@ class HcVaultKmsClient(_kms_aead_key_manager.KmsClient):
     return _HcVaultKmsAead(self.client, key_uri)
 
   @classmethod
-  def register_client(cls, key_uri: str, token: str) -> None:
+  def register_client(cls, key_uri: str, token: str, https=True, verify=True, client_certs: Tuple[str, str] = None, namespace: Optional[str]=None) -> None:
     """Registers the KMS client internally."""
     _kms_aead_key_manager.register_kms_client(  # pylint: disable=protected-access
-      HcVaultKmsClient(key_uri, token)
+      HcVaultKmsClient(key_uri, token, https=https, verify=verify, client_certs=client_certs, namespace=namespace)
     )

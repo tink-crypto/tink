@@ -25,12 +25,11 @@ from tink.integration.hcvault import _hcvault_kms_client
 from tink.testing import helper
 
 
-TOKEN = "hvs.LPUqFLiJZXO3Q8kNtCawP33i" # Your auth token
+TOKEN = "" # Your auth token
 
 BAD_TOKEN = "notavalidtoken"
 
-#KEY_URI = ('hcvault://hcvault.corp.com:8200/transit/keys/key-1')
-KEY_URI = ('hcvault://10.10.18.215:8200/transit/keys/key-1')
+KEY_URI = ('hcvault://hcvault.corp.com:8200/transit/keys/key-1') # Replace this with your vault URI
 
 GCP_KEY_URI = ('gcp-kms://projects/tink-test-infrastructure/locations/global/'
                'keyRings/unit-and-integration-testing/cryptoKeys/aead-key')
