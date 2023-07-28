@@ -25,7 +25,7 @@ def _java_single_jar(ctx):
     if ctx.attr.source_jar:
         inputs = depset(transitive = [dep[JavaInfo].transitive_source_jars for dep in ctx.attr.deps])
     else:
-        inputs = depset(transitive = [dep[JavaInfo].transitive_runtime_deps for dep in ctx.attr.deps])
+        inputs = depset(transitive = [dep[JavaInfo].transitive_runtime_jars for dep in ctx.attr.deps])
 
     args = ctx.actions.args()
     args.add_all("--sources", inputs)
