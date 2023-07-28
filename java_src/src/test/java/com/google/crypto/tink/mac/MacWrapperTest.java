@@ -23,18 +23,15 @@ import static org.junit.Assert.assertThrows;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
-import com.google.crypto.tink.PrimitiveSet;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.testing.FakeMonitoringClient;
 import com.google.crypto.tink.mac.HmacParameters.HashType;
 import com.google.crypto.tink.mac.internal.HmacProtoSerialization;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
-import com.google.crypto.tink.proto.KeyStatusType;
-import com.google.crypto.tink.proto.Keyset.Key;
-import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Hex;
-import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.util.SecretBytes;
 import java.security.GeneralSecurityException;
 import java.util.List;
@@ -197,6 +194,9 @@ public class MacWrapperTest {
 
   @Test
   public void testComputeVerifyMac_throwsOnWrongKey() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    MacConfig.register();
+
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     KeysetHandle computeKeysetHandle =
         KeysetHandle.newBuilder()
@@ -216,6 +216,9 @@ public class MacWrapperTest {
 
   @Test
   public void testVerifyMac_checksAllNecessaryRawKeys() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    MacConfig.register();
+
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     KeysetHandle computeKeysetHandle =
         KeysetHandle.newBuilder()
@@ -236,6 +239,9 @@ public class MacWrapperTest {
 
   @Test
   public void testVerifyMac_checksRawKeysWhenTagHasTinkKeyPrefix() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    MacConfig.register();
+
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] tag = Hex.decode("0152af9740d2fab0cf3f");
     HmacKey rawKey5 =
@@ -267,6 +273,9 @@ public class MacWrapperTest {
 
   @Test
   public void computeMac_usesPrimaryKey() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    MacConfig.register();
+
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     KeysetHandle keysetHandle =
         KeysetHandle.newBuilder()
@@ -288,6 +297,9 @@ public class MacWrapperTest {
 
   @Test
   public void testComputeVerifyMac_manyKeysWork() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    MacConfig.register();
+
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     KeysetHandle assortedKeysetHandle =
         KeysetHandle.newBuilder()
@@ -311,6 +323,9 @@ public class MacWrapperTest {
 
   @Test
   public void testVerifyMac_shiftedPrimaryWithManyKeysWorks() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    MacConfig.register();
+
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     KeysetHandle assortedKeysetHandle0 =
         KeysetHandle.newBuilder()
@@ -339,6 +354,9 @@ public class MacWrapperTest {
 
   @Test
   public void testMultipleKeysWithoutAnnotation() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    MacConfig.register();
+
     FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
     MutableMonitoringRegistry.globalInstance().clear();
     MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
@@ -388,45 +406,36 @@ public class MacWrapperTest {
 
   @Test
   public void testWithAnnotation_hasMonitoring() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    MacConfig.register();
+
     FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
     MutableMonitoringRegistry.globalInstance().clear();
     MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
 
-    Key tinkKey =
-        TestUtil.createKey(
-            TestUtil.createHmacKeyData(Random.randBytes(HMAC_KEY_SIZE), 16),
-            42,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.TINK);
-    Key rawKey =
-        TestUtil.createKey(
-            TestUtil.createHmacKeyData(Random.randBytes(HMAC_KEY_SIZE), 16),
-            43,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.RAW);
-    Key legacyKey =
-        TestUtil.createKey(
-            TestUtil.createHmacKeyData(Random.randBytes(HMAC_KEY_SIZE), 16),
-            44,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.LEGACY);
     MonitoringAnnotations annotations =
         MonitoringAnnotations.newBuilder().add("annotation_name", "annotation_value").build();
-    Mac rawMac =
-        new MacWrapper()
-            .wrap(
-                TestUtil.createPrimitiveSetWithAnnotations(
-                    TestUtil.createKeyset(rawKey), annotations, Mac.class));
-    Mac legacyMac =
-        new MacWrapper()
-            .wrap(
-                TestUtil.createPrimitiveSetWithAnnotations(
-                    TestUtil.createKeyset(legacyKey), annotations, Mac.class));
-    Mac mac =
-        new MacWrapper()
-            .wrap(
-                TestUtil.createPrimitiveSetWithAnnotations(
-                    TestUtil.createKeyset(tinkKey, rawKey, legacyKey), annotations, Mac.class));
+    KeysetHandle rawKeysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(rawKey0).withFixedId(43).makePrimary())
+            .setMonitoringAnnotations(annotations)
+            .build();
+    KeysetHandle legacyKeysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(legacyKey0).makePrimary())
+            .setMonitoringAnnotations(annotations)
+            .build();
+    KeysetHandle mixedKeysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(tinkKey1).makePrimary())
+            .addEntry(KeysetHandle.importKey(rawKey0).withFixedId(43))
+            .addEntry(KeysetHandle.importKey(legacyKey0))
+            .setMonitoringAnnotations(annotations)
+            .build();
+    Mac rawMac = rawKeysetHandle.getPrimitive(Mac.class);
+    Mac legacyMac = legacyKeysetHandle.getPrimitive(Mac.class);
+    Mac mac = mixedKeysetHandle.getPrimitive(Mac.class);
+
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] tinkTag = mac.computeMac(plaintext);
     byte[] rawTag = rawMac.computeMac(plaintext);
@@ -440,7 +449,8 @@ public class MacWrapperTest {
     assertThat(logEntries).hasSize(6);
 
     FakeMonitoringClient.LogEntry tinkComputeEntry = logEntries.get(0);
-    assertThat(tinkComputeEntry.getKeyId()).isEqualTo(42);
+    // 5 is tinkKey1's id.
+    assertThat(tinkComputeEntry.getKeyId()).isEqualTo(5);
     assertThat(tinkComputeEntry.getPrimitive()).isEqualTo("mac");
     assertThat(tinkComputeEntry.getApi()).isEqualTo("compute");
     assertThat(tinkComputeEntry.getNumBytesAsInput()).isEqualTo(plaintext.length);
@@ -454,15 +464,16 @@ public class MacWrapperTest {
     assertThat(rawComputeEntry.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
 
     FakeMonitoringClient.LogEntry legacyComputeEntry = logEntries.get(2);
-    assertThat(legacyComputeEntry.getKeyId()).isEqualTo(44);
+    // 8 is legacyKey0's id.
+    assertThat(legacyComputeEntry.getKeyId()).isEqualTo(8);
     assertThat(legacyComputeEntry.getPrimitive()).isEqualTo("mac");
     assertThat(legacyComputeEntry.getApi()).isEqualTo("compute");
-    // legacy mac appends one byte to the input data, therefore the input length is one longer.
-    assertThat(legacyComputeEntry.getNumBytesAsInput()).isEqualTo(plaintext.length + 1);
+    assertThat(legacyComputeEntry.getNumBytesAsInput()).isEqualTo(plaintext.length);
     assertThat(legacyComputeEntry.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
 
     FakeMonitoringClient.LogEntry tinkVerifyEntry = logEntries.get(3);
-    assertThat(tinkVerifyEntry.getKeyId()).isEqualTo(42);
+    // 5 is tinkKey1's id.
+    assertThat(tinkVerifyEntry.getKeyId()).isEqualTo(5);
     assertThat(tinkVerifyEntry.getPrimitive()).isEqualTo("mac");
     assertThat(tinkVerifyEntry.getApi()).isEqualTo("verify");
     assertThat(tinkVerifyEntry.getNumBytesAsInput()).isEqualTo(plaintext.length);
@@ -476,11 +487,11 @@ public class MacWrapperTest {
     assertThat(rawVerifyEntry.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
 
     FakeMonitoringClient.LogEntry legacyVerifyEntry = logEntries.get(5);
-    assertThat(legacyVerifyEntry.getKeyId()).isEqualTo(44);
+    // 8 is legacyKey0's id.
+    assertThat(legacyVerifyEntry.getKeyId()).isEqualTo(8);
     assertThat(legacyVerifyEntry.getPrimitive()).isEqualTo("mac");
     assertThat(legacyVerifyEntry.getApi()).isEqualTo("verify");
-    // legacy mac appends one byte to the input data, therefore the input length is one longer.
-    assertThat(legacyVerifyEntry.getNumBytesAsInput()).isEqualTo(plaintext.length + 1);
+    assertThat(legacyVerifyEntry.getNumBytesAsInput()).isEqualTo(plaintext.length);
     assertThat(legacyVerifyEntry.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
 
     List<FakeMonitoringClient.LogFailureEntry> failures =
@@ -489,11 +500,15 @@ public class MacWrapperTest {
     FakeMonitoringClient.LogFailureEntry verifyFailure = failures.get(0);
     assertThat(verifyFailure.getPrimitive()).isEqualTo("mac");
     assertThat(verifyFailure.getApi()).isEqualTo("verify");
-    assertThat(verifyFailure.getKeysetInfo().getPrimaryKeyId()).isEqualTo(42);
+    // 5 is tinkKey1's id.
+    assertThat(verifyFailure.getKeysetInfo().getPrimaryKeyId()).isEqualTo(5);
     assertThat(verifyFailure.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
   }
 
   public static class AlwaysFailingMac implements Mac {
+
+    AlwaysFailingMac(HmacKey key) {}
+
     @Override
     public byte[] computeMac(final byte[] data) throws GeneralSecurityException {
       throw new GeneralSecurityException("fail");
@@ -507,35 +522,39 @@ public class MacWrapperTest {
 
   @Test
   public void testAlwaysFailingWithAnnotation_hasMonitoring() throws Exception {
+    // Test setup.
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(
+            PrimitiveConstructor.create(AlwaysFailingMac::new, HmacKey.class, Mac.class));
+    MacWrapper.register();
+    HmacProtoSerialization.register();
+    Registry.registerKeyManager(new HmacKeyManager(), true);
+
     FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
     MutableMonitoringRegistry.globalInstance().clear();
     MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
 
     MonitoringAnnotations annotations =
         MonitoringAnnotations.newBuilder().add("annotation_name", "annotation_value").build();
-    PrimitiveSet<Mac> primitives =
-        PrimitiveSet.newBuilder(Mac.class)
-            .setAnnotations(annotations)
-            .addPrimaryPrimitive(
-                new AlwaysFailingMac(),
-                TestUtil.createKey(
-                    TestUtil.createHmacKeyData(Random.randBytes(HMAC_KEY_SIZE), 16),
-                    42,
-                    KeyStatusType.ENABLED,
-                    OutputPrefixType.TINK))
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(tinkKey0).makePrimary())
+            .setMonitoringAnnotations(annotations)
             .build();
-    Mac mac = new MacWrapper().wrap(primitives);
+    Mac mac = keysetHandle.getPrimitive(Mac.class);
 
     byte[] data = "some data".getBytes(UTF_8);
     byte[] invalidTag = "an invalid tag".getBytes(UTF_8);
+    byte[] shortInvalidTag = "t".getBytes(UTF_8);
 
+    // Test active work, including a test with a short tag, because there is a different code path
+    // for this.
     assertThrows(GeneralSecurityException.class, () -> mac.computeMac(data));
     assertThrows(GeneralSecurityException.class, () -> mac.verifyMac(invalidTag, data));
-
-    // Test short tags, because there is a different code path for this.
-    byte[] shortInvalidTag = "t".getBytes(UTF_8);
     assertThrows(GeneralSecurityException.class, () -> mac.verifyMac(shortInvalidTag, data));
 
+    // Assert correctness.
     assertThat(fakeMonitoringClient.getLogEntries()).isEmpty();
 
     List<FakeMonitoringClient.LogFailureEntry> failures =
@@ -544,19 +563,22 @@ public class MacWrapperTest {
     FakeMonitoringClient.LogFailureEntry compFailure = failures.get(0);
     assertThat(compFailure.getPrimitive()).isEqualTo("mac");
     assertThat(compFailure.getApi()).isEqualTo("compute");
-    assertThat(compFailure.getKeysetInfo().getPrimaryKeyId()).isEqualTo(42);
+    // 4 is tinkKey0's id.
+    assertThat(compFailure.getKeysetInfo().getPrimaryKeyId()).isEqualTo(4);
     assertThat(compFailure.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
 
     FakeMonitoringClient.LogFailureEntry verifyFailure = failures.get(1);
     assertThat(verifyFailure.getPrimitive()).isEqualTo("mac");
     assertThat(verifyFailure.getApi()).isEqualTo("verify");
-    assertThat(verifyFailure.getKeysetInfo().getPrimaryKeyId()).isEqualTo(42);
+    // 4 is tinkKey0's id.
+    assertThat(verifyFailure.getKeysetInfo().getPrimaryKeyId()).isEqualTo(4);
     assertThat(verifyFailure.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
 
     FakeMonitoringClient.LogFailureEntry verifyFailure2 = failures.get(2);
     assertThat(verifyFailure2.getPrimitive()).isEqualTo("mac");
     assertThat(verifyFailure2.getApi()).isEqualTo("verify");
-    assertThat(verifyFailure2.getKeysetInfo().getPrimaryKeyId()).isEqualTo(42);
+    // 4 is tinkKey0's id.
+    assertThat(verifyFailure2.getKeysetInfo().getPrimaryKeyId()).isEqualTo(4);
     assertThat(verifyFailure2.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
   }
 }
