@@ -883,3 +883,18 @@ gen_maven_jar_rules(
         "//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_client",
     ],
 )
+
+gen_maven_jar_rules(
+    name = "tink-hcvault",
+    doctitle = "Tink Cryptography API with Hashicorp Vault",
+    manifest_lines = [
+        "Automatic-Module-Name: com.google.crypto.tink.integration.hcvault",
+    ],
+    root_packages = [
+        "com.google.crypto.tink.integration.hcvault",
+    ],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/integration/hcvault:hcvault_kms_aead",
+        "//src/main/java/com/google/crypto/tink/integration/hcvault:hcvault_kms_client",
+    ],
+)

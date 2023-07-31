@@ -1,1 +1,5 @@
 examples
+bazel-bin
+bazel-java_src
+bazel-out
+bazel-testlogs
