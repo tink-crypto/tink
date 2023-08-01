@@ -422,6 +422,23 @@ tink_cc_library(
     tink::util::statusor
 )
 
+tink_cc_library(
+  NAME ed25519_public_key
+  SRCS
+    ed25519_public_key.cc
+    ed25519_public_key.h
+  DEPS
+    tink::signature::ed25519_parameters
+    tink::signature::signature_public_key
+    absl::core_headers
+    absl::strings
+    absl::optional
+    tink::core::partial_key_access_token
+    tink::subtle::subtle_util
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -785,6 +802,19 @@ tink_cc_test(
   DEPS
     tink::signature::ed25519_parameters
     gmock
+    tink::util::statusor
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME ed25519_public_key_test
+  SRCS
+    ed25519_public_key_test.cc
+  DEPS
+    tink::signature::ed25519_public_key
+    gmock
+    tink::core::partial_key_access
+    tink::subtle::random
     tink::util::statusor
     tink::util::test_matchers
 )
