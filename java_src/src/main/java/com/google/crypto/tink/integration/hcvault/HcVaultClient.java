@@ -24,6 +24,8 @@ import com.google.crypto.tink.KmsClients;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.jopenlibs.vault.*;
 import io.github.jopenlibs.vault.api.Logical;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Locale;
@@ -39,6 +41,8 @@ import javax.annotation.Nullable;
 public final class HcVaultClient implements KmsClient {
   /** The prefix of all keys stored in Hashicorp Vault. */
   public static final String PREFIX = "hcvault://";
+  public static final String HTTP_PREFIX = "http://";
+  public static final String HTTPS_PREFIX = "https://";
 
   @Nullable private Logical hcVault;
   private String keyUri;
@@ -85,7 +89,7 @@ public final class HcVaultClient implements KmsClient {
   /**
    * Loads Hashicorp Vault credentials from a properties file.
    *
-   * <p>The Hashicorp Vault token is expected to be in the <code>token</code> property.</p>
+   * <p>Not implemented. Auth tokens should not be stored in cleartext anywhere.</p>
    *
    * @throws GeneralSecurityException if the client initialization fails
    */
@@ -106,8 +110,8 @@ public final class HcVaultClient implements KmsClient {
    *
    * <ul>
    *   <li>Environment Variables - VAULT_TOKEN and VAULT_URI
-   *   <li>Java System Properties - hcvault.token and hcvault.uri
-   *   <li>Filesystem - $user.home/.vault.token
+   *   <li>Java System Properties - hcvault.token and hcvault.uri - not yet implemented
+   *   <li>Filesystem - $user.home/.vault.token - not yet implemented
    * </ul>
    *
    * @throws GeneralSecurityException if the client initialization fails
@@ -128,10 +132,19 @@ public final class HcVaultClient implements KmsClient {
                                             .token(authToken)
                                             .readTimeout(30)
                                             .openTimeout(30)
-                                            .engineVersion(2);
+                                            .engineVersion(1); // Transit not available in V2
 
       if (https) {
-        config = config.sslConfig(new SslConfig().verify(verifyCert));
+        SslConfig sslConf = new SslConfig().verify(verifyCert);
+        if (clientPemPath != null) {
+          sslConf = sslConf.clientPemUTF8(clientPemPath);
+        }
+
+        if (clientKeyPath != null) {
+          sslConf = sslConf.clientKeyPemUTF8(clientKeyPath);
+        }
+
+        config = config.sslConfig(sslConf);
       }
 
       if (namespace != null) {
@@ -168,8 +181,7 @@ public final class HcVaultClient implements KmsClient {
   public Aead getAead(String uri) throws GeneralSecurityException {
     if (this.keyUri != null && !this.keyUri.equals(uri)) {
       throw new GeneralSecurityException(
-          String.format(
-              "this client is bound to %s, cannot load keys bound to %s", this.keyUri, uri));
+          String.format("this client is bound to %s, cannot load keys bound to %s", this.keyUri, uri));
     }
 
     try {
@@ -223,12 +235,14 @@ public final class HcVaultClient implements KmsClient {
       throws GeneralSecurityException {
     try {
       HcVaultClient client = new HcVaultClient(keyUri);
-
-      VaultConfig config = new VaultConfig().address(keyUri)
+      keyUri = https ? keyUri.replace(PREFIX, HTTPS_PREFIX) : keyUri.replace(PREFIX, HTTP_PREFIX);
+      URI u = new URI(keyUri);
+      String address = u.getScheme() + "://" + u.getHost() + ":" + u.getPort();
+      VaultConfig config = new VaultConfig().address(address)
                                             .token(authToken)
                                             .readTimeout(30)
                                             .openTimeout(30)
-                                            .engineVersion(2);
+                                            .engineVersion(1); // Transit not available in V2
 
       if (https) {
         config = config.sslConfig(new SslConfig().verify(verifyCert));
@@ -247,7 +261,7 @@ public final class HcVaultClient implements KmsClient {
       client.withCredentialsProvider(config);
       client.withHcVault(hcVault);
       KmsClients.add(client);
-    } catch (VaultException e) {
+    } catch (URISyntaxException | VaultException e) {
       throw new GeneralSecurityException("failed to create client", e);
     }
   }

@@ -45,7 +45,7 @@ public final class HcVaultAead implements Aead {
   /** This client knows how to talk to Hashicorp Vault. */
   private final Logical kmsClient;
 
-  // The location of a crypto key in Hashicorp Vault, without the hcvault:// prefix.
+  // The location of a crypto key in Hashicorp Vault
   private final String keyUri;
 
   public HcVaultAead(Logical kmsClient, String keyUri) {
@@ -58,12 +58,12 @@ public final class HcVaultAead implements Aead {
       throws GeneralSecurityException {
     try {
       String encPath = getOperationEndpoint(this.keyUri, "encrypt");
+      System.out.println("Running encryption against: " + encPath);
       Map<String,Object> content = new HashMap<>();
-      //System.out.println("HVA: Encrypting: " + new String(plaintext));
       content.put("plaintext", Base64.getEncoder().encodeToString(plaintext));
       content.put("context", Base64.getEncoder().encodeToString(associatedData));
       LogicalResponse resp = kmsClient.write(encPath, content);
-      //System.out.println("HVA: Encrypted: " + new String(resp.getData().get("ciphertext").getBytes()));
+      handleResponse(resp);
       return resp.getData().get("ciphertext").getBytes();
     } catch (VaultException e) {
       throw new GeneralSecurityException("encryption failed", e);
@@ -75,12 +75,12 @@ public final class HcVaultAead implements Aead {
       throws GeneralSecurityException {
     try {
       String encPath = getOperationEndpoint(this.keyUri, "decrypt");
+      System.out.println("Running decryption against: " + encPath);
       Map<String,Object> content = new HashMap<>();
-      //System.out.println("HVA: Decrypting: " + new String(ciphertext));
       content.put("ciphertext", new String(ciphertext));
       content.put("context", Base64.getEncoder().encodeToString(associatedData));
       LogicalResponse resp = kmsClient.write(encPath, content);
-      //System.out.println("HVA: Decrypted: " + new String(resp.getData().get("plaintext").getBytes()));
+      handleResponse(resp);
       return Base64.getDecoder().decode(resp.getData().get("plaintext").getBytes());
     } catch (VaultException e) {
       throw new GeneralSecurityException("decryption failed", e);
@@ -96,16 +96,25 @@ public final class HcVaultAead implements Aead {
 
       String[] parts = u.getPath().split("/");
       if (parts.length < 4 || !parts[parts.length - 2].equals("keys")) {
-        throw new GeneralSecurityException(String.format("malformed URL: %d/%s %b/%b", parts.length, parts[parts.length -2], Boolean.valueOf(parts.length < 4), Boolean.valueOf(!parts[parts.length - 2].equals("keys"))));
+        throw new GeneralSecurityException(String.format("malformed URL"));
       }
 
       parts[parts.length - 2] = operation;
-      return Arrays.asList(parts).stream().collect(Collectors.joining("/"));
+      return Arrays.asList(parts).stream().collect(Collectors.joining("/")).replaceFirst("/", "");
     } catch (URISyntaxException e) {
       throw new GeneralSecurityException("malformed URL", e);
     }
     catch (Exception e) {
       throw new GeneralSecurityException("unknown exception, keyUri: " + keyUri, e);
     }
+  }
+
+  /* This shouldn't be necessary, but in older versions of the client library failing requests didn't
+   * throw an exception. Belt and braces here to make sure this is thrown.
+   */
+  private void handleResponse(LogicalResponse resp) throws VaultException {
+    int rc = resp.getRestResponse().getStatus();
+    if (rc == 200 || rc == 204) return;
+    throw new VaultException(String.format("Operation failed with HTTP error code %d. Response body: %s", rc, new String(resp.getRestResponse().getBody())));
   }
 }

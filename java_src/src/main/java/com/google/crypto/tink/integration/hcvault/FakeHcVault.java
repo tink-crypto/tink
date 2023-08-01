@@ -22,6 +22,7 @@ import io.github.jopenlibs.vault.VaultConfig;
 import io.github.jopenlibs.vault.VaultException;
 import io.github.jopenlibs.vault.api.Logical;
 import io.github.jopenlibs.vault.response.LogicalResponse;
+import io.github.jopenlibs.vault.rest.RestResponse;
 import java.lang.IllegalArgumentException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -33,11 +34,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * A partial, fake implementation of AWSKMS that only supports encrypt and decrypt.
+ * A partial, fake implementation of Hashicorp Vault that only supports encrypt and decrypt.
  *
- * <p>It creates a new AEAD for every valid key ID. It can encrypt message for these valid key IDs,
- * but fails for all other key IDs. On decrypt, it tries out all its AEADs and returns the plaintext
- * and the key ID of the AEAD that can successfully decrypt it.
+ * <p>It creates a new AEAD for every instance. It can only encrypt and decrypt keys for the URI specified in the config.
  */
 final class FakeHcVault extends Logical {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
@@ -60,19 +59,17 @@ final class FakeHcVault extends Logical {
       byte[] context = Base64.getDecoder().decode((String) nameValuePairs.get("context"));
       if (path.contains("encrypt")) {
         byte[] plaintext = Base64.getDecoder().decode((String) nameValuePairs.get("plaintext"));
-        //System.out.println("FHV: Encrypting: " + new String(plaintext));
         byte[] ciphertext = aead.encrypt(plaintext, context);
-        LogicalResponse resp = new LogicalResponse(null, 0, null);
+        RestResponse restResp = new RestResponse(200, null, null);
+        LogicalResponse resp = new LogicalResponse(restResp, 0, null);
         resp.getData().put("ciphertext", new String(Base64.getEncoder().encode(ciphertext)));
-        //System.out.println("FHV: Encrypted: " + resp.getData().get("ciphertext"));
         return resp;
       } else if (path.contains("decrypt")) {
         String ciphertext = (String) nameValuePairs.get("ciphertext");
-        //System.out.println("FHV: Decrypting: " + new String(ciphertext));
         byte[] ciphertextBytes = Base64.getDecoder().decode(ciphertext);
         byte[] plaintext = aead.decrypt(ciphertextBytes, context);
-        //System.out.println("FHV: Decrypted: " + new String(plaintext));
-        LogicalResponse resp = new LogicalResponse(null, 0, null);
+        RestResponse restResp = new RestResponse(200, null, null);
+        LogicalResponse resp = new LogicalResponse(restResp, 0, null);
         resp.getData().put("plaintext", Base64.getEncoder().encodeToString(plaintext));
         return resp;
       }
