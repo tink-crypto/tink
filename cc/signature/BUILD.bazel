@@ -461,6 +461,24 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "ed25519_private_key",
+    srcs = ["ed25519_private_key.cc"],
+    hdrs = ["ed25519_private_key.h"],
+    include_prefix = "tink/signature",
+    deps = [
+        ":ed25519_public_key",
+        ":signature_private_key",
+        "//:insecure_secret_key_access",
+        "//:partial_key_access_token",
+        "//:restricted_data",
+        "//internal:ec_util",
+        "//util:secret_data",
+        "//util:statusor",
+        "@boringssl//:crypto",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -850,6 +868,22 @@ cc_test(
     deps = [
         ":ed25519_public_key",
         "//:partial_key_access",
+        "//subtle:random",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "ed25519_private_key_test",
+    srcs = ["ed25519_private_key_test.cc"],
+    deps = [
+        ":ed25519_private_key",
+        ":ed25519_public_key",
+        "//:insecure_secret_key_access",
+        "//:partial_key_access",
+        "//internal:ec_util",
         "//subtle:random",
         "//util:statusor",
         "//util:test_matchers",
