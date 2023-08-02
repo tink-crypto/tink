@@ -30,6 +30,7 @@ import java.security.GeneralSecurityException;
 public final class HpkeUtil {
   // HPKE mode identifiers.
   public static final byte[] BASE_MODE = intToByteArray(1, 0x0);
+  public static final byte[] AUTH_MODE = intToByteArray(1, 0x2);
 
   // HPKE KEM algorithm identifiers.
   public static final byte[] X25519_HKDF_SHA256_KEM_ID = intToByteArray(2, 0x20);

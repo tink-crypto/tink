@@ -104,13 +104,25 @@ public final class HpkeContextTest {
 
     HpkeContext encryptionContext =
         HpkeContext.createContext(
-            testSetup.encapsulatedKey, testSetup.sharedSecret, kem, kdf, aead, testSetup.info);
+            mode,
+            testSetup.encapsulatedKey,
+            testSetup.sharedSecret,
+            kem,
+            kdf,
+            aead,
+            testSetup.info);
     verifyContext(encryptionContext, testVector);
     verifyEncrypt(encryptionContext, testVector);
 
     HpkeContext decryptionContext =
         HpkeContext.createContext(
-            testSetup.encapsulatedKey, testSetup.sharedSecret, kem, kdf, aead, testSetup.info);
+            mode,
+            testSetup.encapsulatedKey,
+            testSetup.sharedSecret,
+            kem,
+            kdf,
+            aead,
+            testSetup.info);
     verifyContext(decryptionContext, testVector);
     verifyDecrypt(decryptionContext, testVector);
   }

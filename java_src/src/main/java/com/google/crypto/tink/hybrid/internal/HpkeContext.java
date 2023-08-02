@@ -58,6 +58,7 @@ final class HpkeContext {
 
   /** Helper function factored out to facilitate unit testing. */
   static HpkeContext createContext(
+      byte[] mode,
       byte[] encapsulatedKey,
       byte[] sharedSecret,
       HpkeKem kem,
@@ -68,7 +69,7 @@ final class HpkeContext {
     byte[] suiteId = HpkeUtil.hpkeSuiteId(kem.getKemId(), kdf.getKdfId(), aead.getAeadId());
     byte[] pskIdHash = kdf.labeledExtract(HpkeUtil.EMPTY_SALT, EMPTY_IKM, "psk_id_hash", suiteId);
     byte[] infoHash = kdf.labeledExtract(HpkeUtil.EMPTY_SALT, info, "info_hash", suiteId);
-    byte[] keyScheduleContext = Bytes.concat(HpkeUtil.BASE_MODE, pskIdHash, infoHash);
+    byte[] keyScheduleContext = Bytes.concat(mode, pskIdHash, infoHash);
     byte[] secret = kdf.labeledExtract(sharedSecret, EMPTY_IKM, "secret", suiteId);
 
     byte[] key = kdf.labeledExpand(secret, keyScheduleContext, "key", suiteId, aead.getKeyLength());
@@ -96,7 +97,7 @@ final class HpkeContext {
         kem.encapsulate(recipientPublicKey.getPublicKey().toByteArray());
     byte[] encapsulatedKey = encapOutput.getEncapsulatedKey();
     byte[] sharedSecret = encapOutput.getSharedSecret();
-    return createContext(encapsulatedKey, sharedSecret, kem, kdf, aead, info);
+    return createContext(HpkeUtil.BASE_MODE, encapsulatedKey, sharedSecret, kem, kdf, aead, info);
   }
 
   /**
@@ -119,7 +120,7 @@ final class HpkeContext {
       byte[] info)
       throws GeneralSecurityException {
     byte[] sharedSecret = kem.decapsulate(encapsulatedKey, recipientPrivateKey);
-    return createContext(encapsulatedKey, sharedSecret, kem, kdf, aead, info);
+    return createContext(HpkeUtil.BASE_MODE, encapsulatedKey, sharedSecret, kem, kdf, aead, info);
   }
 
   private static BigInteger maxSequenceNumber(int nonceLength) {
