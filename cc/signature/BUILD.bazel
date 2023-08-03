@@ -479,6 +479,26 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "ed25519_proto_serialization",
+    srcs = ["ed25519_proto_serialization.cc"],
+    hdrs = ["ed25519_proto_serialization.h"],
+    include_prefix = "tink/signature",
+    deps = [
+        ":ed25519_parameters",
+        "//internal:mutable_serialization_registry",
+        "//internal:parameters_parser",
+        "//internal:parameters_serializer",
+        "//internal:proto_parameters_serialization",
+        "//proto:ed25519_cc_proto",
+        "//proto:tink_cc_proto",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -887,6 +907,26 @@ cc_test(
         "//subtle:random",
         "//util:statusor",
         "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "ed25519_proto_serialization_test",
+    srcs = ["ed25519_proto_serialization_test.cc"],
+    deps = [
+        ":ed25519_parameters",
+        ":ed25519_proto_serialization",
+        "//:parameters",
+        "//internal:mutable_serialization_registry",
+        "//internal:proto_parameters_serialization",
+        "//internal:serialization",
+        "//proto:ed25519_cc_proto",
+        "//proto:tink_cc_proto",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/types:optional",
         "@com_google_googletest//:gtest_main",
     ],
 )
