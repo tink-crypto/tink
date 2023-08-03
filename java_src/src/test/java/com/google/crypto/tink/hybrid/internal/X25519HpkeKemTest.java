@@ -73,7 +73,7 @@ public final class X25519HpkeKemTest {
 
     X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf(MAC_ALGORITHM));
     HpkeKemEncapOutput result =
-        kem.encapsulate(testSetup.recipientPublicKey, testSetup.senderPrivateKey);
+        kem.encapsulate(testSetup.recipientPublicKey, testSetup.senderEphemeralPrivateKey);
     expect.that(result.getSharedSecret()).isEqualTo(testSetup.sharedSecret);
     expect.that(result.getEncapsulatedKey()).isEqualTo(testSetup.encapsulatedKey);
   }

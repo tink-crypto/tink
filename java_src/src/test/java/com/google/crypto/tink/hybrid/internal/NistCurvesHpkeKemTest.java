@@ -144,10 +144,11 @@ public final class NistCurvesHpkeKemTest {
             hpkeNistKemParams.aeadId);
     HpkeTestSetup testSetup = testVectors.get(testId).getTestSetup();
     EllipticCurves.CurveType curve = curveTypeFromKemId(hpkeNistKemParams.kemId);
-    ECPrivateKey privateKey = EllipticCurves.getEcPrivateKey(curve, testSetup.senderPrivateKey);
+    ECPrivateKey privateKey =
+        EllipticCurves.getEcPrivateKey(curve, testSetup.senderEphemeralPrivateKey);
     ECPublicKey publicKey =
         EllipticCurves.getEcPublicKey(
-            curve, PointFormatType.UNCOMPRESSED, testSetup.senderPublicKey);
+            curve, PointFormatType.UNCOMPRESSED, testSetup.senderEphemeralPublicKey);
     NistCurvesHpkeKem kem = NistCurvesHpkeKem.fromCurve(curve);
     HpkeKemEncapOutput result =
         kem.encapsulate(testSetup.recipientPublicKey, new KeyPair(publicKey, privateKey));
