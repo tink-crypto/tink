@@ -17,9 +17,7 @@
 import base64
 from typing import Optional, Tuple
 import urllib
-
 import hvac
-
 import tink
 from tink import aead
 from tink.aead import _kms_aead_key_manager
@@ -29,7 +27,7 @@ VAULT_KEYURI_PREFIX = 'hcvault://'
 
 
 class _HcVaultKmsAead(aead.Aead):
-  """Implements the Aead interface for AWS KMS."""
+  """Implements the Aead interface for Hashicorp Vault."""
 
   def __init__(self, client: hvac.Client, key_uri: str) -> None:
     self.client = client
@@ -110,7 +108,7 @@ class HcVaultKmsClient(_kms_aead_key_manager.KmsClient):
     self.vault_url = f'{"http" if not https else "https"}://{parsed_uri.netloc}'
     self.key_uri = parsed_uri.path
     self.token = token
-    self.client = hvac.Client(url=self.vault_url, token=self.token, verify=verify, client_certs=client_certs, namespace=namespace)
+    self.client = hvac.Client(url=self.vault_url, token=self.token, verify=verify, cert=client_certs, namespace=namespace)
     if not self.client.is_authenticated():
       raise tink.TinkError('failed to authenticate with vault')
     
