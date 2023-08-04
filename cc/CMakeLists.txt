@@ -451,15 +451,19 @@ tink_cc_library(
     absl::status
     absl::strings
     absl::optional
+    tink::config::global_registry
     tink::internal::configuration_impl
     tink::internal::key_gen_configuration_impl
     tink::internal::key_info
     tink::internal::key_status_util
+    tink::internal::key_type_info_store
     tink::internal::mutable_serialization_registry
     tink::internal::proto_key_serialization
     tink::internal::util
     tink::util::errors
     tink::util::keyset_util
+    tink::util::status
+    tink::util::statusor
     tink::proto::tink_cc_proto
 )
 
@@ -818,6 +822,7 @@ tink_cc_test(
     tink::core::primitive_set
     tink::core::primitive_wrapper
     gmock
+    absl::memory
     absl::status
     absl::strings
     tink::aead::aead_key_templates
@@ -830,8 +835,10 @@ tink_cc_test(
     tink::internal::fips_utils
     tink::internal::key_gen_configuration_impl
     tink::signature::ecdsa_sign_key_manager
+    tink::signature::ecdsa_verify_key_manager
     tink::signature::signature_key_templates
     tink::util::status
+    tink::util::statusor
     tink::util::test_keyset_handle
     tink::util::test_matchers
     tink::util::test_util

@@ -24,6 +24,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead/aead_key_templates.h"
@@ -47,8 +48,10 @@
 #include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"
 #include "tink/signature/ecdsa_sign_key_manager.h"
+#include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/signature/signature_key_templates.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
@@ -679,6 +682,42 @@ void CompareKeyMetadata(const Keyset::Key& expected,
   EXPECT_EQ(expected.output_prefix_type(), actual.output_prefix_type());
 }
 
+util::StatusOr<const Keyset> CreateEcdsaMultiKeyset() {
+  Keyset keyset;
+  EcdsaSignKeyManager key_manager;
+  EcdsaKeyFormat key_format;
+
+  if (!key_format.ParseFromString(SignatureKeyTemplates::EcdsaP256().value())) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Failed to parse EcdsaP256 key template");
+  }
+  AddTinkKey(EcdsaSignKeyManager().get_key_type(),
+             /* key_id= */ 623628, key_manager.CreateKey(key_format).value(),
+             KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PRIVATE, &keyset);
+
+  if (!key_format.ParseFromString(
+          SignatureKeyTemplates::EcdsaP384Sha384().value())) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Failed to parse EcdsaP384Sha384 key template");
+  }
+  AddLegacyKey(EcdsaSignKeyManager().get_key_type(),
+               /* key_id= */ 36285, key_manager.CreateKey(key_format).value(),
+               KeyStatusType::DISABLED, KeyData::ASYMMETRIC_PRIVATE, &keyset);
+
+  if (!key_format.ParseFromString(
+          SignatureKeyTemplates::EcdsaP384Sha512().value())) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Failed to parse EcdsaP384Sha512 key template");
+  }
+  AddRawKey(EcdsaSignKeyManager().get_key_type(),
+            /* key_id= */ 42, key_manager.CreateKey(key_format).value(),
+            KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PRIVATE, &keyset);
+  keyset.set_primary_key_id(42);
+
+  return keyset;
+}
+
+// TODO(b/265865177): Modernize existing GetPublicKeysetHandle tests.
 TEST_F(KeysetHandleTest, GetPublicKeysetHandle) {
   {  // A keyset with a single key.
     auto handle_result =
@@ -697,36 +736,19 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandle) {
               public_keyset.key(0).key_data().key_material_type());
   }
   {  // A keyset with multiple keys.
-    EcdsaSignKeyManager key_manager;
-    Keyset keyset;
-    int key_count = 3;
+    util::StatusOr<const Keyset> keyset = CreateEcdsaMultiKeyset();
+    ASSERT_THAT(keyset, IsOk());
+    std::unique_ptr<KeysetHandle> handle =
+        TestKeysetHandle::GetKeysetHandle(*keyset);
+    util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
+        handle->GetPublicKeysetHandle();
+    ASSERT_THAT(public_handle, IsOk());
 
-    EcdsaKeyFormat key_format;
-    ASSERT_TRUE(
-        key_format.ParseFromString(SignatureKeyTemplates::EcdsaP256().value()));
-    AddTinkKey(EcdsaSignKeyManager().get_key_type(),
-               /* key_id= */ 623628, key_manager.CreateKey(key_format).value(),
-               KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PRIVATE, &keyset);
-    ASSERT_TRUE(key_format.ParseFromString(
-        SignatureKeyTemplates::EcdsaP384Sha384().value()));
-    AddLegacyKey(EcdsaSignKeyManager().get_key_type(),
-                 /* key_id= */ 36285, key_manager.CreateKey(key_format).value(),
-                 KeyStatusType::DISABLED, KeyData::ASYMMETRIC_PRIVATE, &keyset);
-    ASSERT_TRUE(key_format.ParseFromString(
-        SignatureKeyTemplates::EcdsaP384Sha512().value()));
-    AddRawKey(EcdsaSignKeyManager().get_key_type(),
-              /* key_id= */ 42, key_manager.CreateKey(key_format).value(),
-              KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PRIVATE, &keyset);
-    keyset.set_primary_key_id(42);
-    auto handle = TestKeysetHandle::GetKeysetHandle(keyset);
-    auto public_handle_result = handle->GetPublicKeysetHandle();
-    ASSERT_TRUE(public_handle_result.ok()) << public_handle_result.status();
-    auto public_keyset =
-        TestKeysetHandle::GetKeyset(*(public_handle_result.value()));
-    EXPECT_EQ(keyset.primary_key_id(), public_keyset.primary_key_id());
-    EXPECT_EQ(keyset.key_size(), public_keyset.key_size());
-    for (int i = 0; i < key_count; i++) {
-      CompareKeyMetadata(keyset.key(i), public_keyset.key(i));
+    const Keyset& public_keyset = TestKeysetHandle::GetKeyset(**public_handle);
+    EXPECT_EQ(keyset->primary_key_id(), public_keyset.primary_key_id());
+    EXPECT_EQ(keyset->key_size(), public_keyset.key_size());
+    for (int i = 0; i < keyset->key_size(); i++) {
+      CompareKeyMetadata(keyset->key(i), public_keyset.key(i));
       EXPECT_EQ(KeyData::ASYMMETRIC_PUBLIC,
                 public_keyset.key(i).key_data().key_material_type());
     }
@@ -769,6 +791,74 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandleErrors) {
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "PrivateKeyFactory",
                         std::string(public_handle_result.status().message()));
   }
+}
+
+TEST_F(KeysetHandleTest, GetPublicKeysetHandleWithBespokeConfigSucceeds) {
+  util::StatusOr<const Keyset> keyset = CreateEcdsaMultiKeyset();
+  ASSERT_THAT(keyset, IsOk());
+  std::unique_ptr<KeysetHandle> handle =
+      TestKeysetHandle::GetKeysetHandle(*keyset);
+
+  KeyGenConfiguration config;
+  ASSERT_THAT(internal::KeyGenConfigurationImpl::AddAsymmetricKeyManagers(
+                  absl::make_unique<EcdsaSignKeyManager>(),
+                  absl::make_unique<EcdsaVerifyKeyManager>(), config),
+              IsOk());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
+      handle->GetPublicKeysetHandle(config);
+  ASSERT_THAT(public_handle, IsOk());
+
+  const Keyset& public_keyset = TestKeysetHandle::GetKeyset(**public_handle);
+  EXPECT_EQ(keyset->primary_key_id(), public_keyset.primary_key_id());
+  EXPECT_EQ(keyset->key_size(), public_keyset.key_size());
+  for (int i = 0; i < keyset->key_size(); i++) {
+    CompareKeyMetadata(keyset->key(i), public_keyset.key(i));
+    EXPECT_EQ(KeyData::ASYMMETRIC_PUBLIC,
+              public_keyset.key(i).key_data().key_material_type());
+  }
+}
+
+TEST_F(KeysetHandleTest, GetPublicKeysetHandleWithBespokeConfigFails) {
+  KeyGenConfiguration config;
+  ASSERT_THAT(internal::KeyGenConfigurationImpl::AddKeyTypeManager(
+                  absl::make_unique<AesGcmKeyManager>(), config),
+              IsOk());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm(), config);
+  ASSERT_THAT(handle, IsOk());
+  EXPECT_THAT((*handle)->GetPublicKeysetHandle(config).status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST_F(KeysetHandleTest,
+       GetPublicKeysetHandleWithGlobalRegistryConfigSucceeds) {
+  util::StatusOr<const Keyset> keyset = CreateEcdsaMultiKeyset();
+  ASSERT_THAT(keyset, IsOk());
+  std::unique_ptr<KeysetHandle> handle =
+      TestKeysetHandle::GetKeysetHandle(*keyset);
+
+  util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
+      handle->GetPublicKeysetHandle(KeyGenConfigGlobalRegistry());
+  ASSERT_THAT(public_handle, IsOk());
+
+  const Keyset& public_keyset = TestKeysetHandle::GetKeyset(**public_handle);
+  EXPECT_EQ(keyset->primary_key_id(), public_keyset.primary_key_id());
+  EXPECT_EQ(keyset->key_size(), public_keyset.key_size());
+  for (int i = 0; i < keyset->key_size(); i++) {
+    CompareKeyMetadata(keyset->key(i), public_keyset.key(i));
+    EXPECT_EQ(KeyData::ASYMMETRIC_PUBLIC,
+              public_keyset.key(i).key_data().key_material_type());
+  }
+}
+
+TEST_F(KeysetHandleTest, GetPublicKeysetHandleWithGlobalRegistryConfigFails) {
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm(),
+                                KeyGenConfigGlobalRegistry());
+  ASSERT_THAT(handle, IsOk());
+  EXPECT_THAT(
+      (*handle)->GetPublicKeysetHandle(KeyGenConfigGlobalRegistry()).status(),
+      StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST_F(KeysetHandleTest, GetPrimitive) {
