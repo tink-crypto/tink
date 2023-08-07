@@ -23,10 +23,12 @@ import static org.junit.Assert.assertThrows;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.proto.AesCmacPrfKey;
 import com.google.crypto.tink.proto.AesCmacPrfKeyFormat;
 import com.google.crypto.tink.subtle.PrfAesCmac;
 import com.google.crypto.tink.subtle.Random;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
@@ -168,5 +170,17 @@ public class AesCmacPrfKeyManagerTest {
     assertThat(h.size()).isEqualTo(1);
     assertThat(h.getAt(0).getKey().getParameters())
         .isEqualTo(KeyTemplates.get(templateName).toParameters());
+  }
+
+  @Test
+  public void registersPrfPrimitiveConstructor() throws Exception {
+    Prf prf =
+        MutablePrimitiveRegistry.globalInstance()
+            .getPrimitive(
+                com.google.crypto.tink.prf.AesCmacPrfKey.create(
+                    AesCmacPrfParameters.create(32), SecretBytes.randomBytes(32)),
+                Prf.class);
+
+    assertThat(prf).isInstanceOf(PrfAesCmac.class);
   }
 }
