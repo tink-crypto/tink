@@ -24,6 +24,7 @@
 #include "absl/status/status.h"
 #include "absl/types/optional.h"
 #include "tink/insecure_secret_key_access.h"
+#include "tink/internal/ec_util.h"
 #include "tink/internal/mutable_serialization_registry.h"
 #include "tink/internal/proto_key_serialization.h"
 #include "tink/internal/proto_parameters_serialization.h"
@@ -33,6 +34,7 @@
 #include "tink/partial_key_access.h"
 #include "tink/restricted_data.h"
 #include "tink/signature/ed25519_parameters.h"
+#include "tink/signature/ed25519_private_key.h"
 #include "tink/signature/ed25519_public_key.h"
 #include "tink/subtle/random.h"
 #include "tink/util/statusor.h"
@@ -53,7 +55,6 @@ using ::google::crypto::tink::OutputPrefixType;
 using ::testing::Eq;
 using ::testing::IsTrue;
 using ::testing::NotNull;
-using ::testing::SizeIs;
 using ::testing::TestWithParam;
 using ::testing::Values;
 
@@ -314,7 +315,230 @@ TEST_P(Ed25519ProtoSerializationTest, SerializePublicKey) {
                       InsecureSecretKeyAccess::Get()))),
               IsTrue());
   EXPECT_THAT(proto_key.version(), Eq(0));
-  EXPECT_THAT(proto_key.key_value(), SizeIs(32));
+  EXPECT_THAT(proto_key.key_value(), Eq(raw_key_bytes));
+}
+
+TEST_P(Ed25519ProtoSerializationTest, ParsePrivateKey) {
+  TestCase test_case = GetParam();
+  ASSERT_THAT(RegisterEd25519ProtoSerialization(), IsOk());
+
+  util::StatusOr<std::unique_ptr<internal::Ed25519Key>> key_pair =
+      internal::NewEd25519Key();
+  ASSERT_THAT(key_pair, IsOk());
+
+  google::crypto::tink::Ed25519PublicKey public_key_proto;
+  public_key_proto.set_version(0);
+  public_key_proto.set_key_value((*key_pair)->public_key);
+
+  google::crypto::tink::Ed25519PrivateKey private_key_proto;
+  private_key_proto.set_version(0);
+  *private_key_proto.mutable_public_key() = public_key_proto;
+  private_key_proto.set_key_value((*key_pair)->private_key);
+
+  RestrictedData serialized_key = RestrictedData(
+      private_key_proto.SerializeAsString(), InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(
+          "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey",
+          serialized_key, KeyData::ASYMMETRIC_PRIVATE,
+          test_case.output_prefix_type, test_case.id);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(key, IsOk());
+  EXPECT_THAT((*key)->GetIdRequirement(), Eq(test_case.id));
+  EXPECT_THAT((*key)->GetParameters().HasIdRequirement(),
+              test_case.id.has_value());
+
+  util::StatusOr<Ed25519Parameters> expected_parameters =
+      Ed25519Parameters::Create(test_case.variant);
+  ASSERT_THAT(expected_parameters, IsOk());
+
+  util::StatusOr<Ed25519PublicKey> expected_public_key =
+      Ed25519PublicKey::Create(*expected_parameters, (*key_pair)->public_key,
+                               test_case.id, GetPartialKeyAccess());
+  ASSERT_THAT(expected_public_key, IsOk());
+
+  util::StatusOr<Ed25519PrivateKey> expected_private_key =
+      Ed25519PrivateKey::Create(*expected_public_key,
+                                RestrictedData((*key_pair)->private_key,
+                                               InsecureSecretKeyAccess::Get()),
+                                GetPartialKeyAccess());
+  ASSERT_THAT(expected_private_key, IsOk());
+
+  EXPECT_THAT(**key, Eq(*expected_private_key));
+}
+
+TEST_F(Ed25519ProtoSerializationTest, ParsePrivateKeyWithInvalidSerialization) {
+  ASSERT_THAT(RegisterEd25519ProtoSerialization(), IsOk());
+
+  RestrictedData serialized_key =
+      RestrictedData("invalid_serialization", InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(
+          "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey",
+          serialized_key, KeyData::ASYMMETRIC_PRIVATE, OutputPrefixType::TINK,
+          /*id_requirement=*/0x23456789);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, InsecureSecretKeyAccess::Get());
+  EXPECT_THAT(key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST_F(Ed25519ProtoSerializationTest, ParsePrivateKeyWithInvalidVersion) {
+  ASSERT_THAT(RegisterEd25519ProtoSerialization(), IsOk());
+
+  util::StatusOr<std::unique_ptr<internal::Ed25519Key>> key_pair =
+      internal::NewEd25519Key();
+  ASSERT_THAT(key_pair, IsOk());
+
+  google::crypto::tink::Ed25519PublicKey public_key_proto;
+  public_key_proto.set_version(0);
+  public_key_proto.set_key_value((*key_pair)->public_key);
+
+  google::crypto::tink::Ed25519PrivateKey private_key_proto;
+  private_key_proto.set_version(1);
+  *private_key_proto.mutable_public_key() = public_key_proto;
+  private_key_proto.set_key_value((*key_pair)->private_key);
+
+  RestrictedData serialized_key = RestrictedData(
+      private_key_proto.SerializeAsString(), InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(
+          "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey",
+          serialized_key, KeyData::ASYMMETRIC_PRIVATE, OutputPrefixType::TINK,
+          /*id_requirement=*/0x23456789);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, InsecureSecretKeyAccess::Get());
+  EXPECT_THAT(key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST_F(Ed25519ProtoSerializationTest, ParsePrivateKeyNoSecretKeyAccess) {
+  ASSERT_THAT(RegisterEd25519ProtoSerialization(), IsOk());
+
+  util::StatusOr<std::unique_ptr<internal::Ed25519Key>> key_pair =
+      internal::NewEd25519Key();
+  ASSERT_THAT(key_pair, IsOk());
+
+  google::crypto::tink::Ed25519PublicKey public_key_proto;
+  public_key_proto.set_version(0);
+  public_key_proto.set_key_value((*key_pair)->public_key);
+
+  google::crypto::tink::Ed25519PrivateKey private_key_proto;
+  private_key_proto.set_version(0);
+  *private_key_proto.mutable_public_key() = public_key_proto;
+  private_key_proto.set_key_value((*key_pair)->private_key);
+
+  RestrictedData serialized_key = RestrictedData(
+      private_key_proto.SerializeAsString(), InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(
+          "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey",
+          serialized_key, KeyData::ASYMMETRIC_PRIVATE, OutputPrefixType::TINK,
+          /*id_requirement=*/0x23456789);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, /*token=*/absl::nullopt);
+  EXPECT_THAT(key.status(), StatusIs(absl::StatusCode::kPermissionDenied));
+}
+
+TEST_P(Ed25519ProtoSerializationTest, SerializePrivateKey) {
+  TestCase test_case = GetParam();
+  ASSERT_THAT(RegisterEd25519ProtoSerialization(), IsOk());
+
+  util::StatusOr<Ed25519Parameters> parameters =
+      Ed25519Parameters::Create(test_case.variant);
+  ASSERT_THAT(parameters, IsOk());
+
+  util::StatusOr<std::unique_ptr<internal::Ed25519Key>> key_pair =
+      internal::NewEd25519Key();
+  ASSERT_THAT(key_pair, IsOk());
+
+  util::StatusOr<Ed25519PublicKey> public_key =
+      Ed25519PublicKey::Create(*parameters, (*key_pair)->public_key,
+                               test_case.id, GetPartialKeyAccess());
+  ASSERT_THAT(public_key, IsOk());
+
+  util::StatusOr<Ed25519PrivateKey> private_key = Ed25519PrivateKey::Create(
+      *public_key,
+      RestrictedData((*key_pair)->private_key, InsecureSecretKeyAccess::Get()),
+      GetPartialKeyAccess());
+  ASSERT_THAT(private_key, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialization =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeKey<internal::ProtoKeySerialization>(
+              *private_key, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(serialization, IsOk());
+  EXPECT_THAT((*serialization)->ObjectIdentifier(),
+              Eq("type.googleapis.com/google.crypto.tink.Ed25519PrivateKey"));
+
+  const internal::ProtoKeySerialization* proto_serialization =
+      dynamic_cast<const internal::ProtoKeySerialization*>(
+          serialization->get());
+  ASSERT_THAT(proto_serialization, NotNull());
+  EXPECT_THAT(proto_serialization->TypeUrl(),
+              Eq("type.googleapis.com/google.crypto.tink.Ed25519PrivateKey"));
+  EXPECT_THAT(proto_serialization->KeyMaterialType(),
+              Eq(KeyData::ASYMMETRIC_PRIVATE));
+  EXPECT_THAT(proto_serialization->GetOutputPrefixType(),
+              Eq(test_case.output_prefix_type));
+  EXPECT_THAT(proto_serialization->IdRequirement(), Eq(test_case.id));
+
+  google::crypto::tink::Ed25519PrivateKey proto_key;
+  // OSS proto library complains if input is not converted to a string.
+  ASSERT_THAT(proto_key.ParseFromString(std::string(
+                  proto_serialization->SerializedKeyProto().GetSecret(
+                      InsecureSecretKeyAccess::Get()))),
+              IsTrue());
+  EXPECT_THAT(proto_key.version(), Eq(0));
+  EXPECT_THAT(proto_key.key_value(), Eq((*key_pair)->private_key));
+  EXPECT_THAT(proto_key.has_public_key(), IsTrue());
+  EXPECT_THAT(proto_key.public_key().version(), Eq(0));
+  EXPECT_THAT(proto_key.public_key().key_value(), Eq((*key_pair)->public_key));
+}
+
+TEST_F(Ed25519ProtoSerializationTest, SerializePrivateKeyNoSecretKeyAccess) {
+  ASSERT_THAT(RegisterEd25519ProtoSerialization(), IsOk());
+
+  util::StatusOr<Ed25519Parameters> parameters =
+      Ed25519Parameters::Create(Ed25519Parameters::Variant::kTink);
+  ASSERT_THAT(parameters, IsOk());
+
+  util::StatusOr<std::unique_ptr<internal::Ed25519Key>> key_pair =
+      internal::NewEd25519Key();
+  ASSERT_THAT(key_pair, IsOk());
+
+  util::StatusOr<Ed25519PublicKey> public_key =
+      Ed25519PublicKey::Create(*parameters, (*key_pair)->public_key,
+                               /*id_requirement=*/123, GetPartialKeyAccess());
+  ASSERT_THAT(public_key, IsOk());
+
+  util::StatusOr<Ed25519PrivateKey> private_key = Ed25519PrivateKey::Create(
+      *public_key,
+      RestrictedData((*key_pair)->private_key, InsecureSecretKeyAccess::Get()),
+      GetPartialKeyAccess());
+  ASSERT_THAT(private_key, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialization =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeKey<internal::ProtoKeySerialization>(
+              *private_key, /*token=*/absl::nullopt);
+  ASSERT_THAT(serialization.status(),
+              StatusIs(absl::StatusCode::kPermissionDenied));
 }
 
 }  // namespace

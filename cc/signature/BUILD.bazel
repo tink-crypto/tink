@@ -486,6 +486,7 @@ cc_library(
     include_prefix = "tink/signature",
     deps = [
         ":ed25519_parameters",
+        ":ed25519_private_key",
         ":ed25519_public_key",
         "//:insecure_secret_key_access",
         "//:partial_key_access",
@@ -925,6 +926,7 @@ cc_test(
     srcs = ["ed25519_proto_serialization_test.cc"],
     deps = [
         ":ed25519_parameters",
+        ":ed25519_private_key",
         ":ed25519_proto_serialization",
         ":ed25519_public_key",
         "//:insecure_secret_key_access",
@@ -932,6 +934,7 @@ cc_test(
         "//:parameters",
         "//:partial_key_access",
         "//:restricted_data",
+        "//internal:ec_util",
         "//internal:mutable_serialization_registry",
         "//internal:proto_key_serialization",
         "//internal:proto_parameters_serialization",

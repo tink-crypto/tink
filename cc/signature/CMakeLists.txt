@@ -463,6 +463,7 @@ tink_cc_library(
     ed25519_proto_serialization.h
   DEPS
     tink::signature::ed25519_parameters
+    tink::signature::ed25519_private_key
     tink::signature::ed25519_public_key
     absl::status
     absl::strings
@@ -886,6 +887,7 @@ tink_cc_test(
     ed25519_proto_serialization_test.cc
   DEPS
     tink::signature::ed25519_parameters
+    tink::signature::ed25519_private_key
     tink::signature::ed25519_proto_serialization
     tink::signature::ed25519_public_key
     gmock
@@ -896,6 +898,7 @@ tink_cc_test(
     tink::core::parameters
     tink::core::partial_key_access
     tink::core::restricted_data
+    tink::internal::ec_util
     tink::internal::mutable_serialization_registry
     tink::internal::proto_key_serialization
     tink::internal::proto_parameters_serialization
