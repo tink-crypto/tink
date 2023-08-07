@@ -330,6 +330,7 @@ java_library(
     srcs = ["EciesProtoSerialization.java"],
     deps = [
         ":ecies_parameters",
+        ":ecies_private_key",
         ":ecies_public_key",
         "//proto:common_java_proto",
         "//proto:ecies_aead_hkdf_java_proto",
@@ -348,6 +349,8 @@ java_library(
         "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
         "//src/main/java/com/google/crypto/tink/internal:util",
         "//src/main/java/com/google/crypto/tink/util:bytes",
+        "//src/main/java/com/google/crypto/tink/util:secret_big_integer",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_protobuf_protobuf_java",
     ],
@@ -685,6 +688,7 @@ android_library(
     srcs = ["EciesProtoSerialization.java"],
     deps = [
         ":ecies_parameters-android",
+        ":ecies_private_key-android",
         ":ecies_public_key-android",
         "//proto:common_java_proto_lite",
         "//proto:ecies_aead_hkdf_java_proto_lite",
@@ -703,6 +707,8 @@ android_library(
         "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization-android",
         "//src/main/java/com/google/crypto/tink/internal:util-android",
         "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "//src/main/java/com/google/crypto/tink/util:secret_big_integer-android",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes-android",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_protobuf_protobuf_javalite",
     ],

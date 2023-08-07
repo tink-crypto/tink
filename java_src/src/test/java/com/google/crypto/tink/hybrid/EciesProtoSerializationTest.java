@@ -35,6 +35,7 @@ import com.google.crypto.tink.proto.EcPointFormat;
 import com.google.crypto.tink.proto.EciesAeadDemParams;
 import com.google.crypto.tink.proto.EciesAeadHkdfKeyFormat;
 import com.google.crypto.tink.proto.EciesAeadHkdfParams;
+import com.google.crypto.tink.proto.EciesAeadHkdfPrivateKey;
 import com.google.crypto.tink.proto.EciesAeadHkdfPublicKey;
 import com.google.crypto.tink.proto.EciesHkdfKemParams;
 import com.google.crypto.tink.proto.EllipticCurveType;
@@ -47,6 +48,8 @@ import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.X25519;
 import com.google.crypto.tink.util.Bytes;
+import com.google.crypto.tink.util.SecretBigInteger;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
@@ -859,6 +862,276 @@ public final class EciesProtoSerializationTest {
 
   @Theory
   public void testParseInvalidPublicKeys_throws(
+      @FromDataPoints("invalidPublicKeySerializations") ProtoKeySerialization serialization)
+      throws Exception {
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> registry.parseKey(serialization, InsecureSecretKeyAccess.get()));
+  }
+
+  // PRIVATE KEY SERIALIZATION =====================================================================
+  @Test
+  public void serializeParseNistPrivateKey_works() throws Exception {
+    String hexX = "60FED4BA255A9D31C961EB74C6356D68C049B8923B61FA6CE669622E60F29FB6";
+    String hexY = "7903FE1008B8BC99A41AE9E95628BC64F2F1B20C2D7E9F5177A3C294D4462299";
+    String hexPrivateValue = "C9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6721";
+
+    // Java object
+    EciesParameters parameters =
+        EciesParameters.builder()
+            .setCurveType(EciesParameters.CurveType.NIST_P256)
+            .setHashType(EciesParameters.HashType.SHA256)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.COMPRESSED)
+            .setVariant(EciesParameters.Variant.TINK)
+            .setDemParameters(DEM_PARAMETERS)
+            .setSalt(SALT)
+            .build();
+    EciesPublicKey publicKey =
+        EciesPublicKey.createForNistCurve(
+            parameters, new ECPoint(new BigInteger(hexX, 16), new BigInteger(hexY, 16)), 101);
+    EciesPrivateKey privateKey =
+        EciesPrivateKey.createForNistCurve(
+            publicKey,
+            SecretBigInteger.fromBigInteger(
+                new BigInteger(hexPrivateValue, 16), InsecureSecretKeyAccess.get()));
+
+    // Proto object
+    EciesAeadHkdfPublicKey protoPublicKey =
+        EciesAeadHkdfPublicKey.newBuilder()
+            .setVersion(0)
+            .setParams(
+                validParamsForCurve(com.google.crypto.tink.proto.EllipticCurveType.NIST_P256))
+            .setX(ByteString.copyFrom(Hex.decode("00" + hexX)))
+            .setY(ByteString.copyFrom(Hex.decode("00" + hexY)))
+            .build();
+    EciesAeadHkdfPrivateKey protoPrivateKey =
+        EciesAeadHkdfPrivateKey.newBuilder()
+            .setVersion(0)
+            .setPublicKey(protoPublicKey)
+            // privateValue is currently serialized with an extra zero at the beginning.
+            .setKeyValue(ByteString.copyFrom(Hex.decode("00" + hexPrivateValue)))
+            .build();
+    ProtoKeySerialization serialization =
+        ProtoKeySerialization.create(
+            "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+            protoPrivateKey.toByteString(),
+            KeyMaterialType.ASYMMETRIC_PRIVATE,
+            OutputPrefixType.TINK,
+            /* idRequirement= */ 101);
+
+    // Comparison
+    Key parsed = registry.parseKey(serialization, InsecureSecretKeyAccess.get());
+    assertThat(parsed.equalsKey(privateKey)).isTrue();
+
+    ProtoKeySerialization serialized =
+        registry.serializeKey(
+            privateKey, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
+
+    assertEqualWhenValueParsed(EciesAeadHkdfPublicKey.parser(), serialized, serialization);
+  }
+
+  @Test
+  public void serializeParseX25519PrivateKey_works() throws Exception {
+    byte[] privateKeyBytes = X25519.generatePrivateKey();
+    byte[] publicKeyBytes = X25519.publicFromPrivate(privateKeyBytes);
+
+    // Java object
+    EciesParameters parameters =
+        EciesParameters.builder()
+            .setCurveType(EciesParameters.CurveType.X25519)
+            .setHashType(EciesParameters.HashType.SHA256)
+            .setVariant(EciesParameters.Variant.TINK)
+            .setDemParameters(DEM_PARAMETERS)
+            .setSalt(SALT)
+            .build();
+    EciesPublicKey publicKey =
+        EciesPublicKey.createForCurveX25519(parameters, Bytes.copyFrom(publicKeyBytes), 101);
+    EciesPrivateKey privateKey =
+        EciesPrivateKey.createForCurveX25519(
+            publicKey, SecretBytes.copyFrom(privateKeyBytes, InsecureSecretKeyAccess.get()));
+
+    // Proto object
+    EciesAeadHkdfPublicKey protoPublicKey =
+        EciesAeadHkdfPublicKey.newBuilder()
+            .setVersion(0)
+            .setParams(validParamsForCurve(EllipticCurveType.CURVE25519))
+            .setX(ByteString.copyFrom(publicKeyBytes))
+            .build();
+    EciesAeadHkdfPrivateKey protoPrivateKey =
+        EciesAeadHkdfPrivateKey.newBuilder()
+            .setVersion(0)
+            .setPublicKey(protoPublicKey)
+            .setKeyValue(ByteString.copyFrom(privateKeyBytes))
+            .build();
+    ProtoKeySerialization serialization =
+        ProtoKeySerialization.create(
+            "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+            protoPrivateKey.toByteString(),
+            KeyMaterialType.ASYMMETRIC_PRIVATE,
+            OutputPrefixType.TINK,
+            /* idRequirement= */ 101);
+
+    // Comparison
+    Key parsed = registry.parseKey(serialization, InsecureSecretKeyAccess.get());
+    assertThat(parsed.equalsKey(privateKey)).isTrue();
+
+    ProtoKeySerialization serialized =
+        registry.serializeKey(
+            privateKey, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
+
+    assertEqualWhenValueParsed(EciesAeadHkdfPublicKey.parser(), serialized, serialization);
+  }
+
+  @Test
+  public void testParsePrivateKey_noAccess_throws() throws Exception {
+    String hexX = "60FED4BA255A9D31C961EB74C6356D68C049B8923B61FA6CE669622E60F29FB6";
+    String hexY = "7903FE1008B8BC99A41AE9E95628BC64F2F1B20C2D7E9F5177A3C294D4462299";
+    String hexPrivateValue = "C9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6721";
+
+    // Proto object
+    EciesAeadHkdfPublicKey protoPublicKey =
+        EciesAeadHkdfPublicKey.newBuilder()
+            .setVersion(0)
+            .setParams(
+                validParamsForCurve(com.google.crypto.tink.proto.EllipticCurveType.NIST_P256))
+            .setX(ByteString.copyFrom(Hex.decode("00" + hexX)))
+            .setY(ByteString.copyFrom(Hex.decode("00" + hexY)))
+            .build();
+    EciesAeadHkdfPrivateKey protoPrivateKey =
+        EciesAeadHkdfPrivateKey.newBuilder()
+            .setVersion(0)
+            .setPublicKey(protoPublicKey)
+            // privateValue is currently serialized with an extra zero at the beginning.
+            .setKeyValue(ByteString.copyFrom(Hex.decode("00" + hexPrivateValue)))
+            .build();
+    ProtoKeySerialization serialization =
+        ProtoKeySerialization.create(
+            "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+            protoPrivateKey.toByteString(),
+            KeyMaterialType.ASYMMETRIC_PRIVATE,
+            OutputPrefixType.TINK,
+            /* idRequirement= */ 101);
+    assertThrows(
+        GeneralSecurityException.class, () -> registry.parseKey(serialization, /* access= */ null));
+  }
+
+  @Test
+  public void testSerializeKeys_noAccess_throws() throws Exception {
+    String hexX = "60FED4BA255A9D31C961EB74C6356D68C049B8923B61FA6CE669622E60F29FB6";
+    String hexY = "7903FE1008B8BC99A41AE9E95628BC64F2F1B20C2D7E9F5177A3C294D4462299";
+    String hexPrivateValue = "C9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6721";
+
+    EciesParameters parameters =
+        EciesParameters.builder()
+            .setCurveType(EciesParameters.CurveType.NIST_P256)
+            .setHashType(EciesParameters.HashType.SHA256)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.COMPRESSED)
+            .setVariant(EciesParameters.Variant.TINK)
+            .setDemParameters(DEM_PARAMETERS)
+            .setSalt(SALT)
+            .build();
+    EciesPublicKey publicKey =
+        EciesPublicKey.createForNistCurve(
+            parameters, new ECPoint(new BigInteger(hexX, 16), new BigInteger(hexY, 16)), 101);
+    EciesPrivateKey privateKey =
+        EciesPrivateKey.createForNistCurve(
+            publicKey,
+            SecretBigInteger.fromBigInteger(
+                new BigInteger(hexPrivateValue, 16), InsecureSecretKeyAccess.get()));
+
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> registry.serializeKey(privateKey, ProtoKeySerialization.class, /* access= */ null));
+  }
+
+  private static ProtoKeySerialization[] createInvalidPrivateKeySerializations() {
+    try {
+      String hexX = "60FED4BA255A9D31C961EB74C6356D68C049B8923B61FA6CE669622E60F29FB6";
+      String hexY = "7903FE1008B8BC99A41AE9E95628BC64F2F1B20C2D7E9F5177A3C294D4462299";
+      String hexPrivateValue = "C9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6721";
+
+      EciesAeadHkdfPublicKey validProtoPublicKey =
+          EciesAeadHkdfPublicKey.newBuilder()
+              .setVersion(0)
+              .setParams(validParamsForCurve(EllipticCurveType.NIST_P256))
+              .setX(ByteString.copyFrom(Hex.decode("00" + hexX)))
+              .setY(ByteString.copyFrom(Hex.decode("00" + hexY)))
+              .build();
+
+      return new ProtoKeySerialization[] {
+        // Bad private key value
+        ProtoKeySerialization.create(
+            "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+            EciesAeadHkdfPrivateKey.newBuilder()
+                .setVersion(0)
+                .setPublicKey(validProtoPublicKey)
+                .setKeyValue(
+                    ByteString.copyFrom(
+                        Hex.decode(
+                            // modified hexPrivateValue
+                            "C9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6720")))
+                .build()
+                .toByteString(),
+            KeyMaterialType.ASYMMETRIC_PRIVATE,
+            OutputPrefixType.TINK,
+            /* idRequirement= */ 101),
+        // Bad version
+        ProtoKeySerialization.create(
+            "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+            EciesAeadHkdfPrivateKey.newBuilder()
+                .setVersion(1)
+                .setPublicKey(validProtoPublicKey)
+                .setKeyValue(ByteString.copyFrom(Hex.decode(hexPrivateValue)))
+                .build()
+                .toByteString(),
+            KeyMaterialType.ASYMMETRIC_PRIVATE,
+            OutputPrefixType.TINK,
+            /* idRequirement= */ 101),
+        // Unknown prefix
+        ProtoKeySerialization.create(
+            "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+            EciesAeadHkdfPrivateKey.newBuilder()
+                .setVersion(0)
+                .setPublicKey(validProtoPublicKey)
+                .setKeyValue(ByteString.copyFrom(Hex.decode(hexPrivateValue)))
+                .build()
+                .toByteString(),
+            KeyMaterialType.ASYMMETRIC_PRIVATE,
+            OutputPrefixType.UNKNOWN_PREFIX,
+            /* idRequirement= */ 101),
+        // Bad Public Key (X25519 Curve with EC Point Format uncompressed)
+        ProtoKeySerialization.create(
+            "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+            EciesAeadHkdfPrivateKey.newBuilder()
+                .setVersion(0)
+                .setPublicKey(
+                    EciesAeadHkdfPublicKey.newBuilder()
+                        .setVersion(0)
+                        .setParams(
+                            validParamsForCurve(EllipticCurveType.CURVE25519).toBuilder()
+                                .setEcPointFormat(EcPointFormat.UNCOMPRESSED)
+                                .build())
+                        .setX(ByteString.copyFrom(Random.randBytes(32)))
+                        .build())
+                .setKeyValue(ByteString.copyFrom(Random.randBytes(32)))
+                .build()
+                .toByteString(),
+            KeyMaterialType.ASYMMETRIC_PUBLIC,
+            OutputPrefixType.TINK,
+            /* idRequirement= */ 101),
+      };
+
+    } catch (GeneralSecurityException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @DataPoints("invalidPrivateKeySerializations")
+  public static final ProtoKeySerialization[] INVALID_PRIVATE_KEY_SERIALIZATIONS =
+      createInvalidPrivateKeySerializations();
+
+  @Theory
+  public void testParseInvalidPrivateKeys_throws(
       @FromDataPoints("invalidPublicKeySerializations") ProtoKeySerialization serialization)
       throws Exception {
     assertThrows(
