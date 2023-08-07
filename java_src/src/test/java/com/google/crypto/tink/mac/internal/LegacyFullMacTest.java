@@ -46,10 +46,13 @@ public class LegacyFullMacTest {
   public static void setUp() throws Exception {
     LegacyHmacTestKeyManager.register();
     HmacProtoSerialization.register();
+    // This is to ensure that the tests indeed get the objects we are testing for.
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(
             PrimitiveConstructor.create(
-                LegacyFullMac::create, LegacyProtoKey.class, LegacyFullMac.class));
+                (LegacyProtoKey key) -> (LegacyFullMac) LegacyFullMac.create(key),
+                LegacyProtoKey.class,
+                LegacyFullMac.class));
     TestLegacyMacWrapper.register();
 
     hmacImplementationTestVectors =

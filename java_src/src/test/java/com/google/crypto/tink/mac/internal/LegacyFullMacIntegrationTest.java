@@ -95,10 +95,13 @@ public class LegacyFullMacIntegrationTest {
   public void endToEnd_works(@FromDataPoints("allHmacTestVectors") HmacTestVector t)
       throws Exception {
     MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    // This is to ensure that the tests indeed get the objects we are testing for.
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(
             PrimitiveConstructor.create(
-                LegacyFullMac::create, LegacyProtoKey.class, LegacyFullMac.class));
+                (LegacyProtoKey key) -> (LegacyFullMac) LegacyFullMac.create(key),
+                LegacyProtoKey.class,
+                LegacyFullMac.class));
     TestLegacyMacWrapper.register();
 
     KeysetHandle keysetHandle = getKeysetHandleFromKeyNoSerialization(t.key);

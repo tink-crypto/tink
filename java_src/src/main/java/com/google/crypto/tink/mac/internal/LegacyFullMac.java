@@ -45,7 +45,7 @@ public final class LegacyFullMac implements Mac {
   private final byte[] identifier;
 
   /** This method covers the cases where users created their own mac/key classes. */
-  public static LegacyFullMac create(LegacyProtoKey key) throws GeneralSecurityException {
+  public static Mac create(LegacyProtoKey key) throws GeneralSecurityException {
     ProtoKeySerialization protoKeySerialization =
         key.getSerialization(InsecureSecretKeyAccess.get());
     KeyData keyData =
