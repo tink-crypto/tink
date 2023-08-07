@@ -35,7 +35,6 @@ import com.google.crypto.tink.mac.HmacKey;
 import com.google.crypto.tink.mac.HmacParameters;
 import com.google.crypto.tink.mac.HmacParameters.HashType;
 import com.google.crypto.tink.mac.MacConfig;
-import com.google.crypto.tink.mac.internal.LegacyFullMac;
 import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -60,7 +59,6 @@ public class RegistryConfigurationTest {
   private static HmacKey rawKey;
   private static KeyData rawKeyData;
   private static Keyset.Key rawKeysetKey;
-  private static LegacyProtoKey legacyProtoRawKey;
 
   @Before
   public void setUp() throws GeneralSecurityException {
@@ -112,11 +110,6 @@ public class RegistryConfigurationTest {
               .setKeyId(keysetHandle.getKeysetInfo().getPrimaryKeyId())
               .setOutputPrefixType(OutputPrefixType.RAW)
               .build();
-      legacyProtoRawKey =
-          new LegacyProtoKey(
-              MutableSerializationRegistry.globalInstance()
-                  .serializeKey(rawKey, ProtoKeySerialization.class, InsecureSecretKeyAccess.get()),
-              InsecureSecretKeyAccess.get());
     } catch (GeneralSecurityException e) {
       throw new IllegalStateException(e);
     }
@@ -155,13 +148,13 @@ public class RegistryConfigurationTest {
     byte[] plaintext = "plaintext".getBytes(UTF_8);
 
     Mac registryMac = Registry.getPrimitive(rawKeyData, Mac.class);
-    // The following relies on the fact that internally LegacyFullMac uses RegistryConfiguration.
+    Mac configurationMac = RegistryConfiguration.get().getLegacyPrimitive(rawKeyData, Mac.class);
     Mac wrappedConfigurationMac =
         RegistryConfiguration.get()
             .wrap(
                 PrimitiveSet.newBuilder(Mac.class)
                     .addPrimaryFullPrimitiveAndOptionalPrimitive(
-                        LegacyFullMac.create(legacyProtoRawKey), null, rawKeysetKey)
+                        null, configurationMac, rawKeysetKey)
                     .build(),
                 Mac.class);
 
