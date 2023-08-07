@@ -24,6 +24,7 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacPrfKey;
 import com.google.crypto.tink.proto.HmacPrfKeyFormat;
@@ -31,6 +32,7 @@ import com.google.crypto.tink.proto.HmacPrfParams;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.PrfHmacJce;
 import com.google.crypto.tink.subtle.Random;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -309,5 +311,23 @@ public class HmacPrfKeyManagerTest {
     assertThat(h.size()).isEqualTo(1);
     assertThat(h.getAt(0).getKey().getParameters())
         .isEqualTo(KeyTemplates.get(templateName).toParameters());
+  }
+
+  @Test
+  public void registersPrfPrimitiveConstructor() throws Exception {
+    Prf prf =
+        MutablePrimitiveRegistry.globalInstance()
+            .getPrimitive(
+                com.google.crypto.tink.prf.HmacPrfKey.builder()
+                    .setParameters(
+                        HmacPrfParameters.builder()
+                            .setHashType(HmacPrfParameters.HashType.SHA256)
+                            .setKeySizeBytes(32)
+                            .build())
+                    .setKeyBytes(SecretBytes.randomBytes(32))
+                    .build(),
+                Prf.class);
+
+    assertThat(prf).isInstanceOf(PrfHmacJce.class);
   }
 }
