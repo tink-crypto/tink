@@ -157,6 +157,34 @@ public final class NistCurvesHpkeKemTest {
   }
 
   @Theory
+  public void authEncapsulate_succeeds(
+      @FromDataPoints("hpkeKemParams") HpkeKemParams hpkeNistKemParams)
+      throws GeneralSecurityException {
+    HpkeTestId testId =
+        new HpkeTestId(
+            HpkeUtil.AUTH_MODE,
+            hpkeNistKemParams.kemId,
+            hpkeNistKemParams.hkdfId,
+            hpkeNistKemParams.aeadId);
+    HpkeTestSetup testSetup = testVectors.get(testId).getTestSetup();
+    EllipticCurves.CurveType curve = curveTypeFromKemId(hpkeNistKemParams.kemId);
+    ECPrivateKey privateKey =
+        EllipticCurves.getEcPrivateKey(curve, testSetup.senderEphemeralPrivateKey);
+    ECPublicKey publicKey =
+        EllipticCurves.getEcPublicKey(
+            curve, PointFormatType.UNCOMPRESSED, testSetup.senderEphemeralPublicKey);
+    NistCurvesHpkeKem kem = NistCurvesHpkeKem.fromCurve(curve);
+    HpkeKemEncapOutput result =
+        kem.authEncapsulate(
+            testSetup.recipientPublicKey,
+            new KeyPair(publicKey, privateKey),
+            NistCurvesHpkeKemPrivateKey.fromBytes(
+                testSetup.senderPrivateKey, testSetup.senderPublicKey, curve));
+    expect.that(result.getSharedSecret()).isEqualTo(testSetup.sharedSecret);
+    expect.that(result.getEncapsulatedKey()).isEqualTo(testSetup.encapsulatedKey);
+  }
+
+  @Theory
   public void decapsulate_succeeds(@FromDataPoints("hpkeKemParams") HpkeKemParams hpkeNistKemParams)
       throws GeneralSecurityException {
     HpkeTestId testId =
@@ -186,6 +214,37 @@ public final class NistCurvesHpkeKemTest {
   }
 
   @Theory
+  public void authDecapsulate_succeeds(
+      @FromDataPoints("hpkeKemParams") HpkeKemParams hpkeNistKemParams)
+      throws GeneralSecurityException {
+    HpkeTestId testId =
+        new HpkeTestId(
+            HpkeUtil.AUTH_MODE,
+            hpkeNistKemParams.kemId,
+            hpkeNistKemParams.hkdfId,
+            hpkeNistKemParams.aeadId);
+    HpkeTestSetup testSetup = testVectors.get(testId).getTestSetup();
+    HpkeKemPrivateKey recipientKeyPair =
+        HpkeKemKeyFactory.createPrivate(
+            HpkePrivateKey.newBuilder()
+                .setPrivateKey(ByteString.copyFrom(testSetup.recipientPrivateKey))
+                .setPublicKey(
+                    HpkePublicKey.newBuilder()
+                        .setPublicKey(ByteString.copyFrom(testSetup.recipientPublicKey))
+                        .setParams(
+                            HpkeParams.newBuilder()
+                                .setKem(kemIdToKemProtoParam(hpkeNistKemParams.kemId))
+                                .build())
+                        .build())
+                .build());
+    NistCurvesHpkeKem kem =
+        NistCurvesHpkeKem.fromCurve(curveTypeFromKemId(hpkeNistKemParams.kemId));
+    byte[] result =
+        kem.authDecapsulate(testSetup.encapsulatedKey, recipientKeyPair, testSetup.senderPublicKey);
+    expect.that(result).isEqualTo(testSetup.sharedSecret);
+  }
+
+  @Theory
   public void encapsulate_failsWithInvalidRecipientPublicKey(
       @FromDataPoints("hpkeKemParams") HpkeKemParams hpkeNistKemParams)
       throws GeneralSecurityException {
@@ -201,6 +260,31 @@ public final class NistCurvesHpkeKemTest {
     byte[] invalidRecipientPublicKey =
         Arrays.copyOf(testSetup.recipientPublicKey, testSetup.recipientPublicKey.length + 2);
     assertThrows(GeneralSecurityException.class, () -> kem.encapsulate(invalidRecipientPublicKey));
+  }
+
+  @Theory
+  public void authEncapsulate_failsWithInvalidRecipientPublicKey(
+      @FromDataPoints("hpkeKemParams") HpkeKemParams hpkeNistKemParams)
+      throws GeneralSecurityException {
+    HpkeTestId testId =
+        new HpkeTestId(
+            HpkeUtil.AUTH_MODE,
+            hpkeNistKemParams.kemId,
+            hpkeNistKemParams.hkdfId,
+            hpkeNistKemParams.aeadId);
+    HpkeTestSetup testSetup = testVectors.get(testId).getTestSetup();
+    EllipticCurves.CurveType curve = curveTypeFromKemId(hpkeNistKemParams.kemId);
+    NistCurvesHpkeKem kem =
+        NistCurvesHpkeKem.fromCurve(curveTypeFromKemId(hpkeNistKemParams.kemId));
+    byte[] invalidRecipientPublicKey =
+        Arrays.copyOf(testSetup.recipientPublicKey, testSetup.recipientPublicKey.length + 2);
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            kem.authEncapsulate(
+                invalidRecipientPublicKey,
+                NistCurvesHpkeKemPrivateKey.fromBytes(
+                    testSetup.senderPrivateKey, testSetup.senderPublicKey, curve)));
   }
 
   @Theory
@@ -224,5 +308,30 @@ public final class NistCurvesHpkeKemTest {
     assertThrows(
         GeneralSecurityException.class,
         () -> kem.decapsulate(invalidEncapsulatedKey, validRecipientPrivateKey));
+  }
+
+  @Theory
+  public void authDecapsulate_failsWithInvalidEncapsulatedPublicKey(
+      @FromDataPoints("hpkeKemParams") HpkeKemParams hpkeNistKemParams)
+      throws GeneralSecurityException {
+    HpkeTestId testId =
+        new HpkeTestId(
+            HpkeUtil.AUTH_MODE,
+            hpkeNistKemParams.kemId,
+            hpkeNistKemParams.hkdfId,
+            hpkeNistKemParams.aeadId);
+    HpkeTestSetup testSetup = testVectors.get(testId).getTestSetup();
+    byte[] invalidEncapsulatedKey =
+        Arrays.copyOf(testSetup.encapsulatedKey, testSetup.encapsulatedKey.length + 2);
+    EllipticCurves.CurveType curve = curveTypeFromKemId(hpkeNistKemParams.kemId);
+    NistCurvesHpkeKem kem = NistCurvesHpkeKem.fromCurve(curve);
+    HpkeKemPrivateKey validRecipientPrivateKey =
+        NistCurvesHpkeKemPrivateKey.fromBytes(
+            testSetup.recipientPrivateKey, testSetup.recipientPublicKey, curve);
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            kem.authDecapsulate(
+                invalidEncapsulatedKey, validRecipientPrivateKey, testSetup.senderPublicKey));
   }
 }
