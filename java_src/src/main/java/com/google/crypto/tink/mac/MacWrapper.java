@@ -25,7 +25,6 @@ import com.google.crypto.tink.internal.MonitoringUtil;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
 import com.google.crypto.tink.monitoring.MonitoringClient;
 import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
-import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.util.Bytes;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -44,7 +43,6 @@ import java.util.logging.Logger;
 class MacWrapper implements PrimitiveWrapper<Mac, Mac> {
   private static final Logger logger = Logger.getLogger(MacWrapper.class.getName());
 
-  private static final byte[] FORMAT_VERSION = new byte[] {0};
   private static final MacWrapper WRAPPER = new MacWrapper();
 
   private static class WrappedMac implements Mac {
@@ -67,16 +65,9 @@ class MacWrapper implements PrimitiveWrapper<Mac, Mac> {
 
     @Override
     public byte[] computeMac(final byte[] data) throws GeneralSecurityException {
-      byte[] data2 = data;
-      if (primitives.getPrimary().getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
-        data2 = com.google.crypto.tink.subtle.Bytes.concat(data, FORMAT_VERSION);
-      }
       try {
-        byte[] output =
-            com.google.crypto.tink.subtle.Bytes.concat(
-                primitives.getPrimary().getIdentifier(),
-                primitives.getPrimary().getPrimitive().computeMac(data2));
-        computeLogger.log(primitives.getPrimary().getKeyId(), data2.length);
+        byte[] output = primitives.getPrimary().getFullPrimitive().computeMac(data);
+        computeLogger.log(primitives.getPrimary().getKeyId(), data.length);
         return output;
       } catch (GeneralSecurityException e) {
         computeLogger.logFailure();
@@ -93,16 +84,11 @@ class MacWrapper implements PrimitiveWrapper<Mac, Mac> {
         throw new GeneralSecurityException("tag too short");
       }
       byte[] prefix = Arrays.copyOf(mac, CryptoFormat.NON_RAW_PREFIX_SIZE);
-      byte[] macNoPrefix = Arrays.copyOfRange(mac, CryptoFormat.NON_RAW_PREFIX_SIZE, mac.length);
       List<PrimitiveSet.Entry<Mac>> entries = primitives.getPrimitive(prefix);
       for (PrimitiveSet.Entry<Mac> entry : entries) {
-        byte[] data2 = data;
-        if (entry.getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
-          data2 = com.google.crypto.tink.subtle.Bytes.concat(data, FORMAT_VERSION);
-        }
         try {
-          entry.getPrimitive().verifyMac(macNoPrefix, data2);
-          verifyLogger.log(entry.getKeyId(), data2.length);
+          entry.getFullPrimitive().verifyMac(mac, data);
+          verifyLogger.log(entry.getKeyId(), data.length);
           // If there is no exception, the MAC is valid and we can return.
           return;
         } catch (GeneralSecurityException e) {
@@ -115,7 +101,7 @@ class MacWrapper implements PrimitiveWrapper<Mac, Mac> {
       entries = primitives.getRawPrimitives();
       for (PrimitiveSet.Entry<Mac> entry : entries) {
         try {
-          entry.getPrimitive().verifyMac(mac, data);
+          entry.getFullPrimitive().verifyMac(mac, data);
           verifyLogger.log(entry.getKeyId(), data.length);
           // If there is no exception, the MAC is valid and we can return.
           return;
@@ -169,7 +155,7 @@ class MacWrapper implements PrimitiveWrapper<Mac, Mac> {
     return Mac.class;
   }
 
- public static void register() throws GeneralSecurityException {
+  public static void register() throws GeneralSecurityException {
     Registry.registerPrimitiveWrapper(WRAPPER);
   }
 }
