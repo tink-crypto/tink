@@ -683,3 +683,54 @@ func TestPrimitiveFactoryEncryptDecryptWithoutAnnotationsDoesNotMonitor(t *testi
 		t.Errorf("len(client.Failures()) = %d, want 0", len(client.Failures()))
 	}
 }
+
+// Since the HybridEncrypt interface is a subset of the AEAD interface, verify
+// that a HybridEncrypt primitive cannot be obtained from a keyset handle
+// containing an AEAD key.
+func TestEncryptFactoryFailsOnAEADHandle(t *testing.T) {
+	handle, err := keyset.NewHandle(hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Key_Template())
+	if err != nil {
+		t.Fatalf("keyset.NewHandle gives err = '%v', want nil", err)
+	}
+	pub, err := handle.Public()
+	if err != nil {
+		t.Fatalf("handle.Public gives err = '%v', want nil", err)
+	}
+	manager := keyset.NewManagerFromHandle(pub)
+	_, err = manager.Add(aead.AES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("manager.Add gives err = '%v', want nil", err)
+	}
+	mixedHandle, err := manager.Handle()
+	if err != nil {
+		t.Fatalf("manager.Handle gives err = '%v', want nil", err)
+	}
+	if _, err := hybrid.NewHybridEncrypt(mixedHandle); err == nil {
+		t.Error("hybrid.NewHybridDecrypt err = nil, want err")
+	}
+}
+
+// Similar to the above but for HybridDecrypt.
+func TestDecryptFactoryFailsOnAEADHandle(t *testing.T) {
+	manager := keyset.NewManager()
+	id, err := manager.Add(aead.AES256GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("manager.Add gives err = '%v', want nil", err)
+	}
+	err = manager.SetPrimary(id)
+	if err != nil {
+		t.Fatalf("manager.SetPrimary gives err = '%v', want nil", err)
+	}
+	_, err = manager.Add(hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Key_Template())
+	if err != nil {
+		t.Fatalf("manager.Add gives err = '%v', want nil", err)
+	}
+	handle, err := manager.Handle()
+	if err != nil {
+		t.Fatalf("manager.Handle gives err = '%v', want nil", err)
+	}
+
+	if _, err := hybrid.NewHybridDecrypt(handle); err == nil {
+		t.Error("hybrid.NewHybridDecrypt err = nil, want err")
+	}
+}
