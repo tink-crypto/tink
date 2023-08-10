@@ -101,6 +101,32 @@ final class HpkeContext {
   }
 
   /**
+   * Creates HPKE sender context with authentication according to KeySchedule() defined in
+   * https://www.rfc-editor.org/rfc/rfc9180.html#section-5.1.3.
+   *
+   * @param recipientPublicKey recipient's public key (pkR)
+   * @param kem key encapsulation mechanism primitive
+   * @param kdf key derivation function primitive
+   * @param aead authenticated encryption with associated data primitive
+   * @param info application-specific information parameter to influence key generation
+   * @param senderPrivateKey sender's private key (skS)
+   */
+  static HpkeContext createAuthSenderContext(
+      HpkePublicKey recipientPublicKey,
+      HpkeKem kem,
+      HpkeKdf kdf,
+      HpkeAead aead,
+      byte[] info,
+      HpkeKemPrivateKey senderPrivateKey)
+      throws GeneralSecurityException {
+    HpkeKemEncapOutput encapOutput =
+        kem.authEncapsulate(recipientPublicKey.getPublicKey().toByteArray(), senderPrivateKey);
+    byte[] encapsulatedKey = encapOutput.getEncapsulatedKey();
+    byte[] sharedSecret = encapOutput.getSharedSecret();
+    return createContext(HpkeUtil.AUTH_MODE, encapsulatedKey, sharedSecret, kem, kdf, aead, info);
+  }
+
+  /**
    * Creates HPKE sender recipient context according to KeySchedule() defined in
    * https://www.rfc-editor.org/rfc/rfc9180.html#section-5.1-9.
    *
@@ -121,6 +147,33 @@ final class HpkeContext {
       throws GeneralSecurityException {
     byte[] sharedSecret = kem.decapsulate(encapsulatedKey, recipientPrivateKey);
     return createContext(HpkeUtil.BASE_MODE, encapsulatedKey, sharedSecret, kem, kdf, aead, info);
+  }
+
+  /**
+   * Creates HPKE recipient context with authentication according to KeySchedule() defined in
+   * https://www.rfc-editor.org/rfc/rfc9180.html#section-5.1.3.
+   *
+   * @param encapsulatedKey encapsulated key (enc)
+   * @param recipientPrivateKey recipient's private key (skR)
+   * @param kem key encapsulation mechanism primitive
+   * @param kdf key derivation function primitive
+   * @param aead authenticated encryption with associated data primitive
+   * @param info application-specific information parameter to influence key generation
+   * @param senderPublicKey sender's public key (pkS)
+   */
+  static HpkeContext createAuthRecipientContext(
+      byte[] encapsulatedKey,
+      HpkeKemPrivateKey recipientPrivateKey,
+      HpkeKem kem,
+      HpkeKdf kdf,
+      HpkeAead aead,
+      byte[] info,
+      HpkePublicKey senderPublicKey)
+      throws GeneralSecurityException {
+    byte[] sharedSecret =
+        kem.authDecapsulate(
+            encapsulatedKey, recipientPrivateKey, senderPublicKey.getPublicKey().toByteArray());
+    return createContext(HpkeUtil.AUTH_MODE, encapsulatedKey, sharedSecret, kem, kdf, aead, info);
   }
 
   private static BigInteger maxSequenceNumber(int nonceLength) {
