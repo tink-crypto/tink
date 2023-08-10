@@ -20,6 +20,8 @@ import static com.google.crypto.tink.internal.Util.toBytesFromPrintableAscii;
 
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.SecretKeyAccess;
+import com.google.crypto.tink.hybrid.internal.HpkeUtil;
+import com.google.crypto.tink.internal.BigIntegerEncoding;
 import com.google.crypto.tink.internal.EnumTypeProtoConverter;
 import com.google.crypto.tink.internal.KeyParser;
 import com.google.crypto.tink.internal.KeySerializer;
@@ -41,6 +43,7 @@ import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import javax.annotation.Nullable;
 
@@ -248,6 +251,16 @@ final class HpkeProtoSerialization {
         serialization.getKeyTemplate().getOutputPrefixType(), format.getParams());
   }
 
+  private static Bytes encodePublicKeyBytes(
+      com.google.crypto.tink.proto.HpkeKem kem, byte[] publicKeyBytes)
+      throws GeneralSecurityException {
+    BigInteger n = BigIntegerEncoding.fromUnsignedBigEndianBytes(publicKeyBytes);
+    byte[] encodedPublicKeyBytes =
+        BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+            n, HpkeUtil.getEncodedPublicKeyLength(kem));
+    return Bytes.copyFrom(encodedPublicKeyBytes);
+  }
+
   @SuppressWarnings("UnusedException")
   private static HpkePublicKey parsePublicKey(
       ProtoKeySerialization serialization, @Nullable SecretKeyAccess access)
@@ -269,11 +282,24 @@ final class HpkeProtoSerialization {
           fromProtoParameters(serialization.getOutputPrefixType(), protoKey.getParams());
       return HpkePublicKey.create(
           params,
-          Bytes.copyFrom(protoKey.getPublicKey().toByteArray()),
+          encodePublicKeyBytes(
+              protoKey.getParams().getKem(), protoKey.getPublicKey().toByteArray()),
           serialization.getIdRequirementOrNull());
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("Parsing HpkePublicKey failed");
     }
+  }
+
+  private static SecretBytes encodePrivateKeyBytes(
+      com.google.crypto.tink.proto.HpkeKem kem,
+      byte[] privateKeyBytes,
+      @Nullable SecretKeyAccess access)
+      throws GeneralSecurityException {
+    BigInteger n = BigIntegerEncoding.fromUnsignedBigEndianBytes(privateKeyBytes);
+    byte[] encodedPrivateKeyBytes =
+        BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+            n, HpkeUtil.getEncodedPrivateKeyLength(kem));
+    return SecretBytes.copyFrom(encodedPrivateKeyBytes, SecretKeyAccess.requireAccess(access));
   }
 
   @SuppressWarnings("UnusedException") // Prevents leaking key material
@@ -298,12 +324,13 @@ final class HpkeProtoSerialization {
       HpkePublicKey publicKey =
           HpkePublicKey.create(
               params,
-              Bytes.copyFrom(protoPublicKey.getPublicKey().toByteArray()),
+              encodePublicKeyBytes(
+                  protoPublicKey.getParams().getKem(), protoPublicKey.getPublicKey().toByteArray()),
               serialization.getIdRequirementOrNull());
       return HpkePrivateKey.create(
           publicKey,
-          SecretBytes.copyFrom(
-              protoKey.getPrivateKey().toByteArray(), SecretKeyAccess.requireAccess(access)));
+          encodePrivateKeyBytes(
+              protoPublicKey.getParams().getKem(), protoKey.getPrivateKey().toByteArray(), access));
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("Parsing HpkePrivateKey failed");
     }

@@ -145,7 +145,7 @@ public final class HpkeUtil {
   }
 
   /** Lengths from 'Npk' column in https://www.rfc-editor.org/rfc/rfc9180.html#table-2. */
-  static int getEncodedPublicKeyLength(HpkeKem kem) throws GeneralSecurityException {
+  public static int getEncodedPublicKeyLength(HpkeKem kem) throws GeneralSecurityException {
     switch (kem) {
       case DHKEM_X25519_HKDF_SHA256:
         return 32;
@@ -161,7 +161,7 @@ public final class HpkeUtil {
   }
 
   /** Lengths from 'Nsk' column in https://www.rfc-editor.org/rfc/rfc9180.html#table-2. */
-  static int getEncodedPrivateKeyLength(HpkeKem kem) throws GeneralSecurityException {
+  public static int getEncodedPrivateKeyLength(HpkeKem kem) throws GeneralSecurityException {
     switch (kem) {
       case DHKEM_X25519_HKDF_SHA256:
         return 32;
