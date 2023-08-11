@@ -53,7 +53,7 @@ import javax.annotation.Nullable;
  */
 @AccessesPartialKey
 @SuppressWarnings("UnnecessarilyFullyQualified") // Fully specifying proto types is more readable
-final class HpkeProtoSerialization {
+public final class HpkeProtoSerialization {
   private static final int VERSION = 0;
   private static final String PRIVATE_TYPE_URL =
       "type.googleapis.com/google.crypto.tink.HpkePrivateKey";

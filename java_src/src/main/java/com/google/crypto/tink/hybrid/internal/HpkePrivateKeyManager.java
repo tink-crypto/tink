@@ -19,6 +19,7 @@ package com.google.crypto.tink.hybrid.internal;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.hybrid.HpkeProtoSerialization;
 import com.google.crypto.tink.internal.BigIntegerEncoding;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
@@ -71,6 +72,7 @@ public final class HpkePrivateKeyManager
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerAsymmetricKeyManagers(
         new HpkePrivateKeyManager(), new HpkePublicKeyManager(), newKeyAllowed);
+    HpkeProtoSerialization.register();
   }
 
   @Override
