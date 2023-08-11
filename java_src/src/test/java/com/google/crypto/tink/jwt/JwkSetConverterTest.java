@@ -944,9 +944,8 @@ public final class JwkSetConverterTest {
         GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
 
     String psJwksString = jwksString.replace("RS256", "PS256");
-    KeysetHandle psHandle = JwkSetConverter.toPublicKeysetHandle(psJwksString);
     assertThrows(
-        GeneralSecurityException.class, () -> psHandle.getPrimitive(JwtPublicKeyVerify.class));
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(psJwksString));
   }
 
   @Test

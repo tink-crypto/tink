@@ -313,6 +313,29 @@ public class JwtRsaSsaPssSignKeyManagerTest {
   }
 
   @Test
+  public void createKeysetHandle_works() throws Exception {
+    if (TestUtil.isTsan()) {
+      // factory.createKey is too slow in Tsan.
+      return;
+    }
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("JWT_PS256_2048_F4"));
+
+    com.google.crypto.tink.Key key = handle.getAt(0).getKey();
+    assertThat(key).isInstanceOf(com.google.crypto.tink.jwt.JwtRsaSsaPssPrivateKey.class);
+    com.google.crypto.tink.jwt.JwtRsaSsaPssPrivateKey jwtPrivateKey =
+        (com.google.crypto.tink.jwt.JwtRsaSsaPssPrivateKey) key;
+
+    assertThat(jwtPrivateKey.getParameters())
+        .isEqualTo(
+            JwtRsaSsaPssParameters.builder()
+                .setModulusSizeBits(2048)
+                .setPublicExponent(JwtRsaSsaPssParameters.F4)
+                .setAlgorithm(JwtRsaSsaPssParameters.Algorithm.PS256)
+                .setKidStrategy(JwtRsaSsaPssParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
+  }
+
+  @Test
   public void testTinkTemplatesAreTink() throws Exception {
     assertThat(getOutputPrefixType(KeyTemplates.get("JWT_PS256_2048_F4")))
         .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
@@ -708,8 +731,7 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     KeysetHandle handleWithKid =
         CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
 
-    JwtPublicKeySign signerWithKid = handleWithKid.getPrimitive(JwtPublicKeySign.class);
-    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
-    assertThrows(JwtInvalidException.class, () -> signerWithKid.signAndEncode(rawToken));
+    assertThrows(
+        GeneralSecurityException.class, () -> handleWithKid.getPrimitive(JwtPublicKeySign.class));
   }
 }
