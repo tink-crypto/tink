@@ -30,6 +30,12 @@ import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.daead.AesSivParameters;
 import com.google.crypto.tink.daead.PredefinedDeterministicAeadParameters;
 import com.google.crypto.tink.internal.Util;
+import com.google.crypto.tink.jwt.JwtEcdsaParameters;
+import com.google.crypto.tink.jwt.JwtHmacParameters;
+import com.google.crypto.tink.jwt.JwtMacConfig;
+import com.google.crypto.tink.jwt.JwtRsaSsaPkcs1Parameters;
+import com.google.crypto.tink.jwt.JwtRsaSsaPssParameters;
+import com.google.crypto.tink.jwt.JwtSignatureConfig;
 import com.google.crypto.tink.mac.AesCmacParameters;
 import com.google.crypto.tink.mac.HmacParameters;
 import com.google.crypto.tink.mac.PredefinedMacParameters;
@@ -80,6 +86,8 @@ public final class KeyTemplatesAsParametersTest {
 
   @BeforeClass
   public static void registerTink() throws Exception {
+    JwtMacConfig.register();
+    JwtSignatureConfig.register();
     TinkConfig.register();
   }
 
@@ -269,7 +277,7 @@ public final class KeyTemplatesAsParametersTest {
     result.add(new Pair("HMAC_SHA512_PRF", PredefinedPrfParameters.HMAC_SHA512_PRF));
     result.add(new Pair("AES256_CMAC_PRF", PredefinedPrfParameters.AES_CMAC_PRF));
     result.add(new Pair("AES_CMAC_PRF", PredefinedPrfParameters.AES_CMAC_PRF));
-
+    // Signature
     result.add(new Pair("ECDSA_P256", PredefinedSignatureParameters.ECDSA_P256));
     result.add(
         new Pair("ECDSA_P256_IEEE_P1363", PredefinedSignatureParameters.ECDSA_P256_IEEE_P1363));
@@ -427,6 +435,242 @@ public final class KeyTemplatesAsParametersTest {
                   .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
                   .build()));
     }
+    // JWT Mac
+    result.add(
+        new Pair(
+            "JWT_HS256",
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(32)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS256)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_HS256_RAW",
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(32)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS256)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_HS384",
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(48)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS384)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_HS384_RAW",
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(48)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS384)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_HS512",
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(64)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS512)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_HS512_RAW",
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(64)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS512)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
+                .build()));
+    // JWT Signature
+    result.add(
+        new Pair(
+            "JWT_ES256",
+            JwtEcdsaParameters.builder()
+                .setAlgorithm(JwtEcdsaParameters.Algorithm.ES256)
+                .setKidStrategy(JwtEcdsaParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_ES256_RAW",
+            JwtEcdsaParameters.builder()
+                .setAlgorithm(JwtEcdsaParameters.Algorithm.ES256)
+                .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_ES384",
+            JwtEcdsaParameters.builder()
+                .setAlgorithm(JwtEcdsaParameters.Algorithm.ES384)
+                .setKidStrategy(JwtEcdsaParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_ES384_RAW",
+            JwtEcdsaParameters.builder()
+                .setAlgorithm(JwtEcdsaParameters.Algorithm.ES384)
+                .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_ES512",
+            JwtEcdsaParameters.builder()
+                .setAlgorithm(JwtEcdsaParameters.Algorithm.ES512)
+                .setKidStrategy(JwtEcdsaParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_ES512_RAW",
+            JwtEcdsaParameters.builder()
+                .setAlgorithm(JwtEcdsaParameters.Algorithm.ES512)
+                .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_PS256_2048_F4",
+            JwtRsaSsaPssParameters.builder()
+                .setModulusSizeBits(2048)
+                .setPublicExponent(JwtRsaSsaPssParameters.F4)
+                .setAlgorithm(JwtRsaSsaPssParameters.Algorithm.PS256)
+                .setKidStrategy(JwtRsaSsaPssParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_PS256_2048_F4_RAW",
+            JwtRsaSsaPssParameters.builder()
+                .setModulusSizeBits(2048)
+                .setPublicExponent(JwtRsaSsaPssParameters.F4)
+                .setAlgorithm(JwtRsaSsaPssParameters.Algorithm.PS256)
+                .setKidStrategy(JwtRsaSsaPssParameters.KidStrategy.IGNORED)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_PS256_3072_F4",
+            JwtRsaSsaPssParameters.builder()
+                .setModulusSizeBits(3072)
+                .setPublicExponent(JwtRsaSsaPssParameters.F4)
+                .setAlgorithm(JwtRsaSsaPssParameters.Algorithm.PS256)
+                .setKidStrategy(JwtRsaSsaPssParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_PS256_3072_F4_RAW",
+            JwtRsaSsaPssParameters.builder()
+                .setModulusSizeBits(3072)
+                .setPublicExponent(JwtRsaSsaPssParameters.F4)
+                .setAlgorithm(JwtRsaSsaPssParameters.Algorithm.PS256)
+                .setKidStrategy(JwtRsaSsaPssParameters.KidStrategy.IGNORED)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_PS384_3072_F4",
+            JwtRsaSsaPssParameters.builder()
+                .setModulusSizeBits(3072)
+                .setPublicExponent(JwtRsaSsaPssParameters.F4)
+                .setAlgorithm(JwtRsaSsaPssParameters.Algorithm.PS384)
+                .setKidStrategy(JwtRsaSsaPssParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_PS384_3072_F4_RAW",
+            JwtRsaSsaPssParameters.builder()
+                .setModulusSizeBits(3072)
+                .setPublicExponent(JwtRsaSsaPssParameters.F4)
+                .setAlgorithm(JwtRsaSsaPssParameters.Algorithm.PS384)
+                .setKidStrategy(JwtRsaSsaPssParameters.KidStrategy.IGNORED)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_PS512_4096_F4",
+            JwtRsaSsaPssParameters.builder()
+                .setModulusSizeBits(4096)
+                .setPublicExponent(JwtRsaSsaPssParameters.F4)
+                .setAlgorithm(JwtRsaSsaPssParameters.Algorithm.PS512)
+                .setKidStrategy(JwtRsaSsaPssParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_PS512_4096_F4_RAW",
+            JwtRsaSsaPssParameters.builder()
+                .setModulusSizeBits(4096)
+                .setPublicExponent(JwtRsaSsaPssParameters.F4)
+                .setAlgorithm(JwtRsaSsaPssParameters.Algorithm.PS512)
+                .setKidStrategy(JwtRsaSsaPssParameters.KidStrategy.IGNORED)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_RS256_2048_F4",
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(2048)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_RS256_2048_F4_RAW",
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(2048)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_RS256_3072_F4",
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(3072)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_RS256_3072_F4_RAW",
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(3072)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_RS384_3072_F4",
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(3072)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS384)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_RS384_3072_F4_RAW",
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(3072)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS384)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_RS512_4096_F4",
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(4096)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS512)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build()));
+    result.add(
+        new Pair(
+            "JWT_RS512_4096_F4_RAW",
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(4096)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS512)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
+                .build()));
     return result;
   }
 
