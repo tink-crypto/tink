@@ -769,7 +769,6 @@ tink_cc_test(
     tink::core::json_keyset_reader
     gmock
     absl::strings
-    tink::util::protobuf_helper
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::aes_eax_cc_proto
