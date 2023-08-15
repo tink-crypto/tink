@@ -27,10 +27,15 @@
 #include "absl/container/flat_hash_map.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "tink/aead.h"
+#include "tink/config/global_registry.h"
 #include "tink/configuration.h"
 #include "tink/internal/configuration_impl.h"
 #include "tink/internal/key_info.h"
+#include "tink/internal/keyset_wrapper.h"
+#include "tink/internal/keyset_wrapper_store.h"
+#include "tink/internal/registry_impl.h"
 #include "tink/key.h"
 #include "tink/key_gen_configuration.h"
 #include "tink/key_manager.h"
@@ -39,7 +44,9 @@
 #include "tink/keyset_writer.h"
 #include "tink/primitive_set.h"
 #include "tink/registry.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/validation.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -377,14 +384,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive(
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive()
     const {
-  // TODO(b/265705174): Replace with ConfigGlobalRegistry instance.
-  crypto::tink::Configuration config;
-  crypto::tink::util::Status status =
-      crypto::tink::internal::ConfigurationImpl::SetGlobalRegistryMode(config);
-  if (!status.ok()) {
-    return status;
-  }
-  return GetPrimitive<P>(config);
+  return GetPrimitive<P>(crypto::tink::ConfigGlobalRegistry());
 }
 
 template <class P>
