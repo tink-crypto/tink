@@ -46,13 +46,17 @@ public final class Bytes {
    *
    * @param data the byte array to be wrapped.
    * @param start the starting index of the slice
-   * @param len the length of the slice. start + len must be less than the length of the array.
+   * @param len the length of the slice. If start + len is larger than the size of {@code data}, the
+   *     remaining data will be returned.
    * @return an immutable wrapper around the bytes in the slice from {@code start} to {@code start +
    *     len}
    */
-  public static Bytes copyFrom(final byte[] data, final int start, final int len) {
+  public static Bytes copyFrom(byte[] data, int start, int len) {
     if (data == null) {
       throw new NullPointerException("data must be non-null");
+    }
+    if (start + len > data.length) {
+      len = data.length - start;
     }
     return new Bytes(data, start, len);
   }

@@ -41,6 +41,13 @@ public class BytesTest {
   }
 
   @Test
+  public void testWithRange_rangeTooBig() throws Exception {
+    byte[] plainArray = new byte[] {100, 100, 100, 0, 1, 2, 3, 4, 5, 6, 7};
+    Bytes array = Bytes.copyFrom(plainArray, 3, 100);
+    assertThat(array.toByteArray()).isEqualTo(new byte[] {0, 1, 2, 3, 4, 5, 6, 7});
+  }
+
+  @Test
   public void testGetLength() throws Exception {
     byte[] plainArray = new byte[] {100, 100, 100, 0, 1, 2, 3, 4, 5, 6, 7, 100, 100, 100};
     Bytes array = Bytes.copyFrom(plainArray, 3, 8);
