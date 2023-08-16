@@ -48,14 +48,14 @@ type wrappedHybridDecrypt struct {
 var _ tink.HybridDecrypt = (*wrappedHybridDecrypt)(nil)
 
 func newWrappedHybridDecrypt(ps *primitiveset.PrimitiveSet) (*wrappedHybridDecrypt, error) {
-	if _, ok := (ps.Primary.Primitive).(tink.HybridDecrypt); !ok {
-		return nil, fmt.Errorf("hybrid_factory: not a HybridDecrypt primitive")
+	if err := isHybridDecrypt(ps.Primary.Primitive); err != nil {
+		return nil, err
 	}
 
 	for _, primitives := range ps.Entries {
 		for _, p := range primitives {
-			if _, ok := (p.Primitive).(tink.HybridDecrypt); !ok {
-				return nil, fmt.Errorf("hybrid_factory: not a HybridDecrypt primitive")
+			if err := isHybridDecrypt(p.Primitive); err != nil {
+				return nil, err
 			}
 		}
 	}
@@ -95,11 +95,7 @@ func (a *wrappedHybridDecrypt) Decrypt(ciphertext, contextInfo []byte) ([]byte, 
 		entries, err := a.ps.EntriesForPrefix(string(prefix))
 		if err == nil {
 			for i := 0; i < len(entries); i++ {
-				p, ok := (entries[i].Primitive).(tink.HybridDecrypt)
-				if !ok {
-					return nil, fmt.Errorf("hybrid_factory: not a HybridDecrypt primitive")
-				}
-
+				p := entries[i].Primitive.(tink.HybridDecrypt) // verified in newWrappedHybridDecrypt
 				pt, err := p.Decrypt(ctNoPrefix, contextInfo)
 				if err == nil {
 					a.logger.Log(entries[i].KeyID, len(ctNoPrefix))
@@ -113,11 +109,7 @@ func (a *wrappedHybridDecrypt) Decrypt(ciphertext, contextInfo []byte) ([]byte, 
 	entries, err := a.ps.RawEntries()
 	if err == nil {
 		for i := 0; i < len(entries); i++ {
-			p, ok := (entries[i].Primitive).(tink.HybridDecrypt)
-			if !ok {
-				return nil, fmt.Errorf("hybrid_factory: not a HybridDecrypt primitive")
-			}
-
+			p := entries[i].Primitive.(tink.HybridDecrypt) // verified in newWrappedHybridDecrypt
 			pt, err := p.Decrypt(ciphertext, contextInfo)
 			if err == nil {
 				a.logger.Log(entries[i].KeyID, len(ciphertext))
@@ -129,4 +121,16 @@ func (a *wrappedHybridDecrypt) Decrypt(ciphertext, contextInfo []byte) ([]byte, 
 	// nothing worked
 	a.logger.LogFailure()
 	return nil, fmt.Errorf("hybrid_factory: decryption failed")
+}
+
+// Asserts `p` implements tink.HybridDecrypt and not tink.AEAD. The latter check
+// is required as implementations of tink.AEAD also satisfy tink.HybridDecrypt.
+func isHybridDecrypt(p any) error {
+	if _, ok := p.(tink.AEAD); ok {
+		return fmt.Errorf("hybrid_factory: tink.AEAD is not tink.HybridDecrypt")
+	}
+	if _, ok := p.(tink.HybridDecrypt); !ok {
+		return fmt.Errorf("hybrid_factory: not tink.HybridDecrypt")
+	}
+	return nil
 }

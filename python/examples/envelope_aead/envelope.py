@@ -17,7 +17,6 @@
 from absl import app
 from absl import flags
 from absl import logging
-
 import tink
 from tink import aead
 from tink.integration import gcpkms
@@ -25,48 +24,49 @@ from tink.integration import gcpkms
 
 FLAGS = flags.FLAGS
 
-flags.DEFINE_enum('mode', None, ['encrypt', 'decrypt'],
-                  'The operation to perform.')
-flags.DEFINE_string('kek_uri', None,
-                    'The Cloud KMS URI of the key encryption key.')
-flags.DEFINE_string('gcp_credential_path', None,
-                    'Path to the GCP credentials JSON file.')
+flags.DEFINE_enum(
+    'mode', None, ['encrypt', 'decrypt'], 'The operation to perform.'
+)
+flags.DEFINE_string(
+    'kek_uri', None, 'The Cloud KMS URI of the key encryption key.'
+)
+flags.DEFINE_string(
+    'gcp_credential_path', None, 'Path to the GCP credentials JSON file.'
+)
 flags.DEFINE_string('input_path', None, 'Path to the input file.')
 flags.DEFINE_string('output_path', None, 'Path to the output file.')
-flags.DEFINE_string('associated_data', None,
-                    'Optional associated data used for the encryption.')
+flags.DEFINE_string(
+    'associated_data', None, 'Optional associated data used for the encryption.'
+)
 
 
 def main(argv):
   del argv  # Unused.
 
-  associated_data = b'' if not FLAGS.associated_data else bytes(
-      FLAGS.associated_data, 'utf-8')
+  associated_data = (
+      b''
+      if not FLAGS.associated_data
+      else bytes(FLAGS.associated_data, 'utf-8')
+  )
 
   # Initialise Tink
-  try:
-    aead.register()
-  except tink.TinkError as e:
-    logging.error('Error initialising Tink: %s', e)
-    return 1
+  aead.register()
 
-  # Read the GCP credentials and setup client
   try:
-    gcpkms.GcpKmsClient.register_client(
-        FLAGS.kek_uri, FLAGS.gcp_credential_path)
+    # Read the GCP credentials and setup client
+    client = gcpkms.GcpKmsClient(FLAGS.kek_uri, FLAGS.gcp_credential_path)
   except tink.TinkError as e:
-    logging.error('Error initializing GCP client: %s', e)
+    logging.exception('Error creating GCP KMS client: %s', e)
     return 1
 
   # Create envelope AEAD primitive using AES256 GCM for encrypting the data
   try:
-    template = aead.aead_key_templates.create_kms_envelope_aead_key_template(
-        kek_uri=FLAGS.kek_uri,
-        dek_template=aead.aead_key_templates.AES256_GCM)
-    handle = tink.new_keyset_handle(template)
-    env_aead = handle.primitive(aead.Aead)
+    remote_aead = client.get_aead(FLAGS.kek_uri)
+    env_aead = aead.KmsEnvelopeAead(
+        aead.aead_key_templates.AES256_GCM, remote_aead
+    )
   except tink.TinkError as e:
-    logging.error('Error creating primitive: %s', e)
+    logging.exception('Error creating primitive: %s', e)
     return 1
 
   with open(FLAGS.input_path, 'rb') as input_file:
@@ -77,14 +77,18 @@ def main(argv):
       output_data = env_aead.encrypt(input_data, associated_data)
     else:
       logging.error(
-          'Error mode not supported. Please choose "encrypt" or "decrypt".')
+          'Unsupported mode %s. Please choose "encrypt" or "decrypt".',
+          FLAGS.mode,
+      )
       return 1
 
     with open(FLAGS.output_path, 'wb') as output_file:
       output_file.write(output_data)
 
+
 if __name__ == '__main__':
-  flags.mark_flags_as_required([
-      'mode', 'kek_uri', 'gcp_credential_path', 'input_path', 'output_path'])
+  flags.mark_flags_as_required(
+      ['mode', 'kek_uri', 'gcp_credential_path', 'input_path', 'output_path']
+  )
   app.run(main)
 # [END envelope-example]

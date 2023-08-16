@@ -23,6 +23,7 @@ import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.mac.AesCmacParameters.Variant;
 import com.google.crypto.tink.mac.HmacParameters.HashType;
+import com.google.crypto.tink.mac.internal.HmacProtoSerialization;
 import com.google.crypto.tink.util.SecretBytes;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;

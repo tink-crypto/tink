@@ -29,8 +29,6 @@ go_test(
     embed = [":hcvault"],
     deps = [
         "//aead",
-        "//core/registry",
-        "//keyset",
     ],
 )
 

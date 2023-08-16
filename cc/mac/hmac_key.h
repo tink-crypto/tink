@@ -47,8 +47,7 @@ class HmacKey : public MacKey {
                                         PartialKeyAccessToken token);
 
   // Returns the underlying HMAC key bytes.
-  util::StatusOr<RestrictedData> GetKeyBytes(
-      PartialKeyAccessToken token) const {
+  const RestrictedData& GetKeyBytes(PartialKeyAccessToken token) const {
     return key_bytes_;
   }
 

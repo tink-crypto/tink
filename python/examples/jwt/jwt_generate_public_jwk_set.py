@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START python-jwt-sign-example]
+# [START python-jwt-jwkset-example]
 """A utility for generating the public JWK set from the public keyset.
 """
 
@@ -34,11 +34,7 @@ def main(argv):
   del argv  # Unused.
 
   # Initialise Tink
-  try:
-    jwt.register_jwt_signature()
-  except tink.TinkError as e:
-    logging.exception('Error initialising Tink: %s', e)
-    return 1
+  jwt.register_jwt_signature()
 
   # Read the keyset into a KeysetHandle
   with open(_PUBLIC_KEYSET_PATH.value, 'rt') as keyset_file:
@@ -62,4 +58,4 @@ if __name__ == '__main__':
   flags.mark_flags_as_required(['public_keyset_path', 'public_jwk_set_path'])
   app.run(main)
 
-# [END python-jwt-sign-example]
+# [END python-jwt-jwkset-example]

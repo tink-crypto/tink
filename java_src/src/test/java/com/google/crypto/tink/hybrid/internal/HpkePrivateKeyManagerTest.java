@@ -22,7 +22,10 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
-import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.KeyTemplates;
+import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.hybrid.HybridDecryptWrapper;
+import com.google.crypto.tink.hybrid.HybridEncryptWrapper;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.HpkeAead;
 import com.google.crypto.tink.proto.HpkeKdf;
@@ -149,7 +152,11 @@ public final class HpkePrivateKeyManagerTest {
     assertThat(key.getVersion()).isEqualTo(manager.getVersion());
     assertThat(key.getPublicKey().getParams()).isEqualTo(format.getParams());
     assertThat(key.getPublicKey().getPublicKey()).isNotEmpty();
+    assertThat(key.getPublicKey().getPublicKey().toByteArray().length)
+        .isEqualTo(HpkeUtil.getEncodedPublicKeyLength(format.getParams().getKem()));
     assertThat(key.getPrivateKey()).isNotEmpty();
+    assertThat(key.getPrivateKey().toByteArray().length)
+        .isEqualTo(HpkeUtil.getEncodedPrivateKeyLength(format.getParams().getKem()));
   }
 
   @Theory
@@ -237,19 +244,26 @@ public final class HpkePrivateKeyManagerTest {
 
   @Test
   public void registerPair() throws Exception {
-    String publicKeyUrl = new HpkePublicKeyManager().getKeyType();
-    String privateKeyUrl = new HpkePrivateKeyManager().getKeyType();
+    if (TestUtil.isTsan()) {
+      // key generation is too slow in Tsan.
+      return;
+    }
+    HybridDecryptWrapper.register();
+    HybridEncryptWrapper.register();
 
     assertThrows(
         GeneralSecurityException.class,
-        () -> Registry.getKeyManager(publicKeyUrl, HybridEncrypt.class));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> Registry.getKeyManager(privateKeyUrl, HybridDecrypt.class));
+        () ->
+            KeysetHandle.generateNew(
+                KeyTemplates.get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM")));
 
-    HpkePrivateKeyManager.registerPair(/*newKeyAllowed=*/ true);
+    HpkePrivateKeyManager.registerPair(/* newKeyAllowed= */ true);
 
-    assertNotNull(Registry.getKeyManager(publicKeyUrl, HybridEncrypt.class));
-    assertNotNull(Registry.getKeyManager(privateKeyUrl, HybridDecrypt.class));
+    KeysetHandle privateHandle =
+        KeysetHandle.generateNew(
+            KeyTemplates.get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM"));
+    KeysetHandle publicHandle = privateHandle.getPublicKeysetHandle();
+    assertNotNull(privateHandle.getPrimitive(HybridDecrypt.class));
+    assertNotNull(publicHandle.getPrimitive(HybridEncrypt.class));
   }
 }

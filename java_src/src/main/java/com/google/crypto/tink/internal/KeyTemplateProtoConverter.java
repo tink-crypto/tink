@@ -77,5 +77,10 @@ public final class KeyTemplateProtoConverter {
     }
   }
 
+  public static KeyTemplate.OutputPrefixType getOutputPrefixType(KeyTemplate t)
+      throws GeneralSecurityException {
+    return prefixFromProto(toProto(t).getOutputPrefixType());
+  }
+
   private KeyTemplateProtoConverter() {}
 }

@@ -303,6 +303,7 @@ public final class JwtRsaSsaPssSignKeyManager
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerAsymmetricKeyManagers(
         new JwtRsaSsaPssSignKeyManager(), new JwtRsaSsaPssVerifyKeyManager(), newKeyAllowed);
+    JwtRsaSsaPssProtoSerialization.register();
   }
 
   private static KeyFactory.KeyFormat<JwtRsaSsaPssKeyFormat> createKeyFormat(

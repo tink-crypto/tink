@@ -18,7 +18,8 @@ package com.google.crypto.tink.tinkey;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
-import com.google.crypto.tink.keyderivation.KeyDerivationKeyTemplates;
+import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationParameters;
+import com.google.crypto.tink.prf.PrfParameters;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,41 +36,45 @@ import java.util.Map;
  * PrfBasedDeriverKeyManager#keyFormats()}.
  */
 final class TinkeyKeyTemplates {
+  private static KeyTemplate createPrfBasedKeyTemplate(
+      KeyTemplate prfTemplate, KeyTemplate derivedKeyTemplate) throws GeneralSecurityException {
+    return KeyTemplate.createFrom(
+        PrfBasedKeyDerivationParameters.builder()
+            .setPrfParameters((PrfParameters) prfTemplate.toParameters())
+            .setDerivedKeyParameters(derivedKeyTemplate.toParameters())
+            .build());
+  }
 
   public static final Map<String, KeyTemplate> get() throws GeneralSecurityException {
     Map<String, KeyTemplate> result = new HashMap<>();
     result.put(
         "HKDF_SHA256_DERIVES_AES128_GCM",
-        KeyDerivationKeyTemplates.createPrfBasedKeyTemplate(
-            KeyTemplates.get("HKDF_SHA256"), KeyTemplates.get("AES128_GCM")));
+        createPrfBasedKeyTemplate(KeyTemplates.get("HKDF_SHA256"), KeyTemplates.get("AES128_GCM")));
     result.put(
         "HKDF_SHA256_DERIVES_AES256_GCM",
-        KeyDerivationKeyTemplates.createPrfBasedKeyTemplate(
-            KeyTemplates.get("HKDF_SHA256"), KeyTemplates.get("AES256_GCM")));
+        createPrfBasedKeyTemplate(KeyTemplates.get("HKDF_SHA256"), KeyTemplates.get("AES256_GCM")));
     result.put(
         "HKDF_SHA256_DERIVES_HMAC_SHA256_128BITTAG",
-        KeyDerivationKeyTemplates.createPrfBasedKeyTemplate(
+        createPrfBasedKeyTemplate(
             KeyTemplates.get("HKDF_SHA256"), KeyTemplates.get("HMAC_SHA256_128BITTAG")));
     result.put(
         "HKDF_SHA256_DERIVES_HMAC_SHA256_PRF",
-        KeyDerivationKeyTemplates.createPrfBasedKeyTemplate(
+        createPrfBasedKeyTemplate(
             KeyTemplates.get("HKDF_SHA256"), KeyTemplates.get("HMAC_SHA256_PRF")));
     result.put(
         "HKDF_SHA256_DERIVES_AES256_GCM_HKDF_1MB",
-        KeyDerivationKeyTemplates.createPrfBasedKeyTemplate(
+        createPrfBasedKeyTemplate(
             KeyTemplates.get("HKDF_SHA256"), KeyTemplates.get("AES256_GCM_HKDF_1MB")));
     result.put(
         "HKDF_SHA256_DERIVES_ED25519",
-        KeyDerivationKeyTemplates.createPrfBasedKeyTemplate(
-            KeyTemplates.get("HKDF_SHA256"), KeyTemplates.get("ED25519")));
+        createPrfBasedKeyTemplate(KeyTemplates.get("HKDF_SHA256"), KeyTemplates.get("ED25519")));
     result.put(
         "HKDF_SHA256_DERIVES_XCHACHA20_POLY1305",
-        KeyDerivationKeyTemplates.createPrfBasedKeyTemplate(
+        createPrfBasedKeyTemplate(
             KeyTemplates.get("HKDF_SHA256"), KeyTemplates.get("XCHACHA20_POLY1305")));
     result.put(
         "HKDF_SHA256_DERIVES_AES256_SIV",
-        KeyDerivationKeyTemplates.createPrfBasedKeyTemplate(
-            KeyTemplates.get("HKDF_SHA256"), KeyTemplates.get("AES256_SIV")));
+        createPrfBasedKeyTemplate(KeyTemplates.get("HKDF_SHA256"), KeyTemplates.get("AES256_SIV")));
     return Collections.unmodifiableMap(result);
   }
 

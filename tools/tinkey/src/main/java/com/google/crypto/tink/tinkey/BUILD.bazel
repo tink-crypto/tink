@@ -291,7 +291,8 @@ java_library(
     deps = [
         "@tink_java//src/main/java/com/google/crypto/tink:key_template",
         "@tink_java//src/main/java/com/google/crypto/tink:key_templates",
-        "@tink_java//src/main/java/com/google/crypto/tink/keyderivation:key_derivation_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/keyderivation:prf_based_key_derivation_parameters",
+        "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_parameters",
     ],
 )
 

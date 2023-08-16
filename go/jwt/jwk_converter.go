@@ -352,7 +352,6 @@ func esPublicKeyDataFromStruct(keyStruct *spb.Struct) (*tinkpb.KeyData, error) {
 	}, nil
 }
 
-// TODO(b/173082704): Support RSA Key Types once Tink has RSA key managers
 func keysetKeyFromStruct(val *spb.Value, keyID uint32) (*tinkpb.Keyset_Key, error) {
 	keyStruct := val.GetStructValue()
 	if keyStruct == nil {

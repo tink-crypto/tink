@@ -138,7 +138,7 @@ public final class EciesParameters extends HybridParameters {
   public static final class Builder {
     private CurveType curveType = null;
     private HashType hashType = null;
-    private PointFormat pointFormat = null;
+    private PointFormat nistCurvePointFormat = null;
     private Parameters demParameters = null;
     private Variant variant = Variant.NO_PREFIX;
     @Nullable private Bytes salt = null;
@@ -158,8 +158,8 @@ public final class EciesParameters extends HybridParameters {
     }
 
     @CanIgnoreReturnValue
-    public Builder setPointFormat(PointFormat pointFormat) {
-      this.pointFormat = pointFormat;
+    public Builder setNistCurvePointFormat(PointFormat pointFormat) {
+      this.nistCurvePointFormat = pointFormat;
       return this;
     }
 
@@ -212,9 +212,6 @@ public final class EciesParameters extends HybridParameters {
       if (hashType == null) {
         throw new GeneralSecurityException("Hash type is not set");
       }
-      if (pointFormat == null) {
-        throw new GeneralSecurityException("Point format is not set");
-      }
       if (demParameters == null) {
         throw new GeneralSecurityException("DEM parameters are not set");
       }
@@ -222,16 +219,20 @@ public final class EciesParameters extends HybridParameters {
         throw new GeneralSecurityException("Variant is not set");
       }
 
-      if (curveType == CurveType.X25519 && pointFormat != PointFormat.COMPRESSED) {
-        throw new GeneralSecurityException("X25519 only supports compressed elliptic curve points");
+      if (curveType != CurveType.X25519 && nistCurvePointFormat == null) {
+        throw new GeneralSecurityException("Point format is not set");
       }
-      return new EciesParameters(curveType, hashType, pointFormat, demParameters, variant, salt);
+      if (curveType == CurveType.X25519 && nistCurvePointFormat != null) {
+        throw new GeneralSecurityException("For Curve25519 point format must not be set");
+      }
+      return new EciesParameters(
+          curveType, hashType, nistCurvePointFormat, demParameters, variant, salt);
     }
   }
 
   private final CurveType curveType;
   private final HashType hashType;
-  private final PointFormat pointFormat;
+  @Nullable private final PointFormat nistCurvePointFormat;
   private final Variant variant;
   private final Parameters demParameters;
   @Nullable private final Bytes salt;
@@ -239,13 +240,13 @@ public final class EciesParameters extends HybridParameters {
   private EciesParameters(
       CurveType curveType,
       HashType hashType,
-      PointFormat pointFormat,
+      @Nullable PointFormat pointFormat,
       Parameters demParameters,
       Variant variant,
       Bytes salt) {
     this.curveType = curveType;
     this.hashType = hashType;
-    this.pointFormat = pointFormat;
+    this.nistCurvePointFormat = pointFormat;
     this.demParameters = demParameters;
     this.variant = variant;
     this.salt = salt;
@@ -263,8 +264,8 @@ public final class EciesParameters extends HybridParameters {
     return hashType;
   }
 
-  public PointFormat getPointFormat() {
-    return pointFormat;
+  public PointFormat getNistCurvePointFormat() {
+    return nistCurvePointFormat;
   }
 
   public Parameters getDemParameters() {
@@ -300,7 +301,7 @@ public final class EciesParameters extends HybridParameters {
     EciesParameters that = (EciesParameters) o;
     return Objects.equals(that.getCurveType(), getCurveType())
         && Objects.equals(that.getHashType(), getHashType())
-        && Objects.equals(that.getPointFormat(), getPointFormat())
+        && Objects.equals(that.getNistCurvePointFormat(), getNistCurvePointFormat())
         && Objects.equals(that.getDemParameters(), getDemParameters())
         && Objects.equals(that.getVariant(), getVariant())
         && Objects.equals(that.getSalt(), getSalt());
@@ -309,6 +310,20 @@ public final class EciesParameters extends HybridParameters {
   @Override
   public int hashCode() {
     return Objects.hash(
-        EciesParameters.class, curveType, hashType, pointFormat, demParameters, variant, salt);
+        EciesParameters.class,
+        curveType,
+        hashType,
+        nistCurvePointFormat,
+        demParameters,
+        variant,
+        salt);
+  }
+
+  @Override
+  public String toString() {
+    return String.format(
+        "EciesParameters(curveType=%s, hashType=%s, pointFormat=%s, demParameters=%s, variant=%s,"
+            + " salt=%s)",
+        curveType, hashType, nistCurvePointFormat, demParameters, variant, salt);
   }
 }

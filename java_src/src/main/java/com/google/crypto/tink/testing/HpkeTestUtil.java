@@ -53,20 +53,28 @@ public final class HpkeTestUtil {
               testObject.get("kdf_id").getAsInt(),
               testObject.get("aead_id").getAsInt());
       // Filter out test vectors for unsupported modes and/or KEMs.
-      if (Arrays.equals(testId.mode, HpkeUtil.BASE_MODE)) {
-        HpkeTestSetup testSetup =
-            new HpkeTestSetup(
-                testObject.get("info").getAsString(),
-                testObject.get("pkEm").getAsString(),
-                testObject.get("skEm").getAsString(),
-                testObject.get("pkRm").getAsString(),
-                testObject.get("skRm").getAsString(),
-                testObject.get("enc").getAsString(),
-                testObject.get("shared_secret").getAsString(),
-                testObject.get("key_schedule_context").getAsString(),
-                testObject.get("secret").getAsString(),
-                testObject.get("key").getAsString(),
-                testObject.get("base_nonce").getAsString());
+      if (Arrays.equals(testId.mode, HpkeUtil.BASE_MODE)
+          || Arrays.equals(testId.mode, HpkeUtil.AUTH_MODE)) {
+        HpkeTestSetup.Builder testSetupBuilder =
+            HpkeTestSetup.builder()
+                .setInfo(testObject.get("info").getAsString())
+                .setSenderEphemeralPublicKey(testObject.get("pkEm").getAsString())
+                .setSenderEphemeralPrivateKey(testObject.get("skEm").getAsString())
+                .setRecipientPublicKey(testObject.get("pkRm").getAsString())
+                .setRecipientPrivateKey(testObject.get("skRm").getAsString())
+                .setEncapsulatedKey(testObject.get("enc").getAsString())
+                .setSharedSecret(testObject.get("shared_secret").getAsString())
+                .setKeyScheduleContext(testObject.get("key_schedule_context").getAsString())
+                .setSecret(testObject.get("secret").getAsString())
+                .setKey(testObject.get("key").getAsString())
+                .setBaseNonce(testObject.get("base_nonce").getAsString());
+        if (Arrays.equals(testId.mode, HpkeUtil.AUTH_MODE)) {
+          testSetupBuilder =
+              testSetupBuilder
+                  .setSenderPublicKey(testObject.get("pkSm").getAsString())
+                  .setSenderPrivateKey(testObject.get("skSm").getAsString());
+        }
+        HpkeTestSetup testSetup = testSetupBuilder.build();
         JsonArray encryptionsArray = testObject.get("encryptions").getAsJsonArray();
         List<HpkeTestEncryption> testEncryptions = new ArrayList<>();
         for (JsonElement encryptionElement : encryptionsArray) {

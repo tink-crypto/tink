@@ -82,3 +82,13 @@ android_library(
         "@maven//:com_google_truth_truth",
     ],
 )
+
+android_library(
+    name = "big_integer_test_util-android",
+    srcs = ["BigIntegerTestUtil.java"],
+)
+
+java_library(
+    name = "big_integer_test_util",
+    srcs = ["BigIntegerTestUtil.java"],
+)

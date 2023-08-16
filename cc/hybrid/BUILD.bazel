@@ -269,6 +269,49 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "failing_hybrid",
+    srcs = ["failing_hybrid.cc"],
+    hdrs = ["failing_hybrid.h"],
+    include_prefix = "tink/hybrid",
+    deps = [
+        "//:hybrid_decrypt",
+        "//:hybrid_encrypt",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "hybrid_parameters",
+    hdrs = ["hybrid_parameters.h"],
+    include_prefix = "tink/hybrid",
+    deps = ["//:parameters"],
+)
+
+cc_library(
+    name = "hybrid_public_key",
+    hdrs = ["hybrid_public_key.h"],
+    include_prefix = "tink/hybrid",
+    deps = [
+        ":hybrid_parameters",
+        "//:key",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "hybrid_private_key",
+    hdrs = ["hybrid_private_key.h"],
+    include_prefix = "tink/hybrid",
+    deps = [
+        ":hybrid_parameters",
+        ":hybrid_public_key",
+        "//:key",
+        "//:private_key",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -532,18 +575,6 @@ cc_test(
         "//util:test_util",
         "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_library(
-    name = "failing_hybrid",
-    srcs = ["failing_hybrid.cc"],
-    hdrs = ["failing_hybrid.h"],
-    include_prefix = "tink/hybrid",
-    deps = [
-        "//:hybrid_decrypt",
-        "//:hybrid_encrypt",
-        "@com_google_absl//absl/strings",
     ],
 )
 

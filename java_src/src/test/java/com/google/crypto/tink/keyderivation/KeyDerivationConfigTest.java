@@ -17,95 +17,57 @@
 package com.google.crypto.tink.keyderivation;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.prf.PredefinedPrfParameters;
 import java.security.GeneralSecurityException;
 import org.junit.Assume;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.junit.runners.MethodSorters;
 
-/**
- * Tests for KeyDerivationConfig. Using FixedMethodOrder to ensure that aaaTestInitialization runs
- * first, as it tests execution of a static block within KeyDerivationConfig-class.
- */
+/** Tests for KeyDerivationConfig. */
 @RunWith(JUnit4.class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class KeyDerivationConfigTest {
 
-  // This test must run first.
   @Test
-  public void aaaTestInitialization() throws Exception {
+  public void notOnlyFips_shouldBeRegistered() throws Exception {
     Assume.assumeFalse(TinkFips.useOnlyFips());
 
-    String[] keyTypeUrls = {
-      "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey",
-      "type.googleapis.com/google.crypto.tink.HkdfPrfKey",
-    };
-
-    for (String typeUrl : keyTypeUrls) {
-      GeneralSecurityException e =
-          assertThrows(
-              GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
-      assertThat(e.toString()).contains("No key manager found");
-    }
-
-    // Initialize the config.
+    AeadConfig.register();
     KeyDerivationConfig.register();
 
-    // After registration the key manager should be present.
-    for (String typeUrl : keyTypeUrls) {
-      assertNotNull(Registry.getUntypedKeyManager(typeUrl));
-    }
-    assertNotNull(
-        Registry.getKeyManager(
-            "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey", KeysetDeriver.class));
-
-    // Running init() manually again should succeed.
-    KeyDerivationConfig.register();
+    // Check that registration worked by generating a new key.
+    PrfBasedKeyDerivationParameters prfBasedParameters =
+        PrfBasedKeyDerivationParameters.builder()
+            .setPrfParameters(PredefinedPrfParameters.HKDF_SHA256)
+            .setDerivedKeyParameters(PredefinedAeadParameters.AES128_GCM)
+            .build();
+    assertThat(KeysetHandle.generateNew(prfBasedParameters)).isNotNull();
   }
 
   @Test
-  public void testNoFipsRegister() throws Exception {
-    Assume.assumeFalse(TinkFips.useOnlyFips());
-
-    // Register key derivation key manager.
-    KeyDerivationConfig.register();
-
-    // Check if all key types are registered when not using FIPS mode.
-    String[] keyTypeUrls = {
-      "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey",
-      "type.googleapis.com/google.crypto.tink.HkdfPrfKey",
-    };
-
-    for (String typeUrl : keyTypeUrls) {
-      assertNotNull(Registry.getUntypedKeyManager(typeUrl));
-    }
-    assertNotNull(
-        Registry.getKeyManager(
-            "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey", KeysetDeriver.class));
-  }
-
-  @Test
-  public void testFipsRegisterNonFipsKeys() throws Exception {
+  public void onlyFips_shouldNotBeRegistered() throws Exception {
     Assume.assumeTrue(TinkFips.useOnlyFips());
 
-    // Register key derivation key manager.
+    AeadConfig.register();
     KeyDerivationConfig.register();
 
-    // List of algorithms which are not part of FIPS and should not be registered.
-    String[] keyTypeUrls = {
-      "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey",
-      "type.googleapis.com/google.crypto.tink.HkdfPrfKey",
-    };
-
-    for (String typeUrl : keyTypeUrls) {
-      assertThrows(GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
-    }
+    // Both the PRF and the Key Derivation key manager should not have been installed.
+    // Check that this by verifying that key generation fails.
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> KeysetHandle.generateNew(PredefinedPrfParameters.HKDF_SHA256));
+    PrfBasedKeyDerivationParameters prfBasedParameters =
+        PrfBasedKeyDerivationParameters.builder()
+            .setPrfParameters(PredefinedPrfParameters.HKDF_SHA256)
+            .setDerivedKeyParameters(PredefinedAeadParameters.AES128_GCM)
+            .build();
+    assertThrows(
+        GeneralSecurityException.class, () -> KeysetHandle.generateNew(prfBasedParameters));
   }
 }

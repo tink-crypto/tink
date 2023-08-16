@@ -21,7 +21,10 @@ import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTempl
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacPrfKey;
 import com.google.crypto.tink.proto.HmacPrfKeyFormat;
@@ -29,6 +32,7 @@ import com.google.crypto.tink.proto.HmacPrfParams;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.PrfHmacJce;
 import com.google.crypto.tink.subtle.Random;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -38,11 +42,14 @@ import java.util.TreeSet;
 import javax.crypto.spec.SecretKeySpec;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Unit tests for {@link HmacPrfKeyManager}. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public class HmacPrfKeyManagerTest {
   private final HmacPrfKeyManager manager = new HmacPrfKeyManager();
   private final KeyTypeManager.KeyFactory<HmacPrfKeyFormat, HmacPrfKey> factory =
@@ -295,9 +302,32 @@ public class HmacPrfKeyManagerTest {
     testKeyTemplateCompatible(manager, HmacPrfKeyManager.hmacSha512Template());
   }
 
+  @DataPoints("templateNames")
+  public static final String[] KEY_TEMPLATES = new String[] {"HMAC_SHA256_PRF", "HMAC_SHA512_PRF"};
+
+  @Theory
+  public void testTemplates(@FromDataPoints("templateNames") String templateName) throws Exception {
+    KeysetHandle h = KeysetHandle.generateNew(KeyTemplates.get(templateName));
+    assertThat(h.size()).isEqualTo(1);
+    assertThat(h.getAt(0).getKey().getParameters())
+        .isEqualTo(KeyTemplates.get(templateName).toParameters());
+  }
+
   @Test
-  public void testKeyFormats() throws Exception {
-    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA256_PRF").keyFormat);
-    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA512_PRF").keyFormat);
+  public void registersPrfPrimitiveConstructor() throws Exception {
+    Prf prf =
+        MutablePrimitiveRegistry.globalInstance()
+            .getPrimitive(
+                com.google.crypto.tink.prf.HmacPrfKey.builder()
+                    .setParameters(
+                        HmacPrfParameters.builder()
+                            .setHashType(HmacPrfParameters.HashType.SHA256)
+                            .setKeySizeBytes(32)
+                            .build())
+                    .setKeyBytes(SecretBytes.randomBytes(32))
+                    .build(),
+                Prf.class);
+
+    assertThat(prf).isInstanceOf(PrfHmacJce.class);
   }
 }

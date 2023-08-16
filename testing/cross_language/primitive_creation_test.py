@@ -84,46 +84,6 @@ def named_testcases():
         case_num += 1
 
 
-def _is_b243759652_test_case(lang: str, keyset: bytes, primitive: Any) -> bool:
-  """Returns whether the test case falls under b/243759652.
-
-  When calling hybrid.NewHybridDecrypt or hybrid.NewHybridEncrypt, Tink asks
-  each key manager to create a primitive (whose type is fixed for each key
-  manager). Because of duck-typing, if the key manager returns an Aead, Tink
-  happily carries on in case it wants a HybridEncrypt/HybridDecrypt.
-
-  Args:
-    lang: A string describing the language.
-    keyset: A serialized keyset
-    primitive: One of the primitives
-
-  Returns:
-    True iff this test case falls under b/243759652.
-  """
-  # The bug only exists in go.
-  if lang != 'go':
-    return False
-  # The bug only happens if we create a HybridEncrypt or a HybridDecrypt
-  if primitive not in [tink.hybrid.HybridDecrypt, tink.hybrid.HybridEncrypt]:
-    return False
-
-  keytypes = utilities.key_types_in_keyset(keyset)
-  primitives = [tink_config.primitive_for_keytype(k) for k in keytypes]
-  # For the bug to occur, we must only at least one AEAD keytype (as it only
-  # happens if at least one key type should *not* work).
-  if not any(p == aead.Aead for p in primitives):
-    return False
-  # For the bug to occur, all key types must be either for 'primitive' or
-  # for Aead (otherwise primitive creation fails).
-  if not all(p == aead.Aead or p == primitive for p in primitives):
-    return False
-  # For the bug to occur, we must not have an AesEaxKey: these are unsupported
-  # in go, and so if we have them, primitive creation fails.
-  if any(k == 'AesEaxKey' for k in keytypes):
-    return False
-  return True
-
-
 class SupportedKeyTypesTest(parameterized.TestCase):
   """Tests if creation of primitives succeeds as described in tink_config.
 
@@ -148,11 +108,6 @@ class SupportedKeyTypesTest(parameterized.TestCase):
     """
     keytypes = utilities.key_types_in_keyset(keyset)
     keytype = keytypes[0]
-
-    if _is_b243759652_test_case(lang, keyset, primitive):
-      # TODO(b/243759652): This should raise a TinkError, but doesn't
-      _ = testing_servers.remote_primitive(lang, keyset, primitive)
-      return
 
     if (lang in tink_config.supported_languages_for_key_type(keytype) and
         primitive == tink_config.primitive_for_keytype(keytype)):
@@ -183,11 +138,6 @@ class SupportedKeyTypesTest(parameterized.TestCase):
     self.assertLen(keytypes, 1)
     keytype = keytypes[0]
 
-    if _is_b243759652_test_case(lang, public_keyset, primitive):
-      # TODO(b/243759652): This should raise a TinkError, but doesn't
-      _ = testing_servers.remote_primitive(lang, public_keyset, primitive)
-      return
-
     if (lang in tink_config.supported_languages_for_key_type(keytype) and
         primitive == tink_config.primitive_for_keytype(keytype)):
       _ = testing_servers.remote_primitive(lang, public_keyset, primitive)
@@ -213,11 +163,6 @@ class SupportedKeyTypesTest(parameterized.TestCase):
 
     keytypes = utilities.key_types_in_keyset(keyset)
     keytype = keytypes[0]
-
-    if _is_b243759652_test_case(lang, modified_keyset, primitive):
-      # TODO(b/243759652): This should raise a TinkError, but doesn't
-      _ = testing_servers.remote_primitive(lang, modified_keyset, primitive)
-      return
 
     if (lang in tink_config.supported_languages_for_key_type(keytype) and
         primitive == tink_config.primitive_for_keytype(keytype)):

@@ -17,7 +17,6 @@
 #ifndef TINK_MAC_AES_CMAC_KEY_H_
 #define TINK_MAC_AES_CMAC_KEY_H_
 
-#include <memory>
 #include <string>
 #include <utility>
 
@@ -47,8 +46,7 @@ class AesCmacKey : public MacKey {
                                            PartialKeyAccessToken token);
 
   // Returns the underlying AES key.
-  util::StatusOr<RestrictedData> GetKeyBytes(
-      PartialKeyAccessToken token) const {
+  const RestrictedData& GetKeyBytes(PartialKeyAccessToken token) const {
     return key_bytes_;
   }
 

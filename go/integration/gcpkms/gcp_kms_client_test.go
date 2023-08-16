@@ -22,9 +22,7 @@ import (
 
 	"google.golang.org/api/option"
 	"github.com/google/tink/go/aead"
-	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/integration/gcpkms"
-	"github.com/google/tink/go/keyset"
 )
 
 func Example() {
@@ -34,28 +32,28 @@ func Example() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	registry.RegisterKMSClient(gcpclient)
-
-	dek := aead.AES128CTRHMACSHA256KeyTemplate()
-	template, err := aead.CreateKMSEnvelopeAEADKeyTemplate(keyURI, dek)
-	if err != nil {
-		log.Fatal(err)
-	}
-	handle, err := keyset.NewHandle(template)
-	if err != nil {
-		log.Fatal(err)
-	}
-	a, err := aead.New(handle)
+	kekAEAD, err := gcpclient.GetAEAD(keyURI)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ct, err := a.Encrypt([]byte("this data needs to be encrypted"), []byte("this data needs to be authenticated, but not encrypted"))
+	// Get the KMS envelope AEAD primitive.
+	dekTemplate := aead.AES128CTRHMACSHA256KeyTemplate()
+	primitive := aead.NewKMSEnvelopeAEAD2(dekTemplate, kekAEAD)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = a.Decrypt(ct, []byte("this data needs to be authenticated, but not encrypted"))
+	// Use the primitive.
+	plaintext := []byte("message")
+	associatedData := []byte("example KMS envelope AEAD encryption")
+
+	ciphertext, err := primitive.Encrypt(plaintext, associatedData)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = primitive.Decrypt(ciphertext, associatedData)
 	if err != nil {
 		log.Fatal(err)
 	}

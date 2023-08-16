@@ -45,11 +45,7 @@ def main(argv):
   del argv  # Unused.
 
   # Initialise Tink
-  try:
-    signature.register()
-  except tink.TinkError as e:
-    logging.exception('Error initialising Tink: %s', e)
-    return 1
+  signature.register()
 
   # Read the keyset into a keyset_handle
   with open(FLAGS.keyset_path, 'rt') as keyset_file:

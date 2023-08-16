@@ -19,6 +19,8 @@ package com.google.crypto.tink.hybrid.internal;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.hybrid.HpkeProtoSerialization;
+import com.google.crypto.tink.internal.BigIntegerEncoding;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
@@ -70,6 +72,7 @@ public final class HpkePrivateKeyManager
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerAsymmetricKeyManagers(
         new HpkePrivateKeyManager(), new HpkePublicKeyManager(), newKeyAllowed);
+    HpkeProtoSerialization.register();
   }
 
   @Override
@@ -128,7 +131,8 @@ public final class HpkePrivateKeyManager
         byte[] privateKeyBytes;
         byte[] publicKeyBytes;
 
-        switch (keyFormat.getParams().getKem()) {
+        HpkeKem kem = keyFormat.getParams().getKem();
+        switch (kem) {
           case DHKEM_X25519_HKDF_SHA256:
             privateKeyBytes = X25519.generatePrivateKey();
             publicKeyBytes = X25519.publicFromPrivate(privateKeyBytes);
@@ -144,7 +148,10 @@ public final class HpkePrivateKeyManager
                     curveType,
                     EllipticCurves.PointFormatType.UNCOMPRESSED,
                     ((ECPublicKey) keyPair.getPublic()).getW());
-            privateKeyBytes = ((ECPrivateKey) keyPair.getPrivate()).getS().toByteArray();
+            privateKeyBytes =
+                BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+                    ((ECPrivateKey) keyPair.getPrivate()).getS(),
+                    HpkeUtil.getEncodedPrivateKeyLength(kem));
             break;
           default:
             throw new GeneralSecurityException("Invalid KEM");

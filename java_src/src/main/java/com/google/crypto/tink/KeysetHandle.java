@@ -472,6 +472,22 @@ public final class KeysetHandle {
     public boolean isPrimary() {
       return isPrimary;
     }
+
+    private boolean equalsEntry(Entry other) {
+      if (other.isPrimary != isPrimary) {
+        return false;
+      }
+      if (!other.keyStatus.equals(keyStatus)) {
+        return false;
+      }
+      if (other.id != id) {
+        return false;
+      }
+      if (!other.key.equalsKey(key)) {
+        return false;
+      }
+      return true;
+    }
   }
 
   private static KeyStatus parseStatus(KeyStatusType in) throws GeneralSecurityException {
@@ -1148,7 +1164,10 @@ public final class KeysetHandle {
    * wrapped in a {@code KeyHandle}.
    *
    * <p>Please do not use this function in new code. Instead, use {@link #getPrimary}.
+   *
+   * @deprecated Use {@link #getPrimary} instead.
    */
+  @Deprecated
   public KeyHandle primaryKey() throws GeneralSecurityException {
     int primaryKeyId = keyset.getPrimaryKeyId();
     for (Keyset.Key key : keyset.getKeyList()) {
@@ -1193,5 +1212,40 @@ public final class KeysetHandle {
       // TODO(lizatretyakova): stop ignoring when all key classes are migrated from protos.
       return null;
     }
+  }
+
+  /**
+   * Returns true if this keyset is equal to {@code other}, ignoring monitoring annotations.
+   *
+   * <p>Note: this may return false even if the keysets represent the same set of functions. For
+   * example, this can happen if the keys store zero-byte padding of a {@link java.math.BigInteger},
+   * which are irrelevant to the function computed. Currently, keysets can also be invalid in which
+   * case this will return false.
+   */
+  public boolean equalsKeyset(KeysetHandle other) {
+    if (size() != other.size()) {
+      return false;
+    }
+    boolean primaryFound = false;
+    for (int i = 0; i < size(); ++i) {
+      Entry thisEntry = entries.get(i);
+      Entry otherEntry = other.entries.get(i);
+      if (thisEntry == null) {
+        // Can only happen for invalid keyset
+        return false;
+      }
+      if (otherEntry == null) {
+        // Can only happen for invalid keyset
+        return false;
+      }
+      if (!thisEntry.equalsEntry(otherEntry)) {
+        return false;
+      }
+      primaryFound |= thisEntry.isPrimary;
+    }
+    if (!primaryFound) {
+      return false;
+    }
+    return true;
   }
 }

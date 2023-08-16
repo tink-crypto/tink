@@ -23,6 +23,9 @@ import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesGcmParameters;
 import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.internal.LegacyProtoParameters;
+import com.google.crypto.tink.internal.MutableSerializationRegistry;
+import com.google.crypto.tink.internal.ParametersSerializer;
+import com.google.crypto.tink.internal.ProtoParametersSerialization;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.protobuf.ByteString;
@@ -110,7 +113,37 @@ public final class KeyTemplateTest {
             return false;
           }
         };
+    KeyTemplate t = KeyTemplate.createFrom(p);
+    assertThrows(RuntimeException.class, () -> t.getTypeUrl());
+  }
 
-    assertThrows(GeneralSecurityException.class, () -> KeyTemplate.createFrom(p));
+  private static class ParametersSubclass extends Parameters {
+    ParametersSubclass() {}
+
+    @Override
+    public boolean hasIdRequirement() {
+      return false;
+    }
+  }
+
+  private static ParametersSerializer<ParametersSubclass, ProtoParametersSerialization>
+      PARAMETERS_SUBCLASS_SERIALIZER =
+          ParametersSerializer.create(
+              (ParametersSubclass p) ->
+                  ProtoParametersSerialization.create(
+                      "sometypeurl", OutputPrefixType.RAW, AesGcmKeyFormat.getDefaultInstance()),
+              ParametersSubclass.class,
+              ProtoParametersSerialization.class);
+
+  @Test
+  public void testCreateFromParameters_unserializableAtCreationButLaterYes_works()
+      throws Exception {
+    Parameters p = new ParametersSubclass();
+    KeyTemplate t = KeyTemplate.createFrom(p);
+    // We only do this in this test, and never use it elsewhere -- hence this global state does not
+    // break anything.
+    MutableSerializationRegistry.globalInstance()
+        .registerParametersSerializer(PARAMETERS_SUBCLASS_SERIALIZER);
+    assertThat(t.getTypeUrl()).isEqualTo("sometypeurl");
   }
 }

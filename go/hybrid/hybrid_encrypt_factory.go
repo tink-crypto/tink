@@ -46,14 +46,14 @@ type wrappedHybridEncrypt struct {
 var _ tink.HybridEncrypt = (*wrappedHybridEncrypt)(nil)
 
 func newEncryptPrimitiveSet(ps *primitiveset.PrimitiveSet) (*wrappedHybridEncrypt, error) {
-	if _, ok := (ps.Primary.Primitive).(tink.HybridEncrypt); !ok {
-		return nil, fmt.Errorf("hybrid_factory: not a HybridEncrypt primitive")
+	if err := isHybridEncrypt(ps.Primary.Primitive); err != nil {
+		return nil, err
 	}
 
 	for _, primitives := range ps.Entries {
 		for _, p := range primitives {
-			if _, ok := (p.Primitive).(tink.HybridEncrypt); !ok {
-				return nil, fmt.Errorf("hybrid_factory: not a HybridEncrypt primitive")
+			if err := isHybridEncrypt(p.Primitive); err != nil {
+				return nil, err
 			}
 		}
 	}
@@ -86,10 +86,7 @@ func createEncryptLogger(ps *primitiveset.PrimitiveSet) (monitoring.Logger, erro
 // It returns the concatenation of the primary's identifier and the ciphertext.
 func (a *wrappedHybridEncrypt) Encrypt(plaintext, contextInfo []byte) ([]byte, error) {
 	primary := a.ps.Primary
-	p, ok := (primary.Primitive).(tink.HybridEncrypt)
-	if !ok {
-		return nil, fmt.Errorf("hybrid_factory: not a HybridEncrypt primitive")
-	}
+	p := primary.Primitive.(tink.HybridEncrypt) // verified in newEncryptPrimitiveSet
 
 	ct, err := p.Encrypt(plaintext, contextInfo)
 	if err != nil {
@@ -104,4 +101,16 @@ func (a *wrappedHybridEncrypt) Encrypt(plaintext, contextInfo []byte) ([]byte, e
 	output = append(output, primary.Prefix...)
 	output = append(output, ct...)
 	return output, nil
+}
+
+// Asserts `p` implements tink.HybridEncrypt and not tink.AEAD. The latter check
+// is required as implementations of tink.AEAD also satisfy tink.HybridEncrypt.
+func isHybridEncrypt(p any) error {
+	if _, ok := p.(tink.AEAD); ok {
+		return fmt.Errorf("hybrid_factory: tink.AEAD is not tink.HybridEncrypt")
+	}
+	if _, ok := p.(tink.HybridEncrypt); !ok {
+		return fmt.Errorf("hybrid_factory: not tink.HybridEncrypt")
+	}
+	return nil
 }

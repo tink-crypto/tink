@@ -75,7 +75,7 @@ class MutableSerializationRegistry {
   template <typename SerializationT>
   util::StatusOr<std::unique_ptr<Serialization>> SerializeParameters(
       const Parameters& parameters) ABSL_LOCKS_EXCLUDED(registry_mutex_) {
-    absl::MutexLock lock(&registry_mutex_);
+    absl::ReaderMutexLock lock(&registry_mutex_);
     return registry_.SerializeParameters<SerializationT>(parameters);
   }
 
@@ -95,18 +95,20 @@ class MutableSerializationRegistry {
   util::StatusOr<std::unique_ptr<Serialization>> SerializeKey(
       const Key& key, absl::optional<SecretKeyAccessToken> token)
       ABSL_LOCKS_EXCLUDED(registry_mutex_) {
-    absl::MutexLock lock(&registry_mutex_);
+    absl::ReaderMutexLock lock(&registry_mutex_);
     return registry_.SerializeKey<SerializationT>(key, token);
   }
 
   // Resets to a new empty registry.
   void Reset() ABSL_LOCKS_EXCLUDED(registry_mutex_) {
-    absl::MutexLock lock(&registry_mutex_);
+    absl::WriterMutexLock lock(&registry_mutex_);
     registry_ = SerializationRegistry();
   }
 
  private:
   mutable absl::Mutex registry_mutex_;
+  // Simple wrappers around const methods of `registry_` may safely acquire a
+  // shared (reader) lock. Other calls require an exclusive (writer) lock.
   SerializationRegistry registry_ ABSL_GUARDED_BY(registry_mutex_);
 };
 

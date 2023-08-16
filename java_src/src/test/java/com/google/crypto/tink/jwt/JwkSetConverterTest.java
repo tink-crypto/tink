@@ -18,10 +18,9 @@ package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
-import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
@@ -31,7 +30,6 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
-import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.tinkkey.KeyAccess;
 import com.google.gson.JsonArray;
@@ -84,6 +82,13 @@ public final class JwkSetConverterTest {
           + "\"y\":\"AFMQrStMAKkBv3ub6a-0koCTSreYeM9xRmbQLgS54Nbh\","
           + "\"use\":\"sig\",\"alg\":\"ES256\",\"key_ops\":[\"verify\"],"
           + "\"kid\":\"ENgjPA\"}]}";
+  private static final String ES256_JWK_SET_KID_TINK =
+      "{\"primaryKeyId\":1623060913,\"key\":[{\"keyData\":{"
+          + "\"typeUrl\":\"type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey\","
+          + "\"value\":\"EAEaIQAQzyOuoYyx748ZlCdp8hyAQ5nTrUOID7L1oGGIGdIMoCIhAFMQrStMAKkBv3ub6a+0ko"
+          + "CTSreYeM9xRmbQLgS54NbhKggKBkVOZ2pQQQ==\","
+          + "\"keyMaterialType\":\"ASYMMETRIC_PUBLIC\"},"
+          + "\"status\":\"ENABLED\",\"keyId\":1623060913,\"outputPrefixType\":\"RAW\"}]}";
 
   private static final String ES384_KEYSET =
       "{\"primaryKeyId\":456087424,\"key\":[{\"keyData\":{"
@@ -150,6 +155,16 @@ public final class JwkSetConverterTest {
           + "xlvs188\","
           + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS256\",\"key_ops\":[\"verify\"],"
           + "\"kid\":\"HL1QoQ\"}]}";
+  private static final String RS256_JWK_SET_KID_TINK =
+      "{\"primaryKeyId\":1204986267,\"key\":[{\"keyData\":{"
+          + "\"typeUrl\":\"type.googleapis.com/google.crypto.tink.JwtRsaSsaPkcs1PublicKey\","
+          + "\"value\":\"EAEagQIAkspk37lGBqXmPPq2CL5KdDeRx7xFiTadpL3jc4nXaqftCtpM6qExfrc2JLaIsnwpwf"
+          + "GMClfe/alIs2GrT9fpM8oDeCccvC39DzZhsSFnAELggi3hnWNKRLfSV0UJzBI+5hZ6ifUsv8W8mSHKlsVMmvOf"
+          + "C2P5+l72qTwN6Le3hy6CxFp5s9pw011B7J3PU65sty6GI9sehB2B/n7nfiWw9YN5++pfwyoitzoMoVKOOpj7fF"
+          + "q88f8ArpC7kR1SBTe20Bt1AmpZDT2Dmfmlb/Q1UFjj/F3C77NCNQ344ZcAEI42HY+uighy5GdKQRHMoTT1OzyD"
+          + "G90ABjggQqDGW+zXzyIDAQABKggKBkhMMVFvUQ==\","
+          + "\"keyMaterialType\":\"ASYMMETRIC_PUBLIC\"},"
+          + "\"status\":\"ENABLED\",\"keyId\":1204986267,\"outputPrefixType\":\"RAW\"}]}";
 
   private static final String RS384_KEYSET =
       "{\"primaryKeyId\":333504275,\"key\":[{\"keyData\":{"
@@ -248,6 +263,18 @@ public final class JwkSetConverterTest {
           + "xCNmnQ\","
           + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"PS256\",\"key_ops\":[\"verify\"],"
           + "\"kid\":\"Wes4wg\"}]}";
+  private static final String PS256_JWK_SET_KID_TINK =
+      "{\"primaryKeyId\":1004877962,\"key\":[{\"keyData\":{"
+          + "\"typeUrl\":\"type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPublicKey\","
+          + "\"value\":\"EAEagQMAj7Eud2n5G11qsdtjpgGWjW4cAKalSE1atm7d+Cp8biRX9wbmLJRMUvoO2j7Sp9Szx1"
+          + "TMmksY2Ugf/7+Nv9fY7vBbmxOiBQVTvikWn0FgPwhFTXTz+9fhGjM6E6sdSOUzjM6nsPulKqOQ8Aed+TLIlgvw"
+          + "uSTF4B5d6QkZWBymq7My6vV+epzWnoLpVDzCHh+c35r81Pyrj6tiTPQzPLN2ixeanclMjx8deNwlak3vwBdMDg"
+          + "wQ63rVCo2eWDS/BYK4rG22luSTDVfQVHU1NXlwXEnb/eONFSF6ZbD6JXFMT3uHT4okTOrX4Kd34stbPIUtZFUy"
+          + "3XiSeCGtghBXLMf/ge113Q9WDJ+RN1Xa4vgHJCO0+VO+cAugVkiu9UgsPP8o/r7tA2aP/Ps8EHYa1IaZg75vnr"
+          + "MZPvsTH7WG2SjSgW9GLLsbNJLFFqLFMwPuZPe8BbgvimPdStXasX/PN6DLKoK2PaT0I+iLK9mRi1Z4OjFbl9KA"
+          + "ZXXElhAQTzrEI2adIgMBAAEqCAoGV2VzNHdn\","
+          + "\"keyMaterialType\":\"ASYMMETRIC_PUBLIC\"},"
+          + "\"status\":\"ENABLED\",\"keyId\":1004877962,\"outputPrefixType\":\"RAW\"}]}";
 
   private static final String PS384_KEYSET =
       "{\"primaryKeyId\":1042230435,\"key\":[{\"keyData\":{"
@@ -452,18 +479,37 @@ public final class JwkSetConverterTest {
   }
 
   @Test
-  public void jwkWithKid_isImportedAsRaw() throws Exception {
-    KeysetHandle es = JwkSetConverter.toPublicKeysetHandle(ES256_JWK_SET_KID);
-    assertThat(CleartextKeysetHandle.getKeyset(es).getKey(0).getOutputPrefixType())
-        .isEqualTo(OutputPrefixType.RAW);
-    KeysetHandle rs = JwkSetConverter.toPublicKeysetHandle(RS256_JWK_SET_KID);
-    assertThat(CleartextKeysetHandle.getKeyset(rs).getKey(0).getOutputPrefixType())
-        .isEqualTo(OutputPrefixType.RAW);
-    KeysetHandle ps = JwkSetConverter.toPublicKeysetHandle(PS256_JWK_SET_KID);
-    assertThat(CleartextKeysetHandle.getKeyset(ps).getKey(0).getOutputPrefixType())
-        .isEqualTo(OutputPrefixType.RAW);
+  public void jwkEs256WithKid_isImportedAsRaw() throws Exception {
+    KeysetHandle converted = JwkSetConverter.toPublicKeysetHandle(ES256_JWK_SET_KID);
+    KeysetHandle expected =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            ES256_JWK_SET_KID_TINK, InsecureSecretKeyAccess.get());
+    // The KeyID is picked at random, hence we just compare the keys.
+    assertTrue(converted.getAt(0).getKey().equalsKey(expected.getAt(0).getKey()));
   }
 
+  @Test
+  public void jwkRs256WithKid_isImportedAsRaw() throws Exception {
+    KeysetHandle converted = JwkSetConverter.toPublicKeysetHandle(RS256_JWK_SET_KID);
+    KeysetHandle expected =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            RS256_JWK_SET_KID_TINK, InsecureSecretKeyAccess.get());
+    // The KeyID is picked at random, hence we just compare the keys.
+    assertTrue(converted.getAt(0).getKey().equalsKey(expected.getAt(0).getKey()));
+  }
+
+  @Test
+  public void jwkPs256WithKid_isImportedAsRaw() throws Exception {
+    KeysetHandle converted = JwkSetConverter.toPublicKeysetHandle(PS256_JWK_SET_KID);
+    KeysetHandle expected =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            PS256_JWK_SET_KID_TINK, InsecureSecretKeyAccess.get());
+    System.out.println(
+        TinkJsonProtoKeysetFormat.serializeKeyset(converted, InsecureSecretKeyAccess.get()));
+    // The KeyID is picked at random, hence we just compare the keys.
+    assertTrue(converted.getAt(0).getKey().equalsKey(expected.getAt(0).getKey()));
+  }
+  
   @Test
   public void jwkWithEmptyKid_kidIsPreserved() throws Exception {
     String esWithEmptyKid = ES256_JWK_SET_KID.replace("\"ENgjPA\"", "\"\"");
@@ -940,14 +986,12 @@ public final class JwkSetConverterTest {
         "{\"keys\":[{\"kty\":\"RSA\","
             + "\"n\":\"AAAwOQ\","
             + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS256\",\"key_ops\":[\"verify\"]}]}";
-    KeysetHandle handle = JwkSetConverter.toPublicKeysetHandle(jwksString);
     assertThrows(
-        GeneralSecurityException.class, () -> handle.getPrimitive(JwtPublicKeyVerify.class));
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(jwksString));
 
     String psJwksString = jwksString.replace("RS256", "PS256");
-    KeysetHandle psHandle = JwkSetConverter.toPublicKeysetHandle(psJwksString);
     assertThrows(
-        GeneralSecurityException.class, () -> psHandle.getPrimitive(JwtPublicKeyVerify.class));
+        GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(psJwksString));
   }
 
   @Test
@@ -1027,7 +1071,8 @@ public final class JwkSetConverterTest {
   @SuppressWarnings("InlineMeInliner")
   public void deprecatedFromKeysetHandle_sameAs_fromPublicKeysetHandle()
       throws Exception {
-    KeysetHandle handle = CleartextKeysetHandle.read(JsonKeysetReader.withString(ES256_KEYSET));
+    KeysetHandle handle =
+        TinkJsonProtoKeysetFormat.parseKeyset(ES256_KEYSET, InsecureSecretKeyAccess.get());
     assertEqualJwkSets(
         JwkSetConverter.fromKeysetHandle(handle, KeyAccess.publicAccess()),
         JwkSetConverter.fromPublicKeysetHandle(handle));

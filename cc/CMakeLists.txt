@@ -451,15 +451,19 @@ tink_cc_library(
     absl::status
     absl::strings
     absl::optional
+    tink::config::global_registry
     tink::internal::configuration_impl
     tink::internal::key_gen_configuration_impl
     tink::internal::key_info
     tink::internal::key_status_util
+    tink::internal::key_type_info_store
     tink::internal::mutable_serialization_registry
     tink::internal::proto_key_serialization
     tink::internal::util
     tink::util::errors
     tink::util::keyset_util
+    tink::util::status
+    tink::util::statusor
     tink::proto::tink_cc_proto
 )
 
@@ -652,6 +656,14 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME private_key
+  SRCS
+    private_key.h
+  DEPS
+    tink::core::key
+)
+
+tink_cc_library(
   NAME partial_key_access_token
   SRCS
     partial_key_access_token.h
@@ -696,6 +708,23 @@ tink_cc_library(
   NAME key_status
   SRCS
     key_status.h
+)
+
+tink_cc_library(
+  NAME configuration
+  SRCS
+    configuration.h
+  DEPS
+    tink::internal::key_type_info_store
+    tink::internal::keyset_wrapper_store
+)
+
+tink_cc_library(
+  NAME key_gen_configuration
+  SRCS
+    key_gen_configuration.h
+  DEPS
+    tink::internal::key_type_info_store
 )
 
 # tests
@@ -793,20 +822,23 @@ tink_cc_test(
     tink::core::primitive_set
     tink::core::primitive_wrapper
     gmock
+    absl::memory
     absl::status
     absl::strings
     tink::aead::aead_key_templates
     tink::aead::aead_wrapper
     tink::aead::aes_gcm_key_manager
     tink::config::fips_140_2
+    tink::config::global_registry
     tink::config::key_gen_fips_140_2
     tink::config::tink_config
-    tink::config::internal::global_registry
     tink::internal::fips_utils
     tink::internal::key_gen_configuration_impl
     tink::signature::ecdsa_sign_key_manager
+    tink::signature::ecdsa_verify_key_manager
     tink::signature::signature_key_templates
     tink::util::status
+    tink::util::statusor
     tink::util::test_keyset_handle
     tink::util::test_matchers
     tink::util::test_util
@@ -1052,21 +1084,4 @@ tink_cc_test(
     tink::signature::signature_key_templates
     tink::util::secret_data
     tink::util::test_matchers
-)
-
-tink_cc_library(
-  NAME configuration
-  SRCS
-    configuration.h
-  DEPS
-    tink::internal::key_type_info_store
-    tink::internal::keyset_wrapper_store
-)
-
-tink_cc_library(
-  NAME key_gen_configuration
-  SRCS
-    key_gen_configuration.h
-  DEPS
-    tink::internal::key_type_info_store
 )

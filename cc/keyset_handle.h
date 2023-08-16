@@ -39,6 +39,7 @@
 #include "tink/keyset_writer.h"
 #include "tink/primitive_set.h"
 #include "tink/registry.h"
+#include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -174,9 +175,17 @@ class KeysetHandle {
   // `CleartextKeysetHandle`.
   crypto::tink::util::Status WriteNoSecret(KeysetWriter* writer) const;
 
-  // Returns a new KeysetHandle that contains public keys corresponding
-  // to the private keys from this handle.
-  // Returns an error if this handle contains keys that are not private keys.
+  // Returns a new KeysetHandle containing public keys corresponding to the
+  // private keys in this handle. Relies on key type managers stored in `config`
+  // to do so. Returns an error if this handle contains keys that are not
+  // private keys.
+  crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
+  GetPublicKeysetHandle(const KeyGenConfiguration& config) const;
+
+  // Returns a new KeysetHandle containing public keys corresponding to the
+  // private keys in this handle. Relies on key type managers stored in the
+  // global registry to do so. Returns an error if this handle contains keys
+  // that are not private keys.
   crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
   GetPublicKeysetHandle() const;
 

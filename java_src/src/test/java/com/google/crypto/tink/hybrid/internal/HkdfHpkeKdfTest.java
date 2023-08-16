@@ -112,8 +112,10 @@ public final class HkdfHpkeKdfTest {
     HpkeTestSetup testSetup = getTestSetup(mode, kemId, kdfId, aeadId);
 
     byte[] dhSharedSecret =
-        X25519.computeSharedSecret(testSetup.senderPrivateKey, testSetup.recipientPublicKey);
-    byte[] kemContext = Bytes.concat(testSetup.senderPublicKey, testSetup.recipientPublicKey);
+        X25519.computeSharedSecret(
+            testSetup.senderEphemeralPrivateKey, testSetup.recipientPublicKey);
+    byte[] kemContext =
+        Bytes.concat(testSetup.senderEphemeralPublicKey, testSetup.recipientPublicKey);
     byte[] sharedSecret =
         kdf.extractAndExpand(
             HpkeUtil.EMPTY_SALT,

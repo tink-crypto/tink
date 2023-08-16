@@ -42,7 +42,7 @@ def _android_jar(android_api_level):
 def _javadoc_library(ctx):
     _check_non_empty(ctx.attr.root_packages, "root_packages")
 
-    transitive_deps = [dep[JavaInfo].transitive_deps for dep in ctx.attr.deps]
+    transitive_deps = [dep[JavaInfo].transitive_compile_time_jars for dep in ctx.attr.deps]
     if ctx.attr._android_jar:
         transitive_deps.append(ctx.attr._android_jar.files)
 

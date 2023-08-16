@@ -17,92 +17,50 @@
 package com.google.crypto.tink.hybrid;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.HybridDecrypt;
-import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.KeyTemplates;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import java.security.GeneralSecurityException;
 import org.junit.Assume;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.junit.runners.MethodSorters;
 
-/**
- * Tests for HybridConfig. Using FixedMethodOrder to ensure that aaaTestInitialization runs first,
- * as it tests execution of a static block within HybridConfig-class.
- */
+/** Tests for HybridConfig. */
 @RunWith(JUnit4.class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class HybridConfigTest {
 
-  // This test must run first.
   @Test
-  public void aaaTestInitialization() throws Exception {
+  public void notOnlyFips_shouldRegisterAllKeyTypes() throws Exception {
     Assume.assumeFalse(TinkFips.useOnlyFips());
 
-    String eciesPrivateKeyUrl = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
-    GeneralSecurityException e =
-        assertThrows(
-            GeneralSecurityException.class,
-            () -> Registry.getUntypedKeyManager(eciesPrivateKeyUrl));
-    assertThat(e.toString()).contains("No key manager found");
-
-    String hpkePrivateKeyUrl = "type.googleapis.com/google.crypto.tink.HpkePrivateKey";
-    e =
-        assertThrows(
-            GeneralSecurityException.class,
-            () -> Registry.getUntypedKeyManager(hpkePrivateKeyUrl));
-    assertThat(e.toString()).contains("No key manager found");
-
-    // Initialize the config.
     HybridConfig.register();
 
-    assertNotNull(Registry.getKeyManager(eciesPrivateKeyUrl, HybridDecrypt.class));
-    assertNotNull(Registry.getKeyManager(hpkePrivateKeyUrl, HybridDecrypt.class));
-
-    // Running init() manually again should succeed.
-    HybridConfig.register();
+    assertThat(KeysetHandle.generateNew(KeyTemplates.get("ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM")))
+        .isNotNull();
+    assertThat(
+            KeysetHandle.generateNew(
+                KeyTemplates.get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM")))
+        .isNotNull();
   }
 
   @Test
-  public void testNoFipsRegister() throws Exception {
-    Assume.assumeFalse(TinkFips.useOnlyFips());
-
-    // Register Hybrid key manager
-    HybridConfig.register();
-
-    // Check if all key types are registered when not using FIPS mode.
-    String[] keyTypeUrls = {
-      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
-      "type.googleapis.com/google.crypto.tink.HpkePrivateKey",
-    };
-
-    for (String typeUrl : keyTypeUrls) {
-      assertNotNull(Registry.getKeyManager(typeUrl, HybridDecrypt.class));
-    }
-  }
-
-  @Test
-  public void testFipsRegisterNonFipsKeys() throws Exception {
+  public void onlyFips_shouldNotRegisterNonFipsKeyTypes() throws Exception {
     Assume.assumeTrue(TinkFips.useOnlyFips());
     Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
 
-    // Register Hybrid key manager
     HybridConfig.register();
 
-    // List of algorithms which are not part of FIPS and should not be registered.
-    String[] keyTypeUrls = {
-      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
-      "type.googleapis.com/google.crypto.tink.HpkePrivateKey",
-    };
-
-    for (String typeUrl : keyTypeUrls) {
-      assertThrows(GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> KeysetHandle.generateNew(KeyTemplates.get("ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM")));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            KeysetHandle.generateNew(
+                KeyTemplates.get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM")));
   }
 }

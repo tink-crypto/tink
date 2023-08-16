@@ -30,7 +30,6 @@ tink_cc_library(
     tink::internal::ssl_unique_ptr
     tink::subtle::subtle_util
     tink::util::secret_data
-    tink::util::status
     tink::util::statusor
   TAGS
     exclude_if_openssl
@@ -250,9 +249,6 @@ tink_cc_library(
     absl::strings
     crypto
     tink::internal::ssl_unique_ptr
-    tink::subtle::subtle_util
-    tink::util::secret_data
-    tink::util::status
     tink::util::statusor
   TESTONLY
   TAGS
@@ -288,13 +284,9 @@ tink_cc_test(
     tink::hybrid::internal::test_hpke_context_boringssl
     gmock
     absl::status
-    absl::strings
     crypto
     tink::util::secret_data
-    tink::util::status
     tink::util::test_matchers
-    tink::util::test_util
-    tink::proto::hpke_cc_proto
   TAGS
     exclude_if_openssl
 )
