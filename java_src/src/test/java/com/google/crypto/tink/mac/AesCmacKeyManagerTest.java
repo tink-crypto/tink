@@ -21,8 +21,9 @@ import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTempl
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
-import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.AesCmacKey;
 import com.google.crypto.tink.proto.AesCmacKeyFormat;
 import com.google.crypto.tink.proto.AesCmacParams;
@@ -33,15 +34,16 @@ import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Test for AesCmacKeyManager. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public class AesCmacKeyManagerTest {
   private final AesCmacKeyManager manager = new AesCmacKeyManager();
-  private final KeyTypeManager.KeyFactory<AesCmacKeyFormat, AesCmacKey> factory =
-      manager.keyFactory();
 
   @Before
   public void register() throws Exception {
@@ -235,9 +237,14 @@ public class AesCmacKeyManagerTest {
     testKeyTemplateCompatible(manager, AesCmacKeyManager.rawAes256CmacTemplate());
   }
 
-  @Test
-  public void testKeyFormats() throws Exception {
-    factory.validateKeyFormat(factory.keyFormats().get("AES256_CMAC").keyFormat);
-    factory.validateKeyFormat(factory.keyFormats().get("AES256_CMAC_RAW").keyFormat);
+  @DataPoints("templateNames")
+  public static final String[] KEY_TEMPLATES = new String[] {"AES256_CMAC", "AES256_CMAC_RAW"};
+
+  @Theory
+  public void testTemplates(@FromDataPoints("templateNames") String templateName) throws Exception {
+    KeysetHandle h = KeysetHandle.generateNew(KeyTemplates.get(templateName));
+    assertThat(h.size()).isEqualTo(1);
+    assertThat(h.getAt(0).getKey().getParameters())
+        .isEqualTo(KeyTemplates.get(templateName).toParameters());
   }
 }

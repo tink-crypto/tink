@@ -19,7 +19,6 @@ package gcpkms_test
 import (
 	"bytes"
 	"context"
-	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -28,11 +27,7 @@ import (
 	// context is used to cancel outstanding requests
 	"google.golang.org/api/option"
 	"github.com/google/tink/go/aead"
-	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/integration/gcpkms"
-	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/tink"
 )
 
 const (
@@ -49,57 +44,44 @@ func init() {
 	os.Setenv("SSL_CERT_FILE", certPath)
 }
 
-func setupKMS(t *testing.T) {
-	t.Helper()
-
+func TestGetAeadWithEnvelopeAead(t *testing.T) {
 	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
 	if !ok {
 		t.Skip("TEST_SRCDIR not set")
 	}
 	ctx := context.Background()
-	g, err := gcpkms.NewClientWithOptions(ctx, keyURI, option.WithCredentialsFile(filepath.Join(srcDir, credFile)))
+	gcpClient, err := gcpkms.NewClientWithOptions(
+		ctx, keyURI, option.WithCredentialsFile(filepath.Join(srcDir, credFile)))
 	if err != nil {
-		t.Fatalf("error setting up GCP client: %v", err)
+		t.Fatalf("gcpkms.NewClientWithOptions() err = %q, want nil", err)
 	}
-	registry.RegisterKMSClient(g)
-}
+	kekAEAD, err := gcpClient.GetAEAD(keyURI)
+	if err != nil {
+		t.Fatalf("gcpClient.GetAEAD(keyURI) err = %q, want nil", err)
+	}
 
-func basicAEADTest(t *testing.T, a tink.AEAD) error {
-	t.Helper()
-	for i := 0; i < 100; i++ {
-		pt := random.GetRandomBytes(20)
-		ad := random.GetRandomBytes(20)
-		ct, err := a.Encrypt(pt, ad)
-		if err != nil {
-			return err
-		}
-		dt, err := a.Decrypt(ct, ad)
-		if err != nil {
-			return err
-		}
-		if !bytes.Equal(dt, pt) {
-			return errors.New("decrypt not inverse of encrypt")
-		}
+	dekTemplate := aead.AES128CTRHMACSHA256KeyTemplate()
+	a := aead.NewKMSEnvelopeAEAD2(dekTemplate, kekAEAD)
+	if err != nil {
+		t.Fatalf("a.Encrypt(plaintext, associatedData) err = %q, want nil", err)
 	}
-	return nil
-}
+	plaintext := []byte("message")
+	associatedData := []byte("example KMS envelope AEAD encryption")
 
-func TestBasicAead(t *testing.T) {
-	setupKMS(t)
-	dek := aead.AES128CTRHMACSHA256KeyTemplate()
-	template, err := aead.CreateKMSEnvelopeAEADKeyTemplate(keyURI, dek)
+	ciphertext, err := a.Encrypt(plaintext, associatedData)
 	if err != nil {
-		t.Fatalf("error creating key template: %v", err)
+		t.Fatalf("a.Encrypt(plaintext, associatedData) err = %q, want nil", err)
 	}
-	handle, err := keyset.NewHandle(template)
+	gotPlaintext, err := a.Decrypt(ciphertext, associatedData)
 	if err != nil {
-		t.Fatalf("error getting a new keyset handle: %v", err)
+		t.Fatalf("a.Decrypt(ciphertext, associatedData) err = %q, want nil", err)
 	}
-	a, err := aead.New(handle)
-	if err != nil {
-		t.Fatalf("error getting the primitive: %v", err)
+	if !bytes.Equal(gotPlaintext, plaintext) {
+		t.Errorf("a.Decrypt() = %q, want %q", gotPlaintext, plaintext)
 	}
-	if err := basicAEADTest(t, a); err != nil {
-		t.Errorf("error in basic aead tests: %v", err)
+
+	_, err = a.Decrypt(ciphertext, []byte("invalid associatedData"))
+	if err == nil {
+		t.Error("a.Decrypt(ciphertext, []byte(\"invalid associatedData\")) err = nil, want error")
 	}
 }

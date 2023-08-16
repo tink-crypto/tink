@@ -135,7 +135,11 @@ public final class HybridKeyTemplates {
           OutputPrefixType.TINK,
           EMPTY_SALT);
 
-  /** @return a {@link KeyTemplate} containing a {@link EciesAeadHkdfKeyFormat}. */
+  /**
+   * @return a {@link KeyTemplate} containing a {@link EciesAeadHkdfKeyFormat}.
+   * @deprecated Use EciesParameters instead.
+   */
+  @Deprecated
   public static KeyTemplate createEciesAeadHkdfKeyTemplate(
       EllipticCurveType curve,
       HashType hashType,
@@ -154,7 +158,11 @@ public final class HybridKeyTemplates {
         .build();
   }
 
-  /** @return a {@link EciesAeadHkdfParams} with the specified parameters. */
+  /**
+   * @return a {@link EciesAeadHkdfParams} with the specified parameters.
+   * @deprecated Use EciesParameters instead.
+   */
+  @Deprecated
   public static EciesAeadHkdfParams createEciesAeadHkdfParams(
       EllipticCurveType curve,
       HashType hashType,

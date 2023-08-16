@@ -44,11 +44,7 @@ def main(argv):
       FLAGS.context_info, 'utf-8')
 
   # Initialise Tink
-  try:
-    hybrid.register()
-  except tink.TinkError as e:
-    logging.exception('Error initialising Tink: %s', e)
-    return 1
+  hybrid.register()
 
   # Read the keyset into a keyset_handle
   with open(FLAGS.keyset_path, 'rt') as keyset_file:

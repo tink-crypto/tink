@@ -29,20 +29,25 @@
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "tink/aead.h"
+#include "tink/config/global_registry.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/key_gen_configuration_impl.h"
 #include "tink/internal/key_info.h"
 #include "tink/internal/key_status_util.h"
+#include "tink/internal/key_type_info_store.h"
 #include "tink/internal/mutable_serialization_registry.h"
 #include "tink/internal/proto_key_serialization.h"
 #include "tink/internal/util.h"
 #include "tink/key_gen_configuration.h"
+#include "tink/key_manager.h"
 #include "tink/key_status.h"
 #include "tink/keyset_reader.h"
 #include "tink/keyset_writer.h"
 #include "tink/registry.h"
 #include "tink/util/errors.h"
 #include "tink/util/keyset_util.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::EncryptedKeyset;
@@ -366,25 +371,52 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::GenerateNew(
 }
 
 util::StatusOr<std::unique_ptr<Keyset::Key>> ExtractPublicKey(
-    const Keyset::Key& key) {
+    const Keyset::Key& key, const KeyGenConfiguration& config) {
   if (key.key_data().key_material_type() != KeyData::ASYMMETRIC_PRIVATE) {
     return util::Status(
         absl::StatusCode::kInvalidArgument,
         "Key material is not of type KeyData::ASYMMETRIC_PRIVATE");
   }
-  auto key_data_result = Registry::GetPublicKeyData(key.key_data().type_url(),
-                                                    key.key_data().value());
-  if (!key_data_result.ok()) return key_data_result.status();
+
+  util::StatusOr<std::unique_ptr<KeyData>> key_data;
+  if (internal::KeyGenConfigurationImpl::IsInGlobalRegistryMode(config)) {
+    key_data = Registry::GetPublicKeyData(key.key_data().type_url(),
+                                          key.key_data().value());
+  } else {
+    util::StatusOr<const internal::KeyTypeInfoStore*> key_type_info_store =
+        internal::KeyGenConfigurationImpl::GetKeyTypeInfoStore(config);
+    if (!key_type_info_store.ok()) {
+      return key_type_info_store.status();
+    }
+    util::StatusOr<const internal::KeyTypeInfoStore::Info*> key_type_info =
+        (*key_type_info_store)->Get(key.key_data().type_url());
+    if (!key_type_info.ok()) {
+      return key_type_info.status();
+    }
+    auto factory = dynamic_cast<const PrivateKeyFactory*>(
+        &(*key_type_info)->key_factory());
+    if (factory == nullptr) {
+      return ToStatusF(
+          absl::StatusCode::kInvalidArgument,
+          "KeyManager for type '%s' does not have a PrivateKeyFactory.",
+          key.key_data().type_url());
+    }
+    key_data = factory->GetPublicKeyData(key.key_data().value());
+  }
+  if (!key_data.ok()) {
+    return key_data.status();
+  }
+
   auto public_key = absl::make_unique<Keyset::Key>(key);
-  public_key->mutable_key_data()->Swap(key_data_result.value().get());
+  public_key->mutable_key_data()->Swap(key_data->get());
   return std::move(public_key);
 }
 
 util::StatusOr<std::unique_ptr<KeysetHandle>>
-KeysetHandle::GetPublicKeysetHandle() const {
+KeysetHandle::GetPublicKeysetHandle(const KeyGenConfiguration& config) const {
   std::unique_ptr<Keyset> public_keyset(new Keyset());
   for (const Keyset::Key& key : get_keyset().key()) {
-    auto public_key_result = ExtractPublicKey(key);
+    auto public_key_result = ExtractPublicKey(key, config);
     if (!public_key_result.ok()) return public_key_result.status();
     public_keyset->add_key()->Swap(public_key_result.value().get());
   }
@@ -401,6 +433,11 @@ KeysetHandle::GetPublicKeysetHandle() const {
   std::unique_ptr<KeysetHandle> handle(
       new KeysetHandle(std::move(public_keyset), *entries));
   return std::move(handle);
+}
+
+util::StatusOr<std::unique_ptr<KeysetHandle>>
+KeysetHandle::GetPublicKeysetHandle() const {
+  return GetPublicKeysetHandle(KeyGenConfigGlobalRegistry());
 }
 
 crypto::tink::util::StatusOr<uint32_t> KeysetHandle::AddToKeyset(

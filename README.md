@@ -39,11 +39,11 @@ https://developers.google.com/tink*.
 > Tink C++                              | [tink-crypto/tink-cc](https://github.com/tink-crypto/tink-cc)                             | Complete (Q2 2023)             | Q4 2023
 > Tink C++ AWS KMS extension            | [tink-crypto/tink-cc-awskms](https://github.com/tink-crypto/tink-cc-awskms)               | Complete (Q2 2023)             | Q4 2023
 > Tink C++ Google Cloud KMS extension   | [tink-crypto/tink-cc-gcpkms](https://github.com/tink-crypto/tink-cc-gcpkms)               | Complete (Q2 2023)             | Q4 2023
-> Tink Python                           | [tink-crypto/tink-py](https://github.com/tink-crypto/tink-py)                             | Not started (expected Q3 2023) | TBA
-> Tink Go                               | [tink-crypto/tink-go](https://github.com/tink-crypto/tink-go)                             | In progress (expected Q2 2023) | TBA
-> Tink Go AWS KMS extension             | [tink-crypto/tink-go-awskms](https://github.com/tink-crypto/tink-go-awskms)               | In progress (expected Q2 2023) | TBA
-> Tink Go Google Cloud KMS extension    | [tink-crypto/tink-go-gcpkms](https://github.com/tink-crypto/tink-go-gcpkms)               | In progress (expected Q2 2023) | TBA
-> Tink Go HashiCorp Vault KMS extension | [tink-crypto/tink-go-hcvault](https://github.com/tink-crypto/tink-go-hcvault)             | In progress (expected Q2 2023) | TBA
+> Tink Go                               | [tink-crypto/tink-go](https://github.com/tink-crypto/tink-go)                             | Complete (Q3 2023)             | Q4 2023
+> Tink Go AWS KMS extension             | [tink-crypto/tink-go-awskms](https://github.com/tink-crypto/tink-go-awskms)               | Complete (Q3 2023)             | Q4 2023
+> Tink Go Google Cloud KMS extension    | [tink-crypto/tink-go-gcpkms](https://github.com/tink-crypto/tink-go-gcpkms)               | Complete (Q3 2023)             | Q4 2023
+> Tink Go HashiCorp Vault KMS extension | [tink-crypto/tink-go-hcvault](https://github.com/tink-crypto/tink-go-hcvault)             | Complete (Q3 2023)             | Q4 2023
+> Tink Python                           | [tink-crypto/tink-py](https://github.com/tink-crypto/tink-py)                             | In progress (Q3 2023)          | TBA
 > Tink Obj-C                            | [tink-crypto/tink-objc](https://github.com/tink-crypto/tink-objc)                         | Not started (expected Q4 2023) | TBA
 > Tink Tinkey                           | [tink-crypto/tink-tinkey](https://github.com/tink-crypto/tink-tinkey)                     | Complete (Q2 2023)             | Q4 2023
 > Tink cross language tests             | [tink-crypto/tink-cross-lang-tests](https://github.com/tink-crypto/tink-cross-lang-tests) | Not started (expected Q4 2023) | TBA

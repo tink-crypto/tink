@@ -51,12 +51,27 @@ final class NistCurvesHpkeKem implements HpkeKem {
   }
 
   private byte[] deriveKemSharedSecret(
-      byte[] dhSharedSecret, byte[] senderPublicKey, byte[] recipientPublicKey)
+      byte[] dhSharedSecret, byte[] senderEphemeralPublicKey, byte[] recipientPublicKey)
       throws GeneralSecurityException {
-    byte[] kemContext = Bytes.concat(senderPublicKey, recipientPublicKey);
+    byte[] kemContext = Bytes.concat(senderEphemeralPublicKey, recipientPublicKey);
+    return extractAndExpand(dhSharedSecret, kemContext);
+  }
+
+  private byte[] deriveKemSharedSecret(
+      byte[] dhSharedSecret,
+      byte[] senderEphemeralPublicKey,
+      byte[] recipientPublicKey,
+      byte[] senderPublicKey)
+      throws GeneralSecurityException {
+    byte[] kemContext = Bytes.concat(senderEphemeralPublicKey, recipientPublicKey, senderPublicKey);
+    return extractAndExpand(dhSharedSecret, kemContext);
+  }
+
+  private byte[] extractAndExpand(byte[] dhSharedSecret, byte[] kemContext)
+      throws GeneralSecurityException {
     byte[] kemSuiteID = HpkeUtil.kemSuiteId(getKemId());
     return hkdf.extractAndExpand(
-        /*salt=*/ null,
+        /* salt= */ null,
         dhSharedSecret,
         "eae_prk",
         kemContext,
@@ -66,18 +81,18 @@ final class NistCurvesHpkeKem implements HpkeKem {
   }
 
   /** Helper function factored out to facilitate unit testing. */
-  HpkeKemEncapOutput encapsulate(byte[] recipientPublicKey, KeyPair senderKeyPair)
+  HpkeKemEncapOutput encapsulate(byte[] recipientPublicKey, KeyPair senderEphemeralKeyPair)
       throws GeneralSecurityException {
     ECPublicKey recipientECPublicKey =
         EllipticCurves.getEcPublicKey(curve, PointFormatType.UNCOMPRESSED, recipientPublicKey);
     byte[] dhSharedSecret =
         EllipticCurves.computeSharedSecret(
-            (ECPrivateKey) senderKeyPair.getPrivate(), recipientECPublicKey);
+            (ECPrivateKey) senderEphemeralKeyPair.getPrivate(), recipientECPublicKey);
     byte[] senderPublicKey =
         EllipticCurves.pointEncode(
             curve,
             PointFormatType.UNCOMPRESSED,
-            ((ECPublicKey) senderKeyPair.getPublic()).getW());
+            ((ECPublicKey) senderEphemeralKeyPair.getPublic()).getW());
     byte[] kemSharedSecret =
         deriveKemSharedSecret(dhSharedSecret, senderPublicKey, recipientPublicKey);
     return new HpkeKemEncapOutput(kemSharedSecret, senderPublicKey);
@@ -87,6 +102,43 @@ final class NistCurvesHpkeKem implements HpkeKem {
   public HpkeKemEncapOutput encapsulate(byte[] recipientPublicKey) throws GeneralSecurityException {
     KeyPair keyPair = EllipticCurves.generateKeyPair(curve);
     return encapsulate(recipientPublicKey, keyPair);
+  }
+
+  /** Helper function factored out to facilitate unit testing. */
+  HpkeKemEncapOutput authEncapsulate(
+      byte[] recipientPublicKey, KeyPair senderEphemeralKeyPair, HpkeKemPrivateKey senderPrivateKey)
+      throws GeneralSecurityException {
+    ECPublicKey recipientECPublicKey =
+        EllipticCurves.getEcPublicKey(curve, PointFormatType.UNCOMPRESSED, recipientPublicKey);
+    ECPrivateKey privateKey =
+        EllipticCurves.getEcPrivateKey(
+            curve, senderPrivateKey.getSerializedPrivate().toByteArray());
+    byte[] dhSharedSecret =
+        Bytes.concat(
+            EllipticCurves.computeSharedSecret(
+                (ECPrivateKey) senderEphemeralKeyPair.getPrivate(), recipientECPublicKey),
+            EllipticCurves.computeSharedSecret(privateKey, recipientECPublicKey));
+    byte[] senderEphemeralPublicKey =
+        EllipticCurves.pointEncode(
+            curve,
+            PointFormatType.UNCOMPRESSED,
+            ((ECPublicKey) senderEphemeralKeyPair.getPublic()).getW());
+
+    byte[] kemSharedSecret =
+        deriveKemSharedSecret(
+            dhSharedSecret,
+            senderEphemeralPublicKey,
+            recipientPublicKey,
+            senderPrivateKey.getSerializedPublic().toByteArray());
+    return new HpkeKemEncapOutput(kemSharedSecret, senderEphemeralPublicKey);
+  }
+
+  @Override
+  public HpkeKemEncapOutput authEncapsulate(
+      byte[] recipientPublicKey, HpkeKemPrivateKey senderPrivateKey)
+      throws GeneralSecurityException {
+    KeyPair keyPair = EllipticCurves.generateKeyPair(curve);
+    return authEncapsulate(recipientPublicKey, keyPair, senderPrivateKey);
   }
 
   @Override
@@ -100,6 +152,30 @@ final class NistCurvesHpkeKem implements HpkeKem {
     byte[] dhSharedSecret = EllipticCurves.computeSharedSecret(privateKey, publicKey);
     return deriveKemSharedSecret(
         dhSharedSecret, encapsulatedKey, recipientPrivateKey.getSerializedPublic().toByteArray());
+  }
+
+  @Override
+  public byte[] authDecapsulate(
+      byte[] encapsulatedKey, HpkeKemPrivateKey recipientPrivateKey, byte[] senderPublicKey)
+      throws GeneralSecurityException {
+    ECPrivateKey privateKey =
+        EllipticCurves.getEcPrivateKey(
+            curve, recipientPrivateKey.getSerializedPrivate().toByteArray());
+    ECPublicKey senderEphemeralPublicKey =
+        EllipticCurves.getEcPublicKey(curve, PointFormatType.UNCOMPRESSED, encapsulatedKey);
+
+    byte[] dhSharedSecret =
+        Bytes.concat(
+            EllipticCurves.computeSharedSecret(privateKey, senderEphemeralPublicKey),
+            EllipticCurves.computeSharedSecret(
+                privateKey,
+                EllipticCurves.getEcPublicKey(
+                    curve, PointFormatType.UNCOMPRESSED, senderPublicKey)));
+    return deriveKemSharedSecret(
+        dhSharedSecret,
+        encapsulatedKey,
+        recipientPrivateKey.getSerializedPublic().toByteArray(),
+        senderPublicKey);
   }
 
   @Override

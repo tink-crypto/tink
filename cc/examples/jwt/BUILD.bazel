@@ -11,8 +11,8 @@ filegroup(
 )
 
 cc_binary(
-    name = "jwt_signature_cli",
-    srcs = ["jwt_signature_cli.cc"],
+    name = "jwt_sign",
+    srcs = ["jwt_sign.cc"],
     deps = [
         "//util",
         "@com_google_absl//absl/flags:flag",
@@ -20,10 +20,40 @@ cc_binary(
         "@com_google_absl//absl/log:check",
         "@tink_cc//:keyset_handle",
         "@tink_cc//jwt:jwt_public_key_sign",
+        "@tink_cc//jwt:jwt_signature_config",
+        "@tink_cc//jwt:raw_jwt",
+        "@tink_cc//util:status",
+    ],
+)
+
+cc_binary(
+    name = "jwt_verify",
+    srcs = ["jwt_verify.cc"],
+    deps = [
+        "//util",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/log:check",
+        "@tink_cc//:keyset_handle",
+        "@tink_cc//jwt:jwk_set_converter",
         "@tink_cc//jwt:jwt_public_key_verify",
         "@tink_cc//jwt:jwt_signature_config",
         "@tink_cc//jwt:jwt_validator",
-        "@tink_cc//jwt:raw_jwt",
+        "@tink_cc//util:status",
+    ],
+)
+
+cc_binary(
+    name = "jwt_generate_public_jwk_set",
+    srcs = ["jwt_generate_public_jwk_set.cc"],
+    deps = [
+        "//util",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/log:check",
+        "@tink_cc//:keyset_handle",
+        "@tink_cc//jwt:jwk_set_converter",
+        "@tink_cc//jwt:jwt_signature_config",
         "@tink_cc//util:status",
     ],
 )
@@ -33,11 +63,15 @@ sh_test(
     size = "small",
     srcs = ["jwt_signature_cli_test.sh"],
     args = [
-        "$(rootpath :jwt_signature_cli)",
+        "$(rootpath :jwt_sign)",
+        "$(rootpath :jwt_generate_public_jwk_set)",
+        "$(rootpath :jwt_verify)",
         "$(rootpaths :jwt_signature_keysets)",
     ],
     data = [
-        ":jwt_signature_cli",
+        ":jwt_generate_public_jwk_set",
+        ":jwt_sign",
         ":jwt_signature_keysets",
+        ":jwt_verify",
     ],
 )

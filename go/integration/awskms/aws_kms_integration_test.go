@@ -25,9 +25,6 @@ import (
 	"flag"
 	// context is used to cancel outstanding requests
 	"github.com/google/tink/go/aead"
-	"github.com/google/tink/go/core/registry"
-	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
 
 	"github.com/google/tink/go/integration/awskms"
@@ -165,19 +162,6 @@ func TestKeyCommitment(t *testing.T) {
 	}
 }
 
-func setupKMS(t *testing.T, credPath string, uri string) {
-	t.Helper()
-	client, err := awskms.NewClientWithOptions(keyURI, awskms.WithCredentialPath(credPath))
-	if err != nil {
-		t.Fatalf("error setting up AWS client: %v", err)
-	}
-	// The registry will return the first KMS client that claims support for
-	// the keyURI.  The tests re-use the same keyURI, so clear any clients
-	// registered by earlier tests before registering the new client.
-	registry.ClearKMSClients()
-	registry.RegisterKMSClient(client)
-}
-
 func TestKMSEnvelopeAEADEncryptAndDecrypt(t *testing.T) {
 	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
 	if !ok {
@@ -185,32 +169,35 @@ func TestKMSEnvelopeAEADEncryptAndDecrypt(t *testing.T) {
 	}
 
 	for _, credFile := range []string{credCSVFile, credINIFile} {
-		setupKMS(t, filepath.Join(srcDir, credFile), keyURI)
-		dek := aead.AES128CTRHMACSHA256KeyTemplate()
-		template, err := aead.CreateKMSEnvelopeAEADKeyTemplate(keyURI, dek)
+		credPath := filepath.Join(srcDir, credFile)
+
+		client, err := awskms.NewClientWithOptions(keyURI, awskms.WithCredentialPath(credPath))
 		if err != nil {
-			t.Fatalf("aead.CreateKMSEnvelopeAEADKeyTemplate() err = %v, want nil", err)
+			t.Fatalf("awskms.NewClientWithOptions() err = %q, want nil", err)
 		}
-		handle, err := keyset.NewHandle(template)
+
+		kekAEAD, err := client.GetAEAD(keyURI)
 		if err != nil {
-			t.Fatalf("keyset.NewHandle() err = %v, want nil", err)
+			t.Fatalf("client.GetAEAD(keyURI) err = %q, want nil", err)
 		}
-		a, err := aead.New(handle)
+
+		dekTemplate := aead.AES128CTRHMACSHA256KeyTemplate()
+		a := aead.NewKMSEnvelopeAEAD2(dekTemplate, kekAEAD)
 		if err != nil {
-			t.Fatalf("aead.New() err = %v, want nil", err)
+			t.Fatalf("aead.NewKMSEnvelopeAEAD2(dekTemplate, kekAEAD) err = %q, want nil", err)
 		}
-		for _, ad := range [][]byte{nil, random.GetRandomBytes(20)} {
-			pt := random.GetRandomBytes(20)
-			ct, err := a.Encrypt(pt, ad)
+		plaintext := []byte("plaintext")
+		for _, associatedData := range [][]byte{nil, []byte("associated data")} {
+			ciphertext, err := a.Encrypt(plaintext, associatedData)
 			if err != nil {
-				t.Fatalf("a.Encrypt(pt, ad) err = %v, want nil", err)
+				t.Fatalf("a.Encrypt(plaintext, associatedData) err = %q, want nil", err)
 			}
-			dt, err := a.Decrypt(ct, ad)
+			gotPlaintext, err := a.Decrypt(ciphertext, associatedData)
 			if err != nil {
-				t.Fatalf("a.Decrypt(ct, ad) err = %v, want nil", err)
+				t.Fatalf("a.Decrypt(ciphertext, associatedData) err = %q, want nil", err)
 			}
-			if !bytes.Equal(dt, pt) {
-				t.Errorf("a.Decrypt() = %q, want %q", dt, pt)
+			if !bytes.Equal(gotPlaintext, plaintext) {
+				t.Errorf("a.Decrypt() = %q, want %q", gotPlaintext, plaintext)
 			}
 		}
 	}

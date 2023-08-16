@@ -18,12 +18,16 @@ package com.google.crypto.tink;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
 import com.google.common.truth.Expect;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
+import com.google.crypto.tink.aead.XChaCha20Poly1305Key;
+import com.google.crypto.tink.aead.XChaCha20Poly1305Parameters;
 import com.google.crypto.tink.internal.InternalConfiguration;
 import com.google.crypto.tink.internal.KeyParser;
 import com.google.crypto.tink.internal.KeyStatusTypeProtoConverter;
@@ -1704,5 +1708,252 @@ public class KeysetHandleTest {
     Mac keysetHandleMac = keysetHandle.getPrimitive(Mac.class);
 
     assertThat(keysetHandleMac.computeMac(plaintext)).isEqualTo(registryMac.computeMac(plaintext));
+  }
+
+  @Test
+  public void keysetEquality_singleKeyEquals_returnsTrue() throws Exception {
+    SecretBytes bytes = SecretBytes.randomBytes(32);
+
+    KeysetHandle keysetHandle1 =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes))
+                    .withFixedId(101)
+                    .makePrimary())
+            .build();
+    KeysetHandle keysetHandle2 =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes))
+                    .withFixedId(101)
+                    .makePrimary())
+            .build();
+
+    assertTrue(keysetHandle1.equalsKeyset(keysetHandle2));
+  }
+
+  @Test
+  public void keysetEquality_singleKeyDifferentKeys_returnsFalse() throws Exception {
+    SecretBytes bytes = SecretBytes.randomBytes(32);
+
+    KeysetHandle keysetHandle1 =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.importKey(
+                        XChaCha20Poly1305Key.create(
+                            XChaCha20Poly1305Parameters.Variant.TINK, bytes, 101))
+                    .withFixedId(101)
+                    .makePrimary())
+            .build();
+    KeysetHandle keysetHandle2 =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.importKey(
+                        XChaCha20Poly1305Key.create(
+                            XChaCha20Poly1305Parameters.Variant.CRUNCHY, bytes, 101))
+                    .withFixedId(101)
+                    .makePrimary())
+            .build();
+
+    assertFalse(keysetHandle1.equalsKeyset(keysetHandle2));
+  }
+
+  @Test
+  public void keysetEquality_singleKeyDifferentId_returnsFalse() throws Exception {
+    SecretBytes bytes = SecretBytes.randomBytes(32);
+
+    KeysetHandle keysetHandle1 =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes))
+                    .withFixedId(102)
+                    .makePrimary())
+            .build();
+    KeysetHandle keysetHandle2 =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes))
+                    .withFixedId(103)
+                    .makePrimary())
+            .build();
+
+    assertFalse(keysetHandle1.equalsKeyset(keysetHandle2));
+  }
+
+  @Test
+  public void keysetEquality_twoKeysEquals_returnsTrue() throws Exception {
+    SecretBytes bytes1 = SecretBytes.randomBytes(32);
+    SecretBytes bytes2 = SecretBytes.randomBytes(32);
+
+    KeysetHandle keysetHandle1 =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes1))
+                    .withFixedId(101)
+                    .makePrimary())
+            .addEntry(KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes2)).withFixedId(102))
+            .build();
+    KeysetHandle keysetHandle2 =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes1))
+                    .withFixedId(101)
+                    .makePrimary())
+            .addEntry(KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes2)).withFixedId(102))
+            .build();
+
+    assertTrue(keysetHandle1.equalsKeyset(keysetHandle2));
+  }
+
+  @Test
+  public void keysetEquality_twoKeysDifferentPrimaries_returnsFalse() throws Exception {
+    SecretBytes bytes1 = SecretBytes.randomBytes(32);
+    SecretBytes bytes2 = SecretBytes.randomBytes(32);
+
+    KeysetHandle keysetHandle1 =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes1)).withFixedId(101))
+            .addEntry(
+                KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes2))
+                    .withFixedId(102)
+                    .makePrimary())
+            .build();
+    KeysetHandle keysetHandle2 =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes1))
+                    .withFixedId(101)
+                    .makePrimary())
+            .addEntry(KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes2)).withFixedId(102))
+            .build();
+
+    assertFalse(keysetHandle1.equalsKeyset(keysetHandle2));
+  }
+
+  @Test
+  public void keysetEquality_twoKeysDifferentOrder_returnsFalse() throws Exception {
+    SecretBytes bytes1 = SecretBytes.randomBytes(32);
+    SecretBytes bytes2 = SecretBytes.randomBytes(32);
+
+    KeysetHandle keysetHandle1 =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes1))
+                    .withFixedId(101)
+                    .makePrimary())
+            .addEntry(KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes2)).withFixedId(102))
+            .build();
+    KeysetHandle keysetHandle2 =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes2)).withFixedId(102))
+            .addEntry(
+                KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes1))
+                    .withFixedId(101)
+                    .makePrimary())
+            .build();
+
+    assertFalse(keysetHandle1.equalsKeyset(keysetHandle2));
+  }
+
+  @Test
+  public void keysetEquality_twoKeysDifferentStatuses_returnsFalse() throws Exception {
+    SecretBytes bytes1 = SecretBytes.randomBytes(32);
+    SecretBytes bytes2 = SecretBytes.randomBytes(32);
+
+    KeysetHandle keysetHandle1 =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes1))
+                    .withFixedId(101)
+                    .makePrimary())
+            .addEntry(
+                KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes2))
+                    .withFixedId(102)
+                    .setStatus(KeyStatus.DISABLED))
+            .build();
+    KeysetHandle keysetHandle2 =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes1))
+                    .withFixedId(101)
+                    .makePrimary())
+            .addEntry(KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes2)).withFixedId(102))
+            .build();
+
+    assertFalse(keysetHandle1.equalsKeyset(keysetHandle2));
+  }
+
+  @Test
+  public void keysetEquality_twoKeysDifferentSizes_returnsFalse() throws Exception {
+    SecretBytes bytes1 = SecretBytes.randomBytes(32);
+    SecretBytes bytes2 = SecretBytes.randomBytes(32);
+
+    KeysetHandle keysetHandle1 =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes1))
+                    .withFixedId(101)
+                    .makePrimary())
+            .addEntry(KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes2)).withFixedId(102))
+            .build();
+    KeysetHandle keysetHandle2 =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes1))
+                    .withFixedId(101)
+                    .makePrimary())
+            .build();
+
+    assertFalse(keysetHandle1.equalsKeyset(keysetHandle2));
+  }
+
+  @Test
+  public void keysetEquality_unparseableStatus_returnsFalse() throws Exception {
+    Keyset.Key key1 =
+        TestUtil.createKey(
+            TestUtil.createHmacKeyData("01234567890123456".getBytes(UTF_8), 16),
+            42,
+            KeyStatusType.UNKNOWN_STATUS,
+            OutputPrefixType.TINK);
+    KeysetHandle badKeyset = KeysetHandle.fromKeyset(TestUtil.createKeyset(key1));
+    assertFalse(badKeyset.equalsKeyset(badKeyset));
+  }
+
+  @Test
+  public void keysetEquality_noPrimary_returnsFalse() throws Exception {
+    Keyset.Key key1 =
+        TestUtil.createKey(
+            TestUtil.createHmacKeyData("01234567890123456".getBytes(UTF_8), 16),
+            42,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.TINK);
+    Keyset keyset = TestUtil.createKeyset(key1);
+    KeysetHandle badKeyset =
+        KeysetHandle.fromKeyset(Keyset.newBuilder(keyset).setPrimaryKeyId(77).build());
+    assertFalse(badKeyset.equalsKeyset(badKeyset));
+  }
+
+  @Test
+  public void keysetEquality_monitoringAnnotationIgnored_returnsTrue() throws Exception {
+    SecretBytes bytes = SecretBytes.randomBytes(32);
+
+    KeysetHandle keysetHandle1 =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes))
+                    .withFixedId(101)
+                    .makePrimary())
+            .setMonitoringAnnotations(MonitoringAnnotations.newBuilder().add("k1", "v1").build())
+            .build();
+    KeysetHandle keysetHandle2 =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.importKey(XChaCha20Poly1305Key.create(bytes))
+                    .withFixedId(101)
+                    .makePrimary())
+            .setMonitoringAnnotations(MonitoringAnnotations.newBuilder().add("k2", "v2").build())
+            .build();
+
+    assertTrue(keysetHandle1.equalsKeyset(keysetHandle2));
   }
 }

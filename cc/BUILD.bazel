@@ -482,16 +482,20 @@ cc_library(
         ":keyset_writer",
         ":primitive_set",
         ":registry",
+        "//config:global_registry",
         "//internal:configuration_impl",
         "//internal:key_gen_configuration_impl",
         "//internal:key_info",
         "//internal:key_status_util",
+        "//internal:key_type_info_store",
         "//internal:mutable_serialization_registry",
         "//internal:proto_key_serialization",
         "//internal:util",
         "//proto:tink_cc_proto",
         "//util:errors",
         "//util:keyset_util",
+        "//util:status",
+        "//util:statusor",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/log:check",
@@ -702,6 +706,13 @@ cc_library(
 )
 
 cc_library(
+    name = "private_key",
+    hdrs = ["private_key.h"],
+    include_prefix = "tink",
+    deps = [":key"],
+)
+
+cc_library(
     name = "partial_key_access_token",
     hdrs = ["partial_key_access_token.h"],
     include_prefix = "tink",
@@ -747,6 +758,25 @@ cc_library(
     hdrs = ["key_status.h"],
     include_prefix = "tink",
     visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "configuration",
+    hdrs = ["configuration.h"],
+    include_prefix = "tink",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//internal:key_type_info_store",
+        "//internal:keyset_wrapper_store",
+    ],
+)
+
+cc_library(
+    name = "key_gen_configuration",
+    hdrs = ["key_gen_configuration.h"],
+    include_prefix = "tink",
+    visibility = ["//visibility:public"],
+    deps = ["//internal:key_type_info_store"],
 )
 
 # tests
@@ -853,19 +883,22 @@ cc_test(
         "//aead:aead_wrapper",
         "//aead:aes_gcm_key_manager",
         "//config:fips_140_2",
+        "//config:global_registry",
         "//config:key_gen_fips_140_2",
         "//config:tink_config",
-        "//config/internal:global_registry",
         "//internal:fips_utils",
         "//internal:key_gen_configuration_impl",
         "//proto:aes_gcm_siv_cc_proto",
         "//proto:tink_cc_proto",
         "//signature:ecdsa_sign_key_manager",
+        "//signature:ecdsa_verify_key_manager",
         "//signature:signature_key_templates",
         "//util:status",
+        "//util:statusor",
         "//util:test_keyset_handle",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
@@ -1117,23 +1150,4 @@ cc_test(
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
-)
-
-cc_library(
-    name = "configuration",
-    hdrs = ["configuration.h"],
-    include_prefix = "tink",
-    visibility = ["//visibility:public"],
-    deps = [
-        "//internal:key_type_info_store",
-        "//internal:keyset_wrapper_store",
-    ],
-)
-
-cc_library(
-    name = "key_gen_configuration",
-    hdrs = ["key_gen_configuration.h"],
-    include_prefix = "tink",
-    visibility = ["//visibility:public"],
-    deps = ["//internal:key_type_info_store"],
 )

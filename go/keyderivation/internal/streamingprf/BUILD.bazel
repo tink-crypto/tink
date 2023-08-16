@@ -13,7 +13,6 @@ go_library(
         "streaming_prf_factory.go",
     ],
     importpath = "github.com/google/tink/go/keyderivation/internal/streamingprf",
-    visibility = ["//visibility:public"],
     deps = [
         "//core/primitiveset",
         "//core/registry",
@@ -56,5 +55,5 @@ go_test(
 alias(
     name = "go_default_library",
     actual = ":streamingprf",
-    visibility = ["//visibility:public"],
+    visibility = ["//:__subpackages__"],
 )

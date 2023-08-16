@@ -67,23 +67,6 @@ fi
 
 #############################################################################
 
-print_test "verification_with_public_keyset"
-
-# Verify the token
-test_command ${VERIFY_CLI} \
-  --public_keyset_path "${PUBLIC_KEYSET_PATH}" \
-  --audience "${AUDIENCE}" \
-  --token_path "${TOKEN_PATH}"
-
-if (( TEST_STATUS == 0 )); then
-  echo "+++ Success: Verification passed for a valid token."
-else
-  echo "--- Failure: Verification failed for a valid token."
-  exit 1
-fi
-
-#############################################################################
-
 print_test "generate_public_jwk_set"
 
 # Generate the public keyset in JWK format

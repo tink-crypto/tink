@@ -30,11 +30,17 @@ PYTHON_VERSIONS["3.9"]="cp39-cp39"
 PYTHON_VERSIONS["3.10"]="cp310-cp310"
 readonly -A PYTHON_VERSIONS
 
+readonly ARCH="$(uname -m)"
+
 # This is a compressed tag set as specified at
 # https://peps.python.org/pep-0425/#compressed-tag-sets
 #
 # Keep in sync with the output of the auditwheel tool.
-readonly PLATFORM_TAG_SET="manylinux_2_17_x86_64.manylinux2014_x86_64"
+PLATFORM_TAG_SET="manylinux_2_17_x86_64.manylinux2014_x86_64"
+if [[ "${ARCH}" == "aarch64" || "${ARCH}" == "arm64" ]]; then
+  PLATFORM_TAG_SET="manylinux_2_17_aarch64.manylinux2014_aarch64"
+fi
+readonly PLATFORM_TAG_SET
 
 export TINK_PYTHON_ROOT_PATH="${PWD}"
 
@@ -46,13 +52,23 @@ export LD_LIBRARY_PATH="/usr/local/lib"
 # to fail.
 ln -s /etc/ssl/certs/ca-bundle.trust.crt /etc/ssl/certs/ca-certificates.crt
 
+TEST_IGNORE_PATHS=( -not -path "*cc/pybind*")
+if [[ "${ARCH}" == "aarch64" || "${ARCH}" == "arm64" ]]; then
+  # gRPC doesn't seem compatible with libstdc++ present in
+  # manylinux2014_aarch64 (see https://github.com/grpc/grpc/issues/33734).
+  # TODO(b/291055539): Re-enable these tests when/after this is solved.
+  TEST_IGNORE_PATHS+=( -not -path "*integration/gcpkms*")
+fi
+readonly TEST_IGNORE_PATHS
+
 for v in "${!PYTHON_VERSIONS[@]}"; do
   (
     # Executing in a subshell to make the PATH modification temporary.
     export PATH="${PATH}:/opt/python/${PYTHON_VERSIONS[$v]}/bin"
-
-    pip3 install release/*-"${PYTHON_VERSIONS[$v]}"-"${PLATFORM_TAG_SET}".whl
-    find tink/ -not -path "*cc/pybind*" -type f -name "*_test.py" -print0 \
+    python3 -m pip install --require-hashes -r requirements.txt
+    python3 -m pip install --no-deps --no-index \
+      release/*-"${PYTHON_VERSIONS[$v]}"-"${PLATFORM_TAG_SET}".whl
+    find tink/ "${TEST_IGNORE_PATHS[@]}" -type f -name "*_test.py" -print0 \
       | xargs -0 -n1 python3
   )
 done

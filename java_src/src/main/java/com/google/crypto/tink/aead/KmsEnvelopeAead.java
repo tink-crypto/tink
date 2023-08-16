@@ -18,7 +18,10 @@ package com.google.crypto.tink.aead; // instead of subtle, because it depends on
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.TinkProtoParametersFormat;
 import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.protobuf.ExtensionRegistryLite;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
@@ -76,6 +79,28 @@ public final class KmsEnvelopeAead implements Aead {
     }
     this.dekTemplate = dekTemplate;
     this.remote = remote;
+  }
+
+  /**
+   * Creates a new instance of Tink's KMS Envelope AEAD.
+   *
+   * <p>{@code dekParameters} must be any of these Tink AEAD parameters (any other will be
+   * rejected): {@link AesGcmParameters}, {@link ChaCha20Poly1305Parameters}, {@link
+   * XChaCha20Poly1305Parameters}, {@link AesCtrHmacAeadParameters}, {@link AesGcmSivParameters}, or
+   * {@link AesEaxParameters}.
+   */
+  public static Aead create(AeadParameters dekParameters, Aead remote)
+      throws GeneralSecurityException {
+    KeyTemplate dekTemplate;
+    try {
+      dekTemplate =
+          KeyTemplate.parseFrom(
+              TinkProtoParametersFormat.serialize(dekParameters),
+              ExtensionRegistryLite.getEmptyRegistry());
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException(e);
+    }
+    return new KmsEnvelopeAead(dekTemplate, remote);
   }
 
   @Override

@@ -25,6 +25,8 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
@@ -41,11 +43,14 @@ import java.util.Set;
 import java.util.TreeSet;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Test for AesGcmJce and its key manager. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public class AesGcmKeyManagerTest {
   private final AesGcmKeyManager manager = new AesGcmKeyManager();
   private final KeyTypeManager.KeyFactory<AesGcmKeyFormat, AesGcmKey> factory =
@@ -506,12 +511,17 @@ public class AesGcmKeyManagerTest {
     testKeyTemplateCompatible(manager, AesGcmKeyManager.rawAes256GcmTemplate());
   }
 
-  @Test
-  public void testKeyFormats() throws Exception {
-    factory.validateKeyFormat(factory.keyFormats().get("AES128_GCM").keyFormat);
-    factory.validateKeyFormat(factory.keyFormats().get("AES128_GCM_RAW").keyFormat);
+  @DataPoints("templateNames")
+  public static final String[] KEY_TEMPLATES =
+      new String[] {
+        "AES128_GCM", "AES128_GCM_RAW", "AES256_GCM", "AES256_GCM_RAW",
+      };
 
-    factory.validateKeyFormat(factory.keyFormats().get("AES256_GCM").keyFormat);
-    factory.validateKeyFormat(factory.keyFormats().get("AES256_GCM_RAW").keyFormat);
+  @Theory
+  public void testTemplates(@FromDataPoints("templateNames") String templateName) throws Exception {
+    KeysetHandle h = KeysetHandle.generateNew(KeyTemplates.get(templateName));
+    assertThat(h.size()).isEqualTo(1);
+    assertThat(h.getAt(0).getKey().getParameters())
+        .isEqualTo(KeyTemplates.get(templateName).toParameters());
   }
 }

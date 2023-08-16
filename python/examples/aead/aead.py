@@ -45,11 +45,7 @@ def main(argv):
       FLAGS.associated_data, 'utf-8')
 
   # Initialise Tink
-  try:
-    aead.register()
-  except tink.TinkError as e:
-    logging.error('Error initialising Tink: %s', e)
-    return 1
+  aead.register()
 
   # Read the keyset into a keyset_handle
   with open(FLAGS.keyset_path, 'rt') as keyset_file:

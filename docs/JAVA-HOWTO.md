@@ -8,7 +8,7 @@ hacking guide](JAVA-HACKING.md).
 
 ## Setup instructions
 
-See https://developers.devsite.corp.google.com/tink/tink-setup#java for setup
+See https://developers.google.com/tink/tink-setup#java for setup
 instructions.
 
 ## API documentation
@@ -118,7 +118,7 @@ used (which does not require `InsecureSecretKeyAccess`).
 Storing keysets unencrypted on disk is not recommended. Tink supports encrypting
 keysets with master keys stored in remote key management systems, see for
 example
-https://developers.devsite.corp.google.com/tink/client-side-encryption#java.
+https://developers.google.com/tink/client-side-encryption#java.
 
 ## Obtaining and using primitives
 
@@ -190,20 +190,20 @@ encrypt or decrypt data:
 ### Symmetric key encryption of streaming data
 
 See
-https://developers.devsite.corp.google.com/tink/encrypt-large-files-or-data-streams#java
+https://developers.google.com/tink/encrypt-large-files-or-data-streams#java
 
 ### Message Authentication Code
 
 See
-https://developers.devsite.corp.google.com/tink/protect-data-from-tampering#java
+https://developers.google.com/tink/protect-data-from-tampering#java
 
 ### Digital signatures
 
-See https://developers.devsite.corp.google.com/tink/digitally-sign-data
+See https://developers.google.com/tink/digitally-sign-data
 
 ### Hybrid encryption
 
-See https://developers.devsite.corp.google.com/tink/exchange-data#java
+See https://developers.google.com/tink/exchange-data#java
 
 ### Envelope encryption
 

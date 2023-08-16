@@ -115,5 +115,6 @@ public final class PrfBasedDeriverKeyManager extends KeyTypeManager<PrfBasedDeri
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new PrfBasedDeriverKeyManager(), newKeyAllowed);
+    PrfBasedKeyDerivationKeyProtoSerialization.register();
   }
 }

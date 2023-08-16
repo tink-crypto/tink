@@ -38,10 +38,6 @@ go_test(
     deps = [
         ":gcpkms",
         "//aead",
-        "//core/registry",
-        "//keyset",
-        "//subtle/random",
-        "//tink",
         "@org_golang_google_api//option",
     ],
 )

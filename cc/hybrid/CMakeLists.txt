@@ -250,6 +250,47 @@ tink_cc_library(
     tink::proto::tink_cc_proto
 )
 
+tink_cc_library(
+  NAME failing_hybrid
+  SRCS
+    failing_hybrid.cc
+    failing_hybrid.h
+  DEPS
+    absl::strings
+    tink::core::hybrid_decrypt
+    tink::core::hybrid_encrypt
+)
+
+tink_cc_library(
+  NAME hybrid_parameters
+  SRCS
+    hybrid_parameters.h
+  DEPS
+    tink::core::parameters
+)
+
+tink_cc_library(
+  NAME hybrid_public_key
+  SRCS
+    hybrid_public_key.h
+  DEPS
+    tink::hybrid::hybrid_parameters
+    absl::strings
+    tink::core::key
+)
+
+tink_cc_library(
+  NAME hybrid_private_key
+  SRCS
+    hybrid_private_key.h
+  DEPS
+    tink::hybrid::hybrid_parameters
+    tink::hybrid::hybrid_public_key
+    absl::strings
+    tink::core::key
+    tink::core::private_key
+)
+
 # tests
 
 tink_cc_test(
@@ -504,17 +545,6 @@ tink_cc_test(
     tink::proto::common_cc_proto
     tink::proto::ecies_aead_hkdf_cc_proto
     tink::proto::tink_cc_proto
-)
-
-tink_cc_library(
-  NAME failing_hybrid
-  SRCS
-    failing_hybrid.cc
-    failing_hybrid.h
-  DEPS
-    absl::strings
-    tink::core::hybrid_decrypt
-    tink::core::hybrid_encrypt
 )
 
 tink_cc_test(

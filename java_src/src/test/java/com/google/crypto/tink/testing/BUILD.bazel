@@ -29,6 +29,16 @@ java_test(
 )
 
 java_test(
+    name = "HpkeTestUtilTest",
+    size = "small",
+    srcs = ["HpkeTestUtilTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/testing:hpke_test_util",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "FakeKmsClientTest",
     size = "small",
     srcs = ["FakeKmsClientTest.java"],

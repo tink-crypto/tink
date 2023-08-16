@@ -34,11 +34,8 @@ class AeadKey : public Key {
   // have an associated ciphertext output prefix. When decrypting a ciphertext,
   // only keys with a matching prefix have to be tried.
   //
-  // Note that a priori, the output prefix may not be unique in a keyset
-  // (i.e., different keys in a keyset may have the same prefix or one prefix
-  // may be a prefix of another). To avoid this, built-in Tink keys use the
-  // convention that the prefix is either '0x00<big endian key id>' or
-  // '0x01<big endian key id>'.
+  // See https://developers.google.com/tink/wire-format#tink_output_prefix for
+  // more background information on Tink output prefixes.
   virtual absl::string_view GetOutputPrefix() const = 0;
 
   const AeadParameters& GetParameters() const override = 0;

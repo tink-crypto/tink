@@ -109,6 +109,7 @@ java_test(
         "//proto:jwt_rsa_ssa_pss_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
+        "//src/main/java/com/google/crypto/tink:key",
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:key_templates",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
@@ -120,6 +121,8 @@ java_test(
         "//src/main/java/com/google/crypto/tink/jwt:jwt_public_key_sign",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_public_key_sign_internal",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_public_key_verify",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pss_parameters",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pss_private_key",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pss_sign_key_manager",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pss_verify_key_manager",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_signature_config",
@@ -182,6 +185,7 @@ java_test(
         "//proto:jwt_rsa_ssa_pkcs1_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
+        "//src/main/java/com/google/crypto/tink:key",
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:key_templates",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
@@ -193,6 +197,8 @@ java_test(
         "//src/main/java/com/google/crypto/tink/jwt:jwt_public_key_sign",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_public_key_sign_internal",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_public_key_verify",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pkcs1_parameters",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pkcs1_private_key",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pkcs1_sign_key_manager",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pkcs1_verify_key_manager",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_signature_config",
@@ -322,9 +328,7 @@ java_test(
     srcs = ["JwkSetConverterTest.java"],
     deps = [
         "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
         "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
-        "//src/main/java/com/google/crypto/tink:json_keyset_reader",
         "//src/main/java/com/google/crypto/tink:key_templates",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink:tink_json_proto_keyset_format",
@@ -493,6 +497,150 @@ java_test(
         "//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_proto_serialization",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_public_key",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/util:secret_big_integer",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "JwtRsaSsaPkcs1ParametersTest",
+    size = "small",
+    srcs = ["JwtRsaSsaPkcs1ParametersTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pkcs1_parameters",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "JwtRsaSsaPkcs1PublicKeyTest",
+    size = "small",
+    srcs = ["JwtRsaSsaPkcs1PublicKeyTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/internal:key_tester",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pkcs1_parameters",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pkcs1_public_key",
+        "//src/main/java/com/google/crypto/tink/subtle:base64",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "JwtRsaSsaPkcs1PrivateKeyTest",
+    size = "small",
+    srcs = ["JwtRsaSsaPkcs1PrivateKeyTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink/aead:cha_cha20_poly1305_key",
+        "//src/main/java/com/google/crypto/tink/internal:key_tester",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pkcs1_parameters",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pkcs1_private_key",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pkcs1_public_key",
+        "//src/main/java/com/google/crypto/tink/subtle:base64",
+        "//src/main/java/com/google/crypto/tink/util:secret_big_integer",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "JwtRsaSsaPkcs1ProtoSerializationTest",
+    size = "small",
+    srcs = ["JwtRsaSsaPkcs1ProtoSerializationTest.java"],
+    deps = [
+        "//proto:jwt_rsa_ssa_pkcs1_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:parameters",
+        "//src/main/java/com/google/crypto/tink/internal:big_integer_encoding",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
+        "//src/main/java/com/google/crypto/tink/internal/testing:asserts",
+        "//src/main/java/com/google/crypto/tink/internal/testing:big_integer_test_util",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pkcs1_parameters",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pkcs1_private_key",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pkcs1_proto_serialization",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pkcs1_public_key",
+        "//src/main/java/com/google/crypto/tink/subtle:base64",
+        "//src/main/java/com/google/crypto/tink/util:secret_big_integer",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "JwtRsaSsaPssParametersTest",
+    size = "small",
+    srcs = ["JwtRsaSsaPssParametersTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pss_parameters",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "JwtRsaSsaPssPublicKeyTest",
+    size = "small",
+    srcs = ["JwtRsaSsaPssPublicKeyTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/internal:key_tester",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pss_parameters",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pss_public_key",
+        "//src/main/java/com/google/crypto/tink/subtle:base64",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "JwtRsaSsaPssPrivateKeyTest",
+    size = "small",
+    srcs = ["JwtRsaSsaPssPrivateKeyTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink/aead:cha_cha20_poly1305_key",
+        "//src/main/java/com/google/crypto/tink/internal:key_tester",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pss_parameters",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pss_private_key",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pss_public_key",
+        "//src/main/java/com/google/crypto/tink/subtle:base64",
+        "//src/main/java/com/google/crypto/tink/util:secret_big_integer",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "JwtRsaSsaPssProtoSerializationTest",
+    size = "small",
+    srcs = ["JwtRsaSsaPssProtoSerializationTest.java"],
+    deps = [
+        "//proto:jwt_rsa_ssa_pss_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:parameters",
+        "//src/main/java/com/google/crypto/tink/internal:big_integer_encoding",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
+        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
+        "//src/main/java/com/google/crypto/tink/internal/testing:asserts",
+        "//src/main/java/com/google/crypto/tink/internal/testing:big_integer_test_util",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pss_parameters",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pss_private_key",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pss_proto_serialization",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_rsa_ssa_pss_public_key",
+        "//src/main/java/com/google/crypto/tink/subtle:base64",
         "//src/main/java/com/google/crypto/tink/util:secret_big_integer",
         "@maven//:com_google_protobuf_protobuf_java",
         "@maven//:com_google_truth_truth",

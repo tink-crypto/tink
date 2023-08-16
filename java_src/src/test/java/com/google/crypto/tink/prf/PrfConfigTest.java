@@ -17,101 +17,53 @@
 package com.google.crypto.tink.prf;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import java.security.GeneralSecurityException;
 import org.junit.Assume;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.junit.runners.MethodSorters;
 
-/**
- * Tests for PrfConfig. Using FixedMethodOrder to ensure that aaaTestInitialization runs first, as
- * it tests execution of a static block within AeadConfig-class.
- */
+/** Tests for PrfConfig. */
 @RunWith(JUnit4.class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class PrfConfigTest {
-  // This test must run first.
+
   @Test
-  public void aaaTestInitialization() throws Exception {
+  public void notOnlyFips_shouldRegisterAllKeyTypes() throws Exception {
     Assume.assumeFalse(TinkFips.useOnlyFips());
 
-    // Before registration, the key manager should be absent.
-    String typeUrl = "type.googleapis.com/google.crypto.tink.HkdfPrfKey";
-    assertThrows(GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
-
-    // Initialize the config.
     PrfConfig.register();
 
-    // After registration, the key manager should be present.
-    assertNotNull(Registry.getKeyManager(typeUrl, Prf.class));
-
-    // Running init() manually again should succeed.
-    PrfConfig.register();
+    assertThat(KeysetHandle.generateNew(PredefinedPrfParameters.HMAC_SHA256_PRF)).isNotNull();
+    assertThat(KeysetHandle.generateNew(PredefinedPrfParameters.HKDF_SHA256)).isNotNull();
+    assertThat(KeysetHandle.generateNew(PredefinedPrfParameters.AES_CMAC_PRF)).isNotNull();
   }
 
   @Test
-  public void testNoFipsRegister() throws Exception {
-    Assume.assumeFalse(TinkFips.useOnlyFips());
-
-    // Register Prf key manager
-    PrfConfig.register();
-
-    // Check if all key types are registered when not using FIPS mode.
-    String[] keyTypeUrls = {
-      "type.googleapis.com/google.crypto.tink.HmacPrfKey",
-      "type.googleapis.com/google.crypto.tink.HkdfPrfKey",
-      "type.googleapis.com/google.crypto.tink.AesCmacPrfKey",
-    };
-
-    for (String typeUrl : keyTypeUrls) {
-      assertNotNull(Registry.getKeyManager(typeUrl, Prf.class));
-    }
-  }
-
-  @Test
-  public void testFipsRegisterFipsKeys() throws Exception {
+  public void onlyFips_shouldRegisterFipsKeyTypes() throws Exception {
     Assume.assumeTrue(TinkFips.useOnlyFips());
     Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
 
-    // Register Prf key manager
     PrfConfig.register();
 
-    String[] keyTypeUrls = {
-      "type.googleapis.com/google.crypto.tink.HmacPrfKey",
-    };
-
-    for (String typeUrl : keyTypeUrls) {
-      assertNotNull(Registry.getKeyManager(typeUrl, Prf.class));
-    }
+    assertThat(KeysetHandle.generateNew(PredefinedPrfParameters.HMAC_SHA256_PRF)).isNotNull();
   }
 
   @Test
-  public void testFipsRegisterNonFipsKeys() throws Exception {
+  public void onlyFips_shouldNotRegisterNonFipsKeyTypes() throws Exception {
     Assume.assumeTrue(TinkFips.useOnlyFips());
     Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
 
-    // Register Prf key manager
     PrfConfig.register();
-
-    // List of algorithms which are not part of FIPS and should not be registered.
-    String[] keyTypeUrls = {
-      "type.googleapis.com/google.crypto.tink.HkdfPrfKey",
-      "type.googleapis.com/google.crypto.tink.AesCmacPrfKey",
-    };
-
-    for (String typeUrl : keyTypeUrls) {
-      GeneralSecurityException e =
-          assertThrows(
-              GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
-      assertThat(e.toString()).contains("No key manager found");
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> KeysetHandle.generateNew(PredefinedPrfParameters.HKDF_SHA256));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> KeysetHandle.generateNew(PredefinedPrfParameters.AES_CMAC_PRF));
   }
 }

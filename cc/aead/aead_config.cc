@@ -22,6 +22,7 @@
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_eax_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
+#include "tink/aead/aes_gcm_proto_serialization.h"
 #include "tink/aead/aes_gcm_siv_key_manager.h"
 #include "tink/aead/kms_aead_key_manager.h"
 #include "tink/aead/kms_envelope_aead_key_manager.h"
@@ -50,6 +51,9 @@ util::Status AeadConfig::Register() {
   if (!status.ok()) return status;
   status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesGcmKeyManager>(), true);
+  if (!status.ok()) return status;
+
+  status = RegisterAesGcmProtoSerialization();
   if (!status.ok()) return status;
 
   if (IsFipsModeEnabled()) {

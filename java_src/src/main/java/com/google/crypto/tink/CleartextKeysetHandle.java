@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink;
 
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.protobuf.ExtensionRegistryLite;
@@ -70,9 +69,11 @@ public final class CleartextKeysetHandle {
    * the {@link MonitoringClient}.
    *
    * @throws GeneralSecurityException when the keyset is invalid or cannot be read.
+   * @deprecated Instead, use a {@link KeysetHandle.Builder}.
    */
-  @Alpha
-  public static KeysetHandle read(KeysetReader reader, Map<String, String> monitoringAnnotations)
+  @Deprecated
+  public static KeysetHandle read(
+      KeysetReader reader, Map<String, String> monitoringAnnotations)
       throws GeneralSecurityException, IOException {
     return KeysetHandle.fromKeysetAndAnnotations(
         reader.read(), MonitoringAnnotations.newBuilder().addAll(monitoringAnnotations).build());

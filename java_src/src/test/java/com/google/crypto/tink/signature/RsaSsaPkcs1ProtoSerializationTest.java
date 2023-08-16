@@ -291,11 +291,11 @@ public final class RsaSsaPkcs1ProtoSerializationTest {
             OutputPrefixType.RAW,
             /* idRequirement= */ null);
 
-    Key parsed = registry.parseKey(serialization, InsecureSecretKeyAccess.get());
+    Key parsed = registry.parseKey(serialization, /* access= */ null);
     assertThat(parsed.equalsKey(key)).isTrue();
 
     ProtoKeySerialization serialized =
-        registry.serializeKey(key, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
+        registry.serializeKey(key, ProtoKeySerialization.class, /* access= */ null);
     assertEqualWhenValueParsed(
         com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey.parser(), serialized, serialization);
   }
@@ -329,11 +329,11 @@ public final class RsaSsaPkcs1ProtoSerializationTest {
             OutputPrefixType.TINK,
             /* idRequirement= */ 123);
 
-    Key parsed = registry.parseKey(serialization, InsecureSecretKeyAccess.get());
+    Key parsed = registry.parseKey(serialization, /* access= */ null);
     assertThat(parsed.equalsKey(key)).isTrue();
 
     ProtoKeySerialization serialized =
-        registry.serializeKey(key, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
+        registry.serializeKey(key, ProtoKeySerialization.class, /* access= */ null);
     assertEqualWhenValueParsed(
         com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey.parser(), serialized, serialization);
   }
@@ -772,8 +772,7 @@ public final class RsaSsaPkcs1ProtoSerializationTest {
       @FromDataPoints("invalidPublicKeySerializations") ProtoKeySerialization serialization)
       throws Exception {
     assertThrows(
-        GeneralSecurityException.class,
-        () -> registry.parseKey(serialization, InsecureSecretKeyAccess.get()));
+        GeneralSecurityException.class, () -> registry.parseKey(serialization, /* access= */ null));
   }
 
   private static ProtoKeySerialization[] createInvalidPrivateKeySerializations() {

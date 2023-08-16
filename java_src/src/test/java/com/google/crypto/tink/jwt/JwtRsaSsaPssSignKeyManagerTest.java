@@ -16,6 +16,7 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.crypto.tink.internal.KeyTemplateProtoConverter.getOutputPrefixType;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -312,26 +313,49 @@ public class JwtRsaSsaPssSignKeyManagerTest {
   }
 
   @Test
+  public void createKeysetHandle_works() throws Exception {
+    if (TestUtil.isTsan()) {
+      // factory.createKey is too slow in Tsan.
+      return;
+    }
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("JWT_PS256_2048_F4"));
+
+    com.google.crypto.tink.Key key = handle.getAt(0).getKey();
+    assertThat(key).isInstanceOf(com.google.crypto.tink.jwt.JwtRsaSsaPssPrivateKey.class);
+    com.google.crypto.tink.jwt.JwtRsaSsaPssPrivateKey jwtPrivateKey =
+        (com.google.crypto.tink.jwt.JwtRsaSsaPssPrivateKey) key;
+
+    assertThat(jwtPrivateKey.getParameters())
+        .isEqualTo(
+            JwtRsaSsaPssParameters.builder()
+                .setModulusSizeBits(2048)
+                .setPublicExponent(JwtRsaSsaPssParameters.F4)
+                .setAlgorithm(JwtRsaSsaPssParameters.Algorithm.PS256)
+                .setKidStrategy(JwtRsaSsaPssParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
+  }
+
+  @Test
   public void testTinkTemplatesAreTink() throws Exception {
-    assertThat(KeyTemplates.get("JWT_PS256_2048_F4").getOutputPrefixType())
+    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_PS256_2048_F4")))
         .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
-    assertThat(KeyTemplates.get("JWT_PS256_3072_F4").getOutputPrefixType())
+    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_PS256_3072_F4")))
         .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
-    assertThat(KeyTemplates.get("JWT_PS384_3072_F4").getOutputPrefixType())
+    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_PS384_3072_F4")))
         .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
-    assertThat(KeyTemplates.get("JWT_PS512_4096_F4").getOutputPrefixType())
+    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_PS512_4096_F4")))
         .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
   }
 
   @Test
   public void testRawTemplatesAreRaw() throws Exception {
-    assertThat(KeyTemplates.get("JWT_PS256_2048_F4_RAW").getOutputPrefixType())
+    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_PS256_2048_F4_RAW")))
         .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    assertThat(KeyTemplates.get("JWT_PS256_3072_F4_RAW").getOutputPrefixType())
+    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_PS256_3072_F4_RAW")))
         .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    assertThat(KeyTemplates.get("JWT_PS384_3072_F4_RAW").getOutputPrefixType())
+    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_PS384_3072_F4_RAW")))
         .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    assertThat(KeyTemplates.get("JWT_PS512_4096_F4_RAW").getOutputPrefixType())
+    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_PS512_4096_F4_RAW")))
         .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
   }
 
@@ -707,8 +731,7 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     KeysetHandle handleWithKid =
         CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
 
-    JwtPublicKeySign signerWithKid = handleWithKid.getPrimitive(JwtPublicKeySign.class);
-    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
-    assertThrows(JwtInvalidException.class, () -> signerWithKid.signAndEncode(rawToken));
+    assertThrows(
+        GeneralSecurityException.class, () -> handleWithKid.getPrimitive(JwtPublicKeySign.class));
   }
 }

@@ -58,9 +58,9 @@ public final class X25519HpkeKemTest {
     testVectors = HpkeTestUtil.parseTestVectors(Files.newReader(new File(path), UTF_8));
   }
 
-  private HpkeTestId getDefaultTestId() {
+  private HpkeTestId getDefaultTestId(byte[] mode) {
     return new HpkeTestId(
-        HpkeUtil.BASE_MODE,
+        mode,
         HpkeUtil.X25519_HKDF_SHA256_KEM_ID,
         HpkeUtil.HKDF_SHA256_KDF_ID,
         HpkeUtil.AES_128_GCM_AEAD_ID);
@@ -72,8 +72,18 @@ public final class X25519HpkeKemTest {
     HpkeTestSetup testSetup = testVectors.get(testId).getTestSetup();
 
     X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf(MAC_ALGORITHM));
-    HpkeKemEncapOutput result =
-        kem.encapsulate(testSetup.recipientPublicKey, testSetup.senderPrivateKey);
+    HpkeKemEncapOutput result;
+    if (mode == HpkeUtil.BASE_MODE) {
+      result = kem.encapsulate(testSetup.recipientPublicKey, testSetup.senderEphemeralPrivateKey);
+    } else if (mode == HpkeUtil.AUTH_MODE) {
+      result =
+          kem.authEncapsulate(
+              testSetup.recipientPublicKey,
+              testSetup.senderEphemeralPrivateKey,
+              X25519HpkeKemPrivateKey.fromBytes(testSetup.senderPrivateKey));
+    } else {
+      throw new IllegalArgumentException("Unsupported mode: " + mode[0]);
+    }
     expect.that(result.getSharedSecret()).isEqualTo(testSetup.sharedSecret);
     expect.that(result.getEncapsulatedKey()).isEqualTo(testSetup.encapsulatedKey);
   }
@@ -84,10 +94,21 @@ public final class X25519HpkeKemTest {
     HpkeTestSetup testSetup = testVectors.get(testId).getTestSetup();
 
     X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf(MAC_ALGORITHM));
-    byte[] result =
-        kem.decapsulate(
-            testSetup.encapsulatedKey,
-            X25519HpkeKemPrivateKey.fromBytes(testSetup.recipientPrivateKey));
+    byte[] result;
+    if (mode == HpkeUtil.BASE_MODE) {
+      result =
+          kem.decapsulate(
+              testSetup.encapsulatedKey,
+              X25519HpkeKemPrivateKey.fromBytes(testSetup.recipientPrivateKey));
+    } else if (mode == HpkeUtil.AUTH_MODE) {
+      result =
+          kem.authDecapsulate(
+              testSetup.encapsulatedKey,
+              X25519HpkeKemPrivateKey.fromBytes(testSetup.recipientPrivateKey),
+              testSetup.senderPublicKey);
+    } else {
+      throw new IllegalArgumentException("Unsupported mode: " + mode[0]);
+    }
     expect.that(result).isEqualTo(testSetup.sharedSecret);
   }
 
@@ -101,9 +122,29 @@ public final class X25519HpkeKemTest {
   }
 
   @Test
+  public void authEncapsulate_succeedsWithX25519HkdfSha256Aes128Gcm()
+      throws GeneralSecurityException {
+    encapsulate(
+        HpkeUtil.AUTH_MODE,
+        HpkeUtil.X25519_HKDF_SHA256_KEM_ID,
+        HpkeUtil.HKDF_SHA256_KDF_ID,
+        HpkeUtil.AES_128_GCM_AEAD_ID);
+  }
+
+  @Test
   public void encapsulate_succeedsWithX25519HkdfSha256Aes256Gcm() throws GeneralSecurityException {
     encapsulate(
         HpkeUtil.BASE_MODE,
+        HpkeUtil.X25519_HKDF_SHA256_KEM_ID,
+        HpkeUtil.HKDF_SHA256_KDF_ID,
+        HpkeUtil.AES_256_GCM_AEAD_ID);
+  }
+
+  @Test
+  public void authEncapsulate_succeedsWithX25519HkdfSha256Aes256Gcm()
+      throws GeneralSecurityException {
+    encapsulate(
+        HpkeUtil.AUTH_MODE,
         HpkeUtil.X25519_HKDF_SHA256_KEM_ID,
         HpkeUtil.HKDF_SHA256_KDF_ID,
         HpkeUtil.AES_256_GCM_AEAD_ID);
@@ -120,6 +161,16 @@ public final class X25519HpkeKemTest {
   }
 
   @Test
+  public void authEncapsulate_succeedsWithX25519HkdfSha256ChaCha20Poly1305()
+      throws GeneralSecurityException {
+    encapsulate(
+        HpkeUtil.AUTH_MODE,
+        HpkeUtil.X25519_HKDF_SHA256_KEM_ID,
+        HpkeUtil.HKDF_SHA256_KDF_ID,
+        HpkeUtil.CHACHA20_POLY1305_AEAD_ID);
+  }
+
+  @Test
   public void encapsulate_succeedsWithX25519HkdfSha256ExportOnlyAead()
       throws GeneralSecurityException {
     encapsulate(
@@ -130,20 +181,57 @@ public final class X25519HpkeKemTest {
   }
 
   @Test
+  public void authEncapsulate_succeedsWithX25519HkdfSha256ExportOnlyAead()
+      throws GeneralSecurityException {
+    encapsulate(
+        HpkeUtil.AUTH_MODE,
+        HpkeUtil.X25519_HKDF_SHA256_KEM_ID,
+        HpkeUtil.HKDF_SHA256_KDF_ID,
+        EXPORT_ONLY_AEAD_ID);
+  }
+
+  @Test
   public void encapsulate_failsWithInvalidMacAlgorithm() {
     X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf("BadMac"));
-    HpkeTestSetup testSetup = testVectors.get(getDefaultTestId()).getTestSetup();
+    HpkeTestSetup testSetup = testVectors.get(getDefaultTestId(HpkeUtil.BASE_MODE)).getTestSetup();
     byte[] validRecipientPublicKey = testSetup.recipientPublicKey;
     assertThrows(NoSuchAlgorithmException.class, () -> kem.encapsulate(validRecipientPublicKey));
   }
 
   @Test
+  public void authEncapsulate_failsWithInvalidMacAlgorithm() {
+    X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf("BadMac"));
+    HpkeTestSetup testSetup = testVectors.get(getDefaultTestId(HpkeUtil.AUTH_MODE)).getTestSetup();
+    byte[] validRecipientPublicKey = testSetup.recipientPublicKey;
+    byte[] senderPrivateKey = testSetup.senderPrivateKey;
+    assertThrows(
+        NoSuchAlgorithmException.class,
+        () ->
+            kem.authEncapsulate(
+                validRecipientPublicKey, X25519HpkeKemPrivateKey.fromBytes(senderPrivateKey)));
+  }
+
+  @Test
   public void encapsulate_failsWithInvalidRecipientPublicKey() {
     X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf(MAC_ALGORITHM));
-    HpkeTestSetup testSetup = testVectors.get(getDefaultTestId()).getTestSetup();
+    HpkeTestSetup testSetup = testVectors.get(getDefaultTestId(HpkeUtil.BASE_MODE)).getTestSetup();
     byte[] invalidRecipientPublicKey =
         Arrays.copyOf(testSetup.recipientPublicKey, testSetup.recipientPublicKey.length + 2);
     assertThrows(InvalidKeyException.class, () -> kem.encapsulate(invalidRecipientPublicKey));
+  }
+
+  @Test
+  public void authEncapsulate_failsWithInvalidRecipientPublicKey() {
+    X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf(MAC_ALGORITHM));
+    HpkeTestSetup testSetup = testVectors.get(getDefaultTestId(HpkeUtil.AUTH_MODE)).getTestSetup();
+    byte[] invalidRecipientPublicKey =
+        Arrays.copyOf(testSetup.recipientPublicKey, testSetup.recipientPublicKey.length + 2);
+    byte[] senderPrivateKey = testSetup.senderPrivateKey;
+    assertThrows(
+        InvalidKeyException.class,
+        () ->
+            kem.authEncapsulate(
+                invalidRecipientPublicKey, X25519HpkeKemPrivateKey.fromBytes(senderPrivateKey)));
   }
 
   @Test
@@ -156,9 +244,29 @@ public final class X25519HpkeKemTest {
   }
 
   @Test
+  public void authDecapsulate_succeedsWithX25519HkdfSha256Aes128Gcm()
+      throws GeneralSecurityException {
+    decapsulate(
+        HpkeUtil.AUTH_MODE,
+        HpkeUtil.X25519_HKDF_SHA256_KEM_ID,
+        HpkeUtil.HKDF_SHA256_KDF_ID,
+        HpkeUtil.AES_128_GCM_AEAD_ID);
+  }
+
+  @Test
   public void decapsulate_succeedsWithX25519HkdfSha256Aes256Gcm() throws GeneralSecurityException {
     decapsulate(
         HpkeUtil.BASE_MODE,
+        HpkeUtil.X25519_HKDF_SHA256_KEM_ID,
+        HpkeUtil.HKDF_SHA256_KDF_ID,
+        HpkeUtil.AES_256_GCM_AEAD_ID);
+  }
+
+  @Test
+  public void authDecapsulate_succeedsWithX25519HkdfSha256Aes256Gcm()
+      throws GeneralSecurityException {
+    decapsulate(
+        HpkeUtil.AUTH_MODE,
         HpkeUtil.X25519_HKDF_SHA256_KEM_ID,
         HpkeUtil.HKDF_SHA256_KDF_ID,
         HpkeUtil.AES_256_GCM_AEAD_ID);
@@ -175,6 +283,16 @@ public final class X25519HpkeKemTest {
   }
 
   @Test
+  public void authDecapsulate_succeedsWithX25519HkdfSha256ChaCha20Poly1305()
+      throws GeneralSecurityException {
+    decapsulate(
+        HpkeUtil.AUTH_MODE,
+        HpkeUtil.X25519_HKDF_SHA256_KEM_ID,
+        HpkeUtil.HKDF_SHA256_KDF_ID,
+        HpkeUtil.CHACHA20_POLY1305_AEAD_ID);
+  }
+
+  @Test
   public void decapsulate_succeedsWithX25519HkdfSha256ExportOnlyAead()
       throws GeneralSecurityException {
     decapsulate(
@@ -185,9 +303,19 @@ public final class X25519HpkeKemTest {
   }
 
   @Test
+  public void authDecapsulate_succeedsWithX25519HkdfSha256ExportOnlyAead()
+      throws GeneralSecurityException {
+    decapsulate(
+        HpkeUtil.AUTH_MODE,
+        HpkeUtil.X25519_HKDF_SHA256_KEM_ID,
+        HpkeUtil.HKDF_SHA256_KDF_ID,
+        EXPORT_ONLY_AEAD_ID);
+  }
+
+  @Test
   public void decapsulate_failsWithInvalidMacAlgorithm() throws GeneralSecurityException {
     X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf("BadMac"));
-    HpkeTestSetup testSetup = testVectors.get(getDefaultTestId()).getTestSetup();
+    HpkeTestSetup testSetup = testVectors.get(getDefaultTestId(HpkeUtil.BASE_MODE)).getTestSetup();
     byte[] validEncapsulatedKey = testSetup.encapsulatedKey;
     HpkeKemPrivateKey validRecipientPrivateKey =
         X25519HpkeKemPrivateKey.fromBytes(testSetup.recipientPrivateKey);
@@ -197,9 +325,22 @@ public final class X25519HpkeKemTest {
   }
 
   @Test
+  public void authDecapsulate_failsWithInvalidMacAlgorithm() throws GeneralSecurityException {
+    X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf("BadMac"));
+    HpkeTestSetup testSetup = testVectors.get(getDefaultTestId(HpkeUtil.AUTH_MODE)).getTestSetup();
+    byte[] validEncapsulatedKey = testSetup.encapsulatedKey;
+    byte[] senderPublicKey = testSetup.senderPublicKey;
+    HpkeKemPrivateKey validRecipientPrivateKey =
+        X25519HpkeKemPrivateKey.fromBytes(testSetup.recipientPrivateKey);
+    assertThrows(
+        NoSuchAlgorithmException.class,
+        () -> kem.authDecapsulate(validEncapsulatedKey, validRecipientPrivateKey, senderPublicKey));
+  }
+
+  @Test
   public void decapsulate_failsWithInvalidEncapsulatedPublicKey() throws GeneralSecurityException {
     X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf(MAC_ALGORITHM));
-    HpkeTestSetup testSetup = testVectors.get(getDefaultTestId()).getTestSetup();
+    HpkeTestSetup testSetup = testVectors.get(getDefaultTestId(HpkeUtil.BASE_MODE)).getTestSetup();
     byte[] invalidEncapsulatedKey =
         Arrays.copyOf(testSetup.encapsulatedKey, testSetup.encapsulatedKey.length + 2);
     HpkeKemPrivateKey validRecipientPrivateKey =
@@ -207,6 +348,22 @@ public final class X25519HpkeKemTest {
     assertThrows(
         InvalidKeyException.class,
         () -> kem.decapsulate(invalidEncapsulatedKey, validRecipientPrivateKey));
+  }
+
+  @Test
+  public void authDecapsulate_failsWithInvalidEncapsulatedPublicKey()
+      throws GeneralSecurityException {
+    X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf(MAC_ALGORITHM));
+    HpkeTestSetup testSetup = testVectors.get(getDefaultTestId(HpkeUtil.AUTH_MODE)).getTestSetup();
+    byte[] invalidEncapsulatedKey =
+        Arrays.copyOf(testSetup.encapsulatedKey, testSetup.encapsulatedKey.length + 2);
+    HpkeKemPrivateKey validRecipientPrivateKey =
+        X25519HpkeKemPrivateKey.fromBytes(testSetup.recipientPrivateKey);
+    byte[] senderPublicKey = testSetup.senderPublicKey;
+    assertThrows(
+        InvalidKeyException.class,
+        () ->
+            kem.authDecapsulate(invalidEncapsulatedKey, validRecipientPrivateKey, senderPublicKey));
   }
 
   @Test

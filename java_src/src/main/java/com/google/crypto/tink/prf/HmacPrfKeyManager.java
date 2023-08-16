@@ -20,6 +20,8 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacPrfKey;
@@ -74,6 +76,11 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
 
   /** Minimum key size in bytes. */
   private static final int MIN_KEY_SIZE_IN_BYTES = 16;
+
+  private static final PrimitiveConstructor<com.google.crypto.tink.prf.HmacPrfKey, Prf>
+      PRF_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              PrfHmacJce::create, com.google.crypto.tink.prf.HmacPrfKey.class, Prf.class);
 
   @Override
   public String getKeyType() {
@@ -185,6 +192,8 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new HmacPrfKeyManager(), newKeyAllowed);
     HmacPrfProtoSerialization.register();
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(PRF_PRIMITIVE_CONSTRUCTOR);
   }
 
   @Override

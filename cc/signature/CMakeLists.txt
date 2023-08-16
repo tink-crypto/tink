@@ -323,6 +323,7 @@ tink_cc_library(
     signature_config.h
   DEPS
     tink::signature::ecdsa_verify_key_manager
+    tink::signature::ed25519_proto_serialization
     tink::signature::ed25519_sign_key_manager
     tink::signature::ed25519_verify_key_manager
     tink::signature::public_key_sign_wrapper
@@ -368,6 +369,120 @@ tink_cc_library(
     tink::proto::ecdsa_cc_proto
     tink::proto::rsa_ssa_pkcs1_cc_proto
     tink::proto::rsa_ssa_pss_cc_proto
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_library(
+  NAME failing_signature
+  SRCS
+    failing_signature.cc
+    failing_signature.h
+  DEPS
+    absl::strings
+    tink::core::public_key_sign
+    tink::core::public_key_verify
+)
+
+tink_cc_library(
+  NAME signature_parameters
+  SRCS
+    signature_parameters.h
+  DEPS
+    tink::core::parameters
+)
+
+tink_cc_library(
+  NAME signature_public_key
+  SRCS
+    signature_public_key.h
+  DEPS
+    tink::signature::signature_parameters
+    absl::strings
+    tink::core::key
+)
+
+tink_cc_library(
+  NAME signature_private_key
+  SRCS
+    signature_private_key.h
+  DEPS
+    tink::signature::signature_parameters
+    tink::signature::signature_public_key
+    absl::strings
+    tink::core::key
+    tink::core::private_key
+)
+
+tink_cc_library(
+  NAME ed25519_parameters
+  SRCS
+    ed25519_parameters.cc
+    ed25519_parameters.h
+  DEPS
+    tink::signature::signature_parameters
+    tink::util::statusor
+)
+
+tink_cc_library(
+  NAME ed25519_public_key
+  SRCS
+    ed25519_public_key.cc
+    ed25519_public_key.h
+  DEPS
+    tink::signature::ed25519_parameters
+    tink::signature::signature_public_key
+    absl::core_headers
+    absl::strings
+    absl::optional
+    tink::core::partial_key_access_token
+    tink::subtle::subtle_util
+    tink::util::status
+    tink::util::statusor
+)
+
+tink_cc_library(
+  NAME ed25519_private_key
+  SRCS
+    ed25519_private_key.cc
+    ed25519_private_key.h
+  DEPS
+    tink::signature::ed25519_public_key
+    tink::signature::signature_private_key
+    crypto
+    tink::core::insecure_secret_key_access
+    tink::core::partial_key_access_token
+    tink::core::restricted_data
+    tink::internal::ec_util
+    tink::util::secret_data
+    tink::util::statusor
+)
+
+tink_cc_library(
+  NAME ed25519_proto_serialization
+  SRCS
+    ed25519_proto_serialization.cc
+    ed25519_proto_serialization.h
+  DEPS
+    tink::signature::ed25519_parameters
+    tink::signature::ed25519_private_key
+    tink::signature::ed25519_public_key
+    absl::status
+    absl::strings
+    absl::optional
+    tink::core::insecure_secret_key_access
+    tink::core::partial_key_access
+    tink::core::restricted_data
+    tink::core::secret_key_access_token
+    tink::internal::key_parser
+    tink::internal::key_serializer
+    tink::internal::mutable_serialization_registry
+    tink::internal::parameters_parser
+    tink::internal::parameters_serializer
+    tink::internal::proto_key_serialization
+    tink::internal::proto_parameters_serialization
+    tink::util::status
+    tink::util::statusor
+    tink::proto::ed25519_cc_proto
     tink::proto::tink_cc_proto
 )
 
@@ -643,6 +758,9 @@ tink_cc_test(
   SRCS
     signature_config_test.cc
   DEPS
+    tink::signature::ed25519_parameters
+    tink::signature::ed25519_private_key
+    tink::signature::ed25519_public_key
     tink::signature::rsa_ssa_pss_sign_key_manager
     tink::signature::rsa_ssa_pss_verify_key_manager
     tink::signature::signature_config
@@ -651,14 +769,28 @@ tink_cc_test(
     absl::memory
     absl::status
     crypto
+    tink::core::insecure_secret_key_access
+    tink::core::key
     tink::core::keyset_handle
+    tink::core::parameters
+    tink::core::partial_key_access
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::core::registry
+    tink::core::restricted_data
+    tink::internal::ec_util
     tink::internal::fips_utils
+    tink::internal::mutable_serialization_registry
+    tink::internal::proto_key_serialization
+    tink::internal::proto_parameters_serialization
+    tink::internal::serialization
+    tink::subtle::random
     tink::util::status
+    tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
+    tink::proto::ed25519_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -716,17 +848,6 @@ tink_cc_test(
     tink::proto::tink_cc_proto
 )
 
-tink_cc_library(
-  NAME failing_signature
-  SRCS
-    failing_signature.cc
-    failing_signature.h
-  DEPS
-    absl::strings
-    tink::core::public_key_sign
-    tink::core::public_key_verify
-)
-
 tink_cc_test(
   NAME failing_signature_test
   SRCS
@@ -736,4 +857,73 @@ tink_cc_test(
     gmock
     absl::status
     tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME ed25519_parameters_test
+  SRCS
+    ed25519_parameters_test.cc
+  DEPS
+    tink::signature::ed25519_parameters
+    gmock
+    tink::util::statusor
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME ed25519_public_key_test
+  SRCS
+    ed25519_public_key_test.cc
+  DEPS
+    tink::signature::ed25519_public_key
+    gmock
+    tink::core::partial_key_access
+    tink::subtle::random
+    tink::util::statusor
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME ed25519_private_key_test
+  SRCS
+    ed25519_private_key_test.cc
+  DEPS
+    tink::signature::ed25519_private_key
+    tink::signature::ed25519_public_key
+    gmock
+    tink::core::insecure_secret_key_access
+    tink::core::partial_key_access
+    tink::internal::ec_util
+    tink::subtle::random
+    tink::util::statusor
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME ed25519_proto_serialization_test
+  SRCS
+    ed25519_proto_serialization_test.cc
+  DEPS
+    tink::signature::ed25519_parameters
+    tink::signature::ed25519_private_key
+    tink::signature::ed25519_proto_serialization
+    tink::signature::ed25519_public_key
+    gmock
+    absl::status
+    absl::optional
+    tink::core::insecure_secret_key_access
+    tink::core::key
+    tink::core::parameters
+    tink::core::partial_key_access
+    tink::core::restricted_data
+    tink::internal::ec_util
+    tink::internal::mutable_serialization_registry
+    tink::internal::proto_key_serialization
+    tink::internal::proto_parameters_serialization
+    tink::internal::serialization
+    tink::subtle::random
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::proto::ed25519_cc_proto
+    tink::proto::tink_cc_proto
 )

@@ -33,7 +33,6 @@ namespace tink {
 namespace {
 
 using ::crypto::tink::test::IsOk;
-using ::crypto::tink::test::IsOkAndHolds;
 using ::crypto::tink::test::StatusIs;
 using ::testing::Combine;
 using ::testing::Eq;
@@ -157,7 +156,7 @@ TEST_P(AesGcmKeyTest, GetKeyBytes) {
       *params, secret, test_case.id_requirement, GetPartialKeyAccess());
   ASSERT_THAT(key, IsOk());
 
-  EXPECT_THAT(key->GetKeyBytes(GetPartialKeyAccess()), IsOkAndHolds(secret));
+  EXPECT_THAT(key->GetKeyBytes(GetPartialKeyAccess()), Eq(secret));
 }
 
 TEST_P(AesGcmKeyTest, KeyEquals) {

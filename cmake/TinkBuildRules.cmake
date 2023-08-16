@@ -49,6 +49,13 @@ if (NOT DEFINED TINK_CXX_STANDARD)
   endif()
 endif()
 
+set(TINK_DEFAULT_COPTS "")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  # This is required to avoid error C1128.
+  # See https://learn.microsoft.com/en-us/cpp/error-messages/compiler-errors-1/fatal-error-c1128?view=msvc-170.
+  set(TINK_DEFAULT_COPTS "/bigobj")
+endif()
+
 list(APPEND TINK_INCLUDE_DIRS "${TINK_GENFILE_DIR}")
 
 set(TINK_IDE_FOLDER "Tink")
@@ -146,6 +153,7 @@ function(tink_cc_library)
     target_sources(${_target_name} PRIVATE ${tink_cc_library_SRCS})
     target_include_directories(${_target_name} PUBLIC ${TINK_INCLUDE_DIRS})
     target_link_libraries(${_target_name} PUBLIC ${tink_cc_library_DEPS})
+    target_compile_options(${_target_name} PRIVATE ${TINK_DEFAULT_COPTS})
     set_property(TARGET ${_target_name} PROPERTY CXX_STANDARD ${TINK_CXX_STANDARD})
     set_property(TARGET ${_target_name} PROPERTY CXX_STANDARD_REQUIRED true)
     if (tink_cc_library_PUBLIC)

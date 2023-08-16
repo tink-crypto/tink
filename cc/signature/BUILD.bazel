@@ -340,6 +340,7 @@ cc_library(
     deps = [
         ":ecdsa_sign_key_manager",
         ":ecdsa_verify_key_manager",
+        ":ed25519_proto_serialization",
         ":ed25519_sign_key_manager",
         ":ed25519_verify_key_manager",
         ":public_key_sign_wrapper",
@@ -386,6 +387,126 @@ cc_library(
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "failing_signature",
+    srcs = ["failing_signature.cc"],
+    hdrs = ["failing_signature.h"],
+    include_prefix = "tink/signature",
+    deps = [
+        "//:public_key_sign",
+        "//:public_key_verify",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "signature_parameters",
+    hdrs = ["signature_parameters.h"],
+    include_prefix = "tink/signature",
+    deps = ["//:parameters"],
+)
+
+cc_library(
+    name = "signature_public_key",
+    hdrs = ["signature_public_key.h"],
+    include_prefix = "tink/signature",
+    deps = [
+        ":signature_parameters",
+        "//:key",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "signature_private_key",
+    hdrs = ["signature_private_key.h"],
+    include_prefix = "tink/signature",
+    deps = [
+        ":signature_parameters",
+        ":signature_public_key",
+        "//:key",
+        "//:private_key",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "ed25519_parameters",
+    srcs = ["ed25519_parameters.cc"],
+    hdrs = ["ed25519_parameters.h"],
+    include_prefix = "tink/signature",
+    deps = [
+        ":signature_parameters",
+        "//util:statusor",
+    ],
+)
+
+cc_library(
+    name = "ed25519_public_key",
+    srcs = ["ed25519_public_key.cc"],
+    hdrs = ["ed25519_public_key.h"],
+    include_prefix = "tink/signature",
+    deps = [
+        ":ed25519_parameters",
+        ":signature_public_key",
+        "//:partial_key_access_token",
+        "//subtle:subtle_util",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
+cc_library(
+    name = "ed25519_private_key",
+    srcs = ["ed25519_private_key.cc"],
+    hdrs = ["ed25519_private_key.h"],
+    include_prefix = "tink/signature",
+    deps = [
+        ":ed25519_public_key",
+        ":signature_private_key",
+        "//:insecure_secret_key_access",
+        "//:partial_key_access_token",
+        "//:restricted_data",
+        "//internal:ec_util",
+        "//util:secret_data",
+        "//util:statusor",
+        "@boringssl//:crypto",
+    ],
+)
+
+cc_library(
+    name = "ed25519_proto_serialization",
+    srcs = ["ed25519_proto_serialization.cc"],
+    hdrs = ["ed25519_proto_serialization.h"],
+    include_prefix = "tink/signature",
+    deps = [
+        ":ed25519_parameters",
+        ":ed25519_private_key",
+        ":ed25519_public_key",
+        "//:insecure_secret_key_access",
+        "//:partial_key_access",
+        "//:restricted_data",
+        "//:secret_key_access_token",
+        "//internal:key_parser",
+        "//internal:key_serializer",
+        "//internal:mutable_serialization_registry",
+        "//internal:parameters_parser",
+        "//internal:parameters_serializer",
+        "//internal:proto_key_serialization",
+        "//internal:proto_parameters_serialization",
+        "//proto:ed25519_cc_proto",
+        "//proto:tink_cc_proto",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
     ],
 )
 
@@ -674,16 +795,33 @@ cc_test(
     srcs = ["signature_config_test.cc"],
     tags = ["fips"],
     deps = [
+        ":ed25519_parameters",
+        ":ed25519_private_key",
+        ":ed25519_public_key",
         ":rsa_ssa_pss_sign_key_manager",
         ":rsa_ssa_pss_verify_key_manager",
         ":signature_config",
         ":signature_key_templates",
+        "//:insecure_secret_key_access",
+        "//:key",
         "//:keyset_handle",
+        "//:parameters",
+        "//:partial_key_access",
         "//:public_key_sign",
         "//:public_key_verify",
         "//:registry",
+        "//:restricted_data",
+        "//internal:ec_util",
         "//internal:fips_utils",
+        "//internal:mutable_serialization_registry",
+        "//internal:proto_key_serialization",
+        "//internal:proto_parameters_serialization",
+        "//internal:serialization",
+        "//proto:ed25519_cc_proto",
+        "//proto:tink_cc_proto",
+        "//subtle:random",
         "//util:status",
+        "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
         "@boringssl//:crypto",
@@ -750,18 +888,6 @@ cc_test(
     ],
 )
 
-cc_library(
-    name = "failing_signature",
-    srcs = ["failing_signature.cc"],
-    hdrs = ["failing_signature.h"],
-    include_prefix = "tink/signature",
-    deps = [
-        "//:public_key_sign",
-        "//:public_key_verify",
-        "@com_google_absl//absl/strings",
-    ],
-)
-
 cc_test(
     name = "failing_signature_test",
     srcs = ["failing_signature_test.cc"],
@@ -769,6 +895,75 @@ cc_test(
         ":failing_signature",
         "//util:test_matchers",
         "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "ed25519_parameters_test",
+    srcs = ["ed25519_parameters_test.cc"],
+    deps = [
+        ":ed25519_parameters",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "ed25519_public_key_test",
+    srcs = ["ed25519_public_key_test.cc"],
+    deps = [
+        ":ed25519_public_key",
+        "//:partial_key_access",
+        "//subtle:random",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "ed25519_private_key_test",
+    srcs = ["ed25519_private_key_test.cc"],
+    deps = [
+        ":ed25519_private_key",
+        ":ed25519_public_key",
+        "//:insecure_secret_key_access",
+        "//:partial_key_access",
+        "//internal:ec_util",
+        "//subtle:random",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "ed25519_proto_serialization_test",
+    srcs = ["ed25519_proto_serialization_test.cc"],
+    deps = [
+        ":ed25519_parameters",
+        ":ed25519_private_key",
+        ":ed25519_proto_serialization",
+        ":ed25519_public_key",
+        "//:insecure_secret_key_access",
+        "//:key",
+        "//:parameters",
+        "//:partial_key_access",
+        "//:restricted_data",
+        "//internal:ec_util",
+        "//internal:mutable_serialization_registry",
+        "//internal:proto_key_serialization",
+        "//internal:proto_parameters_serialization",
+        "//internal:serialization",
+        "//proto:ed25519_cc_proto",
+        "//proto:tink_cc_proto",
+        "//subtle:random",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/types:optional",
         "@com_google_googletest//:gtest_main",
     ],
 )

@@ -48,8 +48,7 @@ class AesGcmKey : public AeadKey {
                                           PartialKeyAccessToken token);
 
   // Returns the underlying AES key.
-  util::StatusOr<RestrictedData> GetKeyBytes(
-      PartialKeyAccessToken token) const {
+  const RestrictedData& GetKeyBytes(PartialKeyAccessToken token) const {
     return key_bytes_;
   }
 

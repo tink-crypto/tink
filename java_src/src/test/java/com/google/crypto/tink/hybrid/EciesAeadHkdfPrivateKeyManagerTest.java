@@ -234,7 +234,8 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     com.google.crypto.tink.proto.KeyTemplate protoTemplate =
         KeyTemplateProtoConverter.toProto(template);
     assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), protoTemplate.getTypeUrl());
-    assertEquals(KeyTemplate.OutputPrefixType.TINK, template.getOutputPrefixType());
+    assertEquals(
+        com.google.crypto.tink.proto.OutputPrefixType.TINK, protoTemplate.getOutputPrefixType());
     EciesAeadHkdfKeyFormat format =
         EciesAeadHkdfKeyFormat.parseFrom(
             protoTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
@@ -261,7 +262,8 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     com.google.crypto.tink.proto.KeyTemplate protoTemplate =
         KeyTemplateProtoConverter.toProto(template);
     assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), protoTemplate.getTypeUrl());
-    assertEquals(KeyTemplate.OutputPrefixType.RAW, template.getOutputPrefixType());
+    assertEquals(
+        com.google.crypto.tink.proto.OutputPrefixType.RAW, protoTemplate.getOutputPrefixType());
     EciesAeadHkdfKeyFormat format =
         EciesAeadHkdfKeyFormat.parseFrom(
             protoTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
@@ -288,7 +290,8 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     com.google.crypto.tink.proto.KeyTemplate protoTemplate =
         KeyTemplateProtoConverter.toProto(template);
     assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), protoTemplate.getTypeUrl());
-    assertEquals(KeyTemplate.OutputPrefixType.TINK, template.getOutputPrefixType());
+    assertEquals(
+        com.google.crypto.tink.proto.OutputPrefixType.TINK, protoTemplate.getOutputPrefixType());
     EciesAeadHkdfKeyFormat format =
         EciesAeadHkdfKeyFormat.parseFrom(
             protoTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
@@ -317,7 +320,8 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     com.google.crypto.tink.proto.KeyTemplate protoTemplate =
         KeyTemplateProtoConverter.toProto(template);
     assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), protoTemplate.getTypeUrl());
-    assertEquals(KeyTemplate.OutputPrefixType.RAW, template.getOutputPrefixType());
+    assertEquals(
+        com.google.crypto.tink.proto.OutputPrefixType.RAW, protoTemplate.getOutputPrefixType());
     EciesAeadHkdfKeyFormat format =
         EciesAeadHkdfKeyFormat.parseFrom(
             protoTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
