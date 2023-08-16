@@ -59,7 +59,7 @@ You can then encrypt a file and upload the result to GCS:
 
 ```shell
 $ echo "some data" > testdata.txt
-$ ./bazel-bin/gcs/gcs_envelope_aead \
+$ ./bazel-bin/gcs/gcs_envelope_aead_cli \
     --mode encrypt \
     --kek_uri gcp-kms://my-cloud-kms-key-uri \
     --gcp_credential_path my-service-account.json \
@@ -71,7 +71,7 @@ $ ./bazel-bin/gcs/gcs_envelope_aead \
 Or download a file from GCS and decrypt it:
 
 ```shell
-$ ./bazel-bin/gcs/gcs_envelope_aead
+$ ./bazel-bin/gcs/gcs_envelope_aead_cli
     --mode decrypt \
     --kek_uri gcp-kms://my-key-uri \
     --gcp_credential_path my-service-account.json \

@@ -11,8 +11,8 @@ exports_files([
 ])
 
 py_binary(
-    name = "jwt_sign",
-    srcs = ["jwt_sign.py"],
+    name = "jwt_sign_cli",
+    srcs = ["jwt_sign_cli.py"],
     python_version = "PY3",
     deps = [
         requirement("absl-py"),
@@ -34,8 +34,8 @@ py_binary(
 )
 
 py_binary(
-    name = "jwt_verify",
-    srcs = ["jwt_verify.py"],
+    name = "jwt_verify_cli",
+    srcs = ["jwt_verify_cli.py"],
     python_version = "PY3",
     deps = [
         requirement("absl-py"),
@@ -49,18 +49,18 @@ sh_test(
     size = "small",
     srcs = ["jwt_signature_test.sh"],
     args = [
-        "$(rootpath :jwt_sign)",
+        "$(rootpath :jwt_sign_cli)",
         "$(rootpath :jwt_generate_public_jwk_set)",
-        "$(rootpath :jwt_verify)",
+        "$(rootpath :jwt_verify_cli)",
         "$(rootpath :jwt_test_private_keyset.json)",
         "$(rootpath :jwt_test_public_keyset.json)",
     ],
     data = [
         ":jwt_generate_public_jwk_set",
-        ":jwt_sign",
+        ":jwt_sign_cli",
         ":jwt_test_private_keyset.json",
         ":jwt_test_public_keyset.json",
-        ":jwt_verify",
+        ":jwt_verify_cli",
     ],
 )
 
@@ -71,17 +71,17 @@ sh_test(
     size = "small",
     srcs = ["jwt_signature_test.sh"],
     args = [
-        "'python3 $(rootpath :jwt_sign.py)'",
+        "'python3 $(rootpath :jwt_sign_cli.py)'",
         "'python3 $(rootpath :jwt_generate_public_jwk_set.py)'",
-        "'python3 $(rootpath :jwt_verify.py)'",
+        "'python3 $(rootpath :jwt_verify_cli.py)'",
         "$(rootpath :jwt_test_private_keyset.json)",
         "$(rootpath :jwt_test_public_keyset.json)",
     ],
     data = [
         ":jwt_generate_public_jwk_set.py",
-        ":jwt_sign.py",
+        ":jwt_sign_cli.py",
         ":jwt_test_private_keyset.json",
         ":jwt_test_public_keyset.json",
-        ":jwt_verify.py",
+        ":jwt_verify_cli.py",
     ],
 )

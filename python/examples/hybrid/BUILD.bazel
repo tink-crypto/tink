@@ -11,8 +11,8 @@ exports_files([
 ])
 
 py_binary(
-    name = "hybrid",
-    srcs = ["hybrid.py"],
+    name = "hybrid_cli",
+    srcs = ["hybrid_cli.py"],
     python_version = "PY3",
     deps = [
         requirement("absl-py"),
@@ -25,14 +25,14 @@ py_binary(
 sh_test(
     name = "hybrid_test",
     size = "small",
-    srcs = ["hybrid_test.sh"],
+    srcs = ["hybrid_cli_test.sh"],
     args = [
-        "$(rootpath :hybrid)",
+        "$(rootpath :hybrid_cli)",
         "$(rootpath :hybrid_test_public_keyset.json)",
         "$(rootpath :hybrid_test_private_keyset.json)",
     ],
     data = [
-        ":hybrid",
+        ":hybrid_cli",
         ":hybrid_test_private_keyset.json",
         ":hybrid_test_public_keyset.json",
     ],
@@ -43,14 +43,14 @@ sh_test(
 sh_test(
     name = "hybrid_test_package",
     size = "small",
-    srcs = ["hybrid_test.sh"],
+    srcs = ["hybrid_cli_test.sh"],
     args = [
-        "'python3 $(rootpath :hybrid)'",
+        "'python3 $(rootpath :hybrid_cli)'",
         "$(rootpath :hybrid_test_public_keyset.json)",
         "$(rootpath :hybrid_test_private_keyset.json)",
     ],
     data = [
-        ":hybrid",
+        ":hybrid_cli",
         ":hybrid_test_private_keyset.json",
         ":hybrid_test_public_keyset.json",
     ],

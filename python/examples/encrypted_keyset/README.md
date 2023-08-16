@@ -32,7 +32,7 @@ You can generate an encrypted keyset:
 ```shell
 # Replace `<my-key-uri>` in `gcp-kms://<my-key-uri>` with your key URI, and
 # my-service-account.json with your service account's credential JSON file.
-$ ./bazel-bin/encrypted_keyset/encrypted_keyset --mode generate \
+$ ./bazel-bin/encrypted_keyset/encrypted_keyset_cli --mode generate \
     --keyset_path aes128_gcm_test_encrypted_keyset.json \
     --kek_uri gcp-kms://<my-key-uri> \
     --gcp_credential_path my-service-account.json
@@ -42,7 +42,7 @@ You can then encrypt a file:
 
 ```shell
 $ echo "some data" > testdata.txt
-$ ./bazel-bin/encrypted_keyset/encrypted_keyset --mode encrypt \
+$ ./bazel-bin/encrypted_keyset/encrypted_keyset_cli --mode encrypt \
     --keyset_path aes128_gcm_test_encrypted_keyset.json \
     --kek_uri gcp-kms://<my-key-uri> \
     --gcp_credential_path my-service-account.json \
@@ -52,7 +52,7 @@ $ ./bazel-bin/encrypted_keyset/encrypted_keyset --mode encrypt \
 Or decrypt the file with:
 
 ```shell
-$ ./bazel-bin/encrypted_keyset/encrypted_keyset --mode decrypt \
+$ ./bazel-bin/encrypted_keyset/encrypted_keyset_cli --mode decrypt \
     --keyset_path aes128_gcm_test_encrypted_keyset.json \
     --kek_uri gcp-kms://<my-key-uri> \
     --gcp_credential_path my-service-account.json \

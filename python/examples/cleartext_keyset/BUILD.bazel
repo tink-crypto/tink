@@ -6,8 +6,8 @@ package(default_visibility = ["//visibility:private"])
 licenses(["notice"])
 
 py_binary(
-    name = "cleartext_keyset",
-    srcs = ["cleartext_keyset.py"],
+    name = "cleartext_keyset_cli",
+    srcs = ["cleartext_keyset_cli.py"],
     python_version = "PY3",
     deps = [
         requirement("absl-py"),
@@ -20,11 +20,11 @@ py_binary(
 sh_test(
     name = "cleartext_keyset_test",
     size = "small",
-    srcs = ["cleartext_keyset_test.sh"],
+    srcs = ["cleartext_keyset_cli_test.sh"],
     args = [
-        "$(rootpath :cleartext_keyset)",
+        "$(rootpath :cleartext_keyset_cli)",
     ],
     data = [
-        ":cleartext_keyset",
+        ":cleartext_keyset_cli",
     ],
 )

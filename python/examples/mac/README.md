@@ -30,7 +30,7 @@ Compute a MAC:
 ```shell
 $ echo "some data" > data.txt
 $ touch mac_file.txt
-$ ./bazel-bin/mac/mac --mode compute \
+$ ./bazel-bin/mac/mac_cli --mode compute \
     --keyset_path ./mac/mac_test_keyset.json \
     --data_path data.txt --mac_path mac_file.txt
 ```
@@ -38,7 +38,7 @@ $ ./bazel-bin/mac/mac --mode compute \
 Verify a MAC:
 
 ```shell
-$ ./bazel-bin/mac/mac --mode verify \
+$ ./bazel-bin/mac/mac_cli --mode verify \
     --keyset_path ./mac/mac_test_keyset.json \
     --data_path data.txt --mac_path mac_file.txt
 ```

@@ -35,7 +35,7 @@ Generate a JWT token using the private keyset:
 ```shell
 $ touch token_file.txt
 
-$ ./bazel-bin/jwt/jwt_sign \
+$ ./bazel-bin/jwt/jwt_sign_cli \
     --private_keyset_path ./jwt/jwt_test_private_keyset.json \
     --audience "audience" --token_path token_file.txt
 ```
@@ -56,7 +56,7 @@ $ ./bazel-bin/jwt/jwt_generate_public_jwk_set \
 You can verify a token using a public keyset given in JWK Set format:
 
 ```shell
-$ ./bazel-bin/jwt/jwt_verify \
+$ ./bazel-bin/jwt/jwt_verify_cli \
     --public_jwk_set_path public_jwk_set.json \
     --audience "audience" --token_path token_file.txt
 ```
