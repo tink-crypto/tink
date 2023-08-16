@@ -40,13 +40,11 @@ import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.Enums;
 import com.google.crypto.tink.subtle.Hex;
-import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.RsaSsaPkcs1SignJce;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
-import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
@@ -259,16 +257,6 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     assertThrows(
         GeneralSecurityException.class,
         () -> manager.getPrimitive(corruptedKey, JwtPublicKeySignInternal.class));
-  }
-
-  @Test
-  public void testDeriveKey_throw() throws Exception {
-    assertThrows(
-        UnsupportedOperationException.class,
-        () ->
-            factory.deriveKey(
-                JwtRsaSsaPkcs1KeyFormat.getDefaultInstance(),
-                new ByteArrayInputStream(Random.randBytes(100))));
   }
 
   private static void checkTemplate(

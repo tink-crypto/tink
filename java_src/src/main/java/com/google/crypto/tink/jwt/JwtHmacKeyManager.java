@@ -35,7 +35,6 @@ import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
-import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -201,12 +200,6 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
             .setAlgorithm(format.getAlgorithm())
             .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
             .build();
-      }
-
-      @Override
-      public JwtHmacKey deriveKey(JwtHmacKeyFormat format, InputStream inputStream)
-          throws GeneralSecurityException {
-        throw new UnsupportedOperationException();
       }
 
       /**

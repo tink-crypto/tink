@@ -44,7 +44,6 @@ import com.google.crypto.tink.testing.TestUtil;
 import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
-import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import java.time.Clock;
 import java.time.Duration;
@@ -183,16 +182,6 @@ public class JwtHmacKeyManagerTest {
                 JwtHmacKey.newBuilder(validKey)
                     .setKeyValue(ByteString.copyFrom(Random.randBytes(31)))
                     .build()));
-  }
-
-  @Test
-  public void testDeriveKey_shouldThrowUnsupportedException() throws Exception {
-    assertThrows(
-        UnsupportedOperationException.class,
-        () ->
-            factory.deriveKey(
-                JwtHmacKeyFormat.getDefaultInstance(),
-                new ByteArrayInputStream(Random.randBytes(100))));
   }
 
   @Test
