@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "absl/base/attributes.h"
+#include "absl/base/macros.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
@@ -380,8 +381,8 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive(
   return (*wrapper)->Wrap(keyset_, monitoring_annotations_);
 }
 
-// TODO(b/265865177): Deprecate.
 template <class P>
+ABSL_DEPRECATED("Inline this function's body at its call sites")
 crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive()
     const {
   return GetPrimitive<P>(crypto::tink::ConfigGlobalRegistry());
