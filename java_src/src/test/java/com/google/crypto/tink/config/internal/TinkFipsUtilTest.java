@@ -16,7 +16,9 @@
 package com.google.crypto.tink.config.internal;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 
+import java.security.GeneralSecurityException;
 import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -70,34 +72,29 @@ public final class TinkFipsUtilTest {
   }
 
   @Test
-  public void testFipsOnlyModeEnabledAtRuntimeAlgorithmCompatibility() {
+  public void testFipsOnlyModeEnabledAtRuntimeWithBoringCrypto() throws GeneralSecurityException {
     // Test behavior when FIPS-only mode is set at runtime.
     Assume.assumeFalse(TinkFipsUtil.useOnlyFips());
-    TinkFipsUtil.setFipsRestricted();
-
-    assertThat(TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()).isFalse();
-
     // BoringCrypto is available, therefore an algorithm which has a FIPS validated
     // implementation is compatible.
     Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
+
+    TinkFipsUtil.setFipsRestricted();
+
+    assertThat(TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()).isFalse();
     assertThat(
             TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO.isCompatible())
         .isTrue();
   }
 
   @Test
-  public void testFipsOnlyModeEnabledAtRuntimeAlgorithmCompatibilityNoBoringCrypto() {
+  public void testFipsOnlyModeEnabledAtRuntimeWithoutBoringCrypto()
+      throws GeneralSecurityException {
     // Test behavior when FIPS-only mode is set at runtime.
     Assume.assumeFalse(TinkFipsUtil.useOnlyFips());
-    TinkFipsUtil.setFipsRestricted();
+    // BoringCrypto is not available.
+    Assume.assumeFalse(TinkFipsUtil.fipsModuleAvailable());
 
-    assertThat(TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()).isFalse();
-
-    // BoringCrypto is not available, therefore no validated implementation is available and
-    // the compatibility check must fail.
-    Assume.assumeTrue(!TinkFipsUtil.fipsModuleAvailable());
-    assertThat(
-            TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO.isCompatible())
-        .isFalse();
+    assertThrows(GeneralSecurityException.class, TinkFipsUtil::setFipsRestricted);
   }
 }

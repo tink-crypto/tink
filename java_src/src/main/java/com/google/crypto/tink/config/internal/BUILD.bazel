@@ -23,11 +23,17 @@ android_library(
 java_library(
     name = "tink_fips_util",
     srcs = ["TinkFipsUtil.java"],
-    deps = [":tink_fips_status"],
+    deps = [
+        ":tink_fips_status",
+        "//src/main/java/com/google/crypto/tink/internal:random",
+    ],
 )
 
 android_library(
     name = "tink_fips_util-android",
     srcs = ["TinkFipsUtil.java"],
-    deps = [":tink_fips_status-android"],
+    deps = [
+        ":tink_fips_status-android",
+        "//src/main/java/com/google/crypto/tink/internal:random-android",
+    ],
 )

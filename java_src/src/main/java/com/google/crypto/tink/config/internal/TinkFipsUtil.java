@@ -15,7 +15,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.google.crypto.tink.config.internal;
 
+import com.google.crypto.tink.internal.Random;
 import java.lang.reflect.Method;
+import java.security.GeneralSecurityException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
@@ -52,7 +54,13 @@ public final class TinkFipsUtil {
     public abstract boolean isCompatible();
   }
 
-  public static void setFipsRestricted() {
+  /** Sets the binary to FIPS-only restricted mode. Fails if no FIPS-mode is available. */
+  public static void setFipsRestricted() throws GeneralSecurityException {
+    if (!checkConscryptIsAvailableAndUsesFipsBoringSsl()) {
+      throw new GeneralSecurityException(
+          "Conscrypt is not available or does not support checking for FIPS build.");
+    }
+    Random.validateUsesConscrypt();
     isRestrictedToFips.set(true);
   }
 
@@ -74,8 +82,8 @@ public final class TinkFipsUtil {
   static Boolean checkConscryptIsAvailableAndUsesFipsBoringSsl() {
     try {
       Class<?> cls = Class.forName("org.conscrypt.Conscrypt");
-      Method isBoringSslFIPSBuild = cls.getMethod("isBoringSslFIPSBuild");
-      return (Boolean) isBoringSslFIPSBuild.invoke(null);
+      Method isBoringSslFipsBuild = cls.getMethod("isBoringSslFIPSBuild");
+      return (Boolean) isBoringSslFipsBuild.invoke(null);
     } catch (Exception e) {
       // For older versions of Conscrypt we get a NoSuchMethodException. But no matter what goes
       // wrong, we cannot guarantee that Conscrypt uses BoringCrypto, so we will return false.
