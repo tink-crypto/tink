@@ -16,6 +16,8 @@
 
 package com.google.crypto.tink.hybrid;
 
+import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
+
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.aead.AesCtrHmacAeadParameters;
 import com.google.crypto.tink.aead.AesGcmParameters;
@@ -25,8 +27,10 @@ import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
-import java.security.InvalidAlgorithmParameterException;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import javax.annotation.Nullable;
 
 /**
@@ -45,6 +49,58 @@ import javax.annotation.Nullable;
  * </ul>
  */
 public final class EciesParameters extends HybridParameters {
+  private static Set<Parameters> listAcceptedDemParameters() throws GeneralSecurityException {
+    HashSet<Parameters> acceptedDemParameters = new HashSet<>();
+    // AES128_GCM_RAW
+    acceptedDemParameters.add(
+        AesGcmParameters.builder()
+            .setIvSizeBytes(12)
+            .setKeySizeBytes(16)
+            .setTagSizeBytes(16)
+            .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+            .build());
+    // AES256_GCM_RAW
+    acceptedDemParameters.add(
+        AesGcmParameters.builder()
+            .setIvSizeBytes(12)
+            .setKeySizeBytes(32)
+            .setTagSizeBytes(16)
+            .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+            .build());
+    // AES128_CTR_HMAC_SHA256_RAW
+    acceptedDemParameters.add(
+        AesCtrHmacAeadParameters.builder()
+            .setAesKeySizeBytes(16)
+            .setHmacKeySizeBytes(32)
+            .setTagSizeBytes(16)
+            .setIvSizeBytes(16)
+            .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
+            .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
+            .build());
+    // AES256_CTR_HMAC_SHA256_RAW
+    acceptedDemParameters.add(
+        AesCtrHmacAeadParameters.builder()
+            .setAesKeySizeBytes(32)
+            .setHmacKeySizeBytes(32)
+            .setTagSizeBytes(32)
+            .setIvSizeBytes(16)
+            .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
+            .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
+            .build());
+    // XCHACHA20_POLY1305_RAW
+    acceptedDemParameters.add(XChaCha20Poly1305Parameters.create());
+    // AES256_SIV_RAW
+    acceptedDemParameters.add(
+        AesSivParameters.builder()
+            .setKeySizeBytes(64)
+            .setVariant(AesSivParameters.Variant.NO_PREFIX)
+            .build());
+    return Collections.unmodifiableSet(acceptedDemParameters);
+  }
+
+  private static final Set<Parameters> acceptedDemParameters =
+      exceptionIsBug(() -> listAcceptedDemParameters());
+
   /** Description of the output prefix prepended to the ciphertext. */
   @Immutable
   public static final class Variant {
@@ -164,25 +220,20 @@ public final class EciesParameters extends HybridParameters {
     }
 
     /**
-     * Current implementation only accepts NO_PREFIX instances of an AesGcmParameters,
+     * Current implementation only accepts certain NO_PREFIX instances of AesGcmParameters,
      * AesCtrHmacAeadParameters, XChaCha20Poly1305Parameters or AesSivParameters.
      */
     @CanIgnoreReturnValue
-    public Builder setDemParameters(Parameters demParameters)
-        throws InvalidAlgorithmParameterException {
-      if (!(demParameters instanceof AesGcmParameters)
-          && !(demParameters instanceof AesCtrHmacAeadParameters)
-          && !(demParameters instanceof XChaCha20Poly1305Parameters)
-          && !(demParameters instanceof AesSivParameters)) {
-        throw new InvalidAlgorithmParameterException(
-            "Invalid DEM parameters; only instances of AesGcmParameters,"
-                + " AesCtrHmacAeadParameters, XChaCha20Poly1305Parameters or AesSivParameters"
-                + " are currently supported.");
+    public Builder setDemParameters(Parameters demParameters) throws GeneralSecurityException {
+      if (!acceptedDemParameters.contains(demParameters)) {
+        throw new GeneralSecurityException(
+            "Invalid DEM parameters "
+                + demParameters
+                + "; only AES128_GCM_RAW, AES256_GCM_RAW, AES128_CTR_HMAC_SHA256_RAW,"
+                + " AES256_CTR_HMAC_SHA256_RAW XCHACHA20_POLY1305_RAW and AES256_SIV_RAW are"
+                + " currently supported.");
       }
-      if (demParameters.hasIdRequirement()) {
-        throw new InvalidAlgorithmParameterException(
-            "Invalid DEM parameters: only parameters without prefix are accepted.");
-      }
+      
       this.demParameters = demParameters;
       return this;
     }
