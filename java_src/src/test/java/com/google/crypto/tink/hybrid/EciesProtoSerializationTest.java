@@ -50,6 +50,7 @@ import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBigInteger;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.spec.ECPoint;
@@ -669,6 +670,37 @@ public final class EciesProtoSerializationTest {
     assertThat(serialized.getIdRequirementOrNull())
         .isEqualTo(serialization.getIdRequirementOrNull());
     assertThat(serialized.getTypeUrl()).isEqualTo(serialization.getTypeUrl());
+  }
+
+  @Test
+  public void serializedProtoCanBeParsedUsingBigIntegerTwoComplementEncoding() throws Exception {
+    String pointXHex = "700c48f77f56584c5cc632ca65640db91b6bacce3a4df6b42ce7cc838833d287";
+    String pointYHex = "db71e509e3fd9b060ddb20ba5c51dcc5948d46fbf640dfe0441782cab85fa4ac";
+    ECPoint someP256PublicPoint =
+        new ECPoint(new BigInteger(pointXHex, 16), new BigInteger(pointYHex, 16));
+
+    EciesParameters parameters =
+        EciesParameters.builder()
+            .setCurveType(EciesParameters.CurveType.NIST_P256)
+            .setHashType(EciesParameters.HashType.SHA256)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.COMPRESSED)
+            .setVariant(EciesParameters.Variant.TINK)
+            .setDemParameters(DEM_PARAMETERS)
+            .setSalt(SALT)
+            .build();
+    EciesPublicKey publicKey =
+        EciesPublicKey.createForNistCurve(parameters, someP256PublicPoint, 101);
+    ProtoKeySerialization serialized =
+        registry.serializeKey(publicKey, ProtoKeySerialization.class, /* access= */ null);
+
+    com.google.crypto.tink.proto.EciesAeadHkdfPublicKey parsedProtoEciesAeadHkdfPublicKey =
+        com.google.crypto.tink.proto.EciesAeadHkdfPublicKey.parseFrom(
+            serialized.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    // parse x and y using BigIntegers two complement encoding.
+    assertThat(new BigInteger(parsedProtoEciesAeadHkdfPublicKey.getX().toByteArray()))
+        .isEqualTo(publicKey.getNistCurvePoint().getAffineX());
+    assertThat(new BigInteger(parsedProtoEciesAeadHkdfPublicKey.getY().toByteArray()))
+        .isEqualTo(publicKey.getNistCurvePoint().getAffineY());
   }
 
   @Test

@@ -119,6 +119,7 @@ java_library(
     srcs = ["EciesAeadHkdfPrivateKeyManager.java"],
     deps = [
         ":ecies_aead_hkdf_public_key_manager",
+        ":ecies_proto_serialization",
         ":hybrid_util",
         ":registry_ecies_aead_hkdf_dem_helper",
         "//proto:common_java_proto",
@@ -496,6 +497,7 @@ android_library(
     srcs = ["EciesAeadHkdfPrivateKeyManager.java"],
     deps = [
         ":ecies_aead_hkdf_public_key_manager-android",
+        ":ecies_proto_serialization-android",
         ":hybrid_util-android",
         ":registry_ecies_aead_hkdf_dem_helper-android",
         "//proto:common_java_proto_lite",
