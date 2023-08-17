@@ -608,12 +608,6 @@ public final class JwkSetConverterTest {
   }
 
   @Test
-  public void disabledKeysets_fromPublicKeysetHandleReturnsEmptySet() throws Exception {
-    String keyset = ES256_KEYSET.replace("ENABLED", "DISABLED");
-    assertEqualJwkSets(convertToJwkSet(keyset), "{\"keys\":[]}");
-  }
-
-  @Test
   public void privateKey_fromPublicKeysetHandleFails() throws Exception {
     assertThrows(GeneralSecurityException.class, () -> convertToJwkSet(PRIVATEKEY_KEYSET));
   }

@@ -1284,6 +1284,17 @@ public class KeysetHandleTest {
   }
 
   @Test
+  public void testBuilder_primaryNotEnabled_throws() throws Exception {
+    KeysetHandle.Builder builder = KeysetHandle.newBuilder();
+    builder.addEntry(
+        KeysetHandle.generateEntryFromParametersName("AES256_CMAC")
+            .withRandomId()
+            .setStatus(KeyStatus.DISABLED)
+            .makePrimary());
+    assertThrows(GeneralSecurityException.class, builder::build);
+  }
+
+  @Test
   public void testBuilder_removedPrimary_throws() throws Exception {
     KeysetHandle.Builder builder = KeysetHandle.newBuilder();
     builder.addEntry(

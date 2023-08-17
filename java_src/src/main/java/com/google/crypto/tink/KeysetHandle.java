@@ -376,9 +376,9 @@ public final class KeysetHandle {
      *       withRandomId}-entry
      *   <li>There are two entries with the same {@code withFixedId} (including pre-existing keys
      *       and imported keys which have an id requirement).
-     *   <li>{@code build()} was previously called for {@code withRandomId} entries,
-     *       and hence calling {@code build()} twice would result in a keyset with different
-     *       key IDs.
+     *   <li>{@code build()} was previously called for {@code withRandomId} entries, and hence
+     *       calling {@code build()} twice would result in a keyset with different key IDs.
+     *   <li>The primary key is not enabled
      * </ul>
      */
     public KeysetHandle build() throws GeneralSecurityException {
@@ -412,6 +412,9 @@ public final class KeysetHandle {
             throw new GeneralSecurityException("Two primaries were set");
           }
           primaryId = id;
+          if (builderEntry.keyStatus != KeyStatus.ENABLED) {
+            throw new GeneralSecurityException("Primary key is not enabled");
+          }
         }
       }
       if (primaryId == null) {

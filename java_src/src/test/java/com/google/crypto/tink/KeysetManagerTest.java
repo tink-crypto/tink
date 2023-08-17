@@ -75,14 +75,8 @@ public class KeysetManagerTest {
   @Test
   public void testEnable_shouldEnableKey() throws Exception {
     int keyId = 42;
-    KeysetHandle handle =
-        KeysetHandle.newBuilder()
-            .addEntry(
-                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
-                    .withFixedId(keyId)
-                    .setStatus(KeyStatus.DISABLED)
-                    .makePrimary())
-            .build();
+    KeysetHandle handle = KeysetHandle.fromKeyset(TestUtil.createKeyset(createDisabledKey(keyId)));
+
     Keyset keyset =
         KeysetManager.withKeysetHandle(handle).enable(keyId).getKeysetHandle().getKeyset();
 
@@ -119,14 +113,7 @@ public class KeysetManagerTest {
   @Test
   public void testEnable_keyNotFound_shouldThrowException() throws Exception {
     int keyId = 42;
-    KeysetHandle handle =
-        KeysetHandle.newBuilder()
-            .addEntry(
-                KeysetHandle.generateEntryFromParametersName("AES128_GCM")
-                    .withFixedId(keyId)
-                    .setStatus(KeyStatus.DISABLED)
-                    .makePrimary())
-            .build();
+    KeysetHandle handle = KeysetHandle.fromKeyset(TestUtil.createKeyset(createDisabledKey(keyId)));
 
     GeneralSecurityException e =
         assertThrows(
