@@ -26,7 +26,6 @@ import com.google.crypto.tink.proto.AesEaxKeyFormat;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
-import com.google.crypto.tink.proto.KmsAeadKeyFormat;
 import com.google.crypto.tink.proto.KmsEnvelopeAeadKeyFormat;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.protobuf.ExtensionRegistryLite;
@@ -207,20 +206,6 @@ public class AeadKeyTemplatesTest {
     assertEquals(new XChaCha20Poly1305KeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     assertTrue(template.getValue().isEmpty()); // Empty format.
-  }
-
-  @Test
-  public void testCreateKmsAeadKeyTemplate() throws Exception {
-    // Intentionally using "weird" or invalid values for parameters,
-    // to test that the function correctly puts them in the resulting template.
-    String keyUri = "some example URI";
-    KeyTemplate template = AeadKeyTemplates.createKmsAeadKeyTemplate(keyUri);
-    assertEquals(new KmsAeadKeyManager().getKeyType(), template.getTypeUrl());
-    assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
-
-    KmsAeadKeyFormat format =
-        KmsAeadKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    assertEquals(keyUri, format.getKeyUri());
   }
 
   @Test
