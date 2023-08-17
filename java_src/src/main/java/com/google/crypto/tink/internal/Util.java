@@ -116,5 +116,18 @@ public final class Util {
     return BuildDispatchedCode.getApiLevel();
   }
 
+  /** Returns true if the first argument is a prefix of the second argument. Not constant time. */
+  public static boolean isPrefix(byte[] prefix, byte[] complete) {
+    if (complete.length < prefix.length) {
+      return false;
+    }
+    for (int i = 0; i < prefix.length; ++i) {
+      if (complete[i] != prefix[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   private Util() {}
 }
