@@ -1,5 +1,7 @@
 tink_module(config)
 
+add_subdirectory(internal)
+
 tink_cc_library(
   NAME tink_config
   SRCS
@@ -111,12 +113,7 @@ tink_cc_library(
   DEPS
     absl::check
     tink::core::configuration
-    tink::aead::aead_wrapper
-    tink::aead::aes_ctr_hmac_aead_key_manager
-    tink::aead::aes_eax_key_manager
-    tink::aead::aes_gcm_key_manager
-    tink::aead::aes_gcm_siv_key_manager
-    tink::aead::xchacha20_poly1305_key_manager
+    tink::config::internal::aead_v0
     tink::daead::aes_siv_key_manager
     tink::daead::deterministic_aead_wrapper
     tink::hybrid::ecies_aead_hkdf_private_key_manager

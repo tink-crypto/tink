@@ -17,12 +17,7 @@
 #include "tink/config/v0.h"
 
 #include "absl/log/check.h"
-#include "tink/aead/aead_wrapper.h"
-#include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
-#include "tink/aead/aes_eax_key_manager.h"
-#include "tink/aead/aes_gcm_key_manager.h"
-#include "tink/aead/aes_gcm_siv_key_manager.h"
-#include "tink/aead/xchacha20_poly1305_key_manager.h"
+#include "tink/config/internal/aead_v0.h"
 #include "tink/configuration.h"
 #include "tink/daead/aes_siv_key_manager.h"
 #include "tink/daead/deterministic_aead_wrapper.h"
@@ -78,37 +73,6 @@ util::Status AddMac(Configuration& config) {
   }
   return internal::ConfigurationImpl::AddKeyTypeManager(
       absl::make_unique<AesCmacKeyManager>(), config);
-}
-
-util::Status AddAead(Configuration& config) {
-  util::Status status = internal::ConfigurationImpl::AddPrimitiveWrapper(
-      absl::make_unique<AeadWrapper>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-
-  status = internal::ConfigurationImpl::AddKeyTypeManager(
-      absl::make_unique<AesCtrHmacAeadKeyManager>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  status = internal::ConfigurationImpl::AddKeyTypeManager(
-      absl::make_unique<AesGcmKeyManager>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  status = internal::ConfigurationImpl::AddKeyTypeManager(
-      absl::make_unique<AesGcmSivKeyManager>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  status = internal::ConfigurationImpl::AddKeyTypeManager(
-      absl::make_unique<AesEaxKeyManager>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  return internal::ConfigurationImpl::AddKeyTypeManager(
-      absl::make_unique<XChaCha20Poly1305KeyManager>(), config);
 }
 
 util::Status AddDeterministicAead(Configuration& config) {
@@ -223,7 +187,7 @@ const Configuration& ConfigV0() {
   static const Configuration* instance = [] {
     static Configuration* config = new Configuration();
     CHECK_OK(AddMac(*config));
-    CHECK_OK(AddAead(*config));
+    CHECK_OK(internal::AddAeadV0(*config));
     CHECK_OK(AddDeterministicAead(*config));
     CHECK_OK(AddStreamingAead(*config));
     CHECK_OK(AddHybrid(*config));
