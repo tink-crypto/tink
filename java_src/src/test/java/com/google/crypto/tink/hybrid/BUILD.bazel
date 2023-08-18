@@ -149,10 +149,15 @@ java_test(
         "//proto:common_java_proto",
         "//proto:ecies_aead_hkdf_java_proto",
         "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:tink_proto_parameters_format",
         "//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
         "//src/main/java/com/google/crypto/tink/hybrid:ecies_aead_hkdf_private_key_manager",
+        "//src/main/java/com/google/crypto/tink/hybrid:hybrid_config",
         "//src/main/java/com/google/crypto/tink/hybrid:hybrid_key_templates",
+        "//src/main/java/com/google/crypto/tink/hybrid:hybrid_parameters",
+        "//src/main/java/com/google/crypto/tink/hybrid:predefined_hybrid_parameters",
         "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
 )
@@ -445,6 +450,21 @@ java_test(
         "//src/main/java/com/google/crypto/tink/util:bytes",
         "//src/main/java/com/google/crypto/tink/util:secret_big_integer",
         "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "PredefinedHybridParametersTest",
+    size = "small",
+    srcs = ["PredefinedHybridParametersTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/hybrid:hybrid_config",
+        "//src/main/java/com/google/crypto/tink/hybrid:hybrid_parameters",
+        "//src/main/java/com/google/crypto/tink/hybrid:predefined_hybrid_parameters",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
