@@ -30,6 +30,7 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
+import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.tinkkey.KeyAccess;
 import com.google.gson.JsonArray;
@@ -63,8 +64,8 @@ public final class JwkSetConverterTest {
       "{\"keys\":[{"
           + "\"kty\":\"EC\","
           + "\"crv\":\"P-256\","
-          + "\"x\":\"ABDPI66hjLHvjxmUJ2nyHIBDmdOtQ4gPsvWgYYgZ0gyg\","
-          + "\"y\":\"AFMQrStMAKkBv3ub6a-0koCTSreYeM9xRmbQLgS54Nbh\","
+          + "\"x\":\"EM8jrqGMse-PGZQnafIcgEOZ061DiA-y9aBhiBnSDKA\","
+          + "\"y\":\"UxCtK0wAqQG_e5vpr7SSgJNKt5h4z3FGZtAuBLng1uE\","
           + "\"use\":\"sig\",\"alg\":\"ES256\",\"key_ops\":[\"verify\"]}]}";
 
   private static final String ES256_KEYSET_TINK =
@@ -78,8 +79,8 @@ public final class JwkSetConverterTest {
       "{\"keys\":[{"
           + "\"kty\":\"EC\","
           + "\"crv\":\"P-256\","
-          + "\"x\":\"ABDPI66hjLHvjxmUJ2nyHIBDmdOtQ4gPsvWgYYgZ0gyg\","
-          + "\"y\":\"AFMQrStMAKkBv3ub6a-0koCTSreYeM9xRmbQLgS54Nbh\","
+          + "\"x\":\"EM8jrqGMse-PGZQnafIcgEOZ061DiA-y9aBhiBnSDKA\","
+          + "\"y\":\"UxCtK0wAqQG_e5vpr7SSgJNKt5h4z3FGZtAuBLng1uE\","
           + "\"use\":\"sig\",\"alg\":\"ES256\",\"key_ops\":[\"verify\"],"
           + "\"kid\":\"ENgjPA\"}]}";
   private static final String ES256_JWK_SET_KID_TINK =
@@ -99,8 +100,8 @@ public final class JwkSetConverterTest {
           + "},\"status\":\"ENABLED\",\"keyId\":456087424,\"outputPrefixType\":\"RAW\"}]}";
   private static final String ES384_JWK_SET =
       "{\"keys\":[{\"kty\":\"EC\",\"crv\":\"P-384\","
-          + "\"x\":\"ANKO9aKGgoaavieUO4j8qS-4-8Rmv4HhtTQy5dBBeDI0wYCkWbaJN6i2_ssJKwbeZA\","
-          + "\"y\":\"AEHIMGx4wa-Y8yeJQWMiSpukpPM7jP9GqaykZQQ2GY_NLg_n9-BJtntgvFhG5gWLTg\","
+          + "\"x\":\"0o71ooaChpq-J5Q7iPypL7j7xGa_geG1NDLl0EF4MjTBgKRZtok3qLb-ywkrBt5k\","
+          + "\"y\":\"QcgwbHjBr5jzJ4lBYyJKm6Sk8zuM_0aprKRlBDYZj80uD-f34Em2e2C8WEbmBYtO\","
           + "\"use\":\"sig\",\"alg\":\"ES384\",\"key_ops\":[\"verify\"]}]}";
 
   private static final String ES512_KEYSET =
@@ -113,8 +114,8 @@ public final class JwkSetConverterTest {
           + "},\"status\":\"ENABLED\",\"keyId\":1570200439,\"outputPrefixType\":\"RAW\"}]}";
   private static final String ES512_JWK_SET =
       "{\"keys\":[{\"kty\":\"EC\",\"crv\":\"P-521\","
-          + "\"x\":\"AAEV3nweRej6Z1_aPTqCkc1tQla5eVI68-qfwR1kB_wXCuYCB5otarhomUt64Fah_8Tjf0WJHMZyFr86RUitiRQm1Q\","
-          + "\"y\":\"AAE4bfzTl_EXG2hK9TGh_tARU2nqb6U80n0NOAtj_FQqFEQdxnlSpOFUIfDvyi0mH1_ufG6hJ2mdBu1vaox2tqJbNg\","
+          + "\"x\":\"ARXefB5F6PpnX9o9OoKRzW1CVrl5Ujrz6p_BHWQH_BcK5gIHmi1quGiZS3rgVqH_xON_RYkcxnIWvzpFSK2JFCbV\","
+          + "\"y\":\"ATht_NOX8RcbaEr1MaH-0BFTaepvpTzSfQ04C2P8VCoURB3GeVKk4VQh8O_KLSYfX-58bqEnaZ0G7W9qjHa2ols2\","
           + "\"use\":\"sig\",\"alg\":\"ES512\",\"key_ops\":[\"verify\"]}]}";
 
   private static final String RS256_KEYSET =
@@ -328,6 +329,27 @@ public final class JwkSetConverterTest {
           + "xyhj\","
           + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"PS512\",\"key_ops\":[\"verify\"]}]}";
 
+  private static final String P256_PUBLIC_KEYSET_SMALL_COORDINATES =
+      "{\"primaryKeyId\":2124611562,\"key\":[{\"keyData\":{\"typeUrl\":"
+          + " \"type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey\""
+          + " ,\"value\":\"EAEaH2lFjtbwLgtzRDh7dV9sYmW4IWl3ZKA+WghvrQPiCNoiIEJ8pQXMy"
+          + " A/JywaGWT+IHmWxuVYWqdxkPsUSHLhSQm51\",\"keyMaterialType\":\"ASYMMETRIC_PUBLIC\"}"
+          + " ,\"status\":\"ENABLED\",\"keyId\":2124611562,\"outputPrefixType\":\"TINK\"}]}";
+  private static final String P384_PUBLIC_KEYSET_SMALL_COORDINATES =
+      "{\"primaryKeyId\":4159170178,\"key\":[{\"keyData\":{"
+          + " \"typeUrl\":\"type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey\","
+          + " \"value\":\"EAIaL/bm1+e6X7gat+MJK3e65BGlZzKIf6I1q0Ro8zAKeyryUxgvZl8Ww/NlcVN2XJhEI"
+          + " jA3b73hm8eDfSEEUAAaJbrLZFOFGnSdTWng116r+hOvszYiov+WrsTyIgnL/9aRdN8=\","
+          + " \"keyMaterialType\":\"ASYMMETRIC_PUBLIC\"},\"status\":\"ENABLED\","
+          + " \"keyId\":4159170178,\"outputPrefixType\":\"TINK\"}]}";
+  private static final String P521_PUBLIC_KEYSET_SMALL_COORDINATES =
+      "{\"primaryKeyId\":1286030637,\"key\":[{\"keyData\":{"
+          + " \"typeUrl\":\"type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey\","
+          + " \"value\":\"EAMaQUgdEssWf+tdFT3vSoy/OAotV501af+XQ6JSXDjnOPCzZnFh8fYwrJ8Yu8XYF3"
+          + " 3IeHBdAIKyicKuW884JkjYR1qJIkH2OWoa4SOmk0FtpeRBZHPbs7U8SMFXVkaV+HZtjmfl11QGiQU9hqU"
+          + " hoW9ock2K0xg6wdcWBe67YTVFdQbThFmtCg==\",\"keyMaterialType\":\"ASYMMETRIC_PUBLIC\"},"
+          + " \"status\":\"ENABLED\",\"keyId\":1286030637,\"outputPrefixType\":\"TINK\"}]}";
+
   private static final String PRIVATEKEY_KEYSET =
       "{\"primaryKeyId\":152493399,\"key\":[{\"keyData\":{"
           + "\"typeUrl\":\"type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey\","
@@ -357,8 +379,8 @@ public final class JwkSetConverterTest {
       "{\"keys\":[{"
           + "\"kty\":\"EC\","
           + "\"crv\":\"P-256\","
-          + "\"x\":\"ABDPI66hjLHvjxmUJ2nyHIBDmdOtQ4gPsvWgYYgZ0gyg\","
-          + "\"y\":\"AFMQrStMAKkBv3ub6a-0koCTSreYeM9xRmbQLgS54Nbh\","
+          + "\"x\":\"EM8jrqGMse-PGZQnafIcgEOZ061DiA-y9aBhiBnSDKA\","
+          + "\"y\":\"UxCtK0wAqQG_e5vpr7SSgJNKt5h4z3FGZtAuBLng1uE\","
           + "\"use\":\"sig\",\"alg\":\"ES256\",\"key_ops\":[\"verify\"]},"
           + "{\"kty\":\"RSA\","
           + "\"n\":\"AJLKZN-5Rgal5jz6tgi-SnQ3kce8RYk2naS943OJ12qn7QraTOqhMX63NiS2iLJ8KcHxjApX3v2pSL"
@@ -402,6 +424,30 @@ public final class JwkSetConverterTest {
     KeysetHandle handle =
         TinkJsonProtoKeysetFormat.parseKeyset(jsonKeyset, InsecureSecretKeyAccess.get());
     return JwkSetConverter.fromPublicKeysetHandle(handle);
+  }
+
+  private static byte[] getCoordinate(JsonObject jwkSet, String coordinate) throws Exception {
+    return Base64.urlSafeDecode(
+        jwkSet.get("keys").getAsJsonArray().get(0).getAsJsonObject().get(coordinate).getAsString());
+  }
+
+  @Test
+  public void convertEcdsaKeysets_encodesFixedSizeCordinates() throws Exception {
+    JsonObject jwkSet =
+        JsonParser.parseString(convertToJwkSet(P256_PUBLIC_KEYSET_SMALL_COORDINATES))
+            .getAsJsonObject();
+    assertThat(getCoordinate(jwkSet, "x")).hasLength(32);
+    assertThat(getCoordinate(jwkSet, "y")).hasLength(32);
+    jwkSet =
+        JsonParser.parseString(convertToJwkSet(P384_PUBLIC_KEYSET_SMALL_COORDINATES))
+            .getAsJsonObject();
+    assertThat(getCoordinate(jwkSet, "x")).hasLength(48);
+    assertThat(getCoordinate(jwkSet, "y")).hasLength(48);
+    jwkSet =
+        JsonParser.parseString(convertToJwkSet(P521_PUBLIC_KEYSET_SMALL_COORDINATES))
+            .getAsJsonObject();
+    assertThat(getCoordinate(jwkSet, "x")).hasLength(66);
+    assertThat(getCoordinate(jwkSet, "y")).hasLength(66);
   }
 
   @Test
