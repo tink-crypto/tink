@@ -82,7 +82,9 @@ Status MacCli(absl::string_view mode, const std::string keyset_filename,
 
   // Get the primitive.
   StatusOr<std::unique_ptr<Mac>> mac_primitive =
-      (*keyset_handle)->GetPrimitive<Mac>();
+      (*keyset_handle)
+          ->GetPrimitive<crypto::tink::Mac>(
+              crypto::tink::ConfigGlobalRegistry());
   if (!mac_primitive.ok()) return mac_primitive.status();
 
   // Read the input.
