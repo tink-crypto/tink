@@ -37,7 +37,8 @@ PublicKeySignFactory::GetPrimitive(const KeysetHandle& keyset_handle) {
   if (!status.ok()) {
     return status;
   }
-  return keyset_handle.GetPrimitive<PublicKeySign>();
+  return keyset_handle.GetPrimitive<crypto::tink::PublicKeySign>(
+      ConfigGlobalRegistry());
 }
 
 // static
