@@ -112,7 +112,10 @@ TEST_F(JwtMacWrapperTest, CannotWrapPrimitivesFromNonRawOrTinkKeys) {
       KeysetHandle::GenerateNew(tink_key_template);
   EXPECT_THAT(keyset_handle, IsOk());
 
-  EXPECT_FALSE((*keyset_handle)->GetPrimitive<JwtMac>().status().ok());
+  EXPECT_FALSE((*keyset_handle)
+                   ->GetPrimitive<crypto::tink::JwtMac>(ConfigGlobalRegistry())
+                   .status()
+                   .ok());
 }
 
 TEST_F(JwtMacWrapperTest, GenerateRawComputeVerifySuccess) {
@@ -121,7 +124,8 @@ TEST_F(JwtMacWrapperTest, GenerateRawComputeVerifySuccess) {
       KeysetHandle::GenerateNew(key_template);
   EXPECT_THAT(keyset_handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtMac>> jwt_mac =
-      (*keyset_handle)->GetPrimitive<JwtMac>();
+      (*keyset_handle)
+          ->GetPrimitive<crypto::tink::JwtMac>(ConfigGlobalRegistry());
   EXPECT_THAT(jwt_mac, IsOk());
 
   util::StatusOr<RawJwt> raw_jwt =
@@ -159,7 +163,8 @@ TEST_F(JwtMacWrapperTest, GenerateRawComputeVerifySuccess) {
   std::unique_ptr<KeysetHandle> tink_keyset_handle =
       KeysetHandleWithTinkPrefix(**keyset_handle);
   util::StatusOr<std::unique_ptr<JwtMac>> tink_jwt_mac =
-      tink_keyset_handle->GetPrimitive<JwtMac>();
+      tink_keyset_handle->GetPrimitive<crypto::tink::JwtMac>(
+          ConfigGlobalRegistry());
   ASSERT_THAT(tink_jwt_mac, IsOk());
 
   EXPECT_THAT(
@@ -173,7 +178,8 @@ TEST_F(JwtMacWrapperTest, GenerateTinkComputeVerifySuccess) {
       KeysetHandle::GenerateNew(key_template);
   EXPECT_THAT(keyset_handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtMac>> jwt_mac =
-      (*keyset_handle)->GetPrimitive<JwtMac>();
+      (*keyset_handle)
+          ->GetPrimitive<crypto::tink::JwtMac>(ConfigGlobalRegistry());
   EXPECT_THAT(jwt_mac, IsOk());
 
   util::StatusOr<RawJwt> raw_jwt =
@@ -213,7 +219,8 @@ TEST_F(JwtMacWrapperTest, GenerateTinkComputeVerifySuccess) {
   std::unique_ptr<KeysetHandle> keyset_handle_with_new_key_id =
       KeysetHandleWithNewKeyId(**keyset_handle);
   util::StatusOr<std::unique_ptr<JwtMac>> jwt_mac_with_new_key_id =
-      keyset_handle_with_new_key_id->GetPrimitive<JwtMac>();
+      keyset_handle_with_new_key_id->GetPrimitive<crypto::tink::JwtMac>(
+          ConfigGlobalRegistry());
   ASSERT_THAT(jwt_mac_with_new_key_id, IsOk());
 
   util::StatusOr<VerifiedJwt> verified_jwt_2 =
@@ -234,26 +241,26 @@ TEST_F(JwtMacWrapperTest, KeyRotation) {
     ASSERT_THAT(manager.SetPrimary(*old_id), IsOk());
     std::unique_ptr<KeysetHandle> handle1 = manager.GetKeysetHandle();
     util::StatusOr<std::unique_ptr<JwtMac>> jwt_mac1 =
-        handle1->GetPrimitive<JwtMac>();
+        handle1->GetPrimitive<crypto::tink::JwtMac>(ConfigGlobalRegistry());
     ASSERT_THAT(jwt_mac1, IsOk());
 
     util::StatusOr<uint32_t> new_id = manager.Add(key_template);
     ASSERT_THAT(new_id, IsOk());
     std::unique_ptr<KeysetHandle> handle2 = manager.GetKeysetHandle();
     util::StatusOr<std::unique_ptr<JwtMac>> jwt_mac2 =
-        handle2->GetPrimitive<JwtMac>();
+        handle2->GetPrimitive<crypto::tink::JwtMac>(ConfigGlobalRegistry());
     ASSERT_THAT(jwt_mac2, IsOk());
 
     ASSERT_THAT(manager.SetPrimary(*new_id), IsOk());
     std::unique_ptr<KeysetHandle> handle3 = manager.GetKeysetHandle();
     util::StatusOr<std::unique_ptr<JwtMac>> jwt_mac3 =
-        handle3->GetPrimitive<JwtMac>();
+        handle3->GetPrimitive<crypto::tink::JwtMac>(ConfigGlobalRegistry());
     ASSERT_THAT(jwt_mac3, IsOk());
 
     ASSERT_THAT(manager.Disable(*old_id), IsOk());
     std::unique_ptr<KeysetHandle> handle4 = manager.GetKeysetHandle();
     util::StatusOr<std::unique_ptr<JwtMac>> jwt_mac4 =
-        handle4->GetPrimitive<JwtMac>();
+        handle4->GetPrimitive<crypto::tink::JwtMac>(ConfigGlobalRegistry());
     ASSERT_THAT(jwt_mac4, IsOk());
 
     util::StatusOr<RawJwt> raw_jwt =
