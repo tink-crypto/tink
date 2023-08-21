@@ -35,7 +35,7 @@ util::StatusOr<std::unique_ptr<Mac>> MacFactory::GetPrimitive(
   if (!status.ok()) {
     return status;
   }
-  return keyset_handle.GetPrimitive<Mac>();
+  return keyset_handle.GetPrimitive<crypto::tink::Mac>(ConfigGlobalRegistry());
 }
 
 // static
