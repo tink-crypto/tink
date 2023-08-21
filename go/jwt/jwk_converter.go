@@ -497,21 +497,34 @@ func esPublicKeyToStruct(key *tinkpb.Keyset_Key) (*spb.Struct, error) {
 		Fields: map[string]*spb.Value{},
 	}
 	var algorithm, curve string
+	// RFC 7518 specifies a fixed sized encoding for the x and y coordinates from SEC 1
+	// https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.2
+	var encLen int
 	switch pubKey.GetAlgorithm() {
 	case jepb.JwtEcdsaAlgorithm_ES256:
-		curve, algorithm = "P-256", "ES256"
+		curve, algorithm, encLen = "P-256", "ES256", 32
 	case jepb.JwtEcdsaAlgorithm_ES384:
-		curve, algorithm = "P-384", "ES384"
+		curve, algorithm, encLen = "P-384", "ES384", 48
 	case jepb.JwtEcdsaAlgorithm_ES512:
-		curve, algorithm = "P-521", "ES512"
+		curve, algorithm, encLen = "P-521", "ES512", 66
 	default:
 		return nil, fmt.Errorf("invalid algorithm")
 	}
+
+	// x and y coordinates are big-endian encoded.
+	xPadLen := encLen - len(pubKey.GetX())
+	x := make([]byte, xPadLen, encLen)
+	x = append(x, pubKey.GetX()...)
+
+	yPadLen := encLen - len(pubKey.GetY())
+	y := make([]byte, yPadLen, encLen)
+	y = append(y, pubKey.GetY()...)
+
 	addStringEntry(outKey, "crv", curve)
 	addStringEntry(outKey, "alg", algorithm)
 	addStringEntry(outKey, "kty", "EC")
-	addStringEntry(outKey, "x", base64Encode(pubKey.GetX()))
-	addStringEntry(outKey, "y", base64Encode(pubKey.GetY()))
+	addStringEntry(outKey, "x", base64Encode(x))
+	addStringEntry(outKey, "y", base64Encode(y))
 	addStringEntry(outKey, "use", "sig")
 	addKeyOPSVerify(outKey)
 

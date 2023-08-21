@@ -18,6 +18,7 @@ package jwt_test
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"testing"
 
@@ -28,6 +29,7 @@ import (
 	"github.com/google/tink/go/jwt"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/testkeyset"
+	epb "github.com/google/tink/go/proto/ecdsa_go_proto"
 	jepb "github.com/google/tink/go/proto/jwt_ecdsa_go_proto"
 	jrsppb "github.com/google/tink/go/proto/jwt_rsa_ssa_pkcs1_go_proto"
 	jrpsspb "github.com/google/tink/go/proto/jwt_rsa_ssa_pss_go_proto"
@@ -1416,5 +1418,113 @@ func TestJWKSetFromPublicKeysetHandleInvalidKeysetsFails(t *testing.T) {
 				t.Errorf("jwt.JWKSetFromPublicKeysetHandle() err = nil, want error")
 			}
 		})
+	}
+}
+
+func getCoordinateFromJwk(jwk *spb.Struct, coord string) ([]byte, error) {
+	c := jwk.GetFields()["keys"].GetListValue().GetValues()[0].GetStructValue().GetFields()[coord].GetStringValue()
+	return base64.URLEncoding.WithPadding(base64.NoPadding).DecodeString(c)
+}
+
+func TestJWKEncodesLeadingZerosForFieldCoordiates(t *testing.T) {
+	type testCase struct {
+		tag                string
+		publicKeyset       string
+		elementSizeInBytes int
+	}
+
+	for _, tc := range []testCase{
+		{
+			tag: "P-256",
+			publicKeyset: `{
+				"primaryKeyId": 2124611562,
+				"key": [
+					{
+						"keyData": {
+							"typeUrl": "type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey",
+							"value": "EAEaH2lFjtbwLgtzRDh7dV9sYmW4IWl3ZKA+WghvrQPiCNoiIEJ8pQXMyA/JywaGWT+IHmWxuVYWqdxkPsUSHLhSQm51",
+							"keyMaterialType": "ASYMMETRIC_PUBLIC"
+						},
+						"status": "ENABLED",
+						"keyId": 2124611562,
+						"outputPrefixType": "TINK"
+					}
+				]
+			}`,
+			elementSizeInBytes: 32,
+		},
+		{
+			tag: "P-384",
+			publicKeyset: `{
+				"primaryKeyId": 4159170178,
+				"key": [
+					{
+						"keyData": {
+							"typeUrl": "type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey",
+							"value": "EAIaL/bm1+e6X7gat+MJK3e65BGlZzKIf6I1q0Ro8zAKeyryUxgvZl8Ww/NlcVN2XJhEIjA3b73hm8eDfSEEUAAaJbrLZFOFGnSdTWng116r+hOvszYiov+WrsTyIgnL/9aRdN8=",
+							"keyMaterialType": "ASYMMETRIC_PUBLIC"
+						},
+						"status": "ENABLED",
+						"keyId": 4159170178,
+						"outputPrefixType": "TINK"
+					}
+				]
+			}`,
+			elementSizeInBytes: 48,
+		},
+		{
+			tag: "P-384",
+			publicKeyset: `{
+				"primaryKeyId": 1286030637,
+				"key": [
+					{
+						"keyData": {
+							"typeUrl": "type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey",
+							"value": "EAMaQUgdEssWf+tdFT3vSoy/OAotV501af+XQ6JSXDjnOPCzZnFh8fYwrJ8Yu8XYF33IeHBdAIKyicKuW884JkjYR1qJIkH2OWoa4SOmk0FtpeRBZHPbs7U8SMFXVkaV+HZtjmfl11QGiQU9hqUhoW9ock2K0xg6wdcWBe67YTVFdQbThFmtCg==",
+							"keyMaterialType": "ASYMMETRIC_PUBLIC"
+						},
+						"status": "ENABLED",
+						"keyId": 1286030637,
+						"outputPrefixType": "TINK"
+					}
+				]
+			}`,
+			elementSizeInBytes: 66,
+		},
+	} {
+		handle, err := createKeysetHandle(tc.publicKeyset)
+		if err != nil {
+			t.Fatalf("createKeysetHandle() err = %v, want nil", err)
+		}
+		keyset := testkeyset.KeysetMaterial(handle)
+		pubKey := &epb.EcdsaPublicKey{}
+		if err := proto.Unmarshal(keyset.GetKey()[0].GetKeyData().GetValue(), pubKey); err != nil {
+			t.Fatalf("proto.Unmarshal() err = %v, want nil", err)
+		}
+		if len(pubKey.GetX()) == tc.elementSizeInBytes && len(pubKey.GetY()) == tc.elementSizeInBytes {
+			t.Errorf("excepted serialized coordinates to be smaller than element, to test padding logic")
+		}
+		js, err := jwt.JWKSetFromPublicKeysetHandle(handle)
+		if err != nil {
+			t.Fatalf("jwt.JWKSetFromPublicKeysetHandle() err = %v, want nil", err)
+		}
+		jwkSet := &spb.Struct{}
+		if err := jwkSet.UnmarshalJSON(js); err != nil {
+			t.Fatalf("want.UnmarshalJSON() err = %v, want nil", err)
+		}
+		x, err := getCoordinateFromJwk(jwkSet, "x")
+		if err != nil {
+			t.Fatalf("base64.URLEncoding.WithPadding(base64.NoPadding).DecodeString() err = %v, want nil", err)
+		}
+		y, err := getCoordinateFromJwk(jwkSet, "y")
+		if err != nil {
+			t.Fatalf("base64.URLEncoding.WithPadding(base64.NoPadding).DecodeString() err = %v, want nil", err)
+		}
+		if len(x) != tc.elementSizeInBytes {
+			t.Errorf("len(x) = %d, want %d", len(x), tc.elementSizeInBytes)
+		}
+		if len(y) != tc.elementSizeInBytes {
+			t.Errorf("len(x) = %d, want %d", len(y), tc.elementSizeInBytes)
+		}
 	}
 }
