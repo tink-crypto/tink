@@ -42,7 +42,7 @@ var (
 	vaultCert = filepath.Join(os.Getenv("TEST_WORKSPACE"), "/integration/hcvault/testdata/server.crt")
 )
 
-func TestVaultAEAD_Encrypt(t *testing.T) {
+func TestVaultAEAD_EncryptDecrypt(t *testing.T) {
 	port, stopFunc := newServer(t)
 	defer stopFunc()
 
@@ -61,19 +61,22 @@ func TestVaultAEAD_Encrypt(t *testing.T) {
 	if err != nil {
 		t.Fatal("Cannot obtain Vault AEAD:", err)
 	}
-	pt := []byte("Hello World")
-	context := []byte("extracontext")
-	ct, err := aead.Encrypt(pt, context)
+	plaintext := []byte("plaintext")
+	context := []byte("context")
+	ciphertext, err := aead.Encrypt(plaintext, context)
 	if err != nil {
 		t.Fatal("Error encrypting data:", err)
 	}
-	wantCT := encrypt(pt, context)
-	if !bytes.Equal(wantCT, ct) {
-		t.Fatalf("Incorrect cipher text, want=%s;got=%s", wantCT, ct)
+	gotPlaintext, err := aead.Decrypt(ciphertext, context)
+	if err != nil {
+		t.Fatal("Error decrypting data:", err)
+	}
+	if !bytes.Equal(gotPlaintext, plaintext) {
+		t.Fatalf("Incorrect plain text, want=%s;got=%s", string(plaintext), string(gotPlaintext))
 	}
 }
 
-func TestVaultAEAD_Decrypt(t *testing.T) {
+func TestVaultAEAD_DecryptWithFixedCiphertext(t *testing.T) {
 	port, stopFunc := newServer(t)
 	defer stopFunc()
 
@@ -92,15 +95,14 @@ func TestVaultAEAD_Decrypt(t *testing.T) {
 	if err != nil {
 		t.Fatal("Cannot obtain Vault AEAD:", err)
 	}
-	wantPT := []byte("Hello World")
-	context := []byte("extracontext")
-	ct := encrypt(wantPT, context)
-	pt, err := aead.Decrypt(ct, context)
+	ciphertext := fakeEncrypt([]byte("plaintext"), []byte("context"))
+	context := []byte("context")
+	plaintext, err := aead.Decrypt(ciphertext, context)
 	if err != nil {
 		t.Fatal("Error decrypting data:", err)
 	}
-	if !bytes.Equal(wantPT, pt) {
-		t.Fatalf("Incorrect plain text, want=%s;got=%s", string(wantPT), string(pt))
+	if !bytes.Equal(plaintext, []byte("plaintext")) {
+		t.Fatalf("plaintext = %q, want \"plaintext\"", string(plaintext))
 	}
 }
 
@@ -170,9 +172,10 @@ func newServer(t *testing.T) (int, closeFunc) {
 			if err != nil {
 				t.Fatal("context must be base64 encoded")
 			}
-			resp := map[string]interface{}{
+			ciphertext := fakeEncrypt(pt, context)
+			resp := map[string]any{
 				"data": map[string]string{
-					"ciphertext": string(encrypt(pt, context)),
+					"ciphertext": string(ciphertext),
 				},
 			}
 			respBytes, err := json.Marshal(resp)
@@ -196,13 +199,13 @@ func newServer(t *testing.T) (int, closeFunc) {
 			if err != nil {
 				t.Fatal("context must be base64 encoded")
 			}
-			pt, err := decrypt([]byte(ct), context)
+			plaintext, err := fakeDecrypt([]byte(ct), context)
 			if err != nil {
 				t.Fatal("Cannot decrypt ciphertext:", err)
 			}
-			resp := map[string]interface{}{
+			resp := map[string]any{
 				"data": map[string]string{
-					"plaintext": base64.StdEncoding.EncodeToString(pt),
+					"plaintext": base64.StdEncoding.EncodeToString(plaintext),
 				},
 			}
 			respBytes, err := json.Marshal(resp)
@@ -242,17 +245,31 @@ func newServer(t *testing.T) (int, closeFunc) {
 	return port, l.Close
 }
 
-func encrypt(pt, context []byte) []byte {
+// The ciphertext returned by HC valut is of the form: vault:v1:<ciphertext>,
+// where ciphertext is base64-encoded. See:
+// https://developer.hashicorp.com/vault/api-docs/secret/transit#sample-request-13
+//
+// The ciphertext returned by this fake implementation is of the form: enc:<context>:<plaintext>,
+// where context and plaintext are base64-encoded. It is deterministic and not secure.
+func fakeEncrypt(plaintext, context []byte) []byte {
 	s := fmt.Sprintf(
 		"enc:%s:%s",
 		base64.StdEncoding.EncodeToString(context),
-		base64.StdEncoding.EncodeToString(pt),
+		base64.StdEncoding.EncodeToString(plaintext),
 	)
 	return []byte(s)
 }
 
-func decrypt(ctb, context []byte) ([]byte, error) {
-	ct := string(ctb)
+func TestFakeEncrypt(t *testing.T) {
+	want := []byte("enc:Y29udGV4dA==:cGxhaW50ZXh0")
+	got := fakeEncrypt([]byte("plaintext"), []byte("context"))
+	if !bytes.Equal(got, want) {
+		t.Fatalf("got = %q, want %q", string(got), string(want))
+	}
+}
+
+func fakeDecrypt(ciphertext, context []byte) ([]byte, error) {
+	ct := string(ciphertext)
 	parts := strings.Split(ct, ":")
 	if len(parts) != 3 || parts[0] != "enc" {
 		return nil, errors.New("malformed ciphertext")
@@ -264,9 +281,9 @@ func decrypt(ctb, context []byte) ([]byte, error) {
 	if !bytes.Equal(context, context2) {
 		return nil, errors.New("context doesn't match")
 	}
-	pt, err := base64.StdEncoding.DecodeString(parts[2])
+	plaintext, err := base64.StdEncoding.DecodeString(parts[2])
 	if err != nil {
 		return nil, err
 	}
-	return pt, nil
+	return plaintext, nil
 }
