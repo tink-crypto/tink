@@ -195,7 +195,7 @@ TEST_F(SerializeKeysetToProtoKeysetFormatTest, TestVector) {
                                        InsecureSecretKeyAccess::Get());
   ASSERT_THAT(keyset_handle.status(), IsOk());
   crypto::tink::util::StatusOr<std::unique_ptr<Mac>> mac =
-      (*keyset_handle).GetPrimitive<Mac>();
+      (*keyset_handle).GetPrimitive<crypto::tink::Mac>(ConfigGlobalRegistry());
   ASSERT_THAT(mac.status(), IsOk());
   ASSERT_THAT(
       (*mac)->VerifyMac(
