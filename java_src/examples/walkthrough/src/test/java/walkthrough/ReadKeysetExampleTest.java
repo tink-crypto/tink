@@ -19,11 +19,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.KmsClients;
+import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
-import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.testing.FakeKmsClient;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,51 +46,27 @@ public final class ReadKeysetExampleTest {
           + "  \"primaryKeyId\": 1931667682"
           + "}";
 
-  private static final String FAKE_KMS_KEY =
-      "{"
-          + "  \"key\": ["
-          + "    {"
-          + "      \"keyData\": {"
-          + "        \"keyMaterialType\": \"SYMMETRIC\","
-          + "        \"typeUrl\": \"type.googleapis.com/google.crypto.tink.AesGcmKey\","
-          + "        \"value\": \"GiBWyUfGgYk3RTRhj/LIUzSudIWlyjCftCOypTr0jCNSLg==\""
-          + "      },"
-          + "      \"keyId\": 294406504,"
-          + "      \"outputPrefixType\": \"TINK\","
-          + "      \"status\": \"ENABLED\""
-          + "    }"
-          + "  ],"
-          + "  \"primaryKeyId\": 294406504"
-          + "}";
-
-  /** Returns a FakeKmsClient key URI from {@code FAKE_KMS_KEY}. */
-  private String getFakeKmsKeyUri() throws Exception {
-    KeysetHandle keysetHandle =
-        TinkJsonProtoKeysetFormat.parseKeyset(FAKE_KMS_KEY, InsecureSecretKeyAccess.get());
-    byte[] serializedKmsKey =
-        TinkProtoKeysetFormat.serializeKeyset(keysetHandle, InsecureSecretKeyAccess.get());
-    return FakeKmsClient.PREFIX + Base64.urlSafeEncode(serializedKmsKey);
-  }
-
   @Test
   public void readEncryptedKeyset_succeedsWithValidInputs() throws Exception {
     AeadConfig.register();
-    KmsClients.add(new FakeKmsClient());
+
+    KmsClient kmsClient = new FakeKmsClient();
+    String keyEncryptionKeyUri = FakeKmsClient.createFakeKeyUri();
+    Aead keyEncryptionAead = kmsClient.getAead(keyEncryptionKeyUri);
+
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);
     byte[] keysetAssociatedData = "keysetAssociatedData".getBytes(UTF_8);
-    String kmsKekKeyUri = getFakeKmsKeyUri();
 
     KeysetHandle keysetHandle =
         TinkJsonProtoKeysetFormat.parseKeyset(KEYSET_TO_SERIALIZE, InsecureSecretKeyAccess.get());
-    Aead kmsKekAead = KmsClients.get(kmsKekKeyUri).getAead(kmsKekKeyUri);
     String serializedEncryptedKeyset =
         TinkJsonProtoKeysetFormat.serializeEncryptedKeyset(
-            keysetHandle, kmsKekAead, keysetAssociatedData);
+            keysetHandle, keyEncryptionAead, keysetAssociatedData);
 
     KeysetHandle deserializedKeyset =
         ReadKeysetExample.readEncryptedKeyset(
-            serializedEncryptedKeyset, kmsKekKeyUri, keysetAssociatedData);
+            serializedEncryptedKeyset, keyEncryptionAead, keysetAssociatedData);
     // Make sure the keyset was read correctly trying to decrypt ciphertext.
     byte[] decrypted =
         ObtainAndUseAeadPrimitiveExample.aeadEncryptDecrypt(

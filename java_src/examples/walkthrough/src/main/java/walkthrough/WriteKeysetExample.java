@@ -16,7 +16,6 @@ package walkthrough;
 // [START tink_walkthrough_write_keyset]
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import java.security.GeneralSecurityException;
 
@@ -24,17 +23,19 @@ import java.security.GeneralSecurityException;
 /** Examples to write a keyset to an output stream encrypted with a KMS key. */
 final class WriteKeysetExample {
   private WriteKeysetExample() {}
+
   // [END_EXCLUDE]
 
   /**
    * Serializes a keyset with handle {@code keysetHandle} in JSON format; the keyset is encrypted
-   * through a KMS service using the KMS key {@code kmsKekUri} and {@code associatedData}.
+   * with {@code keyEncryptionAead} and {@code associatedData}.
    *
    * <p>Prerequisites for this example:
    *
    * <ul>
    *   <li>Register AEAD implementations of Tink.
-   *   <li>Register a KMS client to {@link KmsClients} that can use {@code kmsKekUri}.
+   *   <li>Create a key encryption AEAD primitive. This is usually a remote AEAD provided by a Key
+   *       Management Service (KMS).
    *   <li>Create a keyset and wrap it with a {@link KeysetHandle}.
    * </ul>
    *
@@ -43,12 +44,10 @@ final class WriteKeysetExample {
    * @return the serialized keyset.
    */
   static String writeEncryptedKeyset(
-      KeysetHandle keysetHandle, String kmsKekUri, byte[] associatedData)
+      KeysetHandle keysetHandle, Aead keyEncryptionAead, byte[] associatedData)
       throws GeneralSecurityException {
-    // Get an Aead primitive that uses the KMS service to encrypt/decrypt.
-    Aead kmsKekAead = KmsClients.get(kmsKekUri).getAead(kmsKekUri);
     return TinkJsonProtoKeysetFormat.serializeEncryptedKeyset(
-        keysetHandle, kmsKekAead, associatedData);
+        keysetHandle, keyEncryptionAead, associatedData);
   }
   // [END tink_walkthrough_write_keyset]
 }
