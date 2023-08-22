@@ -84,8 +84,8 @@ public final class EciesParametersTest {
       throws Exception {
     Parameters aesGcmParameters =
         AesGcmParameters.builder()
+            .setIvSizeBytes(12)
             .setKeySizeBytes(16)
-            .setIvSizeBytes(16)
             .setTagSizeBytes(16)
             .setVariant(AesGcmParameters.Variant.NO_PREFIX)
             .build();
@@ -113,9 +113,9 @@ public final class EciesParametersTest {
     Parameters aesCtrHmacAeadParameters =
         AesCtrHmacAeadParameters.builder()
             .setAesKeySizeBytes(16)
-            .setHmacKeySizeBytes(16)
+            .setHmacKeySizeBytes(32)
+            .setTagSizeBytes(16)
             .setIvSizeBytes(16)
-            .setTagSizeBytes(21)
             .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
             .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
             .build();
@@ -152,7 +152,11 @@ public final class EciesParametersTest {
 
   @Theory
   public void buildWithAesSivDem_succeeds() throws Exception {
-    Parameters aesSivParameters = AesSivParameters.builder().setKeySizeBytes(32).build();
+    Parameters aesSivParameters =
+        AesSivParameters.builder()
+            .setKeySizeBytes(64)
+            .setVariant(AesSivParameters.Variant.NO_PREFIX)
+            .build();
 
     EciesParameters params =
         EciesParameters.builder()
@@ -521,7 +525,11 @@ public final class EciesParametersTest {
             .setCurveType(EciesParameters.CurveType.NIST_P256)
             .setHashType(EciesParameters.HashType.SHA256)
             .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
-            .setDemParameters(AesSivParameters.builder().setKeySizeBytes(32).build())
+            .setDemParameters(
+                AesSivParameters.builder()
+                    .setKeySizeBytes(64)
+                    .setVariant(AesSivParameters.Variant.NO_PREFIX)
+                    .build())
             .build();
 
     EciesParameters xChaCha20Poly1305Params =

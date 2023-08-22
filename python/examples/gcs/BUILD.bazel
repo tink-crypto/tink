@@ -6,8 +6,8 @@ package(default_visibility = ["//visibility:private"])
 licenses(["notice"])
 
 py_binary(
-    name = "gcs_envelope_aead",
-    srcs = ["gcs_envelope_aead.py"],
+    name = "gcs_envelope_aead_cli",
+    srcs = ["gcs_envelope_aead_cli.py"],
     python_version = "PY3",
     deps = [
         requirement("absl-py"),
@@ -21,9 +21,9 @@ py_binary(
 sh_test(
     name = "gcs_envelope_aead_test",
     size = "small",
-    srcs = ["gcs_envelope_aead_test.sh"],
+    srcs = ["gcs_envelope_aead_cli_test.sh"],
     args = [
-        "$(rootpath :gcs_envelope_aead)",
+        "$(rootpath :gcs_envelope_aead_cli)",
         # Change this to your key.
         "gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key",
         # Change this to your credential.
@@ -34,7 +34,7 @@ sh_test(
         "gs://tink-gcs-examples",
     ],
     data = [
-        ":gcs_envelope_aead",
+        ":gcs_envelope_aead_cli",
         "@google_root_pem//file",
         # Change this to your credential.
         "//testdata/gcp:credential.json",
@@ -47,9 +47,9 @@ sh_test(
 sh_test(
     name = "gcs_envelope_aead_test_package",
     size = "small",
-    srcs = ["gcs_envelope_aead_test.sh"],
+    srcs = ["gcs_envelope_aead_cli_test.sh"],
     args = [
-        "'python3 $(rootpath :gcs_envelope_aead.py)'",
+        "'python3 $(rootpath :gcs_envelope_aead_cli.py)'",
         # Change this to your key
         "gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key",
         # Change this to your credential
@@ -60,7 +60,7 @@ sh_test(
         "gs://tink-gcs-examples",
     ],
     data = [
-        ":gcs_envelope_aead.py",
+        ":gcs_envelope_aead_cli.py",
         "@google_root_pem//file",
         # Change this to your credential.
         "//testdata/gcp:credential.json",

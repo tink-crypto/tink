@@ -8,8 +8,8 @@ licenses(["notice"])
 exports_files(["aead_test_keyset.json"])
 
 py_binary(
-    name = "aead",
-    srcs = ["aead.py"],
+    name = "aead_cli",
+    srcs = ["aead_cli.py"],
     python_version = "PY3",
     deps = [
         requirement("absl-py"),
@@ -42,13 +42,13 @@ py_test(
 sh_test(
     name = "aead_test",
     size = "small",
-    srcs = ["aead_test.sh"],
+    srcs = ["aead_cli_test.sh"],
     args = [
-        "$(rootpath :aead)",
+        "$(rootpath :aead_cli)",
         "$(rootpath :aead_test_keyset.json)",
     ],
     data = [
-        ":aead",
+        ":aead_cli",
         ":aead_test_keyset.json",
     ],
 )
@@ -58,13 +58,13 @@ sh_test(
 sh_test(
     name = "aead_test_package",
     size = "small",
-    srcs = ["aead_test.sh"],
+    srcs = ["aead_cli_test.sh"],
     args = [
-        "'python3 $(rootpath :aead.py)'",
+        "'python3 $(rootpath :aead_cli.py)'",
         "$(rootpath :aead_test_keyset.json)",
     ],
     data = [
-        ":aead.py",
+        ":aead_cli.py",
         ":aead_test_keyset.json",
     ],
 )

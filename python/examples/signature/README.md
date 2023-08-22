@@ -33,7 +33,7 @@ Generate a signature:
 $ echo "some data" > data.txt
 $ touch signature_file.txt
 
-$ ./bazel-bin/signature/signature --mode sign \
+$ ./bazel-bin/signature/signature_cli --mode sign \
     --keyset_path ./signature/signature_test_private_keyset.json \
     --data_path data.txt --signature_path signature_file.txt
 ```
@@ -41,7 +41,7 @@ $ ./bazel-bin/signature/signature --mode sign \
 Verify a signature:
 
 ```shell
-$ ./bazel-bin/signature/signature --mode verify \
+$ ./bazel-bin/signature/signature_cli --mode verify \
     --keyset_path ./signature/signature_test_public_keyset.json \
     --data_path data.txt --signature_path signature_file.txt
 ```

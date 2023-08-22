@@ -15,7 +15,7 @@ Continuous builds are triggered for every new commit to the master branch and
 the current release branch.
 
 For the master branch, at the end of a successful
-continious build, a snapshot of Tink and the example apps are created and
+continuous build, a snapshot of Tink and the example apps are created and
 uploaded to Maven.
 
 ## Presubmit testing

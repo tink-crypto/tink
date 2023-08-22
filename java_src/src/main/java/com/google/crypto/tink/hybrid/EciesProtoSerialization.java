@@ -36,6 +36,7 @@ import com.google.crypto.tink.proto.EciesAeadHkdfParams;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBigInteger;
@@ -171,12 +172,20 @@ final class EciesProtoSerialization {
 
     com.google.crypto.tink.proto.EciesAeadDemParams demProtoParams;
     try {
+      KeyTemplate demKeyTemplate =
+          KeyTemplate.parseFrom(
+              TinkProtoParametersFormat.serialize(parameters.getDemParameters()),
+              ExtensionRegistryLite.getEmptyRegistry());
       demProtoParams =
+          // Always set OutputPrefixType to TINK when serializing. This is to maintain consistency
+          // among the languages.
           com.google.crypto.tink.proto.EciesAeadDemParams.newBuilder()
               .setAeadDem(
-                  com.google.crypto.tink.proto.KeyTemplate.parseFrom(
-                      TinkProtoParametersFormat.serialize(parameters.getDemParameters()),
-                      ExtensionRegistryLite.getEmptyRegistry()))
+                  com.google.crypto.tink.proto.KeyTemplate.newBuilder()
+                      .setTypeUrl(demKeyTemplate.getTypeUrl())
+                      .setOutputPrefixType(OutputPrefixType.TINK)
+                      .setValue(demKeyTemplate.getValue())
+                      .build())
               .build();
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("Parsing EciesParameters failed: ", e);
@@ -197,8 +206,14 @@ final class EciesProtoSerialization {
   private static EciesParameters fromProtoParameters(
       OutputPrefixType outputPrefixType, EciesAeadHkdfParams protoParams)
       throws GeneralSecurityException {
+    /* Set OutputPrefixType to RAW when parsing the DEM parameters */
     com.google.crypto.tink.proto.KeyTemplate aeadKeyTemplate =
-        protoParams.getDemParams().getAeadDem();
+        com.google.crypto.tink.proto.KeyTemplate.newBuilder()
+            .setTypeUrl(protoParams.getDemParams().getAeadDem().getTypeUrl())
+            .setOutputPrefixType(OutputPrefixType.RAW)
+            .setValue(protoParams.getDemParams().getAeadDem().getValue())
+            .build();
+
     EciesParameters.Builder builder =
         EciesParameters.builder()
             .setVariant(VARIANT_CONVERTER.fromProtoEnum(outputPrefixType))

@@ -39,12 +39,10 @@ import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import com.google.crypto.tink.subtle.Enums;
 import com.google.crypto.tink.subtle.Hex;
-import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
-import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
 import java.util.Arrays;
@@ -178,16 +176,6 @@ public class JwtEcdsaSignKeyManagerTest {
     assertThrows(
         GeneralSecurityException.class,
         () -> manager.getPrimitive(corruptedKey, JwtPublicKeySignInternal.class));
-  }
-
-  @Test
-  public void testDeriveKey_throw() throws Exception {
-    assertThrows(
-        UnsupportedOperationException.class,
-        () ->
-            factory.deriveKey(
-                JwtEcdsaKeyFormat.getDefaultInstance(),
-                new ByteArrayInputStream(Random.randBytes(100))));
   }
 
   @Test

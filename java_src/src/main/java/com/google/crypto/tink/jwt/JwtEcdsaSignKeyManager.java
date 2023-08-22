@@ -36,7 +36,6 @@ import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
-import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;
@@ -160,11 +159,6 @@ public final class JwtEcdsaSignKeyManager
       public JwtEcdsaKeyFormat parseKeyFormat(ByteString byteString)
           throws InvalidProtocolBufferException {
         return JwtEcdsaKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-      }
-
-      @Override
-      public JwtEcdsaPrivateKey deriveKey(JwtEcdsaKeyFormat format, InputStream inputStream) {
-        throw new UnsupportedOperationException();
       }
 
       @Override

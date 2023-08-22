@@ -35,7 +35,6 @@ import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -185,12 +184,6 @@ public final class JwtRsaSsaPssSignKeyManager
           throws InvalidProtocolBufferException {
         return JwtRsaSsaPssKeyFormat.parseFrom(
             byteString, ExtensionRegistryLite.getEmptyRegistry());
-      }
-
-      @Override
-      public JwtRsaSsaPssPrivateKey deriveKey(
-          JwtRsaSsaPssKeyFormat format, InputStream inputStream) {
-        throw new UnsupportedOperationException();
       }
 
       @Override

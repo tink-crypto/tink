@@ -30,7 +30,7 @@ You can then encrypt a file:
 
 ```shell
 $ echo "some data" > testdata.txt
-$ ./bazel-bin/hybrid/hybrid --mode encrypt \
+$ ./bazel-bin/hybrid/hybrid_cli --mode encrypt \
     --keyset_path ./hybrid/hybrid_test_public_keyset.json \
     --input_path testdata.txt --output_path testdata.txt.encrypted
 ```
@@ -38,7 +38,7 @@ $ ./bazel-bin/hybrid/hybrid --mode encrypt \
 Or decrypt the file with:
 
 ```shell
-$ ./bazel-bin/hybrid/hybrid --mode decrypt \
+$ ./bazel-bin/hybrid/hybrid_cli --mode decrypt \
     --keyset_path ./hybrid/hybrid_test_private_keyset.json \
     --input_path testdata.txt.encrypted --output_path testdata.txt.decrypted
 $ diff testdata.txt testdata.txt.decrypted

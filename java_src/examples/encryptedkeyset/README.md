@@ -5,7 +5,7 @@ primitive, and use the primitive to do crypto.
 
 ## Build and run
 
-### Prequisite
+### Prerequisite
 
 This example uses a Cloud KMS key as a key-encryption key (KEK) to
 encrypt/decrypt a keyset, which in turn is used to encrypt files.

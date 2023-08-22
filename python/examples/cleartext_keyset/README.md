@@ -19,7 +19,7 @@ $ bazel build ...
 You can generate a cleartext keyset:
 
 ```shell
-$ ./bazel-bin/cleartext_keyset/cleartext_keyset --mode generate \
+$ ./bazel-bin/cleartext_keyset/cleartext_keyset_cli --mode generate \
     --keyset_path aes128_gcm_test_keyset.json
 ```
 
@@ -27,7 +27,7 @@ You can then encrypt a file with the resulting keyset:
 
 ```shell
 $ echo "some data" > testdata.txt
-$ ./bazel-bin/cleartext_keyset/cleartext_keyset --mode encrypt \
+$ ./bazel-bin/cleartext_keyset/cleartext_keyset_cli --mode encrypt \
     --keyset_path aes128_gcm_test_keyset.json \
     --input_path testdata.txt --output_path testdata.txt.encrypted
 ```
@@ -35,7 +35,7 @@ $ ./bazel-bin/cleartext_keyset/cleartext_keyset --mode encrypt \
 Or decrypt a file with:
 
 ```shell
-$ ./bazel-bin/cleartext_keyset/cleartext_keyset --mode decrypt \
+$ ./bazel-bin/cleartext_keyset/cleartext_keyset_cli --mode decrypt \
     --keyset_path aes128_gcm_test_keyset.json \
     --input_path testdata.txt.encrypted --output_path testdata.txt.decrypted
 

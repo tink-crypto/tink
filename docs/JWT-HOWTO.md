@@ -44,7 +44,7 @@ entity. The algorithms supported by this primitive are `HS256`, `HS384` and
 `HS512`.
 
 In [Tinkey](TINKEY.md), all templates that can be used with the JWT primitives
-start with `JWT_`, followed by the algorithm and some additonal paramters. For
+start with `JWT_`, followed by the algorithm and some additional parameters. For
 example `JWT_HS256`, `JWT_ES256`, `JWT_RS256_3072_F4` or `JWT_PS256_3072_F4`.
 
 ## Public keyset distribution

@@ -10,8 +10,8 @@ exports_files([
 ])
 
 py_binary(
-    name = "streaming_aead",
-    srcs = ["streaming_aead.py"],
+    name = "streaming_aead_cli",
+    srcs = ["streaming_aead_cli.py"],
     python_version = "PY3",
     deps = [
         requirement("absl-py"),
@@ -24,13 +24,13 @@ py_binary(
 sh_test(
     name = "streaming_aead_test",
     size = "small",
-    srcs = ["streaming_aead_test.sh"],
+    srcs = ["streaming_aead_cli_test.sh"],
     args = [
-        "$(rootpath :streaming_aead)",
+        "$(rootpath :streaming_aead_cli)",
         "$(rootpath :streaming_aead_keyset.json)",
     ],
     data = [
-        ":streaming_aead",
+        ":streaming_aead_cli",
         ":streaming_aead_keyset.json",
     ],
 )
@@ -40,14 +40,14 @@ sh_test(
 sh_test(
     name = "streaming_aead_test_package",
     size = "small",
-    srcs = ["streaming_aead_test.sh"],
+    srcs = ["streaming_aead_cli_test.sh"],
     args = [
-        "'python3 $(rootpath :streaming_aead.py)'",
+        "'python3 $(rootpath :streaming_aead_cli.py)'",
         "$(rootpath :streaming_aead_keyset.json)",
     ],
     data = [
-        ":streaming_aead",
-        ":streaming_aead.py",
+        ":streaming_aead_cli",
+        ":streaming_aead_cli.py",
         ":streaming_aead_keyset.json",
     ],
 )
