@@ -50,7 +50,8 @@ KeyDerivationKeyTemplates::CreatePrfBasedKeyTemplate(
     return handle.status();
   }
   util::StatusOr<std::unique_ptr<KeysetDeriver>> deriver =
-      (*handle)->GetPrimitive<KeysetDeriver>();
+      (*handle)->GetPrimitive<crypto::tink::KeysetDeriver>(
+          ConfigGlobalRegistry());
   if (!deriver.ok()) {
     return deriver.status();
   }
