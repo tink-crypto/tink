@@ -26,7 +26,6 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClient;
-import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.KmsClientsTestUtil;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.KmsAeadKeyManager;
@@ -98,6 +97,22 @@ public final class AwsKmsClientTest {
     byte[] associatedData = "associatedData".getBytes(UTF_8);
     byte[] ciphertext = kmsAead.encrypt(plaintext, associatedData);
     byte[] decrypted = kmsAead.decrypt(ciphertext, associatedData);
+    assertThat(decrypted).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void clientUnboundToKeyUri_getAead_works() throws Exception {
+    String kekId = "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab";
+    String kekUri =
+        "aws-kms://arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab";
+
+    KmsClient client = new AwsKmsClient().withAwsKms(new FakeAwsKms(asList(kekId)));
+    Aead aead = client.getAead(kekUri);
+
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] associatedData = "associatedData".getBytes(UTF_8);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    byte[] decrypted = aead.decrypt(ciphertext, associatedData);
     assertThat(decrypted).isEqualTo(plaintext);
   }
 
@@ -189,26 +204,6 @@ public final class AwsKmsClientTest {
     byte[] ciphertext2 = kmsAead2.encrypt(plaintext, associatedData);
     byte[] decrypted2 = kmsAead2.decrypt(ciphertext2, associatedData);
     assertThat(decrypted2).isEqualTo(plaintext);
-  }
-
-  @Test
-  public void clientUnboundToKeyUri_getAead_works() throws Exception {
-    String kekId = "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab";
-    String kekUri =
-        "aws-kms://arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab";
-
-    KmsClient client = new AwsKmsClient().withAwsKms(new FakeAwsKms(asList(kekId)));
-    KmsClients.add(client);
-
-    KeyTemplate kmsTemplate = KmsAeadKeyManager.createKeyTemplate(kekUri);
-    KeysetHandle handle = KeysetHandle.generateNew(kmsTemplate);
-    Aead aead = handle.getPrimitive(Aead.class);
-
-    byte[] plaintext = "plaintext".getBytes(UTF_8);
-    byte[] associatedData = "associatedData".getBytes(UTF_8);
-    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
-    byte[] decrypted = aead.decrypt(ciphertext, associatedData);
-    assertThat(decrypted).isEqualTo(plaintext);
   }
 
   @Test
