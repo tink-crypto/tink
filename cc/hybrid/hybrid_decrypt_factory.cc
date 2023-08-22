@@ -37,7 +37,8 @@ HybridDecryptFactory::GetPrimitive(const KeysetHandle& keyset_handle) {
   if (!status.ok()) {
     return status;
   }
-  return keyset_handle.GetPrimitive<HybridDecrypt>();
+  return keyset_handle.GetPrimitive<crypto::tink::HybridDecrypt>(
+      ConfigGlobalRegistry());
 }
 
 // static
