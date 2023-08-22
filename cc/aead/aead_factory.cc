@@ -38,7 +38,7 @@ util::StatusOr<std::unique_ptr<Aead>> AeadFactory::GetPrimitive(
   if (!status.ok()) {
     return status;
   }
-  return keyset_handle.GetPrimitive<Aead>();
+  return keyset_handle.GetPrimitive<crypto::tink::Aead>(ConfigGlobalRegistry());
 }
 
 // static

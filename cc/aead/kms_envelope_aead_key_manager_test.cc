@@ -262,7 +262,7 @@ TEST_P(KmsEnvelopeAeadKeyManagerDekTemplatesTest, EncryptDecryp) {
       KeysetHandle::GenerateNew(env_template);
   ASSERT_THAT(handle, IsOk());
   util::StatusOr<std::unique_ptr<Aead>> envelope_aead =
-      (*handle)->GetPrimitive<Aead>();
+      (*handle)->GetPrimitive<crypto::tink::Aead>(ConfigGlobalRegistry());
   ASSERT_THAT(envelope_aead, IsOk());
 
   std::string plaintext = "plaintext";

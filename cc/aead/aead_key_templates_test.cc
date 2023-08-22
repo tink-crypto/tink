@@ -414,7 +414,8 @@ TEST(AeadKeyTemplatesTest, testKmsEnvelopeAeadMultipleKeysSameKek) {
   auto handle_result1 = KeysetHandle::GenerateNew(key_template1);
   EXPECT_TRUE(handle_result1.ok());
   auto handle1 = std::move(handle_result1.value());
-  auto aead_result1 = handle1->GetPrimitive<Aead>();
+  auto aead_result1 =
+      handle1->GetPrimitive<crypto::tink::Aead>(ConfigGlobalRegistry());
   EXPECT_TRUE(aead_result1.ok());
   auto aead1 = std::move(aead_result1.value());
 
@@ -423,7 +424,8 @@ TEST(AeadKeyTemplatesTest, testKmsEnvelopeAeadMultipleKeysSameKek) {
   auto handle_result2 = KeysetHandle::GenerateNew(key_template2);
   EXPECT_TRUE(handle_result2.ok());
   auto handle2 = std::move(handle_result2.value());
-  auto aead_result2 = handle2->GetPrimitive<Aead>();
+  auto aead_result2 =
+      handle2->GetPrimitive<crypto::tink::Aead>(ConfigGlobalRegistry());
   EXPECT_TRUE(aead_result2.ok());
   auto aead2 = std::move(aead_result2.value());
 
