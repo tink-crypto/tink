@@ -16,6 +16,8 @@
 
 package com.google.crypto.tink.mac;
 
+import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
+
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Registry;
@@ -260,7 +262,15 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
    *     </ul>
    */
   public static final KeyTemplate hmacSha256HalfDigestTemplate() {
-    return createTemplate(32, 16, HashType.SHA256);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                HmacParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setTagSizeBytes(16)
+                    .setHashType(HmacParameters.HashType.SHA256)
+                    .setVariant(HmacParameters.Variant.TINK)
+                    .build()));
   }
 
   /**
@@ -274,7 +284,15 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
    *     </ul>
    */
   public static final KeyTemplate hmacSha256Template() {
-    return createTemplate(32, 32, HashType.SHA256);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                HmacParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setTagSizeBytes(32)
+                    .setHashType(HmacParameters.HashType.SHA256)
+                    .setVariant(HmacParameters.Variant.TINK)
+                    .build()));
   }
 
   /**
@@ -288,7 +306,15 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
    *     </ul>
    */
   public static final KeyTemplate hmacSha512HalfDigestTemplate() {
-    return createTemplate(64, 32, HashType.SHA512);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                HmacParameters.builder()
+                    .setKeySizeBytes(64)
+                    .setTagSizeBytes(32)
+                    .setHashType(HmacParameters.HashType.SHA512)
+                    .setVariant(HmacParameters.Variant.TINK)
+                    .build()));
   }
 
   /**
@@ -302,24 +328,21 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
    *     </ul>
    */
   public static final KeyTemplate hmacSha512Template() {
-    return createTemplate(64, 64, HashType.SHA512);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                HmacParameters.builder()
+                    .setKeySizeBytes(64)
+                    .setTagSizeBytes(64)
+                    .setHashType(HmacParameters.HashType.SHA512)
+                    .setVariant(HmacParameters.Variant.TINK)
+                    .build()));
   }
 
   @Override
   public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
     return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
   };
-
-  /**
-   * @return a {@link KeyTemplate} containing a {@link HmacKeyFormat} with some specified
-   *     parameters.
-   */
-  private static KeyTemplate createTemplate(int keySize, int tagSize, HashType hashType) {
-    HmacParams params = HmacParams.newBuilder().setHash(hashType).setTagSize(tagSize).build();
-    HmacKeyFormat format = HmacKeyFormat.newBuilder().setParams(params).setKeySize(keySize).build();
-    return KeyTemplate.create(
-        new HmacKeyManager().getKeyType(), format.toByteArray(), KeyTemplate.OutputPrefixType.TINK);
-  }
 
   private static KeyFactory.KeyFormat<HmacKeyFormat> createKeyFormat(
       int keySize, int tagSize, HashType hashType, KeyTemplate.OutputPrefixType prefixType) {
