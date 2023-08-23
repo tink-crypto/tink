@@ -197,6 +197,17 @@ public class JwtHmacKeyManagerTest {
   }
 
   @Test
+  public void testHs256Template_function() throws Exception {
+    assertThat(JwtHmacKeyManager.hs256Template().toParameters())
+        .isEqualTo(
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(32)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS256)
+                .build());
+  }
+
+  @Test
   public void testHs384Template() throws Exception {
     KeyTemplate template = KeyTemplates.get("JWT_HS384");
     assertThat(template.toParameters())
@@ -209,6 +220,17 @@ public class JwtHmacKeyManagerTest {
   }
 
   @Test
+  public void testHs384Template_function() throws Exception {
+    assertThat(JwtHmacKeyManager.hs384Template().toParameters())
+        .isEqualTo(
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(48)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS384)
+                .build());
+  }
+
+  @Test
   public void testHs512Template() throws Exception {
     KeyTemplate template = KeyTemplates.get("JWT_HS512");
     assertThat(template.toParameters())
@@ -216,6 +238,17 @@ public class JwtHmacKeyManagerTest {
             JwtHmacParameters.builder()
                 .setKeySizeBytes(64)
                 .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS512)
+                .build());
+  }
+
+  @Test
+  public void testHs512Template_function() throws Exception {
+    assertThat(JwtHmacKeyManager.hs512Template().toParameters())
+        .isEqualTo(
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(64)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
                 .setAlgorithm(JwtHmacParameters.Algorithm.HS512)
                 .build());
   }
