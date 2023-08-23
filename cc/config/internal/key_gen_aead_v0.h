@@ -14,22 +14,21 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_CONFIG_INTERNAL_AEAD_V0_H_
-#define TINK_CONFIG_INTERNAL_AEAD_V0_H_
+#ifndef TINK_CONFIG_INTERNAL_KEY_GEN_AEAD_V0_H_
+#define TINK_CONFIG_INTERNAL_KEY_GEN_AEAD_V0_H_
 
-#include "tink/configuration.h"
+#include "tink/key_gen_configuration.h"
 #include "tink/util/status.h"
 
 namespace crypto {
 namespace tink {
 namespace internal {
 
-// Add recommended AEAD primitive wrappers and key managers to `config`, used to
-// generate primitives.
-util::Status AddAeadV0(Configuration& config);
+// Add recommended AEAD key managers to `config`, used to generate keys.
+util::Status AddAeadV0(KeyGenConfiguration& config);
 
 }  // namespace internal
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_CONFIG_INTERNAL_AEAD_V0_H_
+#endif  // TINK_CONFIG_INTERNAL_KEY_GEN_AEAD_V0_H_
