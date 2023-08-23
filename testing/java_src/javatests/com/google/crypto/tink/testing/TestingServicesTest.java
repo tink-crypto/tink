@@ -22,13 +22,13 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
-import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.TinkProtoParametersFormat;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.daead.AesSivKeyManager;
-import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.prf.HmacPrfKeyManager;
 import com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKeyManager;
@@ -163,9 +163,9 @@ public final class TestingServicesTest {
         KeysetTemplateRequest.newBuilder().setTemplateName("AES256_GCM").build();
     KeysetTemplateResponse response = keysetStub.getTemplate(request);
     assertThat(response.getErr()).isEmpty();
-    KeyTemplate template =
-        KeyTemplateProtoConverter.fromByteArray(response.getKeyTemplate().toByteArray());
-    assertThat(template.toParameters()).isEqualTo(KeyTemplates.get("AES256_GCM").toParameters());
+    Parameters parameters =
+        TinkProtoParametersFormat.parse(response.getKeyTemplate().toByteArray());
+    assertThat(parameters).isEqualTo(KeyTemplates.get("AES256_GCM").toParameters());
   }
 
   @Test
@@ -206,7 +206,8 @@ public final class TestingServicesTest {
 
   @Test
   public void toFromJson_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("AES128_GCM"));
+    byte[] template =
+        TinkProtoParametersFormat.serialize(KeyTemplates.get("AES128_GCM").toParameters());
 
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
@@ -259,7 +260,8 @@ public final class TestingServicesTest {
 
   @Test
   public void generateEncryptDecryptKeyset() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("AES128_GCM"));
+    byte[] template =
+        TinkProtoParametersFormat.serialize(KeyTemplates.get("AES128_GCM").toParameters());
 
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
@@ -306,7 +308,8 @@ public final class TestingServicesTest {
 
   @Test
   public void generateEncryptDecryptKeysetWithAssociatedData() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("AES128_GCM"));
+    byte[] template =
+        TinkProtoParametersFormat.serialize(KeyTemplates.get("AES128_GCM").toParameters());
     byte[] associatedData = "a".getBytes(UTF_8);
 
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
@@ -347,7 +350,8 @@ public final class TestingServicesTest {
 
   @Test
   public void generateEncryptDecryptKeysetWithEmptyAssociatedData() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("AES128_GCM"));
+    byte[] template =
+        TinkProtoParametersFormat.serialize(KeyTemplates.get("AES128_GCM").toParameters());
     byte[] emptyAssociatedData = new byte[0];
 
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
@@ -381,7 +385,8 @@ public final class TestingServicesTest {
   @Test
   public void encryptDecryptInvalidKeyset_fails() throws Exception {
     byte[] invalidData = "invalid".getBytes(UTF_8);
-    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("AES128_GCM"));
+    byte[] template =
+        TinkProtoParametersFormat.serialize(KeyTemplates.get("AES128_GCM").toParameters());
 
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
@@ -414,7 +419,8 @@ public final class TestingServicesTest {
 
   @Test
   public void aeadCreateKeyset_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("AES128_GCM"));
+    byte[] template =
+        TinkProtoParametersFormat.serialize(KeyTemplates.get("AES128_GCM").toParameters());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     CreationResponse response =
@@ -471,7 +477,8 @@ public final class TestingServicesTest {
 
   @Test
   public void aeadGenerateEncryptDecrypt_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("AES128_GCM"));
+    byte[] template =
+        TinkProtoParametersFormat.serialize(KeyTemplates.get("AES128_GCM").toParameters());
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
 
@@ -499,7 +506,8 @@ public final class TestingServicesTest {
 
   @Test
   public void aeadDecrypt_failsOnBadCiphertext() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("AES128_GCM"));
+    byte[] template =
+        TinkProtoParametersFormat.serialize(KeyTemplates.get("AES128_GCM").toParameters());
     byte[] badCiphertext = "bad ciphertext".getBytes(UTF_8);
     byte[] associatedData = "aead_decrypt_fails_on_bad_ciphertext".getBytes(UTF_8);
 
@@ -513,7 +521,8 @@ public final class TestingServicesTest {
 
   @Test
   public void deterministicAeadCreateKeyset_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(AesSivKeyManager.aes256SivTemplate());
+    byte[] template =
+        TinkProtoParametersFormat.serialize(AesSivKeyManager.aes256SivTemplate().toParameters());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     CreationResponse response =
@@ -571,7 +580,8 @@ public final class TestingServicesTest {
 
   @Test
   public void daeadGenerateEncryptDecryptDeterministically_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(AesSivKeyManager.aes256SivTemplate());
+    byte[] template =
+        TinkProtoParametersFormat.serialize(AesSivKeyManager.aes256SivTemplate().toParameters());
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
 
@@ -604,7 +614,8 @@ public final class TestingServicesTest {
 
   @Test
   public void daeadDecryptDeterministically_failsOnBadCiphertext() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(AesSivKeyManager.aes256SivTemplate());
+    byte[] template =
+        TinkProtoParametersFormat.serialize(AesSivKeyManager.aes256SivTemplate().toParameters());
     byte[] badCiphertext = "bad ciphertext".getBytes(UTF_8);
     byte[] associatedData = "aead_decrypt_fails_on_bad_ciphertext".getBytes(UTF_8);
 
@@ -619,7 +630,8 @@ public final class TestingServicesTest {
 
   @Test
   public void daeadDecryptDeterministically_failsOnBadKeyset() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(AesSivKeyManager.aes256SivTemplate());
+    byte[] template =
+        TinkProtoParametersFormat.serialize(AesSivKeyManager.aes256SivTemplate().toParameters());
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
 
@@ -641,8 +653,8 @@ public final class TestingServicesTest {
   @Test
   public void streamingAeadCreateKeyset_success() throws Exception {
     byte[] template =
-        KeyTemplateProtoConverter.toByteArray(
-            AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate());
+        TinkProtoParametersFormat.serialize(
+            AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate().toParameters());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     CreationResponse response =
@@ -706,8 +718,8 @@ public final class TestingServicesTest {
   @Test
   public void streamingAeadGenerateEncryptDecrypt_success() throws Exception {
     byte[] template =
-        KeyTemplateProtoConverter.toByteArray(
-            AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate());
+        TinkProtoParametersFormat.serialize(
+            AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate().toParameters());
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
 
@@ -741,8 +753,8 @@ public final class TestingServicesTest {
   @Test
   public void streamingAeadDecrypt_failsOnBadCiphertext() throws Exception {
     byte[] template =
-        KeyTemplateProtoConverter.toByteArray(
-            AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate());
+        TinkProtoParametersFormat.serialize(
+            AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate().toParameters());
     byte[] badCiphertext = "bad ciphertext".getBytes(UTF_8);
     byte[] associatedData = "streamingAead_decrypt_fails_on_bad_ciphertext".getBytes(UTF_8);
 
@@ -758,8 +770,8 @@ public final class TestingServicesTest {
   @Test
   public void streamingAeadDecrypt_failsOnBadKeyset() throws Exception {
     byte[] template =
-        KeyTemplateProtoConverter.toByteArray(
-            AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate());
+        TinkProtoParametersFormat.serialize(
+            AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate().toParameters());
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
 
@@ -782,7 +794,8 @@ public final class TestingServicesTest {
   @Test
   public void macCreateKeyset_success() throws Exception {
     byte[] template =
-        KeyTemplateProtoConverter.toByteArray(HmacKeyManager.hmacSha256HalfDigestTemplate());
+        TinkProtoParametersFormat.serialize(
+            HmacKeyManager.hmacSha256HalfDigestTemplate().toParameters());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     CreationResponse response =
@@ -839,7 +852,8 @@ public final class TestingServicesTest {
   @Test
   public void computeVerifyMac_success() throws Exception {
     byte[] template =
-        KeyTemplateProtoConverter.toByteArray(HmacKeyManager.hmacSha256HalfDigestTemplate());
+        TinkProtoParametersFormat.serialize(
+            HmacKeyManager.hmacSha256HalfDigestTemplate().toParameters());
     byte[] data = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
 
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
@@ -866,7 +880,8 @@ public final class TestingServicesTest {
   @Test
   public void verifyMac_failsOnBadMacValue() throws Exception {
     byte[] template =
-        KeyTemplateProtoConverter.toByteArray(HmacKeyManager.hmacSha256HalfDigestTemplate());
+        TinkProtoParametersFormat.serialize(
+            HmacKeyManager.hmacSha256HalfDigestTemplate().toParameters());
     byte[] data = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
 
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
@@ -881,7 +896,8 @@ public final class TestingServicesTest {
   @Test
   public void verifyMac_failsOnBadKeyset() throws Exception {
     byte[] template =
-        KeyTemplateProtoConverter.toByteArray(HmacKeyManager.hmacSha256HalfDigestTemplate());
+        TinkProtoParametersFormat.serialize(
+            HmacKeyManager.hmacSha256HalfDigestTemplate().toParameters());
     byte[] data = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
 
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
@@ -899,7 +915,8 @@ public final class TestingServicesTest {
 
   @Test
   public void prfSetCreateKeyset_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(HmacPrfKeyManager.hmacSha256Template());
+    byte[] template =
+        TinkProtoParametersFormat.serialize(HmacPrfKeyManager.hmacSha256Template().toParameters());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     CreationResponse response =
@@ -959,8 +976,8 @@ public final class TestingServicesTest {
 
   @Test
   public void computePrf_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        HmacPrfKeyManager.hmacSha256Template());
+    byte[] template =
+        TinkProtoParametersFormat.serialize(HmacPrfKeyManager.hmacSha256Template().toParameters());
     byte[] inputData = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     int outputLength = 15;
 
@@ -988,8 +1005,8 @@ public final class TestingServicesTest {
 
   @Test
   public void computePrf_failsOnUnknownKeyId() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        HmacPrfKeyManager.hmacSha256Template());
+    byte[] template =
+        TinkProtoParametersFormat.serialize(HmacPrfKeyManager.hmacSha256Template().toParameters());
     byte[] inputData = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     int outputLength = 15;
     int badKeyId = 123456789;
@@ -1005,8 +1022,8 @@ public final class TestingServicesTest {
 
   @Test
   public void computePrf_failsOnBadOutputLength() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        HmacPrfKeyManager.hmacSha256Template());
+    byte[] template =
+        TinkProtoParametersFormat.serialize(HmacPrfKeyManager.hmacSha256Template().toParameters());
     byte[] inputData = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     int outputLength = 12345;
 

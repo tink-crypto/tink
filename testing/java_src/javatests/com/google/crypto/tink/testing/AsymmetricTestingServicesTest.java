@@ -21,9 +21,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.TinkProtoParametersFormat;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.hybrid.EciesAeadHkdfPrivateKeyManager;
-import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.signature.EcdsaSignKeyManager;
 import com.google.crypto.tink.testing.proto.AnnotatedKeyset;
 import com.google.crypto.tink.testing.proto.CreationRequest;
@@ -105,8 +105,9 @@ public final class AsymmetricTestingServicesTest {
   @Test
   public void hybridDecryptCreateKeyset_success() throws Exception {
     byte[] template =
-        KeyTemplateProtoConverter.toByteArray(
-            EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate());
+        TinkProtoParametersFormat.serialize(
+            EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate()
+                .toParameters());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     CreationResponse response =
@@ -136,8 +137,10 @@ public final class AsymmetricTestingServicesTest {
 
   @Test
   public void hybridEncryptCreateKeyset_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate());
+    byte[] template =
+        TinkProtoParametersFormat.serialize(
+            EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate()
+                .toParameters());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] privateKeyset = keysetResponse.getKeyset().toByteArray();
@@ -204,8 +207,10 @@ public final class AsymmetricTestingServicesTest {
 
   @Test
   public void hybridGenerateEncryptDecrypt_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate());
+    byte[] template =
+        TinkProtoParametersFormat.serialize(
+            EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate()
+                .toParameters());
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
 
@@ -249,8 +254,10 @@ public final class AsymmetricTestingServicesTest {
 
   @Test
   public void hybridDecrypt_errorOnBadCiphertext() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate());
+    byte[] template =
+        TinkProtoParametersFormat.serialize(
+            EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate()
+                .toParameters());
     byte[] badCiphertext = "bad ciphertext".getBytes(UTF_8);
     byte[] contextInfo = "hybrid_decrypt_bad_ciphertext".getBytes(UTF_8);
 
@@ -269,8 +276,10 @@ public final class AsymmetricTestingServicesTest {
 
   @Test
   public void hybridDecrypt_failsOnBadKeyset() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate());
+    byte[] template =
+        TinkProtoParametersFormat.serialize(
+            EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate()
+                .toParameters());
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] contextInfo = "hybrid_decrypt_bad_keyset".getBytes(UTF_8);
 
@@ -295,8 +304,8 @@ public final class AsymmetricTestingServicesTest {
 
   @Test
   public void publicKeySignCreateKeyset_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        EcdsaSignKeyManager.ecdsaP256Template());
+    byte[] template =
+        TinkProtoParametersFormat.serialize(EcdsaSignKeyManager.ecdsaP256Template().toParameters());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     CreationResponse response =
@@ -326,8 +335,8 @@ public final class AsymmetricTestingServicesTest {
 
   @Test
   public void publicKeyVerifyCreateKeyset_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        EcdsaSignKeyManager.ecdsaP256Template());
+    byte[] template =
+        TinkProtoParametersFormat.serialize(EcdsaSignKeyManager.ecdsaP256Template().toParameters());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] privateKeyset = keysetResponse.getKeyset().toByteArray();
@@ -390,8 +399,8 @@ public final class AsymmetricTestingServicesTest {
 
   @Test
   public void signatureSignVerify_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        EcdsaSignKeyManager.ecdsaP256Template());
+    byte[] template =
+        TinkProtoParametersFormat.serialize(EcdsaSignKeyManager.ecdsaP256Template().toParameters());
     byte[] data = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
 
     KeysetGenerateResponse genResponse = generateKeyset(keysetStub, template);
@@ -422,8 +431,8 @@ public final class AsymmetricTestingServicesTest {
 
   @Test
   public void signatureVerify_failsOnBadSignature() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        EcdsaSignKeyManager.ecdsaP256Template());
+    byte[] template =
+        TinkProtoParametersFormat.serialize(EcdsaSignKeyManager.ecdsaP256Template().toParameters());
     byte[] data = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
 
     KeysetGenerateResponse genResponse = generateKeyset(keysetStub, template);
@@ -441,8 +450,8 @@ public final class AsymmetricTestingServicesTest {
 
   @Test
   public void signatureVerify_failsOnBadKeyset() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        EcdsaSignKeyManager.ecdsaP256Template());
+    byte[] template =
+        TinkProtoParametersFormat.serialize(EcdsaSignKeyManager.ecdsaP256Template().toParameters());
     byte[] data = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
 
     KeysetGenerateResponse genResponse = generateKeyset(keysetStub, template);
