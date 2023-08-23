@@ -16,6 +16,8 @@
 
 package com.google.crypto.tink.aead;
 
+import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
+
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Registry;
@@ -131,10 +133,10 @@ public class ChaCha20Poly1305KeyManager extends KeyTypeManager<ChaCha20Poly1305K
    * @return a {@link KeyTemplate} that generates new instances of ChaCha20Poly1305 keys.
    */
   public static final KeyTemplate chaCha20Poly1305Template() {
-    return KeyTemplate.create(
-        new ChaCha20Poly1305KeyManager().getKeyType(),
-        ChaCha20Poly1305KeyFormat.getDefaultInstance().toByteArray(),
-        KeyTemplate.OutputPrefixType.TINK);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                ChaCha20Poly1305Parameters.create(ChaCha20Poly1305Parameters.Variant.TINK)));
   }
 
   /**
@@ -143,9 +145,9 @@ public class ChaCha20Poly1305KeyManager extends KeyTypeManager<ChaCha20Poly1305K
    *     libraries.
    */
   public static final KeyTemplate rawChaCha20Poly1305Template() {
-    return KeyTemplate.create(
-        new ChaCha20Poly1305KeyManager().getKeyType(),
-        ChaCha20Poly1305KeyFormat.getDefaultInstance().toByteArray(),
-        KeyTemplate.OutputPrefixType.RAW);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                ChaCha20Poly1305Parameters.create(ChaCha20Poly1305Parameters.Variant.NO_PREFIX)));
   }
 }
