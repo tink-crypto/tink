@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.jwt;
 
+import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
 import com.google.crypto.tink.KeyTemplate;
@@ -240,30 +241,38 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
 
   /** Returns a {@link KeyTemplate} that generates new instances of HS256 256-bit keys. */
   public static final KeyTemplate hs256Template() {
-    return createTemplate(JwtHmacAlgorithm.HS256, 32);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                JwtHmacParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
+                    .setAlgorithm(JwtHmacParameters.Algorithm.HS256)
+                    .build()));
   }
 
   /** Returns a {@link KeyTemplate} that generates new instances of HS384 384-bit keys. */
   public static final KeyTemplate hs384Template() {
-    return createTemplate(JwtHmacAlgorithm.HS384, 48);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                JwtHmacParameters.builder()
+                    .setKeySizeBytes(48)
+                    .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
+                    .setAlgorithm(JwtHmacParameters.Algorithm.HS384)
+                    .build()));
   }
 
-  /** Returns a {@link KeyTemplate} that generates new instances of HS512 384-bit keys. */
+  /** Returns a {@link KeyTemplate} that generates new instances of HS512 512-bit keys. */
   public static final KeyTemplate hs512Template() {
-    return createTemplate(JwtHmacAlgorithm.HS512, 64);
-  }
-
-  /**
-   * @return a {@link KeyTemplate} containing a {@link JwtHmacKeyFormat} with some specified
-   *     parameters.
-   */
-  private static KeyTemplate createTemplate(JwtHmacAlgorithm algorithm, int keySize) {
-    JwtHmacKeyFormat format =
-        JwtHmacKeyFormat.newBuilder().setAlgorithm(algorithm).setKeySize(keySize).build();
-    return KeyTemplate.create(
-        new JwtHmacKeyManager().getKeyType(),
-        format.toByteArray(),
-        KeyTemplate.OutputPrefixType.RAW);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                JwtHmacParameters.builder()
+                    .setKeySizeBytes(64)
+                    .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
+                    .setAlgorithm(JwtHmacParameters.Algorithm.HS512)
+                    .build()));
   }
 
   private static KeyFactory.KeyFormat<JwtHmacKeyFormat> createKeyFormat(
