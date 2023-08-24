@@ -74,6 +74,12 @@ func TestVaultAEAD_EncryptDecrypt(t *testing.T) {
 	if !bytes.Equal(gotPlaintext, plaintext) {
 		t.Fatalf("Incorrect plain text, want=%s;got=%s", string(plaintext), string(gotPlaintext))
 	}
+
+	invalidContext := []byte("invalidContext")
+	_, err = aead.Decrypt(ciphertext, invalidContext)
+	if err == nil {
+		t.Error("aead.Decrypt(ciphertext, invalidContext) err = nil, want error")
+	}
 }
 
 func TestVaultAEAD_DecryptWithFixedCiphertext(t *testing.T) {
@@ -160,17 +166,20 @@ func newServer(t *testing.T) (int, closeFunc) {
 			decoder := json.NewDecoder(r.Body)
 			var encReq = make(map[string]string)
 			if err := decoder.Decode(&encReq); err != nil {
-				t.Fatal("Cannot decode encryption request:", err)
+				http.Error(w, fmt.Sprintf("Cannot decode encryption request: %s", err), 400)
+				return
 			}
 			pt64 := encReq["plaintext"]
 			pt, err := base64.StdEncoding.DecodeString(pt64)
 			if err != nil {
-				t.Fatal("plaintext must be base64 encoded")
+				http.Error(w, "Plaintext must be base64 encoded", 400)
+				return
 			}
 			context64 := encReq["context"]
 			context, err := base64.StdEncoding.DecodeString(context64)
 			if err != nil {
-				t.Fatal("context must be base64 encoded")
+				http.Error(w, "Context must be base64 encoded", 400)
+				return
 			}
 			ciphertext := fakeEncrypt(pt, context)
 			resp := map[string]any{
@@ -191,17 +200,20 @@ func newServer(t *testing.T) (int, closeFunc) {
 			decoder := json.NewDecoder(r.Body)
 			var encReq = make(map[string]string)
 			if err := decoder.Decode(&encReq); err != nil {
-				t.Fatal("Cannot decode encryption request:", err)
+				http.Error(w, fmt.Sprintf("Cannot decode decryption request: %s", err), 400)
+				return
 			}
 			ct := encReq["ciphertext"]
 			context64 := encReq["context"]
 			context, err := base64.StdEncoding.DecodeString(context64)
 			if err != nil {
-				t.Fatal("context must be base64 encoded")
+				http.Error(w, "Context must be base64 encoded", 400)
+				return
 			}
 			plaintext, err := fakeDecrypt([]byte(ct), context)
 			if err != nil {
-				t.Fatal("Cannot decrypt ciphertext:", err)
+				http.Error(w, fmt.Sprintf("Cannot decrypt ciphertext: %s", err), 400)
+				return
 			}
 			resp := map[string]any{
 				"data": map[string]string{
