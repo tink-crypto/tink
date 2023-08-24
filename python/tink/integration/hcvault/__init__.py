@@ -15,5 +15,6 @@
 """Hashicorp Vault KMS integration package."""
 
 from tink.integration.hcvault import _hcvault_kms_client
+from tink.integration.hcvault._hcvault_kms_client import create_aead
 
-HcVaultKmsClient = _hcvault_kms_client.HcVaultKmsClient
+create_aead = _hcvault_kms_client.create_aead

@@ -27,8 +27,8 @@ py_library(
 )
 
 py_test(
-    name = "_hcvault_kms_client_test",
-    srcs = ["_hcvault_kms_client_test.py"],
+    name = "_hcvault_kms_aead_test",
+    srcs = ["_hcvault_kms_aead_test.py"],
     srcs_version = "PY3",
     deps = [
         ":hcvault",
@@ -36,6 +36,7 @@ py_test(
         "//tink:tink_python",
         "//tink/testing:helper",
         requirement("absl-py"),
+        requirement("flask"),
     ],
 )
 
