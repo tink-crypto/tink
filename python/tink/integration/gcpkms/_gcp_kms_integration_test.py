@@ -92,6 +92,49 @@ class GcpKmsIntegrationTest(absltest.TestCase):
     with self.assertRaises(tink.TinkError):
       envelope_aead.decrypt(ciphertext, b'invalid')
 
+  def test_get_aead_is_compatible_with_kms_aead_key(self):
+    # Get aead directly from GCP KMS client.
+    kms_aead = gcpkms.GcpKmsClient('', CREDENTIAL_PATH).get_aead(KEY_URI)
+
+    # Get aead by registering a client, and create a keyset with a KmsAeadKey.
+    gcpkms.GcpKmsClient.register_client('', CREDENTIAL_PATH)
+    handle = tink.new_keyset_handle(
+        aead.aead_key_templates.create_kms_aead_key_template(KEY_URI)
+    )
+    aead_from_kms_aead_key = handle.primitive(aead.Aead)
+
+    # Verify that they are compatible.
+    ciphertext = kms_aead.encrypt(b'plaintext', b'associated_data')
+    self.assertEqual(
+        b'plaintext',
+        aead_from_kms_aead_key.decrypt(ciphertext, b'associated_data'),
+    )
+
+  def test_kms_envelope_aead_is_compatible(self):
+    # Get aead directly from GCP KMS client, and create an EnvelopeAead.
+    kms_aead = gcpkms.GcpKmsClient('', CREDENTIAL_PATH).get_aead(KEY_URI)
+    envelope_aead = aead.KmsEnvelopeAead(
+        aead.aead_key_templates.AES128_GCM_SIV, kms_aead
+    )
+
+    # Get envelope aead by registering a client, and create a keyset with a
+    # KmsEnvelopeAeadKey.
+    gcpkms.GcpKmsClient.register_client('', CREDENTIAL_PATH)
+
+    handle = tink.new_keyset_handle(
+        aead.aead_key_templates.create_kms_envelope_aead_key_template(
+            KEY_URI, aead.aead_key_templates.AES128_GCM_SIV
+        )
+    )
+    aead_from_kms_envelope_aead_key = handle.primitive(aead.Aead)
+
+    # Verify that they are compatible.
+    ciphertext = envelope_aead.encrypt(b'plaintext', b'associated_data')
+    self.assertEqual(
+        b'plaintext',
+        aead_from_kms_envelope_aead_key.decrypt(ciphertext, b'associated_data'),
+    )
+
   def test_aead_from_keyset_handle_for_key2_uri(self):
     # Register client not bound to a key URI.
     gcpkms.GcpKmsClient.register_client('', CREDENTIAL_PATH)
@@ -122,9 +165,6 @@ class GcpKmsIntegrationTest(absltest.TestCase):
   def test_decrypt_ciphertext_encrypted_in_bigquery_using_a_wrapped_keyset(
       self,
   ):
-    # Register client not bound to a key URI.
-    gcpkms.GcpKmsClient.register_client('', CREDENTIAL_PATH)
-
     # This wrapped keyset was generated in BigQuery using this command:
     # DECLARE kms_key_uri STRING;
     # SET kms_key_uri =
@@ -151,10 +191,7 @@ class GcpKmsIntegrationTest(absltest.TestCase):
     )
 
     key_uri = 'gcp-kms://projects/tink-test-infrastructure/locations/us/keyRings/big-query-test-key/cryptoKeys/aead-key'
-    gcp_aead_keyset_handle = tink.new_keyset_handle(
-        aead.aead_key_templates.create_kms_aead_key_template(key_uri)
-    )
-    gcp_aead = gcp_aead_keyset_handle.primitive(aead.Aead)
+    gcp_aead = gcpkms.GcpKmsClient('', CREDENTIAL_PATH).get_aead(key_uri)
 
     unwrapped_keyset = gcp_aead.decrypt(wrapped_keyset, b'')
     keyset_handle = cleartext_keyset_handle.read(
