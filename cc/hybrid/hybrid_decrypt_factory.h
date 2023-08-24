@@ -37,6 +37,8 @@ namespace tink {
 // you call one of
 // * HybridConfig::Register()
 // * TinkConfig::Register()
+// NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
+// TINK-PENDING-REMOVAL-IN-3.0.0-START
 class ABSL_DEPRECATED(
     "Call getPrimitive<HybridDecrypt>() on the keyset_handle after registering "
     "the HybridDecryptWrapper instead.") HybridDecryptFactory {
@@ -60,6 +62,8 @@ class ABSL_DEPRECATED(
  private:
   HybridDecryptFactory() {}
 };
+// TINK-PENDING-REMOVAL-IN-3.0.0-END
+// NOLINTEND(whitespace/line_length)
 
 }  // namespace tink
 }  // namespace crypto

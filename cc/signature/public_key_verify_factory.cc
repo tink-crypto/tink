@@ -29,6 +29,8 @@
 namespace crypto {
 namespace tink {
 
+// NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
+// TINK-PENDING-REMOVAL-IN-3.0.0-START
 // static
 util::StatusOr<std::unique_ptr<PublicKeyVerify>>
 PublicKeyVerifyFactory::GetPrimitive(const KeysetHandle& keyset_handle) {
@@ -53,6 +55,8 @@ PublicKeyVerifyFactory::GetPrimitive(
   }
   return keyset_handle.GetPrimitive<PublicKeyVerify>(custom_key_manager);
 }
+// TINK-PENDING-REMOVAL-IN-3.0.0-END
+// NOLINTEND(whitespace/line_length)
 
 }  // namespace tink
 }  // namespace crypto

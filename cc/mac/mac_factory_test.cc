@@ -33,6 +33,12 @@
 #include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
 
+namespace crypto {
+namespace tink {
+namespace {
+
+// NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
+// TINK-PENDING-REMOVAL-IN-3.0.0-START
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using google::crypto::tink::HashType;
@@ -40,11 +46,6 @@ using google::crypto::tink::HmacKeyFormat;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
-
-
-namespace crypto {
-namespace tink {
-namespace {
 
 class MacFactoryTest : public ::testing::Test {
 };
@@ -131,6 +132,8 @@ TEST_F(MacFactoryTest, testPrimitive) {
   status = mac->VerifyMac(raw_mac_value, data);
   EXPECT_TRUE(status.ok()) << status;
 }
+// TINK-PENDING-REMOVAL-IN-3.0.0-END
+// NOLINTEND(whitespace/line_length)
 
 }  // namespace
 }  // namespace tink
