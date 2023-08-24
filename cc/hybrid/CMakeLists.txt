@@ -291,6 +291,19 @@ tink_cc_library(
     tink::core::private_key
 )
 
+tink_cc_library(
+  NAME hpke_parameters
+  SRCS
+    hpke_parameters.cc
+    hpke_parameters.h
+  DEPS
+    tink::hybrid::hybrid_parameters
+    absl::status
+    tink::core::parameters
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -555,5 +568,17 @@ tink_cc_test(
     tink::hybrid::failing_hybrid
     gmock
     absl::status
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME hpke_parameters_test
+  SRCS
+    hpke_parameters_test.cc
+  DEPS
+    tink::hybrid::hpke_parameters
+    gmock
+    absl::status
+    tink::util::statusor
     tink::util::test_matchers
 )
