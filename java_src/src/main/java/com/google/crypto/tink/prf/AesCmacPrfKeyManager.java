@@ -16,6 +16,8 @@
 
 package com.google.crypto.tink.prf;
 
+import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
+
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
@@ -160,10 +162,6 @@ public final class AesCmacPrfKeyManager extends KeyTypeManager<AesCmacPrfKey> {
    *     </ul>
    */
   public static final KeyTemplate aes256CmacTemplate() {
-    AesCmacPrfKeyFormat format = AesCmacPrfKeyFormat.newBuilder().setKeySize(32).build();
-    return KeyTemplate.create(
-        new AesCmacPrfKeyManager().getKeyType(),
-        format.toByteArray(),
-        KeyTemplate.OutputPrefixType.RAW);
+    return exceptionIsBug(() -> KeyTemplate.createFrom(AesCmacPrfParameters.create(32)));
   }
 }

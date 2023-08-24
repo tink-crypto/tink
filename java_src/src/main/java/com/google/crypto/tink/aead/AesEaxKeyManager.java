@@ -16,6 +16,8 @@
 
 package com.google.crypto.tink.aead;
 
+import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
+
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Registry;
@@ -139,7 +141,15 @@ public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
    *     </ul>
    */
   public static final KeyTemplate aes128EaxTemplate() {
-    return createKeyTemplate(16, 16, KeyTemplate.OutputPrefixType.TINK);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                AesEaxParameters.builder()
+                    .setIvSizeBytes(16)
+                    .setKeySizeBytes(16)
+                    .setTagSizeBytes(16)
+                    .setVariant(AesEaxParameters.Variant.TINK)
+                    .build()));
   }
 
   /**
@@ -152,7 +162,15 @@ public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
    *     </ul>
    */
   public static final KeyTemplate rawAes128EaxTemplate() {
-    return createKeyTemplate(16, 16, KeyTemplate.OutputPrefixType.RAW);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                AesEaxParameters.builder()
+                    .setIvSizeBytes(16)
+                    .setKeySizeBytes(16)
+                    .setTagSizeBytes(16)
+                    .setVariant(AesEaxParameters.Variant.NO_PREFIX)
+                    .build()));
   }
 
   /**
@@ -165,7 +183,15 @@ public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
    *     </ul>
    */
   public static final KeyTemplate aes256EaxTemplate() {
-    return createKeyTemplate(32, 16, KeyTemplate.OutputPrefixType.TINK);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                AesEaxParameters.builder()
+                    .setIvSizeBytes(16)
+                    .setKeySizeBytes(32)
+                    .setTagSizeBytes(16)
+                    .setVariant(AesEaxParameters.Variant.TINK)
+                    .build()));
   }
 
   /**
@@ -178,22 +204,15 @@ public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
    *     </ul>
    */
   public static final KeyTemplate rawAes256EaxTemplate() {
-    return createKeyTemplate(32, 16, KeyTemplate.OutputPrefixType.RAW);
-  }
-
-  /**
-   * @return a {@link KeyTemplate} containing a {@link AesEaxKeyFormat} with some specified
-   *     parameters.
-   */
-  private static KeyTemplate createKeyTemplate(
-      int keySize, int ivSize, KeyTemplate.OutputPrefixType prefixType) {
-    AesEaxKeyFormat format =
-        AesEaxKeyFormat.newBuilder()
-            .setKeySize(keySize)
-            .setParams(AesEaxParams.newBuilder().setIvSize(ivSize).build())
-            .build();
-    return KeyTemplate.create(
-        new AesEaxKeyManager().getKeyType(), format.toByteArray(), prefixType);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                AesEaxParameters.builder()
+                    .setIvSizeBytes(16)
+                    .setKeySizeBytes(32)
+                    .setTagSizeBytes(16)
+                    .setVariant(AesEaxParameters.Variant.NO_PREFIX)
+                    .build()));
   }
 
   private static KeyFactory.KeyFormat<AesEaxKeyFormat> createKeyFormat(
