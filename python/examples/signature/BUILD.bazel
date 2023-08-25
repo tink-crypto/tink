@@ -11,8 +11,8 @@ exports_files([
 ])
 
 py_binary(
-    name = "signature",
-    srcs = ["signature.py"],
+    name = "signature_cli",
+    srcs = ["signature_cli.py"],
     python_version = "PY3",
     deps = [
         requirement("absl-py"),
@@ -45,14 +45,14 @@ py_test(
 sh_test(
     name = "signature_test",
     size = "small",
-    srcs = ["signature_test.sh"],
+    srcs = ["signature_cli_test.sh"],
     args = [
-        "$(rootpath :signature)",
+        "$(rootpath :signature_cli)",
         "$(rootpath :signature_test_private_keyset.json)",
         "$(rootpath :signature_test_public_keyset.json)",
     ],
     data = [
-        ":signature",
+        ":signature_cli",
         ":signature_test_private_keyset.json",
         ":signature_test_public_keyset.json",
     ],
@@ -63,14 +63,14 @@ sh_test(
 sh_test(
     name = "signature_test_package",
     size = "small",
-    srcs = ["signature_test.sh"],
+    srcs = ["signature_cli_test.sh"],
     args = [
-        "'python3 $(rootpath :signature.py)'",
+        "'python3 $(rootpath :signature_cli.py)'",
         "$(rootpath :signature_test_private_keyset.json)",
         "$(rootpath :signature_test_public_keyset.json)",
     ],
     data = [
-        ":signature.py",
+        ":signature_cli.py",
         ":signature_test_private_keyset.json",
         ":signature_test_public_keyset.json",
     ],

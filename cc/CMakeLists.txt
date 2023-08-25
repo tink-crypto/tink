@@ -457,13 +457,17 @@ tink_cc_library(
     tink::internal::key_info
     tink::internal::key_status_util
     tink::internal::key_type_info_store
+    tink::internal::keyset_wrapper
+    tink::internal::keyset_wrapper_store
     tink::internal::mutable_serialization_registry
     tink::internal::proto_key_serialization
+    tink::internal::registry_impl
     tink::internal::util
     tink::util::errors
     tink::util::keyset_util
     tink::util::status
     tink::util::statusor
+    tink::util::validation
     tink::proto::tink_cc_proto
 )
 
@@ -769,7 +773,6 @@ tink_cc_test(
     tink::core::json_keyset_reader
     gmock
     absl::strings
-    tink::util::protobuf_helper
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::aes_eax_cc_proto

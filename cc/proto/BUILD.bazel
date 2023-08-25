@@ -38,19 +38,6 @@ proto_library(
 )
 
 proto_library(
-    name = "cached_dek_aead_proto",
-    srcs = ["cached_dek_aead.proto"],
-    visibility = ["//visibility:public"],
-)
-
-proto_library(
-    name = "cached_dek_envelope_proto",
-    srcs = ["cached_dek_envelope.proto"],
-    visibility = ["//visibility:public"],
-    deps = [":tink_proto"],
-)
-
-proto_library(
     name = "rsa_ssa_pss_proto",
     srcs = ["rsa_ssa_pss.proto"],
     visibility = ["//visibility:public"],

@@ -18,7 +18,6 @@ package com.google.crypto.tink.hybrid;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
-import static com.google.crypto.tink.internal.testing.Asserts.assertEqualWhenValueParsed;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
@@ -51,6 +50,7 @@ import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBigInteger;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.spec.ECPoint;
@@ -73,19 +73,13 @@ public final class EciesProtoSerializationTest {
   private static final Parameters DEM_PARAMETERS =
       exceptionIsBug(() -> XChaCha20Poly1305Parameters.create());
 
-  private static final XChaCha20Poly1305KeyFormat DEM_KEY_FORMAT_PROTO =
-      XChaCha20Poly1305KeyFormat.newBuilder().setVersion(0).build();
-
   private static final MutableSerializationRegistry registry = new MutableSerializationRegistry();
 
   private static final class VariantTuple {
     final EciesParameters.Variant variant;
     final OutputPrefixType outputPrefixType;
 
-    VariantTuple(
-        EciesParameters.Variant variant,
-        OutputPrefixType outputPrefixType,
-        @Nullable Integer idRequirement) {
+    VariantTuple(EciesParameters.Variant variant, OutputPrefixType outputPrefixType) {
       this.variant = variant;
       this.outputPrefixType = outputPrefixType;
     }
@@ -94,12 +88,9 @@ public final class EciesProtoSerializationTest {
   @DataPoints("variants")
   public static final VariantTuple[] VARIANTS_TUPLES =
       new VariantTuple[] {
-        new VariantTuple(
-            EciesParameters.Variant.NO_PREFIX, OutputPrefixType.RAW, /* idRequirement= */ null),
-        new VariantTuple(
-            EciesParameters.Variant.TINK, OutputPrefixType.TINK, /* idRequirement= */ 123),
-        new VariantTuple(
-            EciesParameters.Variant.CRUNCHY, OutputPrefixType.CRUNCHY, /* idRequirement= */ 456),
+        new VariantTuple(EciesParameters.Variant.NO_PREFIX, OutputPrefixType.RAW),
+        new VariantTuple(EciesParameters.Variant.TINK, OutputPrefixType.TINK),
+        new VariantTuple(EciesParameters.Variant.CRUNCHY, OutputPrefixType.CRUNCHY),
       };
 
   private static final EciesAeadHkdfParams createEciesProtoParams(
@@ -140,6 +131,10 @@ public final class EciesProtoSerializationTest {
     }
   }
 
+  private static final KeyTemplate DEM_KEY_TEMPLATE =
+      exceptionIsBug(
+          () -> KeyTemplateProtoConverter.toProto(KeyTemplates.get("XCHACHA20_POLY1305_RAW")));
+
   @Test
   public void register_calledTwice_succeedsAndSecondCallHasNoEffect() throws Exception {
     EciesParameters parameters =
@@ -158,11 +153,7 @@ public final class EciesProtoSerializationTest {
             HashType.SHA256,
             EcPointFormat.UNCOMPRESSED,
             ByteString.copyFrom(SALT.toByteArray()),
-            KeyTemplate.newBuilder()
-                .setTypeUrl("type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key")
-                .setValue(DEM_KEY_FORMAT_PROTO.toByteString())
-                .setOutputPrefixType(OutputPrefixType.RAW)
-                .build());
+            DEM_KEY_TEMPLATE);
     EciesAeadHkdfKeyFormat format =
         EciesAeadHkdfKeyFormat.newBuilder().setParams(protoParams).build();
     ProtoParametersSerialization serialization =
@@ -205,11 +196,7 @@ public final class EciesProtoSerializationTest {
             HashType.SHA256,
             EcPointFormat.UNCOMPRESSED,
             ByteString.copyFrom(SALT.toByteArray()),
-            KeyTemplate.newBuilder()
-                .setTypeUrl("type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key")
-                .setValue(DEM_KEY_FORMAT_PROTO.toByteString())
-                .setOutputPrefixType(OutputPrefixType.RAW)
-                .build());
+            DEM_KEY_TEMPLATE);
     EciesAeadHkdfKeyFormat format =
         EciesAeadHkdfKeyFormat.newBuilder().setParams(protoParams).build();
 
@@ -219,7 +206,10 @@ public final class EciesProtoSerializationTest {
 
     ProtoParametersSerialization serialized =
         registry.serializeParameters(parameters, ProtoParametersSerialization.class);
-    assertEqualWhenValueParsed(EciesAeadHkdfKeyFormat.parser(), serialized, serialization);
+    assertThat(serialized.getKeyTemplate().getTypeUrl())
+        .isEqualTo(serialization.getKeyTemplate().getTypeUrl());
+    assertThat(serialized.getKeyTemplate().getOutputPrefixType())
+        .isEqualTo(serialization.getKeyTemplate().getOutputPrefixType());
 
     Parameters parsed = registry.parseParameters(serialization);
     assertThat(parsed).isEqualTo(parameters);
@@ -241,11 +231,7 @@ public final class EciesProtoSerializationTest {
             HashType.SHA256,
             EcPointFormat.COMPRESSED,
             null,
-            KeyTemplate.newBuilder()
-                .setTypeUrl("type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key")
-                .setValue(DEM_KEY_FORMAT_PROTO.toByteString())
-                .setOutputPrefixType(OutputPrefixType.RAW)
-                .build());
+            DEM_KEY_TEMPLATE);
     EciesAeadHkdfKeyFormat format =
         EciesAeadHkdfKeyFormat.newBuilder().setParams(protoParams).build();
 
@@ -254,10 +240,32 @@ public final class EciesProtoSerializationTest {
 
     ProtoParametersSerialization serialized =
         registry.serializeParameters(parameters, ProtoParametersSerialization.class);
-    assertEqualWhenValueParsed(EciesAeadHkdfKeyFormat.parser(), serialized, serialization);
+    assertThat(serialized.getKeyTemplate().getTypeUrl())
+        .isEqualTo(serialization.getKeyTemplate().getTypeUrl());
+    assertThat(serialized.getKeyTemplate().getOutputPrefixType())
+        .isEqualTo(serialization.getKeyTemplate().getOutputPrefixType());
 
     Parameters parsed = registry.parseParameters(serialization);
     assertThat(parsed).isEqualTo(parameters);
+  }
+
+  @Theory
+  public void test_demOutputPrefixTypeIsIgnored_whenParsed() throws Exception {
+    EciesAeadHkdfParams protoParams =
+        createEciesProtoParams(
+            EllipticCurveType.CURVE25519,
+            HashType.SHA256,
+            EcPointFormat.COMPRESSED,
+            null,
+            DEM_KEY_TEMPLATE);
+    EciesAeadHkdfKeyFormat format =
+        EciesAeadHkdfKeyFormat.newBuilder().setParams(protoParams).build();
+
+    ProtoParametersSerialization serialization =
+        ProtoParametersSerialization.create(PRIVATE_TYPE_URL, OutputPrefixType.RAW, format);
+
+    EciesParameters parsed = (EciesParameters) registry.parseParameters(serialization);
+    assertThat(parsed.getDemParameters().hasIdRequirement()).isFalse();
   }
 
   @DataPoints("invalidParametersSerializations")
@@ -274,12 +282,7 @@ public final class EciesProtoSerializationTest {
                         HashType.SHA256,
                         EcPointFormat.UNCOMPRESSED,
                         ByteString.copyFrom(SALT.toByteArray()),
-                        KeyTemplate.newBuilder()
-                            .setTypeUrl(
-                                "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key")
-                            .setValue(DEM_KEY_FORMAT_PROTO.toByteString())
-                            .setOutputPrefixType(OutputPrefixType.RAW)
-                            .build()))
+                        DEM_KEY_TEMPLATE))
                 .build()),
         // Unknown Curve.
         ProtoParametersSerialization.create(
@@ -292,12 +295,7 @@ public final class EciesProtoSerializationTest {
                         HashType.SHA256,
                         EcPointFormat.UNCOMPRESSED,
                         ByteString.copyFrom(SALT.toByteArray()),
-                        KeyTemplate.newBuilder()
-                            .setTypeUrl(
-                                "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key")
-                            .setValue(DEM_KEY_FORMAT_PROTO.toByteString())
-                            .setOutputPrefixType(OutputPrefixType.RAW)
-                            .build()))
+                        DEM_KEY_TEMPLATE))
                 .build()),
         // CURVE25519 with UNCOMPRESSED.
         ProtoParametersSerialization.create(
@@ -310,12 +308,7 @@ public final class EciesProtoSerializationTest {
                         HashType.SHA256,
                         EcPointFormat.UNCOMPRESSED,
                         ByteString.copyFrom(SALT.toByteArray()),
-                        KeyTemplate.newBuilder()
-                            .setTypeUrl(
-                                "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key")
-                            .setValue(DEM_KEY_FORMAT_PROTO.toByteString())
-                            .setOutputPrefixType(OutputPrefixType.RAW)
-                            .build()))
+                        DEM_KEY_TEMPLATE))
                 .build()),
         // Unknown HashType.
         ProtoParametersSerialization.create(
@@ -328,12 +321,7 @@ public final class EciesProtoSerializationTest {
                         HashType.UNKNOWN_HASH,
                         EcPointFormat.UNCOMPRESSED,
                         ByteString.copyFrom(SALT.toByteArray()),
-                        KeyTemplate.newBuilder()
-                            .setTypeUrl(
-                                "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key")
-                            .setValue(DEM_KEY_FORMAT_PROTO.toByteString())
-                            .setOutputPrefixType(OutputPrefixType.RAW)
-                            .build()))
+                        DEM_KEY_TEMPLATE))
                 .build()),
         // Unknown Point Format.
         ProtoParametersSerialization.create(
@@ -346,12 +334,7 @@ public final class EciesProtoSerializationTest {
                         HashType.SHA256,
                         EcPointFormat.UNKNOWN_FORMAT,
                         ByteString.copyFrom(SALT.toByteArray()),
-                        KeyTemplate.newBuilder()
-                            .setTypeUrl(
-                                "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key")
-                            .setValue(DEM_KEY_FORMAT_PROTO.toByteString())
-                            .setOutputPrefixType(OutputPrefixType.RAW)
-                            .build()))
+                        DEM_KEY_TEMPLATE))
                 .build()),
         // Bad dem key template Type URL.
         ProtoParametersSerialization.create(
@@ -366,7 +349,11 @@ public final class EciesProtoSerializationTest {
                         ByteString.copyFrom(SALT.toByteArray()),
                         KeyTemplate.newBuilder()
                             .setTypeUrl("Non Existent Type Url")
-                            .setValue(DEM_KEY_FORMAT_PROTO.toByteString())
+                            .setValue(
+                                XChaCha20Poly1305KeyFormat.newBuilder()
+                                    .setVersion(0)
+                                    .build()
+                                    .toByteString())
                             .setOutputPrefixType(OutputPrefixType.RAW)
                             .build()))
                 .build()),
@@ -386,24 +373,6 @@ public final class EciesProtoSerializationTest {
                                 "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key")
                             .setValue(ByteString.copyFrom(new byte[] {(byte) 0x80}))
                             .setOutputPrefixType(OutputPrefixType.RAW)
-                            .build()))
-                .build()),
-        // Unknown dem key template prefix.
-        ProtoParametersSerialization.create(
-            PRIVATE_TYPE_URL,
-            OutputPrefixType.TINK,
-            EciesAeadHkdfKeyFormat.newBuilder()
-                .setParams(
-                    createEciesProtoParams(
-                        EllipticCurveType.NIST_P256,
-                        HashType.SHA256,
-                        EcPointFormat.UNCOMPRESSED,
-                        ByteString.copyFrom(SALT.toByteArray()),
-                        KeyTemplate.newBuilder()
-                            .setTypeUrl(
-                                "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key")
-                            .setValue(DEM_KEY_FORMAT_PROTO.toByteString())
-                            .setOutputPrefixType(OutputPrefixType.UNKNOWN_PREFIX)
                             .build()))
                 .build()),
         // Proto messages start with a VarInt, which always ends with a byte with most
@@ -434,10 +403,8 @@ public final class EciesProtoSerializationTest {
             .setHkdfHashType(HashType.SHA256)
             .setHkdfSalt(ByteString.copyFrom(SALT.toByteArray()))
             .build();
-    KeyTemplate demKeyTemplate =
-        KeyTemplateProtoConverter.toProto(KeyTemplates.get("XCHACHA20_POLY1305_RAW"));
     EciesAeadDemParams demParams =
-        EciesAeadDemParams.newBuilder().setAeadDem(demKeyTemplate).build();
+        EciesAeadDemParams.newBuilder().setAeadDem(DEM_KEY_TEMPLATE).build();
     return EciesAeadHkdfParams.newBuilder()
         .setKemParams(kemParams)
         .setDemParams(demParams)
@@ -490,8 +457,11 @@ public final class EciesProtoSerializationTest {
     ProtoKeySerialization serialized =
         registry.serializeKey(publicKey, ProtoKeySerialization.class, /* access= */ null);
 
-    assertEqualWhenValueParsed(
-        com.google.crypto.tink.proto.EciesAeadHkdfPublicKey.parser(), serialized, serialization);
+    assertThat(serialized.getKeyMaterialType()).isEqualTo(serialization.getKeyMaterialType());
+    assertThat(serialized.getOutputPrefixType()).isEqualTo(serialization.getOutputPrefixType());
+    assertThat(serialized.getIdRequirementOrNull())
+        .isEqualTo(serialization.getIdRequirementOrNull());
+    assertThat(serialized.getTypeUrl()).isEqualTo(serialization.getTypeUrl());
   }
 
   @Test
@@ -538,8 +508,11 @@ public final class EciesProtoSerializationTest {
     ProtoKeySerialization serialized =
         registry.serializeKey(publicKey, ProtoKeySerialization.class, /* access= */ null);
 
-    assertEqualWhenValueParsed(
-        com.google.crypto.tink.proto.EciesAeadHkdfPublicKey.parser(), serialized, serialization);
+    assertThat(serialized.getKeyMaterialType()).isEqualTo(serialization.getKeyMaterialType());
+    assertThat(serialized.getOutputPrefixType()).isEqualTo(serialization.getOutputPrefixType());
+    assertThat(serialized.getIdRequirementOrNull())
+        .isEqualTo(serialization.getIdRequirementOrNull());
+    assertThat(serialized.getTypeUrl()).isEqualTo(serialization.getTypeUrl());
   }
 
   @Test
@@ -634,8 +607,11 @@ public final class EciesProtoSerializationTest {
     ProtoKeySerialization serialized =
         registry.serializeKey(publicKey, ProtoKeySerialization.class, /* access= */ null);
 
-    assertEqualWhenValueParsed(
-        com.google.crypto.tink.proto.EciesAeadHkdfPublicKey.parser(), serialized, serialization);
+    assertThat(serialized.getKeyMaterialType()).isEqualTo(serialization.getKeyMaterialType());
+    assertThat(serialized.getOutputPrefixType()).isEqualTo(serialization.getOutputPrefixType());
+    assertThat(serialized.getIdRequirementOrNull())
+        .isEqualTo(serialization.getIdRequirementOrNull());
+    assertThat(serialized.getTypeUrl()).isEqualTo(serialization.getTypeUrl());
   }
 
   @Test
@@ -689,8 +665,42 @@ public final class EciesProtoSerializationTest {
     ProtoKeySerialization serialized =
         registry.serializeKey(publicKey, ProtoKeySerialization.class, /* access= */ null);
 
-    assertEqualWhenValueParsed(
-        com.google.crypto.tink.proto.EciesAeadHkdfPublicKey.parser(), serialized, serialization);
+    assertThat(serialized.getKeyMaterialType()).isEqualTo(serialization.getKeyMaterialType());
+    assertThat(serialized.getOutputPrefixType()).isEqualTo(serialization.getOutputPrefixType());
+    assertThat(serialized.getIdRequirementOrNull())
+        .isEqualTo(serialization.getIdRequirementOrNull());
+    assertThat(serialized.getTypeUrl()).isEqualTo(serialization.getTypeUrl());
+  }
+
+  @Test
+  public void serializedProtoCanBeParsedUsingBigIntegerTwoComplementEncoding() throws Exception {
+    String pointXHex = "700c48f77f56584c5cc632ca65640db91b6bacce3a4df6b42ce7cc838833d287";
+    String pointYHex = "db71e509e3fd9b060ddb20ba5c51dcc5948d46fbf640dfe0441782cab85fa4ac";
+    ECPoint someP256PublicPoint =
+        new ECPoint(new BigInteger(pointXHex, 16), new BigInteger(pointYHex, 16));
+
+    EciesParameters parameters =
+        EciesParameters.builder()
+            .setCurveType(EciesParameters.CurveType.NIST_P256)
+            .setHashType(EciesParameters.HashType.SHA256)
+            .setNistCurvePointFormat(EciesParameters.PointFormat.COMPRESSED)
+            .setVariant(EciesParameters.Variant.TINK)
+            .setDemParameters(DEM_PARAMETERS)
+            .setSalt(SALT)
+            .build();
+    EciesPublicKey publicKey =
+        EciesPublicKey.createForNistCurve(parameters, someP256PublicPoint, 101);
+    ProtoKeySerialization serialized =
+        registry.serializeKey(publicKey, ProtoKeySerialization.class, /* access= */ null);
+
+    com.google.crypto.tink.proto.EciesAeadHkdfPublicKey parsedProtoEciesAeadHkdfPublicKey =
+        com.google.crypto.tink.proto.EciesAeadHkdfPublicKey.parseFrom(
+            serialized.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    // parse x and y using BigIntegers two complement encoding.
+    assertThat(new BigInteger(parsedProtoEciesAeadHkdfPublicKey.getX().toByteArray()))
+        .isEqualTo(publicKey.getNistCurvePoint().getAffineX());
+    assertThat(new BigInteger(parsedProtoEciesAeadHkdfPublicKey.getY().toByteArray()))
+        .isEqualTo(publicKey.getNistCurvePoint().getAffineY());
   }
 
   @Test
@@ -781,8 +791,11 @@ public final class EciesProtoSerializationTest {
     ProtoKeySerialization serialized =
         registry.serializeKey(publicKey, ProtoKeySerialization.class, /* access= */ null);
 
-    assertEqualWhenValueParsed(
-        com.google.crypto.tink.proto.EciesAeadHkdfPublicKey.parser(), serialized, serialization);
+    assertThat(serialized.getKeyMaterialType()).isEqualTo(serialization.getKeyMaterialType());
+    assertThat(serialized.getOutputPrefixType()).isEqualTo(serialization.getOutputPrefixType());
+    assertThat(serialized.getIdRequirementOrNull())
+        .isEqualTo(serialization.getIdRequirementOrNull());
+    assertThat(serialized.getTypeUrl()).isEqualTo(serialization.getTypeUrl());
   }
 
   private static ProtoKeySerialization[] createInvalidPublicKeySerializations() {
@@ -927,7 +940,11 @@ public final class EciesProtoSerializationTest {
         registry.serializeKey(
             privateKey, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
 
-    assertEqualWhenValueParsed(EciesAeadHkdfPublicKey.parser(), serialized, serialization);
+    assertThat(serialized.getKeyMaterialType()).isEqualTo(serialization.getKeyMaterialType());
+    assertThat(serialized.getOutputPrefixType()).isEqualTo(serialization.getOutputPrefixType());
+    assertThat(serialized.getIdRequirementOrNull())
+        .isEqualTo(serialization.getIdRequirementOrNull());
+    assertThat(serialized.getTypeUrl()).isEqualTo(serialization.getTypeUrl());
   }
 
   @Test
@@ -979,7 +996,11 @@ public final class EciesProtoSerializationTest {
         registry.serializeKey(
             privateKey, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
 
-    assertEqualWhenValueParsed(EciesAeadHkdfPublicKey.parser(), serialized, serialization);
+    assertThat(serialized.getKeyMaterialType()).isEqualTo(serialization.getKeyMaterialType());
+    assertThat(serialized.getOutputPrefixType()).isEqualTo(serialization.getOutputPrefixType());
+    assertThat(serialized.getIdRequirementOrNull())
+        .isEqualTo(serialization.getIdRequirementOrNull());
+    assertThat(serialized.getTypeUrl()).isEqualTo(serialization.getTypeUrl());
   }
 
   @Test

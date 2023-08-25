@@ -6,8 +6,8 @@ package(default_visibility = ["//visibility:private"])
 licenses(["notice"])
 
 py_binary(
-    name = "envelope",
-    srcs = ["envelope.py"],
+    name = "envelope_cli",
+    srcs = ["envelope_cli.py"],
     python_version = "PY3",
     deps = [
         requirement("absl-py"),
@@ -20,16 +20,16 @@ py_binary(
 sh_test(
     name = "envelope_test",
     size = "small",
-    srcs = ["envelope_test.sh"],
+    srcs = ["envelope_cli_test.sh"],
     args = [
-        "$(rootpath :envelope)",
+        "$(rootpath :envelope_cli)",
         # Change this to your key.
         "gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key",
         # Change this to your credential.
         "$(rootpath //testdata/gcp:credential.json)",
     ],
     data = [
-        ":envelope",
+        ":envelope_cli",
         "@google_root_pem//file",
         # Change this to your credential.
         "//testdata/gcp:credential.json",
@@ -42,16 +42,16 @@ sh_test(
 sh_test(
     name = "envelope_test_package",
     size = "small",
-    srcs = ["envelope_test.sh"],
+    srcs = ["envelope_cli_test.sh"],
     args = [
-        "'python3 $(rootpath :envelope.py)'",
+        "'python3 $(rootpath :envelope_cli.py)'",
         # Change this to your key.
         "gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key",
         # Change this to your credential.
         "$(rootpath //testdata/gcp:credential.json)",
     ],
     data = [
-        ":envelope.py",
+        ":envelope_cli.py",
         "@google_root_pem//file",
         # Change this to your credential.
         "//testdata/gcp:credential.json",

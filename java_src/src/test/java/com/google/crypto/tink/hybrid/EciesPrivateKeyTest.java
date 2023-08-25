@@ -128,7 +128,8 @@ public final class EciesPrivateKeyTest {
             .setCurveType(nistCurveMapping.curveType)
             .setNistCurvePointFormat(pointFormat)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
-            .setDemParameters(XChaCha20Poly1305Parameters.create())
+            .setDemParameters(
+                XChaCha20Poly1305Parameters.create(XChaCha20Poly1305Parameters.Variant.NO_PREFIX))
             .build();
 
     KeyPair keyPair = EllipticCurves.generateKeyPair(nistCurveMapping.ecNistCurve);

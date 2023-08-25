@@ -3,9 +3,6 @@
 This document contains instructions and Java code snippets for common tasks in
 [Tink](https://github.com/tink-crypto/tink-java).
 
-If you want to contribute code to the Java implementation, please read the [Java
-hacking guide](JAVA-HACKING.md).
-
 ## Setup instructions
 
 See https://developers.google.com/tink/tink-setup#java for setup

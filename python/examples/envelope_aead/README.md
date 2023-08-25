@@ -1,4 +1,4 @@
-# Python envelope encryption example
+# Python envelope_cli encryption example
 
 This example shows how to encrypt data with Tink using
 [Envelope Encryption](https://cloud.google.com/kms/docs/envelope-encryption).
@@ -19,7 +19,7 @@ The CLI takes 5 arguments:
 
 ## Build and Run
 
-### Prequisite
+### Prerequisite
 
 This envelope encryption example uses a Cloud KMS key as a key-encryption key
 (KEK). In order to run it, you need to:
@@ -47,7 +47,7 @@ $ echo "some data" > testdata.txt
 # Replace `<my-key-uri>` in `gcp-kms://<my-key-uri>` with your key URI, and
 # my-service-account.json with your service account's credential JSON file.
 
-$ ./bazel-bin/envelope/envelope --mode encrypt \
+$ ./bazel-bin/envelope/envelope_cli --mode encrypt \
     --gcp_credential_path my-service-account.json \
     --kek_uri gcp-kms://<my-key-uri> \
     --input_path testdata.txt --output_path testdata.txt.encrypted
@@ -56,7 +56,7 @@ $ ./bazel-bin/envelope/envelope --mode encrypt \
 Or decrypt the file with:
 
 ```shell
-$ ./bazel-bin/envelope/envelope --mode decrypt \
+$ ./bazel-bin/envelope/envelope_cli --mode decrypt \
      --gcp_credential_path my-service-account.json \
      --kek_uri gcp-kms://<my-key-uri> \
      --input_path testdata.txt.encrypted --output_path testdata.txt
@@ -74,7 +74,7 @@ You can then encrypt the file:
 
 ```shell
 $ echo "some data" > testdata.txt
-$ python3 envelope.py --mode encrypt \
+$ python3 envelope_cli.py --mode encrypt \
     --gcp_credential_path my-service-account.json \
     --kek_uri gcp-kms://<my-key-uri> \
     --input_path testdata.txt --output_path testdata.txt.encrypted

@@ -368,7 +368,8 @@ public final class EciesPublicKeyTest {
             .setHashType(EciesParameters.HashType.SHA256)
             .setCurveType(EciesParameters.CurveType.X25519)
             .setVariant(EciesParameters.Variant.NO_PREFIX)
-            .setDemParameters(XChaCha20Poly1305Parameters.create())
+            .setDemParameters(
+                XChaCha20Poly1305Parameters.create(XChaCha20Poly1305Parameters.Variant.NO_PREFIX))
             .build();
     Bytes publicKeyBytes1 = Bytes.copyFrom(X25519.publicFromPrivate(X25519.generatePrivateKey()));
     byte[] buf2 = publicKeyBytes1.toByteArray();
@@ -389,7 +390,8 @@ public final class EciesPublicKeyTest {
         EciesParameters.builder()
             .setHashType(EciesParameters.HashType.SHA256)
             .setCurveType(EciesParameters.CurveType.X25519)
-            .setDemParameters(XChaCha20Poly1305Parameters.create());
+            .setDemParameters(
+                XChaCha20Poly1305Parameters.create(XChaCha20Poly1305Parameters.Variant.NO_PREFIX));
     Bytes publicKeyBytes = Bytes.copyFrom(X25519.publicFromPrivate(X25519.generatePrivateKey()));
 
     EciesParameters params1 = paramsBuilder.setVariant(EciesParameters.Variant.TINK).build();

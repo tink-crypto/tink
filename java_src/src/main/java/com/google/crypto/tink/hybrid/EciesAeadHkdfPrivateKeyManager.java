@@ -266,6 +266,7 @@ public final class EciesAeadHkdfPrivateKeyManager
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerAsymmetricKeyManagers(
         new EciesAeadHkdfPrivateKeyManager(), new EciesAeadHkdfPublicKeyManager(), newKeyAllowed);
+    EciesProtoSerialization.register();
   }
 
   private static final byte[] EMPTY_SALT = new byte[0];
