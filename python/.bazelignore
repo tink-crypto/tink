@@ -1,1 +1,3 @@
 examples
+bazel-*
+bazel-python
