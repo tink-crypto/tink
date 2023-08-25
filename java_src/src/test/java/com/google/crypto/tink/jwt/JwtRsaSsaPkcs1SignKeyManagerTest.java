@@ -93,10 +93,13 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
   public static final String[] TEMPLATES =
       new String[] {
         "JWT_RS256_2048_F4",
-        "JWT_RS256_3072_F4",
-        "JWT_RS384_3072_F4",
-        "JWT_RS512_4096_F4",
         "JWT_RS256_2048_F4_RAW",
+        "JWT_RS256_3072_F4",
+        "JWT_RS256_3072_F4_RAW",
+        "JWT_RS384_3072_F4",
+        "JWT_RS384_3072_F4_RAW",
+        "JWT_RS512_4096_F4",
+        "JWT_RS512_4096_F4_RAW",
       };
 
   @Test
@@ -124,12 +127,17 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     factory.validateKeyFormat(format);
   }
 
-  @Test
-  public void testKeyFormatsAreValid() throws Exception {
-    for (KeyTypeManager.KeyFactory.KeyFormat<JwtRsaSsaPkcs1KeyFormat> format :
-        factory.keyFormats().values()) {
-      factory.validateKeyFormat(format.keyFormat);
+  @Theory
+  public void testTemplates(@FromDataPoints("templates") String templateName) throws Exception {
+    if (TestUtil.isTsan()) {
+      // creating keys is too slow in Tsan.
+      // We do not use assume because Theories expects to find something which is not skipped.
+      return;
     }
+    KeysetHandle h = KeysetHandle.generateNew(KeyTemplates.get(templateName));
+    assertThat(h.size()).isEqualTo(1);
+    assertThat(h.getAt(0).getKey().getParameters())
+        .isEqualTo(KeyTemplates.get(templateName).toParameters());
   }
 
   // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
