@@ -149,12 +149,16 @@ tink_cc_library(
     tink::hybrid::internal::hpke_decrypt
     tink::hybrid::internal::hpke_key_manager_util
     absl::status
+    crypto
     tink::core::key_type_manager
     tink::core::private_key_type_manager
     tink::core::hybrid_decrypt
     tink::core::key_manager
     tink::internal::ec_util
+    tink::internal::ssl_unique_ptr
+    tink::subtle::common_enums
     tink::util::constants
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::validation
@@ -406,13 +410,12 @@ tink_cc_test(
     tink::hybrid::internal::hpke_encrypt
     tink::hybrid::internal::hpke_private_key_manager
     gmock
+    absl::btree
     absl::status
     tink::core::hybrid_encrypt
     tink::subtle::hybrid_test_util
-    tink::util::status
     tink::util::statusor
     tink::util::test_matchers
-    tink::util::test_util
     tink::proto::hpke_cc_proto
     tink::proto::tink_cc_proto
   TAGS

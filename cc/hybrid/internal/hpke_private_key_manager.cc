@@ -17,10 +17,15 @@
 #include "tink/hybrid/internal/hpke_private_key_manager.h"
 
 #include <memory>
+#include <string>
 
 #include "absl/status/status.h"
+#include "openssl/base.h"
 #include "tink/hybrid/internal/hpke_key_manager_util.h"
 #include "tink/internal/ec_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
+#include "tink/subtle/common_enums.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
@@ -31,6 +36,8 @@ namespace tink {
 namespace internal {
 namespace {
 
+using ::crypto::tink::subtle::EcPointFormat;
+using ::crypto::tink::subtle::EllipticCurveType;
 using ::google::crypto::tink::HpkeKem;
 using ::google::crypto::tink::HpkeKeyFormat;
 using ::google::crypto::tink::HpkePrivateKey;
@@ -45,6 +52,32 @@ util::Status GenerateX25519Key(HpkePublicKey& public_key,
   }
   public_key.set_public_key((*key)->public_value, X25519KeyPubKeySize());
   private_key.set_private_key((*key)->private_key, X25519KeyPrivKeySize());
+  return util::OkStatus();
+}
+
+util::Status GenerateEcKey(HpkePublicKey& public_key,
+                           HpkePrivateKey& private_key,
+                           EllipticCurveType ec_curve_type) {
+  util::StatusOr<internal::EcKey> ec_key = internal::NewEcKey(ec_curve_type);
+  if (!ec_key.ok()) {
+    return ec_key.status();
+  }
+
+  util::StatusOr<SslUniquePtr<EC_POINT>> pub_point =
+      internal::GetEcPoint(ec_curve_type, ec_key->pub_x, ec_key->pub_y);
+  if (!pub_point.ok()) {
+    return pub_point.status();
+  }
+
+  util::StatusOr<std::string> encoded_pub_point = EcPointEncode(
+      ec_curve_type, EcPointFormat::UNCOMPRESSED, pub_point->get());
+  if (!encoded_pub_point.ok()) {
+    return encoded_pub_point.status();
+  }
+
+  private_key.set_private_key(
+      std::string(util::SecretDataAsStringView(ec_key->priv)));
+  public_key.set_public_key(encoded_pub_point.value());
   return util::OkStatus();
 }
 
@@ -70,6 +103,30 @@ util::StatusOr<HpkePrivateKey> HpkePrivateKeyManager::CreateKey(
   switch (key_format.params().kem()) {
     case HpkeKem::DHKEM_X25519_HKDF_SHA256: {
       util::Status res = GenerateX25519Key(*public_key, private_key);
+      if (!res.ok()) {
+        return res;
+      }
+      break;
+    }
+    case HpkeKem::DHKEM_P256_HKDF_SHA256: {
+      util::Status res =
+          GenerateEcKey(*public_key, private_key, EllipticCurveType::NIST_P256);
+      if (!res.ok()) {
+        return res;
+      }
+      break;
+    }
+    case HpkeKem::DHKEM_P384_HKDF_SHA384: {
+      util::Status res =
+          GenerateEcKey(*public_key, private_key, EllipticCurveType::NIST_P384);
+      if (!res.ok()) {
+        return res;
+      }
+      break;
+    }
+    case HpkeKem::DHKEM_P521_HKDF_SHA512: {
+      util::Status res =
+          GenerateEcKey(*public_key, private_key, EllipticCurveType::NIST_P521);
       if (!res.ok()) {
         return res;
       }
