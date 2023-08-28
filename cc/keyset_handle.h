@@ -141,23 +141,34 @@ class KeysetHandle {
                const absl::flat_hash_map<std::string, std::string>&
                    monitoring_annotations = {});
 
-  // Returns a KeysetHandle containing a single new key generated according to
-  // `key_template` and using `config`. The keyset is annotated for monitoring
-  // with `monitoring_annotations`, which is empty by default.
+  // Returns a KeysetHandle containing one new key generated according to
+  // `key_template` using `config`. When specified, the keyset is annotated
+  // for monitoring with `monitoring_annotations`.
   static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
   GenerateNew(const google::crypto::tink::KeyTemplate& key_template,
               const crypto::tink::KeyGenConfiguration& config,
               const absl::flat_hash_map<std::string, std::string>&
-                  monitoring_annotations = {});
+                  monitoring_annotations);
+  static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
+  GenerateNew(const google::crypto::tink::KeyTemplate& key_template,
+              const crypto::tink::KeyGenConfiguration& config);
 
-  // TODO(b/265865177): Deprecate.
-  // Returns a KeysetHandle containing a single new key generated according to
-  // `key_template`. The keyset is annotated for monitoring with
-  // `monitoring_annotations`, which is empty by default.
+  // TODO(b/265865177): Deprecate and inline.
+  // Returns a KeysetHandle containing one new key generated according to
+  // `key_template` using the global registry. When specified, the keyset is
+  //  annotated for monitoring with `monitoring_annotations`.
   static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
   GenerateNew(const google::crypto::tink::KeyTemplate& key_template,
               const absl::flat_hash_map<std::string, std::string>&
-                  monitoring_annotations = {});
+                  monitoring_annotations) {
+    return GenerateNew(key_template, crypto::tink::KeyGenConfigGlobalRegistry(),
+                       monitoring_annotations);
+  }
+  static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
+  GenerateNew(const google::crypto::tink::KeyTemplate& key_template) {
+    return GenerateNew(key_template,
+                       crypto::tink::KeyGenConfigGlobalRegistry());
+  }
 
   // Encrypts the underlying keyset with the provided `master_key_aead`
   // and writes the resulting EncryptedKeyset to the given `writer`,

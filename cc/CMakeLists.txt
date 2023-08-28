@@ -444,6 +444,7 @@ tink_cc_library(
     tink::core::keyset_writer
     tink::core::primitive_set
     tink::core::registry
+    tink::core::restricted_data
     absl::core_headers
     absl::flat_hash_map
     absl::check
