@@ -21,6 +21,8 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.AesSivKey;
 import com.google.crypto.tink.proto.AesSivKeyFormat;
@@ -34,15 +36,15 @@ import java.security.GeneralSecurityException;
 import java.util.TreeSet;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Test for AesSivKeyManager. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public class AesSivKeyManagerTest {
-  private final AesSivKeyManager manager = new AesSivKeyManager();
-  private final KeyTypeManager.KeyFactory<AesSivKeyFormat, AesSivKey> factory =
-      manager.keyFactory();
 
   @Before
   public void register() throws Exception {
@@ -255,9 +257,17 @@ public class AesSivKeyManagerTest {
                 .build());
   }
 
-  @Test
-  public void testKeyFormats() throws Exception {
-    factory.validateKeyFormat(factory.keyFormats().get("AES256_SIV").keyFormat);
-    factory.validateKeyFormat(factory.keyFormats().get("AES256_SIV_RAW").keyFormat);
+  @DataPoints("templateNames")
+  public static final String[] KEY_TEMPLATES =
+      new String[] {
+        "AES256_SIV", "AES256_SIV_RAW",
+      };
+
+  @Theory
+  public void testTemplates(@FromDataPoints("templateNames") String templateName) throws Exception {
+    KeysetHandle h = KeysetHandle.generateNew(KeyTemplates.get(templateName));
+    assertThat(h.size()).isEqualTo(1);
+    assertThat(h.getAt(0).getKey().getParameters())
+        .isEqualTo(KeyTemplates.get(templateName).toParameters());
   }
 }
