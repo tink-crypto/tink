@@ -395,6 +395,20 @@ tink_cc_library(
     tink::proto::tink_cc_proto
 )
 
+tink_cc_library(
+  NAME aes_gcm_siv_parameters
+  SRCS
+    aes_gcm_siv_parameters.cc
+    aes_gcm_siv_parameters.h
+  DEPS
+    tink::aead::aead_parameters
+    absl::status
+    absl::strings
+    tink::core::parameters
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -771,4 +785,16 @@ tink_cc_test(
     tink::util::test_matchers
     tink::proto::aes_gcm_cc_proto
     tink::proto::tink_cc_proto
+)
+
+tink_cc_test(
+  NAME aes_gcm_siv_parameters_test
+  SRCS
+    aes_gcm_siv_parameters_test.cc
+  DEPS
+    tink::aead::aes_gcm_siv_parameters
+    gmock
+    absl::status
+    tink::util::statusor
+    tink::util::test_matchers
 )
