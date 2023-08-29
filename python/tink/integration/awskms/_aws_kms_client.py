@@ -16,8 +16,8 @@
 import binascii
 import configparser
 import re
-
-from typing import Optional, Tuple, Any, Dict
+from typing import Any, Dict, Optional, Tuple
+import warnings
 
 import boto3
 from botocore import exceptions
@@ -175,11 +175,21 @@ class AwsKmsClient(_kms_aead_key_manager.KmsClient):
     )
     return _AwsKmsAead(session.client('kms'), key_arn)
 
+  # Deprecated. It is preferable to not register KMS clients. Instead, create
+  # a KMS AEAD with
+  # kms_aead = awskms.AwsKmsClient(key_uri, credentials_path).get_aead(key_uri)
+  # and then use it to encrypt a keyset with KeysetHandle.write, or to create
+  # an envelope AEAD using aead.KmsEnvelopeAead.
   @classmethod
   def register_client(
       cls, key_uri: Optional[str], credentials_path: Optional[str]
   ) -> None:
     """Registers the KMS client internally."""
+    warnings.warn(
+        'The "awskms.AwsKmsClient.register_client" function is deprecated.',
+        DeprecationWarning,
+        2,
+    )
     _kms_aead_key_manager.register_kms_client(  # pylint: disable=protected-access
         AwsKmsClient(key_uri, credentials_path)
     )

@@ -38,12 +38,14 @@
 #include "tink/internal/mutable_serialization_registry.h"
 #include "tink/internal/proto_key_serialization.h"
 #include "tink/internal/util.h"
+#include "tink/key.h"
 #include "tink/key_gen_configuration.h"
 #include "tink/key_manager.h"
 #include "tink/key_status.h"
 #include "tink/keyset_reader.h"
 #include "tink/keyset_writer.h"
 #include "tink/registry.h"
+#include "tink/restricted_data.h"
 #include "tink/util/errors.h"
 #include "tink/util/keyset_util.h"
 #include "tink/util/status.h"
@@ -358,16 +360,8 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::GenerateNew(
 }
 
 util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::GenerateNew(
-    const KeyTemplate& key_template,
-    const absl::flat_hash_map<std::string, std::string>&
-        monitoring_annotations) {
-  KeyGenConfiguration config;
-  util::Status status =
-      internal::KeyGenConfigurationImpl::SetGlobalRegistryMode(config);
-  if (!status.ok()) {
-    return status;
-  }
-  return GenerateNew(key_template, config, monitoring_annotations);
+    const KeyTemplate& key_template, const KeyGenConfiguration& config) {
+  return GenerateNew(key_template, config, /*monitoring_annotations=*/{});
 }
 
 util::StatusOr<std::unique_ptr<Keyset::Key>> ExtractPublicKey(

@@ -17,14 +17,13 @@
 package com.google.crypto.tink.internal;
 
 import static com.google.common.truth.Truth.assertThat;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.TinkProtoParametersFormat;
+import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
-import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.protobuf.ExtensionRegistryLite;
-import java.security.GeneralSecurityException;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -32,37 +31,16 @@ import org.junit.runners.JUnit4;
 /** Tests KeyTemplateProtoConverter. */
 @RunWith(JUnit4.class)
 public final class KeyTemplateProtoConverterTest {
+  @BeforeClass
+  public static void registerTink() throws Exception {
+    AeadConfig.register();
+  }
 
   @Test
-  public void toByteArrayFromByteArray_sameValues() throws Exception {
+  public void toByteArrayTheParse_sameValues() throws Exception {
     KeyTemplate template = AesGcmKeyManager.aes128GcmTemplate();
     byte[] bytes = KeyTemplateProtoConverter.toByteArray(template);
-    KeyTemplate template2 = KeyTemplateProtoConverter.fromByteArray(bytes);
-    assertThat(template.toParameters()).isEqualTo(template2.toParameters());
-  }
-
-  @Test
-  public void unknownOutputPrefix_throwsGeneralSecurityException() throws Exception {
-    byte[] templateBytes = KeyTemplateProtoConverter.toByteArray(
-        AesGcmKeyManager.aes128GcmTemplate());
-    com.google.crypto.tink.proto.KeyTemplate templateProto =
-          com.google.crypto.tink.proto.KeyTemplate.parseFrom(
-              templateBytes, ExtensionRegistryLite.getEmptyRegistry());
-    byte[] invalidTemplateBytes = templateProto.toBuilder()
-        .setOutputPrefixType(OutputPrefixType.UNKNOWN_PREFIX).build().toByteArray();
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> {
-          KeyTemplateProtoConverter.fromByteArray(invalidTemplateBytes);
-        });
-  }
-
-  @Test
-  public void fromBadByteArray_throwsException() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> {
-          KeyTemplateProtoConverter.fromByteArray("bad template".getBytes(UTF_8));
-        });
+    Parameters parameters = TinkProtoParametersFormat.parse(bytes);
+    assertThat(template.toParameters()).isEqualTo(parameters);
   }
 }

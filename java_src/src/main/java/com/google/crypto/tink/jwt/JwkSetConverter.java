@@ -192,17 +192,17 @@ public final class JwkSetConverter {
       case ES256:
         alg = "ES256";
         crv = "P-256";
-        encLength = 33;
+        encLength = 32;
         break;
       case ES384:
         alg = "ES384";
         crv = "P-384";
-        encLength = 49;
+        encLength = 48;
         break;
       case ES512:
         alg = "ES512";
         crv = "P-521";
-        encLength = 67;
+        encLength = 66;
         break;
       default:
         throw new GeneralSecurityException("unknown algorithm");

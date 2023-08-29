@@ -295,7 +295,9 @@ TEST_F(KeysetHandleTest, ReadEncryptedWithAnnotations) {
                   /*new_key_allowed=*/true),
               IsOk());
 
-  ASSERT_THAT((*keyset_handle)->GetPrimitive<Aead>(), IsOk());
+  ASSERT_THAT((*keyset_handle)
+                  ->GetPrimitive<crypto::tink::Aead>(ConfigGlobalRegistry()),
+              IsOk());
   EXPECT_EQ(generated_annotations, kAnnotations);
   // This is needed to cleanup mocks.
   Registry::Reset();
@@ -488,7 +490,9 @@ TEST_F(KeysetHandleTest, ReadEncryptedWithAssociatedDataAndAnnotations) {
                   /*new_key_allowed=*/true),
               IsOk());
 
-  ASSERT_THAT((*keyset_handle)->GetPrimitive<Aead>(), IsOk());
+  ASSERT_THAT((*keyset_handle)
+                  ->GetPrimitive<crypto::tink::Aead>(ConfigGlobalRegistry()),
+              IsOk());
   EXPECT_EQ(generated_annotations, kAnnotations);
   // This is needed to cleanup mocks.
   Registry::Reset();
@@ -650,7 +654,8 @@ TEST_F(KeysetHandleTest, GenerateNewWithAnnotations) {
                     /*new_key_allowed=*/true),
                 IsOk());
 
-    EXPECT_THAT(h.GetPrimitive<Aead>(), IsOk());
+    EXPECT_THAT(h.GetPrimitive<crypto::tink::Aead>(ConfigGlobalRegistry()),
+                IsOk());
     EXPECT_EQ(generated_annotations, kAnnotations);
 
     // This is needed to cleanup mocks.
@@ -883,7 +888,8 @@ TEST_F(KeysetHandleTest, GetPrimitive) {
       TestKeysetHandle::GetKeysetHandle(keyset);
 
   // Check that encryption with the primary can be decrypted with key_data_1.
-  auto aead_result = keyset_handle->GetPrimitive<Aead>();
+  auto aead_result =
+      keyset_handle->GetPrimitive<crypto::tink::Aead>(ConfigGlobalRegistry());
   ASSERT_TRUE(aead_result.ok()) << aead_result.status();
   std::unique_ptr<Aead> aead = std::move(aead_result.value());
 
@@ -998,7 +1004,8 @@ TEST_F(KeysetHandleTest, GetPrimitiveCustomKeyManager) {
       Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>())
           .ok());
   // Without custom key manager it now fails.
-  ASSERT_FALSE(handle->GetPrimitive<Aead>().ok());
+  ASSERT_FALSE(
+      handle->GetPrimitive<crypto::tink::Aead>(ConfigGlobalRegistry()).ok());
   AesGcmKeyManager key_type_manager;
   std::unique_ptr<KeyManager<Aead>> key_manager =
       crypto::tink::internal::MakeKeyManager<Aead>(&key_type_manager);
@@ -1064,7 +1071,9 @@ TEST_F(KeysetHandleTest, ReadNoSecretWithAnnotations) {
                   /*new_key_allowed=*/true),
               IsOk());
 
-  EXPECT_THAT((*keyset_handle)->GetPrimitive<Aead>(), IsOk());
+  EXPECT_THAT((*keyset_handle)
+                  ->GetPrimitive<crypto::tink::Aead>(ConfigGlobalRegistry()),
+              IsOk());
   EXPECT_EQ(generated_annotations, kAnnotations);
   // This is needed to cleanup mocks.
   Registry::Reset();

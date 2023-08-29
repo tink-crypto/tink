@@ -1772,14 +1772,23 @@ public class RegistryTest {
   }
 
   @Test
-  public void testFips_succeedsOnEmptyRegistry() throws Exception {
+  public void testRestrictToFips_fipsModuleAvailable_succeedsOnEmptyRegistry() throws Exception {
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
     Registry.reset();
     Registry.restrictToFipsIfEmpty();
     assertTrue(TinkFipsUtil.useOnlyFips());
   }
 
   @Test
-  public void testFips_succeedsOnSuccessiveRestrictToFips() throws Exception {
+  public void test_fipsModuleNotAvailable_fails() throws Exception {
+    Assume.assumeFalse(TinkFipsUtil.fipsModuleAvailable());
+    Registry.reset();
+    assertThrows(GeneralSecurityException.class, Registry::restrictToFipsIfEmpty);
+  }
+
+  @Test
+  public void testSuccessiveRestrictToFips_works() throws Exception {
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
     Registry.reset();
     Registry.restrictToFipsIfEmpty();
     Registry.restrictToFipsIfEmpty();
@@ -1788,14 +1797,14 @@ public class RegistryTest {
   }
 
   @Test
-  public void testFips_succeedsOnRestrictToFipsWhenBuiltInFipsMode() throws Exception {
+  public void testRestrictToFips_builtInFipsMode_works() throws Exception {
     Assume.assumeTrue(TinkFipsUtil.useOnlyFips());
     Registry.restrictToFipsIfEmpty();
     assertTrue(TinkFipsUtil.useOnlyFips());
   }
 
   @Test
-  public void testFips_failsOnNonEmptyRegistry() throws Exception {
+  public void testRestrictToFips_failsOnNonEmptyRegistry() throws Exception {
     Assume.assumeFalse(TinkFipsUtil.useOnlyFips());
     assertThrows(GeneralSecurityException.class, Registry::restrictToFipsIfEmpty);
   }

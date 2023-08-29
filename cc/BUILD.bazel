@@ -482,6 +482,7 @@ cc_library(
         ":keyset_writer",
         ":primitive_set",
         ":registry",
+        ":restricted_data",
         "//config:global_registry",
         "//internal:configuration_impl",
         "//internal:key_gen_configuration_impl",

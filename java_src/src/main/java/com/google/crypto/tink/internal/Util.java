@@ -35,9 +35,8 @@ public final class Util {
     int result = 0;
     while (result == 0) {
       secureRandom.nextBytes(rand);
-      // TODO(b/148124847): Other languages create key_ids with the MSB set, so we should here too.
       result =
-          ((rand[0] & 0x7f) << 24)
+          ((rand[0] & 0xff) << 24)
               | ((rand[1] & 0xff) << 16)
               | ((rand[2] & 0xff) << 8)
               | (rand[3] & 0xff);
@@ -114,6 +113,19 @@ public final class Util {
       return null;
     }
     return BuildDispatchedCode.getApiLevel();
+  }
+
+  /** Returns true if the first argument is a prefix of the second argument. Not constant time. */
+  public static boolean isPrefix(byte[] prefix, byte[] complete) {
+    if (complete.length < prefix.length) {
+      return false;
+    }
+    for (int i = 0; i < prefix.length; ++i) {
+      if (complete[i] != prefix[i]) {
+        return false;
+      }
+    }
+    return true;
   }
 
   private Util() {}

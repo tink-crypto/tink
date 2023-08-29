@@ -282,10 +282,17 @@ java_library(
     name = "aes_gcm_jce",
     srcs = ["AesGcmJce.java"],
     deps = [
+        ":bytes",
         ":random",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
         "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink/aead:aes_gcm_key",
         "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_aes_gcm_jce",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/internal:util",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -559,10 +566,17 @@ android_library(
     name = "aes_gcm_jce-android",
     srcs = ["AesGcmJce.java"],
     deps = [
+        ":bytes-android",
         ":random-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
         "//src/main/java/com/google/crypto/tink:aead-android",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access-android",
+        "//src/main/java/com/google/crypto/tink/aead:aes_gcm_key-android",
         "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_aes_gcm_jce-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/internal:util-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 

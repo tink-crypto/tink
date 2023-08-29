@@ -15,6 +15,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.google.crypto.tink.prf;
 
+import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
+
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
@@ -187,12 +189,12 @@ public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
    * </ul>
    */
   public static final KeyTemplate hkdfSha256Template() {
-    HkdfPrfKeyFormat format =
-        HkdfPrfKeyFormat.newBuilder()
-            .setKeySize(32) // the size in bytes of the HKDF key
-            .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
-            .build();
-    return KeyTemplate.create(
-        HkdfPrfKeyManager.staticKeyType(), format.toByteArray(), KeyTemplate.OutputPrefixType.RAW);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                HkdfPrfParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setHashType(HkdfPrfParameters.HashType.SHA256)
+                    .build()));
   }
 }

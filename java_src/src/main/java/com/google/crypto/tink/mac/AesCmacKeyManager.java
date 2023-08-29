@@ -16,6 +16,8 @@
 
 package com.google.crypto.tink.mac;
 
+import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
+
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Registry;
@@ -192,15 +194,14 @@ public final class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
    *     </ul>
    */
   public static final KeyTemplate aes256CmacTemplate() {
-    AesCmacKeyFormat format =
-        AesCmacKeyFormat.newBuilder()
-            .setKeySize(32)
-            .setParams(AesCmacParams.newBuilder().setTagSize(16).build())
-            .build();
-    return KeyTemplate.create(
-        new AesCmacKeyManager().getKeyType(),
-        format.toByteArray(),
-        KeyTemplate.OutputPrefixType.TINK);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                AesCmacParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setTagSizeBytes(16)
+                    .setVariant(AesCmacParameters.Variant.TINK)
+                    .build()));
   }
 
   /**
@@ -213,14 +214,13 @@ public final class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
    *     </ul>
    */
   public static final KeyTemplate rawAes256CmacTemplate() {
-    AesCmacKeyFormat format =
-        AesCmacKeyFormat.newBuilder()
-            .setKeySize(32)
-            .setParams(AesCmacParams.newBuilder().setTagSize(16).build())
-            .build();
-    return KeyTemplate.create(
-        new AesCmacKeyManager().getKeyType(),
-        format.toByteArray(),
-        KeyTemplate.OutputPrefixType.RAW);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                AesCmacParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setTagSizeBytes(16)
+                    .setVariant(AesCmacParameters.Variant.NO_PREFIX)
+                    .build()));
   }
 }

@@ -20,13 +20,11 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.aead.KmsAeadKeyManager;
 import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
 
 /**
  * A command-line utility for working with encrypted keysets.
@@ -58,7 +56,7 @@ public final class EncryptedKeysetExample {
       System.exit(1);
     }
     String mode = args[0];
-    if (!MODE_ENCRYPT.equals(mode) && !MODE_DECRYPT.equals(mode) && !MODE_GENERATE.equals(mode)) {
+    if (!mode.equals(MODE_ENCRYPT) && !mode.equals(MODE_DECRYPT) && !mode.equals(MODE_GENERATE)) {
       System.err.print("The first argument should be either encrypt, decrypt or generate");
       System.exit(1);
     }
@@ -69,15 +67,11 @@ public final class EncryptedKeysetExample {
     // Initialise Tink: register all AEAD key types with the Tink runtime
     AeadConfig.register();
 
-    // Read the GCP credentials and set up client
-    GcpKmsClient.register(Optional.of(kekUri), Optional.of(gcpCredentialFilename));
-
     // From the key-encryption key (KEK) URI, create a remote AEAD primitive for encrypting Tink
     // keysets.
-    KeysetHandle kekHandle = KeysetHandle.generateNew(KmsAeadKeyManager.createKeyTemplate(kekUri));
-    Aead kekAead = kekHandle.getPrimitive(Aead.class);
+    Aead kekAead = new GcpKmsClient().withCredentials(gcpCredentialFilename).getAead(kekUri);
 
-    if (MODE_GENERATE.equals(mode)) {
+    if (mode.equals(MODE_GENERATE)) {
       // [START generate-a-new-keyset]
       KeysetHandle handle = KeysetHandle.generateNew(PredefinedAeadParameters.AES128_GCM);
       // [END generate-a-new-keyset]
@@ -104,11 +98,11 @@ public final class EncryptedKeysetExample {
     Path inputFile = Paths.get(args[4]);
     Path outputFile = Paths.get(args[5]);
 
-    if (MODE_ENCRYPT.equals(mode)) {
+    if (mode.equals(MODE_ENCRYPT)) {
       byte[] plaintext = Files.readAllBytes(inputFile);
       byte[] ciphertext = aead.encrypt(plaintext, EMPTY_ASSOCIATED_DATA);
       Files.write(outputFile, ciphertext);
-    } else if (MODE_DECRYPT.equals(mode)) {
+    } else if (mode.equals(MODE_DECRYPT)) {
       byte[] ciphertext = Files.readAllBytes(inputFile);
       byte[] plaintext = aead.decrypt(ciphertext, EMPTY_ASSOCIATED_DATA);
       Files.write(outputFile, plaintext);

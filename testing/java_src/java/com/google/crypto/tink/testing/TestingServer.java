@@ -32,7 +32,6 @@ import io.grpc.ServerBuilder;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.Security;
-import java.util.Optional;
 import org.conscrypt.Conscrypt;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -63,6 +62,28 @@ public final class TestingServer {
           "AWS KMS key URL of the form: aws-kms://arn:aws:kms:<region>:<account-id>:key/<key-id>.")
   private String awsKeyUri;
 
+  private static GcpKmsClient getGcpKmsClient(String uri, String credentialsPath)
+      throws GeneralSecurityException {
+    GcpKmsClient client = (uri == null) ? new GcpKmsClient() : new GcpKmsClient(uri);
+    if (credentialsPath != null) {
+      client.withCredentials(credentialsPath);
+    } else {
+      client.withDefaultCredentials();
+    }
+    return client;
+  }
+
+  private static AwsKmsClient getAwsKmsClient(String uri, String credentialsPath)
+      throws GeneralSecurityException {
+    AwsKmsClient client = (uri == null) ? new AwsKmsClient() : new AwsKmsClient(uri);
+    if (credentialsPath != null) {
+      client.withCredentials(credentialsPath);
+    } else {
+      client.withDefaultCredentials();
+    }
+    return client;
+  }
+
   public void run() throws InterruptedException, GeneralSecurityException, IOException {
     installConscrypt();
     AeadConfig.register();
@@ -74,11 +95,13 @@ public final class TestingServer {
     PrfConfig.register();
     SignatureConfig.register();
     StreamingAeadConfig.register();
-    GcpKmsClient.register(Optional.ofNullable(gcpKeyUri), Optional.of(gcpCredentialsPath));
-    AwsKmsClient.register(Optional.ofNullable(awsKeyUri), Optional.of(awsCredentialsPath));
+
+    KmsClients.add(getGcpKmsClient(gcpKeyUri, gcpCredentialsPath));
+    KmsClients.add(getAwsKmsClient(awsKeyUri, awsCredentialsPath));
+
+    KmsClients.add(new FakeKmsClient());
 
     System.out.println("Start server on port " + port);
-    KmsClients.add(new FakeKmsClient());
     ServerBuilder.forPort(port)
         .addService(new MetadataServiceImpl())
         .addService(new KeysetServiceImpl())

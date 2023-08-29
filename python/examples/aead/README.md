@@ -27,7 +27,7 @@ You can then encrypt a file with:
 
 ```shell
 $ echo "some data" > testdata.txt
-$ ./bazel-bin/aead/aead --mode encrypt \
+$ ./bazel-bin/aead/aead_cli --mode encrypt \
     --keyset_path ./aead/aead_test_keyset.json \
     --input_path testdata.txt --output_path testdata.txt.encrypted
 ```
@@ -35,7 +35,7 @@ $ ./bazel-bin/aead/aead --mode encrypt \
 and then decrypt the the output with:
 
 ```shell
-$ ./bazel-bin/aead/aead --mode decrypt \
+$ ./bazel-bin/aead/aead_cli --mode decrypt \
     --keyset_path ./aead/aead_test_keyset.json \
     --input_path testdata.txt.encrypted --output_path testdata.txt.decrypted
 $ diff testdata.txt testdata.txt.decrypted

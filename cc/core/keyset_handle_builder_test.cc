@@ -669,7 +669,8 @@ TEST_F(KeysetHandleBuilderTest, UsePrimitiveFromLegacyProtoParams) {
       KeysetHandleBuilder().AddEntry(std::move(entry)).Build();
   ASSERT_THAT(handle.status(), IsOk());
 
-  util::StatusOr<std::unique_ptr<Mac>> mac = handle->GetPrimitive<Mac>();
+  util::StatusOr<std::unique_ptr<Mac>> mac =
+      handle->GetPrimitive<crypto::tink::Mac>(ConfigGlobalRegistry());
   ASSERT_THAT(mac.status(), IsOk());
   util::StatusOr<std::string> tag = (*mac)->ComputeMac("some input");
   ASSERT_THAT(tag.status(), IsOk());
@@ -692,7 +693,8 @@ TEST_F(KeysetHandleBuilderTest, UsePrimitiveFromParams) {
       KeysetHandleBuilder().AddEntry(std::move(entry)).Build();
   ASSERT_THAT(handle.status(), IsOk());
 
-  util::StatusOr<std::unique_ptr<Mac>> mac = handle->GetPrimitive<Mac>();
+  util::StatusOr<std::unique_ptr<Mac>> mac =
+      handle->GetPrimitive<crypto::tink::Mac>(ConfigGlobalRegistry());
   ASSERT_THAT(mac.status(), IsOk());
   util::StatusOr<std::string> tag = (*mac)->ComputeMac("some input");
   ASSERT_THAT(tag.status(), IsOk());
@@ -730,7 +732,8 @@ TEST_F(KeysetHandleBuilderTest, UsePrimitiveFromLegacyProtoKey) {
       KeysetHandleBuilder().AddEntry(std::move(entry)).Build();
   ASSERT_THAT(handle.status(), IsOk());
 
-  util::StatusOr<std::unique_ptr<Mac>> mac = handle->GetPrimitive<Mac>();
+  util::StatusOr<std::unique_ptr<Mac>> mac =
+      handle->GetPrimitive<crypto::tink::Mac>(ConfigGlobalRegistry());
   ASSERT_THAT(mac.status(), IsOk());
   util::StatusOr<std::string> tag = (*mac)->ComputeMac("some input");
   ASSERT_THAT(tag.status(), IsOk());
@@ -757,7 +760,8 @@ TEST_F(KeysetHandleBuilderTest, UsePrimitiveFromKey) {
       KeysetHandleBuilder().AddEntry(std::move(entry)).Build();
   ASSERT_THAT(handle.status(), IsOk());
 
-  util::StatusOr<std::unique_ptr<Mac>> mac = handle->GetPrimitive<Mac>();
+  util::StatusOr<std::unique_ptr<Mac>> mac =
+      handle->GetPrimitive<crypto::tink::Mac>(ConfigGlobalRegistry());
   ASSERT_THAT(mac.status(), IsOk());
   util::StatusOr<std::string> tag = (*mac)->ComputeMac("some input");
   ASSERT_THAT(tag.status(), IsOk());
@@ -816,18 +820,21 @@ TEST_F(KeysetHandleBuilderTest, UsePrimitivesFromSplitKeyset) {
   ASSERT_THAT(handle1, IsOkAndHolds(SizeIs(1)));
   ASSERT_THAT((*handle)[1].GetId(), Eq((*handle1)[0].GetId()));
 
-  util::StatusOr<std::unique_ptr<Mac>> mac0 = handle0->GetPrimitive<Mac>();
+  util::StatusOr<std::unique_ptr<Mac>> mac0 =
+      handle0->GetPrimitive<crypto::tink::Mac>(ConfigGlobalRegistry());
   ASSERT_THAT(mac0.status(), IsOk());
   util::StatusOr<std::string> tag0 = (*mac0)->ComputeMac("some input");
   ASSERT_THAT(tag0.status(), IsOk());
 
-  util::StatusOr<std::unique_ptr<Mac>> mac1 = handle1->GetPrimitive<Mac>();
+  util::StatusOr<std::unique_ptr<Mac>> mac1 =
+      handle1->GetPrimitive<crypto::tink::Mac>(ConfigGlobalRegistry());
   ASSERT_THAT(mac1.status(), IsOk());
   util::StatusOr<std::string> tag1 = (*mac1)->ComputeMac("some other input");
   ASSERT_THAT(tag1.status(), IsOk());
 
   // Use original keyset to verify tags computed from new keysets.
-  util::StatusOr<std::unique_ptr<Mac>> mac = handle->GetPrimitive<Mac>();
+  util::StatusOr<std::unique_ptr<Mac>> mac =
+      handle->GetPrimitive<crypto::tink::Mac>(ConfigGlobalRegistry());
   ASSERT_THAT(mac.status(), IsOk());
   EXPECT_THAT((*mac)->VerifyMac(*tag0, "some input"), IsOk());
   EXPECT_THAT((*mac)->VerifyMac(*tag1, "some other input"), IsOk());

@@ -82,7 +82,9 @@ Status JwtVerify(const std::string& jwk_set_filename,
   if (!validator.ok()) return validator.status();
 
   StatusOr<std::unique_ptr<JwtPublicKeyVerify>> jwt_verifier =
-      (*keyset_handle)->GetPrimitive<JwtPublicKeyVerify>();
+      (*keyset_handle)
+          ->GetPrimitive<crypto::tink::JwtPublicKeyVerify>(
+              crypto::tink::ConfigGlobalRegistry());
   if (!jwt_verifier.ok()) return jwt_verifier.status();
 
   return (*jwt_verifier)->VerifyAndDecode(*token, *validator).status();

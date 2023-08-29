@@ -30,7 +30,7 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetManager;
 import com.google.crypto.tink.KeysetWriter;
-import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.TinkProtoParametersFormat;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.InlineMe;
@@ -152,7 +152,10 @@ public final class AndroidKeysetManager {
     private String masterKeyUri = null;
     private Aead masterAead = null;
     private boolean useKeystore = true;
+    // If both keyTemplate and keyTemplateProto are set, we prefer keyTemplate.
+    // Otherwise, when build() is called we convert "keyTemplateProto" to keyTemplate first.
     private KeyTemplate keyTemplate = null;
+    private com.google.crypto.tink.proto.KeyTemplate keyTemplateProto = null;
 
     @GuardedBy("this")
     private KeysetManager keysetManager;
@@ -205,9 +208,7 @@ public final class AndroidKeysetManager {
      */
     @CanIgnoreReturnValue
     public Builder withKeyTemplate(com.google.crypto.tink.proto.KeyTemplate val) {
-      keyTemplate =
-          KeyTemplate.create(
-              val.getTypeUrl(), val.getValue().toByteArray(), fromProto(val.getOutputPrefixType()));
+      this.keyTemplateProto = val;
       return this;
     }
 
@@ -280,6 +281,10 @@ public final class AndroidKeysetManager {
     public synchronized AndroidKeysetManager build() throws GeneralSecurityException, IOException {
       if (keysetName == null) {
         throw new IllegalArgumentException("keysetName cannot be null");
+      }
+      if (keyTemplateProto != null && keyTemplate == null) {
+        keyTemplate =
+            KeyTemplate.createFrom(TinkProtoParametersFormat.parse(keyTemplateProto.toByteArray()));
       }
       // readKeysetFromPrefs(), readOrGenerateNewMasterKey() and generateNewKeyset() involve shared
       // pref filesystem operations. To control access to this global state in multi-threaded
@@ -540,21 +545,6 @@ public final class AndroidKeysetManager {
       }
     } catch (IOException e) {
       throw new GeneralSecurityException(e);
-    }
-  }
-
-  private static KeyTemplate.OutputPrefixType fromProto(OutputPrefixType outputPrefixType) {
-    switch (outputPrefixType) {
-      case TINK:
-        return KeyTemplate.OutputPrefixType.TINK;
-      case LEGACY:
-        return KeyTemplate.OutputPrefixType.LEGACY;
-      case RAW:
-        return KeyTemplate.OutputPrefixType.RAW;
-      case CRUNCHY:
-        return KeyTemplate.OutputPrefixType.CRUNCHY;
-      default:
-        throw new IllegalArgumentException("Unknown output prefix type");
     }
   }
 

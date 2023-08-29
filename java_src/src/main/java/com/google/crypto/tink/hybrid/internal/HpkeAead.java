@@ -26,7 +26,7 @@ import java.security.GeneralSecurityException;
  * <p>HPKE RFC is available at https://www.rfc-editor.org/rfc/rfc9180.html.
  */
 @Immutable
-interface HpkeAead {
+public interface HpkeAead {
   /**
    * Performs authenticated encryption of {@code plaintext} and {@code associatedData} using {@code
    * key} and {@code nonce} according to the HPKE AEAD specification.

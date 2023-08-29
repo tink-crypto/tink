@@ -105,7 +105,8 @@ TEST(PrfSetWrapperTest, TestPrimitivesEndToEnd) {
   uint32_t aes_cmac_id = id_result.value();
   auto keyset_handle = keyset_manager->GetKeysetHandle();
   uint32_t hkdf_id = keyset_handle->GetKeysetInfo().primary_key_id();
-  auto prf_set_result = keyset_handle->GetPrimitive<PrfSet>();
+  auto prf_set_result =
+      keyset_handle->GetPrimitive<crypto::tink::PrfSet>(ConfigGlobalRegistry());
   ASSERT_TRUE(prf_set_result.ok()) << prf_set_result.status();
   auto prf_set = std::move(prf_set_result.value());
   EXPECT_THAT(prf_set->GetPrimaryId(), Eq(hkdf_id));

@@ -29,6 +29,8 @@
 namespace crypto {
 namespace tink {
 
+// NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
+// TINK-PENDING-REMOVAL-IN-3.0.0-START
 // static
 util::StatusOr<std::unique_ptr<DeterministicAead>>
 DeterministicAeadFactory::GetPrimitive(const KeysetHandle& keyset_handle) {
@@ -37,7 +39,8 @@ DeterministicAeadFactory::GetPrimitive(const KeysetHandle& keyset_handle) {
   if (!status.ok()) {
     return status;
   }
-  return keyset_handle.GetPrimitive<DeterministicAead>();
+  return keyset_handle.GetPrimitive<crypto::tink::DeterministicAead>(
+      ConfigGlobalRegistry());
 }
 
 // static
@@ -52,6 +55,8 @@ DeterministicAeadFactory::GetPrimitive(
   }
   return keyset_handle.GetPrimitive<DeterministicAead>(custom_key_manager);
 }
+// TINK-PENDING-REMOVAL-IN-3.0.0-END
+// NOLINTEND(whitespace/line_length)
 
 }  // namespace tink
 }  // namespace crypto

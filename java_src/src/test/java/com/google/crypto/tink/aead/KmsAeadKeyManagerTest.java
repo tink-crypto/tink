@@ -44,10 +44,10 @@ public class KmsAeadKeyManagerTest {
   }
 
   @Test
-  public void testKmsAeadWithBoundedClient_success() throws Exception {
+  public void testKmsAead_success() throws Exception {
     String keyUri = FakeKmsClient.createFakeKeyUri();
     KeysetHandle keysetHandle =
-        KeysetHandle.generateNew(AeadKeyTemplates.createKmsAeadKeyTemplate(keyUri));
+        KeysetHandle.generateNew(KmsAeadKeyManager.createKeyTemplate(keyUri));
     TestUtil.runBasicAeadTests(keysetHandle.getPrimitive(Aead.class));
   }
 

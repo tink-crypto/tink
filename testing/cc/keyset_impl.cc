@@ -369,7 +369,9 @@ grpc::Status KeysetImpl::WriteEncrypted(
     return grpc::Status::OK;
   }
   StatusOr<std::unique_ptr<crypto::tink::Aead>> master_aead =
-      (*master_keyset_handle)->GetPrimitive<crypto::tink::Aead>();
+      (*master_keyset_handle)
+          ->GetPrimitive<crypto::tink::Aead>(
+              crypto::tink::ConfigGlobalRegistry());
   if (!master_aead.ok()) {
     response->set_err(std::string(master_aead.status().message()));
     return grpc::Status::OK;
@@ -451,7 +453,9 @@ grpc::Status KeysetImpl::ReadEncrypted(
     return grpc::Status::OK;
   }
   StatusOr<std::unique_ptr<crypto::tink::Aead>> master_aead =
-      (*master_keyset_handle)->GetPrimitive<crypto::tink::Aead>();
+      (*master_keyset_handle)
+          ->GetPrimitive<crypto::tink::Aead>(
+              crypto::tink::ConfigGlobalRegistry());
   if (!master_aead.ok()) {
     response->set_err(std::string(master_aead.status().message()));
     return grpc::Status::OK;

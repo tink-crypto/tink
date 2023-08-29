@@ -45,7 +45,9 @@ StatusOr<std::string> AeadEncrypt(const KeysetHandle& keyset_handle,
   // To facilitate key rotation, GetPrimitive returns an Aead primitive that
   // "wraps" multiple Aead primitives in the keyset. When encrypting it uses the
   // primary key.
-  StatusOr<std::unique_ptr<Aead>> aead = keyset_handle.GetPrimitive<Aead>();
+  StatusOr<std::unique_ptr<Aead>> aead =
+      keyset_handle.GetPrimitive<crypto::tink::Aead>(
+          crypto::tink::ConfigGlobalRegistry());
   if (!aead.ok()) return aead.status();
   return (*aead)->Encrypt(palintext, associated_data);
 }
@@ -62,7 +64,9 @@ StatusOr<std::string> AeadDecrypt(const KeysetHandle& keyset_handle,
   // To facilitate key rotation, GetPrimitive returns an Aead primitive that
   // "wraps" multiple Aead primitives in the keyset. When decrypting it uses the
   // key that was used to encrypt using the key ID contained in the ciphertext.
-  StatusOr<std::unique_ptr<Aead>> aead = keyset_handle.GetPrimitive<Aead>();
+  StatusOr<std::unique_ptr<Aead>> aead =
+      keyset_handle.GetPrimitive<crypto::tink::Aead>(
+          crypto::tink::ConfigGlobalRegistry());
   if (!aead.ok()) return aead.status();
   return (*aead)->Decrypt(ciphertext, associated_data);
 }

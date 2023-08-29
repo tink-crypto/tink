@@ -84,7 +84,9 @@ Status DigitalSignatureCli(absl::string_view mode,
 
   if (mode == kSign) {
     StatusOr<std::unique_ptr<PublicKeySign>> public_key_sign =
-        (*keyset_handle)->GetPrimitive<PublicKeySign>();
+        (*keyset_handle)
+            ->GetPrimitive<crypto::tink::PublicKeySign>(
+                crypto::tink::ConfigGlobalRegistry());
     if (!public_key_sign.ok()) return public_key_sign.status();
 
     StatusOr<std::string> signature =
@@ -94,7 +96,9 @@ Status DigitalSignatureCli(absl::string_view mode,
     return WriteToFile(*signature, signature_filename);
   } else {  // mode == kVerify
     StatusOr<std::unique_ptr<PublicKeyVerify>> public_key_verify =
-        (*keyset_handle)->GetPrimitive<PublicKeyVerify>();
+        (*keyset_handle)
+            ->GetPrimitive<crypto::tink::PublicKeyVerify>(
+                crypto::tink::ConfigGlobalRegistry());
     if (!public_key_verify.ok()) return public_key_verify.status();
 
     // Read the signature.

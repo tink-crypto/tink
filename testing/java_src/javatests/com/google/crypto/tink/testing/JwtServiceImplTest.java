@@ -22,7 +22,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplates;
-import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
+import com.google.crypto.tink.TinkProtoParametersFormat;
 import com.google.crypto.tink.jwt.JwtHmacKeyManager;
 import com.google.crypto.tink.jwt.JwtMacConfig;
 import com.google.crypto.tink.jwt.JwtSignatureConfig;
@@ -133,7 +133,8 @@ public final class JwtServiceImplTest {
 
   @Test
   public void jwtMacCreateKeyset_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("JWT_HS256"));
+    byte[] template =
+        TinkProtoParametersFormat.serialize(KeyTemplates.get("JWT_HS256").toParameters());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     CreationResponse response =
@@ -162,7 +163,8 @@ public final class JwtServiceImplTest {
 
   @Test
   public void jwtComputeVerifyMac_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("JWT_HS256"));
+    byte[] template =
+        TinkProtoParametersFormat.serialize(KeyTemplates.get("JWT_HS256").toParameters());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
@@ -207,7 +209,8 @@ public final class JwtServiceImplTest {
 
   @Test
   public void jwtEmptyTokenComputeVerifyMac_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(JwtHmacKeyManager.hs256Template());
+    byte[] template =
+        TinkProtoParametersFormat.serialize(JwtHmacKeyManager.hs256Template().toParameters());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
@@ -243,7 +246,8 @@ public final class JwtServiceImplTest {
 
   @Test
   public void jwtPublicKeySignCreateKeyset_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("JWT_ES256"));
+    byte[] template =
+        TinkProtoParametersFormat.serialize(KeyTemplates.get("JWT_ES256").toParameters());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     CreationResponse response =
@@ -271,7 +275,8 @@ public final class JwtServiceImplTest {
 
   @Test
   public void jwtPublicKeyVerifyCreateKeyset_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("JWT_ES256"));
+    byte[] template =
+        TinkProtoParametersFormat.serialize(KeyTemplates.get("JWT_ES256").toParameters());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] privateKeyset = keysetResponse.getKeyset().toByteArray();
@@ -304,7 +309,8 @@ public final class JwtServiceImplTest {
 
   @Test
   public void publicKeySignVerify_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("JWT_ES256"));
+    byte[] template =
+        TinkProtoParametersFormat.serialize(KeyTemplates.get("JWT_ES256").toParameters());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] privateKeyset = keysetResponse.getKeyset().toByteArray();
@@ -370,7 +376,8 @@ public final class JwtServiceImplTest {
 
   @Test
   public void verifyFailsWhenExpired() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(JwtHmacKeyManager.hs256Template());
+    byte[] template =
+        TinkProtoParametersFormat.serialize(JwtHmacKeyManager.hs256Template().toParameters());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
@@ -411,7 +418,8 @@ public final class JwtServiceImplTest {
 
   @Test
   public void verifyFailsWithWrongAudience() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(JwtHmacKeyManager.hs256Template());
+    byte[] template =
+        TinkProtoParametersFormat.serialize(JwtHmacKeyManager.hs256Template().toParameters());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
@@ -452,7 +460,8 @@ public final class JwtServiceImplTest {
 
   @Test
   public void verifyFailsWithWrongKey() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(JwtHmacKeyManager.hs256Template());
+    byte[] template =
+        TinkProtoParametersFormat.serialize(JwtHmacKeyManager.hs256Template().toParameters());
 
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
@@ -498,7 +507,8 @@ public final class JwtServiceImplTest {
 
   @Test
   public void jwtToFromJwt_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("JWT_ES256"));
+    byte[] template =
+        TinkProtoParametersFormat.serialize(KeyTemplates.get("JWT_ES256").toParameters());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] privateKeyset = keysetResponse.getKeyset().toByteArray();

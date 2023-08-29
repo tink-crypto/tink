@@ -128,12 +128,7 @@ cc_library(
     tags = ["requires_boringcrypto_update"],
     deps = [
         "//:configuration",
-        "//aead:aead_wrapper",
-        "//aead:aes_ctr_hmac_aead_key_manager",
-        "//aead:aes_eax_key_manager",
-        "//aead:aes_gcm_key_manager",
-        "//aead:aes_gcm_siv_key_manager",
-        "//aead:xchacha20_poly1305_key_manager",
+        "//config/internal:aead_v0",
         "//daead:aes_siv_key_manager",
         "//daead:deterministic_aead_wrapper",
         "//hybrid:ecies_aead_hkdf_private_key_manager",

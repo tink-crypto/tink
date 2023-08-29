@@ -32,6 +32,12 @@
 #include "proto/ecdsa.pb.h"
 #include "proto/tink.pb.h"
 
+namespace crypto {
+namespace tink {
+namespace {
+
+// NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
+// TINK-PENDING-REMOVAL-IN-3.0.0-START
 using crypto::tink::test::AddTinkKey;
 using google::crypto::tink::EcdsaPublicKey;
 using google::crypto::tink::EcdsaSignatureEncoding;
@@ -40,10 +46,6 @@ using google::crypto::tink::HashType;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
-
-namespace crypto {
-namespace tink {
-namespace {
 
 class PublicKeyVerifyFactoryTest : public ::testing::Test {
  protected:
@@ -98,6 +100,8 @@ TEST_F(PublicKeyVerifyFactoryTest, testPrimitive) {
       << public_key_verify_result.status();
   auto public_key_verify = std::move(public_key_verify_result.value());
 }
+// TINK-PENDING-REMOVAL-IN-3.0.0-END
+// NOLINTEND(whitespace/line_length)
 
 }  // namespace
 }  // namespace tink

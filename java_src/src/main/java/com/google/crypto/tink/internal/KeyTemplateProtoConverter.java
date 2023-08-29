@@ -19,8 +19,6 @@ package com.google.crypto.tink.internal;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
 /** KeyTemplateProtoConverter converts KeyTemplate to and from the binary proto format. */
@@ -56,25 +54,6 @@ public final class KeyTemplateProtoConverter {
 
   public static byte[] toByteArray(KeyTemplate keyTemplate) throws GeneralSecurityException {
     return toProto(keyTemplate).toByteArray();
-  }
-
-  public static KeyTemplate fromProto(com.google.crypto.tink.proto.KeyTemplate proto)
-      throws GeneralSecurityException {
-    return KeyTemplate.create(
-        proto.getTypeUrl(),
-        proto.getValue().toByteArray(),
-        prefixFromProto(proto.getOutputPrefixType()));
-  }
-
-  public static KeyTemplate fromByteArray(byte[] bytes) throws GeneralSecurityException {
-    try {
-      com.google.crypto.tink.proto.KeyTemplate proto =
-          com.google.crypto.tink.proto.KeyTemplate.parseFrom(
-              bytes, ExtensionRegistryLite.getEmptyRegistry());
-      return fromProto(proto);
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("invalid key template", e);
-    }
   }
 
   public static KeyTemplate.OutputPrefixType getOutputPrefixType(KeyTemplate t)

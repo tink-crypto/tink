@@ -60,14 +60,16 @@ TEST(KeyDerivationConfigTest, Register) {
       KeysetHandle::GenerateNew(*templ);
   ASSERT_THAT(handle, IsOk());
   util::StatusOr<std::unique_ptr<KeysetDeriver>> deriver =
-      (*handle)->GetPrimitive<KeysetDeriver>();
+      (*handle)->GetPrimitive<crypto::tink::KeysetDeriver>(
+          ConfigGlobalRegistry());
   ASSERT_THAT(deriver, IsOk());
   util::StatusOr<std::unique_ptr<KeysetHandle>> derived_handle =
       (*deriver)->DeriveKeyset("salty");
   ASSERT_THAT(derived_handle, IsOk());
 
   util::StatusOr<std::unique_ptr<Aead>> aead =
-      (*derived_handle)->GetPrimitive<Aead>();
+      (*derived_handle)
+          ->GetPrimitive<crypto::tink::Aead>(ConfigGlobalRegistry());
   ASSERT_THAT(aead, IsOk());
   std::string plaintext = "plaintext";
   std::string ad = "ad";

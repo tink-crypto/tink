@@ -291,6 +291,40 @@ tink_cc_library(
     tink::core::private_key
 )
 
+tink_cc_library(
+  NAME hpke_parameters
+  SRCS
+    hpke_parameters.cc
+    hpke_parameters.h
+  DEPS
+    tink::hybrid::hybrid_parameters
+    absl::status
+    tink::core::parameters
+    tink::util::status
+    tink::util::statusor
+)
+
+tink_cc_library(
+  NAME hpke_public_key
+  SRCS
+    hpke_public_key.cc
+    hpke_public_key.h
+  DEPS
+    tink::hybrid::hpke_parameters
+    tink::hybrid::hybrid_public_key
+    absl::status
+    absl::strings
+    absl::str_format
+    absl::optional
+    tink::core::key
+    tink::core::partial_key_access_token
+    tink::internal::ec_util
+    tink::subtle::common_enums
+    tink::subtle::subtle_util
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -555,5 +589,38 @@ tink_cc_test(
     tink::hybrid::failing_hybrid
     gmock
     absl::status
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME hpke_parameters_test
+  SRCS
+    hpke_parameters_test.cc
+  DEPS
+    tink::hybrid::hpke_parameters
+    gmock
+    absl::status
+    tink::util::statusor
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME hpke_public_key_test
+  SRCS
+    hpke_public_key_test.cc
+  DEPS
+    tink::hybrid::hpke_parameters
+    tink::hybrid::hpke_public_key
+    gmock
+    absl::status
+    absl::strings
+    absl::optional
+    crypto
+    tink::core::partial_key_access
+    tink::internal::ec_util
+    tink::internal::ssl_unique_ptr
+    tink::subtle::common_enums
+    tink::subtle::random
+    tink::util::statusor
     tink::util::test_matchers
 )

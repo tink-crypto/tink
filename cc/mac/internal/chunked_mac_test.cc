@@ -67,11 +67,12 @@ TEST_P(ChunkedMacCompatibilityTest, ComputeAndVerify) {
       KeysetHandle::GenerateNew(key_template);
   ASSERT_THAT(key, IsOk());
 
-  util::StatusOr<std::unique_ptr<Mac>> mac = (*key)->GetPrimitive<Mac>();
+  util::StatusOr<std::unique_ptr<Mac>> mac =
+      (*key)->GetPrimitive<crypto::tink::Mac>(ConfigGlobalRegistry());
   ASSERT_THAT(mac, IsOk());
 
   util::StatusOr<std::unique_ptr<ChunkedMac>> chunked_mac =
-      (*key)->GetPrimitive<ChunkedMac>();
+      (*key)->GetPrimitive<crypto::tink::ChunkedMac>(ConfigGlobalRegistry());
   ASSERT_THAT(chunked_mac, IsOk());
 
   // Compute tag with chunked MAC.
@@ -108,7 +109,7 @@ TEST(ChunkedMacSlicingTest, DifferentChunkSizes) {
   ASSERT_THAT(key, IsOk());
 
   util::StatusOr<std::unique_ptr<ChunkedMac>> chunked_mac =
-      (*key)->GetPrimitive<ChunkedMac>();
+      (*key)->GetPrimitive<crypto::tink::ChunkedMac>(ConfigGlobalRegistry());
   ASSERT_THAT(chunked_mac, IsOk());
 
   // Update three input chunks.
@@ -138,7 +139,7 @@ TEST(ChunkedMacTest, VerifyPrefixFails) {
   ASSERT_THAT(key, IsOk());
 
   util::StatusOr<std::unique_ptr<ChunkedMac>> chunked_mac =
-      (*key)->GetPrimitive<ChunkedMac>();
+      (*key)->GetPrimitive<crypto::tink::ChunkedMac>(ConfigGlobalRegistry());
   ASSERT_THAT(chunked_mac, IsOk());
 
   util::StatusOr<std::unique_ptr<ChunkedMacComputation>> computation =
@@ -164,7 +165,7 @@ TEST(ChunkedMacTest, UpdateWrongOrderFails) {
   ASSERT_THAT(key, IsOk());
 
   util::StatusOr<std::unique_ptr<ChunkedMac>> chunked_mac =
-      (*key)->GetPrimitive<ChunkedMac>();
+      (*key)->GetPrimitive<crypto::tink::ChunkedMac>(ConfigGlobalRegistry());
   ASSERT_THAT(chunked_mac, IsOk());
 
   util::StatusOr<std::unique_ptr<ChunkedMacComputation>> computation =
@@ -192,7 +193,7 @@ TEST(ChunkedMacTest, OperationsFailAfterComputeVerifyMac) {
   ASSERT_THAT(key, IsOk());
 
   util::StatusOr<std::unique_ptr<ChunkedMac>> chunked_mac =
-      (*key)->GetPrimitive<ChunkedMac>();
+      (*key)->GetPrimitive<crypto::tink::ChunkedMac>(ConfigGlobalRegistry());
   ASSERT_THAT(chunked_mac, IsOk());
 
   util::StatusOr<std::unique_ptr<ChunkedMacComputation>> computation =

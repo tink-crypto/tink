@@ -76,7 +76,8 @@ TEST_F(KmsEnvelopeAeadTest, EncryptDecryptSucceed) {
   ASSERT_THAT(keyset_handle, IsOk());
   KeyTemplate dek_template = AeadKeyTemplates::Aes128Eax();
   util::StatusOr<std::unique_ptr<Aead>> remote_aead =
-      (*keyset_handle)->GetPrimitive<Aead>();
+      (*keyset_handle)
+          ->GetPrimitive<crypto::tink::Aead>(ConfigGlobalRegistry());
 
   util::StatusOr<std::unique_ptr<Aead>> envelope_aead =
       KmsEnvelopeAead::New(dek_template, *std::move(remote_aead));
@@ -248,7 +249,8 @@ TEST_P(KmsEnvelopeAeadDekTemplatesTest, EncryptDecrypt) {
       KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm());
   ASSERT_THAT(keyset_handle, IsOk());
   util::StatusOr<std::unique_ptr<Aead>> remote_aead =
-      (*keyset_handle)->GetPrimitive<Aead>();
+      (*keyset_handle)
+          ->GetPrimitive<crypto::tink::Aead>(ConfigGlobalRegistry());
 
   KeyTemplate dek_template = GetParam();
   util::StatusOr<std::unique_ptr<Aead>> envelope_aead =
@@ -305,7 +307,7 @@ TEST_F(KmsEnvelopeAeadTest, PrimitiveFromTemplateAndFromNewAreCompatible) {
       KeysetHandle::GenerateNew(env_template);
   ASSERT_THAT(handle, IsOk());
   util::StatusOr<std::unique_ptr<Aead>> envelope_aead_from_template =
-      (*handle)->GetPrimitive<Aead>();
+      (*handle)->GetPrimitive<crypto::tink::Aead>(ConfigGlobalRegistry());
   ASSERT_THAT(envelope_aead_from_template, IsOk());
 
   // Create a KmsEnvelopeAead primitive form KmsEnvelopeAead::New.

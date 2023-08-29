@@ -110,7 +110,8 @@ StatusOr<std::unique_ptr<Aead>> FakeKmsClient::GetAead(
   if (!handle_result.ok()) {
     return handle_result.status();
   }
-  return handle_result.value()->GetPrimitive<crypto::tink::Aead>();
+  return handle_result.value()->GetPrimitive<crypto::tink::Aead>(
+      ConfigGlobalRegistry());
 }
 
 Status FakeKmsClient::RegisterNewClient(absl::string_view key_uri,

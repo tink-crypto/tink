@@ -158,9 +158,9 @@ public final class EciesPublicKey extends HybridPublicKey {
   }
 
   /**
-   * Returns the underlying public point as byte array in case the curve is X25519.
+   * Returns the underlying public point if the curve is a NIST curve.
    *
-   * <p>Returns null For NIST curves.
+   * <p>Returns null if the curve used for this key is not a NIST curve.
    */
   @RestrictedApi(
       explanation = "Accessing parts of keys can produce unexpected incompatibilities, annotate the function with @AccessesPartialKey",

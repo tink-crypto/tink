@@ -79,11 +79,11 @@ if (TINK_BUILD_TESTS)
 endif()
 
 if (NOT TINK_USE_INSTALLED_ABSEIL)
-  # Release from 2023-05-04.
+  # Release from 2023-08-02.
   http_archive(
     NAME abseil
-    URL https://github.com/abseil/abseil-cpp/archive/refs/tags/20230125.3.zip
-    SHA256 51d676b6846440210da48899e4df618a357e6e44ecde7106f1e44ea16ae8adc7
+    URL https://github.com/abseil/abseil-cpp/archive/refs/tags/20230802.0.zip
+    SHA256 2942db09db29359e0c1982986167167d226e23caac50eea1f07b2eb2181169cf
   )
 else()
   # This is everything that needs to be done here. Abseil already defines its

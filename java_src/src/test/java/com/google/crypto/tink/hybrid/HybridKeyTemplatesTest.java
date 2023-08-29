@@ -16,9 +16,11 @@
 
 package com.google.crypto.tink.hybrid;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.google.crypto.tink.TinkProtoParametersFormat;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.proto.EcPointFormat;
 import com.google.crypto.tink.proto.EciesAeadHkdfKeyFormat;
@@ -29,13 +31,22 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.nio.charset.Charset;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Tests for HybridKeyTemplates. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public class HybridKeyTemplatesTest {
+  @BeforeClass
+  public static void setUp() throws Exception {
+    HybridConfig.register();
+  }
+
   private static final Charset UTF_8 = Charset.forName("UTF-8");
 
   @Test
@@ -134,5 +145,36 @@ public class HybridKeyTemplatesTest {
     assertEquals(salt, kemParams.getHkdfSalt().toStringUtf8());
     assertEquals(AeadKeyTemplates.AES256_EAX.toString(),
         format.getParams().getDemParams().getAeadDem().toString());
+  }
+
+  public static class Pair {
+    public Pair(KeyTemplate template, HybridParameters parameters) {
+      this.template = template;
+      this.parameters = parameters;
+    }
+
+    KeyTemplate template;
+    HybridParameters parameters;
+  }
+
+  @DataPoints("EquivalentPairs")
+  public static final Pair[] TEMPLATES =
+      new Pair[] {
+        new Pair(
+            HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM,
+            PredefinedHybridParameters.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM),
+        new Pair(
+            HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM_COMPRESSED_WITHOUT_PREFIX,
+            PredefinedHybridParameters
+                .ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM_COMPRESSED_WITHOUT_PREFIX),
+        new Pair(
+            HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256,
+            PredefinedHybridParameters.ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256),
+      };
+
+  @Theory
+  public void testParametersEqualsKeyTemplate(@FromDataPoints("EquivalentPairs") Pair p)
+      throws Exception {
+    assertThat(TinkProtoParametersFormat.parse(p.template.toByteArray())).isEqualTo(p.parameters);
   }
 }

@@ -122,13 +122,19 @@ TEST_F(JwtPublicKeyWrappersTest, CannotWrapPrimitivesFromNonRawOrTinkKeys) {
       KeysetHandle::GenerateNew(tink_key_template);
   ASSERT_THAT(keyset_handle, IsOk());
   EXPECT_FALSE(
-      (*keyset_handle)->GetPrimitive<JwtPublicKeySign>().status().ok());
+      (*keyset_handle)
+          ->GetPrimitive<crypto::tink::JwtPublicKeySign>(ConfigGlobalRegistry())
+          .status()
+          .ok());
 
   util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
       (*keyset_handle)->GetPublicKeysetHandle();
   ASSERT_THAT(public_handle, IsOk());
-  EXPECT_FALSE(
-      (*public_handle)->GetPrimitive<JwtPublicKeyVerify>().status().ok());
+  EXPECT_FALSE((*public_handle)
+                   ->GetPrimitive<crypto::tink::JwtPublicKeyVerify>(
+                       ConfigGlobalRegistry())
+                   .status()
+                   .ok());
 }
 
 TEST_F(JwtPublicKeyWrappersTest, GenerateRawSignVerifySuccess) {
@@ -137,14 +143,17 @@ TEST_F(JwtPublicKeyWrappersTest, GenerateRawSignVerifySuccess) {
       KeysetHandle::GenerateNew(key_template);
   ASSERT_THAT(handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeySign>> jwt_sign =
-      (*handle)->GetPrimitive<JwtPublicKeySign>();
+      (*handle)->GetPrimitive<crypto::tink::JwtPublicKeySign>(
+          ConfigGlobalRegistry());
   EXPECT_THAT(jwt_sign, IsOk());
 
   util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
       (*handle)->GetPublicKeysetHandle();
   EXPECT_THAT(public_handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> jwt_verify =
-      (*public_handle)->GetPrimitive<JwtPublicKeyVerify>();
+      (*public_handle)
+          ->GetPrimitive<crypto::tink::JwtPublicKeyVerify>(
+              ConfigGlobalRegistry());
   EXPECT_THAT(jwt_verify, IsOk());
 
   util::StatusOr<RawJwt> raw_jwt =
@@ -181,7 +190,8 @@ TEST_F(JwtPublicKeyWrappersTest, GenerateRawSignVerifySuccess) {
   std::unique_ptr<KeysetHandle> tink_public_handle =
       KeysetHandleWithTinkPrefix(**public_handle);
   util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> tink_verify =
-      tink_public_handle->GetPrimitive<JwtPublicKeyVerify>();
+      tink_public_handle->GetPrimitive<crypto::tink::JwtPublicKeyVerify>(
+          ConfigGlobalRegistry());
   ASSERT_THAT(tink_verify, IsOk());
 
   EXPECT_THAT((*tink_verify)->VerifyAndDecode(*compact, *validator).status(),
@@ -194,14 +204,17 @@ TEST_F(JwtPublicKeyWrappersTest, GenerateTinkSignVerifySuccess) {
       KeysetHandle::GenerateNew(key_template);
   ASSERT_THAT(handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeySign>> jwt_sign =
-      (*handle)->GetPrimitive<JwtPublicKeySign>();
+      (*handle)->GetPrimitive<crypto::tink::JwtPublicKeySign>(
+          ConfigGlobalRegistry());
   EXPECT_THAT(jwt_sign, IsOk());
 
   util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
       (*handle)->GetPublicKeysetHandle();
   EXPECT_THAT(public_handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> jwt_verify =
-      (*public_handle)->GetPrimitive<JwtPublicKeyVerify>();
+      (*public_handle)
+          ->GetPrimitive<crypto::tink::JwtPublicKeyVerify>(
+              ConfigGlobalRegistry());
   EXPECT_THAT(jwt_verify, IsOk());
 
   util::StatusOr<RawJwt> raw_jwt =
@@ -240,7 +253,9 @@ TEST_F(JwtPublicKeyWrappersTest, GenerateTinkSignVerifySuccess) {
   std::unique_ptr<KeysetHandle> public_handle_with_new_key_id =
       KeysetHandleWithNewKeyId(**public_handle);
   util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> verify_with_new_key_id =
-      public_handle_with_new_key_id->GetPrimitive<JwtPublicKeyVerify>();
+      public_handle_with_new_key_id
+          ->GetPrimitive<crypto::tink::JwtPublicKeyVerify>(
+              ConfigGlobalRegistry());
   ASSERT_THAT(verify_with_new_key_id, IsOk());
 
   util::StatusOr<VerifiedJwt> verified_jwt_2 =
@@ -261,50 +276,62 @@ TEST_F(JwtPublicKeyWrappersTest, KeyRotation) {
     ASSERT_THAT(manager.SetPrimary(*old_id), IsOk());
     std::unique_ptr<KeysetHandle> handle1 = manager.GetKeysetHandle();
     util::StatusOr<std::unique_ptr<JwtPublicKeySign>> jwt_sign1 =
-        handle1->GetPrimitive<JwtPublicKeySign>();
+        handle1->GetPrimitive<crypto::tink::JwtPublicKeySign>(
+            ConfigGlobalRegistry());
     ASSERT_THAT(jwt_sign1, IsOk());
     util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle1 =
         handle1->GetPublicKeysetHandle();
     EXPECT_THAT(public_handle1, IsOk());
     util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> jwt_verify1 =
-        (*public_handle1)->GetPrimitive<JwtPublicKeyVerify>();
+        (*public_handle1)
+            ->GetPrimitive<crypto::tink::JwtPublicKeyVerify>(
+                ConfigGlobalRegistry());
     EXPECT_THAT(jwt_verify1, IsOk());
 
     util::StatusOr<uint32_t> new_id = manager.Add(key_template);
     ASSERT_THAT(new_id, IsOk());
     std::unique_ptr<KeysetHandle> handle2 = manager.GetKeysetHandle();
     util::StatusOr<std::unique_ptr<JwtPublicKeySign>> jwt_sign2 =
-        handle2->GetPrimitive<JwtPublicKeySign>();
+        handle2->GetPrimitive<crypto::tink::JwtPublicKeySign>(
+            ConfigGlobalRegistry());
     ASSERT_THAT(jwt_sign2, IsOk());
     util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle2 =
         handle2->GetPublicKeysetHandle();
     EXPECT_THAT(public_handle2, IsOk());
     util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> jwt_verify2 =
-        (*public_handle2)->GetPrimitive<JwtPublicKeyVerify>();
+        (*public_handle2)
+            ->GetPrimitive<crypto::tink::JwtPublicKeyVerify>(
+                ConfigGlobalRegistry());
     EXPECT_THAT(jwt_verify2, IsOk());
 
     ASSERT_THAT(manager.SetPrimary(*new_id), IsOk());
     std::unique_ptr<KeysetHandle> handle3 = manager.GetKeysetHandle();
     util::StatusOr<std::unique_ptr<JwtPublicKeySign>> jwt_sign3 =
-        handle3->GetPrimitive<JwtPublicKeySign>();
+        handle3->GetPrimitive<crypto::tink::JwtPublicKeySign>(
+            ConfigGlobalRegistry());
     ASSERT_THAT(jwt_sign3, IsOk());
     util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle3 =
         handle3->GetPublicKeysetHandle();
     EXPECT_THAT(public_handle3, IsOk());
     util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> jwt_verify3 =
-        (*public_handle3)->GetPrimitive<JwtPublicKeyVerify>();
+        (*public_handle3)
+            ->GetPrimitive<crypto::tink::JwtPublicKeyVerify>(
+                ConfigGlobalRegistry());
     EXPECT_THAT(jwt_verify3, IsOk());
 
     ASSERT_THAT(manager.Disable(*old_id), IsOk());
     std::unique_ptr<KeysetHandle> handle4 = manager.GetKeysetHandle();
     util::StatusOr<std::unique_ptr<JwtPublicKeySign>> jwt_sign4 =
-        handle4->GetPrimitive<JwtPublicKeySign>();
+        handle4->GetPrimitive<crypto::tink::JwtPublicKeySign>(
+            ConfigGlobalRegistry());
     ASSERT_THAT(jwt_sign4, IsOk());
     util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle4 =
         handle4->GetPublicKeysetHandle();
     EXPECT_THAT(public_handle4, IsOk());
     util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> jwt_verify4 =
-        (*public_handle4)->GetPrimitive<JwtPublicKeyVerify>();
+        (*public_handle4)
+            ->GetPrimitive<crypto::tink::JwtPublicKeyVerify>(
+                ConfigGlobalRegistry());
     EXPECT_THAT(jwt_verify4, IsOk());
 
     util::StatusOr<RawJwt> raw_jwt =

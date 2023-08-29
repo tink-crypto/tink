@@ -65,12 +65,12 @@ public final class KmsClients {
    * <p><b>Warning</b> This method searches over the classpath for all implementations of {@link
    * KmsClient}. An attacker that can insert a class in your classpath (e.g., someone controlling a
    * library that you're using) could provide a fake {@link KmsClient} that steal your keys. For
-   * this reason Tink does not use this method. It is used by <a
-   * href="https://github.com/google/tink/tree/master/tools/tinkey">Tinkey</a> which needs to talk
-   * to custom, in-house key management systems.
+   * this reason Tink does not use this method.
    *
+   * @deprecated Don't use this.
    * @throws GeneralSecurityException if cannot found any KMS clients that support {@code keyUri}
    */
+  @Deprecated
   public static synchronized KmsClient getAutoLoaded(String keyUri)
       throws GeneralSecurityException {
     if (autoClients == null) {

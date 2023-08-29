@@ -92,7 +92,9 @@ TEST_F(AeadConfigTest, WrappersRegistered) {
   StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
       KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm());
   ASSERT_THAT(keyset_handle.status(), IsOk());
-  StatusOr<std::unique_ptr<Aead>> aead = (*keyset_handle)->GetPrimitive<Aead>();
+  StatusOr<std::unique_ptr<Aead>> aead =
+      (*keyset_handle)
+          ->GetPrimitive<crypto::tink::Aead>(ConfigGlobalRegistry());
   ASSERT_THAT(aead.status(), IsOk());
   ASSERT_THAT(*aead, Not(IsNull()));
 }

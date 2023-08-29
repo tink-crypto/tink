@@ -332,7 +332,7 @@ TEST(StreamingAeadSetWrapperTest, EncryptWithTink) {
   ASSERT_THAT(handle.status(), IsOk());
 
   crypto::tink::util::StatusOr<std::unique_ptr<StreamingAead>> streaming_aead =
-      handle->GetPrimitive<StreamingAead>();
+      handle->GetPrimitive<crypto::tink::StreamingAead>(ConfigGlobalRegistry());
 
   ASSERT_THAT(streaming_aead.status(), IsOk());
 

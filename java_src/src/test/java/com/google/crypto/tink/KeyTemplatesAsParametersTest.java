@@ -29,6 +29,7 @@ import com.google.crypto.tink.aead.XChaCha20Poly1305Parameters;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.daead.AesSivParameters;
 import com.google.crypto.tink.daead.PredefinedDeterministicAeadParameters;
+import com.google.crypto.tink.hybrid.EciesParameters;
 import com.google.crypto.tink.hybrid.HpkeParameters;
 import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.jwt.JwtEcdsaParameters;
@@ -836,6 +837,159 @@ public final class KeyTemplatesAsParametersTest {
                 .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS512)
                 .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
                 .build()));
+
+    result.add(
+        new Pair(
+            "ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256",
+            EciesParameters.builder()
+                .setCurveType(EciesParameters.CurveType.NIST_P256)
+                .setHashType(EciesParameters.HashType.SHA256)
+                .setNistCurvePointFormat(EciesParameters.PointFormat.COMPRESSED)
+                .setVariant(EciesParameters.Variant.TINK)
+                .setDemParameters(
+                    AesCtrHmacAeadParameters.builder()
+                        .setAesKeySizeBytes(16)
+                        .setHmacKeySizeBytes(32)
+                        .setTagSizeBytes(16)
+                        .setIvSizeBytes(16)
+                        .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
+                        .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
+                        .build())
+                .build()));
+    result.add(
+        new Pair(
+            "ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256_RAW",
+            EciesParameters.builder()
+                .setCurveType(EciesParameters.CurveType.NIST_P256)
+                .setHashType(EciesParameters.HashType.SHA256)
+                .setNistCurvePointFormat(EciesParameters.PointFormat.COMPRESSED)
+                .setVariant(EciesParameters.Variant.NO_PREFIX)
+                .setDemParameters(
+                    AesCtrHmacAeadParameters.builder()
+                        .setAesKeySizeBytes(16)
+                        .setHmacKeySizeBytes(32)
+                        .setTagSizeBytes(16)
+                        .setIvSizeBytes(16)
+                        .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
+                        .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
+                        .build())
+                .build()));
+    result.add(
+        new Pair(
+            "ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM",
+            EciesParameters.builder()
+                .setCurveType(EciesParameters.CurveType.NIST_P256)
+                .setHashType(EciesParameters.HashType.SHA256)
+                .setNistCurvePointFormat(EciesParameters.PointFormat.COMPRESSED)
+                .setVariant(EciesParameters.Variant.TINK)
+                .setDemParameters(
+                    AesGcmParameters.builder()
+                        .setIvSizeBytes(12)
+                        .setKeySizeBytes(16)
+                        .setTagSizeBytes(16)
+                        .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+                        .build())
+                .build()));
+    result.add(
+        new Pair(
+            "ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM_RAW",
+            EciesParameters.builder()
+                .setCurveType(EciesParameters.CurveType.NIST_P256)
+                .setHashType(EciesParameters.HashType.SHA256)
+                .setNistCurvePointFormat(EciesParameters.PointFormat.COMPRESSED)
+                .setVariant(EciesParameters.Variant.NO_PREFIX)
+                .setDemParameters(
+                    AesGcmParameters.builder()
+                        .setIvSizeBytes(12)
+                        .setKeySizeBytes(16)
+                        .setTagSizeBytes(16)
+                        .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+                        .build())
+                .build()));
+    result.add(
+        new Pair(
+            "ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256",
+            EciesParameters.builder()
+                .setCurveType(EciesParameters.CurveType.NIST_P256)
+                .setHashType(EciesParameters.HashType.SHA256)
+                .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+                .setVariant(EciesParameters.Variant.TINK)
+                .setDemParameters(
+                    AesCtrHmacAeadParameters.builder()
+                        .setAesKeySizeBytes(16)
+                        .setHmacKeySizeBytes(32)
+                        .setTagSizeBytes(16)
+                        .setIvSizeBytes(16)
+                        .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
+                        .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
+                        .build())
+                .build()));
+    result.add(
+        new Pair(
+            "ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256_RAW",
+            EciesParameters.builder()
+                .setCurveType(EciesParameters.CurveType.NIST_P256)
+                .setHashType(EciesParameters.HashType.SHA256)
+                .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+                .setVariant(EciesParameters.Variant.NO_PREFIX)
+                .setDemParameters(
+                    AesCtrHmacAeadParameters.builder()
+                        .setAesKeySizeBytes(16)
+                        .setHmacKeySizeBytes(32)
+                        .setTagSizeBytes(16)
+                        .setIvSizeBytes(16)
+                        .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
+                        .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
+                        .build())
+                .build()));
+    result.add(
+        new Pair(
+            "ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM",
+            EciesParameters.builder()
+                .setCurveType(EciesParameters.CurveType.NIST_P256)
+                .setHashType(EciesParameters.HashType.SHA256)
+                .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+                .setVariant(EciesParameters.Variant.TINK)
+                .setDemParameters(
+                    AesGcmParameters.builder()
+                        .setIvSizeBytes(12)
+                        .setKeySizeBytes(16)
+                        .setTagSizeBytes(16)
+                        .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+                        .build())
+                .build()));
+    result.add(
+        new Pair(
+            "ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM_COMPRESSED_WITHOUT_PREFIX",
+            EciesParameters.builder()
+                .setCurveType(EciesParameters.CurveType.NIST_P256)
+                .setHashType(EciesParameters.HashType.SHA256)
+                .setNistCurvePointFormat(EciesParameters.PointFormat.COMPRESSED)
+                .setVariant(EciesParameters.Variant.NO_PREFIX)
+                .setDemParameters(
+                    AesGcmParameters.builder()
+                        .setIvSizeBytes(12)
+                        .setKeySizeBytes(16)
+                        .setTagSizeBytes(16)
+                        .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+                        .build())
+                .build()));
+    result.add(
+        new Pair(
+            "ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM_RAW",
+            EciesParameters.builder()
+                .setCurveType(EciesParameters.CurveType.NIST_P256)
+                .setHashType(EciesParameters.HashType.SHA256)
+                .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+                .setVariant(EciesParameters.Variant.NO_PREFIX)
+                .setDemParameters(
+                    AesGcmParameters.builder()
+                        .setIvSizeBytes(12)
+                        .setKeySizeBytes(16)
+                        .setTagSizeBytes(16)
+                        .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+                        .build())
+                .build()));
     return result;
   }
 
@@ -856,32 +1010,11 @@ public final class KeyTemplatesAsParametersTest {
     return result;
   }
 
-  private static Set<String> getUntestedNames() {
-    Set<String> result = new HashSet<>();
-    result.add("ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256");
-    result.add("ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256_RAW");
-    result.add("ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM");
-    result.add("ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM_RAW");
-    result.add("ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256");
-    result.add("ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256_RAW");
-    result.add("ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM");
-    result.add("ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM_COMPRESSED_WITHOUT_PREFIX");
-    result.add("ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM_RAW");
-    return result;
-  }
-
   /** Tests that we test all available names */
   @Test
   public void testCompletenessOfThisTest() throws Exception {
     Set<String> testedNames = getAllTestedNames();
-    Set<String> untestedNames = getUntestedNames();
 
-    // Note that this means the two sets do not intersect.
-    assertThat(testedNames).containsNoneIn(untestedNames);
-
-    Set<String> testedPlusMissing = new HashSet<>();
-    testedPlusMissing.addAll(testedNames);
-    testedPlusMissing.addAll(untestedNames);
-    assertThat(Registry.keyTemplateMap().keySet()).containsExactlyElementsIn(testedPlusMissing);
+    assertThat(Registry.keyTemplateMap().keySet()).containsExactlyElementsIn(testedNames);
   }
 }

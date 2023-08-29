@@ -24,8 +24,7 @@ import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.hybrid.HybridDecryptWrapper;
-import com.google.crypto.tink.hybrid.HybridEncryptWrapper;
+import com.google.crypto.tink.hybrid.HybridConfig;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.HpkeAead;
 import com.google.crypto.tink.proto.HpkeKdf;
@@ -39,6 +38,7 @@ import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.FromDataPoints;
@@ -52,8 +52,13 @@ public final class HpkePrivateKeyManagerTest {
   private HpkePrivateKeyManager manager;
   private KeyTypeManager.KeyFactory<HpkeKeyFormat, HpkePrivateKey> factory;
 
+  @BeforeClass
+  public static void setUpClass() throws Exception {
+    HybridConfig.register();
+  }
+
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
     manager = new HpkePrivateKeyManager();
     factory = manager.keyFactory();
   }
@@ -70,6 +75,23 @@ public final class HpkePrivateKeyManagerTest {
     HpkeParams params = HpkeParams.newBuilder().setKem(kem).setKdf(kdf).setAead(aead).build();
     return HpkeKeyFormat.newBuilder().setParams(params).build();
   }
+
+  @DataPoints("validKeyFormats")
+  public static final HpkeKeyFormat[] KEY_FORMATS =
+      new HpkeKeyFormat[] {
+        createKeyFormat(
+            HpkeKem.DHKEM_X25519_HKDF_SHA256, HpkeKdf.HKDF_SHA256, HpkeAead.AES_128_GCM),
+        createKeyFormat(
+            HpkeKem.DHKEM_X25519_HKDF_SHA256, HpkeKdf.HKDF_SHA256, HpkeAead.AES_256_GCM),
+        createKeyFormat(
+            HpkeKem.DHKEM_X25519_HKDF_SHA256, HpkeKdf.HKDF_SHA256, HpkeAead.CHACHA20_POLY1305),
+        createKeyFormat(HpkeKem.DHKEM_P256_HKDF_SHA256, HpkeKdf.HKDF_SHA256, HpkeAead.AES_128_GCM),
+        createKeyFormat(HpkeKem.DHKEM_P256_HKDF_SHA256, HpkeKdf.HKDF_SHA256, HpkeAead.AES_256_GCM),
+        createKeyFormat(HpkeKem.DHKEM_P384_HKDF_SHA384, HpkeKdf.HKDF_SHA384, HpkeAead.AES_128_GCM),
+        createKeyFormat(HpkeKem.DHKEM_P384_HKDF_SHA384, HpkeKdf.HKDF_SHA384, HpkeAead.AES_256_GCM),
+        createKeyFormat(HpkeKem.DHKEM_P521_HKDF_SHA512, HpkeKdf.HKDF_SHA512, HpkeAead.AES_128_GCM),
+        createKeyFormat(HpkeKem.DHKEM_P521_HKDF_SHA512, HpkeKdf.HKDF_SHA512, HpkeAead.AES_256_GCM),
+      };
 
   @DataPoints("templateNames")
   public static final String[] KEY_TEMPLATES =
@@ -95,10 +117,15 @@ public final class HpkePrivateKeyManagerTest {
       };
 
   @Theory
-  public void validateKeyFormat_succeeds(@FromDataPoints("templateNames") String template)
-      throws Exception {
-    HpkeKeyFormat format = factory.keyFormats().get(template).keyFormat;
-    factory.validateKeyFormat(format);
+  public void testTemplates(@FromDataPoints("templateNames") String templateName) throws Exception {
+    if (TestUtil.isTsan()) {
+      // key generation is too slow in Tsan.
+      return;
+    }
+    KeysetHandle h = KeysetHandle.generateNew(KeyTemplates.get(templateName));
+    assertThat(h.size()).isEqualTo(1);
+    assertThat(h.getAt(0).getKey().getParameters())
+        .isEqualTo(KeyTemplates.get(templateName).toParameters());
   }
 
   @Test
@@ -135,46 +162,38 @@ public final class HpkePrivateKeyManagerTest {
   }
 
   @Theory
-  public void keyFormats(@FromDataPoints("templateNames") String template) throws Exception {
-    factory.validateKeyFormat(factory.keyFormats().get(template).keyFormat);
-  }
-
-  @Theory
-  public void createKey_succeeds(@FromDataPoints("templateNames") String template)
+  public void createKey_succeeds(@FromDataPoints("validKeyFormats") HpkeKeyFormat keyFormat)
       throws Exception {
     if (TestUtil.isTsan()) {
       // key generation is too slow in Tsan.
       return;
     }
-    HpkeKeyFormat format = factory.keyFormats().get(template).keyFormat;
-    HpkePrivateKey key = factory.createKey(format);
+    HpkePrivateKey key = factory.createKey(keyFormat);
 
     assertThat(key.getVersion()).isEqualTo(manager.getVersion());
-    assertThat(key.getPublicKey().getParams()).isEqualTo(format.getParams());
+    assertThat(key.getPublicKey().getParams()).isEqualTo(keyFormat.getParams());
     assertThat(key.getPublicKey().getPublicKey()).isNotEmpty();
     assertThat(key.getPublicKey().getPublicKey().toByteArray().length)
-        .isEqualTo(HpkeUtil.getEncodedPublicKeyLength(format.getParams().getKem()));
+        .isEqualTo(HpkeUtil.getEncodedPublicKeyLength(keyFormat.getParams().getKem()));
     assertThat(key.getPrivateKey()).isNotEmpty();
     assertThat(key.getPrivateKey().toByteArray().length)
-        .isEqualTo(HpkeUtil.getEncodedPrivateKeyLength(format.getParams().getKem()));
+        .isEqualTo(HpkeUtil.getEncodedPrivateKeyLength(keyFormat.getParams().getKem()));
   }
 
   @Theory
-  public void validateKey_succeeds(@FromDataPoints("templateNames") String template)
+  public void validateKey_succeeds(@FromDataPoints("validKeyFormats") HpkeKeyFormat keyFormat)
       throws Exception {
     if (TestUtil.isTsan()) {
       // key generation is too slow in Tsan.
       return;
     }
-    HpkeKeyFormat format = factory.keyFormats().get(template).keyFormat;
-
-    manager.validateKey(factory.createKey(format));
+    manager.validateKey(factory.createKey(keyFormat));
   }
 
   @Test
   public void validateKey_failsWithInvalidVersion() throws Exception {
     HpkeKeyFormat format =
-        factory.keyFormats().get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM").keyFormat;
+        createKeyFormat(HpkeKem.DHKEM_P521_HKDF_SHA512, HpkeKdf.HKDF_SHA512, HpkeAead.AES_128_GCM);
     HpkePrivateKey key = HpkePrivateKey.newBuilder(factory.createKey(format)).setVersion(1).build();
 
     assertThrows(GeneralSecurityException.class, () -> manager.validateKey(key));
@@ -183,7 +202,7 @@ public final class HpkePrivateKeyManagerTest {
   @Test
   public void validateKey_failsWithMissingPublicKey() throws Exception {
     HpkeKeyFormat format =
-        factory.keyFormats().get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM").keyFormat;
+        createKeyFormat(HpkeKem.DHKEM_P521_HKDF_SHA512, HpkeKdf.HKDF_SHA512, HpkeAead.AES_128_GCM);
     HpkePrivateKey key =
         HpkePrivateKey.newBuilder(factory.createKey(format)).clearPublicKey().build();
 
@@ -193,7 +212,7 @@ public final class HpkePrivateKeyManagerTest {
   @Test
   public void validateKey_failsWithEmptyPrivateKey() throws Exception {
     HpkeKeyFormat format =
-        factory.keyFormats().get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM").keyFormat;
+        createKeyFormat(HpkeKem.DHKEM_P521_HKDF_SHA512, HpkeKdf.HKDF_SHA512, HpkeAead.AES_128_GCM);
     HpkePrivateKey key =
         HpkePrivateKey.newBuilder(factory.createKey(format)).clearPrivateKey().build();
 
@@ -203,33 +222,33 @@ public final class HpkePrivateKeyManagerTest {
   @Test
   public void getPublicKey() throws Exception {
     HpkeKeyFormat format =
-        factory.keyFormats().get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM").keyFormat;
+        createKeyFormat(HpkeKem.DHKEM_P521_HKDF_SHA512, HpkeKdf.HKDF_SHA512, HpkeAead.AES_128_GCM);
     HpkePrivateKey key = factory.createKey(format);
 
     assertThat(manager.getPublicKey(key)).isEqualTo(key.getPublicKey());
   }
 
   @Theory
-  public void parseKey(@FromDataPoints("templateNames") String template) throws Exception {
-    HpkeKeyFormat format = factory.keyFormats().get(template).keyFormat;
-    HpkePrivateKey privateKey = factory.createKey(format);
+  public void parseKey(@FromDataPoints("validKeyFormats") HpkeKeyFormat keyFormat)
+      throws Exception {
+    HpkePrivateKey privateKey = factory.createKey(keyFormat);
     assertThat(manager.parseKey(privateKey.toByteString())).isEqualTo(privateKey);
   }
 
   @Theory
-  public void parseKeyFormat(@FromDataPoints("templateNames") String template) throws Exception {
-    HpkeKeyFormat format = factory.keyFormats().get(template).keyFormat;
-    assertThat(factory.parseKeyFormat(format.toByteString())).isEqualTo(format);
+  public void parseKeyFormat(@FromDataPoints("validKeyFormats") HpkeKeyFormat keyFormat)
+      throws Exception {
+    assertThat(factory.parseKeyFormat(keyFormat.toByteString())).isEqualTo(keyFormat);
   }
 
   @Theory
-  public void createPrimitive(@FromDataPoints("templateNames") String template) throws Exception {
+  public void createPrimitive(@FromDataPoints("validKeyFormats") HpkeKeyFormat keyFormat)
+      throws Exception {
     if (TestUtil.isTsan()) {
       // key generation is too slow in Tsan.
       return;
     }
-    HpkeKeyFormat format = factory.keyFormats().get(template).keyFormat;
-    HpkePrivateKey privateKey = factory.createKey(format);
+    HpkePrivateKey privateKey = factory.createKey(keyFormat);
     HpkePublicKey publicKey = manager.getPublicKey(privateKey);
     HybridDecrypt hybridDecrypt = manager.getPrimitive(privateKey, HybridDecrypt.class);
     HybridEncrypt hybridEncrypt = HpkeEncrypt.createHpkeEncrypt(publicKey);
@@ -248,16 +267,6 @@ public final class HpkePrivateKeyManagerTest {
       // key generation is too slow in Tsan.
       return;
     }
-    HybridDecryptWrapper.register();
-    HybridEncryptWrapper.register();
-
-    assertThrows(
-        GeneralSecurityException.class,
-        () ->
-            KeysetHandle.generateNew(
-                KeyTemplates.get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM")));
-
-    HpkePrivateKeyManager.registerPair(/* newKeyAllowed= */ true);
 
     KeysetHandle privateHandle =
         KeysetHandle.generateNew(

@@ -16,6 +16,8 @@
 
 package com.google.crypto.tink.signature;
 
+import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
+
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
@@ -247,11 +249,15 @@ public final class RsaSsaPkcs1SignKeyManager
    *     </ul>
    */
   public static final KeyTemplate rsa3072SsaPkcs1Sha256F4Template() {
-    return createKeyTemplate(
-        HashType.SHA256,
-        /*modulusSize=*/ 3072,
-        RSAKeyGenParameterSpec.F4,
-        KeyTemplate.OutputPrefixType.TINK);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                RsaSsaPkcs1Parameters.builder()
+                    .setModulusSizeBits(3072)
+                    .setPublicExponent(RsaSsaPkcs1Parameters.F4)
+                    .setHashType(RsaSsaPkcs1Parameters.HashType.SHA256)
+                    .setVariant(RsaSsaPkcs1Parameters.Variant.TINK)
+                    .build()));
   }
 
   /**
@@ -265,11 +271,15 @@ public final class RsaSsaPkcs1SignKeyManager
    *     </ul>
    */
   public static final KeyTemplate rawRsa3072SsaPkcs1Sha256F4Template() {
-    return createKeyTemplate(
-        HashType.SHA256,
-        /*modulusSize=*/ 3072,
-        RSAKeyGenParameterSpec.F4,
-        KeyTemplate.OutputPrefixType.RAW);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                RsaSsaPkcs1Parameters.builder()
+                    .setModulusSizeBits(3072)
+                    .setPublicExponent(RsaSsaPkcs1Parameters.F4)
+                    .setHashType(RsaSsaPkcs1Parameters.HashType.SHA256)
+                    .setVariant(RsaSsaPkcs1Parameters.Variant.NO_PREFIX)
+                    .build()));
   }
 
   /**
@@ -283,11 +293,15 @@ public final class RsaSsaPkcs1SignKeyManager
    *     </ul>
    */
   public static final KeyTemplate rsa4096SsaPkcs1Sha512F4Template() {
-    return createKeyTemplate(
-        HashType.SHA512,
-        /*modulusSize=*/ 4096,
-        RSAKeyGenParameterSpec.F4,
-        KeyTemplate.OutputPrefixType.TINK);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                RsaSsaPkcs1Parameters.builder()
+                    .setModulusSizeBits(4096)
+                    .setPublicExponent(RsaSsaPkcs1Parameters.F4)
+                    .setHashType(RsaSsaPkcs1Parameters.HashType.SHA512)
+                    .setVariant(RsaSsaPkcs1Parameters.Variant.TINK)
+                    .build()));
   }
 
   /**
@@ -301,25 +315,15 @@ public final class RsaSsaPkcs1SignKeyManager
    *     </ul>
    */
   public static final KeyTemplate rawRsa4096SsaPkcs1Sha512F4Template() {
-    return createKeyTemplate(
-        HashType.SHA512,
-        /*modulusSize=*/ 4096,
-        RSAKeyGenParameterSpec.F4,
-        KeyTemplate.OutputPrefixType.RAW);
-  }
-
-  /**
-   * @return a {@link KeyTemplate} containing a {@link RsaSsaPkcs1KeyFormat} with some specified
-   *     parameters.
-   */
-  private static KeyTemplate createKeyTemplate(
-      HashType hashType,
-      int modulusSize,
-      BigInteger publicExponent,
-      KeyTemplate.OutputPrefixType prefixType) {
-    RsaSsaPkcs1KeyFormat format = createKeyFormat(hashType, modulusSize, publicExponent);
-    return KeyTemplate.create(
-        new RsaSsaPkcs1SignKeyManager().getKeyType(), format.toByteArray(), prefixType);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                RsaSsaPkcs1Parameters.builder()
+                    .setModulusSizeBits(4096)
+                    .setPublicExponent(RsaSsaPkcs1Parameters.F4)
+                    .setHashType(RsaSsaPkcs1Parameters.HashType.SHA512)
+                    .setVariant(RsaSsaPkcs1Parameters.Variant.NO_PREFIX)
+                    .build()));
   }
 
   private static RsaSsaPkcs1KeyFormat createKeyFormat(

@@ -37,6 +37,12 @@
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
 
+namespace crypto {
+namespace tink {
+namespace {
+
+// NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
+// TINK-PENDING-REMOVAL-IN-3.0.0-START
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using google::crypto::tink::AesGcmKey;
@@ -44,11 +50,6 @@ using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
-
-
-namespace crypto {
-namespace tink {
-namespace {
 
 class AeadFactoryTest : public ::testing::Test {
 };
@@ -130,6 +131,8 @@ TEST_F(AeadFactoryTest, testPrimitive) {
   EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
   EXPECT_EQ(plaintext, decrypt_result.value());
 }
+// TINK-PENDING-REMOVAL-IN-3.0.0-END
+// NOLINTEND(whitespace/line_length)
 
 }  // namespace
 }  // namespace tink

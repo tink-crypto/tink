@@ -39,12 +39,12 @@ def tink_cc_deps():
     # Abseil.
     # -------------------------------------------------------------------------
     if not native.existing_rule("com_google_absl"):
-        # Release from 2023-05-04.
+        # Release from 2023-08-02.
         http_archive(
             name = "com_google_absl",
-            strip_prefix = "abseil-cpp-20230125.3",
-            url = "https://github.com/abseil/abseil-cpp/archive/refs/tags/20230125.3.zip",
-            sha256 = "51d676b6846440210da48899e4df618a357e6e44ecde7106f1e44ea16ae8adc7",
+            strip_prefix = "abseil-cpp-20230802.0",
+            urls = ["https://github.com/abseil/abseil-cpp/archive/refs/tags/20230802.0.zip"],
+            sha256 = "2942db09db29359e0c1982986167167d226e23caac50eea1f07b2eb2181169cf",
         )
 
     # -------------------------------------------------------------------------

@@ -37,6 +37,8 @@ namespace tink {
 // you call one of
 // * SignatureConfig::Register()
 // * TinkConfig::Register()
+// NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
+// TINK-PENDING-REMOVAL-IN-3.0.0-START
 class ABSL_DEPRECATED(
     "Call getPrimitive<PublicKeySign>() on the keyset_handle after registering "
     "the PublicKeySignWrapper instead.") PublicKeySignFactory {
@@ -56,6 +58,8 @@ class ABSL_DEPRECATED(
  private:
   PublicKeySignFactory() {}
 };
+// TINK-PENDING-REMOVAL-IN-3.0.0-END
+// NOLINTEND(whitespace/line_length)
 
 }  // namespace tink
 }  // namespace crypto

@@ -16,7 +16,10 @@
 package com.google.crypto.tink.internal;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.nio.charset.StandardCharsets.US_ASCII;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import com.google.crypto.tink.util.Bytes;
 import java.security.GeneralSecurityException;
@@ -37,10 +40,16 @@ public final class UtilTest {
   }
 
   @Test
+  public void randKeyId_repeatedCallsShouldOutputANegativeValue() {
+    assertThat(IntStream.range(0, 100).map(unused -> Util.randKeyId()).min().getAsInt())
+        .isAtMost(0);
+  }
+
+  @Test
   public void toBytesFromPrintableAscii_works() throws Exception {
     String pureAsciiString =
         "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
-    Bytes pureAsciiBytes = Bytes.copyFrom(pureAsciiString.getBytes("ASCII"));
+    Bytes pureAsciiBytes = Bytes.copyFrom(pureAsciiString.getBytes(US_ASCII));
     assertThat(Util.toBytesFromPrintableAscii(pureAsciiString)).isEqualTo(pureAsciiBytes);
   }
 
@@ -88,5 +97,17 @@ public final class UtilTest {
     } catch (ReflectiveOperationException e) {
       assertThat(Util.isAndroid()).isFalse();
     }
+  }
+
+  @Test
+  public void testIsPrefix() throws Exception {
+    assertTrue(Util.isPrefix(new byte[] {1, 2, 3}, new byte[] {1, 2, 3, 4, 5}));
+    assertTrue(Util.isPrefix(new byte[] {}, new byte[] {1, 2, 3, 4, 5}));
+    assertTrue(Util.isPrefix(new byte[] {}, new byte[] {}));
+    assertTrue(Util.isPrefix(new byte[] {5, 7, 9}, new byte[] {5, 7, 9}));
+
+    assertFalse(Util.isPrefix(new byte[] {5, 7, 9, 10}, new byte[] {5, 7, 9}));
+    assertFalse(Util.isPrefix(new byte[] {5, 7, 10}, new byte[] {5, 7, 9}));
+    assertFalse(Util.isPrefix(new byte[] {1}, new byte[] {}));
   }
 }

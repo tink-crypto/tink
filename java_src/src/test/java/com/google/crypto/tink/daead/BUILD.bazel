@@ -47,6 +47,8 @@ java_test(
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:deterministic_aead",
         "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_templates",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink/daead:aes_siv_key_manager",
         "//src/main/java/com/google/crypto/tink/daead:aes_siv_parameters",
         "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",

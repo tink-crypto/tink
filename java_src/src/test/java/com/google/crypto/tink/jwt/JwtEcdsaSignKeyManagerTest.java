@@ -82,7 +82,7 @@ public class JwtEcdsaSignKeyManagerTest {
   @DataPoints("templates")
   public static final String[] TEMPLATES =
       new String[] {
-        "JWT_ES256", "JWT_ES384", "JWT_ES512", "JWT_ES256_RAW",
+        "JWT_ES256", "JWT_ES384", "JWT_ES512", "JWT_ES256_RAW", "JWT_ES384_RAW", "JWT_ES512_RAW",
       };
 
   @Test
@@ -244,12 +244,12 @@ public class JwtEcdsaSignKeyManagerTest {
                 .build());
   }
 
-  @Test
-  public void testKeyFormatsAreValid() throws Exception {
-    for (KeyTypeManager.KeyFactory.KeyFormat<JwtEcdsaKeyFormat> format :
-        factory.keyFormats().values()) {
-      factory.validateKeyFormat(format.keyFormat);
-    }
+  @Theory
+  public void testTemplates(@FromDataPoints("templates") String templateName) throws Exception {
+    KeysetHandle h = KeysetHandle.generateNew(KeyTemplates.get(templateName));
+    assertThat(h.size()).isEqualTo(1);
+    assertThat(h.getAt(0).getKey().getParameters())
+        .isEqualTo(KeyTemplates.get(templateName).toParameters());
   }
 
   // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
