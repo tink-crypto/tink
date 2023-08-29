@@ -32,6 +32,23 @@ KEY_URI = ('https://localhost:8200/transit/keys/key-1') # Replace this with your
 GCP_KEY_URI = ('gcp-kms://projects/tink-test-infrastructure/locations/global/'
                'keyRings/unit-and-integration-testing/cryptoKeys/aead-key')
 
+VALID_EP_KEY_URIS = {
+  'hcvault://localhost:8200/transit/keys/key-1': ['transit', 'key-1'],
+  "hcvault://vault.example.com/transit/keys/foo": ['transit', 'foo'],
+  "hcvault://vault.example.com/teams/billing/something/transit/keys/pci-key": ["teams/billing/something/transit", "pci-key"],
+  "hcvault://vault.example.com/transit/keys/something/transit/keys/my-key": ["transit/keys/something/transit", "my-key"],
+  "hcvault://vault-prd.example.com/transit/keys/hi": ["transit", "hi"],
+  "hcvault:///transit/keys/hi": ["transit", "hi"],
+  "hcvault:///cipher/keys/hi": ["cipher", "hi"]
+}
+
+INVALID_EP_KEY_URIS = [
+  "hcvault://vault.com",
+  "hcvault://vault.com/",
+  "hcvault://vault.example.com/foo/bar/baz",
+  "hcvault://vault.example.com/transit/keys/bar/baz"
+]
+
 class MockServer(Thread):
   def __init__(self):
     super().__init__()
@@ -137,6 +154,17 @@ class HcVaultKmsAeadTest(absltest.TestCase):
       hcvault.create_aead(GCP_KEY_URI, client)
 
     server.stop()
+
+  def test_endpoint_paths(self):
+    from tink.integration.hcvault._hcvault_kms_client import _endpoint_paths as _ep
+    for e in VALID_EP_KEY_URIS:
+      mount, path = _ep(e)
+      self.assertEqual(mount, VALID_EP_KEY_URIS[e][0])
+      self.assertEqual(path, VALID_EP_KEY_URIS[e][1])
+    
+    for e in INVALID_EP_KEY_URIS:
+      with self.assertRaises(tink.TinkError):
+        mount, path = _ep(e)
 
 if __name__ == '__main__':
   absltest.main()

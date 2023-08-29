@@ -15,26 +15,25 @@
 """A client for Hashicorp Vault."""
 
 import base64
-from typing import Optional, Tuple
+from typing import Tuple
 import urllib
 import hvac
 import tink
 from tink import aead
-from tink.aead import _kms_aead_key_manager
 
 
 VAULT_KEYURI_PREFIX = 'hcvault://'
 
 """
-_endpoint_paths transforms key_uri into the Vault transit encrypt and decrypt
-paths. The keyURL is expected to end in "/{mount}/keys/{keyName}". For
-example, the keyURL "hcvault:///transit/keys/key-foo" will be transformed to
-"transit/encrypt/key-foo" and "transit/decrypt/key-foo", and
+_endpoint_paths transforms key_uri into the Vault transit encrypt/decrypt
+mount point and transit key. The key_uri is expected to end in "/{mount}/keys/{keyName}". For
+example, the key_uri "hcvault:///transit/keys/key-foo" will be transformed to
+"transit" and "key-foo", and
 "hcvault://my-vault.example.com/teams/billing/service/cipher/keys/key-bar"
 will be transformed into
-"hcvault://my-vault.example.com/teams/billing/service/cipher/encrypt/key-bar"
+"teams/billing/service/cipher"
 and
-"hcvault://my-vault.example.com/teams/billing/service/cipher/decrypt/key-bar".
+"key-bar".
 """
 
 def _endpoint_paths(key_uri: str) -> Tuple[str, str]:
@@ -44,8 +43,13 @@ def _endpoint_paths(key_uri: str) -> Tuple[str, str]:
   
   escaped_path = urllib.parse.quote(u.path)
   parts = escaped_path.split('/')
+  length = len(parts)
+  if length < 4 or parts[length-2] != "keys":
+    raise tink.TinkError('malformed URL')
+
+  parts[length - 2] = ''
   parts = [x for x in parts if x]
-  return parts[:1][0], parts[-1:][0] # First entry i.e. "transit" and last entry i.e. "key-bar"
+  return '/'.join(parts[:-1]), parts[-1:][0] # First entry i.e. "transit" and last entry i.e. "key-bar"
 
 def create_aead(key_uri: str, client: hvac.Client) -> aead.Aead:
   return _HcVaultKmsAead(client, key_uri)
