@@ -55,6 +55,8 @@ import javax.crypto.spec.SecretKeySpec;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoint;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
@@ -111,12 +113,18 @@ public class JwtHmacKeyManagerTest {
         () -> factory.validateKeyFormat(makeJwtHmacKeyFormat(63, JwtHmacAlgorithm.HS512)));
   }
 
-  @Test
-  public void testKeyFormatsAreValid() throws Exception {
-    for (KeyTypeManager.KeyFactory.KeyFormat<JwtHmacKeyFormat> format :
-        factory.keyFormats().values()) {
-      factory.validateKeyFormat(format.keyFormat);
-    }
+  @DataPoints("templateNames")
+  public static final String[] KEY_TEMPLATES =
+      new String[] {
+        "JWT_HS256_RAW", "JWT_HS256", "JWT_HS384_RAW", "JWT_HS384", "JWT_HS512_RAW", "JWT_HS512",
+      };
+
+  @Theory
+  public void testTemplates(@FromDataPoints("templateNames") String templateName) throws Exception {
+    KeysetHandle h = KeysetHandle.generateNew(KeyTemplates.get(templateName));
+    assertThat(h.size()).isEqualTo(1);
+    assertThat(h.getAt(0).getKey().getParameters())
+        .isEqualTo(KeyTemplates.get(templateName).toParameters());
   }
 
   @Test

@@ -199,6 +199,8 @@ java_test(
         "//src/main/java/com/google/crypto/tink:hybrid_decrypt",
         "//src/main/java/com/google/crypto/tink:hybrid_encrypt",
         "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_templates",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink/aead:aead_config",
         "//src/main/java/com/google/crypto/tink/aead:aes_ctr_hmac_aead_key_manager",
         "//src/main/java/com/google/crypto/tink/aead:aes_ctr_hmac_aead_parameters",

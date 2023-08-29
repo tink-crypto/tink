@@ -23,6 +23,8 @@ import static org.junit.Assert.assertThrows;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
 import com.google.crypto.tink.aead.AesCtrHmacAeadParameters;
@@ -46,11 +48,14 @@ import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Tests for EciesAeadHkdfPrivateKeyManager. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public class EciesAeadHkdfPrivateKeyManagerTest {
   @BeforeClass
   public static void setUp() throws Exception {
@@ -335,36 +340,24 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
             .rawEciesP256HkdfHmacSha256Aes128CtrHmacSha256CompressedTemplate());
   }
 
-  @Test
-  public void testKeyFormats() throws Exception {
-    factory.validateKeyFormat(
-        factory.keyFormats().get("ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM").keyFormat);
-    factory.validateKeyFormat(
-        factory.keyFormats().get("ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM_RAW").keyFormat);
-    factory.validateKeyFormat(
-        factory.keyFormats().get("ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM").keyFormat);
-    factory.validateKeyFormat(
-        factory
-            .keyFormats()
-            .get("ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM_RAW")
-            .keyFormat);
+  @DataPoints("templateNames")
+  public static final String[] KEY_TEMPLATES =
+      new String[] {
+        "ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM",
+        "ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM_RAW",
+        "ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM",
+        "ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM_RAW",
+        "ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256",
+        "ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256_RAW",
+        "ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256",
+        "ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256_RAW",
+      };
 
-    factory.validateKeyFormat(
-        factory.keyFormats().get("ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256").keyFormat);
-    factory.validateKeyFormat(
-        factory
-            .keyFormats()
-            .get("ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256_RAW")
-            .keyFormat);
-    factory.validateKeyFormat(
-        factory
-            .keyFormats()
-            .get("ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256")
-            .keyFormat);
-    factory.validateKeyFormat(
-        factory
-            .keyFormats()
-            .get("ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256_RAW")
-            .keyFormat);
+  @Theory
+  public void testTemplates(@FromDataPoints("templateNames") String templateName) throws Exception {
+    KeysetHandle h = KeysetHandle.generateNew(KeyTemplates.get(templateName));
+    assertThat(h.size()).isEqualTo(1);
+    assertThat(h.getAt(0).getKey().getParameters())
+        .isEqualTo(KeyTemplates.get(templateName).toParameters());
   }
 }
