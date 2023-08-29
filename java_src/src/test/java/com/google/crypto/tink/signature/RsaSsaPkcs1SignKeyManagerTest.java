@@ -309,22 +309,38 @@ public class RsaSsaPkcs1SignKeyManagerTest {
 
   @Test
   public void testRsa3072SsaPkcs1Sha256F4TemplateWithManager() throws Exception {
+    if (TestUtil.isTsan()) {
+      // factory.createKey is too slow in Tsan.
+      return;
+    }
     testKeyTemplateCompatible(manager, RsaSsaPkcs1SignKeyManager.rsa3072SsaPkcs1Sha256F4Template());
   }
 
   @Test
   public void testRawRsa3072SsaPkcs1Sha256F4TemplateWithManager() throws Exception {
+    if (TestUtil.isTsan()) {
+      // factory.createKey is too slow in Tsan.
+      return;
+    }
     testKeyTemplateCompatible(
         manager, RsaSsaPkcs1SignKeyManager.rawRsa3072SsaPkcs1Sha256F4Template());
   }
 
   @Test
   public void testRsa4096SsaPkcs1Sha512F4TemplateWithManager() throws Exception {
+    if (TestUtil.isTsan()) {
+      // factory.createKey is too slow in Tsan.
+      return;
+    }
     testKeyTemplateCompatible(manager, RsaSsaPkcs1SignKeyManager.rsa4096SsaPkcs1Sha512F4Template());
   }
 
   @Test
   public void testRawRsa4096SsaPkcs1Sha512F4TemplateWithManager() throws Exception {
+    if (TestUtil.isTsan()) {
+      // factory.createKey is too slow in Tsan.
+      return;
+    }
     testKeyTemplateCompatible(
         manager, RsaSsaPkcs1SignKeyManager.rawRsa4096SsaPkcs1Sha512F4Template());
   }
