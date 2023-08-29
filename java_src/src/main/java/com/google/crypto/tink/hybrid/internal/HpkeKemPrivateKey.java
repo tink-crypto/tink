@@ -21,7 +21,7 @@ import com.google.errorprone.annotations.Immutable;
 
 /** Interface for private keys for Key Encapsulation Mechanism (KEM) */
 @Immutable
-interface HpkeKemPrivateKey {
+public interface HpkeKemPrivateKey {
   /** Gets the serialized KEM private key to perform decapsulation. */
   Bytes getSerializedPrivate();
 
