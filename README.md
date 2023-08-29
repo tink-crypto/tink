@@ -30,23 +30,23 @@ https://developers.google.com/tink*.
 > Below is the list of resulting repositories, migration timeline and expected
 > end of support.
 >
-> Tink implementation/extension         | New repository                                                                            | Migration status               | End of support in google/tink
-> ------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------ | -----------------------------
-> Tink Java                             | [tink-crypto/tink-java](https://github.com/tink-crypto/tink-java)                         | Complete (Q1 2023)             | Q3 2023
-> Tink Java AWS KMS extension           | [tink-crypto/tink-java-awskms](https://github.com/tink-crypto/tink-java-awskms)           | Complete (Q1 2023)             | Q3 2023
-> Tink Java Google Cloud KMS extension  | [tink-crypto/tink-java-gcpkms](https://github.com/tink-crypto/tink-java-gcpkms)           | Complete (Q1 2023)             | Q3 2023
-> Tink Java apps extension              | [tink-crypto/tink-java-apps](https://github.com/tink-crypto/tink-java-apps)               | Complete (Q1 2023)             | Q3 2023
-> Tink C++                              | [tink-crypto/tink-cc](https://github.com/tink-crypto/tink-cc)                             | Complete (Q2 2023)             | Q4 2023
-> Tink C++ AWS KMS extension            | [tink-crypto/tink-cc-awskms](https://github.com/tink-crypto/tink-cc-awskms)               | Complete (Q2 2023)             | Q4 2023
-> Tink C++ Google Cloud KMS extension   | [tink-crypto/tink-cc-gcpkms](https://github.com/tink-crypto/tink-cc-gcpkms)               | Complete (Q2 2023)             | Q4 2023
-> Tink Go                               | [tink-crypto/tink-go](https://github.com/tink-crypto/tink-go)                             | Complete (Q3 2023)             | Q4 2023
-> Tink Go AWS KMS extension             | [tink-crypto/tink-go-awskms](https://github.com/tink-crypto/tink-go-awskms)               | Complete (Q3 2023)             | Q4 2023
-> Tink Go Google Cloud KMS extension    | [tink-crypto/tink-go-gcpkms](https://github.com/tink-crypto/tink-go-gcpkms)               | Complete (Q3 2023)             | Q4 2023
-> Tink Go HashiCorp Vault KMS extension | [tink-crypto/tink-go-hcvault](https://github.com/tink-crypto/tink-go-hcvault)             | Complete (Q3 2023)             | Q4 2023
-> Tink Python                           | [tink-crypto/tink-py](https://github.com/tink-crypto/tink-py)                             | In progress (Q3 2023)          | TBA
-> Tink Obj-C                            | [tink-crypto/tink-objc](https://github.com/tink-crypto/tink-objc)                         | Not started (expected Q4 2023) | TBA
-> Tink Tinkey                           | [tink-crypto/tink-tinkey](https://github.com/tink-crypto/tink-tinkey)                     | Complete (Q2 2023)             | Q4 2023
-> Tink cross language tests             | [tink-crypto/tink-cross-lang-tests](https://github.com/tink-crypto/tink-cross-lang-tests) | Not started (expected Q4 2023) | TBA
+> Tink implementation/extension         | New repository                                                                            | Migration status   | End of support in google/tink
+> ------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------ | -----------------------------
+> Tink Java                             | [tink-crypto/tink-java](https://github.com/tink-crypto/tink-java)                         | Complete (Q1 2023) | Q3 2023
+> Tink Java AWS KMS extension           | [tink-crypto/tink-java-awskms](https://github.com/tink-crypto/tink-java-awskms)           | Complete (Q1 2023) | Q3 2023
+> Tink Java Google Cloud KMS extension  | [tink-crypto/tink-java-gcpkms](https://github.com/tink-crypto/tink-java-gcpkms)           | Complete (Q1 2023) | Q3 2023
+> Tink Java apps extension              | [tink-crypto/tink-java-apps](https://github.com/tink-crypto/tink-java-apps)               | Complete (Q1 2023) | Q3 2023
+> Tink Tinkey                           | [tink-crypto/tink-tinkey](https://github.com/tink-crypto/tink-tinkey)                     | Complete (Q2 2023) | Q4 2023
+> Tink C++                              | [tink-crypto/tink-cc](https://github.com/tink-crypto/tink-cc)                             | Complete (Q2 2023) | Q2 2024
+> Tink C++ AWS KMS extension            | [tink-crypto/tink-cc-awskms](https://github.com/tink-crypto/tink-cc-awskms)               | Complete (Q2 2023) | Q2 2024
+> Tink C++ Google Cloud KMS extension   | [tink-crypto/tink-cc-gcpkms](https://github.com/tink-crypto/tink-cc-gcpkms)               | Complete (Q2 2023) | Q2 2024
+> Tink Go                               | [tink-crypto/tink-go](https://github.com/tink-crypto/tink-go)                             | Complete (Q3 2023) | Q1 2024
+> Tink Go AWS KMS extension             | [tink-crypto/tink-go-awskms](https://github.com/tink-crypto/tink-go-awskms)               | Complete (Q3 2023) | Q1 2024
+> Tink Go Google Cloud KMS extension    | [tink-crypto/tink-go-gcpkms](https://github.com/tink-crypto/tink-go-gcpkms)               | Complete (Q3 2023) | Q1 2024
+> Tink Go HashiCorp Vault KMS extension | [tink-crypto/tink-go-hcvault](https://github.com/tink-crypto/tink-go-hcvault)             | Complete (Q3 2023) | Q1 2024
+> Tink Python                           | [tink-crypto/tink-py](https://github.com/tink-crypto/tink-py)                             | Complete (Q3 2023) | Q1 2024
+> Tink Obj-C                            | [tink-crypto/tink-objc](https://github.com/tink-crypto/tink-objc)                         | Complete (Q3 2023) | Q1 2024
+> Tink cross language tests             | [tink-crypto/tink-cross-lang-tests](https://github.com/tink-crypto/tink-cross-lang-tests) | Complete (Q3 2023) | N/A
 
 > **NOTE**: **We are removing Tink for JavaScript/TypeScript**
 >
