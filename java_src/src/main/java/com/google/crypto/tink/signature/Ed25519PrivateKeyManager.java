@@ -146,24 +146,21 @@ public final class Ed25519PrivateKeyManager
       }
 
       @Override
-      public Map<String, KeyFactory.KeyFormat<Ed25519KeyFormat>> keyFormats()
+      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
           throws GeneralSecurityException {
-        Map<String, KeyFactory.KeyFormat<Ed25519KeyFormat>> result = new HashMap<>();
+        Map<String, KeyTemplate> result = new HashMap<>();
         result.put(
             "ED25519",
-            new KeyFormat<>(
-                Ed25519KeyFormat.getDefaultInstance(), KeyTemplate.OutputPrefixType.TINK));
+            KeyTemplate.createFrom(Ed25519Parameters.create(Ed25519Parameters.Variant.TINK)));
         result.put(
             "ED25519_RAW",
-            new KeyFormat<>(
-                Ed25519KeyFormat.getDefaultInstance(), KeyTemplate.OutputPrefixType.RAW));
+            KeyTemplate.createFrom(Ed25519Parameters.create(Ed25519Parameters.Variant.NO_PREFIX)));
         // This is identical to ED25519_RAW.
         // It is needed to maintain backward compatibility with SignatureKeyTemplates.
         // TODO(b/185475349): remove this in 2.0.0.
         result.put(
             "ED25519WithRawOutput",
-            new KeyFormat<>(
-                Ed25519KeyFormat.getDefaultInstance(), KeyTemplate.OutputPrefixType.RAW));
+            KeyTemplate.createFrom(Ed25519Parameters.create(Ed25519Parameters.Variant.NO_PREFIX)));
         return Collections.unmodifiableMap(result);
       }
     };

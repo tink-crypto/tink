@@ -24,7 +24,6 @@ import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
-import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.RsaSsaPssKeyFormat;
 import com.google.crypto.tink.proto.RsaSsaPssParams;
@@ -194,76 +193,67 @@ public final class RsaSsaPssSignKeyManager
       }
 
       @Override
-      public Map<String, KeyFactory.KeyFormat<RsaSsaPssKeyFormat>> keyFormats()
+      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
           throws GeneralSecurityException {
-        Map<String, KeyFactory.KeyFormat<RsaSsaPssKeyFormat>> result = new HashMap<>();
+        Map<String, KeyTemplate> result = new HashMap<>();
         result.put(
             "RSA_SSA_PSS_3072_SHA256_F4",
-            new KeyFormat<>(
-                createKeyFormat(
-                    HashType.SHA256,
-                    HashType.SHA256,
-                    /*saltLength=*/ 32,
-                    /*modulusSize=*/ 3072,
-                    RSAKeyGenParameterSpec.F4),
-                KeyTemplate.OutputPrefixType.TINK));
+            KeyTemplate.createFrom(
+                RsaSsaPssParameters.builder()
+                    .setSigHashType(RsaSsaPssParameters.HashType.SHA256)
+                    .setMgf1HashType(RsaSsaPssParameters.HashType.SHA256)
+                    .setSaltLengthBytes(32)
+                    .setModulusSizeBits(3072)
+                    .setPublicExponent(RsaSsaPssParameters.F4)
+                    .setVariant(RsaSsaPssParameters.Variant.TINK)
+                    .build()));
         result.put(
             "RSA_SSA_PSS_3072_SHA256_F4_RAW",
-            new KeyFormat<>(
-                createKeyFormat(
-                    HashType.SHA256,
-                    HashType.SHA256,
-                    /*saltLength=*/ 32,
-                    /*modulusSize=*/ 3072,
-                    RSAKeyGenParameterSpec.F4),
-                KeyTemplate.OutputPrefixType.RAW));
+            KeyTemplate.createFrom(
+                RsaSsaPssParameters.builder()
+                    .setSigHashType(RsaSsaPssParameters.HashType.SHA256)
+                    .setMgf1HashType(RsaSsaPssParameters.HashType.SHA256)
+                    .setSaltLengthBytes(32)
+                    .setModulusSizeBits(3072)
+                    .setPublicExponent(RsaSsaPssParameters.F4)
+                    .setVariant(RsaSsaPssParameters.Variant.NO_PREFIX)
+                    .build()));
         // This is identical to RSA_SSA_PSS_3072_SHA256_F4. It is needed to maintain backward
         // compatibility with SignatureKeyTemplates.
         // TODO(b/185475349): remove this in Tink 2.0.0.
         result.put(
             "RSA_SSA_PSS_3072_SHA256_SHA256_32_F4",
-            new KeyFormat<>(
-                createKeyFormat(
-                    HashType.SHA256,
-                    HashType.SHA256,
-                    /*saltLength=*/ 32,
-                    /*modulusSize=*/ 3072,
-                    RSAKeyGenParameterSpec.F4),
-                KeyTemplate.OutputPrefixType.TINK));
-
+            KeyTemplate.createFrom(
+                PredefinedSignatureParameters.RSA_SSA_PSS_3072_SHA256_SHA256_32_F4));
         result.put(
             "RSA_SSA_PSS_4096_SHA512_F4",
-            new KeyFormat<>(
-                createKeyFormat(
-                    HashType.SHA512,
-                    HashType.SHA512,
-                    /*saltLength=*/ 64,
-                    /*modulusSize=*/ 4096,
-                    RSAKeyGenParameterSpec.F4),
-                KeyTemplate.OutputPrefixType.TINK));
+            KeyTemplate.createFrom(
+                RsaSsaPssParameters.builder()
+                    .setSigHashType(RsaSsaPssParameters.HashType.SHA512)
+                    .setMgf1HashType(RsaSsaPssParameters.HashType.SHA512)
+                    .setSaltLengthBytes(64)
+                    .setModulusSizeBits(4096)
+                    .setPublicExponent(RsaSsaPssParameters.F4)
+                    .setVariant(RsaSsaPssParameters.Variant.TINK)
+                    .build()));
         result.put(
             "RSA_SSA_PSS_4096_SHA512_F4_RAW",
-            new KeyFormat<>(
-                createKeyFormat(
-                    HashType.SHA512,
-                    HashType.SHA512,
-                    /*saltLength=*/ 64,
-                    /*modulusSize=*/ 4096,
-                    RSAKeyGenParameterSpec.F4),
-                KeyTemplate.OutputPrefixType.RAW));
+            KeyTemplate.createFrom(
+                RsaSsaPssParameters.builder()
+                    .setSigHashType(RsaSsaPssParameters.HashType.SHA512)
+                    .setMgf1HashType(RsaSsaPssParameters.HashType.SHA512)
+                    .setSaltLengthBytes(64)
+                    .setModulusSizeBits(4096)
+                    .setPublicExponent(RsaSsaPssParameters.F4)
+                    .setVariant(RsaSsaPssParameters.Variant.NO_PREFIX)
+                    .build()));
         // This is identical to RSA_SSA_PSS_4096_SHA512_F4. It is needed to maintain backward
         // compatibility with SignatureKeyTemplates.
         // TODO(b/185475349): remove this in Tink 2.0.0.
         result.put(
             "RSA_SSA_PSS_4096_SHA512_SHA512_64_F4",
-            new KeyFormat<>(
-                createKeyFormat(
-                    HashType.SHA512,
-                    HashType.SHA512,
-                    /*saltLength=*/ 64,
-                    /*modulusSize=*/ 4096,
-                    RSAKeyGenParameterSpec.F4),
-                KeyTemplate.OutputPrefixType.TINK));
+            KeyTemplate.createFrom(
+                PredefinedSignatureParameters.RSA_SSA_PSS_4096_SHA512_SHA512_64_F4));
         return Collections.unmodifiableMap(result);
       }
     };
@@ -386,22 +376,4 @@ public final class RsaSsaPssSignKeyManager
                     .build()));
   }
 
-  private static RsaSsaPssKeyFormat createKeyFormat(
-      HashType sigHash,
-      HashType mgf1Hash,
-      int saltLength,
-      int modulusSize,
-      BigInteger publicExponent) {
-    RsaSsaPssParams params =
-        RsaSsaPssParams.newBuilder()
-            .setSigHash(sigHash)
-            .setMgf1Hash(mgf1Hash)
-            .setSaltLength(saltLength)
-            .build();
-    return RsaSsaPssKeyFormat.newBuilder()
-        .setParams(params)
-        .setModulusSizeInBits(modulusSize)
-        .setPublicExponent(ByteString.copyFrom(publicExponent.toByteArray()))
-        .build();
-  }
 }

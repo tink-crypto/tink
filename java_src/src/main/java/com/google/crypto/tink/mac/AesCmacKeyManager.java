@@ -143,33 +143,19 @@ public final class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
       }
 
       @Override
-      public Map<String, KeyFactory.KeyFormat<AesCmacKeyFormat>> keyFormats()
+      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
           throws GeneralSecurityException {
-        Map<String, KeyFactory.KeyFormat<AesCmacKeyFormat>> result = new HashMap<>();
-        result.put(
-            "AES_CMAC", // backward compatibility with MacKeyTemplates
-            new KeyFactory.KeyFormat<>(
-                AesCmacKeyFormat.newBuilder()
-                    .setKeySize(32)
-                    .setParams(AesCmacParams.newBuilder().setTagSize(16).build())
-                    .build(),
-                KeyTemplate.OutputPrefixType.TINK));
-        result.put(
-            "AES256_CMAC",
-            new KeyFactory.KeyFormat<>(
-                AesCmacKeyFormat.newBuilder()
-                    .setKeySize(32)
-                    .setParams(AesCmacParams.newBuilder().setTagSize(16).build())
-                    .build(),
-                KeyTemplate.OutputPrefixType.TINK));
+        Map<String, KeyTemplate> result = new HashMap<>();
+        result.put("AES_CMAC", KeyTemplate.createFrom(PredefinedMacParameters.AES_CMAC));
+        result.put("AES256_CMAC", KeyTemplate.createFrom(PredefinedMacParameters.AES_CMAC));
         result.put(
             "AES256_CMAC_RAW",
-            new KeyFactory.KeyFormat<>(
-                AesCmacKeyFormat.newBuilder()
-                    .setKeySize(32)
-                    .setParams(AesCmacParams.newBuilder().setTagSize(16).build())
-                    .build(),
-                KeyTemplate.OutputPrefixType.RAW));
+            KeyTemplate.createFrom(
+                AesCmacParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setTagSizeBytes(16)
+                    .setVariant(AesCmacParameters.Variant.NO_PREFIX)
+                    .build()));
         return Collections.unmodifiableMap(result);
       }
     };
