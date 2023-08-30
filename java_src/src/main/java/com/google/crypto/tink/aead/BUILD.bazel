@@ -1227,3 +1227,15 @@ java_library(
         "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception",
     ],
 )
+
+java_library(
+    name = "legacy_kms_aead_parameters",
+    srcs = ["LegacyKmsAeadParameters.java"],
+    deps = [":aead_parameters"],
+)
+
+android_library(
+    name = "legacy_kms_aead_parameters-android",
+    srcs = ["LegacyKmsAeadParameters.java"],
+    deps = [":aead_parameters-android"],
+)
