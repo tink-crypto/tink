@@ -370,16 +370,31 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
 
   @Test
   public void testJwtRsa4096AlgoRS512F4TemplateWithManager_ok() throws Exception {
+    if (TestUtil.isTsan()) {
+      // creating keys is too slow in Tsan.
+      // We do not use assume because Theories expects to find something which is not skipped.
+      return;
+    }
     testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_RS512_4096_F4"));
   }
 
   @Test
   public void testJwtRsa3072AlgoRS384F4TemplateWithManager_ok() throws Exception {
+    if (TestUtil.isTsan()) {
+      // creating keys is too slow in Tsan.
+      // We do not use assume because Theories expects to find something which is not skipped.
+      return;
+    }
     testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_RS384_3072_F4"));
   }
 
   @Test
   public void testJwtRsa3072AlgoRS256F4TemplateWithManager_ok() throws Exception {
+    if (TestUtil.isTsan()) {
+      // creating keys is too slow in Tsan.
+      // We do not use assume because Theories expects to find something which is not skipped.
+      return;
+    }
     testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_RS256_3072_F4"));
   }
 
