@@ -138,8 +138,6 @@ util::Status MacSetWrapper::VerifyMac(
                                            data.size());
           }
           return status;
-        } else {
-          // TODO(przydatek): LOG that a matching key didn't verify the MAC.
         }
       }
     }

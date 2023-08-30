@@ -87,8 +87,6 @@ util::StatusOr<absl::Cord> CordAeadSetWrapper::Decrypt(
         auto decrypt_result = aead.Decrypt(raw_ciphertext, associated_data);
         if (decrypt_result.ok()) {
           return std::move(decrypt_result.value());
-        } else {
-          // LOG that a matching key didn't decrypt the ciphertext.
         }
       }
     }
