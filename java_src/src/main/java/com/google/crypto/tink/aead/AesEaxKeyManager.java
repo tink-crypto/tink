@@ -25,7 +25,6 @@ import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.AesEaxKeyFormat;
-import com.google.crypto.tink.proto.AesEaxParams;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.AesEaxJce;
 import com.google.crypto.tink.subtle.Random;
@@ -112,14 +111,29 @@ public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
       }
 
       @Override
-      public Map<String, KeyFactory.KeyFormat<AesEaxKeyFormat>> keyFormats()
+      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
           throws GeneralSecurityException {
-        Map<String, KeyFactory.KeyFormat<AesEaxKeyFormat>> result = new HashMap<>();
-        result.put("AES128_EAX", createKeyFormat(16, 16, KeyTemplate.OutputPrefixType.TINK));
-        result.put("AES128_EAX_RAW", createKeyFormat(16, 16, KeyTemplate.OutputPrefixType.RAW));
-
-        result.put("AES256_EAX", createKeyFormat(32, 16, KeyTemplate.OutputPrefixType.TINK));
-        result.put("AES256_EAX_RAW", createKeyFormat(32, 16, KeyTemplate.OutputPrefixType.RAW));
+        Map<String, KeyTemplate> result = new HashMap<>();
+        result.put("AES128_EAX", KeyTemplate.createFrom(PredefinedAeadParameters.AES128_EAX));
+        result.put(
+            "AES128_EAX_RAW",
+            KeyTemplate.createFrom(
+                AesEaxParameters.builder()
+                    .setIvSizeBytes(16)
+                    .setKeySizeBytes(16)
+                    .setTagSizeBytes(16)
+                    .setVariant(AesEaxParameters.Variant.NO_PREFIX)
+                    .build()));
+        result.put("AES256_EAX", KeyTemplate.createFrom(PredefinedAeadParameters.AES256_EAX));
+        result.put(
+            "AES256_EAX_RAW",
+            KeyTemplate.createFrom(
+                AesEaxParameters.builder()
+                    .setIvSizeBytes(16)
+                    .setKeySizeBytes(32)
+                    .setTagSizeBytes(16)
+                    .setVariant(AesEaxParameters.Variant.NO_PREFIX)
+                    .build()));
 
         return Collections.unmodifiableMap(result);
       }
@@ -215,13 +229,4 @@ public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
                     .build()));
   }
 
-  private static KeyFactory.KeyFormat<AesEaxKeyFormat> createKeyFormat(
-      int keySize, int ivSize, KeyTemplate.OutputPrefixType prefixType) {
-    AesEaxKeyFormat format =
-        AesEaxKeyFormat.newBuilder()
-            .setKeySize(keySize)
-            .setParams(AesEaxParams.newBuilder().setIvSize(ivSize).build())
-            .build();
-    return new KeyFactory.KeyFormat<>(format, prefixType);
-  }
 }

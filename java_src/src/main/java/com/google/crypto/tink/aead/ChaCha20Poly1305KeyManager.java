@@ -108,17 +108,17 @@ public class ChaCha20Poly1305KeyManager extends KeyTypeManager<ChaCha20Poly1305K
       }
 
       @Override
-      public Map<String, KeyFactory.KeyFormat<ChaCha20Poly1305KeyFormat>> keyFormats()
+      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
           throws GeneralSecurityException {
-        Map<String, KeyFactory.KeyFormat<ChaCha20Poly1305KeyFormat>> result = new HashMap<>();
+        Map<String, KeyTemplate> result = new HashMap<>();
         result.put(
             "CHACHA20_POLY1305",
-            new KeyFactory.KeyFormat<>(
-                ChaCha20Poly1305KeyFormat.getDefaultInstance(), KeyTemplate.OutputPrefixType.TINK));
+            KeyTemplate.createFrom(
+                ChaCha20Poly1305Parameters.create(ChaCha20Poly1305Parameters.Variant.TINK)));
         result.put(
             "CHACHA20_POLY1305_RAW",
-            new KeyFactory.KeyFormat<>(
-                ChaCha20Poly1305KeyFormat.getDefaultInstance(), KeyTemplate.OutputPrefixType.RAW));
+            KeyTemplate.createFrom(
+                ChaCha20Poly1305Parameters.create(ChaCha20Poly1305Parameters.Variant.NO_PREFIX)));
         return Collections.unmodifiableMap(result);
       }
     };

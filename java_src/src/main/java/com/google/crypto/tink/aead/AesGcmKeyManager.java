@@ -122,13 +122,29 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
       }
 
       @Override
-      public Map<String, KeyFactory.KeyFormat<AesGcmKeyFormat>> keyFormats()
+      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
           throws GeneralSecurityException {
-        Map<String, KeyFactory.KeyFormat<AesGcmKeyFormat>> result = new HashMap<>();
-        result.put("AES128_GCM", createKeyFormat(16, KeyTemplate.OutputPrefixType.TINK));
-        result.put("AES128_GCM_RAW", createKeyFormat(16, KeyTemplate.OutputPrefixType.RAW));
-        result.put("AES256_GCM", createKeyFormat(32, KeyTemplate.OutputPrefixType.TINK));
-        result.put("AES256_GCM_RAW", createKeyFormat(32, KeyTemplate.OutputPrefixType.RAW));
+        Map<String, KeyTemplate> result = new HashMap<>();
+        result.put("AES128_GCM", KeyTemplate.createFrom(PredefinedAeadParameters.AES128_GCM));
+        result.put(
+            "AES128_GCM_RAW",
+            KeyTemplate.createFrom(
+                AesGcmParameters.builder()
+                    .setIvSizeBytes(12)
+                    .setKeySizeBytes(16)
+                    .setTagSizeBytes(16)
+                    .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+                    .build()));
+        result.put("AES256_GCM", KeyTemplate.createFrom(PredefinedAeadParameters.AES256_GCM));
+        result.put(
+            "AES256_GCM_RAW",
+            KeyTemplate.createFrom(
+                AesGcmParameters.builder()
+                    .setIvSizeBytes(12)
+                    .setKeySizeBytes(32)
+                    .setTagSizeBytes(16)
+                    .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+                    .build()));
         return Collections.unmodifiableMap(result);
       }
     };
@@ -233,12 +249,6 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
                     .setTagSizeBytes(16)
                     .setVariant(AesGcmParameters.Variant.NO_PREFIX)
                     .build()));
-  }
-
-  private static KeyFactory.KeyFormat<AesGcmKeyFormat> createKeyFormat(
-      int keySize, KeyTemplate.OutputPrefixType prefixType) {
-    AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder().setKeySize(keySize).build();
-    return new KeyFactory.KeyFormat<>(format, prefixType);
   }
 
   @Override

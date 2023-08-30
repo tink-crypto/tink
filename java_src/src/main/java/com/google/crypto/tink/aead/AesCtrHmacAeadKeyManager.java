@@ -29,12 +29,7 @@ import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
 import com.google.crypto.tink.proto.AesCtrKey;
-import com.google.crypto.tink.proto.AesCtrKeyFormat;
-import com.google.crypto.tink.proto.AesCtrParams;
-import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
-import com.google.crypto.tink.proto.HmacKeyFormat;
-import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.crypto.tink.subtle.IndCpaCipher;
@@ -164,23 +159,39 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
       }
 
       @Override
-      public Map<String, KeyFactory.KeyFormat<AesCtrHmacAeadKeyFormat>> keyFormats()
+      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
           throws GeneralSecurityException {
-        Map<String, KeyFactory.KeyFormat<AesCtrHmacAeadKeyFormat>> result = new HashMap<>();
+        Map<String, KeyTemplate> result = new HashMap<>();
 
         result.put(
             "AES128_CTR_HMAC_SHA256",
-            createKeyFormat(16, 16, 32, 16, HashType.SHA256, KeyTemplate.OutputPrefixType.TINK));
+            KeyTemplate.createFrom(PredefinedAeadParameters.AES128_CTR_HMAC_SHA256));
         result.put(
             "AES128_CTR_HMAC_SHA256_RAW",
-            createKeyFormat(16, 16, 32, 16, HashType.SHA256, KeyTemplate.OutputPrefixType.RAW));
+            KeyTemplate.createFrom(
+                AesCtrHmacAeadParameters.builder()
+                    .setAesKeySizeBytes(16)
+                    .setHmacKeySizeBytes(32)
+                    .setTagSizeBytes(16)
+                    .setIvSizeBytes(16)
+                    .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
+                    .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
+                    .build()));
 
         result.put(
             "AES256_CTR_HMAC_SHA256",
-            createKeyFormat(32, 16, 32, 32, HashType.SHA256, KeyTemplate.OutputPrefixType.TINK));
+            KeyTemplate.createFrom(PredefinedAeadParameters.AES256_CTR_HMAC_SHA256));
         result.put(
             "AES256_CTR_HMAC_SHA256_RAW",
-            createKeyFormat(32, 16, 32, 32, HashType.SHA256, KeyTemplate.OutputPrefixType.RAW));
+            KeyTemplate.createFrom(
+                AesCtrHmacAeadParameters.builder()
+                    .setAesKeySizeBytes(32)
+                    .setHmacKeySizeBytes(32)
+                    .setTagSizeBytes(32)
+                    .setIvSizeBytes(16)
+                    .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
+                    .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
+                    .build()));
 
         return Collections.unmodifiableMap(result);
       }
@@ -240,35 +251,6 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
                     .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
                     .setVariant(AesCtrHmacAeadParameters.Variant.TINK)
                     .build()));
-  }
-
-  private static KeyFactory.KeyFormat<AesCtrHmacAeadKeyFormat> createKeyFormat(
-      int aesKeySize,
-      int ivSize,
-      int hmacKeySize,
-      int tagSize,
-      HashType hashType,
-      KeyTemplate.OutputPrefixType prefixType) {
-    return new KeyFactory.KeyFormat<>(
-        createKeyFormat(aesKeySize, ivSize, hmacKeySize, tagSize, hashType), prefixType);
-  }
-
-  private static AesCtrHmacAeadKeyFormat createKeyFormat(
-      int aesKeySize, int ivSize, int hmacKeySize, int tagSize, HashType hashType) {
-    AesCtrKeyFormat aesCtrKeyFormat =
-        AesCtrKeyFormat.newBuilder()
-            .setParams(AesCtrParams.newBuilder().setIvSize(ivSize).build())
-            .setKeySize(aesKeySize)
-            .build();
-    HmacKeyFormat hmacKeyFormat =
-        HmacKeyFormat.newBuilder()
-            .setParams(HmacParams.newBuilder().setHash(hashType).setTagSize(tagSize).build())
-            .setKeySize(hmacKeySize)
-            .build();
-    return AesCtrHmacAeadKeyFormat.newBuilder()
-        .setAesCtrKeyFormat(aesCtrKeyFormat)
-        .setHmacKeyFormat(hmacKeyFormat)
-        .build();
   }
 
   @Override
