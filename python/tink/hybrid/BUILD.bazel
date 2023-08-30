@@ -68,7 +68,6 @@ py_library(
     deps = [
         ":_hybrid_decrypt",
         ":_hybrid_encrypt",
-        requirement("absl-py"),
         "//tink/core",
     ],
 )

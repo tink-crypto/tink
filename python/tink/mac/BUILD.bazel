@@ -57,7 +57,6 @@ py_library(
     srcs_version = "PY3",
     deps = [
         ":_mac",
-        requirement("absl-py"),
         "//tink/core",
         "//tink/proto:tink_py_pb2",
     ],

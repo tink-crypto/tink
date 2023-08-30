@@ -15,7 +15,6 @@
 """AEAD wrapper."""
 
 from typing import Type
-from absl import logging
 
 from tink import core
 from tink.aead import _aead
@@ -40,14 +39,13 @@ class _WrappedAead(_aead.Aead):
         try:
           return entry.primitive.decrypt(ciphertext_no_prefix,
                                          associated_data)
-        except core.TinkError as e:
-          logging.info(
-              'ciphertext prefix matches a key, but cannot decrypt: %s', e)
+        except core.TinkError:
+          pass
     # Let's try all RAW keys.
     for entry in self._primitive_set.raw_primitives():
       try:
         return entry.primitive.decrypt(ciphertext, associated_data)
-      except core.TinkError as e:
+      except core.TinkError:
         pass
     # nothing works.
     raise core.TinkError('Decryption failed.')
