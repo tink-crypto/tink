@@ -354,7 +354,7 @@ TEST(HpkePublicKeyTest, DifferentVariantNotEqual) {
   EXPECT_FALSE(*other_public_key == *public_key);
 }
 
-TEST(Ed25519PublicKeyTest, DifferentPublicKeyBytesNotEqual) {
+TEST(HpkePublicKeyTest, DifferentPublicKeyBytesNotEqual) {
   util::StatusOr<HpkeParameters> params =
       HpkeParameters::Builder()
           .SetVariant(HpkeParameters::Variant::kTink)
@@ -383,7 +383,7 @@ TEST(Ed25519PublicKeyTest, DifferentPublicKeyBytesNotEqual) {
   EXPECT_FALSE(*other_public_key == *public_key);
 }
 
-TEST(Ed25519PublicKeyTest, DifferentIdRequirementNotEqual) {
+TEST(HpkePublicKeyTest, DifferentIdRequirementNotEqual) {
   util::StatusOr<HpkeParameters> params =
       HpkeParameters::Builder()
           .SetVariant(HpkeParameters::Variant::kTink)
