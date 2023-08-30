@@ -209,26 +209,57 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
        * header.
        */
       @Override
-      public Map<String, KeyFactory.KeyFormat<JwtHmacKeyFormat>> keyFormats() {
-        Map<String, KeyFactory.KeyFormat<JwtHmacKeyFormat>> result = new HashMap<>();
+      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
+          throws GeneralSecurityException {
+        Map<String, KeyTemplate> result = new HashMap<>();
         result.put(
             "JWT_HS256_RAW",
-            createKeyFormat(JwtHmacAlgorithm.HS256, 32, KeyTemplate.OutputPrefixType.RAW));
+            KeyTemplate.createFrom(
+                JwtHmacParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setAlgorithm(JwtHmacParameters.Algorithm.HS256)
+                    .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
+                    .build()));
         result.put(
             "JWT_HS256",
-            createKeyFormat(JwtHmacAlgorithm.HS256, 32, KeyTemplate.OutputPrefixType.TINK));
+            KeyTemplate.createFrom(
+                JwtHmacParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setAlgorithm(JwtHmacParameters.Algorithm.HS256)
+                    .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                    .build()));
         result.put(
             "JWT_HS384_RAW",
-            createKeyFormat(JwtHmacAlgorithm.HS384, 48, KeyTemplate.OutputPrefixType.RAW));
+            KeyTemplate.createFrom(
+                JwtHmacParameters.builder()
+                    .setKeySizeBytes(48)
+                    .setAlgorithm(JwtHmacParameters.Algorithm.HS384)
+                    .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
+                    .build()));
         result.put(
             "JWT_HS384",
-            createKeyFormat(JwtHmacAlgorithm.HS384, 48, KeyTemplate.OutputPrefixType.TINK));
+            KeyTemplate.createFrom(
+                JwtHmacParameters.builder()
+                    .setKeySizeBytes(48)
+                    .setAlgorithm(JwtHmacParameters.Algorithm.HS384)
+                    .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                    .build()));
         result.put(
             "JWT_HS512_RAW",
-            createKeyFormat(JwtHmacAlgorithm.HS512, 64, KeyTemplate.OutputPrefixType.RAW));
+            KeyTemplate.createFrom(
+                JwtHmacParameters.builder()
+                    .setKeySizeBytes(64)
+                    .setAlgorithm(JwtHmacParameters.Algorithm.HS512)
+                    .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
+                    .build()));
         result.put(
             "JWT_HS512",
-            createKeyFormat(JwtHmacAlgorithm.HS512, 64, KeyTemplate.OutputPrefixType.TINK));
+            KeyTemplate.createFrom(
+                JwtHmacParameters.builder()
+                    .setKeySizeBytes(64)
+                    .setAlgorithm(JwtHmacParameters.Algorithm.HS512)
+                    .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                    .build()));
         return Collections.unmodifiableMap(result);
       }
     };
@@ -275,10 +306,4 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
                     .build()));
   }
 
-  private static KeyFactory.KeyFormat<JwtHmacKeyFormat> createKeyFormat(
-      JwtHmacAlgorithm algorithm, int keySize, KeyTemplate.OutputPrefixType prefixType) {
-    JwtHmacKeyFormat format =
-        JwtHmacKeyFormat.newBuilder().setAlgorithm(algorithm).setKeySize(keySize).build();
-    return new KeyFactory.KeyFormat<>(format, prefixType);
-  }
 }

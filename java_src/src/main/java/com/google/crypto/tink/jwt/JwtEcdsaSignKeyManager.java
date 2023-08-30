@@ -193,26 +193,51 @@ public final class JwtEcdsaSignKeyManager
        * header.
        */
       @Override
-      public Map<String, KeyFactory.KeyFormat<JwtEcdsaKeyFormat>> keyFormats() {
-        Map<String, KeyFactory.KeyFormat<JwtEcdsaKeyFormat>> result = new HashMap<>();
+      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
+          throws GeneralSecurityException {
+        Map<String, KeyTemplate> result = new HashMap<>();
         result.put(
             "JWT_ES256_RAW",
-            createKeyFormat(JwtEcdsaAlgorithm.ES256, KeyTemplate.OutputPrefixType.RAW));
+            KeyTemplate.createFrom(
+                JwtEcdsaParameters.builder()
+                    .setAlgorithm(JwtEcdsaParameters.Algorithm.ES256)
+                    .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
+                    .build()));
         result.put(
             "JWT_ES256",
-            createKeyFormat(JwtEcdsaAlgorithm.ES256, KeyTemplate.OutputPrefixType.TINK));
+            KeyTemplate.createFrom(
+                JwtEcdsaParameters.builder()
+                    .setAlgorithm(JwtEcdsaParameters.Algorithm.ES256)
+                    .setKidStrategy(JwtEcdsaParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                    .build()));
         result.put(
             "JWT_ES384_RAW",
-            createKeyFormat(JwtEcdsaAlgorithm.ES384, KeyTemplate.OutputPrefixType.RAW));
+            KeyTemplate.createFrom(
+                JwtEcdsaParameters.builder()
+                    .setAlgorithm(JwtEcdsaParameters.Algorithm.ES384)
+                    .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
+                    .build()));
         result.put(
             "JWT_ES384",
-            createKeyFormat(JwtEcdsaAlgorithm.ES384, KeyTemplate.OutputPrefixType.TINK));
+            KeyTemplate.createFrom(
+                JwtEcdsaParameters.builder()
+                    .setAlgorithm(JwtEcdsaParameters.Algorithm.ES384)
+                    .setKidStrategy(JwtEcdsaParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                    .build()));
         result.put(
             "JWT_ES512_RAW",
-            createKeyFormat(JwtEcdsaAlgorithm.ES512, KeyTemplate.OutputPrefixType.RAW));
+            KeyTemplate.createFrom(
+                JwtEcdsaParameters.builder()
+                    .setAlgorithm(JwtEcdsaParameters.Algorithm.ES512)
+                    .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
+                    .build()));
         result.put(
             "JWT_ES512",
-            createKeyFormat(JwtEcdsaAlgorithm.ES512, KeyTemplate.OutputPrefixType.TINK));
+            KeyTemplate.createFrom(
+                JwtEcdsaParameters.builder()
+                    .setAlgorithm(JwtEcdsaParameters.Algorithm.ES512)
+                    .setKidStrategy(JwtEcdsaParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                    .build()));
         return Collections.unmodifiableMap(result);
       }
     };
@@ -228,9 +253,4 @@ public final class JwtEcdsaSignKeyManager
     JwtEcdsaProtoSerialization.register();
   }
 
-  private static KeyFactory.KeyFormat<JwtEcdsaKeyFormat> createKeyFormat(
-      JwtEcdsaAlgorithm algorithm, KeyTemplate.OutputPrefixType prefixType) {
-    JwtEcdsaKeyFormat format = JwtEcdsaKeyFormat.newBuilder().setAlgorithm(algorithm).build();
-    return new KeyFactory.KeyFormat<>(format, prefixType);
-  }
 }
