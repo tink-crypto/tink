@@ -167,25 +167,13 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
       }
 
       @Override
-      public Map<String, KeyFactory.KeyFormat<HmacPrfKeyFormat>> keyFormats()
+      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
           throws GeneralSecurityException {
-        Map<String, KeyFactory.KeyFormat<HmacPrfKeyFormat>> result = new HashMap<>();
+        Map<String, KeyTemplate> result = new HashMap<>();
         result.put(
-            "HMAC_SHA256_PRF",
-            new KeyFactory.KeyFormat<>(
-                HmacPrfKeyFormat.newBuilder()
-                    .setParams(HmacPrfParams.newBuilder().setHash(HashType.SHA256).build())
-                    .setKeySize(32)
-                    .build(),
-                KeyTemplate.OutputPrefixType.RAW));
+            "HMAC_SHA256_PRF", KeyTemplate.createFrom(PredefinedPrfParameters.HMAC_SHA256_PRF));
         result.put(
-            "HMAC_SHA512_PRF",
-            new KeyFactory.KeyFormat<>(
-                HmacPrfKeyFormat.newBuilder()
-                    .setParams(HmacPrfParams.newBuilder().setHash(HashType.SHA512).build())
-                    .setKeySize(64)
-                    .build(),
-                KeyTemplate.OutputPrefixType.RAW));
+            "HMAC_SHA512_PRF", KeyTemplate.createFrom(PredefinedPrfParameters.HMAC_SHA512_PRF));
         return Collections.unmodifiableMap(result);
       }
     };

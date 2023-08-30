@@ -139,19 +139,18 @@ public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
       }
 
       @Override
-      public Map<String, KeyFactory.KeyFormat<AesSivKeyFormat>> keyFormats()
+      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
           throws GeneralSecurityException {
-        Map<String, KeyFactory.KeyFormat<AesSivKeyFormat>> result = new HashMap<>();
+        Map<String, KeyTemplate> result = new HashMap<>();
         result.put(
-            "AES256_SIV",
-            new KeyFactory.KeyFormat<>(
-                AesSivKeyFormat.newBuilder().setKeySize(KEY_SIZE_IN_BYTES).build(),
-                KeyTemplate.OutputPrefixType.TINK));
+            "AES256_SIV", KeyTemplate.createFrom(PredefinedDeterministicAeadParameters.AES256_SIV));
         result.put(
             "AES256_SIV_RAW",
-            new KeyFactory.KeyFormat<>(
-                AesSivKeyFormat.newBuilder().setKeySize(KEY_SIZE_IN_BYTES).build(),
-                KeyTemplate.OutputPrefixType.RAW));
+            KeyTemplate.createFrom(
+                AesSivParameters.builder()
+                    .setKeySizeBytes(64)
+                    .setVariant(AesSivParameters.Variant.NO_PREFIX)
+                    .build()));
         return Collections.unmodifiableMap(result);
       }
     };

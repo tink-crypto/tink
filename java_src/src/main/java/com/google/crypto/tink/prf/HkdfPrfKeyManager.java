@@ -136,17 +136,10 @@ public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
       }
 
       @Override
-      public Map<String, KeyFactory.KeyFormat<HkdfPrfKeyFormat>> keyFormats()
+      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
           throws GeneralSecurityException {
-        Map<String, KeyFactory.KeyFormat<HkdfPrfKeyFormat>> result = new HashMap<>();
-        result.put(
-            "HKDF_SHA256",
-            new KeyFactory.KeyFormat<>(
-                HkdfPrfKeyFormat.newBuilder()
-                    .setKeySize(32) // the size in bytes of the HKDF key
-                    .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
-                    .build(),
-                KeyTemplate.OutputPrefixType.RAW));
+        Map<String, KeyTemplate> result = new HashMap<>();
+        result.put("HKDF_SHA256", KeyTemplate.createFrom(PredefinedPrfParameters.HKDF_SHA256));
         return Collections.unmodifiableMap(result);
       }
     };

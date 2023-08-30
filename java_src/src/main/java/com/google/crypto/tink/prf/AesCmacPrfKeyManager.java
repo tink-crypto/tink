@@ -116,21 +116,12 @@ public final class AesCmacPrfKeyManager extends KeyTypeManager<AesCmacPrfKey> {
       }
 
       @Override
-      public Map<String, KeyFactory.KeyFormat<AesCmacPrfKeyFormat>> keyFormats()
+      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
           throws GeneralSecurityException {
-        Map<String, KeyFactory.KeyFormat<AesCmacPrfKeyFormat>> result = new HashMap<>();
-        result.put(
-            "AES256_CMAC_PRF",
-            new KeyFactory.KeyFormat<>(
-                AesCmacPrfKeyFormat.newBuilder().setKeySize(32).build(),
-                KeyTemplate.OutputPrefixType.RAW));
+        Map<String, KeyTemplate> result = new HashMap<>();
+        result.put("AES256_CMAC_PRF", KeyTemplate.createFrom(PredefinedPrfParameters.AES_CMAC_PRF));
         // Identical to AES256_CMAC_PRF, needed for backward compatibility with PrfKeyTemplates.
-        // TODO(b/185475349): remove this.
-        result.put(
-            "AES_CMAC_PRF",
-            new KeyFactory.KeyFormat<>(
-                AesCmacPrfKeyFormat.newBuilder().setKeySize(32).build(),
-                KeyTemplate.OutputPrefixType.RAW));
+        result.put("AES_CMAC_PRF", KeyTemplate.createFrom(PredefinedPrfParameters.AES_CMAC_PRF));
         return Collections.unmodifiableMap(result);
       }
     };
