@@ -689,3 +689,17 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "LegacyKmsAeadKeyTest",
+    size = "small",
+    srcs = ["LegacyKmsAeadKeyTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/aead:legacy_kms_aead_key",
+        "//src/main/java/com/google/crypto/tink/aead:legacy_kms_aead_parameters",
+        "//src/main/java/com/google/crypto/tink/aead:x_cha_cha20_poly1305_key",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
