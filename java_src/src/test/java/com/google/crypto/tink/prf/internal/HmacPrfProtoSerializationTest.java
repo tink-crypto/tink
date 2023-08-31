@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.prf;
+package com.google.crypto.tink.prf.internal;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.internal.testing.Asserts.assertEqualWhenValueParsed;
@@ -26,6 +26,8 @@ import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.ProtoParametersSerialization;
+import com.google.crypto.tink.prf.HmacPrfKey;
+import com.google.crypto.tink.prf.HmacPrfParameters;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.util.SecretBytes;
@@ -52,7 +54,7 @@ public final class HmacPrfProtoSerializationTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
-    HmacPrfProtoSerialization.register(registry);
+    com.google.crypto.tink.prf.internal.HmacPrfProtoSerialization.register(registry);
   }
 
   public static final class HashType {
@@ -84,8 +86,8 @@ public final class HmacPrfProtoSerializationTest {
   @Test
   public void registerTwice() throws Exception {
     MutableSerializationRegistry registry = new MutableSerializationRegistry();
-    HmacPrfProtoSerialization.register(registry);
-    HmacPrfProtoSerialization.register(registry);
+    com.google.crypto.tink.prf.internal.HmacPrfProtoSerialization.register(registry);
+    com.google.crypto.tink.prf.internal.HmacPrfProtoSerialization.register(registry);
   }
 
   @Theory

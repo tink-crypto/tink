@@ -26,6 +26,7 @@ import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.PrimitiveFactory;
+import com.google.crypto.tink.prf.internal.HmacPrfProtoSerialization;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacPrfKey;
 import com.google.crypto.tink.proto.HmacPrfKeyFormat;
