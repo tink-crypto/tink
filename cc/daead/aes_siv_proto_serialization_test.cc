@@ -66,6 +66,11 @@ class AesSivProtoSerializationTest : public TestWithParam<TestCase> {
   }
 };
 
+TEST_F(AesSivProtoSerializationTest, RegisterTwiceSucceeds) {
+  ASSERT_THAT(RegisterAesSivProtoSerialization(), IsOk());
+  ASSERT_THAT(RegisterAesSivProtoSerialization(), IsOk());
+}
+
 INSTANTIATE_TEST_SUITE_P(
     AesSivProtoSerializationTestSuite, AesSivProtoSerializationTest,
     Values(TestCase{AesSivParameters::Variant::kTink, OutputPrefixType::TINK,

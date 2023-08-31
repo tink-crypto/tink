@@ -68,6 +68,11 @@ class AesGcmProtoSerializationTest : public TestWithParam<TestCase> {
   }
 };
 
+TEST_F(AesGcmProtoSerializationTest, RegisterTwiceSucceeds) {
+  ASSERT_THAT(RegisterAesGcmProtoSerialization(), IsOk());
+  ASSERT_THAT(RegisterAesGcmProtoSerialization(), IsOk());
+}
+
 INSTANTIATE_TEST_SUITE_P(
     AesGcmProtoSerializationTestSuite, AesGcmProtoSerializationTest,
     Values(TestCase{AesGcmParameters::Variant::kTink, OutputPrefixType::TINK,

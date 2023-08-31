@@ -68,6 +68,11 @@ class AesCmacProtoSerializationTest : public TestWithParam<TestCase> {
   }
 };
 
+TEST_F(AesCmacProtoSerializationTest, RegisterTwiceSucceeds) {
+  ASSERT_THAT(RegisterAesCmacProtoSerialization(), IsOk());
+  ASSERT_THAT(RegisterAesCmacProtoSerialization(), IsOk());
+}
+
 INSTANTIATE_TEST_SUITE_P(
     AesCmacProtoSerializationTestSuite, AesCmacProtoSerializationTest,
     Values(TestCase{AesCmacParameters::Variant::kTink, OutputPrefixType::TINK,

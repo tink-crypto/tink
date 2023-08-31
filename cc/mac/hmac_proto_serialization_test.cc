@@ -72,6 +72,11 @@ class HmacProtoSerializationTest : public TestWithParam<TestCase> {
   }
 };
 
+TEST_F(HmacProtoSerializationTest, RegisterTwiceSucceeds) {
+  ASSERT_THAT(RegisterHmacProtoSerialization(), IsOk());
+  ASSERT_THAT(RegisterHmacProtoSerialization(), IsOk());
+}
+
 INSTANTIATE_TEST_SUITE_P(
     HmacProtoSerializationTestSuite, HmacProtoSerializationTest,
     Values(TestCase{HmacParameters::Variant::kTink, OutputPrefixType::TINK,
