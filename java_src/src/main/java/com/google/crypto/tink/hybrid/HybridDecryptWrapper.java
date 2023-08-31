@@ -27,7 +27,6 @@ import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * The implementation of {@code PrimitiveWrapper<HybridDecrypt>}.
@@ -39,7 +38,6 @@ import java.util.logging.Logger;
  */
 public class HybridDecryptWrapper implements PrimitiveWrapper<HybridDecrypt, HybridDecrypt> {
 
-  private static final Logger logger = Logger.getLogger(HybridDecryptWrapper.class.getName());
   private static final HybridDecryptWrapper WRAPPER = new HybridDecryptWrapper();
 
   private static class WrappedHybridDecrypt implements HybridDecrypt {
@@ -72,7 +70,6 @@ public class HybridDecryptWrapper implements PrimitiveWrapper<HybridDecrypt, Hyb
             decLogger.log(entry.getKeyId(), ciphertextNoPrefix.length);
             return output;
           } catch (GeneralSecurityException e) {
-            logger.info("ciphertext prefix matches a key, but cannot decrypt: " + e.toString());
             continue;
           }
         }

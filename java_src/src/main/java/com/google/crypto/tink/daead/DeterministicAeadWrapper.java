@@ -29,7 +29,6 @@ import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * The implementation of {@code PrimitiveWrapper<DeterministicAead>}.
@@ -43,7 +42,6 @@ import java.util.logging.Logger;
 public class DeterministicAeadWrapper
     implements PrimitiveWrapper<DeterministicAead, DeterministicAead> {
 
-  private static final Logger logger = Logger.getLogger(DeterministicAeadWrapper.class.getName());
   private static final DeterministicAeadWrapper WRAPPER = new DeterministicAeadWrapper();
 
   private static class WrappedDeterministicAead implements DeterministicAead {
@@ -99,7 +97,6 @@ public class DeterministicAeadWrapper
             decLogger.log(entry.getKeyId(), ciphertextNoPrefix.length);
             return output;
           } catch (GeneralSecurityException e) {
-            logger.info("ciphertext prefix matches a key, but cannot decrypt: " + e);
             continue;
           }
         }

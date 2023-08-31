@@ -29,7 +29,6 @@ import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * AeadWrapper is the implementation of SetWrapper for the Aead primitive.
@@ -40,7 +39,6 @@ import java.util.logging.Logger;
  * simply throw a GeneralSecurityException.
  */
 public class AeadWrapper implements PrimitiveWrapper<Aead, Aead> {
-  private static final Logger logger = Logger.getLogger(AeadWrapper.class.getName());
 
   private static final AeadWrapper WRAPPER = new AeadWrapper();
 
@@ -92,7 +90,6 @@ public class AeadWrapper implements PrimitiveWrapper<Aead, Aead> {
             decLogger.log(entry.getKeyId(), ciphertextNoPrefix.length);
             return result;
           } catch (GeneralSecurityException e) {
-            logger.info("ciphertext prefix matches a key, but cannot decrypt: " + e);
             continue;
           }
         }
