@@ -242,27 +242,6 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
      */
     public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
         throws GeneralSecurityException {
-      Map<String, KeyTemplate> result = new HashMap<>();
-      for (Map.Entry<String, KeyFormat<KeyFormatProtoT>> entries : keyFormats().entrySet()) {
-        KeyTemplate t =
-            KeyTemplate.create(
-                typeUrl,
-                entries.getValue().keyFormat.toByteArray(),
-                entries.getValue().outputPrefixType);
-        result.put(entries.getKey(), t);
-      }
-      return result;
-    }
-
-    /**
-     * Returns supported key formats and their names.
-     *
-     * <p>Do not use override. Instead, override {@link #namedKeyTemplates}.
-     *
-     * @throws GeneralSecurityException Key type managers can throw GeneralSecurityException when
-     *     their key formats depend on other key formats that were not registered.
-     */
-    public Map<String, KeyFormat<KeyFormatProtoT>> keyFormats() throws GeneralSecurityException {
       return Collections.emptyMap();
     }
 

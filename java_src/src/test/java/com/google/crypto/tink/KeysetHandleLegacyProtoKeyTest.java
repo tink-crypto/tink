@@ -21,19 +21,20 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.LegacyProtoKey;
+import com.google.crypto.tink.internal.LegacyProtoParameters;
 import com.google.crypto.tink.internal.PrimitiveFactory;
+import com.google.crypto.tink.internal.ProtoParametersSerialization;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.AesGcmJce;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -112,30 +113,24 @@ public final class KeysetHandleLegacyProtoKeyTest {
               .setVersion(0)
               .build();
         }
-
-        @Override
-        public Map<String, KeyFactory.KeyFormat<AesGcmKeyFormat>> keyFormats()
-            throws GeneralSecurityException {
-          Map<String, KeyFactory.KeyFormat<AesGcmKeyFormat>> result = new HashMap<>();
-          result.put("AES128_GCM_FOR_TEST", createKeyFormat(16, KeyTemplate.OutputPrefixType.TINK));
-          result.put(
-              "AES128_GCM_FOR_TEST_RAW", createKeyFormat(16, KeyTemplate.OutputPrefixType.RAW));
-          return Collections.unmodifiableMap(result);
-        }
       };
     }
 
     public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
       Registry.registerKeyManager(new TestAesGcmKeyManager(), newKeyAllowed);
     }
-
-    private static KeyFactory.KeyFormat<AesGcmKeyFormat> createKeyFormat(
-        int keySize, KeyTemplate.OutputPrefixType prefixType) {
-      AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder().setKeySize(keySize).build();
-      return new KeyFactory.KeyFormat<>(format, prefixType);
-    }
   }
 
+  private static Parameters createParametersObject(OutputPrefixType outputPrefixType) {
+    return new LegacyProtoParameters(
+        ProtoParametersSerialization.create(
+            KeyTemplate.newBuilder()
+                .setTypeUrl(new TestAesGcmKeyManager().getKeyType())
+                .setOutputPrefixType(outputPrefixType)
+                .setValue(AesGcmKeyFormat.newBuilder().setKeySize(16).build().toByteString())
+                .build()));
+  }
+  
   @BeforeClass
   public static void registerKeyManager() throws GeneralSecurityException {
     TestAesGcmKeyManager.register(true);
@@ -146,7 +141,8 @@ public final class KeysetHandleLegacyProtoKeyTest {
     KeysetHandle keysetHandle =
         KeysetHandle.newBuilder()
             .addEntry(
-                KeysetHandle.generateEntryFromParametersName("AES128_GCM_FOR_TEST")
+                KeysetHandle.generateEntryFromParameters(
+                        createParametersObject(OutputPrefixType.TINK))
                     .withRandomId()
                     .makePrimary())
             .build();
@@ -160,15 +156,19 @@ public final class KeysetHandleLegacyProtoKeyTest {
     KeysetHandle keysetHandle =
         KeysetHandle.newBuilder()
             .addEntry(
-                KeysetHandle.generateEntryFromParametersName("AES128_GCM_FOR_TEST")
+                KeysetHandle.generateEntryFromParameters(
+                        createParametersObject(OutputPrefixType.TINK))
                     .withRandomId()
                     .setStatus(KeyStatus.DISABLED))
             .addEntry(
-                KeysetHandle.generateEntryFromParametersName("AES128_GCM_FOR_TEST")
+                KeysetHandle.generateEntryFromParameters(
+                        createParametersObject(OutputPrefixType.TINK))
                     .withRandomId()
                     .makePrimary())
             .addEntry(
-                KeysetHandle.generateEntryFromParametersName("AES128_GCM_FOR_TEST").withRandomId())
+                KeysetHandle.generateEntryFromParameters(
+                        createParametersObject(OutputPrefixType.TINK))
+                    .withRandomId())
             .build();
     assertThat(keysetHandle.size()).isEqualTo(3);
     KeysetHandle.Entry entry0 = keysetHandle.getAt(0);
@@ -191,7 +191,8 @@ public final class KeysetHandleLegacyProtoKeyTest {
   public void testBuilder_isPrimary_works() throws Exception {
     KeysetHandle.Builder builder = KeysetHandle.newBuilder();
     builder.addEntry(
-        KeysetHandle.generateEntryFromParametersName("AES128_GCM_FOR_TEST").withRandomId());
+        KeysetHandle.generateEntryFromParameters(createParametersObject(OutputPrefixType.TINK))
+            .withRandomId());
     assertThat(builder.getAt(0).isPrimary()).isFalse();
     builder.getAt(0).makePrimary();
     assertThat(builder.getAt(0).isPrimary()).isTrue();
@@ -201,7 +202,8 @@ public final class KeysetHandleLegacyProtoKeyTest {
     Key result =
         KeysetHandle.newBuilder()
             .addEntry(
-                KeysetHandle.generateEntryFromParametersName("AES128_GCM_FOR_TEST_RAW")
+                KeysetHandle.generateEntryFromParameters(
+                        createParametersObject(OutputPrefixType.RAW))
                     .withRandomId()
                     .makePrimary())
             .build()
@@ -215,7 +217,8 @@ public final class KeysetHandleLegacyProtoKeyTest {
     Key result =
         KeysetHandle.newBuilder()
             .addEntry(
-                KeysetHandle.generateEntryFromParametersName("AES128_GCM_FOR_TEST")
+                KeysetHandle.generateEntryFromParameters(
+                        createParametersObject(OutputPrefixType.TINK))
                     .withFixedId(id)
                     .makePrimary())
             .build()

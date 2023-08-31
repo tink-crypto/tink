@@ -68,16 +68,27 @@ public final class KeyTemplatesTest {
     public KeyFactory<Empty, Empty> keyFactory() {
       return new KeyFactory<Empty, Empty>(Empty.class) {
         @Override
-        public Map<String, KeyFactory.KeyFormat<Empty>> keyFormats() {
-          Map<String, KeyTypeManager.KeyFactory.KeyFormat<Empty>> formats = new HashMap<>();
+        public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
+            throws GeneralSecurityException {
+          Map<String, KeyTemplate> formats = new HashMap<>();
           formats.put(
               "TINK",
-              new KeyTypeManager.KeyFactory.KeyFormat<>(
-                  Empty.getDefaultInstance(), KeyTemplate.OutputPrefixType.TINK));
+              KeyTemplate.createFrom(
+                  new Parameters() {
+                    @Override
+                    public boolean hasIdRequirement() {
+                      return true;
+                    }
+                  }));
           formats.put(
               "RAW",
-              new KeyTypeManager.KeyFactory.KeyFormat<>(
-                  Empty.getDefaultInstance(), KeyTemplate.OutputPrefixType.RAW));
+              KeyTemplate.createFrom(
+                  new Parameters() {
+                    @Override
+                    public boolean hasIdRequirement() {
+                      return false;
+                    }
+                  }));
           return Collections.unmodifiableMap(formats);
         }
 
@@ -104,12 +115,10 @@ public final class KeyTemplatesTest {
     Registry.registerKeyManager(new TestKeyTypeManager(), true);
 
     KeyTemplate template1 = KeyTemplates.get("TINK");
-    assertThat(template1.getTypeUrl()).isEqualTo(new TestKeyTypeManager().getKeyType());
-    assertThat(template1.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    assertThat(template1.toParameters().hasIdRequirement()).isEqualTo(true);
 
     KeyTemplate template2 = KeyTemplates.get("RAW");
-    assertThat(template2.getTypeUrl()).isEqualTo(new TestKeyTypeManager().getKeyType());
-    assertThat(template2.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
+    assertThat(template2.toParameters().hasIdRequirement()).isEqualTo(false);
   }
 
   @Test

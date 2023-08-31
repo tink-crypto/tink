@@ -17,6 +17,7 @@
 package com.google.crypto.tink;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertNotNull;
@@ -614,25 +615,34 @@ public class RegistryTest {
     assertThrows(GeneralSecurityException.class, () -> Registry.newKeyData(template));
   }
 
-  private static Map<String, KeyTypeManager.KeyFactory.KeyFormat<AesGcmKeyFormat>>
-      createTestAesGcmKeyFormats() {
-    Map<String, KeyTypeManager.KeyFactory.KeyFormat<AesGcmKeyFormat>> formats = new HashMap<>();
+  private static Map<String, KeyTemplate> createTestAesGcmKeyFormats()
+      throws GeneralSecurityException {
+    Map<String, KeyTemplate> formats = new HashMap<>();
     formats.put(
         "TINK",
-        new KeyTypeManager.KeyFactory.KeyFormat<>(
-            AesGcmKeyFormat.newBuilder().setKeySize(16).build(),
-            KeyTemplate.OutputPrefixType.TINK));
+        KeyTemplate.createFrom(
+            new Parameters() {
+              @Override
+              public boolean hasIdRequirement() {
+                return true;
+              }
+            }));
     formats.put(
         "RAW",
-        new KeyTypeManager.KeyFactory.KeyFormat<>(
-            AesGcmKeyFormat.newBuilder().setKeySize(32).build(), KeyTemplate.OutputPrefixType.RAW));
+        KeyTemplate.createFrom(
+            new Parameters() {
+              @Override
+              public boolean hasIdRequirement() {
+                return false;
+              }
+            }));
     return Collections.unmodifiableMap(formats);
   }
 
   /** Implementation of a KeyTypeManager for testing. */
   private static class TestKeyTypeManager extends KeyTypeManager<AesGcmKey> {
-    private Map<String, KeyFactory.KeyFormat<AesGcmKeyFormat>> keyFormats =
-        createTestAesGcmKeyFormats();
+    private Map<String, KeyTemplate> keyFormats =
+        exceptionIsBug(() -> createTestAesGcmKeyFormats());
 
     public TestKeyTypeManager() {
       super(
@@ -651,7 +661,7 @@ public class RegistryTest {
           });
     }
 
-    public TestKeyTypeManager(Map<String, KeyFactory.KeyFormat<AesGcmKeyFormat>> keyFormats) {
+    public TestKeyTypeManager(Map<String, KeyTemplate> keyFormats) {
       super(
           AesGcmKey.class,
           new PrimitiveFactory<Aead, AesGcmKey>(Aead.class) {
@@ -738,7 +748,7 @@ public class RegistryTest {
         }
 
         @Override
-        public Map<String, KeyFactory.KeyFormat<AesGcmKeyFormat>> keyFormats() {
+        public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl) {
           return keyFormats;
         }
       };
@@ -797,12 +807,16 @@ public class RegistryTest {
     Registry.reset();
     Registry.registerKeyManager(new TestKeyTypeManager(), true);
 
-    Map<String, KeyTypeManager.KeyFactory.KeyFormat<AesGcmKeyFormat>> formats = new HashMap<>();
+    Map<String, KeyTemplate> formats = new HashMap<>();
     formats.put(
         "NEW_KEY_TEMPLATE_NAME",
-        new KeyTypeManager.KeyFactory.KeyFormat<>(
-            AesGcmKeyFormat.newBuilder().setKeySize(16).build(),
-            KeyTemplate.OutputPrefixType.TINK));
+        KeyTemplate.createFrom(
+            new Parameters() {
+              @Override
+              public boolean hasIdRequirement() {
+                return false;
+              }
+            }));
 
     assertThrows(
         GeneralSecurityException.class,
@@ -1058,17 +1072,27 @@ public class RegistryTest {
 
   private static class PrivatePrimitiveB {}
 
-  private static Map<String, KeyTypeManager.KeyFactory.KeyFormat<Ed25519KeyFormat>>
-      createTestEd25519KeyFormats() {
-    Map<String, KeyTypeManager.KeyFactory.KeyFormat<Ed25519KeyFormat>> formats = new HashMap<>();
+  private static Map<String, KeyTemplate> createTestEd25519KeyFormats()
+      throws GeneralSecurityException {
+    Map<String, KeyTemplate> formats = new HashMap<>();
     formats.put(
         "TINK",
-        new KeyTypeManager.KeyFactory.KeyFormat<>(
-            Ed25519KeyFormat.getDefaultInstance(), KeyTemplate.OutputPrefixType.TINK));
+        KeyTemplate.createFrom(
+            new Parameters() {
+              @Override
+              public boolean hasIdRequirement() {
+                return true;
+              }
+            }));
     formats.put(
         "RAW",
-        new KeyTypeManager.KeyFactory.KeyFormat<>(
-            Ed25519KeyFormat.getDefaultInstance(), KeyTemplate.OutputPrefixType.RAW));
+        KeyTemplate.createFrom(
+            new Parameters() {
+              @Override
+              public boolean hasIdRequirement() {
+                return true;
+              }
+            }));
     return Collections.unmodifiableMap(formats);
   }
 
@@ -1140,17 +1164,16 @@ public class RegistryTest {
   }
 
   private static class TestPrivateKeyTypeManagerWithKeyFactory extends TestPrivateKeyTypeManager {
-    private Map<String, KeyTypeManager.KeyFactory.KeyFormat<Ed25519KeyFormat>> keyFormats =
-        createTestEd25519KeyFormats();
+    private Map<String, KeyTemplate> keyTemplates =
+        exceptionIsBug(() -> createTestEd25519KeyFormats());
 
     public TestPrivateKeyTypeManagerWithKeyFactory() {
       super();
     }
 
-    public TestPrivateKeyTypeManagerWithKeyFactory(
-        Map<String, KeyTypeManager.KeyFactory.KeyFormat<Ed25519KeyFormat>> keyFormats) {
+    public TestPrivateKeyTypeManagerWithKeyFactory(Map<String, KeyTemplate> keyTemplates) {
       super();
-      this.keyFormats = keyFormats;
+      this.keyTemplates = keyTemplates;
     }
 
     @Override
@@ -1183,8 +1206,8 @@ public class RegistryTest {
         }
 
         @Override
-        public Map<String, KeyTypeManager.KeyFactory.KeyFormat<Ed25519KeyFormat>> keyFormats() {
-          return keyFormats;
+        public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl) {
+          return keyTemplates;
         }
       };
     }
@@ -1231,11 +1254,16 @@ public class RegistryTest {
     Registry.reset();
     Registry.registerKeyManager(new TestPrivateKeyTypeManagerWithKeyFactory(), true);
 
-    Map<String, KeyTypeManager.KeyFactory.KeyFormat<Ed25519KeyFormat>> formats = new HashMap<>();
+    Map<String, KeyTemplate> formats = new HashMap<>();
     formats.put(
         "NEW_KEY_TEMPLATE_NAME",
-        new KeyTypeManager.KeyFactory.KeyFormat<>(
-            Ed25519KeyFormat.getDefaultInstance(), KeyTemplate.OutputPrefixType.TINK));
+        KeyTemplate.createFrom(
+            new Parameters() {
+              @Override
+              public boolean hasIdRequirement() {
+                return false;
+              }
+            }));
 
     assertThrows(
         GeneralSecurityException.class,
