@@ -19,6 +19,7 @@ package com.google.crypto.tink.prf;
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
@@ -167,13 +168,10 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
       }
 
       @Override
-      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
-          throws GeneralSecurityException {
-        Map<String, KeyTemplate> result = new HashMap<>();
-        result.put(
-            "HMAC_SHA256_PRF", KeyTemplate.createFrom(PredefinedPrfParameters.HMAC_SHA256_PRF));
-        result.put(
-            "HMAC_SHA512_PRF", KeyTemplate.createFrom(PredefinedPrfParameters.HMAC_SHA512_PRF));
+      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
+        result.put("HMAC_SHA256_PRF", PredefinedPrfParameters.HMAC_SHA256_PRF);
+        result.put("HMAC_SHA512_PRF", PredefinedPrfParameters.HMAC_SHA512_PRF);
         return Collections.unmodifiableMap(result);
       }
     };

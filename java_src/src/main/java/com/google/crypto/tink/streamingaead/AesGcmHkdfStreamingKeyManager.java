@@ -19,6 +19,7 @@ package com.google.crypto.tink.streamingaead;
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.internal.KeyTypeManager;
@@ -142,21 +143,12 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
       }
 
       @Override
-      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
-          throws GeneralSecurityException {
-        Map<String, KeyTemplate> result = new HashMap<>();
-        result.put(
-            "AES128_GCM_HKDF_4KB",
-            KeyTemplate.createFrom(PredefinedStreamingAeadParameters.AES128_GCM_HKDF_4KB));
-        result.put(
-            "AES128_GCM_HKDF_1MB",
-            KeyTemplate.createFrom(PredefinedStreamingAeadParameters.AES128_GCM_HKDF_1MB));
-        result.put(
-            "AES256_GCM_HKDF_4KB",
-            KeyTemplate.createFrom(PredefinedStreamingAeadParameters.AES256_GCM_HKDF_4KB));
-        result.put(
-            "AES256_GCM_HKDF_1MB",
-            KeyTemplate.createFrom(PredefinedStreamingAeadParameters.AES256_GCM_HKDF_1MB));
+      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
+        result.put("AES128_GCM_HKDF_4KB", PredefinedStreamingAeadParameters.AES128_GCM_HKDF_4KB);
+        result.put("AES128_GCM_HKDF_1MB", PredefinedStreamingAeadParameters.AES128_GCM_HKDF_1MB);
+        result.put("AES256_GCM_HKDF_4KB", PredefinedStreamingAeadParameters.AES256_GCM_HKDF_4KB);
+        result.put("AES256_GCM_HKDF_1MB", PredefinedStreamingAeadParameters.AES256_GCM_HKDF_1MB);
         return Collections.unmodifiableMap(result);
       }
     };

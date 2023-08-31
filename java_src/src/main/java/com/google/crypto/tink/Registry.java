@@ -295,13 +295,13 @@ public final class Registry {
     String typeUrl = manager.getKeyType();
     ensureKeyManagerInsertable(
         typeUrl,
-        newKeyAllowed ? manager.keyFactory().namedKeyTemplates(typeUrl) : Collections.emptyMap(),
+        newKeyAllowed ? manager.keyFactory().namedParameters() : Collections.emptyMap(),
         newKeyAllowed);
 
     if (!keyManagerRegistry.get().typeUrlExists(typeUrl)) {
       keyDeriverMap.put(typeUrl, createDeriverFor(manager));
       if (newKeyAllowed) {
-        registerKeyTemplates(typeUrl, manager.keyFactory().namedKeyTemplates(typeUrl));
+        registerKeyTemplates(typeUrl, manager.keyFactory().namedParameters());
       }
     }
     newKeyAllowedMap.put(typeUrl, Boolean.valueOf(newKeyAllowed));
@@ -366,8 +366,8 @@ public final class Registry {
    *         <li>The key manager was already registered, but it contains new key templates.
    *         <li>The key manager is new, but it contains existing key templates.
    */
-  private static synchronized <KeyFormatProtoT extends MessageLite> void ensureKeyManagerInsertable(
-      String typeUrl, Map<String, KeyTemplate> keyFormats, boolean newKeyAllowed)
+  private static synchronized void ensureKeyManagerInsertable(
+      String typeUrl, Map<String, Parameters> keyFormats, boolean newKeyAllowed)
       throws GeneralSecurityException {
     if (newKeyAllowed && newKeyAllowedMap.containsKey(typeUrl) && !newKeyAllowedMap.get(typeUrl)) {
       throw new GeneralSecurityException("New keys are already disallowed for key type " + typeUrl);
@@ -377,7 +377,7 @@ public final class Registry {
       if (keyManagerRegistry.get().typeUrlExists(typeUrl)) {
         // When re-inserting an already present KeyTypeManager, no new key templates should be
         // present.
-        for (Map.Entry<String, KeyTemplate> entry : keyFormats.entrySet()) {
+        for (Map.Entry<String, Parameters> entry : keyFormats.entrySet()) {
           if (!keyTemplateMap.containsKey(entry.getKey())) {
             throw new GeneralSecurityException(
                 "Attempted to register a new key template "
@@ -388,7 +388,7 @@ public final class Registry {
         }
       } else {
         // Check that new key managers can't overwrite existing key templates.
-        for (Map.Entry<String, KeyTemplate> entry : keyFormats.entrySet()) {
+        for (Map.Entry<String, Parameters> entry : keyFormats.entrySet()) {
 
           if (keyTemplateMap.containsKey(entry.getKey())) {
             throw new GeneralSecurityException(
@@ -433,7 +433,7 @@ public final class Registry {
     ensureKeyManagerInsertable(
         privateTypeUrl,
         newKeyAllowed
-            ? privateKeyTypeManager.keyFactory().namedKeyTemplates(privateTypeUrl)
+            ? privateKeyTypeManager.keyFactory().namedParameters()
             : Collections.emptyMap(),
         newKeyAllowed);
     // No key format because a public key manager cannot create new keys
@@ -444,7 +444,7 @@ public final class Registry {
       if (newKeyAllowed) {
         registerKeyTemplates(
             privateKeyTypeManager.getKeyType(),
-            privateKeyTypeManager.keyFactory().namedKeyTemplates(privateTypeUrl));
+            privateKeyTypeManager.keyFactory().namedParameters());
       }
     }
     newKeyAllowedMap.put(privateTypeUrl, newKeyAllowed);
@@ -454,9 +454,9 @@ public final class Registry {
   }
 
   private static <KeyFormatProtoT extends MessageLite> void registerKeyTemplates(
-      String typeUrl, Map<String, KeyTemplate> namedKeyTemplates) throws GeneralSecurityException {
-    for (Map.Entry<String, KeyTemplate> entry : namedKeyTemplates.entrySet()) {
-      keyTemplateMap.put(entry.getKey(), entry.getValue());
+      String typeUrl, Map<String, Parameters> namedParameters) throws GeneralSecurityException {
+    for (Map.Entry<String, Parameters> entry : namedParameters.entrySet()) {
+      keyTemplateMap.put(entry.getKey(), KeyTemplate.createFrom(entry.getValue()));
     }
   }
 

@@ -17,7 +17,7 @@ package com.google.crypto.tink.jwt;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
-import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
@@ -228,81 +228,72 @@ public final class JwtRsaSsaPkcs1SignKeyManager
        * header.
        */
       @Override
-      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
-          throws GeneralSecurityException {
-        Map<String, KeyTemplate> result = new HashMap<>();
+      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
         result.put(
             "JWT_RS256_2048_F4_RAW",
-            KeyTemplate.createFrom(
-                JwtRsaSsaPkcs1Parameters.builder()
-                    .setModulusSizeBits(2048)
-                    .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
-                    .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
-                    .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
-                    .build()));
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(2048)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
+                .build());
         result.put(
             "JWT_RS256_2048_F4",
-            KeyTemplate.createFrom(
-                JwtRsaSsaPkcs1Parameters.builder()
-                    .setModulusSizeBits(2048)
-                    .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
-                    .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
-                    .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
-                    .build()));
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(2048)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
         result.put(
             "JWT_RS256_3072_F4_RAW",
-            KeyTemplate.createFrom(
-                JwtRsaSsaPkcs1Parameters.builder()
-                    .setModulusSizeBits(3072)
-                    .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
-                    .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
-                    .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
-                    .build()));
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(3072)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
+                .build());
         result.put(
             "JWT_RS256_3072_F4",
-            KeyTemplate.createFrom(
-                JwtRsaSsaPkcs1Parameters.builder()
-                    .setModulusSizeBits(3072)
-                    .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
-                    .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
-                    .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
-                    .build()));
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(3072)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
         result.put(
             "JWT_RS384_3072_F4_RAW",
-            KeyTemplate.createFrom(
-                JwtRsaSsaPkcs1Parameters.builder()
-                    .setModulusSizeBits(3072)
-                    .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
-                    .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS384)
-                    .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
-                    .build()));
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(3072)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS384)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
+                .build());
         result.put(
             "JWT_RS384_3072_F4",
-            KeyTemplate.createFrom(
-                JwtRsaSsaPkcs1Parameters.builder()
-                    .setModulusSizeBits(3072)
-                    .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
-                    .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS384)
-                    .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
-                    .build()));
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(3072)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS384)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
         result.put(
             "JWT_RS512_4096_F4_RAW",
-            KeyTemplate.createFrom(
-                JwtRsaSsaPkcs1Parameters.builder()
-                    .setModulusSizeBits(4096)
-                    .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
-                    .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS512)
-                    .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
-                    .build()));
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(4096)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS512)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
+                .build());
         result.put(
             "JWT_RS512_4096_F4",
-            KeyTemplate.createFrom(
-                JwtRsaSsaPkcs1Parameters.builder()
-                    .setModulusSizeBits(4096)
-                    .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
-                    .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS512)
-                    .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
-                    .build()));
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(4096)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS512)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
         return Collections.unmodifiableMap(result);
       }
     };

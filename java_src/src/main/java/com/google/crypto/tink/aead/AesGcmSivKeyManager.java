@@ -20,6 +20,7 @@ import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.aead.subtle.AesGcmSiv;
 import com.google.crypto.tink.internal.KeyTypeManager;
@@ -124,38 +125,33 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
       }
 
       @Override
-      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
-          throws GeneralSecurityException {
-        Map<String, KeyTemplate> result = new HashMap<>();
+      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
 
         result.put(
             "AES128_GCM_SIV",
-            KeyTemplate.createFrom(
-                AesGcmSivParameters.builder()
-                    .setKeySizeBytes(16)
-                    .setVariant(AesGcmSivParameters.Variant.TINK)
-                    .build()));
+            AesGcmSivParameters.builder()
+                .setKeySizeBytes(16)
+                .setVariant(AesGcmSivParameters.Variant.TINK)
+                .build());
         result.put(
             "AES128_GCM_SIV_RAW",
-            KeyTemplate.createFrom(
-                AesGcmSivParameters.builder()
-                    .setKeySizeBytes(16)
-                    .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
-                    .build()));
+            AesGcmSivParameters.builder()
+                .setKeySizeBytes(16)
+                .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+                .build());
         result.put(
             "AES256_GCM_SIV",
-            KeyTemplate.createFrom(
-                AesGcmSivParameters.builder()
-                    .setKeySizeBytes(32)
-                    .setVariant(AesGcmSivParameters.Variant.TINK)
-                    .build()));
+            AesGcmSivParameters.builder()
+                .setKeySizeBytes(32)
+                .setVariant(AesGcmSivParameters.Variant.TINK)
+                .build());
         result.put(
             "AES256_GCM_SIV_RAW",
-            KeyTemplate.createFrom(
-                AesGcmSivParameters.builder()
-                    .setKeySizeBytes(32)
-                    .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
-                    .build()));
+            AesGcmSivParameters.builder()
+                .setKeySizeBytes(32)
+                .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+                .build());
 
         return Collections.unmodifiableMap(result);
       }

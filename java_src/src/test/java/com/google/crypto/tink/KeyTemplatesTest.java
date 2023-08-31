@@ -68,27 +68,24 @@ public final class KeyTemplatesTest {
     public KeyFactory<Empty, Empty> keyFactory() {
       return new KeyFactory<Empty, Empty>(Empty.class) {
         @Override
-        public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
-            throws GeneralSecurityException {
-          Map<String, KeyTemplate> formats = new HashMap<>();
+        public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+          Map<String, Parameters> formats = new HashMap<>();
           formats.put(
               "TINK",
-              KeyTemplate.createFrom(
-                  new Parameters() {
-                    @Override
-                    public boolean hasIdRequirement() {
-                      return true;
-                    }
-                  }));
+              new Parameters() {
+                @Override
+                public boolean hasIdRequirement() {
+                  return true;
+                }
+              });
           formats.put(
               "RAW",
-              KeyTemplate.createFrom(
-                  new Parameters() {
-                    @Override
-                    public boolean hasIdRequirement() {
-                      return false;
-                    }
-                  }));
+              new Parameters() {
+                @Override
+                public boolean hasIdRequirement() {
+                  return false;
+                }
+              });
           return Collections.unmodifiableMap(formats);
         }
 

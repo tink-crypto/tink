@@ -20,6 +20,7 @@ import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
@@ -204,87 +205,74 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
       }
 
       @Override
-      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
-          throws GeneralSecurityException {
-        Map<String, KeyTemplate> result = new HashMap<>();
-        result.put(
-            "HMAC_SHA256_128BITTAG",
-            KeyTemplate.createFrom(PredefinedMacParameters.HMAC_SHA256_128BITTAG));
+      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
+        result.put("HMAC_SHA256_128BITTAG", PredefinedMacParameters.HMAC_SHA256_128BITTAG);
         result.put(
             "HMAC_SHA256_128BITTAG_RAW",
-            KeyTemplate.createFrom(
-                HmacParameters.builder()
-                    .setKeySizeBytes(32)
-                    .setTagSizeBytes(16)
-                    .setVariant(HmacParameters.Variant.NO_PREFIX)
-                    .setHashType(HmacParameters.HashType.SHA256)
-                    .build()));
+            HmacParameters.builder()
+                .setKeySizeBytes(32)
+                .setTagSizeBytes(16)
+                .setVariant(HmacParameters.Variant.NO_PREFIX)
+                .setHashType(HmacParameters.HashType.SHA256)
+                .build());
         result.put(
             "HMAC_SHA256_256BITTAG",
-            KeyTemplate.createFrom(
-                HmacParameters.builder()
-                    .setKeySizeBytes(32)
-                    .setTagSizeBytes(32)
-                    .setVariant(HmacParameters.Variant.TINK)
-                    .setHashType(HmacParameters.HashType.SHA256)
-                    .build()));
+            HmacParameters.builder()
+                .setKeySizeBytes(32)
+                .setTagSizeBytes(32)
+                .setVariant(HmacParameters.Variant.TINK)
+                .setHashType(HmacParameters.HashType.SHA256)
+                .build());
         result.put(
             "HMAC_SHA256_256BITTAG_RAW",
-            KeyTemplate.createFrom(
-                HmacParameters.builder()
-                    .setKeySizeBytes(32)
-                    .setTagSizeBytes(32)
-                    .setVariant(HmacParameters.Variant.NO_PREFIX)
-                    .setHashType(HmacParameters.HashType.SHA256)
-                    .build()));
+            HmacParameters.builder()
+                .setKeySizeBytes(32)
+                .setTagSizeBytes(32)
+                .setVariant(HmacParameters.Variant.NO_PREFIX)
+                .setHashType(HmacParameters.HashType.SHA256)
+                .build());
         result.put(
             "HMAC_SHA512_128BITTAG",
-            KeyTemplate.createFrom(
-                HmacParameters.builder()
-                    .setKeySizeBytes(64)
-                    .setTagSizeBytes(16)
-                    .setVariant(HmacParameters.Variant.TINK)
-                    .setHashType(HmacParameters.HashType.SHA512)
-                    .build()));
+            HmacParameters.builder()
+                .setKeySizeBytes(64)
+                .setTagSizeBytes(16)
+                .setVariant(HmacParameters.Variant.TINK)
+                .setHashType(HmacParameters.HashType.SHA512)
+                .build());
         result.put(
             "HMAC_SHA512_128BITTAG_RAW",
-            KeyTemplate.createFrom(
-                HmacParameters.builder()
-                    .setKeySizeBytes(64)
-                    .setTagSizeBytes(16)
-                    .setVariant(HmacParameters.Variant.NO_PREFIX)
-                    .setHashType(HmacParameters.HashType.SHA512)
-                    .build()));
+            HmacParameters.builder()
+                .setKeySizeBytes(64)
+                .setTagSizeBytes(16)
+                .setVariant(HmacParameters.Variant.NO_PREFIX)
+                .setHashType(HmacParameters.HashType.SHA512)
+                .build());
         result.put(
             "HMAC_SHA512_256BITTAG",
-            KeyTemplate.createFrom(
-                HmacParameters.builder()
-                    .setKeySizeBytes(64)
-                    .setTagSizeBytes(32)
-                    .setVariant(HmacParameters.Variant.TINK)
-                    .setHashType(HmacParameters.HashType.SHA512)
-                    .build()));
+            HmacParameters.builder()
+                .setKeySizeBytes(64)
+                .setTagSizeBytes(32)
+                .setVariant(HmacParameters.Variant.TINK)
+                .setHashType(HmacParameters.HashType.SHA512)
+                .build());
         result.put(
             "HMAC_SHA512_256BITTAG_RAW",
-            KeyTemplate.createFrom(
-                HmacParameters.builder()
-                    .setKeySizeBytes(64)
-                    .setTagSizeBytes(32)
-                    .setVariant(HmacParameters.Variant.NO_PREFIX)
-                    .setHashType(HmacParameters.HashType.SHA512)
-                    .build()));
-        result.put(
-            "HMAC_SHA512_512BITTAG",
-            KeyTemplate.createFrom(PredefinedMacParameters.HMAC_SHA512_512BITTAG));
+            HmacParameters.builder()
+                .setKeySizeBytes(64)
+                .setTagSizeBytes(32)
+                .setVariant(HmacParameters.Variant.NO_PREFIX)
+                .setHashType(HmacParameters.HashType.SHA512)
+                .build());
+        result.put("HMAC_SHA512_512BITTAG", PredefinedMacParameters.HMAC_SHA512_512BITTAG);
         result.put(
             "HMAC_SHA512_512BITTAG_RAW",
-            KeyTemplate.createFrom(
-                HmacParameters.builder()
-                    .setKeySizeBytes(64)
-                    .setTagSizeBytes(64)
-                    .setVariant(HmacParameters.Variant.NO_PREFIX)
-                    .setHashType(HmacParameters.HashType.SHA512)
-                    .build()));
+            HmacParameters.builder()
+                .setKeySizeBytes(64)
+                .setTagSizeBytes(64)
+                .setVariant(HmacParameters.Variant.NO_PREFIX)
+                .setHashType(HmacParameters.HashType.SHA512)
+                .build());
         return Collections.unmodifiableMap(result);
       }
     };

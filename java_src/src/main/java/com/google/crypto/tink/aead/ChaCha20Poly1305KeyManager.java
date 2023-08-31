@@ -20,6 +20,7 @@ import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
@@ -108,17 +109,14 @@ public class ChaCha20Poly1305KeyManager extends KeyTypeManager<ChaCha20Poly1305K
       }
 
       @Override
-      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
-          throws GeneralSecurityException {
-        Map<String, KeyTemplate> result = new HashMap<>();
+      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
         result.put(
             "CHACHA20_POLY1305",
-            KeyTemplate.createFrom(
-                ChaCha20Poly1305Parameters.create(ChaCha20Poly1305Parameters.Variant.TINK)));
+            ChaCha20Poly1305Parameters.create(ChaCha20Poly1305Parameters.Variant.TINK));
         result.put(
             "CHACHA20_POLY1305_RAW",
-            KeyTemplate.createFrom(
-                ChaCha20Poly1305Parameters.create(ChaCha20Poly1305Parameters.Variant.NO_PREFIX)));
+            ChaCha20Poly1305Parameters.create(ChaCha20Poly1305Parameters.Variant.NO_PREFIX));
         return Collections.unmodifiableMap(result);
       }
     };

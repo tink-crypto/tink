@@ -20,6 +20,7 @@ import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
@@ -111,29 +112,26 @@ public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
       }
 
       @Override
-      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
-          throws GeneralSecurityException {
-        Map<String, KeyTemplate> result = new HashMap<>();
-        result.put("AES128_EAX", KeyTemplate.createFrom(PredefinedAeadParameters.AES128_EAX));
+      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
+        result.put("AES128_EAX", PredefinedAeadParameters.AES128_EAX);
         result.put(
             "AES128_EAX_RAW",
-            KeyTemplate.createFrom(
-                AesEaxParameters.builder()
-                    .setIvSizeBytes(16)
-                    .setKeySizeBytes(16)
-                    .setTagSizeBytes(16)
-                    .setVariant(AesEaxParameters.Variant.NO_PREFIX)
-                    .build()));
-        result.put("AES256_EAX", KeyTemplate.createFrom(PredefinedAeadParameters.AES256_EAX));
+            AesEaxParameters.builder()
+                .setIvSizeBytes(16)
+                .setKeySizeBytes(16)
+                .setTagSizeBytes(16)
+                .setVariant(AesEaxParameters.Variant.NO_PREFIX)
+                .build());
+        result.put("AES256_EAX", PredefinedAeadParameters.AES256_EAX);
         result.put(
             "AES256_EAX_RAW",
-            KeyTemplate.createFrom(
-                AesEaxParameters.builder()
-                    .setIvSizeBytes(16)
-                    .setKeySizeBytes(32)
-                    .setTagSizeBytes(16)
-                    .setVariant(AesEaxParameters.Variant.NO_PREFIX)
-                    .build()));
+            AesEaxParameters.builder()
+                .setIvSizeBytes(16)
+                .setKeySizeBytes(32)
+                .setTagSizeBytes(16)
+                .setVariant(AesEaxParameters.Variant.NO_PREFIX)
+                .build());
 
         return Collections.unmodifiableMap(result);
       }

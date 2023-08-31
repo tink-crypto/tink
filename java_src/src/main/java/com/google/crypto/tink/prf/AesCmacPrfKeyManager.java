@@ -19,6 +19,7 @@ package com.google.crypto.tink.prf;
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
@@ -116,12 +117,11 @@ public final class AesCmacPrfKeyManager extends KeyTypeManager<AesCmacPrfKey> {
       }
 
       @Override
-      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
-          throws GeneralSecurityException {
-        Map<String, KeyTemplate> result = new HashMap<>();
-        result.put("AES256_CMAC_PRF", KeyTemplate.createFrom(PredefinedPrfParameters.AES_CMAC_PRF));
+      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
+        result.put("AES256_CMAC_PRF", PredefinedPrfParameters.AES_CMAC_PRF);
         // Identical to AES256_CMAC_PRF, needed for backward compatibility with PrfKeyTemplates.
-        result.put("AES_CMAC_PRF", KeyTemplate.createFrom(PredefinedPrfParameters.AES_CMAC_PRF));
+        result.put("AES_CMAC_PRF", PredefinedPrfParameters.AES_CMAC_PRF);
         return Collections.unmodifiableMap(result);
       }
     };

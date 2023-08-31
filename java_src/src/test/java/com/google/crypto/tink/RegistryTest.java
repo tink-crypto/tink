@@ -615,33 +615,31 @@ public class RegistryTest {
     assertThrows(GeneralSecurityException.class, () -> Registry.newKeyData(template));
   }
 
-  private static Map<String, KeyTemplate> createTestAesGcmKeyFormats()
+  private static Map<String, Parameters> createTestAesGcmKeyFormats()
       throws GeneralSecurityException {
-    Map<String, KeyTemplate> formats = new HashMap<>();
+    Map<String, Parameters> formats = new HashMap<>();
     formats.put(
         "TINK",
-        KeyTemplate.createFrom(
-            new Parameters() {
-              @Override
-              public boolean hasIdRequirement() {
-                return true;
-              }
-            }));
+        new Parameters() {
+          @Override
+          public boolean hasIdRequirement() {
+            return true;
+          }
+        });
     formats.put(
         "RAW",
-        KeyTemplate.createFrom(
-            new Parameters() {
-              @Override
-              public boolean hasIdRequirement() {
-                return false;
-              }
-            }));
+        new Parameters() {
+          @Override
+          public boolean hasIdRequirement() {
+            return false;
+          }
+        });
     return Collections.unmodifiableMap(formats);
   }
 
   /** Implementation of a KeyTypeManager for testing. */
   private static class TestKeyTypeManager extends KeyTypeManager<AesGcmKey> {
-    private Map<String, KeyTemplate> keyFormats =
+    private Map<String, Parameters> namedParameters =
         exceptionIsBug(() -> createTestAesGcmKeyFormats());
 
     public TestKeyTypeManager() {
@@ -661,7 +659,7 @@ public class RegistryTest {
           });
     }
 
-    public TestKeyTypeManager(Map<String, KeyTemplate> keyFormats) {
+    public TestKeyTypeManager(Map<String, Parameters> namedParameters) {
       super(
           AesGcmKey.class,
           new PrimitiveFactory<Aead, AesGcmKey>(Aead.class) {
@@ -676,7 +674,7 @@ public class RegistryTest {
               return new FakeAead();
             }
           });
-      this.keyFormats = keyFormats;
+      this.namedParameters = namedParameters;
     }
 
     @Override
@@ -748,8 +746,8 @@ public class RegistryTest {
         }
 
         @Override
-        public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl) {
-          return keyFormats;
+        public Map<String, Parameters> namedParameters() {
+          return namedParameters;
         }
       };
     }
@@ -807,20 +805,19 @@ public class RegistryTest {
     Registry.reset();
     Registry.registerKeyManager(new TestKeyTypeManager(), true);
 
-    Map<String, KeyTemplate> formats = new HashMap<>();
-    formats.put(
+    Map<String, Parameters> namedParameters = new HashMap<>();
+    namedParameters.put(
         "NEW_KEY_TEMPLATE_NAME",
-        KeyTemplate.createFrom(
-            new Parameters() {
-              @Override
-              public boolean hasIdRequirement() {
-                return false;
-              }
-            }));
+        new Parameters() {
+          @Override
+          public boolean hasIdRequirement() {
+            return false;
+          }
+        });
 
     assertThrows(
         GeneralSecurityException.class,
-        () -> Registry.registerKeyManager(new TestKeyTypeManager(formats), true));
+        () -> Registry.registerKeyManager(new TestKeyTypeManager(namedParameters), true));
   }
 
   @Test
@@ -1072,27 +1069,25 @@ public class RegistryTest {
 
   private static class PrivatePrimitiveB {}
 
-  private static Map<String, KeyTemplate> createTestEd25519KeyFormats()
+  private static Map<String, Parameters> createTestEd25519KeyFormats()
       throws GeneralSecurityException {
-    Map<String, KeyTemplate> formats = new HashMap<>();
+    Map<String, Parameters> formats = new HashMap<>();
     formats.put(
         "TINK",
-        KeyTemplate.createFrom(
-            new Parameters() {
-              @Override
-              public boolean hasIdRequirement() {
-                return true;
-              }
-            }));
+        new Parameters() {
+          @Override
+          public boolean hasIdRequirement() {
+            return true;
+          }
+        });
     formats.put(
         "RAW",
-        KeyTemplate.createFrom(
-            new Parameters() {
-              @Override
-              public boolean hasIdRequirement() {
-                return true;
-              }
-            }));
+        new Parameters() {
+          @Override
+          public boolean hasIdRequirement() {
+            return true;
+          }
+        });
     return Collections.unmodifiableMap(formats);
   }
 
@@ -1164,16 +1159,16 @@ public class RegistryTest {
   }
 
   private static class TestPrivateKeyTypeManagerWithKeyFactory extends TestPrivateKeyTypeManager {
-    private Map<String, KeyTemplate> keyTemplates =
+    private Map<String, Parameters> parameters =
         exceptionIsBug(() -> createTestEd25519KeyFormats());
 
     public TestPrivateKeyTypeManagerWithKeyFactory() {
       super();
     }
 
-    public TestPrivateKeyTypeManagerWithKeyFactory(Map<String, KeyTemplate> keyTemplates) {
+    public TestPrivateKeyTypeManagerWithKeyFactory(Map<String, Parameters> parameters) {
       super();
-      this.keyTemplates = keyTemplates;
+      this.parameters = parameters;
     }
 
     @Override
@@ -1206,8 +1201,8 @@ public class RegistryTest {
         }
 
         @Override
-        public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl) {
-          return keyTemplates;
+        public Map<String, Parameters> namedParameters() {
+          return parameters;
         }
       };
     }
@@ -1254,16 +1249,15 @@ public class RegistryTest {
     Registry.reset();
     Registry.registerKeyManager(new TestPrivateKeyTypeManagerWithKeyFactory(), true);
 
-    Map<String, KeyTemplate> formats = new HashMap<>();
+    Map<String, Parameters> formats = new HashMap<>();
     formats.put(
         "NEW_KEY_TEMPLATE_NAME",
-        KeyTemplate.createFrom(
-            new Parameters() {
-              @Override
-              public boolean hasIdRequirement() {
-                return false;
-              }
-            }));
+        new Parameters() {
+          @Override
+          public boolean hasIdRequirement() {
+            return false;
+          }
+        });
 
     assertThrows(
         GeneralSecurityException.class,

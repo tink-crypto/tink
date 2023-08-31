@@ -19,6 +19,7 @@ package com.google.crypto.tink.signature;
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
@@ -146,21 +147,15 @@ public final class Ed25519PrivateKeyManager
       }
 
       @Override
-      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
-          throws GeneralSecurityException {
-        Map<String, KeyTemplate> result = new HashMap<>();
-        result.put(
-            "ED25519",
-            KeyTemplate.createFrom(Ed25519Parameters.create(Ed25519Parameters.Variant.TINK)));
-        result.put(
-            "ED25519_RAW",
-            KeyTemplate.createFrom(Ed25519Parameters.create(Ed25519Parameters.Variant.NO_PREFIX)));
+      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
+        result.put("ED25519", Ed25519Parameters.create(Ed25519Parameters.Variant.TINK));
+        result.put("ED25519_RAW", Ed25519Parameters.create(Ed25519Parameters.Variant.NO_PREFIX));
         // This is identical to ED25519_RAW.
         // It is needed to maintain backward compatibility with SignatureKeyTemplates.
         // TODO(b/185475349): remove this in 2.0.0.
         result.put(
-            "ED25519WithRawOutput",
-            KeyTemplate.createFrom(Ed25519Parameters.create(Ed25519Parameters.Variant.NO_PREFIX)));
+            "ED25519WithRawOutput", Ed25519Parameters.create(Ed25519Parameters.Variant.NO_PREFIX));
         return Collections.unmodifiableMap(result);
       }
     };

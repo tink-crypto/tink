@@ -20,6 +20,7 @@ import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
@@ -209,57 +210,50 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
        * header.
        */
       @Override
-      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
-          throws GeneralSecurityException {
-        Map<String, KeyTemplate> result = new HashMap<>();
+      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
         result.put(
             "JWT_HS256_RAW",
-            KeyTemplate.createFrom(
-                JwtHmacParameters.builder()
-                    .setKeySizeBytes(32)
-                    .setAlgorithm(JwtHmacParameters.Algorithm.HS256)
-                    .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
-                    .build()));
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(32)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS256)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
+                .build());
         result.put(
             "JWT_HS256",
-            KeyTemplate.createFrom(
-                JwtHmacParameters.builder()
-                    .setKeySizeBytes(32)
-                    .setAlgorithm(JwtHmacParameters.Algorithm.HS256)
-                    .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
-                    .build()));
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(32)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS256)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
         result.put(
             "JWT_HS384_RAW",
-            KeyTemplate.createFrom(
-                JwtHmacParameters.builder()
-                    .setKeySizeBytes(48)
-                    .setAlgorithm(JwtHmacParameters.Algorithm.HS384)
-                    .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
-                    .build()));
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(48)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS384)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
+                .build());
         result.put(
             "JWT_HS384",
-            KeyTemplate.createFrom(
-                JwtHmacParameters.builder()
-                    .setKeySizeBytes(48)
-                    .setAlgorithm(JwtHmacParameters.Algorithm.HS384)
-                    .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
-                    .build()));
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(48)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS384)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
         result.put(
             "JWT_HS512_RAW",
-            KeyTemplate.createFrom(
-                JwtHmacParameters.builder()
-                    .setKeySizeBytes(64)
-                    .setAlgorithm(JwtHmacParameters.Algorithm.HS512)
-                    .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
-                    .build()));
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(64)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS512)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
+                .build());
         result.put(
             "JWT_HS512",
-            KeyTemplate.createFrom(
-                JwtHmacParameters.builder()
-                    .setKeySizeBytes(64)
-                    .setAlgorithm(JwtHmacParameters.Algorithm.HS512)
-                    .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
-                    .build()));
+            JwtHmacParameters.builder()
+                .setKeySizeBytes(64)
+                .setAlgorithm(JwtHmacParameters.Algorithm.HS512)
+                .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
         return Collections.unmodifiableMap(result);
       }
     };

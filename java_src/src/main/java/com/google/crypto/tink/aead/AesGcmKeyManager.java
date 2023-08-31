@@ -20,6 +20,7 @@ import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
@@ -122,29 +123,26 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
       }
 
       @Override
-      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
-          throws GeneralSecurityException {
-        Map<String, KeyTemplate> result = new HashMap<>();
-        result.put("AES128_GCM", KeyTemplate.createFrom(PredefinedAeadParameters.AES128_GCM));
+      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
+        result.put("AES128_GCM", PredefinedAeadParameters.AES128_GCM);
         result.put(
             "AES128_GCM_RAW",
-            KeyTemplate.createFrom(
-                AesGcmParameters.builder()
-                    .setIvSizeBytes(12)
-                    .setKeySizeBytes(16)
-                    .setTagSizeBytes(16)
-                    .setVariant(AesGcmParameters.Variant.NO_PREFIX)
-                    .build()));
-        result.put("AES256_GCM", KeyTemplate.createFrom(PredefinedAeadParameters.AES256_GCM));
+            AesGcmParameters.builder()
+                .setIvSizeBytes(12)
+                .setKeySizeBytes(16)
+                .setTagSizeBytes(16)
+                .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+                .build());
+        result.put("AES256_GCM", PredefinedAeadParameters.AES256_GCM);
         result.put(
             "AES256_GCM_RAW",
-            KeyTemplate.createFrom(
-                AesGcmParameters.builder()
-                    .setIvSizeBytes(12)
-                    .setKeySizeBytes(32)
-                    .setTagSizeBytes(16)
-                    .setVariant(AesGcmParameters.Variant.NO_PREFIX)
-                    .build()));
+            AesGcmParameters.builder()
+                .setIvSizeBytes(12)
+                .setKeySizeBytes(32)
+                .setTagSizeBytes(16)
+                .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+                .build());
         return Collections.unmodifiableMap(result);
       }
     };

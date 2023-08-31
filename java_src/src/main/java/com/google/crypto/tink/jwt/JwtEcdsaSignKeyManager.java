@@ -17,7 +17,7 @@ package com.google.crypto.tink.jwt;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
-import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
@@ -193,51 +193,44 @@ public final class JwtEcdsaSignKeyManager
        * header.
        */
       @Override
-      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
-          throws GeneralSecurityException {
-        Map<String, KeyTemplate> result = new HashMap<>();
+      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
         result.put(
             "JWT_ES256_RAW",
-            KeyTemplate.createFrom(
-                JwtEcdsaParameters.builder()
-                    .setAlgorithm(JwtEcdsaParameters.Algorithm.ES256)
-                    .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
-                    .build()));
+            JwtEcdsaParameters.builder()
+                .setAlgorithm(JwtEcdsaParameters.Algorithm.ES256)
+                .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
+                .build());
         result.put(
             "JWT_ES256",
-            KeyTemplate.createFrom(
-                JwtEcdsaParameters.builder()
-                    .setAlgorithm(JwtEcdsaParameters.Algorithm.ES256)
-                    .setKidStrategy(JwtEcdsaParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
-                    .build()));
+            JwtEcdsaParameters.builder()
+                .setAlgorithm(JwtEcdsaParameters.Algorithm.ES256)
+                .setKidStrategy(JwtEcdsaParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
         result.put(
             "JWT_ES384_RAW",
-            KeyTemplate.createFrom(
-                JwtEcdsaParameters.builder()
-                    .setAlgorithm(JwtEcdsaParameters.Algorithm.ES384)
-                    .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
-                    .build()));
+            JwtEcdsaParameters.builder()
+                .setAlgorithm(JwtEcdsaParameters.Algorithm.ES384)
+                .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
+                .build());
         result.put(
             "JWT_ES384",
-            KeyTemplate.createFrom(
-                JwtEcdsaParameters.builder()
-                    .setAlgorithm(JwtEcdsaParameters.Algorithm.ES384)
-                    .setKidStrategy(JwtEcdsaParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
-                    .build()));
+            JwtEcdsaParameters.builder()
+                .setAlgorithm(JwtEcdsaParameters.Algorithm.ES384)
+                .setKidStrategy(JwtEcdsaParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
         result.put(
             "JWT_ES512_RAW",
-            KeyTemplate.createFrom(
-                JwtEcdsaParameters.builder()
-                    .setAlgorithm(JwtEcdsaParameters.Algorithm.ES512)
-                    .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
-                    .build()));
+            JwtEcdsaParameters.builder()
+                .setAlgorithm(JwtEcdsaParameters.Algorithm.ES512)
+                .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
+                .build());
         result.put(
             "JWT_ES512",
-            KeyTemplate.createFrom(
-                JwtEcdsaParameters.builder()
-                    .setAlgorithm(JwtEcdsaParameters.Algorithm.ES512)
-                    .setKidStrategy(JwtEcdsaParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
-                    .build()));
+            JwtEcdsaParameters.builder()
+                .setAlgorithm(JwtEcdsaParameters.Algorithm.ES512)
+                .setKidStrategy(JwtEcdsaParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
         return Collections.unmodifiableMap(result);
       }
     };

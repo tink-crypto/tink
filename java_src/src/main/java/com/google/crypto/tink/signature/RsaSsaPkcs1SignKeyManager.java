@@ -19,6 +19,7 @@ package com.google.crypto.tink.signature;
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
@@ -185,40 +186,36 @@ public final class RsaSsaPkcs1SignKeyManager
       }
 
       @Override
-      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
-          throws GeneralSecurityException {
-        Map<String, KeyTemplate> result = new HashMap<>();
+      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
         result.put(
             "RSA_SSA_PKCS1_3072_SHA256_F4",
-            KeyTemplate.createFrom(PredefinedSignatureParameters.RSA_SSA_PKCS1_3072_SHA256_F4));
+            PredefinedSignatureParameters.RSA_SSA_PKCS1_3072_SHA256_F4);
         result.put(
             "RSA_SSA_PKCS1_3072_SHA256_F4_RAW",
-            KeyTemplate.createFrom(
-                RsaSsaPkcs1Parameters.builder()
-                    .setHashType(RsaSsaPkcs1Parameters.HashType.SHA256)
-                    .setModulusSizeBits(3072)
-                    .setPublicExponent(RsaSsaPkcs1Parameters.F4)
-                    .setVariant(RsaSsaPkcs1Parameters.Variant.NO_PREFIX)
-                    .build()));
+            RsaSsaPkcs1Parameters.builder()
+                .setHashType(RsaSsaPkcs1Parameters.HashType.SHA256)
+                .setModulusSizeBits(3072)
+                .setPublicExponent(RsaSsaPkcs1Parameters.F4)
+                .setVariant(RsaSsaPkcs1Parameters.Variant.NO_PREFIX)
+                .build());
         // This is identical to RSA_SSA_PKCS1_3072_SHA256_F4_RAW. It is needed to maintain backward
         // compatibility with SignatureKeyTemplates.
         // TODO(b/185475349): remove this in Tink 2.0.0.
         result.put(
             "RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX",
-            KeyTemplate.createFrom(
-                PredefinedSignatureParameters.RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX));
+            PredefinedSignatureParameters.RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX);
         result.put(
             "RSA_SSA_PKCS1_4096_SHA512_F4",
-            KeyTemplate.createFrom(PredefinedSignatureParameters.RSA_SSA_PKCS1_4096_SHA512_F4));
+            PredefinedSignatureParameters.RSA_SSA_PKCS1_4096_SHA512_F4);
         result.put(
             "RSA_SSA_PKCS1_4096_SHA512_F4_RAW",
-            KeyTemplate.createFrom(
-                RsaSsaPkcs1Parameters.builder()
-                    .setHashType(RsaSsaPkcs1Parameters.HashType.SHA512)
-                    .setModulusSizeBits(4096)
-                    .setPublicExponent(RsaSsaPkcs1Parameters.F4)
-                    .setVariant(RsaSsaPkcs1Parameters.Variant.NO_PREFIX)
-                    .build()));
+            RsaSsaPkcs1Parameters.builder()
+                .setHashType(RsaSsaPkcs1Parameters.HashType.SHA512)
+                .setModulusSizeBits(4096)
+                .setPublicExponent(RsaSsaPkcs1Parameters.F4)
+                .setVariant(RsaSsaPkcs1Parameters.Variant.NO_PREFIX)
+                .build());
         return result;
       }
     };

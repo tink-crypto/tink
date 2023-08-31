@@ -18,6 +18,7 @@ package com.google.crypto.tink.prf;
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
@@ -136,10 +137,9 @@ public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
       }
 
       @Override
-      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
-          throws GeneralSecurityException {
-        Map<String, KeyTemplate> result = new HashMap<>();
-        result.put("HKDF_SHA256", KeyTemplate.createFrom(PredefinedPrfParameters.HKDF_SHA256));
+      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
+        result.put("HKDF_SHA256", PredefinedPrfParameters.HKDF_SHA256);
         return Collections.unmodifiableMap(result);
       }
     };

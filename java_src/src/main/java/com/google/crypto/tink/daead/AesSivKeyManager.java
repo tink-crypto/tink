@@ -20,6 +20,7 @@ import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
@@ -139,18 +140,15 @@ public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
       }
 
       @Override
-      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
-          throws GeneralSecurityException {
-        Map<String, KeyTemplate> result = new HashMap<>();
-        result.put(
-            "AES256_SIV", KeyTemplate.createFrom(PredefinedDeterministicAeadParameters.AES256_SIV));
+      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
+        result.put("AES256_SIV", PredefinedDeterministicAeadParameters.AES256_SIV);
         result.put(
             "AES256_SIV_RAW",
-            KeyTemplate.createFrom(
-                AesSivParameters.builder()
-                    .setKeySizeBytes(64)
-                    .setVariant(AesSivParameters.Variant.NO_PREFIX)
-                    .build()));
+            AesSivParameters.builder()
+                .setKeySizeBytes(64)
+                .setVariant(AesSivParameters.Variant.NO_PREFIX)
+                .build());
         return Collections.unmodifiableMap(result);
       }
     };

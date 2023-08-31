@@ -21,6 +21,7 @@ import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
@@ -159,39 +160,32 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
       }
 
       @Override
-      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
-          throws GeneralSecurityException {
-        Map<String, KeyTemplate> result = new HashMap<>();
+      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
 
-        result.put(
-            "AES128_CTR_HMAC_SHA256",
-            KeyTemplate.createFrom(PredefinedAeadParameters.AES128_CTR_HMAC_SHA256));
+        result.put("AES128_CTR_HMAC_SHA256", PredefinedAeadParameters.AES128_CTR_HMAC_SHA256);
         result.put(
             "AES128_CTR_HMAC_SHA256_RAW",
-            KeyTemplate.createFrom(
-                AesCtrHmacAeadParameters.builder()
-                    .setAesKeySizeBytes(16)
-                    .setHmacKeySizeBytes(32)
-                    .setTagSizeBytes(16)
-                    .setIvSizeBytes(16)
-                    .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
-                    .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
-                    .build()));
+            AesCtrHmacAeadParameters.builder()
+                .setAesKeySizeBytes(16)
+                .setHmacKeySizeBytes(32)
+                .setTagSizeBytes(16)
+                .setIvSizeBytes(16)
+                .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
+                .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
+                .build());
 
-        result.put(
-            "AES256_CTR_HMAC_SHA256",
-            KeyTemplate.createFrom(PredefinedAeadParameters.AES256_CTR_HMAC_SHA256));
+        result.put("AES256_CTR_HMAC_SHA256", PredefinedAeadParameters.AES256_CTR_HMAC_SHA256);
         result.put(
             "AES256_CTR_HMAC_SHA256_RAW",
-            KeyTemplate.createFrom(
-                AesCtrHmacAeadParameters.builder()
-                    .setAesKeySizeBytes(32)
-                    .setHmacKeySizeBytes(32)
-                    .setTagSizeBytes(32)
-                    .setIvSizeBytes(16)
-                    .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
-                    .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
-                    .build()));
+            AesCtrHmacAeadParameters.builder()
+                .setAesKeySizeBytes(32)
+                .setHmacKeySizeBytes(32)
+                .setTagSizeBytes(32)
+                .setIvSizeBytes(16)
+                .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
+                .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
+                .build());
 
         return Collections.unmodifiableMap(result);
       }

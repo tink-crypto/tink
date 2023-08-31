@@ -20,6 +20,7 @@ import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
@@ -143,19 +144,17 @@ public final class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
       }
 
       @Override
-      public Map<String, KeyTemplate> namedKeyTemplates(String typeUrl)
-          throws GeneralSecurityException {
-        Map<String, KeyTemplate> result = new HashMap<>();
-        result.put("AES_CMAC", KeyTemplate.createFrom(PredefinedMacParameters.AES_CMAC));
-        result.put("AES256_CMAC", KeyTemplate.createFrom(PredefinedMacParameters.AES_CMAC));
+      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
+        result.put("AES_CMAC", PredefinedMacParameters.AES_CMAC);
+        result.put("AES256_CMAC", PredefinedMacParameters.AES_CMAC);
         result.put(
             "AES256_CMAC_RAW",
-            KeyTemplate.createFrom(
-                AesCmacParameters.builder()
-                    .setKeySizeBytes(32)
-                    .setTagSizeBytes(16)
-                    .setVariant(AesCmacParameters.Variant.NO_PREFIX)
-                    .build()));
+            AesCmacParameters.builder()
+                .setKeySizeBytes(32)
+                .setTagSizeBytes(16)
+                .setVariant(AesCmacParameters.Variant.NO_PREFIX)
+                .build());
         return Collections.unmodifiableMap(result);
       }
     };
