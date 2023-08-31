@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.internal;
 
-import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
@@ -172,20 +171,6 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
     private final Class<KeyFormatProtoT> clazz;
     public KeyFactory(Class<KeyFormatProtoT> clazz) {
       this.clazz = clazz;
-    }
-
-    /**
-     * A container that contains key format and other information that form key templates supported
-     * by this factory.
-     */
-    public static final class KeyFormat<KeyFormatProtoT> {
-      public KeyFormatProtoT keyFormat;
-      public KeyTemplate.OutputPrefixType outputPrefixType;
-
-      public KeyFormat(KeyFormatProtoT keyFormat, KeyTemplate.OutputPrefixType outputPrefixType) {
-        this.keyFormat = keyFormat;
-        this.outputPrefixType = outputPrefixType;
-      }
     }
 
     /**
