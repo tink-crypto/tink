@@ -54,3 +54,30 @@ android_library(
     ],
 )
 
+android_library(
+    name = "legacy_hmac_prf_test_util-android",
+    testonly = 1,
+    srcs = ["LegacyHmacPrfTestUtil.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access-android",
+        "//src/main/java/com/google/crypto/tink/prf:hmac_prf_key-android",
+        "//src/main/java/com/google/crypto/tink/prf:hmac_prf_parameters-android",
+        "//src/main/java/com/google/crypto/tink/subtle:hex-android",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes-android",
+    ],
+)
+
+java_library(
+    name = "legacy_hmac_prf_test_util",
+    testonly = 1,
+    srcs = ["LegacyHmacPrfTestUtil.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink/prf:hmac_prf_key",
+        "//src/main/java/com/google/crypto/tink/prf:hmac_prf_parameters",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+    ],
+)
