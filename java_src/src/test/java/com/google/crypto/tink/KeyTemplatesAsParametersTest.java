@@ -1015,6 +1015,6 @@ public final class KeyTemplatesAsParametersTest {
   public void testCompletenessOfThisTest() throws Exception {
     Set<String> testedNames = getAllTestedNames();
 
-    assertThat(Registry.keyTemplateMap().keySet()).containsExactlyElementsIn(testedNames);
+    assertThat(Registry.parametersMap().keySet()).containsExactlyElementsIn(testedNames);
   }
 }

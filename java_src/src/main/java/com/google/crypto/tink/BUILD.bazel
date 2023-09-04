@@ -295,6 +295,7 @@ java_library(
     srcs = ["KeyTemplates.java"],
     deps = [
         ":key_template",
+        ":parameters",
         ":registry",
     ],
 )
@@ -304,6 +305,7 @@ android_library(
     srcs = ["KeyTemplates.java"],
     deps = [
         ":key_template-android",
+        ":parameters-android",
         ":registry-android",
     ],
 )

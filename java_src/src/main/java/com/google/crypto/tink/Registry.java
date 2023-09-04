@@ -92,8 +92,8 @@ public final class Registry {
   private static final ConcurrentMap<String, Catalogue<?>> catalogueMap =
       new ConcurrentHashMap<>(); //  name -> catalogue mapping
 
-  private static final ConcurrentMap<String, KeyTemplate> keyTemplateMap =
-      new ConcurrentHashMap<>(); // name -> KeyTemplate mapping
+  private static final ConcurrentMap<String, Parameters> parametersMap =
+      new ConcurrentHashMap<>(); // name -> Parameters mapping
 
   private static interface KeyDataDeriver {
     KeyData deriveKeyData(ByteString serializedKeyFormat, InputStream stream)
@@ -146,7 +146,7 @@ public final class Registry {
     keyDeriverMap.clear();
     newKeyAllowedMap.clear();
     catalogueMap.clear();
-    keyTemplateMap.clear();
+    parametersMap.clear();
   }
 
   /**
@@ -378,7 +378,7 @@ public final class Registry {
         // When re-inserting an already present KeyTypeManager, no new key templates should be
         // present.
         for (Map.Entry<String, Parameters> entry : namedParameters.entrySet()) {
-          if (!keyTemplateMap.containsKey(entry.getKey())) {
+          if (!parametersMap.containsKey(entry.getKey())) {
             throw new GeneralSecurityException(
                 "Attempted to register a new key template "
                     + entry.getKey()
@@ -389,7 +389,7 @@ public final class Registry {
       } else {
         // Check that new key managers can't overwrite existing key templates.
         for (Map.Entry<String, Parameters> entry : namedParameters.entrySet()) {
-          if (keyTemplateMap.containsKey(entry.getKey())) {
+          if (parametersMap.containsKey(entry.getKey())) {
             throw new GeneralSecurityException(
                 "Attempted overwrite of a registered key template " + entry.getKey());
           }
@@ -453,7 +453,7 @@ public final class Registry {
   private static void registerNamedParameters(Map<String, Parameters> namedParameters)
       throws GeneralSecurityException {
     for (Map.Entry<String, Parameters> entry : namedParameters.entrySet()) {
-      keyTemplateMap.put(entry.getKey(), KeyTemplate.createFrom(entry.getValue()));
+      parametersMap.put(entry.getKey(), entry.getValue());
     }
   }
 
@@ -778,14 +778,14 @@ public final class Registry {
    */
   public static synchronized List<String> keyTemplates() {
     List<String> results = new ArrayList<>();
-    results.addAll(keyTemplateMap.keySet());
+    results.addAll(parametersMap.keySet());
 
     return Collections.unmodifiableList(results);
   }
 
   /** Internal API that returns an unmodifiable map of registered key templates and their names. */
-  static synchronized Map<String, KeyTemplate> keyTemplateMap() {
-    return Collections.unmodifiableMap(keyTemplateMap);
+  static synchronized Map<String, Parameters> parametersMap() {
+    return Collections.unmodifiableMap(parametersMap);
   }
 
   /**
