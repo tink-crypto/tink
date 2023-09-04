@@ -167,7 +167,7 @@ public class LegacyFullMacIntegrationTest {
     static final TestLegacyMacWrapper WRAPPER = new TestLegacyMacWrapper();
 
     @Override
-    public LegacyFullMac wrap(PrimitiveSet<LegacyFullMac> primitiveSet)
+    public Mac wrap(PrimitiveSet<LegacyFullMac> primitiveSet)
         throws GeneralSecurityException {
       // This is a dummy test wrapper that act as a proxy to a single primitive object under test.
       return primitiveSet.getPrimary().getFullPrimitive();
