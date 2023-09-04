@@ -703,3 +703,23 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "LegacyKmsEnvelopeAeadParametersTest",
+    size = "small",
+    srcs = ["LegacyKmsEnvelopeAeadParametersTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/aead:aead_parameters",
+        "//src/main/java/com/google/crypto/tink/aead:aes_ctr_hmac_aead_parameters",
+        "//src/main/java/com/google/crypto/tink/aead:aes_eax_parameters",
+        "//src/main/java/com/google/crypto/tink/aead:aes_gcm_parameters",
+        "//src/main/java/com/google/crypto/tink/aead:aes_gcm_siv_parameters",
+        "//src/main/java/com/google/crypto/tink/aead:cha_cha20_poly1305_parameters",
+        "//src/main/java/com/google/crypto/tink/aead:legacy_kms_envelope_aead_parameters",
+        "//src/main/java/com/google/crypto/tink/aead:x_cha_cha20_poly1305_parameters",
+        "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
