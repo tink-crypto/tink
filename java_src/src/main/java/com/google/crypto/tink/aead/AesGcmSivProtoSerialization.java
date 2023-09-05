@@ -135,7 +135,7 @@ final class AesGcmSivProtoSerialization {
       throws GeneralSecurityException {
     if (!serialization.getKeyTemplate().getTypeUrl().equals(TYPE_URL)) {
       throw new IllegalArgumentException(
-          "Wrong type URL in call to AesGcmSivParameters.parseParameters: "
+          "Wrong type URL in call to AesGcmSivProtoSerialization.parseParameters: "
               + serialization.getKeyTemplate().getTypeUrl());
     }
     com.google.crypto.tink.proto.AesGcmSivKeyFormat format;
@@ -161,7 +161,7 @@ final class AesGcmSivProtoSerialization {
       throws GeneralSecurityException {
     if (!serialization.getTypeUrl().equals(TYPE_URL)) {
       throw new IllegalArgumentException(
-          "Wrong type URL in call to AesGcmSivParameters.parseParameters");
+          "Wrong type URL in call to AesGcmSivProtoSerialization.parseKey");
     }
     try {
       com.google.crypto.tink.proto.AesGcmSivKey protoKey =

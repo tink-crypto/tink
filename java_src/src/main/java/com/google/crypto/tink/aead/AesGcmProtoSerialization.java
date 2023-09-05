@@ -152,7 +152,7 @@ final class AesGcmProtoSerialization {
       throws GeneralSecurityException {
     if (!serialization.getKeyTemplate().getTypeUrl().equals(TYPE_URL)) {
       throw new IllegalArgumentException(
-          "Wrong type URL in call to AesGcmParameters.parseParameters: "
+          "Wrong type URL in call to AesGcmProtoSerialization.parseParameters: "
               + serialization.getKeyTemplate().getTypeUrl());
     }
     com.google.crypto.tink.proto.AesGcmKeyFormat format;
@@ -185,7 +185,7 @@ final class AesGcmProtoSerialization {
       throws GeneralSecurityException {
     if (!serialization.getTypeUrl().equals(TYPE_URL)) {
       throw new IllegalArgumentException(
-          "Wrong type URL in call to AesGcmParameters.parseParameters");
+          "Wrong type URL in call to AesGcmProtoSerialization.parseKey");
     }
     try {
       com.google.crypto.tink.proto.AesGcmKey protoKey =
