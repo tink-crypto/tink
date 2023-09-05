@@ -81,3 +81,37 @@ java_library(
         "//src/main/java/com/google/crypto/tink/util:secret_bytes",
     ],
 )
+
+android_library(
+    name = "legacy_hmac_prf_test_key_manager-android",
+    testonly = 1,
+    srcs = ["LegacyHmacPrfTestKeyManager.java"],
+    deps = [
+        "//proto:common_java_proto_lite",
+        "//proto:hmac_prf_java_proto_lite",
+        "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink:key_manager-android",
+        "//src/main/java/com/google/crypto/tink:registry-android",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set-android",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce-android",
+        "//src/main/java/com/google/crypto/tink/subtle:validators-android",
+        "@maven//:com_google_protobuf_protobuf_javalite",
+    ],
+)
+
+java_library(
+    name = "legacy_hmac_prf_test_key_manager",
+    testonly = 1,
+    srcs = ["LegacyHmacPrfTestKeyManager.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:hmac_prf_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_manager",
+        "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "@maven//:com_google_protobuf_protobuf_java",
+    ],
+)
