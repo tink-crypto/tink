@@ -59,6 +59,10 @@ class JwtRsaSsaPkcs1VerifyKeyManager
   crypto::tink::util::Status ValidateKey(
       const google::crypto::tink::JwtRsaSsaPkcs1PublicKey& key) const override;
 
+  internal::FipsCompatibility FipsStatus() const override {
+    return internal::FipsCompatibility::kRequiresBoringCrypto;
+  }
+
  private:
   static crypto::tink::util::StatusOr<std::string> AlgorithmName(
       const google::crypto::tink::JwtRsaSsaPkcs1Algorithm& algorithm);

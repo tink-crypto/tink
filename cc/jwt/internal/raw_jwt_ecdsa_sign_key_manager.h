@@ -74,6 +74,10 @@ class RawJwtEcdsaSignKeyManager
     return private_key.public_key();
   }
 
+  internal::FipsCompatibility FipsStatus() const override {
+    return internal::FipsCompatibility::kRequiresBoringCrypto;
+  }
+
  private:
   const std::string key_type_ =
       absl::StrCat(kTypeGoogleapisCom,

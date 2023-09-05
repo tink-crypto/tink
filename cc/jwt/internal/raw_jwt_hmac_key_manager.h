@@ -99,6 +99,10 @@ class RawJwtHmacKeyManager
       const google::crypto::tink::JwtHmacKeyFormat& key_format,
       InputStream* input_stream) const override;
 
+  internal::FipsCompatibility FipsStatus() const override {
+    return internal::FipsCompatibility::kRequiresBoringCrypto;
+  }
+
  private:
   const std::string key_type_ = absl::StrCat(
       kTypeGoogleapisCom, google::crypto::tink::JwtHmacKey().GetTypeName());

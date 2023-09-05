@@ -282,3 +282,35 @@ cc_test(
         "@com_google_protobuf//:protobuf",
     ],
 )
+
+cc_test(
+    name = "jwt_mac_config_test",
+    srcs = ["jwt_mac_config_test.cc"],
+    tags = ["fips"],
+    deps = [
+        ":jwt_key_templates",
+        ":jwt_mac_config",
+        "//:keyset_handle",
+        "//:registry",
+        "//internal:fips_utils",
+        "//util:test_matchers",
+        "@boringssl//:crypto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "jwt_signature_config_test",
+    srcs = ["jwt_signature_config_test.cc"],
+    tags = ["fips"],
+    deps = [
+        ":jwt_key_templates",
+        ":jwt_signature_config",
+        "//:keyset_handle",
+        "//:registry",
+        "//internal:fips_utils",
+        "//util:test_matchers",
+        "@boringssl//:crypto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

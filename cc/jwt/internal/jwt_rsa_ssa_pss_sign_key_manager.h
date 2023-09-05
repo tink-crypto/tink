@@ -73,6 +73,10 @@ class JwtRsaSsaPssSignKeyManager
   GetPublicKey(const google::crypto::tink::JwtRsaSsaPssPrivateKey& private_key)
       const override;
 
+  internal::FipsCompatibility FipsStatus() const override {
+    return internal::FipsCompatibility::kRequiresBoringCrypto;
+  }
+
  private:
   const RawJwtRsaSsaPssSignKeyManager raw_key_manager_;
 };

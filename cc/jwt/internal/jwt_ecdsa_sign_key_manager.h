@@ -72,6 +72,10 @@ class JwtEcdsaSignKeyManager
   GetPublicKey(const google::crypto::tink::JwtEcdsaPrivateKey& private_key)
       const override;
 
+  internal::FipsCompatibility FipsStatus() const override {
+    return internal::FipsCompatibility::kRequiresBoringCrypto;
+  }
+
  private:
   const RawJwtEcdsaSignKeyManager raw_key_manager_;
 };

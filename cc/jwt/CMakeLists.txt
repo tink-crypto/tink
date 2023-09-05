@@ -259,3 +259,33 @@ tink_cc_test(
     tink::proto::jwt_ecdsa_cc_proto
     tink::proto::jwt_rsa_ssa_pkcs1_cc_proto
 )
+
+tink_cc_test(
+  NAME jwt_signature_config_test
+  SRCS
+    jwt_signature_config_test.cc
+  DEPS
+    tink::jwt::jwt_key_templates
+    tink::jwt::jwt_signature_config
+    gmock
+    crypto
+    tink::core::keyset_handle
+    tink::core::registry
+    tink::internal::fips_utils
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME jwt_mac_config_test
+  SRCS
+    jwt_mac_config_test.cc
+  DEPS
+    tink::jwt::jwt_key_templates
+    tink::jwt::jwt_mac_config
+    gmock
+    crypto
+    tink::core::keyset_handle
+    tink::core::registry
+    tink::internal::fips_utils
+    tink::util::test_matchers
+)
