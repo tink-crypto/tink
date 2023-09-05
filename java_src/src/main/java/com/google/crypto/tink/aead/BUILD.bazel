@@ -1307,3 +1307,25 @@ java_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
+
+android_library(
+    name = "legacy_kms_envelope_aead_key-android",
+    srcs = ["LegacyKmsEnvelopeAeadKey.java"],
+    deps = [
+        ":aead_key-android",
+        ":legacy_kms_envelope_aead_parameters-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+    ],
+)
+
+java_library(
+    name = "legacy_kms_envelope_aead_key",
+    srcs = ["LegacyKmsEnvelopeAeadKey.java"],
+    deps = [
+        ":aead_key",
+        ":legacy_kms_envelope_aead_parameters",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+    ],
+)
