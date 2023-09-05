@@ -9,7 +9,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/aead:predefined_aead_parameters",
         "//src/main/java/com/google/crypto/tink/config:tink_config",
         "//src/main/java/com/google/crypto/tink/daead:predefined_deterministic_aead_parameters",
-        "//src/main/java/com/google/crypto/tink/hybrid:hybrid_key_templates",
+        "//src/main/java/com/google/crypto/tink/hybrid:predefined_hybrid_parameters",
         "//src/main/java/com/google/crypto/tink/mac:predefined_mac_parameters",
         "//src/main/java/com/google/crypto/tink/signature:predefined_signature_parameters",
         "//src/main/java/com/google/crypto/tink/streamingaead:predefined_streaming_aead_parameters",
