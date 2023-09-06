@@ -111,7 +111,7 @@ public final class HpkeContext {
    * @param info application-specific information parameter to influence key generation
    * @param senderPrivateKey sender's private key (skS)
    */
-  static HpkeContext createAuthSenderContext(
+  public static HpkeContext createAuthSenderContext(
       HpkePublicKey recipientPublicKey,
       HpkeKem kem,
       HpkeKdf kdf,
@@ -212,7 +212,7 @@ public final class HpkeContext {
     return baseNonce;
   }
 
-  byte[] getEncapsulatedKey() {
+  public byte[] getEncapsulatedKey() {
     return encapsulatedKey;
   }
 
@@ -222,7 +222,7 @@ public final class HpkeContext {
    *
    * @return ciphertext
    */
-  byte[] seal(byte[] plaintext, byte[] associatedData) throws GeneralSecurityException {
+  public byte[] seal(byte[] plaintext, byte[] associatedData) throws GeneralSecurityException {
     byte[] nonce = computeNonceAndIncrementSequenceNumber();
     return aead.seal(key, nonce, plaintext, associatedData);
   }
