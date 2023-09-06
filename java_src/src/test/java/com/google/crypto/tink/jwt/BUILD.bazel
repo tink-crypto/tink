@@ -651,3 +651,33 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "JwtSignatureConfigTest",
+    size = "small",
+    srcs = ["JwtSignatureConfigTest.java"],
+    tags = ["fips"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key_templates",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_signature_config",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "JwtMacConfigTest",
+    size = "small",
+    srcs = ["JwtMacConfigTest.java"],
+    tags = ["fips"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key_templates",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_mac_config",
+        "@maven//:junit_junit",
+    ],
+)
