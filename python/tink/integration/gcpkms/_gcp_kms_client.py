@@ -22,7 +22,6 @@ from google.oauth2 import service_account
 
 import tink
 from tink import aead
-from tink.aead import _kms_aead_key_manager
 
 GCP_KEYURI_PREFIX = 'gcp-kms://'
 
@@ -63,7 +62,7 @@ class _GcpKmsAead(aead.Aead):
       raise tink.TinkError(e)
 
 
-class GcpKmsClient(_kms_aead_key_manager.KmsClient):
+class GcpKmsClient(tink.KmsClient):
   """Basic GCP client for AEAD."""
 
   def __init__(
@@ -147,6 +146,4 @@ class GcpKmsClient(_kms_aead_key_manager.KmsClient):
         DeprecationWarning,
         2,
     )
-    _kms_aead_key_manager.register_kms_client(  # pylint: disable=protected-access
-        GcpKmsClient(key_uri, credentials_path)
-    )
+    tink.register_kms_client(GcpKmsClient(key_uri, credentials_path))

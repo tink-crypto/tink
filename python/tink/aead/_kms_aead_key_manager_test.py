@@ -27,7 +27,7 @@ def setUpModule():
   aead.register()
 
 
-class FakeClient(_kms_aead_key_manager.KmsClient):
+class FakeClient(tink.KmsClient):
 
   def __init__(self, key_uri):
     self.key_uri = key_uri
@@ -47,31 +47,9 @@ KMS_ENVELOPE_AEAD_KEY_TYPE_URL = (
 
 class KmsAeadKeyManagerTest(absltest.TestCase):
 
-  def test_register_get_and_reset_kms_clients(self):
-    client1 = FakeClient('key_uri1')
-    client2 = FakeClient('key_uri2')
-    client3 = FakeClient('key_uri3')
-    _kms_aead_key_manager.register_kms_client(client1)
-    _kms_aead_key_manager.register_kms_client(client2)
-    _kms_aead_key_manager.register_kms_client(client3)
-
-    # returns the first registered client that supports the uri.
-    self.assertEqual(
-        _kms_aead_key_manager._kms_client_from_uri('key_uri1'), client1
-    )
-    self.assertEqual(
-        _kms_aead_key_manager._kms_client_from_uri('key_uri2'), client2
-    )
-    with self.assertRaises(tink.TinkError):
-      _kms_aead_key_manager._kms_client_from_uri('unknown')
-
-    _kms_aead_key_manager.reset_kms_clients()
-    with self.assertRaises(tink.TinkError):
-      _kms_aead_key_manager._kms_client_from_uri('key_uri1')
-
   def test_kms_aead_new_key_data_success(self):
     client = FakeClient('key_uri')
-    _kms_aead_key_manager.register_kms_client(client)
+    tink.register_kms_client(client)
     template = aead.aead_key_templates.create_kms_aead_key_template(
         key_uri='key_uri'
     )

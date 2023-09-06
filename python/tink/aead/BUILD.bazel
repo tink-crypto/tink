@@ -149,7 +149,23 @@ py_library(
     deps = [
         ":_aead",
         ":_kms_envelope_aead",
+        "//tink:_kms_clients",
         "//tink/core",
+        "//tink/proto:kms_aead_py_pb2",
+        "//tink/proto:kms_envelope_py_pb2",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_kms_aead_key_manager_test",
+    srcs = ["_kms_aead_key_manager_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_kms_aead_key_manager",
+        ":aead",
+        requirement("absl-py"),
+        "//tink:tink_python",
         "//tink/proto:kms_aead_py_pb2",
         "//tink/proto:kms_envelope_py_pb2",
         "//tink/proto:tink_py_pb2",

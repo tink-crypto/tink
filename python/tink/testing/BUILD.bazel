@@ -87,7 +87,6 @@ py_library(
         "//tink:cleartext_keyset_handle",
         "//tink:tink_python",
         "//tink/aead",
-        "//tink/aead:_kms_aead_key_manager",
         "//tink/core",
     ],
 )

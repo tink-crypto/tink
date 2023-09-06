@@ -14,19 +14,17 @@
 """A client for Fake KMS."""
 
 import base64
-
 from typing import Optional
 
 import tink
 from tink import aead
 from tink import cleartext_keyset_handle
-from tink.aead import _kms_aead_key_manager
 
 
 FAKE_KMS_PREFIX = 'fake-kms://'
 
 
-class FakeKmsClient(_kms_aead_key_manager.KmsClient):
+class FakeKmsClient(tink.KmsClient):
   """A fake KMS client."""
 
   def __init__(self, key_uri: Optional[str] = None):
@@ -58,4 +56,4 @@ class FakeKmsClient(_kms_aead_key_manager.KmsClient):
 def register_client(key_uri=None, credentials_path=None) -> None:
   """Registers a fake KMS client."""
   _ = credentials_path
-  _kms_aead_key_manager.register_kms_client(FakeKmsClient(key_uri))
+  tink.register_kms_client(FakeKmsClient(key_uri))

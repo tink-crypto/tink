@@ -24,7 +24,6 @@ from botocore import exceptions
 
 import tink
 from tink import aead
-from tink.aead import _kms_aead_key_manager
 
 
 AWS_KEYURI_PREFIX = 'aws-kms://'
@@ -99,7 +98,7 @@ def _get_region_from_key_arn(key_arn: str) -> str:
   return key_arn_parts[3]
 
 
-class AwsKmsClient(_kms_aead_key_manager.KmsClient):
+class AwsKmsClient(tink.KmsClient):
   """Basic AWS client for AEAD."""
 
   def __init__(self, key_uri: Optional[str], credentials_path: Optional[str]):
@@ -190,6 +189,4 @@ class AwsKmsClient(_kms_aead_key_manager.KmsClient):
         DeprecationWarning,
         2,
     )
-    _kms_aead_key_manager.register_kms_client(  # pylint: disable=protected-access
-        AwsKmsClient(key_uri, credentials_path)
-    )
+    tink.register_kms_client(AwsKmsClient(key_uri, credentials_path))

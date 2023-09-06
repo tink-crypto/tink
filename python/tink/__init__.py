@@ -16,6 +16,7 @@
 from tink import _keyset_handle
 from tink import _keyset_reader
 from tink import _keyset_writer
+from tink import _kms_clients
 from tink import core
 
 new_keyset_handle = _keyset_handle.new_keyset_handle
@@ -37,3 +38,14 @@ TinkError = core.TinkError
 KeyAccess = core.KeyAccess
 PUBLIC_KEY_ACCESS_TOKEN = _keyset_handle.PUBLIC_KEY_ACCESS_TOKEN
 has_secret_key_access = _keyset_handle.has_secret_key_access
+
+KmsClient = _kms_clients.KmsClient
+
+# Deprecated. It is preferable to not register KMS clients. Instead, get the
+# KMS AEAD with kms_aead = client.get_aead(key_uri) and then use it to encrypt
+# a keyset with KeysetHandle.write, or to create an envelope AEAD using
+# aead.KmsEnvelopeAead.
+register_kms_client = _kms_clients.register_kms_client
+
+# Deprecated. It is preferable to not register KMS clients.
+kms_client_from_uri = _kms_clients.kms_client_from_uri

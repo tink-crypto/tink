@@ -183,3 +183,26 @@ py_test(
         "//tink/mac",
     ],
 )
+
+py_library(
+    name = "_kms_clients",
+    srcs = ["_kms_clients.py"],
+    deps = [
+        "//tink/aead:_aead",
+        "//tink/core:_tink_error",
+    ],
+)
+
+py_test(
+    name = "_kms_clients_test",
+    srcs = ["_kms_clients_test.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        ":_kms_clients",
+        ":tink_config",
+        ":tink_python",
+        requirement("absl-py"),
+        "//tink/aead",
+    ],
+)
