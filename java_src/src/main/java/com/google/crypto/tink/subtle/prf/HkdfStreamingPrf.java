@@ -18,8 +18,15 @@ package com.google.crypto.tink.subtle.prf;
 
 import static java.lang.Math.min;
 
+import com.google.crypto.tink.AccessesPartialKey;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.internal.EnumTypeProtoConverter;
+import com.google.crypto.tink.prf.HkdfPrfKey;
+import com.google.crypto.tink.prf.HkdfPrfParameters;
 import com.google.crypto.tink.subtle.EngineFactory;
+import com.google.crypto.tink.subtle.Enums;
 import com.google.crypto.tink.subtle.Enums.HashType;
+import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +37,19 @@ import javax.crypto.spec.SecretKeySpec;
 
 /** An implementation of the HKDF pseudorandom function, as given by RFC 5869. */
 @Immutable
+@AccessesPartialKey
 public class HkdfStreamingPrf implements StreamingPrf {
+  // This converter is not used with a proto but rather with an ordinary enum type.
+  private static final EnumTypeProtoConverter<Enums.HashType, HkdfPrfParameters.HashType>
+      HASH_TYPE_CONVERTER =
+          EnumTypeProtoConverter.<Enums.HashType, HkdfPrfParameters.HashType>builder()
+              .add(Enums.HashType.SHA1, HkdfPrfParameters.HashType.SHA1)
+              .add(Enums.HashType.SHA224, HkdfPrfParameters.HashType.SHA224)
+              .add(Enums.HashType.SHA256, HkdfPrfParameters.HashType.SHA256)
+              .add(Enums.HashType.SHA384, HkdfPrfParameters.HashType.SHA384)
+              .add(Enums.HashType.SHA512, HkdfPrfParameters.HashType.SHA512)
+              .build();
+
   private static String getJavaxHmacName(HashType hashType) throws GeneralSecurityException {
     switch (hashType) {
       case SHA1:
@@ -51,6 +70,14 @@ public class HkdfStreamingPrf implements StreamingPrf {
     this.hashType = hashType;
     this.ikm = Arrays.copyOf(ikm, ikm.length);
     this.salt = Arrays.copyOf(salt, salt.length);
+  }
+
+  public static StreamingPrf create(HkdfPrfKey key) throws GeneralSecurityException {
+    Bytes saltFromKey = key.getParameters().getSalt();
+    return new HkdfStreamingPrf(
+        HASH_TYPE_CONVERTER.toProtoEnum(key.getParameters().getHashType()),
+        key.getKeyBytes().toByteArray(InsecureSecretKeyAccess.get()),
+        saltFromKey == null ? new byte[] {} : saltFromKey.toByteArray());
   }
 
   private final HashType hashType;
