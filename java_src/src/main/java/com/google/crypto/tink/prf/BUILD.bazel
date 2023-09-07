@@ -6,6 +6,7 @@ java_library(
     name = "hkdf_prf_key_manager",
     srcs = ["HkdfPrfKeyManager.java"],
     deps = [
+        ":hkdf_prf_key",
         ":hkdf_prf_parameters",
         ":hkdf_prf_proto_serialization",
         ":predefined_prf_parameters",
@@ -17,6 +18,8 @@ java_library(
         "//src/main/java/com/google/crypto/tink:parameters",
         "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_primitive_registry",
+        "//src/main/java/com/google/crypto/tink/internal:primitive_constructor",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory",
         "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception",
         "//src/main/java/com/google/crypto/tink/subtle:enums",
@@ -289,6 +292,7 @@ android_library(
     name = "hkdf_prf_key_manager-android",
     srcs = ["HkdfPrfKeyManager.java"],
     deps = [
+        ":hkdf_prf_key-android",
         ":hkdf_prf_parameters-android",
         ":hkdf_prf_proto_serialization-android",
         ":predefined_prf_parameters-android",
@@ -300,6 +304,8 @@ android_library(
         "//src/main/java/com/google/crypto/tink:parameters-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_primitive_registry-android",
+        "//src/main/java/com/google/crypto/tink/internal:primitive_constructor-android",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
         "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception-android",
         "//src/main/java/com/google/crypto/tink/subtle:enums-android",
