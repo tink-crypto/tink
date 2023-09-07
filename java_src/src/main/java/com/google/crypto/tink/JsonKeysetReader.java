@@ -89,7 +89,12 @@ public final class JsonKeysetReader implements KeysetReader {
     return new JsonKeysetReader(new ByteArrayInputStream(input.getBytes(UTF_8)));
   }
 
-  /** Static method to create a JsonKeysetReader from a byte array. */
+  /**
+   * Static method to create a JsonKeysetReader from a byte array.
+   *
+   * @deprecated Use TinkJsonProtoKeysetFormat.parseKeyset() instead.
+   */
+  @Deprecated
   public static JsonKeysetReader withBytes(final byte[] bytes) {
     return new JsonKeysetReader(new ByteArrayInputStream(bytes));
   }
