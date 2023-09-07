@@ -104,13 +104,13 @@ public final class SignatureConfig {
 
     EcdsaSignKeyManager.registerPair(/*newKeyAllowed=*/ true);
     RsaSsaPkcs1SignKeyManager.registerPair(/*newKeyAllowed=*/ true);
+    RsaSsaPssSignKeyManager.registerPair(/* newKeyAllowed= */ true);
 
     if (TinkFips.useOnlyFips()) {
       // If Tink is built in FIPS-mode do not register algorithms which are not compatible.
       return;
     }
 
-    RsaSsaPssSignKeyManager.registerPair(/*newKeyAllowed=*/ true);
     Ed25519PrivateKeyManager.registerPair(/*newKeyAllowed=*/ true);
   }
 
