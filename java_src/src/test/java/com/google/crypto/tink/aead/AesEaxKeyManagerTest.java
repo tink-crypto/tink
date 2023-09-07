@@ -17,7 +17,6 @@
 package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -28,6 +27,7 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.AesEaxKeyFormat;
@@ -351,11 +351,18 @@ public class AesEaxKeyManagerTest {
   }
 
   @Test
-  public void testKeyTemplateAndManagerCompatibility() throws Exception {
-    testKeyTemplateCompatible(manager, AesEaxKeyManager.aes128EaxTemplate());
-    testKeyTemplateCompatible(manager, AesEaxKeyManager.rawAes128EaxTemplate());
-    testKeyTemplateCompatible(manager, AesEaxKeyManager.aes256EaxTemplate());
-    testKeyTemplateCompatible(manager, AesEaxKeyManager.rawAes256EaxTemplate());
+  public void testKeyTemplatesWork() throws Exception {
+    Parameters p = AesEaxKeyManager.aes128EaxTemplate().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
+
+    p = AesEaxKeyManager.rawAes128EaxTemplate().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
+
+    p = AesEaxKeyManager.aes256EaxTemplate().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
+
+    p = AesEaxKeyManager.rawAes256EaxTemplate().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @DataPoints("templateNames")

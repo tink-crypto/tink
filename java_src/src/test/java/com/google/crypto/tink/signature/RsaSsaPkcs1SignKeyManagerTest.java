@@ -17,13 +17,13 @@
 package com.google.crypto.tink.signature;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.internal.KeyTypeManager;
@@ -313,7 +313,8 @@ public class RsaSsaPkcs1SignKeyManagerTest {
       // factory.createKey is too slow in Tsan.
       return;
     }
-    testKeyTemplateCompatible(manager, RsaSsaPkcs1SignKeyManager.rsa3072SsaPkcs1Sha256F4Template());
+    Parameters p = RsaSsaPkcs1SignKeyManager.rsa3072SsaPkcs1Sha256F4Template().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @Test
@@ -322,8 +323,8 @@ public class RsaSsaPkcs1SignKeyManagerTest {
       // factory.createKey is too slow in Tsan.
       return;
     }
-    testKeyTemplateCompatible(
-        manager, RsaSsaPkcs1SignKeyManager.rawRsa3072SsaPkcs1Sha256F4Template());
+    Parameters p = RsaSsaPkcs1SignKeyManager.rawRsa3072SsaPkcs1Sha256F4Template().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @Test
@@ -332,7 +333,8 @@ public class RsaSsaPkcs1SignKeyManagerTest {
       // factory.createKey is too slow in Tsan.
       return;
     }
-    testKeyTemplateCompatible(manager, RsaSsaPkcs1SignKeyManager.rsa4096SsaPkcs1Sha512F4Template());
+    Parameters p = RsaSsaPkcs1SignKeyManager.rsa4096SsaPkcs1Sha512F4Template().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @Test
@@ -341,8 +343,8 @@ public class RsaSsaPkcs1SignKeyManagerTest {
       // factory.createKey is too slow in Tsan.
       return;
     }
-    testKeyTemplateCompatible(
-        manager, RsaSsaPkcs1SignKeyManager.rawRsa4096SsaPkcs1Sha512F4Template());
+    Parameters p = RsaSsaPkcs1SignKeyManager.rawRsa4096SsaPkcs1Sha512F4Template().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @Test

@@ -16,7 +16,6 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -25,6 +24,7 @@ import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1Algorithm;
@@ -375,7 +375,8 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
       // We do not use assume because Theories expects to find something which is not skipped.
       return;
     }
-    testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_RS512_4096_F4"));
+    Parameters p = KeyTemplates.get("JWT_RS512_4096_F4").toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @Test
@@ -385,7 +386,8 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
       // We do not use assume because Theories expects to find something which is not skipped.
       return;
     }
-    testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_RS384_3072_F4"));
+    Parameters p = KeyTemplates.get("JWT_RS384_3072_F4").toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @Test
@@ -395,7 +397,8 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
       // We do not use assume because Theories expects to find something which is not skipped.
       return;
     }
-    testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_RS256_3072_F4"));
+    Parameters p = KeyTemplates.get("JWT_RS256_3072_F4").toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.

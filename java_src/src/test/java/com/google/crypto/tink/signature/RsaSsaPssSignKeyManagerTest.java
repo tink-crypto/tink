@@ -17,13 +17,13 @@
 package com.google.crypto.tink.signature;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.internal.KeyTypeManager;
@@ -387,7 +387,8 @@ public class RsaSsaPssSignKeyManagerTest {
     if (TestUtil.isTsan()) {
       return; // too slow for tsan
     }
-    testKeyTemplateCompatible(manager, RsaSsaPssSignKeyManager.rsa3072PssSha256F4Template());
+    Parameters p = RsaSsaPssSignKeyManager.rsa3072PssSha256F4Template().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @Test
@@ -395,7 +396,8 @@ public class RsaSsaPssSignKeyManagerTest {
     if (TestUtil.isTsan()) {
       return; // too slow for tsan
     }
-    testKeyTemplateCompatible(manager, RsaSsaPssSignKeyManager.rawRsa3072PssSha256F4Template());
+    Parameters p = RsaSsaPssSignKeyManager.rawRsa3072PssSha256F4Template().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @Test
@@ -403,7 +405,8 @@ public class RsaSsaPssSignKeyManagerTest {
     if (TestUtil.isTsan()) {
       return; // too slow for tsan
     }
-    testKeyTemplateCompatible(manager, RsaSsaPssSignKeyManager.rsa4096PssSha512F4Template());
+    Parameters p = RsaSsaPssSignKeyManager.rsa4096PssSha512F4Template().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @Test
@@ -411,7 +414,8 @@ public class RsaSsaPssSignKeyManagerTest {
     if (TestUtil.isTsan()) {
       return; // too slow for tsan
     }
-    testKeyTemplateCompatible(manager, RsaSsaPssSignKeyManager.rawRsa4096PssSha512F4Template());
+    Parameters p = RsaSsaPssSignKeyManager.rawRsa4096PssSha512F4Template().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @DataPoints("templateNames")

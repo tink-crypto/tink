@@ -17,7 +17,6 @@
 package com.google.crypto.tink.hybrid;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.HybridDecrypt;
@@ -25,6 +24,7 @@ import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
 import com.google.crypto.tink.aead.AesCtrHmacAeadParameters;
@@ -323,21 +323,26 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
   }
 
   @Test
-  public void testKeyTemplateAndManagerCompatibility() throws Exception {
-    EciesAeadHkdfPrivateKeyManager manager = new EciesAeadHkdfPrivateKeyManager();
+  public void testKeyTemplatesWork() throws Exception {
+    Parameters p =
+        EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
 
-    testKeyTemplateCompatible(
-        manager, EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate());
-    testKeyTemplateCompatible(
-        manager,
-        EciesAeadHkdfPrivateKeyManager.rawEciesP256HkdfHmacSha256Aes128GcmCompressedTemplate());
-    testKeyTemplateCompatible(
-        manager,
-        EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128CtrHmacSha256Template());
-    testKeyTemplateCompatible(
-        manager,
+    p =
+        EciesAeadHkdfPrivateKeyManager.rawEciesP256HkdfHmacSha256Aes128GcmCompressedTemplate()
+            .toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
+
+    p =
+        EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128CtrHmacSha256Template()
+            .toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
+
+    p =
         EciesAeadHkdfPrivateKeyManager
-            .rawEciesP256HkdfHmacSha256Aes128CtrHmacSha256CompressedTemplate());
+            .rawEciesP256HkdfHmacSha256Aes128CtrHmacSha256CompressedTemplate()
+            .toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @DataPoints("templateNames")

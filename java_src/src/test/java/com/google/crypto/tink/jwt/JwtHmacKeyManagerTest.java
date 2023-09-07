@@ -17,7 +17,6 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
@@ -26,6 +25,7 @@ import com.google.crypto.tink.Key;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.JwtHmacAlgorithm;
@@ -298,11 +298,18 @@ public class JwtHmacKeyManagerTest {
   }
 
   @Test
-  public void testKeyTemplateAndManagerCompatibility() throws Exception {
-    testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_HS256"));
-    testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_HS384"));
-    testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_HS512"));
-    testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_HS512_RAW"));
+  public void testKeyTemplatesWork() throws Exception {
+    Parameters p = KeyTemplates.get("JWT_HS256").toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
+
+    p = KeyTemplates.get("JWT_HS384").toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
+
+    p = KeyTemplates.get("JWT_HS512").toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
+
+    p = KeyTemplates.get("JWT_HS512_RAW").toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @Test

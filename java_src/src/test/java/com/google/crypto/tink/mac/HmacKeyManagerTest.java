@@ -17,13 +17,13 @@
 package com.google.crypto.tink.mac;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
@@ -396,13 +396,18 @@ public class HmacKeyManagerTest {
   }
 
   @Test
-  public void testKeyTemplateAndManagerCompatibility() throws Exception {
-    HmacKeyManager manager = new HmacKeyManager();
+  public void testKeyTemplatesWork() throws Exception {
+    Parameters p = HmacKeyManager.hmacSha256Template().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
 
-    testKeyTemplateCompatible(manager, HmacKeyManager.hmacSha256Template());
-    testKeyTemplateCompatible(manager, HmacKeyManager.hmacSha256HalfDigestTemplate());
-    testKeyTemplateCompatible(manager, HmacKeyManager.hmacSha512Template());
-    testKeyTemplateCompatible(manager, HmacKeyManager.hmacSha512HalfDigestTemplate());
+    p = HmacKeyManager.hmacSha256HalfDigestTemplate().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
+
+    p = HmacKeyManager.hmacSha512Template().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
+
+    p = HmacKeyManager.hmacSha512HalfDigestTemplate().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @DataPoints("templateNames")

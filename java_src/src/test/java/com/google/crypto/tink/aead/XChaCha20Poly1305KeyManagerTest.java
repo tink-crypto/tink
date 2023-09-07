@@ -17,13 +17,13 @@
 package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.XChaCha20Poly1305Key;
@@ -191,11 +191,12 @@ public class XChaCha20Poly1305KeyManagerTest {
   }
 
   @Test
-  public void testKeyTemplateAndManagerCompatibility() throws Exception {
-    XChaCha20Poly1305KeyManager manager = new XChaCha20Poly1305KeyManager();
+  public void testKeyTemplatesWork() throws Exception {
+    Parameters p = XChaCha20Poly1305KeyManager.xChaCha20Poly1305Template().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
 
-    testKeyTemplateCompatible(manager, XChaCha20Poly1305KeyManager.xChaCha20Poly1305Template());
-    testKeyTemplateCompatible(manager, XChaCha20Poly1305KeyManager.rawXChaCha20Poly1305Template());
+    p = XChaCha20Poly1305KeyManager.rawXChaCha20Poly1305Template().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @DataPoints("templateNames")

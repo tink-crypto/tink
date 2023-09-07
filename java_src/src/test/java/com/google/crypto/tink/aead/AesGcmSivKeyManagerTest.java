@@ -17,7 +17,6 @@
 package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
@@ -25,6 +24,7 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.aead.subtle.AesGcmSiv;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.AesGcmSivKey;
@@ -297,13 +297,18 @@ public class AesGcmSivKeyManagerTest {
   }
 
   @Test
-  public void testKeyTemplateAndManagerCompatibility() throws Exception {
-    AesGcmSivKeyManager manager = new AesGcmSivKeyManager();
+  public void testKeyTemplatesWork() throws Exception {
+    Parameters p = AesGcmSivKeyManager.aes128GcmSivTemplate().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
 
-    testKeyTemplateCompatible(manager, AesGcmSivKeyManager.aes128GcmSivTemplate());
-    testKeyTemplateCompatible(manager, AesGcmSivKeyManager.rawAes128GcmSivTemplate());
-    testKeyTemplateCompatible(manager, AesGcmSivKeyManager.aes256GcmSivTemplate());
-    testKeyTemplateCompatible(manager, AesGcmSivKeyManager.rawAes256GcmSivTemplate());
+    p = AesGcmSivKeyManager.rawAes128GcmSivTemplate().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
+
+    p = AesGcmSivKeyManager.aes256GcmSivTemplate().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
+
+    p = AesGcmSivKeyManager.rawAes256GcmSivTemplate().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @DataPoints("templateNames")

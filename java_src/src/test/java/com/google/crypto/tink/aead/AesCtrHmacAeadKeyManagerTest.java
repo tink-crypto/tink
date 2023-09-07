@@ -17,13 +17,13 @@
 package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
@@ -364,11 +364,12 @@ public class AesCtrHmacAeadKeyManagerTest {
   }
 
   @Test
-  public void testKeyTemplateAndManagerCompatibility() throws Exception {
-    AesCtrHmacAeadKeyManager manager = new AesCtrHmacAeadKeyManager();
+  public void testKeyTemplatesWork() throws Exception {
+    Parameters p = AesCtrHmacAeadKeyManager.aes256CtrHmacSha256Template().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
 
-    testKeyTemplateCompatible(manager, AesCtrHmacAeadKeyManager.aes256CtrHmacSha256Template());
-    testKeyTemplateCompatible(manager, AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template());
+    p = AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @DataPoints("templateNames")
