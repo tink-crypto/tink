@@ -24,6 +24,9 @@ import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import java.security.GeneralSecurityException;
+import java.security.Security;
+import org.conscrypt.Conscrypt;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -31,6 +34,17 @@ import org.junit.runners.JUnit4;
 /** Tests for JwtSignatureConfigTest. */
 @RunWith(JUnit4.class)
 public class JwtSignatureConfigTest {
+
+  @BeforeClass
+  public static void setup() {
+    try {
+      Conscrypt.checkAvailability();
+      Security.addProvider(Conscrypt.newProvider());
+    } catch (Throwable cause) {
+      // This test may be run without onlyFips turned on, in which case it is fine that installing
+      // conscrypt fails.
+    }
+  }
 
   @Test
   public void failIfAndOnlyIfInInvalidFipsState() throws Exception {
@@ -49,11 +63,6 @@ public class JwtSignatureConfigTest {
           () -> KeysetHandle.generateNew(KeyTemplates.get("JWT_PS256_2048_F4")));
 
     } else {
-      if (TinkFips.useOnlyFips()) {
-        // TODO(b/298896710): This currently fails, but this is a bug.
-        assertThrows(GeneralSecurityException.class, JwtSignatureConfig::register);
-        return;
-      }
       JwtSignatureConfig.register();
       assertNotNull(KeysetHandle.generateNew(KeyTemplates.get("JWT_ES256")));
       assertNotNull(KeysetHandle.generateNew(KeyTemplates.get("JWT_RS256_2048_F4")));

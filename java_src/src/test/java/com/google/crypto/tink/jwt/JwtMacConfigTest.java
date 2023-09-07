@@ -43,11 +43,6 @@ public class JwtMacConfigTest {
           () -> KeysetHandle.generateNew(KeyTemplates.get("JWT_HS256")));
 
     } else {
-      if (TinkFips.useOnlyFips()) {
-        // TODO(b/298896710): This currently fails, but this is a bug.
-        assertThrows(GeneralSecurityException.class, JwtMacConfig::register);
-        return;
-      }
       JwtMacConfig.register();
       assertNotNull(KeysetHandle.generateNew(KeyTemplates.get("JWT_HS256")));
     }
