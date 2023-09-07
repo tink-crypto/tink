@@ -96,6 +96,7 @@ public class KmsAeadKeyManager extends KeyTypeManager<KmsAeadKey> {
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new KmsAeadKeyManager(), newKeyAllowed);
+    LegacyKmsAeadProtoSerialization.register();
   }
 
   /**
