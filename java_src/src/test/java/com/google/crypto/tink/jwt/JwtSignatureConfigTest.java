@@ -23,9 +23,11 @@ import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import java.security.Security;
 import org.conscrypt.Conscrypt;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,6 +50,7 @@ public class JwtSignatureConfigTest {
 
   @Test
   public void failIfAndOnlyIfInInvalidFipsState() throws Exception {
+    Assume.assumeFalse(TestUtil.isTsan()); // KeysetHandle.generateNew is too slow in Tsan.
     boolean invalidFipsState = TinkFips.useOnlyFips() && !TinkFipsUtil.fipsModuleAvailable();
 
     if (invalidFipsState) {

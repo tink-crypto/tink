@@ -661,6 +661,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_signature_config",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
         "@maven//:junit_junit",
         "@maven//:org_conscrypt_conscrypt_openjdk_uber",
     ],
