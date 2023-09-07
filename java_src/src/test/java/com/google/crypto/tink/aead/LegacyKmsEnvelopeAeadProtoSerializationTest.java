@@ -20,8 +20,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.internal.testing.Asserts.assertEqualWhenValueParsed;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.Key;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
+import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.ProtoParametersSerialization;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.proto.AesCmacKeyFormat;
@@ -36,7 +38,9 @@ import com.google.crypto.tink.proto.AesGcmSivKeyFormat;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKeyFormat;
 import com.google.crypto.tink.proto.HmacParams;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.KmsEnvelopeAeadKey;
 import com.google.crypto.tink.proto.KmsEnvelopeAeadKeyFormat;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import java.security.GeneralSecurityException;
@@ -398,5 +402,87 @@ public final class LegacyKmsEnvelopeAeadProtoSerializationTest {
 
     Parameters parsed = registry.parseParameters(serialization);
     assertThat(parsed).isEqualTo(parameters);
+  }
+
+  @Test
+  public void serializeParseKey_aesGcm_works() throws Exception {
+    LegacyKmsEnvelopeAeadParameters parameters =
+        LegacyKmsEnvelopeAeadParameters.builder()
+            .setKekUri("someKeyUriForKeyTests")
+            .setDekParsingStrategy(
+                LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_XCHACHA20POLY1305)
+            .setDekParametersForNewKeys(XChaCha20Poly1305Parameters.create())
+            .build();
+    LegacyKmsEnvelopeAeadKey key = LegacyKmsEnvelopeAeadKey.create(parameters);
+
+    KmsEnvelopeAeadKeyFormat format =
+        KmsEnvelopeAeadKeyFormat.newBuilder()
+            .setKekUri("someKeyUriForKeyTests")
+            .setDekTemplate(
+                KeyTemplate.newBuilder()
+                    .setTypeUrl("type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key")
+                    .setOutputPrefixType(OutputPrefixType.RAW))
+            .build();
+
+    ProtoKeySerialization serialization =
+        ProtoKeySerialization.create(
+            TYPE_URL,
+            KmsEnvelopeAeadKey.newBuilder().setParams(format).build().toByteString(),
+            KeyMaterialType.REMOTE,
+            OutputPrefixType.RAW,
+            /* idRequirement= */ null);
+
+    ProtoKeySerialization serialized =
+        registry.serializeKey(key, ProtoKeySerialization.class, /* access= */ null);
+    assertEqualWhenValueParsed(KmsEnvelopeAeadKey.parser(), serialized, serialization);
+
+    Key parsed = registry.parseKey(serialization, /* access= */ null);
+    assertThat(parsed.equalsKey(key)).isTrue();
+  }
+
+  @Test
+  public void parseKey_wrongVersion_throws() throws Exception {
+    KmsEnvelopeAeadKeyFormat format =
+        KmsEnvelopeAeadKeyFormat.newBuilder()
+            .setKekUri("someKeyUriForKeyTests")
+            .setDekTemplate(
+                KeyTemplate.newBuilder()
+                    .setTypeUrl("type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key")
+                    .setOutputPrefixType(OutputPrefixType.RAW))
+            .build();
+
+    ProtoKeySerialization serialization =
+        ProtoKeySerialization.create(
+            TYPE_URL,
+            KmsEnvelopeAeadKey.newBuilder().setVersion(1).setParams(format).build().toByteString(),
+            KeyMaterialType.REMOTE,
+            OutputPrefixType.RAW,
+            /* idRequirement= */ null);
+
+    assertThrows(
+        GeneralSecurityException.class, () -> registry.parseKey(serialization, /* access= */ null));
+  }
+
+  @Test
+  public void parseKey_notRaw_throws() throws Exception {
+    KmsEnvelopeAeadKeyFormat format =
+        KmsEnvelopeAeadKeyFormat.newBuilder()
+            .setKekUri("someKeyUriForKeyTests")
+            .setDekTemplate(
+                KeyTemplate.newBuilder()
+                    .setTypeUrl("type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key")
+                    .setOutputPrefixType(OutputPrefixType.RAW))
+            .build();
+
+    ProtoKeySerialization serialization =
+        ProtoKeySerialization.create(
+            TYPE_URL,
+            KmsEnvelopeAeadKey.newBuilder().setParams(format).build().toByteString(),
+            KeyMaterialType.REMOTE,
+            OutputPrefixType.TINK,
+            /* idRequirement= */ 123);
+
+    assertThrows(
+        GeneralSecurityException.class, () -> registry.parseKey(serialization, /* access= */ null));
   }
 }
