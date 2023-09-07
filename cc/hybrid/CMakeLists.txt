@@ -352,6 +352,26 @@ tink_cc_library(
     tink::util::statusor
 )
 
+tink_cc_library(
+  NAME hpke_proto_serialization
+  SRCS
+    hpke_proto_serialization.cc
+    hpke_proto_serialization.h
+  DEPS
+    tink::hybrid::hpke_parameters
+    absl::core_headers
+    absl::status
+    absl::strings
+    tink::internal::mutable_serialization_registry
+    tink::internal::parameters_parser
+    tink::internal::parameters_serializer
+    tink::internal::proto_parameters_serialization
+    tink::util::status
+    tink::util::statusor
+    tink::proto::hpke_cc_proto
+    tink::proto::tink_cc_proto
+)
+
 # tests
 
 tink_cc_test(
@@ -676,4 +696,25 @@ tink_cc_test(
     tink::util::secret_data
     tink::util::statusor
     tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME hpke_proto_serialization_test
+  SRCS
+    hpke_proto_serialization_test.cc
+  DEPS
+    tink::hybrid::hpke_parameters
+    tink::hybrid::hpke_proto_serialization
+    gmock
+    absl::status
+    absl::string_view
+    absl::optional
+    tink::core::parameters
+    tink::internal::mutable_serialization_registry
+    tink::internal::proto_parameters_serialization
+    tink::internal::serialization
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::proto::hpke_cc_proto
+    tink::proto::tink_cc_proto
 )
