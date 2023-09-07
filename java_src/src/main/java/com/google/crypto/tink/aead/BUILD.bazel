@@ -116,6 +116,7 @@ java_library(
     name = "kms_aead_key_manager",
     srcs = ["KmsAeadKeyManager.java"],
     deps = [
+        ":legacy_kms_aead_parameters",
         ":legacy_kms_aead_proto_serialization",
         "//proto:kms_aead_java_proto",
         "//proto:tink_java_proto",
@@ -570,6 +571,7 @@ android_library(
     name = "kms_aead_key_manager-android",
     srcs = ["KmsAeadKeyManager.java"],
     deps = [
+        ":legacy_kms_aead_parameters-android",
         ":legacy_kms_aead_proto_serialization-android",
         "//proto:kms_aead_java_proto_lite",
         "//proto:tink_java_proto_lite",

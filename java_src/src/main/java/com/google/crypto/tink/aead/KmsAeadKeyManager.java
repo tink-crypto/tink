@@ -109,10 +109,12 @@ public class KmsAeadKeyManager extends KeyTypeManager<KmsAeadKey> {
    */
   public static KeyTemplate createKeyTemplate(String kekUri) {
     KmsAeadKeyFormat format = createKeyFormat(kekUri);
-    return KeyTemplate.create(
-        new KmsAeadKeyManager().getKeyType(),
-        format.toByteArray(),
-        KeyTemplate.OutputPrefixType.RAW);
+    try {
+      return KeyTemplate.createFrom(LegacyKmsAeadParameters.create(kekUri));
+    } catch (GeneralSecurityException e) {
+      // This should never happen: LegacyKmsAeadParameters shouldn't throw.
+      throw new IllegalArgumentException(e);
+    }
   }
 
   static KmsAeadKeyFormat createKeyFormat(String keyUri) {
