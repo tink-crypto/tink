@@ -90,8 +90,7 @@ util::StatusOr<std::string> MacSetWrapper::ComputeMac(
   std::string local_data;
   if (primary->get_output_prefix_type() == OutputPrefixType::LEGACY) {
     local_data = std::string(data);
-    local_data.append(
-        reinterpret_cast<const char*>(&CryptoFormat::kLegacyStartByte), 1);
+    local_data.push_back(CryptoFormat::kLegacyStartByte);
     data = local_data;
   }
   auto compute_mac_result = primary->get_primitive().ComputeMac(data);
