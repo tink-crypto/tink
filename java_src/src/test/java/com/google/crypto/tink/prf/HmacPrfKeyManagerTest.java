@@ -17,12 +17,12 @@
 package com.google.crypto.tink.prf;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.proto.HashType;
@@ -296,10 +296,11 @@ public class HmacPrfKeyManagerTest {
 
   @Test
   public void testKeyTemplateAndManagerCompatibility() throws Exception {
-    HmacPrfKeyManager manager = new HmacPrfKeyManager();
+    Parameters p = HmacPrfKeyManager.hmacSha256Template().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
 
-    testKeyTemplateCompatible(manager, HmacPrfKeyManager.hmacSha256Template());
-    testKeyTemplateCompatible(manager, HmacPrfKeyManager.hmacSha512Template());
+    p = HmacPrfKeyManager.hmacSha256Template().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @DataPoints("templateNames")

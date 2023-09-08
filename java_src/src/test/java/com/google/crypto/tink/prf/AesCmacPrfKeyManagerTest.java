@@ -17,12 +17,12 @@
 package com.google.crypto.tink.prf;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.proto.AesCmacPrfKey;
 import com.google.crypto.tink.proto.AesCmacPrfKeyFormat;
@@ -153,9 +153,8 @@ public class AesCmacPrfKeyManagerTest {
 
   @Test
   public void testKeyTemplateAndManagerCompatibility() throws Exception {
-    AesCmacPrfKeyManager manager = new AesCmacPrfKeyManager();
-
-    testKeyTemplateCompatible(manager, AesCmacPrfKeyManager.aes256CmacTemplate());
+    Parameters p = AesCmacPrfKeyManager.aes256CmacTemplate().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @DataPoints("templateNames")

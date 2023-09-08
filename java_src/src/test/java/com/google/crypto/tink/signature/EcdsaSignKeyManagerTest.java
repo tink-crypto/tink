@@ -17,12 +17,12 @@
 package com.google.crypto.tink.signature;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.EcdsaKeyFormat;
@@ -341,10 +341,11 @@ public class EcdsaSignKeyManagerTest {
 
   @Test
   public void testKeyTemplateAndManagerCompatibility() throws Exception {
-    EcdsaSignKeyManager manager = new EcdsaSignKeyManager();
+    Parameters p = EcdsaSignKeyManager.ecdsaP256Template().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
 
-    testKeyTemplateCompatible(manager, EcdsaSignKeyManager.ecdsaP256Template());
-    testKeyTemplateCompatible(manager, EcdsaSignKeyManager.rawEcdsaP256Template());
+    p = EcdsaSignKeyManager.rawEcdsaP256Template().toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @DataPoints("templateNames")
