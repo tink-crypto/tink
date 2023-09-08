@@ -142,6 +142,7 @@ public class KmsEnvelopeAeadKeyManager extends KeyTypeManager<KmsEnvelopeAeadKey
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new KmsEnvelopeAeadKeyManager(), newKeyAllowed);
+    LegacyKmsEnvelopeAeadProtoSerialization.register();
   }
 
   static KmsEnvelopeAeadKeyFormat createKeyFormat(String kekUri, KeyTemplate dekTemplate)

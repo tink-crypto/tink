@@ -189,6 +189,7 @@ java_library(
     srcs = ["KmsEnvelopeAeadKeyManager.java"],
     deps = [
         ":kms_envelope_aead",
+        ":legacy_kms_envelope_aead_proto_serialization",
         "//proto:kms_envelope_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:aead",
@@ -644,6 +645,7 @@ android_library(
     srcs = ["KmsEnvelopeAeadKeyManager.java"],
     deps = [
         ":kms_envelope_aead-android",
+        ":legacy_kms_envelope_aead_proto_serialization-android",
         "//proto:kms_envelope_java_proto_lite",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:aead-android",
