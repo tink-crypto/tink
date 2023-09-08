@@ -389,7 +389,7 @@ TEST(HpkePrivateKeyManagerTest, EncryptThenDecryptSucceeds) {
               IsOk());
 }
 
-TEST(HpkePrivateKeyManagerTest, EncryptThenDecryptP256Fails) {
+TEST(HpkePrivateKeyManagerTest, GetPrimitiveP256Fails) {
   util::StatusOr<HpkePrivateKey> private_key =
       CreateKey(HpkeKem::DHKEM_P256_HKDF_SHA256, HpkeKdf::HKDF_SHA256,
                 HpkeAead::AES_128_GCM);
@@ -397,20 +397,15 @@ TEST(HpkePrivateKeyManagerTest, EncryptThenDecryptP256Fails) {
   util::StatusOr<HpkePublicKey> public_key =
       HpkePrivateKeyManager().GetPublicKey(*private_key);
   ASSERT_THAT(public_key, IsOk());
-  // TODO(b/295306288): make `GetPrimitive` fail on unsupported KEM
   util::StatusOr<std::unique_ptr<HybridDecrypt>> decrypt =
       HpkePrivateKeyManager().GetPrimitive<HybridDecrypt>(*private_key);
-  ASSERT_THAT(decrypt, IsOk());
+  ASSERT_THAT(decrypt.status(), StatusIs(absl::StatusCode::kInvalidArgument));
   util::StatusOr<std::unique_ptr<HybridEncrypt>> encrypt =
       HpkeEncrypt::New(*public_key);
-  ASSERT_THAT(encrypt, IsOk());
-
-  ASSERT_THAT(HybridEncryptThenDecrypt(encrypt->get(), decrypt->get(),
-                                       "some text", "some aad"),
-              StatusIs(absl::StatusCode::kInvalidArgument));
+  ASSERT_THAT(encrypt.status(), StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
-TEST(HpkePrivateKeyManagerTest, EncryptThenDecryptP384Fails) {
+TEST(HpkePrivateKeyManagerTest, GetPrimitiveP384Fails) {
   util::StatusOr<HpkePrivateKey> private_key =
       CreateKey(HpkeKem::DHKEM_P384_HKDF_SHA384, HpkeKdf::HKDF_SHA256,
                 HpkeAead::AES_128_GCM);
@@ -418,20 +413,15 @@ TEST(HpkePrivateKeyManagerTest, EncryptThenDecryptP384Fails) {
   util::StatusOr<HpkePublicKey> public_key =
       HpkePrivateKeyManager().GetPublicKey(*private_key);
   ASSERT_THAT(public_key, IsOk());
-  // TODO(b/295306288): make `GetPrimitive` fail on unsupported KEM
   util::StatusOr<std::unique_ptr<HybridDecrypt>> decrypt =
       HpkePrivateKeyManager().GetPrimitive<HybridDecrypt>(*private_key);
-  ASSERT_THAT(decrypt, IsOk());
+  ASSERT_THAT(decrypt.status(), StatusIs(absl::StatusCode::kInvalidArgument));
   util::StatusOr<std::unique_ptr<HybridEncrypt>> encrypt =
       HpkeEncrypt::New(*public_key);
-  ASSERT_THAT(encrypt, IsOk());
-
-  ASSERT_THAT(HybridEncryptThenDecrypt(encrypt->get(), decrypt->get(),
-                                       "some text", "some aad"),
-              StatusIs(absl::StatusCode::kInvalidArgument));
+  ASSERT_THAT(encrypt.status(), StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
-TEST(HpkePrivateKeyManagerTest, EncryptThenDecryptP521Fails) {
+TEST(HpkePrivateKeyManagerTest, GetPrimitiveP521Fails) {
   util::StatusOr<HpkePrivateKey> private_key =
       CreateKey(HpkeKem::DHKEM_P521_HKDF_SHA512, HpkeKdf::HKDF_SHA256,
                 HpkeAead::AES_128_GCM);
@@ -439,17 +429,12 @@ TEST(HpkePrivateKeyManagerTest, EncryptThenDecryptP521Fails) {
   util::StatusOr<HpkePublicKey> public_key =
       HpkePrivateKeyManager().GetPublicKey(*private_key);
   ASSERT_THAT(public_key, IsOk());
-  // TODO(b/295306288): make `GetPrimitive` fail on unsupported KEM
   util::StatusOr<std::unique_ptr<HybridDecrypt>> decrypt =
       HpkePrivateKeyManager().GetPrimitive<HybridDecrypt>(*private_key);
-  ASSERT_THAT(decrypt, IsOk());
+  ASSERT_THAT(decrypt.status(), StatusIs(absl::StatusCode::kInvalidArgument));
   util::StatusOr<std::unique_ptr<HybridEncrypt>> encrypt =
       HpkeEncrypt::New(*public_key);
-  ASSERT_THAT(encrypt, IsOk());
-
-  ASSERT_THAT(HybridEncryptThenDecrypt(encrypt->get(), decrypt->get(),
-                                       "some text", "some aad"),
-              StatusIs(absl::StatusCode::kInvalidArgument));
+  ASSERT_THAT(encrypt.status(), StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkePrivateKeyManagerTest, EncryptThenDecryptWithDifferentKeysFails) {

@@ -101,7 +101,11 @@ INSTANTIATE_TEST_SUITE_P(
            CreateHpkeParams(HpkeKem::DHKEM_X25519_HKDF_SHA256,
                             HpkeKdf::KDF_UNKNOWN, HpkeAead::AES_128_GCM),
            CreateHpkeParams(HpkeKem::DHKEM_X25519_HKDF_SHA256,
-                            HpkeKdf::HKDF_SHA256, HpkeAead::AEAD_UNKNOWN)));
+                            HpkeKdf::HKDF_SHA256, HpkeAead::AEAD_UNKNOWN),
+           CreateHpkeParams(HpkeKem::DHKEM_P256_HKDF_SHA256,
+                            HpkeKdf::HKDF_SHA256, HpkeAead::AES_128_GCM),
+           CreateHpkeParams(HpkeKem::DHKEM_X25519_HKDF_SHA256,
+                            HpkeKdf::HKDF_SHA384, HpkeAead::AES_128_GCM)));
 
 TEST_P(HpkeEncryptWithBadParamTest, BadParamFails) {
   HpkeParams hpke_params = GetParam();
@@ -110,12 +114,7 @@ TEST_P(HpkeEncryptWithBadParamTest, BadParamFails) {
       CreateHpkePublicKey(hpke_params, params.recipient_public_key);
   util::StatusOr<std::unique_ptr<HybridEncrypt>> hpke_encrypt =
       HpkeEncrypt::New(recipient_key);
-  ASSERT_THAT(hpke_encrypt, IsOk());
-
-  util::StatusOr<std::string> encryption_result =
-      (*hpke_encrypt)->Encrypt(params.plaintext, params.application_info);
-
-  EXPECT_THAT(encryption_result.status(),
+  ASSERT_THAT(hpke_encrypt.status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
