@@ -16,21 +16,29 @@
 
 #include "tink/jwt/jwk_set_converter.h"
 
+#include <cstdint>
 #include <memory>
 #include <ostream>
 #include <sstream>
 #include <string>
+#include <utility>
 
+#include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
+#include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
+#include "openssl/ec.h"
 #include "tink/binary_keyset_writer.h"
+#include "tink/internal/ec_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/jwt/internal/json_util.h"
 #include "tink/jwt/internal/jwt_format.h"
-#include "tink/jwt/jwt_public_key_sign.h"
-#include "tink/jwt/raw_jwt.h"
 #include "tink/keyset_handle.h"
+#include "tink/subtle/common_enums.h"
 #include "tink/util/keyset_util.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "proto/common.pb.h"
 #include "proto/jwt_ecdsa.pb.h"
 #include "proto/jwt_rsa_ssa_pkcs1.pb.h"
 #include "proto/jwt_rsa_ssa_pss.pb.h"
@@ -358,6 +366,33 @@ util::StatusOr<KeyData> EsPublicKeyDataFromKeyStruct(const Struct& key_struct) {
   return key_data_proto;
 }
 
+// RFC 7518 specifies a fixed sized encoding for the x and y coordinates from
+// SEC 1 https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.2
+util::StatusOr<std::pair<std::string, std::string>> Sec1EncodeCoordinates(
+    absl::string_view x, absl::string_view y,
+    subtle::EllipticCurveType curve_type) {
+  util::StatusOr<int32_t> encoded_size =
+      internal::EcFieldSizeInBytes(curve_type);
+  util::StatusOr<internal::SslUniquePtr<EC_POINT>> point =
+      internal::GetEcPoint(curve_type, x, y);
+  if (!point.ok()) {
+    return point.status();
+  }
+  // The uncompressed point is encoded as 0x04 || x || y.
+  util::StatusOr<std::string> uncompressed_point = internal::EcPointEncode(
+      curve_type, subtle::EcPointFormat::UNCOMPRESSED, (*point).get());
+  if (!uncompressed_point.ok()) {
+    return uncompressed_point.status();
+  }
+  if ((*uncompressed_point).size() != *encoded_size * 2 + 1) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "invalid encoded size");
+  }
+  return std::make_pair(
+      uncompressed_point.value().substr(1, *encoded_size),
+      uncompressed_point.value().substr(*encoded_size + 1, *encoded_size));
+}
+
 }  // namespace
 
 util::StatusOr<std::unique_ptr<KeysetHandle>> JwkSetToPublicKeysetHandle(
@@ -444,7 +479,6 @@ void AddKeyOpsVerifyEntry(Struct* key) {
       "verify");
 }
 
-
 util::StatusOr<Struct> EsPublicKeyToKeyStruct(const Keyset_Key& key) {
   JwtEcdsaPublicKey public_key;
   if (!public_key.ParseFromString(key.key_data().value())) {
@@ -453,28 +487,39 @@ util::StatusOr<Struct> EsPublicKeyToKeyStruct(const Keyset_Key& key) {
   }
 
   Struct output_key;
-
+  subtle::EllipticCurveType curve_type;
   switch (public_key.algorithm()) {
     case JwtEcdsaAlgorithm::ES256:
       AddStringEntry(&output_key, "crv", "P-256");
       AddStringEntry(&output_key, "alg", "ES256");
+      curve_type = subtle::EllipticCurveType::NIST_P256;
       break;
     case JwtEcdsaAlgorithm::ES384:
       AddStringEntry(&output_key, "crv", "P-384");
       AddStringEntry(&output_key, "alg", "ES384");
+      curve_type = subtle::EllipticCurveType::NIST_P384;
       break;
     case JwtEcdsaAlgorithm::ES512:
       AddStringEntry(&output_key, "crv", "P-521");
       AddStringEntry(&output_key, "alg", "ES512");
+      curve_type = subtle::EllipticCurveType::NIST_P521;
       break;
     default:
       return util::Status(absl::StatusCode::kInvalidArgument,
                           "unknown JwtEcdsaAlgorithm");
   }
 
+  util::StatusOr<std::pair<std::string, std::string>> encoded_point =
+      Sec1EncodeCoordinates(public_key.x(), public_key.y(), curve_type);
+  if (!encoded_point.ok()) {
+    return encoded_point.status();
+  }
+
   AddStringEntry(&output_key, "kty", "EC");
-  AddStringEntry(&output_key, "x", absl::WebSafeBase64Escape(public_key.x()));
-  AddStringEntry(&output_key, "y", absl::WebSafeBase64Escape(public_key.y()));
+  AddStringEntry(&output_key, "x",
+                 absl::WebSafeBase64Escape((*encoded_point).first));
+  AddStringEntry(&output_key, "y",
+                 absl::WebSafeBase64Escape((*encoded_point).second));
   AddStringEntry(&output_key, "use", "sig");
   AddKeyOpsVerifyEntry(&output_key);
 

@@ -142,16 +142,21 @@ tink_cc_library(
     jwk_set_converter.cc
     jwk_set_converter.h
   DEPS
-    tink::jwt::jwt_public_key_sign
-    tink::jwt::raw_jwt
+    absl::memory
+    absl::status
     absl::strings
+    absl::optional
+    crypto
     tink::core::binary_keyset_writer
     tink::core::keyset_handle
+    tink::internal::ec_util
+    tink::internal::ssl_unique_ptr
     tink::jwt::internal::json_util
     tink::jwt::internal::jwt_format
+    tink::subtle::common_enums
     tink::util::keyset_util
+    tink::util::status
     tink::util::statusor
-    tink::proto::common_cc_proto
     tink::proto::jwt_ecdsa_cc_proto
     tink::proto::jwt_rsa_ssa_pkcs1_cc_proto
     tink::proto::jwt_rsa_ssa_pss_cc_proto
@@ -250,12 +255,16 @@ tink_cc_test(
     protobuf::libprotobuf
     gmock
     absl::strings
+    crypto
     tink::core::cleartext_keyset_handle
     tink::core::json_keyset_reader
-    tink::core::json_keyset_writer
     tink::core::keyset_handle
+    tink::core::keyset_reader
     tink::jwt::internal::json_util
+    tink::util::status
+    tink::util::statusor
     tink::util::test_matchers
+    tink::proto::ecdsa_cc_proto
     tink::proto::jwt_ecdsa_cc_proto
     tink::proto::jwt_rsa_ssa_pkcs1_cc_proto
 )
