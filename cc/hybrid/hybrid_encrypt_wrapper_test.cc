@@ -16,6 +16,7 @@
 
 #include "tink/hybrid/hybrid_encrypt_wrapper.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
@@ -117,11 +118,11 @@ TEST_F(HybridEncryptSetWrapperTest, testBasic) {
     auto entry_result = hybrid_encrypt_set->AddPrimitive(
         std::move(hybrid_encrypt), keyset_info.key_info(0));
     ASSERT_TRUE(entry_result.ok());
-    hybrid_encrypt.reset(new DummyHybridEncrypt(hybrid_name_1));
+    hybrid_encrypt = std::make_unique<DummyHybridEncrypt>(hybrid_name_1);
     entry_result = hybrid_encrypt_set->AddPrimitive(std::move(hybrid_encrypt),
                                                     keyset_info.key_info(1));
     ASSERT_TRUE(entry_result.ok());
-    hybrid_encrypt.reset(new DummyHybridEncrypt(hybrid_name_2));
+    hybrid_encrypt = std::make_unique<DummyHybridEncrypt>(hybrid_name_2);
     entry_result = hybrid_encrypt_set->AddPrimitive(std::move(hybrid_encrypt),
                                                     keyset_info.key_info(2));
     ASSERT_TRUE(entry_result.ok());

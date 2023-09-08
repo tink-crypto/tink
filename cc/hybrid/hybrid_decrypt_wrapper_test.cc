@@ -16,6 +16,7 @@
 
 #include "tink/hybrid/hybrid_decrypt_wrapper.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
@@ -118,12 +119,12 @@ TEST_F(HybridDecryptSetWrapperTest, Basic) {
     auto entry_result = hybrid_decrypt_set->AddPrimitive(
         std::move(hybrid_decrypt), keyset.key_info(0));
     ASSERT_TRUE(entry_result.ok());
-    hybrid_decrypt.reset(new DummyHybridDecrypt(hybrid_name_1));
+    hybrid_decrypt = std::make_unique<DummyHybridDecrypt>(hybrid_name_1);
     entry_result = hybrid_decrypt_set->AddPrimitive(std::move(hybrid_decrypt),
                                                     keyset.key_info(1));
     ASSERT_TRUE(entry_result.ok());
     std::string prefix_id_1 = entry_result.value()->get_identifier();
-    hybrid_decrypt.reset(new DummyHybridDecrypt(hybrid_name_2));
+    hybrid_decrypt = std::make_unique<DummyHybridDecrypt>(hybrid_name_2);
     entry_result = hybrid_decrypt_set->AddPrimitive(std::move(hybrid_decrypt),
                                                     keyset.key_info(2));
     ASSERT_TRUE(entry_result.ok());
