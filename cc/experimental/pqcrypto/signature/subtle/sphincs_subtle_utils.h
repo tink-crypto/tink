@@ -17,6 +17,7 @@
 #ifndef TINK_EXPERIMENTAL_PQCRYPTO_SIGNATURE_SUBTLE_SPHINCS_SUBTLE_UTILS_H_
 #define TINK_EXPERIMENTAL_PQCRYPTO_SIGNATURE_SUBTLE_SPHINCS_SUBTLE_UTILS_H_
 
+#include <cstdint>
 #include <string>
 #include <utility>
 
@@ -136,7 +137,7 @@ crypto::tink::util::Status ValidatePublicKeySize(int32_t key_size);
 crypto::tink::util::Status ValidateParams(SphincsParamsPqclean params);
 
 
-// Convert the sphincs private key size to the appropiate index in the
+// Convert the sphincs private key size to the appropriate index in the
 // pqclean functions array.
 crypto::tink::util::StatusOr<int32_t> SphincsKeySizeToIndex(int32_t key_size);
 
