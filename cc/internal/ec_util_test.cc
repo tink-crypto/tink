@@ -607,15 +607,15 @@ TEST(EcUtilTest, EcGroupFromCurveTypeSuccess) {
   SslUniquePtr<EC_GROUP> ssl_p521_group(
       EC_GROUP_new_by_curve_name(NID_secp521r1));
 
-  EXPECT_EQ(
-      EC_GROUP_cmp(p256_curve->get(), ssl_p256_group.get(), /*ctx=*/nullptr),
-      0);
-  EXPECT_EQ(
-      EC_GROUP_cmp(p384_curve->get(), ssl_p384_group.get(), /*ctx=*/nullptr),
-      0);
-  EXPECT_EQ(
-      EC_GROUP_cmp(p521_curve->get(), ssl_p521_group.get(), /*ctx=*/nullptr),
-      0);
+  EXPECT_EQ(EC_GROUP_cmp(p256_curve->get(), ssl_p256_group.get(),
+                         /*ignored=*/nullptr),
+            0);
+  EXPECT_EQ(EC_GROUP_cmp(p384_curve->get(), ssl_p384_group.get(),
+                         /*ignored=*/nullptr),
+            0);
+  EXPECT_EQ(EC_GROUP_cmp(p521_curve->get(), ssl_p521_group.get(),
+                         /*ignored=*/nullptr),
+            0);
 }
 
 TEST(EcUtilTest, EcGroupFromCurveTypeUnimplemented) {

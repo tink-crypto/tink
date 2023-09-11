@@ -340,7 +340,7 @@ TEST(RsaUtilTest, CopiesRsaPublicKey) {
 
   const BIGNUM* n = nullptr;
   const BIGNUM* e = nullptr;
-  RSA_get0_key(rsa.get(), &n, &e, /*d=*/nullptr);
+  RSA_get0_key(rsa.get(), &n, &e, /*out_d=*/nullptr);
   ExpectBignumEquals(n, public_key.n);
   ExpectBignumEquals(e, public_key.e);
 }

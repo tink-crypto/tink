@@ -59,7 +59,7 @@ util::StatusOr<std::string> SslEcPointEncode(
   // Get the buffer size first passing a NULL buffer.
   size_t buffer_size =
       EC_POINT_point2oct(group, point, conversion_form,
-                         /*buf=*/nullptr, /*len=*/0, /*ctx=*/nullptr);
+                         /*buf=*/nullptr, /*max_out=*/0, /*ctx=*/nullptr);
   if (buffer_size == 0) {
     return util::Status(absl::StatusCode::kInternal,
                         "EC_POINT_point2oct failed");
