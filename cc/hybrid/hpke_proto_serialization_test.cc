@@ -24,11 +24,26 @@
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
+#ifdef OPENSSL_IS_BORINGSSL
+#include "openssl/base.h"
+#else
+#include "openssl/ec.h"
+#endif
 #include "tink/hybrid/hpke_parameters.h"
+#include "tink/hybrid/hpke_public_key.h"
+#include "tink/insecure_secret_key_access.h"
+#include "tink/internal/ec_util.h"
 #include "tink/internal/mutable_serialization_registry.h"
+#include "tink/internal/proto_key_serialization.h"
 #include "tink/internal/proto_parameters_serialization.h"
 #include "tink/internal/serialization.h"
+#include "tink/internal/ssl_unique_ptr.h"
+#include "tink/key.h"
 #include "tink/parameters.h"
+#include "tink/partial_key_access.h"
+#include "tink/restricted_data.h"
+#include "tink/subtle/common_enums.h"
+#include "tink/subtle/random.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/hpke.pb.h"
@@ -45,6 +60,7 @@ using ::google::crypto::tink::HpkeKdf;
 using ::google::crypto::tink::HpkeKem;
 using ::google::crypto::tink::HpkeKeyFormat;
 using ::google::crypto::tink::HpkeParams;
+using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::OutputPrefixType;
 using ::testing::Eq;
 using ::testing::IsTrue;
@@ -52,6 +68,8 @@ using ::testing::NotNull;
 using ::testing::TestWithParam;
 using ::testing::Values;
 
+const absl::string_view kPublicTypeUrl =
+    "type.googleapis.com/google.crypto.tink.HpkePublicKey";
 const absl::string_view kPrivateTypeUrl =
     "type.googleapis.com/google.crypto.tink.HpkePrivateKey";
 
@@ -66,6 +84,7 @@ struct TestCase {
   HpkeAead aead;
   absl::optional<int> id;
   std::string output_prefix;
+  subtle::EllipticCurveType curve;
 };
 
 class HpkeProtoSerializationTest : public TestWithParam<TestCase> {
@@ -88,7 +107,8 @@ INSTANTIATE_TEST_SUITE_P(
                     HpkeParameters::AeadId::kAesGcm128, OutputPrefixType::TINK,
                     HpkeKem::DHKEM_P256_HKDF_SHA256, HpkeKdf::HKDF_SHA256,
                     HpkeAead::AES_128_GCM, /*id=*/0x02030400,
-                    /*output_prefix=*/std::string("\x01\x02\x03\x04\x00", 5)},
+                    /*output_prefix=*/std::string("\x01\x02\x03\x04\x00", 5),
+                    subtle::EllipticCurveType::NIST_P256},
            TestCase{HpkeParameters::Variant::kCrunchy,
                     HpkeParameters::KemId::kDhkemP384HkdfSha384,
                     HpkeParameters::KdfId::kHkdfSha384,
@@ -96,7 +116,8 @@ INSTANTIATE_TEST_SUITE_P(
                     OutputPrefixType::CRUNCHY, HpkeKem::DHKEM_P384_HKDF_SHA384,
                     HpkeKdf::HKDF_SHA384, HpkeAead::AES_256_GCM,
                     /*id=*/0x01030005,
-                    /*output_prefix=*/std::string("\x00\x01\x03\x00\x05", 5)},
+                    /*output_prefix=*/std::string("\x00\x01\x03\x00\x05", 5),
+                    subtle::EllipticCurveType::NIST_P384},
            TestCase{HpkeParameters::Variant::kCrunchy,
                     HpkeParameters::KemId::kDhkemP521HkdfSha512,
                     HpkeParameters::KdfId::kHkdfSha512,
@@ -104,14 +125,16 @@ INSTANTIATE_TEST_SUITE_P(
                     OutputPrefixType::CRUNCHY, HpkeKem::DHKEM_P521_HKDF_SHA512,
                     HpkeKdf::HKDF_SHA512, HpkeAead::AES_256_GCM,
                     /*id=*/0x07080910,
-                    /*output_prefix=*/std::string("\x00\x07\x08\x09\x10", 5)},
+                    /*output_prefix=*/std::string("\x00\x07\x08\x09\x10", 5),
+                    subtle::EllipticCurveType::NIST_P521},
            TestCase{HpkeParameters::Variant::kNoPrefix,
                     HpkeParameters::KemId::kDhkemX25519HkdfSha256,
                     HpkeParameters::KdfId::kHkdfSha256,
                     HpkeParameters::AeadId::kChaChaPoly1305,
                     OutputPrefixType::RAW, HpkeKem::DHKEM_X25519_HKDF_SHA256,
                     HpkeKdf::HKDF_SHA256, HpkeAead::CHACHA20_POLY1305,
-                    /*id=*/absl::nullopt, /*output_prefix=*/""}));
+                    /*id=*/absl::nullopt, /*output_prefix=*/"",
+                    subtle::EllipticCurveType::CURVE25519}));
 
 TEST_P(HpkeProtoSerializationTest, ParseParameters) {
   TestCase test_case = GetParam();
@@ -322,6 +345,177 @@ TEST_P(HpkeProtoSerializationTest, SerializeParameters) {
   EXPECT_THAT(key_format.params().kem(), Eq(test_case.kem));
   EXPECT_THAT(key_format.params().kdf(), Eq(test_case.kdf));
   EXPECT_THAT(key_format.params().aead(), Eq(test_case.aead));
+}
+
+util::StatusOr<std::string> GeneratePublicKeyBytes(
+    subtle::EllipticCurveType curve) {
+  if (curve == subtle::EllipticCurveType::CURVE25519) {
+    return subtle::Random::GetRandomBytes(32);
+  }
+  util::StatusOr<internal::EcKey> ec_key = internal::NewEcKey(curve);
+  if (!ec_key.ok()) {
+    return ec_key.status();
+  }
+  util::StatusOr<internal::SslUniquePtr<EC_POINT>> ec_point =
+      internal::GetEcPoint(curve, ec_key->pub_x, ec_key->pub_y);
+  if (!ec_point.ok()) {
+    return ec_point.status();
+  }
+  return internal::EcPointEncode(curve, subtle::EcPointFormat::UNCOMPRESSED,
+                                 ec_point->get());
+}
+
+TEST_P(HpkeProtoSerializationTest, ParsePublicKey) {
+  TestCase test_case = GetParam();
+  ASSERT_THAT(RegisterHpkeProtoSerialization(), IsOk());
+
+  HpkeParams params;
+  params.set_kem(test_case.kem);
+  params.set_kdf(test_case.kdf);
+  params.set_aead(test_case.aead);
+
+  util::StatusOr<std::string> public_key_bytes =
+      GeneratePublicKeyBytes(test_case.curve);
+  ASSERT_THAT(public_key_bytes, IsOk());
+
+  google::crypto::tink::HpkePublicKey key_proto;
+  key_proto.set_version(0);
+  key_proto.set_public_key(*public_key_bytes);
+  *key_proto.mutable_params() = params;
+  RestrictedData serialized_key = RestrictedData(
+      key_proto.SerializeAsString(), InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(
+          kPublicTypeUrl, serialized_key, KeyData::ASYMMETRIC_PUBLIC,
+          test_case.output_prefix_type, test_case.id);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, /*token=*/absl::nullopt);
+  ASSERT_THAT(key, IsOk());
+  EXPECT_THAT((*key)->GetIdRequirement(), Eq(test_case.id));
+  EXPECT_THAT((*key)->GetParameters().HasIdRequirement(),
+              test_case.id.has_value());
+
+  util::StatusOr<HpkeParameters> expected_parameters =
+      HpkeParameters::Builder()
+          .SetVariant(test_case.variant)
+          .SetKemId(test_case.kem_id)
+          .SetKdfId(test_case.kdf_id)
+          .SetAeadId(test_case.aead_id)
+          .Build();
+  ASSERT_THAT(expected_parameters, IsOk());
+
+  util::StatusOr<HpkePublicKey> expected_key =
+      HpkePublicKey::Create(*expected_parameters, *public_key_bytes,
+                            test_case.id, GetPartialKeyAccess());
+  ASSERT_THAT(expected_key, IsOk());
+
+  EXPECT_THAT(**key, Eq(*expected_key));
+}
+
+TEST_F(HpkeProtoSerializationTest, ParsePublicKeyWithInvalidSerialization) {
+  ASSERT_THAT(RegisterHpkeProtoSerialization(), IsOk());
+
+  RestrictedData serialized_key =
+      RestrictedData("invalid_serialization", InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(kPublicTypeUrl, serialized_key,
+                                              KeyData::ASYMMETRIC_PUBLIC,
+                                              OutputPrefixType::TINK,
+                                              /*id_requirement=*/0x23456789);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, InsecureSecretKeyAccess::Get());
+  EXPECT_THAT(key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST_F(HpkeProtoSerializationTest, ParsePublicKeyWithInvalidVersion) {
+  ASSERT_THAT(RegisterHpkeProtoSerialization(), IsOk());
+
+  HpkeParams params;
+  params.set_kem(HpkeKem::DHKEM_X25519_HKDF_SHA256);
+  params.set_kdf(HpkeKdf::HKDF_SHA256);
+  params.set_aead(HpkeAead::CHACHA20_POLY1305);
+
+  util::StatusOr<std::string> public_key_bytes =
+      GeneratePublicKeyBytes(subtle::EllipticCurveType::CURVE25519);
+  ASSERT_THAT(public_key_bytes, IsOk());
+
+  google::crypto::tink::HpkePublicKey key_proto;
+  key_proto.set_version(1);
+  key_proto.set_public_key(*public_key_bytes);
+  *key_proto.mutable_params() = params;
+  RestrictedData serialized_key = RestrictedData(
+      key_proto.SerializeAsString(), InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(kPublicTypeUrl, serialized_key,
+                                              KeyData::ASYMMETRIC_PUBLIC,
+                                              OutputPrefixType::TINK,
+                                              /*id_requirement=*/0x23456789);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, /*token=*/absl::nullopt);
+  EXPECT_THAT(key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST_P(HpkeProtoSerializationTest, SerializePublicKey) {
+  TestCase test_case = GetParam();
+  ASSERT_THAT(RegisterHpkeProtoSerialization(), IsOk());
+
+  util::StatusOr<HpkeParameters> parameters = HpkeParameters::Builder()
+                                                  .SetVariant(test_case.variant)
+                                                  .SetKemId(test_case.kem_id)
+                                                  .SetKdfId(test_case.kdf_id)
+                                                  .SetAeadId(test_case.aead_id)
+                                                  .Build();
+  ASSERT_THAT(parameters, IsOk());
+
+  util::StatusOr<std::string> public_key_bytes =
+      GeneratePublicKeyBytes(test_case.curve);
+  ASSERT_THAT(public_key_bytes, IsOk());
+
+  util::StatusOr<HpkePublicKey> key = HpkePublicKey::Create(
+      *parameters, *public_key_bytes, test_case.id, GetPartialKeyAccess());
+  ASSERT_THAT(key, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialization =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeKey<internal::ProtoKeySerialization>(
+              *key, /*token=*/absl::nullopt);
+  ASSERT_THAT(serialization, IsOk());
+  EXPECT_THAT((*serialization)->ObjectIdentifier(), Eq(kPublicTypeUrl));
+
+  const internal::ProtoKeySerialization* proto_serialization =
+      dynamic_cast<const internal::ProtoKeySerialization*>(
+          serialization->get());
+  ASSERT_THAT(proto_serialization, NotNull());
+  EXPECT_THAT(proto_serialization->TypeUrl(), Eq(kPublicTypeUrl));
+  EXPECT_THAT(proto_serialization->KeyMaterialType(),
+              Eq(KeyData::ASYMMETRIC_PUBLIC));
+  EXPECT_THAT(proto_serialization->GetOutputPrefixType(),
+              Eq(test_case.output_prefix_type));
+  EXPECT_THAT(proto_serialization->IdRequirement(), Eq(test_case.id));
+
+  google::crypto::tink::HpkePublicKey proto_key;
+  // OSS proto library complains if input is not converted to a string.
+  ASSERT_THAT(proto_key.ParseFromString(std::string(
+                  proto_serialization->SerializedKeyProto().GetSecret(
+                      InsecureSecretKeyAccess::Get()))),
+              IsTrue());
+  EXPECT_THAT(proto_key.version(), Eq(0));
+  EXPECT_THAT(proto_key.public_key(), Eq(*public_key_bytes));
+  EXPECT_THAT(proto_key.params().kem(), Eq(test_case.kem));
+  EXPECT_THAT(proto_key.params().kdf(), Eq(test_case.kdf));
+  EXPECT_THAT(proto_key.params().aead(), Eq(test_case.aead));
 }
 
 }  // namespace

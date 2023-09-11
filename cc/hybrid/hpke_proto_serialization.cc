@@ -16,14 +16,25 @@
 
 #include "tink/hybrid/hpke_proto_serialization.h"
 
+#include <string>
+
 #include "absl/base/attributes.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 #include "tink/hybrid/hpke_parameters.h"
+#include "tink/hybrid/hpke_public_key.h"
+#include "tink/insecure_secret_key_access.h"
+#include "tink/internal/key_parser.h"
+#include "tink/internal/key_serializer.h"
 #include "tink/internal/mutable_serialization_registry.h"
 #include "tink/internal/parameters_parser.h"
 #include "tink/internal/parameters_serializer.h"
+#include "tink/internal/proto_key_serialization.h"
 #include "tink/internal/proto_parameters_serialization.h"
+#include "tink/partial_key_access.h"
+#include "tink/restricted_data.h"
+#include "tink/secret_key_access_token.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/hpke.pb.h"
@@ -38,6 +49,7 @@ using ::google::crypto::tink::HpkeKdf;
 using ::google::crypto::tink::HpkeKem;
 using ::google::crypto::tink::HpkeKeyFormat;
 using ::google::crypto::tink::HpkeParams;
+using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::OutputPrefixType;
 
 using HpkeProtoParametersParserImpl =
@@ -46,7 +58,13 @@ using HpkeProtoParametersParserImpl =
 using HpkeProtoParametersSerializerImpl =
     internal::ParametersSerializerImpl<HpkeParameters,
                                        internal::ProtoParametersSerialization>;
+using HpkeProtoPublicKeyParserImpl =
+    internal::KeyParserImpl<internal::ProtoKeySerialization, HpkePublicKey>;
+using HpkeProtoPublicKeySerializerImpl =
+    internal::KeySerializerImpl<HpkePublicKey, internal::ProtoKeySerialization>;
 
+const absl::string_view kPublicTypeUrl =
+    "type.googleapis.com/google.crypto.tink.HpkePublicKey";
 const absl::string_view kPrivateTypeUrl =
     "type.googleapis.com/google.crypto.tink.HpkePrivateKey";
 
@@ -170,44 +188,25 @@ util::StatusOr<HpkeAead> FromAeadId(HpkeParameters::AeadId aead_id) {
   }
 }
 
-util::StatusOr<HpkeParameters> ParseParameters(
-    const internal::ProtoParametersSerialization& serialization) {
-  if (serialization.GetKeyTemplate().type_url() != kPrivateTypeUrl) {
-    return util::Status(absl::StatusCode::kInvalidArgument,
-                        "Wrong type URL when parsing HpkeParameters.");
-  }
-
-  HpkeKeyFormat proto_key_format;
-  if (!proto_key_format.ParseFromString(
-          serialization.GetKeyTemplate().value())) {
-    return util::Status(absl::StatusCode::kInvalidArgument,
-                        "Failed to parse HpkeKeyFormat proto");
-  }
-  if (!proto_key_format.has_params()) {
-    return util::Status(absl::StatusCode::kInvalidArgument,
-                        "HpkeKeyFormat proto is missing params field.");
-  }
-
+util::StatusOr<HpkeParameters> ToParameters(OutputPrefixType output_prefix_type,
+                                            HpkeParams params) {
   util::StatusOr<HpkeParameters::Variant> variant =
-      ToVariant(serialization.GetKeyTemplate().output_prefix_type());
+      ToVariant(output_prefix_type);
   if (!variant.ok()) {
     return variant.status();
   }
 
-  util::StatusOr<HpkeParameters::KemId> kem_id =
-      ToKemId(proto_key_format.params().kem());
+  util::StatusOr<HpkeParameters::KemId> kem_id = ToKemId(params.kem());
   if (!kem_id.ok()) {
     return kem_id.status();
   }
 
-  util::StatusOr<HpkeParameters::KdfId> kdf_id =
-      ToKdfId(proto_key_format.params().kdf());
+  util::StatusOr<HpkeParameters::KdfId> kdf_id = ToKdfId(params.kdf());
   if (!kdf_id.ok()) {
     return kdf_id.status();
   }
 
-  util::StatusOr<HpkeParameters::AeadId> aead_id =
-      ToAeadId(proto_key_format.params().aead());
+  util::StatusOr<HpkeParameters::AeadId> aead_id = ToAeadId(params.aead());
   if (!aead_id.ok()) {
     return aead_id.status();
   }
@@ -220,14 +219,7 @@ util::StatusOr<HpkeParameters> ParseParameters(
       .Build();
 }
 
-util::StatusOr<internal::ProtoParametersSerialization> SerializeParameters(
-    const HpkeParameters& parameters) {
-  util::StatusOr<OutputPrefixType> output_prefix_type =
-      ToOutputPrefixType(parameters.GetVariant());
-  if (!output_prefix_type.ok()) {
-    return output_prefix_type.status();
-  }
-
+util::StatusOr<HpkeParams> FromParameters(HpkeParameters parameters) {
   util::StatusOr<HpkeKem> kem = FromKemId(parameters.GetKemId());
   if (!kem.ok()) {
     return kem.status();
@@ -247,12 +239,109 @@ util::StatusOr<internal::ProtoParametersSerialization> SerializeParameters(
   params.set_kem(*kem);
   params.set_kdf(*kdf);
   params.set_aead(*aead);
+
+  return params;
+}
+
+util::StatusOr<HpkeParameters> ParseParameters(
+    const internal::ProtoParametersSerialization& serialization) {
+  if (serialization.GetKeyTemplate().type_url() != kPrivateTypeUrl) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Wrong type URL when parsing HpkeParameters.");
+  }
+
   HpkeKeyFormat proto_key_format;
-  *proto_key_format.mutable_params() = params;
+  if (!proto_key_format.ParseFromString(
+          serialization.GetKeyTemplate().value())) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Failed to parse HpkeKeyFormat proto");
+  }
+  if (!proto_key_format.has_params()) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "HpkeKeyFormat proto is missing params field.");
+  }
+
+  return ToParameters(serialization.GetKeyTemplate().output_prefix_type(),
+                      proto_key_format.params());
+}
+
+util::StatusOr<HpkePublicKey> ParsePublicKey(
+    const internal::ProtoKeySerialization& serialization,
+    absl::optional<SecretKeyAccessToken> token) {
+  if (serialization.TypeUrl() != kPublicTypeUrl) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Wrong type URL when parsing HpkePublicKey.");
+  }
+
+  google::crypto::tink::HpkePublicKey proto_key;
+  RestrictedData restricted_data = serialization.SerializedKeyProto();
+  // OSS proto library complains if input is not converted to a string.
+  if (!proto_key.ParseFromString(std::string(
+          restricted_data.GetSecret(InsecureSecretKeyAccess::Get())))) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Failed to parse HpkePublicKey proto");
+  }
+  if (proto_key.version() != 0) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Only version 0 keys are accepted.");
+  }
+
+  util::StatusOr<HpkeParameters> parameters =
+      ToParameters(serialization.GetOutputPrefixType(), proto_key.params());
+  if (!parameters.ok()) {
+    return parameters.status();
+  }
+
+  return HpkePublicKey::Create(*parameters, proto_key.public_key(),
+                               serialization.IdRequirement(),
+                               GetPartialKeyAccess());
+}
+
+util::StatusOr<internal::ProtoParametersSerialization> SerializeParameters(
+    const HpkeParameters& parameters) {
+  util::StatusOr<OutputPrefixType> output_prefix_type =
+      ToOutputPrefixType(parameters.GetVariant());
+  if (!output_prefix_type.ok()) {
+    return output_prefix_type.status();
+  }
+
+  util::StatusOr<HpkeParams> params = FromParameters(parameters);
+  if (!params.ok()) {
+    return params.status();
+  }
+  HpkeKeyFormat proto_key_format;
+  *proto_key_format.mutable_params() = *params;
 
   return internal::ProtoParametersSerialization::Create(
       kPrivateTypeUrl, *output_prefix_type,
       proto_key_format.SerializeAsString());
+}
+
+util::StatusOr<internal::ProtoKeySerialization> SerializePublicKey(
+    const HpkePublicKey& key, absl::optional<SecretKeyAccessToken> token) {
+  util::StatusOr<HpkeParams> params = FromParameters(key.GetParameters());
+  if (!params.ok()) {
+    return params.status();
+  }
+
+  google::crypto::tink::HpkePublicKey proto_key;
+  proto_key.set_version(0);
+  *proto_key.mutable_params() = *params;
+  // OSS proto library complains if input is not converted to a string.
+  proto_key.set_public_key(
+      std::string(key.GetPublicKeyBytes(GetPartialKeyAccess())));
+
+  util::StatusOr<OutputPrefixType> output_prefix_type =
+      ToOutputPrefixType(key.GetParameters().GetVariant());
+  if (!output_prefix_type.ok()) {
+    return output_prefix_type.status();
+  }
+
+  RestrictedData restricted_output = RestrictedData(
+      proto_key.SerializeAsString(), InsecureSecretKeyAccess::Get());
+  return internal::ProtoKeySerialization::Create(
+      kPublicTypeUrl, restricted_output, KeyData::ASYMMETRIC_PUBLIC,
+      *output_prefix_type, key.GetIdRequirement());
 }
 
 HpkeProtoParametersParserImpl* HpkeProtoParametersParser() {
@@ -267,6 +356,18 @@ HpkeProtoParametersSerializerImpl* HpkeProtoParametersSerializer() {
   return serializer;
 }
 
+HpkeProtoPublicKeyParserImpl* HpkeProtoPublicKeyParser() {
+  static auto* parser =
+      new HpkeProtoPublicKeyParserImpl(kPublicTypeUrl, ParsePublicKey);
+  return parser;
+}
+
+HpkeProtoPublicKeySerializerImpl* HpkeProtoPublicKeySerializer() {
+  static auto* serializer =
+      new HpkeProtoPublicKeySerializerImpl(SerializePublicKey);
+  return serializer;
+}
+
 }  // namespace
 
 util::Status RegisterHpkeProtoSerialization() {
@@ -277,8 +378,20 @@ util::Status RegisterHpkeProtoSerialization() {
     return status;
   }
 
+  status = internal::MutableSerializationRegistry::GlobalInstance()
+               .RegisterParametersSerializer(HpkeProtoParametersSerializer());
+  if (!status.ok()) {
+    return status;
+  }
+
+  status = internal::MutableSerializationRegistry::GlobalInstance()
+               .RegisterKeyParser(HpkeProtoPublicKeyParser());
+  if (!status.ok()) {
+    return status;
+  }
+
   return internal::MutableSerializationRegistry::GlobalInstance()
-      .RegisterParametersSerializer(HpkeProtoParametersSerializer());
+      .RegisterKeySerializer(HpkeProtoPublicKeySerializer());
 }
 
 }  // namespace tink
