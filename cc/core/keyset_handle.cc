@@ -408,7 +408,7 @@ util::StatusOr<std::unique_ptr<Keyset::Key>> ExtractPublicKey(
 
 util::StatusOr<std::unique_ptr<KeysetHandle>>
 KeysetHandle::GetPublicKeysetHandle(const KeyGenConfiguration& config) const {
-  std::unique_ptr<Keyset> public_keyset(new Keyset());
+  auto public_keyset = std::make_unique<Keyset>();
   for (const Keyset::Key& key : get_keyset().key()) {
     auto public_key_result = ExtractPublicKey(key, config);
     if (!public_key_result.ok()) return public_key_result.status();
@@ -424,9 +424,8 @@ KeysetHandle::GetPublicKeysetHandle(const KeyGenConfiguration& config) const {
     return util::Status(absl::StatusCode::kInternal,
                         "Error converting keyset proto into key entries.");
   }
-  std::unique_ptr<KeysetHandle> handle(
+  return absl::WrapUnique<KeysetHandle>(
       new KeysetHandle(std::move(public_keyset), *entries));
-  return std::move(handle);
 }
 
 util::StatusOr<std::unique_ptr<KeysetHandle>>

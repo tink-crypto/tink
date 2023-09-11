@@ -320,6 +320,7 @@ tink_cc_library(
     binary_keyset_writer.h
   DEPS
     tink::core::keyset_writer
+    absl::memory
     absl::status
     absl::strings
     tink::util::errors

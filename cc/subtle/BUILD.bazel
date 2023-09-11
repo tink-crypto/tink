@@ -679,6 +679,7 @@ cc_library(
         "//internal:test_file_util",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/log",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@rapidjson",

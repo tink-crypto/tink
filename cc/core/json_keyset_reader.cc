@@ -235,16 +235,13 @@ util::StatusOr<std::unique_ptr<KeysetReader>> JsonKeysetReader::New(
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "keyset_stream must be non-null.");
   }
-  std::unique_ptr<KeysetReader> reader(
-      new JsonKeysetReader(std::move(keyset_stream)));
-  return std::move(reader);
+  return absl::WrapUnique(new JsonKeysetReader(std::move(keyset_stream)));
 }
 
 //  static
 util::StatusOr<std::unique_ptr<KeysetReader>> JsonKeysetReader::New(
     absl::string_view serialized_keyset) {
-  std::unique_ptr<KeysetReader> reader(new JsonKeysetReader(serialized_keyset));
-  return std::move(reader);
+  return absl::WrapUnique(new JsonKeysetReader(serialized_keyset));
 }
 
 util::StatusOr<std::unique_ptr<Keyset>> JsonKeysetReader::Read() {

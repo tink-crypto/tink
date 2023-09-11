@@ -22,11 +22,13 @@
 #include <ostream>
 #include <string>
 
+#include "absl/log/log.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "include/rapidjson/document.h"
 #include "include/rapidjson/istreamwrapper.h"
+#include "include/rapidjson/rapidjson.h"
 #include "tink/internal/test_file_util.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/status.h"
@@ -84,12 +86,9 @@ std::unique_ptr<rapidjson::Document> WycheproofUtil::ReadTestVectors(
   std::ifstream input_stream;
   input_stream.open(test_vectors_path);
   rapidjson::IStreamWrapper input(input_stream);
-  std::unique_ptr<rapidjson::Document> root(
-      new rapidjson::Document(rapidjson::kObjectType));
+  auto root = std::make_unique<rapidjson::Document>(rapidjson::kObjectType);
   if (root->ParseStream(input).HasParseError()) {
-    std::cerr << "Failure parsing of test vectors from "
-              << test_vectors_path << std::endl;
-    exit(1);
+    LOG(FATAL) << "Failure parsing of test vectors from " << test_vectors_path;
   }
   return root;
 }

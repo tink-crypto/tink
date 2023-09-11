@@ -179,6 +179,7 @@ tink_cc_library(
     tink::core::hybrid_encrypt
     tink::core::input_stream
     tink::core::keyset_handle
+    tink::core::keyset_writer
     tink::core::kms_client
     tink::core::mac
     tink::core::output_stream

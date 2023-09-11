@@ -638,6 +638,7 @@ tink_cc_library(
     wycheproof_util.h
   DEPS
     tink::subtle::common_enums
+    absl::log
     absl::status
     absl::strings
     rapidjson

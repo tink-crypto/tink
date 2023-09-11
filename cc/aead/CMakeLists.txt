@@ -264,6 +264,7 @@ tink_cc_library(
     kms_envelope_aead.h
   DEPS
     absl::endian
+    absl::memory
     absl::status
     absl::strings
     tink::core::aead
