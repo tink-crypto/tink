@@ -16,6 +16,9 @@
 
 #include "tink/signature/ed25519_private_key.h"
 
+#include <memory>
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/insecure_secret_key_access.h"

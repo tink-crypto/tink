@@ -16,6 +16,8 @@
 
 #include "tink/signature/ed25519_private_key.h"
 
+#include <memory>
+
 #include "openssl/crypto.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/ec_util.h"
