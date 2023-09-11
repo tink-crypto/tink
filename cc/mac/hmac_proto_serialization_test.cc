@@ -41,7 +41,6 @@ namespace {
 
 using ::crypto::tink::subtle::Random;
 using ::crypto::tink::test::IsOk;
-using ::crypto::tink::test::IsOkAndHolds;
 using ::crypto::tink::test::StatusIs;
 using ::google::crypto::tink::HashType;
 using ::google::crypto::tink::HmacKeyFormat;
