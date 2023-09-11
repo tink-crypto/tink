@@ -1426,7 +1426,7 @@ func getCoordinateFromJwk(jwk *spb.Struct, coord string) ([]byte, error) {
 	return base64.URLEncoding.WithPadding(base64.NoPadding).DecodeString(c)
 }
 
-func TestJWKEncodesLeadingZerosForFieldCoordiates(t *testing.T) {
+func TestJWKSizedSizedECCEncoding(t *testing.T) {
 	type testCase struct {
 		tag                string
 		publicKeyset       string
@@ -1435,7 +1435,7 @@ func TestJWKEncodesLeadingZerosForFieldCoordiates(t *testing.T) {
 
 	for _, tc := range []testCase{
 		{
-			tag: "P-256",
+			tag: "P-256 smaller coordinates",
 			publicKeyset: `{
 				"primaryKeyId": 2124611562,
 				"key": [
@@ -1454,7 +1454,24 @@ func TestJWKEncodesLeadingZerosForFieldCoordiates(t *testing.T) {
 			elementSizeInBytes: 32,
 		},
 		{
-			tag: "P-384",
+			tag:                "P-256 larger coordinates",
+			elementSizeInBytes: 32,
+			publicKeyset: `{
+				"primaryKeyId":858766452,
+				"key":[
+					{
+						"keyData": {
+							"typeUrl":"type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey",
+							"value":"EAEaIQAocb/rp/rsVlYMqlR2KB18kpSAPURySedsnfswHoqEviIhANrIMzHBtAQvDOKUf3BYVmV+AfwKyA0lq9gHOTY3gVm+",
+							"keyMaterialType":"ASYMMETRIC_PUBLIC"
+					},
+					"status":"ENABLED",
+					"keyId":858766452,
+					"outputPrefixType":"TINK"}]
+			}`,
+		},
+		{
+			tag: "P-384 smaller coordinates",
 			publicKeyset: `{
 				"primaryKeyId": 4159170178,
 				"key": [
@@ -1473,7 +1490,7 @@ func TestJWKEncodesLeadingZerosForFieldCoordiates(t *testing.T) {
 			elementSizeInBytes: 48,
 		},
 		{
-			tag: "P-384",
+			tag: "P-384 smaller coordinates",
 			publicKeyset: `{
 				"primaryKeyId": 1286030637,
 				"key": [

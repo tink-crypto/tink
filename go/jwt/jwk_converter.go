@@ -19,6 +19,7 @@ package jwt
 import (
 	"bytes"
 	"fmt"
+	"math/big"
 	"math/rand"
 
 	spb "google.golang.org/protobuf/types/known/structpb"
@@ -497,8 +498,6 @@ func esPublicKeyToStruct(key *tinkpb.Keyset_Key) (*spb.Struct, error) {
 		Fields: map[string]*spb.Value{},
 	}
 	var algorithm, curve string
-	// RFC 7518 specifies a fixed sized encoding for the x and y coordinates from SEC 1
-	// https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.2
 	var encLen int
 	switch pubKey.GetAlgorithm() {
 	case jepb.JwtEcdsaAlgorithm_ES256:
@@ -511,14 +510,18 @@ func esPublicKeyToStruct(key *tinkpb.Keyset_Key) (*spb.Struct, error) {
 		return nil, fmt.Errorf("invalid algorithm")
 	}
 
-	// x and y coordinates are big-endian encoded.
-	xPadLen := encLen - len(pubKey.GetX())
-	x := make([]byte, xPadLen, encLen)
-	x = append(x, pubKey.GetX()...)
-
-	yPadLen := encLen - len(pubKey.GetY())
-	y := make([]byte, yPadLen, encLen)
-	y = append(y, pubKey.GetY()...)
+	// RFC 7518 specifies a fixed sized encoding for the x and y coordinates from SEC 1
+	// https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.2
+	xi := big.NewInt(0).SetBytes(pubKey.GetX())
+	if xi.BitLen() > encLen*8 {
+		return nil, fmt.Errorf("invalid x coordinate")
+	}
+	x := xi.FillBytes(make([]byte, encLen))
+	yi := big.NewInt(0).SetBytes(pubKey.GetY())
+	if yi.BitLen() > encLen*8 {
+		return nil, fmt.Errorf("invalid y coordinate")
+	}
+	y := yi.FillBytes(make([]byte, encLen))
 
 	addStringEntry(outKey, "crv", curve)
 	addStringEntry(outKey, "alg", algorithm)
