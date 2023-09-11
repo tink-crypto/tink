@@ -22,6 +22,7 @@ import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
 import java.io.InputStream;
@@ -545,7 +546,14 @@ public final class Registry {
    */
   public static synchronized KeyData newKeyData(com.google.crypto.tink.KeyTemplate keyTemplate)
       throws GeneralSecurityException {
-    return newKeyData(keyTemplate.getProto());
+    byte[] serializedKeyTemplate = TinkProtoParametersFormat.serialize(keyTemplate.toParameters());
+    try {
+      return newKeyData(
+          com.google.crypto.tink.proto.KeyTemplate.parseFrom(
+              serializedKeyTemplate, ExtensionRegistryLite.getEmptyRegistry()));
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("Failed to parse serialized parameters", e);
+    }
   }
 
   /**
