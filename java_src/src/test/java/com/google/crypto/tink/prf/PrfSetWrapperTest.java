@@ -22,17 +22,14 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.PrimitiveSet;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.testing.FakeMonitoringClient;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.prf.HkdfPrfParameters.HashType;
-import com.google.crypto.tink.proto.KeyStatusType;
-import com.google.crypto.tink.proto.Keyset;
-import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Hex;
-import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
@@ -53,7 +50,6 @@ public class PrfSetWrapperTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
-    PrfConfig.register();
     createTestKeys();
   }
 
@@ -92,6 +88,9 @@ public class PrfSetWrapperTest {
 
   @Test
   public void compute_works() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    PrfConfig.register();
+
     KeysetHandle keysetHandle =
         KeysetHandle.newBuilder()
             .addEntry(KeysetHandle.importKey(hkdfPrfKeyFixed).withFixedId(42).makePrimary())
@@ -107,6 +106,9 @@ public class PrfSetWrapperTest {
 
   @Test
   public void compute_usesPrimaryKey() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    PrfConfig.register();
+
     KeysetHandle keysetHandle =
         KeysetHandle.newBuilder()
             .addEntry(KeysetHandle.importKey(hkdfPrfKey0).withFixedId(42).makePrimary())
@@ -124,6 +126,9 @@ public class PrfSetWrapperTest {
 
   @Test
   public void prfsCorrespondToCorrectKeys() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    PrfConfig.register();
+
     KeysetHandle keysetHandle =
         KeysetHandle.newBuilder()
             .addEntry(KeysetHandle.importKey(hkdfPrfKey0).withFixedId(42).makePrimary())
@@ -145,6 +150,9 @@ public class PrfSetWrapperTest {
 
   @Test
   public void getPrfs_containsOnlyExistingKeys() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    PrfConfig.register();
+
     KeysetHandle keysetHandle =
         KeysetHandle.newBuilder()
             .addEntry(KeysetHandle.importKey(hkdfPrfKey0).withFixedId(42).makePrimary())
@@ -157,6 +165,8 @@ public class PrfSetWrapperTest {
 
   @Test
   public void testWithEmptyAnnotations_noMonitoring() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    PrfConfig.register();
     FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
     MutableMonitoringRegistry.globalInstance().clear();
     MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
@@ -180,32 +190,24 @@ public class PrfSetWrapperTest {
 
   @Test
   public void testWithAnnotations_hasMonitoring() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    PrfConfig.register();
+
     FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
     MutableMonitoringRegistry.globalInstance().clear();
     MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
 
-    byte[] primaryKeyValue = Random.randBytes(KEY_SIZE);
-    Keyset.Key primary =
-        TestUtil.createKey(
-            TestUtil.createPrfKeyData(primaryKeyValue),
-            /* keyId= */ 5,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.RAW);
-    byte[] secondaryKeyValue = Random.randBytes(KEY_SIZE);
-    Keyset.Key secondary =
-        TestUtil.createKey(
-            TestUtil.createPrfKeyData(secondaryKeyValue),
-            /* keyId= */ 6,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.RAW);
     MonitoringAnnotations annotations =
         MonitoringAnnotations.newBuilder().add("annotation_name", "annotation_value").build();
-    PrimitiveSet<Prf> primitives =
-        TestUtil.createPrimitiveSetWithAnnotations(
-            TestUtil.createKeyset(primary, secondary), annotations, Prf.class);
+    KeysetHandle hkdfKeysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(hkdfPrfKey0).withFixedId(5).makePrimary())
+            .addEntry(KeysetHandle.importKey(hkdfPrfKey1).withFixedId(6))
+            .setMonitoringAnnotations(annotations)
+            .build();
     byte[] plaintext = "blah".getBytes(UTF_8);
 
-    PrfSet prfSet = new PrfSetWrapper().wrap(primitives);
+    PrfSet prfSet = hkdfKeysetHandle.getPrimitive(PrfSet.class);
     byte[] prsPrimary = prfSet.computePrimary(plaintext, 12);
     byte[] prs5 = prfSet.getPrfs().get(5).compute(plaintext, 12);
     byte[] prs6 = prfSet.getPrfs().get(6).compute(plaintext, 12);
@@ -241,6 +243,8 @@ public class PrfSetWrapperTest {
   @Immutable
   private static class AlwaysFailingPrf implements Prf {
 
+    AlwaysFailingPrf(HkdfPrfKey key) {}
+
     @Override
     public byte[] compute(byte[] input, int outputLength) throws GeneralSecurityException {
       throw new GeneralSecurityException("fail");
@@ -249,25 +253,26 @@ public class PrfSetWrapperTest {
 
   @Test
   public void testAlwaysFailingPrfWithAnnotations_hasMonitoring() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(
+            PrimitiveConstructor.create(AlwaysFailingPrf::new, HkdfPrfKey.class, Prf.class));
+    PrfSetWrapper.register();
+    HkdfPrfProtoSerialization.register();
+    Registry.registerKeyManager(new HkdfPrfKeyManager(), true);
+
     FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
     MutableMonitoringRegistry.globalInstance().clear();
     MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
 
     MonitoringAnnotations annotations =
         MonitoringAnnotations.newBuilder().add("annotation_name", "annotation_value").build();
-    PrimitiveSet<Prf> primitives =
-        PrimitiveSet.newBuilder(Prf.class)
-            .setAnnotations(annotations)
-            .addPrimaryPrimitive(
-                new AlwaysFailingPrf(),
-                TestUtil.createKey(
-                    TestUtil.createPrfKeyData(Random.randBytes(KEY_SIZE)),
-                    /* keyId= */ 5,
-                    KeyStatusType.ENABLED,
-                    OutputPrefixType.RAW))
+    KeysetHandle hkdfKeysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(hkdfPrfKey0).withFixedId(5).makePrimary())
+            .setMonitoringAnnotations(annotations)
             .build();
-    PrfSet prfSet = new PrfSetWrapper().wrap(primitives);
-
+    PrfSet prfSet = hkdfKeysetHandle.getPrimitive(PrfSet.class);
     byte[] plaintext = "blah".getBytes(UTF_8);
 
     assertThrows(GeneralSecurityException.class, () -> prfSet.computePrimary(plaintext, 12));
