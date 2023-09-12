@@ -748,3 +748,15 @@ android_library(
     name = "random-android",
     srcs = ["Random.java"],
 )
+
+android_library(
+    name = "mutable_parameters_registry-android",
+    srcs = ["MutableParametersRegistry.java"],
+    deps = ["//src/main/java/com/google/crypto/tink:parameters-android"],
+)
+
+java_library(
+    name = "mutable_parameters_registry",
+    srcs = ["MutableParametersRegistry.java"],
+    deps = ["//src/main/java/com/google/crypto/tink:parameters"],
+)
