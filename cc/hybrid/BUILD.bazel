@@ -383,6 +383,7 @@ cc_library(
     include_prefix = "tink/hybrid",
     deps = [
         ":hpke_parameters",
+        ":hpke_private_key",
         ":hpke_public_key",
         "//:insecure_secret_key_access",
         "//:partial_key_access",
@@ -747,6 +748,7 @@ cc_test(
     srcs = ["hpke_proto_serialization_test.cc"],
     deps = [
         ":hpke_parameters",
+        ":hpke_private_key",
         ":hpke_proto_serialization",
         ":hpke_public_key",
         "//:insecure_secret_key_access",
@@ -764,6 +766,7 @@ cc_test(
         "//proto:tink_cc_proto",
         "//subtle:common_enums",
         "//subtle:random",
+        "//util:secret_data",
         "//util:statusor",
         "//util:test_matchers",
         "@boringssl//:crypto",

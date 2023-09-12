@@ -359,6 +359,7 @@ tink_cc_library(
     hpke_proto_serialization.h
   DEPS
     tink::hybrid::hpke_parameters
+    tink::hybrid::hpke_private_key
     tink::hybrid::hpke_public_key
     absl::core_headers
     absl::status
@@ -713,6 +714,7 @@ tink_cc_test(
     hpke_proto_serialization_test.cc
   DEPS
     tink::hybrid::hpke_parameters
+    tink::hybrid::hpke_private_key
     tink::hybrid::hpke_proto_serialization
     tink::hybrid::hpke_public_key
     gmock
@@ -733,6 +735,7 @@ tink_cc_test(
     tink::internal::ssl_unique_ptr
     tink::subtle::common_enums
     tink::subtle::random
+    tink::util::secret_data
     tink::util::statusor
     tink::util::test_matchers
     tink::proto::hpke_cc_proto
