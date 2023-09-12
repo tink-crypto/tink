@@ -16,10 +16,12 @@
 
 package com.google.crypto.tink.aead;
 
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.KmsClients;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.internal.KeyTypeManager;
@@ -112,11 +114,103 @@ public class KmsEnvelopeAeadKeyManager extends KeyTypeManager<KmsEnvelopeAeadKey
       }
 
       @Override
-      public KmsEnvelopeAeadKey createKey(KmsEnvelopeAeadKeyFormat format)
-          throws GeneralSecurityException {
+      public KmsEnvelopeAeadKey createKey(KmsEnvelopeAeadKeyFormat format) {
         return KmsEnvelopeAeadKey.newBuilder().setParams(format).setVersion(getVersion()).build();
       }
     };
+  }
+
+  private static AeadParameters makeRawAesGcm(AesGcmParameters parameters)
+      throws GeneralSecurityException {
+    return AesGcmParameters.builder()
+        .setIvSizeBytes(parameters.getIvSizeBytes())
+        .setKeySizeBytes(parameters.getKeySizeBytes())
+        .setTagSizeBytes(parameters.getTagSizeBytes())
+        .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+        .build();
+  }
+
+  private static AeadParameters makeRawChaCha20Poly1305() {
+    return ChaCha20Poly1305Parameters.create(ChaCha20Poly1305Parameters.Variant.NO_PREFIX);
+  }
+
+  private static AeadParameters makeRawXChaCha20Poly1305() {
+    return XChaCha20Poly1305Parameters.create(XChaCha20Poly1305Parameters.Variant.NO_PREFIX);
+  }
+
+  private static AeadParameters makeRawAesCtrHmacAead(AesCtrHmacAeadParameters parameters)
+      throws GeneralSecurityException {
+    return AesCtrHmacAeadParameters.builder()
+        .setAesKeySizeBytes(parameters.getAesKeySizeBytes())
+        .setHmacKeySizeBytes(parameters.getHmacKeySizeBytes())
+        .setTagSizeBytes(parameters.getTagSizeBytes())
+        .setIvSizeBytes(parameters.getIvSizeBytes())
+        .setHashType(parameters.getHashType())
+        .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
+        .build();
+  }
+
+  private static AeadParameters makeRawAesEax(AesEaxParameters parameters)
+      throws GeneralSecurityException {
+    return AesEaxParameters.builder()
+        .setIvSizeBytes(parameters.getIvSizeBytes())
+        .setKeySizeBytes(parameters.getKeySizeBytes())
+        .setTagSizeBytes(parameters.getTagSizeBytes())
+        .setVariant(AesEaxParameters.Variant.NO_PREFIX)
+        .build();
+  }
+
+  private static AeadParameters makeRawAesGcmSiv(AesGcmSivParameters parameters)
+      throws GeneralSecurityException {
+    return AesGcmSivParameters.builder()
+        .setKeySizeBytes(parameters.getKeySizeBytes())
+        .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+        .build();
+  }
+
+  private static AeadParameters makeRaw(Parameters parameters) throws GeneralSecurityException {
+    if (parameters instanceof AesGcmParameters) {
+      return makeRawAesGcm((AesGcmParameters) parameters);
+    }
+    if (parameters instanceof ChaCha20Poly1305Parameters) {
+      return makeRawChaCha20Poly1305();
+    }
+    if (parameters instanceof XChaCha20Poly1305Parameters) {
+      return makeRawXChaCha20Poly1305();
+    }
+    if (parameters instanceof AesCtrHmacAeadParameters) {
+      return makeRawAesCtrHmacAead((AesCtrHmacAeadParameters) parameters);
+    }
+    if (parameters instanceof AesEaxParameters) {
+      return makeRawAesEax((AesEaxParameters) parameters);
+    }
+    if (parameters instanceof AesGcmSivParameters) {
+      return makeRawAesGcmSiv((AesGcmSivParameters) parameters);
+    }
+    throw new IllegalArgumentException("Illegal parameters" + parameters);
+  }
+
+  private static LegacyKmsEnvelopeAeadParameters.DekParsingStrategy getRequiredParsingStrategy(
+      AeadParameters parameters) {
+    if (parameters instanceof AesGcmParameters) {
+      return LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_AES_GCM;
+    }
+    if (parameters instanceof ChaCha20Poly1305Parameters) {
+      return LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_CHACHA20POLY1305;
+    }
+    if (parameters instanceof XChaCha20Poly1305Parameters) {
+      return LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_XCHACHA20POLY1305;
+    }
+    if (parameters instanceof AesCtrHmacAeadParameters) {
+      return LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_AES_CTR_HMAC;
+    }
+    if (parameters instanceof AesEaxParameters) {
+      return LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_AES_EAX;
+    }
+    if (parameters instanceof AesGcmSivParameters) {
+      return LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_AES_GCM_SIV;
+    }
+    throw new IllegalArgumentException("Illegal parameters" + parameters);
   }
 
   /**
@@ -131,16 +225,21 @@ public class KmsEnvelopeAeadKeyManager extends KeyTypeManager<KmsEnvelopeAeadKey
    * <p>The second argument of the passed in template is used ignoring the Variant, and assuming
    * NO_PREFIX instead.
    */
+  @AccessesPartialKey
   public static KeyTemplate createKeyTemplate(String kekUri, KeyTemplate dekTemplate) {
     try {
-      KmsEnvelopeAeadKeyFormat format = createKeyFormat(kekUri, dekTemplate);
-      return KeyTemplate.create(TYPE_URL, format.toByteArray(), KeyTemplate.OutputPrefixType.RAW);
-    } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
-      // It is in principle possible that this throws: if the "KeyTemplate" is created directly
-      // from a parameters object, but then we cannot serialize it.  However, the only way I can
-      // see this happen is if a user defines their own parameters object and then passes it in
-      // here, hence I think an IllegalArgumentError is appropriate.
-      throw new IllegalArgumentException("Unable to serialize key template", e);
+      Parameters parameters = dekTemplate.toParameters();
+      AeadParameters outputPrefixRawParameters = makeRaw(parameters);
+      LegacyKmsEnvelopeAeadParameters legacyKmsEnvelopeAeadParameters =
+          LegacyKmsEnvelopeAeadParameters.builder()
+              .setKekUri(kekUri)
+              .setDekParsingStrategy(getRequiredParsingStrategy(outputPrefixRawParameters))
+              .setDekParametersForNewKeys(outputPrefixRawParameters)
+              .build();
+      return KeyTemplate.createFrom(legacyKmsEnvelopeAeadParameters);
+    } catch (GeneralSecurityException e) {
+      throw new IllegalArgumentException(
+          "Cannot create LegacyKmsEnvelopeAeadParameters for template: " + dekTemplate, e);
     }
   }
 
