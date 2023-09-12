@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
@@ -231,6 +232,41 @@ public class KmsEnvelopeAeadKeyManagerTest {
     assertThat(kekUri).isEqualTo(format.getKekUri());
     assertThat(dekTemplateProto.getTypeUrl()).isEqualTo(format.getDekTemplate().getTypeUrl());
     assertThat(dekTemplateProto.getValue()).isEqualTo(format.getDekTemplate().getValue());
+  }
+
+  @Test
+  public void createKeyTemplate_ignoresOutputPrefix() throws Exception {
+    // When we create LegacyKmsEnvelopeAeadParameters, the underlying OutputPrefixType in the
+    // passed in dek Template is ignored.
+    KeyTemplate template1 =
+        KmsEnvelopeAeadKeyManager.createKeyTemplate(
+            "some URI", KeyTemplates.get("AES128_CTR_HMAC_SHA256"));
+    KeyTemplate template2 =
+        KmsEnvelopeAeadKeyManager.createKeyTemplate(
+            "some URI", KeyTemplates.get("AES128_CTR_HMAC_SHA256_RAW"));
+    assertThat(template1.toParameters()).isEqualTo(template2.toParameters());
+  }
+
+  @Test
+  public void createKeyTemplate_aesGcm_works() throws Exception {
+    LegacyKmsEnvelopeAeadParameters parameters =
+        LegacyKmsEnvelopeAeadParameters.builder()
+            .setKekUri("SomeMatchingKekUri")
+            .setDekParsingStrategy(
+                LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_AES_GCM)
+            .setDekParametersForNewKeys(
+                AesGcmParameters.builder()
+                    .setIvSizeBytes(12)
+                    .setKeySizeBytes(16)
+                    .setTagSizeBytes(16)
+                    .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+                    .build())
+            .build();
+
+    KeyTemplate template1 =
+        KmsEnvelopeAeadKeyManager.createKeyTemplate(
+            "SomeMatchingKekUri", KeyTemplates.get("AES128_GCM"));
+    assertThat(template1.toParameters()).isEqualTo(parameters);
   }
 
   @Test
