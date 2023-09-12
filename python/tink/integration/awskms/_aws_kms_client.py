@@ -67,6 +67,11 @@ class _AwsKmsAead(aead.Aead):
       raise tink.TinkError(e)
 
 
+def _has_aws_key_uri_format(key_uri: str) -> bool:
+  match = re.match('aws-kms://arn:aws:kms:([a-z0-9-]+):', key_uri)
+  return match is not None
+
+
 def _key_uri_to_key_arn(key_uri: str) -> str:
   if not key_uri.startswith(AWS_KEYURI_PREFIX):
     raise tink.TinkError('invalid key URI')
@@ -118,12 +123,11 @@ class AwsKmsClient(tink.KmsClient):
       TinkError: If the key uri is not valid.
     """
     if not key_uri:
-      self._key_arn = None
+      self._key_uri = None
     else:
-      match = re.match('aws-kms://arn:aws:kms:([a-z0-9-]+):', key_uri)
-      if not match:
+      if not _has_aws_key_uri_format(key_uri):
         raise tink.TinkError('invalid key URI')
-      self._key_arn = _key_uri_to_key_arn(key_uri)
+      self._key_uri = key_uri
     if not credentials_path:
       self._aws_access_key_id = None
       self._aws_secret_access_key = None
@@ -141,11 +145,11 @@ class AwsKmsClient(tink.KmsClient):
     Returns: A boolean value which is true if the key is supported and false
       otherwise.
     """
-    if not key_uri.startswith(AWS_KEYURI_PREFIX):
+    if not _has_aws_key_uri_format(key_uri):
       return False
-    if not self._key_arn:
+    if not self._key_uri:
       return True
-    return _key_uri_to_key_arn(key_uri) == self._key_arn
+    return key_uri == self._key_uri
 
   def get_aead(self, key_uri: str) -> aead.Aead:
     """Returns an Aead-primitive backed by KMS key specified by 'key_uri'.
@@ -160,10 +164,10 @@ class AwsKmsClient(tink.KmsClient):
       TinkError: If the key_uri is not supported.
     """
     if not self.does_support(key_uri):
-      if self._key_arn:
+      if self._key_uri:
         raise tink.TinkError(
             'This client is bound to %s and cannot use key %s' %
-            (self._key_arn, key_uri))
+            (self._key_uri, key_uri))
       raise tink.TinkError(
           'This client does not support key %s' % key_uri)
     key_arn = _key_uri_to_key_arn(key_uri)

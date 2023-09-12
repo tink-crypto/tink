@@ -44,6 +44,32 @@ GCP_KEY_URI = ('gcp-kms://projects/tink-test-infrastructure/locations/global/'
 
 class AwsKmsClientTest(absltest.TestCase):
 
+  def test_has_aws_key_uri_format_is_true_for_valid_key_uri(self):
+    self.assertTrue(_aws_kms_client._has_aws_key_uri_format(KEY_URI))
+    self.assertTrue(_aws_kms_client._has_aws_key_uri_format(KEY_ALIAS_URI))
+    self.assertTrue(_aws_kms_client._has_aws_key_uri_format(KEY_URI_2))
+
+  def test_has_aws_key_uri_format_is_false_for_invalid_key_uri(self):
+    # a GCP key URI is not a valid AWS key URI.
+    self.assertFalse(_aws_kms_client._has_aws_key_uri_format(GCP_KEY_URI))
+    # key URI is case sensitive
+    self.assertFalse(
+        _aws_kms_client._has_aws_key_uri_format(
+            'aws-kms://arn:AWS:kms:us-east-2:235739564943:key/'
+            '3ee50705-5a82-4f5b-9753-05c4f473922f'
+        )
+    )
+
+  def test_key_uri_to_key_arn(self):
+    self.assertEqual(
+        _aws_kms_client._key_uri_to_key_arn(
+            'aws-kms://arn:aws:kms:us-east-2:235739564943:key/'
+            '3ee50705-5a82-4f5b-9753-05c4f473922f'
+        ),
+        'arn:aws:kms:us-east-2:235739564943:key/'
+        '3ee50705-5a82-4f5b-9753-05c4f473922f',
+    )
+
   def test_client_bound_to_key_uri(self):
     aws_client = awskms.AwsKmsClient(KEY_URI, CREDENTIAL_PATH)
 
@@ -60,7 +86,7 @@ class AwsKmsClientTest(absltest.TestCase):
     self.assertEqual(aws_client.does_support(KEY_URI_2), True)
     self.assertEqual(aws_client.does_support(GCP_KEY_URI), False)
 
-  def test_wrong_key_uri(self):
+  def test_invalid_key_uri(self):
     with self.assertRaises(tink.TinkError):
       awskms.AwsKmsClient(GCP_KEY_URI, CREDENTIAL_PATH)
 
