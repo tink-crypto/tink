@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/aead/internal/aead_from_zero_copy.h"
 
+#include <cstring>
 #include <memory>
 #include <string>
 #include <utility>
@@ -48,8 +49,7 @@ using ::testing::Return;
 using ::testing::Unused;
 
 TEST(AeadFromZeroCopyTest, EncryptSucceeds) {
-  std::unique_ptr<MockZeroCopyAead> mock_zero_copy_aead =
-      std::make_unique<MockZeroCopyAead>();
+  auto mock_zero_copy_aead = std::make_unique<MockZeroCopyAead>();
   EXPECT_CALL(*mock_zero_copy_aead, MaxEncryptionSize(kPlaintext.size()))
       .WillOnce(Return(kCiphertext.size()));
   EXPECT_CALL(*mock_zero_copy_aead, Encrypt(kPlaintext, kAssociatedData, _))
@@ -65,8 +65,7 @@ TEST(AeadFromZeroCopyTest, EncryptSucceeds) {
 }
 
 TEST(AeadFromZeroCopyTest, EncryptFailsIfZeroCopyEncryptFails) {
-  std::unique_ptr<MockZeroCopyAead> mock_zero_copy_aead =
-      std::make_unique<MockZeroCopyAead>();
+  auto mock_zero_copy_aead = std::make_unique<MockZeroCopyAead>();
   EXPECT_CALL(*mock_zero_copy_aead, MaxEncryptionSize(kPlaintext.size()))
       .WillOnce(Return(kCiphertext.size()));
   EXPECT_CALL(*mock_zero_copy_aead, Encrypt(kPlaintext, kAssociatedData, _))
@@ -78,8 +77,7 @@ TEST(AeadFromZeroCopyTest, EncryptFailsIfZeroCopyEncryptFails) {
 }
 
 TEST(AeadFromZeroCopyTest, DecryptSucceeds) {
-  std::unique_ptr<MockZeroCopyAead> mock_zero_copy_aead =
-      std::make_unique<MockZeroCopyAead>();
+  auto mock_zero_copy_aead = std::make_unique<MockZeroCopyAead>();
   EXPECT_CALL(*mock_zero_copy_aead, MaxDecryptionSize(kCiphertext.size()))
       .WillOnce(Return(kPlaintext.size()));
   EXPECT_CALL(*mock_zero_copy_aead, Decrypt(kCiphertext, kAssociatedData, _))
@@ -95,8 +93,7 @@ TEST(AeadFromZeroCopyTest, DecryptSucceeds) {
 }
 
 TEST(AeadFromZeroCopyTest, EncryptFailsIfZeroCopyDecryptFails) {
-  std::unique_ptr<MockZeroCopyAead> mock_zero_copy_aead =
-      std::make_unique<MockZeroCopyAead>();
+  auto mock_zero_copy_aead = std::make_unique<MockZeroCopyAead>();
   EXPECT_CALL(*mock_zero_copy_aead, MaxDecryptionSize(kCiphertext.size()))
       .WillOnce(Return(kPlaintext.size()));
   EXPECT_CALL(*mock_zero_copy_aead, Decrypt(kCiphertext, kAssociatedData, _))
