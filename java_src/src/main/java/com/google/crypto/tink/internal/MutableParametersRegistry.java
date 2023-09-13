@@ -18,7 +18,10 @@ package com.google.crypto.tink.internal;
 
 import com.google.crypto.tink.Parameters;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -58,5 +61,18 @@ public final class MutableParametersRegistry {
       return parametersMap.get(name);
     }
     throw new GeneralSecurityException("Name " + name + " does not exist");
+  }
+
+  public synchronized void putAll(Map<String, Parameters> values) throws GeneralSecurityException {
+    for (Map.Entry<String, Parameters> entry : values.entrySet()) {
+      put(entry.getKey(), entry.getValue());
+    }
+  }
+
+  public synchronized List<String> getNames() throws GeneralSecurityException {
+    List<String> results = new ArrayList<>();
+    results.addAll(parametersMap.keySet());
+
+    return Collections.unmodifiableList(results);
   }
 }

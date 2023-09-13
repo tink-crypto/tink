@@ -538,6 +538,7 @@ java_test(
     size = "small",
     srcs = ["MutableParametersRegistryTest.java"],
     deps = [
+        "//src/main/java/com/google/crypto/tink:parameters",
         "//src/main/java/com/google/crypto/tink/aead:predefined_aead_parameters",
         "//src/main/java/com/google/crypto/tink/internal:mutable_parameters_registry",
         "@maven//:com_google_truth_truth",
