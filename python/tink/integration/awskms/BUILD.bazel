@@ -34,11 +34,12 @@ py_test(
     ],
     srcs_version = "PY3",
     deps = [
-        ":awskms",
         ":_aws_kms_client",
+        ":awskms",
         "//tink:tink_python",
         "//tink/testing:helper",
         requirement("absl-py"),
+        requirement("boto3"),
     ],
 )
 
@@ -58,5 +59,6 @@ py_test(
         "//tink/aead",
         "//tink/testing:helper",
         requirement("absl-py"),
+        requirement("boto3"),
     ],
 )

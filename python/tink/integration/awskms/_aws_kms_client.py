@@ -78,6 +78,43 @@ def _key_uri_to_key_arn(key_uri: str) -> str:
   return key_uri[len(AWS_KEYURI_PREFIX) :]
 
 
+class _KmsClient(tink.KmsClient):
+  """KMS client returned by new_client."""
+
+  def __init__(self, boto3_client: Any, key_uri: Optional[str]):
+    if not key_uri:
+      self._key_uri = None
+    else:
+      if not _has_aws_key_uri_format(key_uri):
+        raise tink.TinkError('invalid key URI')
+      self._key_uri = key_uri
+    self._boto3_client = boto3_client
+
+  def does_support(self, key_uri: str) -> bool:
+    if not _has_aws_key_uri_format(key_uri):
+      return False
+    if not self._key_uri:
+      return True
+    return key_uri == self._key_uri
+
+  def get_aead(self, key_uri: str) -> aead.Aead:
+    if not self.does_support(key_uri):
+      if self._key_uri:
+        raise tink.TinkError(
+            'This client is bound to %s and cannot use key %s' %
+            (self._key_uri, key_uri))
+      raise tink.TinkError(
+          'This client does not support key %s' % key_uri)
+    return _AwsKmsAead(self._boto3_client, _key_uri_to_key_arn(key_uri))
+
+
+def new_client(
+    *, boto3_client: Any, key_uri: Optional[str] = None
+) -> tink.KmsClient:
+  """Creates a new Tink KmsClient from a boto3 client."""
+  return _KmsClient(boto3_client, key_uri)
+
+
 def _parse_config(config_path: str) -> Tuple[str, str]:
   """Returns ('aws_access_key_id', 'aws_secret_access_key') from a config."""
   config = configparser.ConfigParser()

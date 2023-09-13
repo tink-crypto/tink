@@ -17,3 +17,5 @@
 from tink.integration.awskms import _aws_kms_client
 
 AwsKmsClient = _aws_kms_client.AwsKmsClient
+
+new_client = _aws_kms_client.new_client
