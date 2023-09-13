@@ -31,6 +31,7 @@ import com.google.crypto.tink.aead.AesCtrHmacAeadParameters;
 import com.google.crypto.tink.aead.AesGcmParameters;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.EcPointFormat;
+import com.google.crypto.tink.proto.EciesAeadDemParams;
 import com.google.crypto.tink.proto.EciesAeadHkdfKeyFormat;
 import com.google.crypto.tink.proto.EciesAeadHkdfParams;
 import com.google.crypto.tink.proto.EciesAeadHkdfPrivateKey;
@@ -39,11 +40,13 @@ import com.google.crypto.tink.proto.EciesHkdfKemParams;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.EciesAeadHkdfDemHelper;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridEncrypt;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
+import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
 import org.junit.BeforeClass;
@@ -123,12 +126,21 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
   @Test
   public void validateKeyFormat_noDem_throws() throws Exception {
     EciesAeadHkdfKeyFormat format =
-        createKeyFormat(
-            EllipticCurveType.NIST_P256,
-            HashType.SHA256,
-            EcPointFormat.UNCOMPRESSED,
-            KeyTemplate.create("", new byte[0], KeyTemplate.OutputPrefixType.TINK),
-            Hex.decode("aabbccddeeff"));
+        EciesAeadHkdfKeyFormat.newBuilder()
+            .setParams(
+                EciesAeadHkdfParams.newBuilder()
+                    .setKemParams(
+                        EciesHkdfKemParams.newBuilder()
+                            .setCurveType(EllipticCurveType.NIST_P256)
+                            .setHkdfHashType(HashType.SHA256)
+                            .setHkdfSalt(ByteString.copyFrom(Hex.decode("aabbccddeeff"))))
+                    .setDemParams(
+                        EciesAeadDemParams.newBuilder()
+                            .setAeadDem(
+                                com.google.crypto.tink.proto.KeyTemplate.newBuilder()
+                                    .setOutputPrefixType(OutputPrefixType.TINK)))
+                    .setEcPointFormat(EcPointFormat.UNCOMPRESSED))
+            .build();
     assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
