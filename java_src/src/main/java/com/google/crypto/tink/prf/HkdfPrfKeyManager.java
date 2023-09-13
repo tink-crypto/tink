@@ -21,6 +21,7 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.PrimitiveFactory;
@@ -186,6 +187,8 @@ public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
     MutablePrimitiveRegistry.globalInstance().registerPrimitiveConstructor(HKDF_PRF_CONSTRUCTOR);
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(STREAMING_HKDF_PRF_CONSTRUCTOR);
+    MutableParametersRegistry.globalInstance()
+        .putAll(new HkdfPrfKeyManager().keyFactory().namedParameters());
   }
 
   public static String staticKeyType() {

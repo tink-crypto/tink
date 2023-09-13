@@ -25,6 +25,7 @@ import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
@@ -195,6 +196,8 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesCtrHmacAeadKeyManager(), newKeyAllowed);
     AesCtrHmacAeadProtoSerialization.register();
+    MutableParametersRegistry.globalInstance()
+        .putAll(new AesCtrHmacAeadKeyManager().keyFactory().namedParameters());
   }
 
   /**

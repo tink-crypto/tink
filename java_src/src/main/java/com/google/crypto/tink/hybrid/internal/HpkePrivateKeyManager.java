@@ -23,6 +23,7 @@ import com.google.crypto.tink.hybrid.HpkeParameters;
 import com.google.crypto.tink.hybrid.HpkeProtoSerialization;
 import com.google.crypto.tink.internal.BigIntegerEncoding;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.HpkeKem;
@@ -71,6 +72,8 @@ public final class HpkePrivateKeyManager
     Registry.registerAsymmetricKeyManagers(
         new HpkePrivateKeyManager(), new HpkePublicKeyManager(), newKeyAllowed);
     HpkeProtoSerialization.register();
+    MutableParametersRegistry.globalInstance()
+        .putAll(new HpkePrivateKeyManager().keyFactory().namedParameters());
   }
 
   @Override

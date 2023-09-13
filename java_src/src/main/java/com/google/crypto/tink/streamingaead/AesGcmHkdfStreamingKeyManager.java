@@ -23,6 +23,7 @@ import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingKey;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingKeyFormat;
@@ -173,6 +174,8 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesGcmHkdfStreamingKeyManager(), newKeyAllowed);
     AesGcmHkdfStreamingProtoSerialization.register();
+    MutableParametersRegistry.globalInstance()
+        .putAll(new AesGcmHkdfStreamingKeyManager().keyFactory().namedParameters());
   }
 
   /**

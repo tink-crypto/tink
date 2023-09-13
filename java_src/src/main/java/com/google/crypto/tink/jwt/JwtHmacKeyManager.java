@@ -24,6 +24,7 @@ import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.JwtHmacAlgorithm;
 import com.google.crypto.tink.proto.JwtHmacKey;
@@ -268,6 +269,8 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new JwtHmacKeyManager(), newKeyAllowed);
     JwtHmacProtoSerialization.register();
+    MutableParametersRegistry.globalInstance()
+        .putAll(new JwtHmacKeyManager().keyFactory().namedParameters());
   }
 
   /** Returns a {@link KeyTemplate} that generates new instances of HS256 256-bit keys. */

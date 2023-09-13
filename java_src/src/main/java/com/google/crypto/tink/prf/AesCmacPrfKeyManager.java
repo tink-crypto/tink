@@ -22,6 +22,7 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.PrimitiveFactory;
@@ -132,6 +133,8 @@ public final class AesCmacPrfKeyManager extends KeyTypeManager<AesCmacPrfKey> {
     AesCmacPrfProtoSerialization.register();
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(PRF_PRIMITIVE_CONSTRUCTOR);
+    MutableParametersRegistry.globalInstance()
+        .putAll(new AesCmacPrfKeyManager().keyFactory().namedParameters());
   }
 
   /**

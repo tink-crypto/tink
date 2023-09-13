@@ -26,6 +26,7 @@ import com.google.crypto.tink.aead.AesCtrHmacAeadParameters;
 import com.google.crypto.tink.aead.AesGcmParameters;
 import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.EcPointFormat;
@@ -328,6 +329,8 @@ public final class EciesAeadHkdfPrivateKeyManager
     Registry.registerAsymmetricKeyManagers(
         new EciesAeadHkdfPrivateKeyManager(), new EciesAeadHkdfPublicKeyManager(), newKeyAllowed);
     EciesProtoSerialization.register();
+    MutableParametersRegistry.globalInstance()
+        .putAll(new EciesAeadHkdfPrivateKeyManager().keyFactory().namedParameters());
   }
 
   /**

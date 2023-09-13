@@ -23,6 +23,7 @@ import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKey;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKeyFormat;
@@ -207,6 +208,8 @@ public final class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHm
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesCtrHmacStreamingKeyManager(), newKeyAllowed);
     AesCtrHmacStreamingProtoSerialization.register();
+    MutableParametersRegistry.globalInstance()
+        .putAll(new AesCtrHmacStreamingKeyManager().keyFactory().namedParameters());
   }
 
   /**

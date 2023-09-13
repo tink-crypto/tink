@@ -24,6 +24,7 @@ import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.EcdsaKeyFormat;
@@ -220,6 +221,8 @@ public final class EcdsaSignKeyManager
     Registry.registerAsymmetricKeyManagers(
         new EcdsaSignKeyManager(), new EcdsaVerifyKeyManager(), newKeyAllowed);
     EcdsaProtoSerialization.register();
+    MutableParametersRegistry.globalInstance()
+        .putAll(new EcdsaSignKeyManager().keyFactory().namedParameters());
   }
 
   /**

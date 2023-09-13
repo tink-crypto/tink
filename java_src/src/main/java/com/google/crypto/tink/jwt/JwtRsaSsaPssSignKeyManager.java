@@ -21,6 +21,7 @@ import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.JwtRsaSsaPssAlgorithm;
@@ -311,6 +312,8 @@ public final class JwtRsaSsaPssSignKeyManager
     Registry.registerAsymmetricKeyManagers(
         new JwtRsaSsaPssSignKeyManager(), new JwtRsaSsaPssVerifyKeyManager(), newKeyAllowed);
     JwtRsaSsaPssProtoSerialization.register();
+    MutableParametersRegistry.globalInstance()
+        .putAll(new JwtRsaSsaPssSignKeyManager().keyFactory().namedParameters());
   }
 
 }

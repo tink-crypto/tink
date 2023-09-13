@@ -24,6 +24,7 @@ import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.aead.subtle.AesGcmSiv;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.AesGcmSivKey;
 import com.google.crypto.tink.proto.AesGcmSivKeyFormat;
@@ -171,6 +172,8 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
     if (canUseAesGcmSive()) {
       Registry.registerKeyManager(new AesGcmSivKeyManager(), newKeyAllowed);
       AesGcmSivProtoSerialization.register();
+      MutableParametersRegistry.globalInstance()
+          .putAll(new AesGcmSivKeyManager().keyFactory().namedParameters());
     }
   }
 
