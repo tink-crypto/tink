@@ -773,67 +773,11 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterKeyTypeManager_keyTemplates_works() throws Exception {
-    Registry.reset();
-    assertThat(Registry.keyTemplates()).isEmpty();
-
-    Registry.registerKeyManager(new TestKeyTypeManager(), true);
-
-    assertThat(Registry.keyTemplates()).hasSize(2);
-    assertThat(Registry.keyTemplates()).contains("TINK");
-    assertThat(Registry.keyTemplates()).contains("RAW");
-  }
-
-  @Test
-  public void testRegisterKeyTypeManager_disallowedNewKey_keyTemplates_works() throws Exception {
-    Registry.reset();
-    Registry.registerKeyManager(new TestKeyTypeManager(), false);
-    assertThat(Registry.keyTemplates()).isEmpty();
-  }
-
-  @Test
   public void testRegisterKeyTypeManager_existingKeyManager_noNewKeyTemplate_works()
       throws Exception {
     Registry.reset();
     Registry.registerKeyManager(new TestKeyTypeManager(), true);
     Registry.registerKeyManager(new TestKeyTypeManager(), true);
-  }
-
-  @Test
-  public void testRegisterKeyTypeManager_existingKeyManager_newKeyTemplate_fails()
-      throws Exception {
-    Registry.reset();
-    Registry.registerKeyManager(new TestKeyTypeManager(), true);
-
-    Map<String, Parameters> namedParameters = new HashMap<>();
-    namedParameters.put(
-        "NEW_KEY_TEMPLATE_NAME",
-        new Parameters() {
-          @Override
-          public boolean hasIdRequirement() {
-            return false;
-          }
-        });
-
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> Registry.registerKeyManager(new TestKeyTypeManager(namedParameters), true));
-  }
-
-  @Test
-  public void testRegisterKeyTypeManager_newKeyManager_existingKeyTemplate_fails()
-      throws Exception {
-    Registry.reset();
-    Registry.registerKeyManager(new TestKeyTypeManager(), true);
-
-    TestKeyTypeManager manager =
-        new TestKeyTypeManager() {
-          @Override
-          public String getKeyType() {
-            return "blah";
-          }
-        };
-    assertThrows(GeneralSecurityException.class, () -> Registry.registerKeyManager(manager, true));
   }
 
   @Test
@@ -1166,11 +1110,6 @@ public class RegistryTest {
       super();
     }
 
-    public TestPrivateKeyTypeManagerWithKeyFactory(Map<String, Parameters> parameters) {
-      super();
-      this.parameters = parameters;
-    }
-
     @Override
     public KeyTypeManager.KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey> keyFactory() {
       return new KeyTypeManager.KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey>(
@@ -1216,70 +1155,11 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterAssymmetricKeyManagers_keyTemplates_works() throws Exception {
-    Registry.reset();
-    assertThat(Registry.keyTemplates()).isEmpty();
-
-    Registry.registerKeyManager(new TestPrivateKeyTypeManagerWithKeyFactory(), true);
-
-    assertThat(Registry.keyTemplates()).hasSize(2);
-    assertThat(Registry.keyTemplates()).contains("TINK");
-    assertThat(Registry.keyTemplates()).contains("RAW");
-  }
-
-  @Test
-  public void testRegisterAssymmetricKeyManagers_disallowedNewKey_keyTemplates_works()
-      throws Exception {
-    Registry.reset();
-    Registry.registerKeyManager(new TestPrivateKeyTypeManagerWithKeyFactory(), false);
-    assertThat(Registry.keyTemplates()).isEmpty();
-  }
-
-  @Test
   public void testRegisterAssymmetricKeyManagers_existingKeyManager_noNewKeyTemplate_works()
       throws Exception {
     Registry.reset();
     Registry.registerKeyManager(new TestPrivateKeyTypeManagerWithKeyFactory(), true);
     Registry.registerKeyManager(new TestPrivateKeyTypeManagerWithKeyFactory(), true);
-  }
-
-  @Test
-  public void testRegisterAssymmetricKeyManagers_existingKeyManager_newKeyTemplate_fails()
-      throws Exception {
-    Registry.reset();
-    Registry.registerKeyManager(new TestPrivateKeyTypeManagerWithKeyFactory(), true);
-
-    Map<String, Parameters> formats = new HashMap<>();
-    formats.put(
-        "NEW_KEY_TEMPLATE_NAME",
-        new Parameters() {
-          @Override
-          public boolean hasIdRequirement() {
-            return false;
-          }
-        });
-
-    assertThrows(
-        GeneralSecurityException.class,
-        () ->
-            Registry.registerKeyManager(
-                new TestPrivateKeyTypeManagerWithKeyFactory(formats), true));
-  }
-
-  @Test
-  public void testRegisterAssymmetricKeyManagers_newKeyManager_existingKeyTemplate_fails()
-      throws Exception {
-    Registry.reset();
-    Registry.registerKeyManager(new TestPrivateKeyTypeManagerWithKeyFactory(), true);
-
-    TestPrivateKeyTypeManagerWithKeyFactory manager =
-        new TestPrivateKeyTypeManagerWithKeyFactory() {
-          @Override
-          public String getKeyType() {
-            return "blah";
-          }
-        };
-    assertThrows(GeneralSecurityException.class, () -> Registry.registerKeyManager(manager, true));
   }
 
   @Test
@@ -1380,17 +1260,6 @@ public class RegistryTest {
         new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), false);
     KeyManager<?> km = Registry.getUntypedKeyManager(new TestPublicKeyTypeManager().getKeyType());
     assertThat(km.getPrimitiveClass()).isEqualTo(PublicPrimitiveA.class);
-  }
-
-  @Test
-  public void testRegisterAssymmetricKeyManagers_newKeyAllowed_withoutKeyFactory_fails()
-      throws Exception {
-    Registry.reset();
-    assertThrows(
-        UnsupportedOperationException.class,
-        () ->
-            Registry.registerAsymmetricKeyManagers(
-                new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true));
   }
 
   @Test

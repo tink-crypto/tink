@@ -220,8 +220,8 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
     }
 
     /**
-     * Returns supported parameters and their names. Subclasses should override this if it should
-     * not return the empty map.
+     * Returns supported parameters and their names. This should not be used. Instead, subclasses
+     * should manually call MutablePrimitiveRegistry.globalInstance().put().
      *
      * @throws GeneralSecurityException Key type managers can throw GeneralSecurityException when
      *     their key formats depend on other key formats that were not registered.

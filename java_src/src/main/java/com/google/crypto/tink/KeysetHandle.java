@@ -19,6 +19,7 @@ package com.google.crypto.tink;
 import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.internal.InternalConfiguration;
 import com.google.crypto.tink.internal.LegacyProtoParameters;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.ProtoParametersSerialization;
@@ -608,12 +609,9 @@ public final class KeysetHandle {
    * <p>{@code namedParameters} is the key template name that fully specifies the parameters, e.g.
    * "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM".
    */
-  public static KeysetHandle.Builder.Entry generateEntryFromParametersName(String namedParameters)
+  public static KeysetHandle.Builder.Entry generateEntryFromParametersName(String parametersName)
       throws GeneralSecurityException {
-    if (!Registry.parametersMap().containsKey(namedParameters)) {
-      throw new GeneralSecurityException("cannot find key template: " + namedParameters);
-    }
-    Parameters parameters = Registry.parametersMap().get(namedParameters);
+    Parameters parameters = MutableParametersRegistry.globalInstance().get(parametersName);
     return new KeysetHandle.Builder.Entry(parameters);
   }
 

@@ -23,6 +23,7 @@ import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.PrimitiveFactory;
@@ -183,6 +184,8 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
     HmacPrfProtoSerialization.register();
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(PRF_PRIMITIVE_CONSTRUCTOR);
+    MutableParametersRegistry.globalInstance()
+        .putAll(new HmacPrfKeyManager().keyFactory().namedParameters());
   }
 
   @Override

@@ -69,7 +69,7 @@ public final class MutableParametersRegistry {
     }
   }
 
-  public synchronized List<String> getNames() throws GeneralSecurityException {
+  public synchronized List<String> getNames() {
     List<String> results = new ArrayList<>();
     results.addAll(parametersMap.keySet());
 
