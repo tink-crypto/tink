@@ -122,9 +122,10 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
           throw new GeneralSecurityException("Reading pseudorandomness failed", e);
         }
       }
+    };
+  }
 
-      @Override
-      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
         Map<String, Parameters> result = new HashMap<>();
         result.put("AES128_GCM", PredefinedAeadParameters.AES128_GCM);
         result.put(
@@ -144,16 +145,13 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
                 .setTagSizeBytes(16)
                 .setVariant(AesGcmParameters.Variant.NO_PREFIX)
                 .build());
-        return Collections.unmodifiableMap(result);
-      }
-    };
+    return Collections.unmodifiableMap(result);
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesGcmKeyManager(), newKeyAllowed);
     AesGcmProtoSerialization.register();
-    MutableParametersRegistry.globalInstance()
-        .putAll(new AesGcmKeyManager().keyFactory().namedParameters());
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 
   /**

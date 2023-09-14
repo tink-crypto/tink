@@ -168,15 +168,14 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
           throw new GeneralSecurityException("Reading pseudorandomness failed", e);
         }
       }
+    };
+  }
 
-      @Override
-      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
         Map<String, Parameters> result = new HashMap<>();
         result.put("HMAC_SHA256_PRF", PredefinedPrfParameters.HMAC_SHA256_PRF);
         result.put("HMAC_SHA512_PRF", PredefinedPrfParameters.HMAC_SHA512_PRF);
-        return Collections.unmodifiableMap(result);
-      }
-    };
+    return Collections.unmodifiableMap(result);
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
@@ -184,8 +183,7 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
     HmacPrfProtoSerialization.register();
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(PRF_PRIMITIVE_CONSTRUCTOR);
-    MutableParametersRegistry.globalInstance()
-        .putAll(new HmacPrfKeyManager().keyFactory().namedParameters());
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 
   @Override

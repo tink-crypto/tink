@@ -146,9 +146,10 @@ public final class Ed25519PrivateKeyManager
           throw new GeneralSecurityException("Reading pseudorandomness failed", e);
         }
       }
+    };
+  }
 
-      @Override
-      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
         Map<String, Parameters> result = new HashMap<>();
         result.put("ED25519", Ed25519Parameters.create(Ed25519Parameters.Variant.TINK));
         result.put("ED25519_RAW", Ed25519Parameters.create(Ed25519Parameters.Variant.NO_PREFIX));
@@ -158,8 +159,6 @@ public final class Ed25519PrivateKeyManager
         result.put(
             "ED25519WithRawOutput", Ed25519Parameters.create(Ed25519Parameters.Variant.NO_PREFIX));
         return Collections.unmodifiableMap(result);
-      }
-    };
   }
 
   /**
@@ -170,8 +169,7 @@ public final class Ed25519PrivateKeyManager
     Registry.registerAsymmetricKeyManagers(
         new Ed25519PrivateKeyManager(), new Ed25519PublicKeyManager(), newKeyAllowed);
     Ed25519ProtoSerialization.register();
-    MutableParametersRegistry.globalInstance()
-        .putAll(new Ed25519PrivateKeyManager().keyFactory().namedParameters());
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 
   /**

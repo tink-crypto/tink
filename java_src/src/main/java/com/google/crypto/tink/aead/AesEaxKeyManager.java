@@ -111,9 +111,10 @@ public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
             .setVersion(getVersion())
             .build();
       }
+    };
+  }
 
-      @Override
-      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
         Map<String, Parameters> result = new HashMap<>();
         result.put("AES128_EAX", PredefinedAeadParameters.AES128_EAX);
         result.put(
@@ -135,15 +136,12 @@ public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
                 .build());
 
         return Collections.unmodifiableMap(result);
-      }
-    };
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesEaxKeyManager(), newKeyAllowed);
     AesEaxProtoSerialization.register();
-    MutableParametersRegistry.globalInstance()
-        .putAll(new AesEaxKeyManager().keyFactory().namedParameters());
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 
   /**

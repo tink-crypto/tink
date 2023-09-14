@@ -108,9 +108,10 @@ public class ChaCha20Poly1305KeyManager extends KeyTypeManager<ChaCha20Poly1305K
             .setKeyValue(ByteString.copyFrom(Random.randBytes(KEY_SIZE_IN_BYTES)))
             .build();
       }
+    };
+  }
 
-      @Override
-      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
         Map<String, Parameters> result = new HashMap<>();
         result.put(
             "CHACHA20_POLY1305",
@@ -119,15 +120,12 @@ public class ChaCha20Poly1305KeyManager extends KeyTypeManager<ChaCha20Poly1305K
             "CHACHA20_POLY1305_RAW",
             ChaCha20Poly1305Parameters.create(ChaCha20Poly1305Parameters.Variant.NO_PREFIX));
         return Collections.unmodifiableMap(result);
-      }
-    };
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new ChaCha20Poly1305KeyManager(), newKeyAllowed);
     ChaCha20Poly1305ProtoSerialization.register();
-    MutableParametersRegistry.globalInstance()
-        .putAll(new ChaCha20Poly1305KeyManager().keyFactory().namedParameters());
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 
   /**

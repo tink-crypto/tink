@@ -157,9 +157,10 @@ public final class EcdsaSignKeyManager
             .setKeyValue(ByteString.copyFrom(privKey.getS().toByteArray()))
             .build();
       }
+    };
+  }
 
-      @Override
-      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
         Map<String, Parameters> result = new HashMap<>();
         result.put("ECDSA_P256", PredefinedSignatureParameters.ECDSA_P256);
         // This key template does not make sense because IEEE P1363 mandates a raw signature.
@@ -204,8 +205,6 @@ public final class EcdsaSignKeyManager
         // TODO(b/185475349): remove this in 2.0.0.
         result.put("ECDSA_P521_IEEE_P1363", PredefinedSignatureParameters.ECDSA_P521_IEEE_P1363);
         return Collections.unmodifiableMap(result);
-      }
-    };
   }
 
   @Override
@@ -221,8 +220,7 @@ public final class EcdsaSignKeyManager
     Registry.registerAsymmetricKeyManagers(
         new EcdsaSignKeyManager(), new EcdsaVerifyKeyManager(), newKeyAllowed);
     EcdsaProtoSerialization.register();
-    MutableParametersRegistry.globalInstance()
-        .putAll(new EcdsaSignKeyManager().keyFactory().namedParameters());
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 
   /**

@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.internal;
 
-import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -217,17 +216,6 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
     public KeyProtoT deriveKey(KeyFormatProtoT keyFormat, InputStream pseudoRandomness)
         throws GeneralSecurityException {
       throw new GeneralSecurityException("deriveKey not implemented for key of type " + clazz);
-    }
-
-    /**
-     * Returns supported parameters and their names. This should not be used. Instead, subclasses
-     * should manually call MutablePrimitiveRegistry.globalInstance().put().
-     *
-     * @throws GeneralSecurityException Key type managers can throw GeneralSecurityException when
-     *     their key formats depend on other key formats that were not registered.
-     */
-    public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
-      return Collections.emptyMap();
     }
 
     /**

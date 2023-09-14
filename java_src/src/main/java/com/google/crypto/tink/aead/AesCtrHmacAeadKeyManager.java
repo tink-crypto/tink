@@ -159,9 +159,10 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
             .setHmacKey(hmacKey)
             .build();
       }
+    };
+  }
 
-      @Override
-      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
         Map<String, Parameters> result = new HashMap<>();
 
         result.put("AES128_CTR_HMAC_SHA256", PredefinedAeadParameters.AES128_CTR_HMAC_SHA256);
@@ -189,15 +190,12 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
                 .build());
 
         return Collections.unmodifiableMap(result);
-      }
-    };
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesCtrHmacAeadKeyManager(), newKeyAllowed);
     AesCtrHmacAeadProtoSerialization.register();
-    MutableParametersRegistry.globalInstance()
-        .putAll(new AesCtrHmacAeadKeyManager().keyFactory().namedParameters());
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 
   /**

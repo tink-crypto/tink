@@ -129,26 +129,24 @@ public class XChaCha20Poly1305KeyManager extends KeyTypeManager<XChaCha20Poly130
           throw new GeneralSecurityException("Reading pseudorandomness failed", e);
         }
       }
+    };
+  }
 
-      @Override
-      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
-        Map<String, Parameters> result = new HashMap<>();
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+    Map<String, Parameters> result = new HashMap<>();
         result.put(
             "XCHACHA20_POLY1305",
             XChaCha20Poly1305Parameters.create(XChaCha20Poly1305Parameters.Variant.TINK));
-        result.put(
-            "XCHACHA20_POLY1305_RAW",
-            XChaCha20Poly1305Parameters.create(XChaCha20Poly1305Parameters.Variant.NO_PREFIX));
+    result.put(
+        "XCHACHA20_POLY1305_RAW",
+        XChaCha20Poly1305Parameters.create(XChaCha20Poly1305Parameters.Variant.NO_PREFIX));
         return Collections.unmodifiableMap(result);
-      }
-    };
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new XChaCha20Poly1305KeyManager(), newKeyAllowed);
     XChaCha20Poly1305ProtoSerialization.register();
-    MutableParametersRegistry.globalInstance()
-        .putAll(new XChaCha20Poly1305KeyManager().keyFactory().namedParameters());
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 
   /**

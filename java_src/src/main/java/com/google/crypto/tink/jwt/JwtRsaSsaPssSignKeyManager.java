@@ -221,14 +221,14 @@ public final class JwtRsaSsaPssSignKeyManager
             .setCrt(ByteString.copyFrom(privKey.getCrtCoefficient().toByteArray()))
             .build();
       }
+    };
+  }
 
-      /**
-       * List of default templates to generate tokens with algorithms "PS256", "PS384" or "PS512".
-       * Use the template with the "_RAW" suffix if you want to generate tokens without a "kid"
-       * header.
-       */
-      @Override
-      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+  /**
+   * List of default templates to generate tokens with algorithms "PS256", "PS384" or "PS512". Use
+   * the template with the "_RAW" suffix if you want to generate tokens without a "kid" header.
+   */
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
         Map<String, Parameters> result = new HashMap<>();
         result.put(
             "JWT_PS256_2048_F4_RAW",
@@ -295,8 +295,6 @@ public final class JwtRsaSsaPssSignKeyManager
                 .setKidStrategy(JwtRsaSsaPssParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
                 .build());
         return Collections.unmodifiableMap(result);
-      }
-    };
   }
 
   @Override
@@ -312,8 +310,7 @@ public final class JwtRsaSsaPssSignKeyManager
     Registry.registerAsymmetricKeyManagers(
         new JwtRsaSsaPssSignKeyManager(), new JwtRsaSsaPssVerifyKeyManager(), newKeyAllowed);
     JwtRsaSsaPssProtoSerialization.register();
-    MutableParametersRegistry.globalInstance()
-        .putAll(new JwtRsaSsaPssSignKeyManager().keyFactory().namedParameters());
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 
 }

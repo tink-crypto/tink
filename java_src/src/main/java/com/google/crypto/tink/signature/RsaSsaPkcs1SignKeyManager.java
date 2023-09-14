@@ -185,41 +185,38 @@ public final class RsaSsaPkcs1SignKeyManager
             .setCrt(ByteString.copyFrom(privKey.getCrtCoefficient().toByteArray()))
             .build();
       }
-
-      @Override
-      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
-        Map<String, Parameters> result = new HashMap<>();
-        result.put(
-            "RSA_SSA_PKCS1_3072_SHA256_F4",
-            PredefinedSignatureParameters.RSA_SSA_PKCS1_3072_SHA256_F4);
-        result.put(
-            "RSA_SSA_PKCS1_3072_SHA256_F4_RAW",
-            RsaSsaPkcs1Parameters.builder()
-                .setHashType(RsaSsaPkcs1Parameters.HashType.SHA256)
-                .setModulusSizeBits(3072)
-                .setPublicExponent(RsaSsaPkcs1Parameters.F4)
-                .setVariant(RsaSsaPkcs1Parameters.Variant.NO_PREFIX)
-                .build());
-        // This is identical to RSA_SSA_PKCS1_3072_SHA256_F4_RAW. It is needed to maintain backward
-        // compatibility with SignatureKeyTemplates.
-        // TODO(b/185475349): remove this in Tink 2.0.0.
-        result.put(
-            "RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX",
-            PredefinedSignatureParameters.RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX);
-        result.put(
-            "RSA_SSA_PKCS1_4096_SHA512_F4",
-            PredefinedSignatureParameters.RSA_SSA_PKCS1_4096_SHA512_F4);
-        result.put(
-            "RSA_SSA_PKCS1_4096_SHA512_F4_RAW",
-            RsaSsaPkcs1Parameters.builder()
-                .setHashType(RsaSsaPkcs1Parameters.HashType.SHA512)
-                .setModulusSizeBits(4096)
-                .setPublicExponent(RsaSsaPkcs1Parameters.F4)
-                .setVariant(RsaSsaPkcs1Parameters.Variant.NO_PREFIX)
-                .build());
-        return result;
-      }
     };
+  }
+
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+    Map<String, Parameters> result = new HashMap<>();
+    result.put(
+        "RSA_SSA_PKCS1_3072_SHA256_F4", PredefinedSignatureParameters.RSA_SSA_PKCS1_3072_SHA256_F4);
+    result.put(
+        "RSA_SSA_PKCS1_3072_SHA256_F4_RAW",
+        RsaSsaPkcs1Parameters.builder()
+            .setHashType(RsaSsaPkcs1Parameters.HashType.SHA256)
+            .setModulusSizeBits(3072)
+            .setPublicExponent(RsaSsaPkcs1Parameters.F4)
+            .setVariant(RsaSsaPkcs1Parameters.Variant.NO_PREFIX)
+            .build());
+    // This is identical to RSA_SSA_PKCS1_3072_SHA256_F4_RAW. It is needed to maintain backward
+    // compatibility with SignatureKeyTemplates.
+    // TODO(b/185475349): remove this in Tink 2.0.0.
+    result.put(
+        "RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX",
+        PredefinedSignatureParameters.RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX);
+    result.put(
+        "RSA_SSA_PKCS1_4096_SHA512_F4", PredefinedSignatureParameters.RSA_SSA_PKCS1_4096_SHA512_F4);
+    result.put(
+        "RSA_SSA_PKCS1_4096_SHA512_F4_RAW",
+        RsaSsaPkcs1Parameters.builder()
+            .setHashType(RsaSsaPkcs1Parameters.HashType.SHA512)
+            .setModulusSizeBits(4096)
+            .setPublicExponent(RsaSsaPkcs1Parameters.F4)
+            .setVariant(RsaSsaPkcs1Parameters.Variant.NO_PREFIX)
+            .build());
+    return result;
   }
 
   @Override
@@ -235,8 +232,7 @@ public final class RsaSsaPkcs1SignKeyManager
     Registry.registerAsymmetricKeyManagers(
         new RsaSsaPkcs1SignKeyManager(), new RsaSsaPkcs1VerifyKeyManager(), newKeyAllowed);
     RsaSsaPkcs1ProtoSerialization.register();
-    MutableParametersRegistry.globalInstance()
-        .putAll(new RsaSsaPkcs1SignKeyManager().keyFactory().namedParameters());
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 
   /**

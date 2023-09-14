@@ -204,9 +204,10 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
           throw new GeneralSecurityException("Reading pseudorandomness failed", e);
         }
       }
+    };
+  }
 
-      @Override
-      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
         Map<String, Parameters> result = new HashMap<>();
         result.put("HMAC_SHA256_128BITTAG", PredefinedMacParameters.HMAC_SHA256_128BITTAG);
         result.put(
@@ -275,8 +276,6 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
                 .setHashType(HmacParameters.HashType.SHA512)
                 .build());
         return Collections.unmodifiableMap(result);
-      }
-    };
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
@@ -286,8 +285,7 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
         .registerPrimitiveConstructor(CHUNKED_MAC_PRIMITIVE_CONSTRUCTOR);
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(MAC_PRIMITIVE_CONSTRUCTOR);
-    MutableParametersRegistry.globalInstance()
-        .putAll(new HmacKeyManager().keyFactory().namedParameters());
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 
   /**

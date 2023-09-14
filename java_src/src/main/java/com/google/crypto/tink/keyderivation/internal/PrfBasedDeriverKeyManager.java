@@ -18,7 +18,6 @@ package com.google.crypto.tink.keyderivation.internal;
 
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
-import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.keyderivation.KeysetDeriver;
 import com.google.crypto.tink.proto.KeyData;
@@ -117,7 +116,5 @@ public final class PrfBasedDeriverKeyManager extends KeyTypeManager<PrfBasedDeri
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new PrfBasedDeriverKeyManager(), newKeyAllowed);
     PrfBasedKeyDerivationKeyProtoSerialization.register();
-    MutableParametersRegistry.globalInstance()
-        .putAll(new PrfBasedDeriverKeyManager().keyFactory().namedParameters());
   }
 }

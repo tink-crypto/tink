@@ -72,8 +72,7 @@ public final class HpkePrivateKeyManager
     Registry.registerAsymmetricKeyManagers(
         new HpkePrivateKeyManager(), new HpkePublicKeyManager(), newKeyAllowed);
     HpkeProtoSerialization.register();
-    MutableParametersRegistry.globalInstance()
-        .putAll(new HpkePrivateKeyManager().keyFactory().namedParameters());
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 
   @Override
@@ -171,9 +170,10 @@ public final class HpkePrivateKeyManager
             .setPrivateKey(ByteString.copyFrom(privateKeyBytes))
             .build();
       }
+    };
+  }
 
-      @Override
-      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
         Map<String, Parameters> result = new HashMap<>();
         result.put(
             "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM",
@@ -320,8 +320,5 @@ public final class HpkePrivateKeyManager
                 .setAeadId(HpkeParameters.AeadId.AES_256_GCM)
                 .build());
         return Collections.unmodifiableMap(result);
-      }
-    };
   }
-
 }

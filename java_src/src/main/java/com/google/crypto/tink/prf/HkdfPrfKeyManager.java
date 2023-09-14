@@ -153,14 +153,13 @@ public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
             .setParams(format.getParams())
             .build();
       }
-
-      @Override
-      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
-        Map<String, Parameters> result = new HashMap<>();
-        result.put("HKDF_SHA256", PredefinedPrfParameters.HKDF_SHA256);
-        return Collections.unmodifiableMap(result);
-      }
     };
+  }
+
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+    Map<String, Parameters> result = new HashMap<>();
+    result.put("HKDF_SHA256", PredefinedPrfParameters.HKDF_SHA256);
+    return Collections.unmodifiableMap(result);
   }
 
   // We use a somewhat larger minimum key size than usual, because PRFs might be used by many users,
@@ -187,8 +186,7 @@ public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
     MutablePrimitiveRegistry.globalInstance().registerPrimitiveConstructor(HKDF_PRF_CONSTRUCTOR);
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(STREAMING_HKDF_PRF_CONSTRUCTOR);
-    MutableParametersRegistry.globalInstance()
-        .putAll(new HkdfPrfKeyManager().keyFactory().namedParameters());
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 
   public static String staticKeyType() {

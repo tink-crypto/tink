@@ -139,27 +139,25 @@ public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
           throw new GeneralSecurityException("Reading pseudorandomness failed", e);
         }
       }
-
-      @Override
-      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
-        Map<String, Parameters> result = new HashMap<>();
-        result.put("AES256_SIV", PredefinedDeterministicAeadParameters.AES256_SIV);
-        result.put(
-            "AES256_SIV_RAW",
-            AesSivParameters.builder()
-                .setKeySizeBytes(64)
-                .setVariant(AesSivParameters.Variant.NO_PREFIX)
-                .build());
-        return Collections.unmodifiableMap(result);
-      }
     };
+  }
+
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+    Map<String, Parameters> result = new HashMap<>();
+    result.put("AES256_SIV", PredefinedDeterministicAeadParameters.AES256_SIV);
+    result.put(
+        "AES256_SIV_RAW",
+        AesSivParameters.builder()
+            .setKeySizeBytes(64)
+            .setVariant(AesSivParameters.Variant.NO_PREFIX)
+            .build());
+    return Collections.unmodifiableMap(result);
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesSivKeyManager(), newKeyAllowed);
     AesSivProtoSerialization.register();
-    MutableParametersRegistry.globalInstance()
-        .putAll(new AesSivKeyManager().keyFactory().namedParameters());
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 
   /**

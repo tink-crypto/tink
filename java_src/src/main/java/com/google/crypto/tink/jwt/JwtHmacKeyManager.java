@@ -205,14 +205,14 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
             .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
             .build();
       }
+    };
+  }
 
-      /**
-       * List of default templates to generate tokens with algorithms "HS256", "HS384" or "HS512".
-       * Use the template with the "_RAW" suffix if you want to generate tokens without a "kid"
-       * header.
-       */
-      @Override
-      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+  /**
+   * List of default templates to generate tokens with algorithms "HS256", "HS384" or "HS512". Use
+   * the template with the "_RAW" suffix if you want to generate tokens without a "kid" header.
+   */
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
         Map<String, Parameters> result = new HashMap<>();
         result.put(
             "JWT_HS256_RAW",
@@ -257,8 +257,6 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
                 .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
                 .build());
         return Collections.unmodifiableMap(result);
-      }
-    };
   }
 
   @Override
@@ -269,8 +267,7 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new JwtHmacKeyManager(), newKeyAllowed);
     JwtHmacProtoSerialization.register();
-    MutableParametersRegistry.globalInstance()
-        .putAll(new JwtHmacKeyManager().keyFactory().namedParameters());
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 
   /** Returns a {@link KeyTemplate} that generates new instances of HS256 256-bit keys. */

@@ -124,39 +124,38 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
           throw new GeneralSecurityException("Reading pseudorandomness failed", e);
         }
       }
-
-      @Override
-      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
-        Map<String, Parameters> result = new HashMap<>();
-
-        result.put(
-            "AES128_GCM_SIV",
-            AesGcmSivParameters.builder()
-                .setKeySizeBytes(16)
-                .setVariant(AesGcmSivParameters.Variant.TINK)
-                .build());
-        result.put(
-            "AES128_GCM_SIV_RAW",
-            AesGcmSivParameters.builder()
-                .setKeySizeBytes(16)
-                .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
-                .build());
-        result.put(
-            "AES256_GCM_SIV",
-            AesGcmSivParameters.builder()
-                .setKeySizeBytes(32)
-                .setVariant(AesGcmSivParameters.Variant.TINK)
-                .build());
-        result.put(
-            "AES256_GCM_SIV_RAW",
-            AesGcmSivParameters.builder()
-                .setKeySizeBytes(32)
-                .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
-                .build());
-
-        return Collections.unmodifiableMap(result);
-      }
     };
+  }
+
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+    Map<String, Parameters> result = new HashMap<>();
+
+    result.put(
+        "AES128_GCM_SIV",
+        AesGcmSivParameters.builder()
+            .setKeySizeBytes(16)
+            .setVariant(AesGcmSivParameters.Variant.TINK)
+            .build());
+    result.put(
+        "AES128_GCM_SIV_RAW",
+        AesGcmSivParameters.builder()
+            .setKeySizeBytes(16)
+            .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+            .build());
+    result.put(
+        "AES256_GCM_SIV",
+        AesGcmSivParameters.builder()
+            .setKeySizeBytes(32)
+            .setVariant(AesGcmSivParameters.Variant.TINK)
+            .build());
+    result.put(
+        "AES256_GCM_SIV_RAW",
+        AesGcmSivParameters.builder()
+            .setKeySizeBytes(32)
+            .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+            .build());
+
+    return Collections.unmodifiableMap(result);
   }
 
   private static boolean canUseAesGcmSive() {
@@ -172,8 +171,7 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
     if (canUseAesGcmSive()) {
       Registry.registerKeyManager(new AesGcmSivKeyManager(), newKeyAllowed);
       AesGcmSivProtoSerialization.register();
-      MutableParametersRegistry.globalInstance()
-          .putAll(new AesGcmSivKeyManager().keyFactory().namedParameters());
+      MutableParametersRegistry.globalInstance().putAll(namedParameters());
     }
   }
 

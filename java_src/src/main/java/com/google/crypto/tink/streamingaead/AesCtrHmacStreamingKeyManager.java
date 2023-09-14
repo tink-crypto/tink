@@ -134,9 +134,10 @@ public final class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHm
             .setVersion(getVersion())
             .build();
       }
+    };
+  }
 
-      @Override
-      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
         Map<String, Parameters> result = new HashMap<>();
         result.put(
             "AES128_CTR_HMAC_SHA256_4KB",
@@ -151,8 +152,6 @@ public final class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHm
             "AES256_CTR_HMAC_SHA256_1MB",
             PredefinedStreamingAeadParameters.AES256_CTR_HMAC_SHA256_1MB);
         return Collections.unmodifiableMap(result);
-      }
-    };
   }
 
   private static void validateParams(AesCtrHmacStreamingParams params)
@@ -208,8 +207,7 @@ public final class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHm
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesCtrHmacStreamingKeyManager(), newKeyAllowed);
     AesCtrHmacStreamingProtoSerialization.register();
-    MutableParametersRegistry.globalInstance()
-        .putAll(new AesCtrHmacStreamingKeyManager().keyFactory().namedParameters());
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 
   /**

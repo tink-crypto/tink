@@ -142,17 +142,16 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
           throw new GeneralSecurityException("Reading pseudorandomness failed", e);
         }
       }
+    };
+  }
 
-      @Override
-      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
         Map<String, Parameters> result = new HashMap<>();
         result.put("AES128_GCM_HKDF_4KB", PredefinedStreamingAeadParameters.AES128_GCM_HKDF_4KB);
         result.put("AES128_GCM_HKDF_1MB", PredefinedStreamingAeadParameters.AES128_GCM_HKDF_1MB);
         result.put("AES256_GCM_HKDF_4KB", PredefinedStreamingAeadParameters.AES256_GCM_HKDF_4KB);
         result.put("AES256_GCM_HKDF_1MB", PredefinedStreamingAeadParameters.AES256_GCM_HKDF_1MB);
         return Collections.unmodifiableMap(result);
-      }
-    };
   }
 
   private static void validateParams(AesGcmHkdfStreamingParams params)
@@ -174,8 +173,7 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesGcmHkdfStreamingKeyManager(), newKeyAllowed);
     AesGcmHkdfStreamingProtoSerialization.register();
-    MutableParametersRegistry.globalInstance()
-        .putAll(new AesGcmHkdfStreamingKeyManager().keyFactory().namedParameters());
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 
   /**

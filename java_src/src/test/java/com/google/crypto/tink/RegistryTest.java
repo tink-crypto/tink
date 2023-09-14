@@ -744,11 +744,6 @@ public class RegistryTest {
               .setVersion(getVersion())
               .build();
         }
-
-        @Override
-        public Map<String, Parameters> namedParameters() {
-          return namedParameters;
-        }
       };
     }
 
@@ -1137,11 +1132,6 @@ public class RegistryTest {
           return Ed25519PrivateKey.newBuilder()
               .setKeyValue(ByteString.copyFrom("derived", UTF_8))
               .build();
-        }
-
-        @Override
-        public Map<String, Parameters> namedParameters() {
-          return parameters;
         }
       };
     }

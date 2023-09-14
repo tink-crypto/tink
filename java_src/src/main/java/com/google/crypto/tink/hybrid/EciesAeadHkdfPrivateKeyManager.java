@@ -167,9 +167,10 @@ public final class EciesAeadHkdfPrivateKeyManager
             .setKeyValue(ByteString.copyFrom(privKey.getS().toByteArray()))
             .build();
       }
+    };
+  }
 
-      @Override
-      public Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
         Map<String, Parameters> result = new HashMap<>();
         result.put(
             "ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM",
@@ -316,8 +317,6 @@ public final class EciesAeadHkdfPrivateKeyManager
                         .build())
                 .build());
         return Collections.unmodifiableMap(result);
-      }
-    };
   }
 
   /**
@@ -329,8 +328,7 @@ public final class EciesAeadHkdfPrivateKeyManager
     Registry.registerAsymmetricKeyManagers(
         new EciesAeadHkdfPrivateKeyManager(), new EciesAeadHkdfPublicKeyManager(), newKeyAllowed);
     EciesProtoSerialization.register();
-    MutableParametersRegistry.globalInstance()
-        .putAll(new EciesAeadHkdfPrivateKeyManager().keyFactory().namedParameters());
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 
   /**
