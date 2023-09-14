@@ -24,6 +24,7 @@
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead/aes_gcm_proto_serialization.h"
 #include "tink/aead/aes_gcm_siv_key_manager.h"
+#include "tink/aead/aes_gcm_siv_proto_serialization.h"
 #include "tink/aead/kms_aead_key_manager.h"
 #include "tink/aead/kms_envelope_aead_key_manager.h"
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
@@ -38,23 +39,34 @@ namespace tink {
 // static
 util::Status AeadConfig::Register() {
   auto status = MacConfig::Register();
-  if (!status.ok()) return status;
+  if (!status.ok()) {
+    return status;
+  }
 
   // Register primitive wrapper.
   status = Registry::RegisterPrimitiveWrapper(absl::make_unique<AeadWrapper>());
-  if (!status.ok()) return status;
+  if (!status.ok()) {
+    return status;
+  }
 
   // Register key managers which utilize the FIPS validated BoringCrypto
   // implementations.
   status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesCtrHmacAeadKeyManager>(), true);
-  if (!status.ok()) return status;
+  if (!status.ok()) {
+    return status;
+  }
+
   status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesGcmKeyManager>(), true);
-  if (!status.ok()) return status;
+  if (!status.ok()) {
+    return status;
+  }
 
   status = RegisterAesGcmProtoSerialization();
-  if (!status.ok()) return status;
+  if (!status.ok()) {
+    return status;
+  }
 
   if (IsFipsModeEnabled()) {
     return util::OkStatus();
@@ -63,19 +75,38 @@ util::Status AeadConfig::Register() {
   // Register all the other key managers.
   status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesGcmSivKeyManager>(), true);
-  if (!status.ok()) return status;
+  if (!status.ok()) {
+    return status;
+  }
+
   status = Registry::RegisterKeyTypeManager(
       absl::make_unique<AesEaxKeyManager>(), true);
-  if (!status.ok()) return status;
+  if (!status.ok()) {
+    return status;
+  }
+
   status = Registry::RegisterKeyTypeManager(
       absl::make_unique<XChaCha20Poly1305KeyManager>(), true);
-  if (!status.ok()) return status;
+  if (!status.ok()) {
+    return status;
+  }
+
   status = Registry::RegisterKeyTypeManager(
       absl::make_unique<KmsAeadKeyManager>(), true);
-  if (!status.ok()) return status;
+  if (!status.ok()) {
+    return status;
+  }
+
   status = Registry::RegisterKeyTypeManager(
       absl::make_unique<KmsEnvelopeAeadKeyManager>(), true);
-  if (!status.ok()) return status;
+  if (!status.ok()) {
+    return status;
+  }
+
+  status = RegisterAesGcmSivProtoSerialization();
+  if (!status.ok()) {
+    return status;
+  }
 
   return util::OkStatus();
 }

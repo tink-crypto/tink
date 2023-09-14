@@ -60,6 +60,7 @@ tink_cc_library(
     tink::aead::aes_gcm_key_manager
     tink::aead::aes_gcm_proto_serialization
     tink::aead::aes_gcm_siv_key_manager
+    tink::aead::aes_gcm_siv_proto_serialization
     tink::aead::kms_aead_key_manager
     tink::aead::kms_envelope_aead_key_manager
     tink::aead::xchacha20_poly1305_key_manager
@@ -496,23 +497,29 @@ tink_cc_test(
     tink::aead::aes_gcm_key
     tink::aead::aes_gcm_key_manager
     tink::aead::aes_gcm_parameters
+    tink::aead::aes_gcm_siv_key
+    tink::aead::aes_gcm_siv_parameters
     gmock
-    absl::memory
     absl::status
     tink::core::aead
     tink::core::insecure_secret_key_access
+    tink::core::key
     tink::core::keyset_handle
+    tink::core::parameters
     tink::core::partial_key_access
-    tink::core::primitive_set
     tink::core::registry
+    tink::core::restricted_data
     tink::config::tink_fips
     tink::internal::fips_utils
     tink::internal::mutable_serialization_registry
     tink::internal::proto_key_serialization
     tink::internal::proto_parameters_serialization
-    tink::util::status
+    tink::internal::serialization
+    tink::subtle::random
     tink::util::statusor
     tink::util::test_matchers
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::aes_gcm_siv_cc_proto
     tink::proto::tink_cc_proto
 )
 
