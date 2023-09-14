@@ -85,6 +85,10 @@ public final class KeyTemplate {
     throw new IllegalArgumentException("Unknown output prefix type");
   }
 
+  /**
+   * @deprecated Use createFrom
+   */
+  @Deprecated
   public static KeyTemplate create(
       String typeUrl, byte[] value, OutputPrefixType outputPrefixType) {
     return new KeyTemplate(
