@@ -17,7 +17,6 @@
 package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.PublicKeyVerify;
-import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -88,10 +87,5 @@ class RsaSsaPssVerifyKeyManager extends KeyTypeManager<RsaSsaPssPublicKey> {
     Validators.validateRsaModulusSize(new BigInteger(1, pubKey.getN().toByteArray()).bitLength());
     Validators.validateRsaPublicExponent(new BigInteger(1, pubKey.getE().toByteArray()));
     SigUtil.validateRsaSsaPssParams(pubKey.getParams());
-  }
-
-  @Override
-  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
-    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
   }
 }

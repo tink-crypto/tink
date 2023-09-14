@@ -22,7 +22,6 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
@@ -252,11 +251,6 @@ public final class RsaSsaPssSignKeyManager
             "RSA_SSA_PSS_4096_SHA512_SHA512_64_F4",
             PredefinedSignatureParameters.RSA_SSA_PSS_4096_SHA512_SHA512_64_F4);
         return Collections.unmodifiableMap(result);
-  }
-
-  @Override
-  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
-    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
   }
 
   /**

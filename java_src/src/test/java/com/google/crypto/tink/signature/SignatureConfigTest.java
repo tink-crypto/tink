@@ -74,10 +74,6 @@ public class SignatureConfigTest {
 
     assertThat(KeysetHandle.generateNew(PredefinedSignatureParameters.RSA_SSA_PKCS1_3072_SHA256_F4))
         .isNotNull();
-    assertThat(
-            KeysetHandle.generateNew(
-                PredefinedSignatureParameters.RSA_SSA_PSS_3072_SHA256_SHA256_32_F4))
-        .isNotNull();
     assertThat(KeysetHandle.generateNew(PredefinedSignatureParameters.ECDSA_P256)).isNotNull();
   }
 
@@ -89,6 +85,11 @@ public class SignatureConfigTest {
 
     SignatureConfig.register();
 
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            KeysetHandle.generateNew(
+                PredefinedSignatureParameters.RSA_SSA_PSS_3072_SHA256_SHA256_32_F4));
     assertThrows(
         GeneralSecurityException.class,
         () -> KeysetHandle.generateNew(PredefinedSignatureParameters.ED25519));
