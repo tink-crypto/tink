@@ -21,14 +21,8 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClients;
-import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
-import com.google.crypto.tink.proto.KeyTemplate;
-import com.google.crypto.tink.proto.KmsAeadKeyFormat;
-import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.FakeKmsClient;
 import com.google.crypto.tink.testing.TestUtil;
-import com.google.protobuf.ExtensionRegistryLite;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,42 +47,8 @@ public class KmsAeadKeyManagerTest {
 
   @Test
   public void createKeyTemplate() throws Exception {
-    // Intentionally using "weird" or invalid values for parameters,
-    // to test that the function correctly puts them in the resulting template.
     String keyUri = "some example KEK URI";
-    com.google.crypto.tink.KeyTemplate nonProtoTemplate =
-        KmsAeadKeyManager.createKeyTemplate(keyUri);
-
-    KeyTemplate template = KeyTemplateProtoConverter.toProto(nonProtoTemplate);
-    assertThat(new KmsAeadKeyManager().getKeyType()).isEqualTo(template.getTypeUrl());
-    assertThat(OutputPrefixType.RAW).isEqualTo(template.getOutputPrefixType());
-
-    KmsAeadKeyFormat format =
-        KmsAeadKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    assertThat(keyUri).isEqualTo(format.getKeyUri());
-  }
-
-  @Test
-  public void createKeyTemplate_multipleKeysWithSameKek() throws Exception {
-    String keyUri = FakeKmsClient.createFakeKeyUri();
-
-    com.google.crypto.tink.KeyTemplate nonProtoTemplate1 =
-        KmsAeadKeyManager.createKeyTemplate(keyUri);
-
-    KeyTemplate template1 = KeyTemplateProtoConverter.toProto(nonProtoTemplate1);
-    KeysetHandle handle1 = KeysetHandle.generateNew(template1);
-    Aead aead1 = handle1.getPrimitive(Aead.class);
-
-    com.google.crypto.tink.KeyTemplate nonProtoTemplate2 =
-        KmsAeadKeyManager.createKeyTemplate(keyUri);
-    KeyTemplate template2 = KeyTemplateProtoConverter.toProto(nonProtoTemplate2);
-    KeysetHandle handle2 = KeysetHandle.generateNew(template2);
-    Aead aead2 = handle2.getPrimitive(Aead.class);
-
-    byte[] plaintext = Random.randBytes(20);
-    byte[] associatedData = Random.randBytes(20);
-
-    assertThat(aead1.decrypt(aead2.encrypt(plaintext, associatedData), associatedData))
-        .isEqualTo(plaintext);
+    assertThat(KmsAeadKeyManager.createKeyTemplate(keyUri).toParameters())
+        .isEqualTo(LegacyKmsAeadParameters.create(keyUri));
   }
 }
