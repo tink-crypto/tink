@@ -509,6 +509,26 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "rsa_ssa_pkcs1_parameters",
+    srcs = ["rsa_ssa_pkcs1_parameters.cc"],
+    hdrs = ["rsa_ssa_pkcs1_parameters.h"],
+    include_prefix = "tink/signature",
+    deps = [
+        ":signature_parameters",
+        "//:parameters",
+        "//internal:bn_util",
+        "//internal:rsa_util",
+        "//internal:ssl_unique_ptr",
+        "//util:status",
+        "//util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -946,6 +966,22 @@ cc_test(
         "//util:test_matchers",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/types:optional",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "rsa_ssa_pkcs1_parameters_test",
+    srcs = ["rsa_ssa_pkcs1_parameters_test.cc"],
+    deps = [
+        ":rsa_ssa_pkcs1_parameters",
+        "//internal:bn_util",
+        "//internal:ssl_unique_ptr",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )
