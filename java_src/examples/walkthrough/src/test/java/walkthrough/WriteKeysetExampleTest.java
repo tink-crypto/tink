@@ -28,7 +28,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public final class WriteKeyserExampleTest {
+public final class WriteKeysetExampleTest {
   private static final String KEYSET_TO_SERIALIZE =
       "{"
           + "  \"key\": ["

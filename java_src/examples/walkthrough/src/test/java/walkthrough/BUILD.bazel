@@ -32,9 +32,9 @@ java_test(
 )
 
 java_test(
-    name = "WriteKeyserExampleTest",
+    name = "WriteKeysetExampleTest",
     size = "small",
-    srcs = ["WriteKeyserExampleTest.java"],
+    srcs = ["WriteKeysetExampleTest.java"],
     deps = [
         "//walkthrough/src/main/java/walkthrough:obtain_and_use_aead_primitive_example",
         "//walkthrough/src/main/java/walkthrough:write_keyset_example",
