@@ -222,13 +222,14 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
      * Reads {@code output.length} number of bytes of (pseudo)randomness from the {@code input}
      * stream into the provided {@code output} buffer.
      *
-     * Note that this method will not close the {@code input} stream.
+     * <p>Note that this method will not close the {@code input} stream.
      *
      * @throws GeneralSecurityException when not enough randomness was provided in the {@code input}
      *     stream.
      */
     protected static void readFully(InputStream input, byte[] output)
-        throws IOException, GeneralSecurityException {
+        throws GeneralSecurityException {
+      try {
       int len = output.length;
       int read;
       int readTotal = 0;
@@ -238,6 +239,9 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
           throw new GeneralSecurityException("Not enough pseudorandomness provided");
         }
         readTotal += read;
+      }
+      } catch (IOException e) {
+        throw new GeneralSecurityException("Reading pseudorandomness failed", e);
       }
     }
   }

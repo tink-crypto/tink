@@ -36,7 +36,6 @@ import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
@@ -131,16 +130,12 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
           throws GeneralSecurityException {
         Validators.validateVersion(format.getVersion(), getVersion());
         byte[] pseudorandomness = new byte[format.getKeySize()];
-        try {
-          readFully(inputStream, pseudorandomness);
-          return AesGcmHkdfStreamingKey.newBuilder()
-              .setKeyValue(ByteString.copyFrom(pseudorandomness))
-              .setParams(format.getParams())
-              .setVersion(getVersion())
-              .build();
-        } catch (IOException e) {
-          throw new GeneralSecurityException("Reading pseudorandomness failed", e);
-        }
+        readFully(inputStream, pseudorandomness);
+        return AesGcmHkdfStreamingKey.newBuilder()
+            .setKeyValue(ByteString.copyFrom(pseudorandomness))
+            .setParams(format.getParams())
+            .setVersion(getVersion())
+            .build();
       }
     };
   }

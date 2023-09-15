@@ -39,7 +39,6 @@ import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
@@ -140,11 +139,7 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
           throws GeneralSecurityException {
         validateKeyFormat(format);
         byte[] aesCtrKeyBytes = new byte[format.getAesCtrKeyFormat().getKeySize()];
-        try {
-          readFully(inputStream, aesCtrKeyBytes);
-        } catch (IOException e) {
-          throw new GeneralSecurityException("Reading pseudorandomness failed", e);
-        }
+        readFully(inputStream, aesCtrKeyBytes);
         HmacKey hmacKey =
             new HmacKeyManager().keyFactory().deriveKey(format.getHmacKeyFormat(), inputStream);
         AesCtrKey aesCtrKey =

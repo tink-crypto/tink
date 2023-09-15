@@ -39,7 +39,6 @@ import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
@@ -157,16 +156,12 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
           throws GeneralSecurityException {
         Validators.validateVersion(format.getVersion(), getVersion());
         byte[] pseudorandomness = new byte[format.getKeySize()];
-        try {
-          readFully(inputStream, pseudorandomness);
-          return HmacPrfKey.newBuilder()
-              .setVersion(getVersion())
-              .setParams(format.getParams())
-              .setKeyValue(ByteString.copyFrom(pseudorandomness))
-              .build();
-        } catch (IOException e) {
-          throw new GeneralSecurityException("Reading pseudorandomness failed", e);
-        }
+        readFully(inputStream, pseudorandomness);
+        return HmacPrfKey.newBuilder()
+            .setVersion(getVersion())
+            .setParams(format.getParams())
+            .setKeyValue(ByteString.copyFrom(pseudorandomness))
+            .build();
       }
     };
   }

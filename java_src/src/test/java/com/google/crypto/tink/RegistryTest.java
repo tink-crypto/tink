@@ -62,7 +62,6 @@ import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
@@ -734,11 +733,7 @@ public class RegistryTest {
         public AesGcmKey deriveKey(AesGcmKeyFormat format, InputStream stream)
             throws GeneralSecurityException {
           byte[] pseudorandomness = new byte[format.getKeySize()];
-          try {
-            readFully(stream, pseudorandomness);
-          } catch (IOException e) {
-            throw new AssertionError("Unexpected IOException", e);
-          }
+          readFully(stream, pseudorandomness);
           return AesGcmKey.newBuilder()
               .setKeyValue(ByteString.copyFrom(pseudorandomness))
               .setVersion(getVersion())
