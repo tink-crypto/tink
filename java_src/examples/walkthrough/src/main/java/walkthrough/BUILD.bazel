@@ -6,9 +6,9 @@ java_library(
     name = "create_keyset_example",
     srcs = ["CreateKeysetExample.java"],
     deps = [
-        "@tink_java//src/main/java/com/google/crypto/tink/aead:predefined_aead_parameters",
         "@tink_java//src/main/java/com/google/crypto/tink:key_templates",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink/aead:predefined_aead_parameters",
     ],
 )
 
@@ -36,6 +36,26 @@ java_library(
     srcs = ["ReadKeysetExample.java"],
     deps = [
         "@tink_java//src/main/java/com/google/crypto/tink:aead",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink:tink_json_proto_keyset_format",
+    ],
+)
+
+java_library(
+    name = "read_cleartext_keyset_example",
+    srcs = ["ReadCleartextKeysetExample.java"],
+    deps = [
+        "@tink_java//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink:tink_json_proto_keyset_format",
+    ],
+)
+
+java_library(
+    name = "write_cleartext_keyset_example",
+    srcs = ["WriteCleartextKeysetExample.java"],
+    deps = [
+        "@tink_java//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
         "@tink_java//src/main/java/com/google/crypto/tink:tink_json_proto_keyset_format",
     ],
