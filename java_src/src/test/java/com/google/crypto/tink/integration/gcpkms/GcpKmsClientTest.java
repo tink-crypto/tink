@@ -30,9 +30,7 @@ import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.KmsClientsTestUtil;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.KmsAeadKeyManager;
-import com.google.crypto.tink.aead.KmsEnvelopeAead;
 import com.google.crypto.tink.aead.KmsEnvelopeAeadKeyManager;
-import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -110,11 +108,14 @@ public final class GcpKmsClientTest {
     String keyUri =
         "gcp-kms://projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key";
 
-    KmsClient client = new GcpKmsClient(keyUri).withCloudKms(new FakeCloudKms(asList(keyId)));
+    // Register a client bound to a single key.
+    registerGcpKmsClient(keyUri, new FakeCloudKms(asList(keyId)));
 
-    Aead kmsEnvelopeAead =
-        KmsEnvelopeAead.create(
-            PredefinedAeadParameters.AES128_CTR_HMAC_SHA256, client.getAead(keyUri));
+    // Create an envelope encryption AEAD primitive
+    KeyTemplate dekTemplate = KeyTemplates.get("AES128_CTR_HMAC_SHA256_RAW");
+    KeyTemplate envelopeTemplate = KmsEnvelopeAeadKeyManager.createKeyTemplate(keyUri, dekTemplate);
+    KeysetHandle handle = KeysetHandle.generateNew(envelopeTemplate);
+    Aead kmsEnvelopeAead = handle.getPrimitive(Aead.class);
 
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);

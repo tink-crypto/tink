@@ -29,9 +29,7 @@ import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.KmsClientsTestUtil;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.KmsAeadKeyManager;
-import com.google.crypto.tink.aead.KmsEnvelopeAead;
 import com.google.crypto.tink.aead.KmsEnvelopeAeadKeyManager;
-import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import java.security.GeneralSecurityException;
 import java.util.Optional;
 import org.junit.Before;
@@ -122,11 +120,15 @@ public final class AwsKmsClientTest {
     String kekUri =
         "aws-kms://arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab";
 
-    KmsClient client = new AwsKmsClient(kekUri).withAwsKms(new FakeAwsKms(asList(kekId)));
+    // Register a client bound to a single key.
+    AwsKmsClient.registerWithAwsKms(
+        Optional.of(kekUri), Optional.empty(), new FakeAwsKms(asList(kekId)));
 
-    Aead kmsEnvelopeAead =
-        KmsEnvelopeAead.create(
-            PredefinedAeadParameters.AES128_CTR_HMAC_SHA256, client.getAead(kekUri));
+    // Create an envelope encryption AEAD primitive
+    KeyTemplate dekTemplate = KeyTemplates.get("AES128_CTR_HMAC_SHA256_RAW");
+    KeyTemplate envelopeTemplate = KmsEnvelopeAeadKeyManager.createKeyTemplate(kekUri, dekTemplate);
+    KeysetHandle handle = KeysetHandle.generateNew(envelopeTemplate);
+    Aead kmsEnvelopeAead = handle.getPrimitive(Aead.class);
 
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);
