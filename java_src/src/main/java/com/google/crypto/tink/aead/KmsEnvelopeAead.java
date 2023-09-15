@@ -70,6 +70,22 @@ public final class KmsEnvelopeAead implements Aead {
     return supportedDekKeyTypes.contains(dekKeyTypeUrl);
   }
 
+  /**
+   * Creates a new KmsEnvelopeAead.
+   *
+   * <p>This function should be avoided. Instead, if you use this with one of the predefined key
+   * templates, call create with the corresponding parameters object.
+   *
+   * <p>For example, if you use:
+   *
+   * <p><code>Aead aead = new KmsEnvelopeAead(AeadKeyTemplates.AES128_GCM, remote)</code> you should
+   * replace this with:
+   *
+   * <p><code>Aead aead = KmsEnvelopeAead.create(PredefinedAeadParameters.AES128_GCM, remote)</code>
+   *
+   * @deprecated Instead, call {@code KmsEnvelopeAead.create} as explained above.
+   */
+  @Deprecated
   public KmsEnvelopeAead(KeyTemplate dekTemplate, Aead remote) {
     if (!isSupportedDekKeyType(dekTemplate.getTypeUrl())) {
       throw new IllegalArgumentException(
