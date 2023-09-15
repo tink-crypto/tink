@@ -807,9 +807,11 @@ public final class KeysetHandle {
    * <p>If this is not possible, please inline the function in your code.
    *
    * @throws GeneralSecurityException if the key template is invalid.
+   * @deprecated Use the overload taking a Parameters object instead.
    */
-  public static final KeysetHandle generateNew(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
-      throws GeneralSecurityException {
+  @Deprecated
+  public static final KeysetHandle generateNew(
+      com.google.crypto.tink.proto.KeyTemplate keyTemplate) throws GeneralSecurityException {
     return generateNew(TinkProtoParametersFormat.parse(keyTemplate.toByteArray()));
   }
 
