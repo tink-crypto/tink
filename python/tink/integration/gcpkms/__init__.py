@@ -14,6 +14,13 @@
 
 """GCP KMS package."""
 
-from tink.integration.gcpkms import _gcp_kms_client
+try:
+  # pylint: disable=g-import-not-at-top
+  from tink.integration.gcpkms import _gcp_kms_client
+except ImportError as import_error:
+  raise ImportError(
+      'Error importing the Tink Google Cloud KMS module; did you forget to'
+      ' install the `tink[gcpkms]` extras?'
+  ) from import_error
 
 GcpKmsClient = _gcp_kms_client.GcpKmsClient

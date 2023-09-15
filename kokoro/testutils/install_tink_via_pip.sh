@@ -24,25 +24,29 @@ set -eo pipefail
 
 usage() {
   cat <<EOF
-Usage:  $0 <path to tink python root>
+Usage:  $0 [-a] <path to tink python root>
+  -a: Install all the extras requirement.
   -h: Help. Print this usage information.
 EOF
   exit 1
 }
 
 TINK_PY_ROOT_DIR=
+TINK_REQUIREMENTS_FILE="requirements.txt"
 
 #######################################
 # Process command line arguments.
 #######################################
 process_args() {
   # Parse options.
-  while getopts "h" opt; do
+  while getopts "ha" opt; do
     case "${opt}" in
+      a) TINK_REQUIREMENTS_FILE="requirements_all.txt" ;;
       *) usage ;;
     esac
   done
   shift $((OPTIND - 1))
+  readonly TINK_REQUIREMENTS_FILE
   TINK_PY_ROOT_DIR="$1"
   if [[ -z "${TINK_PY_ROOT_DIR}" ]]; then
     echo "ERROR: The root folder of Tink Python must be specified" >&2
@@ -71,7 +75,8 @@ main() {
 
     python3 -m pip install "${pip_flags[@]}" --upgrade pip setuptools
     # Install Tink Python requirements.
-    python3 -m pip install "${pip_flags[@]}" --require-hashes -r requirements.txt
+    python3 -m pip install "${pip_flags[@]}" --require-hashes \
+        -r "${TINK_REQUIREMENTS_FILE}"
     # Install Tink Python
     python3 -m pip install "${pip_flags[@]}" .
   )
