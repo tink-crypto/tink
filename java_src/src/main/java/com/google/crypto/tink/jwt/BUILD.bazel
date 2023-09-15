@@ -180,7 +180,6 @@ java_library(
         ":verified_jwt",
         "//proto:jwt_rsa_ssa_pss_java_proto",
         "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory",
         "//src/main/java/com/google/crypto/tink/subtle:enums",
@@ -207,7 +206,6 @@ java_library(
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:parameters",
         "//src/main/java/com/google/crypto/tink:registry",
-        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "//src/main/java/com/google/crypto/tink/internal:mutable_parameters_registry",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory",
@@ -451,6 +449,7 @@ java_library(
         ":jwt_rsa_ssa_pss_sign_key_manager",
         ":jwt_rsa_ssa_pss_verify_key_manager",
         "//proto:config_java_proto",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
     ],
 )
 
@@ -467,6 +466,7 @@ android_library(
         ":jwt_rsa_ssa_pss_sign_key_manager-android",
         ":jwt_rsa_ssa_pss_verify_key_manager-android",
         "//proto:config_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips-android",
     ],
 )
 
@@ -780,7 +780,6 @@ android_library(
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:parameters-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
-        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink/internal:mutable_parameters_registry-android",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
@@ -806,7 +805,6 @@ android_library(
         ":verified_jwt-android",
         "//proto:jwt_rsa_ssa_pss_java_proto_lite",
         "//proto:tink_java_proto_lite",
-        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
         "//src/main/java/com/google/crypto/tink/subtle:enums-android",

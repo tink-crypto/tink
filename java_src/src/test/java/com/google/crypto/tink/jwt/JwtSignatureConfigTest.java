@@ -61,15 +61,32 @@ public class JwtSignatureConfigTest {
       assertThrows(
           GeneralSecurityException.class,
           () -> KeysetHandle.generateNew(KeyTemplates.get("JWT_RS256_2048_F4")));
-      assertThrows(
-          GeneralSecurityException.class,
-          () -> KeysetHandle.generateNew(KeyTemplates.get("JWT_PS256_2048_F4")));
 
     } else {
       JwtSignatureConfig.register();
       assertNotNull(KeysetHandle.generateNew(KeyTemplates.get("JWT_ES256")));
       assertNotNull(KeysetHandle.generateNew(KeyTemplates.get("JWT_RS256_2048_F4")));
-      assertNotNull(KeysetHandle.generateNew(KeyTemplates.get("JWT_PS256_2048_F4")));
     }
+  }
+
+  @Test
+  public void ps256WorksWhenNotInFipsOnlyState() throws Exception {
+    Assume.assumeFalse(TestUtil.isTsan());
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
+    JwtSignatureConfig.register();
+    assertNotNull(KeysetHandle.generateNew(KeyTemplates.get("JWT_PS256_2048_F4")));
+  }
+
+  @Test
+  public void ps256FailsInValidFipsOnlyState() throws Exception {
+    Assume.assumeFalse(TestUtil.isTsan());
+    Assume.assumeTrue(TinkFips.useOnlyFips());
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
+
+    JwtSignatureConfig.register();
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> KeysetHandle.generateNew(KeyTemplates.get("JWT_PS256_2048_F4")));
   }
 }
