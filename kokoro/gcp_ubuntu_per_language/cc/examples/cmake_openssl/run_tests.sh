@@ -20,7 +20,6 @@ if [[ -n "${KOKORO_ROOT:-}" ]]; then
   cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
 fi
 
-./kokoro/testutils/update_certs.sh
 ./kokoro/testutils/upgrade_gcc.sh
 source ./kokoro/testutils/install_cmake.sh
 source ./kokoro/testutils/install_openssl.sh
