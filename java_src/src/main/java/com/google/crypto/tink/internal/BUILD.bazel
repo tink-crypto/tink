@@ -44,7 +44,9 @@ java_library(
     deps = [
         ":build_dispatched_code",
         ":tink_bug_exception",
+        "//src/main/java/com/google/crypto/tink:secret_key_access",
         "//src/main/java/com/google/crypto/tink/util:bytes",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
         "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
@@ -54,7 +56,9 @@ android_library(
     srcs = ["Util.java"],
     deps = [
         ":tink_bug_exception-android",
+        "//src/main/java/com/google/crypto/tink:secret_key_access-android",
         "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes-android",
         "//src_android/main/java/com/google/crypto/tink/internal:build_dispatched_code",
         "@maven//:com_google_code_findbugs_jsr305",
     ],
