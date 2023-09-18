@@ -19,9 +19,11 @@ py_library(
     name = "tink",
     srcs_version = "PY3",
     deps = [
+        ":_json_proto_keyset_format",
         ":_keyset_handle",
         ":_keyset_reader",
         ":_keyset_writer",
+        ":_proto_keyset_format",
         "//tink/core",
     ],
 )
@@ -204,5 +206,88 @@ py_test(
         ":tink_python",
         requirement("absl-py"),
         "//tink/aead",
+    ],
+)
+
+py_library(
+    name = "_insecure_keyset_handle",
+    srcs = ["_insecure_keyset_handle.py"],
+    deps = [
+        ":_keyset_handle",
+        ":secret_key_access",
+        "//tink/core",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_library(
+    name = "_insecure_keyset_handle_test",
+    srcs = ["_insecure_keyset_handle_test.py"],
+    deps = [
+        ":_insecure_keyset_handle",
+        ":secret_key_access",
+        ":tink_config",
+        ":tink_python",
+        requirement("absl-py"),
+        "//tink/aead",
+        "//tink/core",
+    ],
+)
+
+py_library(
+    name = "_proto_keyset_format",
+    srcs = ["_proto_keyset_format.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_insecure_keyset_handle",
+        ":_keyset_handle",
+        ":_keyset_reader",
+        ":_keyset_writer",
+        "//tink/aead",
+        "//tink/core",
+    ],
+)
+
+py_test(
+    name = "_proto_keyset_format_test",
+    srcs = ["_proto_keyset_format_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":secret_key_access",
+        ":tink_config",
+        ":tink_python",
+        requirement("absl-py"),
+        "//tink/aead",
+        "//tink/core",
+        "//tink/hybrid",
+    ],
+)
+
+py_library(
+    name = "_json_proto_keyset_format",
+    srcs = ["_json_proto_keyset_format.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_insecure_keyset_handle",
+        ":_keyset_handle",
+        ":_keyset_reader",
+        ":_keyset_writer",
+        "//tink/aead",
+        "//tink/core",
+    ],
+)
+
+py_test(
+    name = "_json_proto_keyset_format_test",
+    srcs = ["_json_proto_keyset_format_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":secret_key_access",
+        ":tink_config",
+        ":tink_python",
+        requirement("absl-py"),
+        "//tink/aead",
+        "//tink/core",
+        "//tink/hybrid",
     ],
 )

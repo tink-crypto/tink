@@ -13,10 +13,12 @@
 # limitations under the License.
 """Tink package."""
 
+from tink import _json_proto_keyset_format as json_proto_keyset_format
 from tink import _keyset_handle
 from tink import _keyset_reader
 from tink import _keyset_writer
 from tink import _kms_clients
+from tink import _proto_keyset_format as proto_keyset_format
 from tink import core
 
 new_keyset_handle = _keyset_handle.new_keyset_handle
