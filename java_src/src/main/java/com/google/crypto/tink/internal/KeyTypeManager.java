@@ -227,6 +227,7 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
      * @throws GeneralSecurityException when not enough randomness was provided in the {@code input}
      *     stream.
      */
+    @SuppressWarnings("UnusedException") // We don't want to leak secrets in the exception
     protected static void readFully(InputStream input, byte[] output)
         throws GeneralSecurityException {
       try {
@@ -241,7 +242,7 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
         readTotal += read;
       }
       } catch (IOException e) {
-        throw new GeneralSecurityException("Reading pseudorandomness failed", e);
+        throw new GeneralSecurityException("Reading pseudorandomness failed");
       }
     }
   }
