@@ -107,6 +107,7 @@ public class XChaCha20Poly1305KeyManagerTest {
     byte[] keyMaterial = Random.randBytes(100);
     XChaCha20Poly1305Key key =
         factory.deriveKey(
+            manager,
             XChaCha20Poly1305KeyFormat.newBuilder().setVersion(0).build(),
             new ByteArrayInputStream(keyMaterial));
     assertThat(key.getKeyValue()).hasSize(keySize);
@@ -135,7 +136,9 @@ public class XChaCha20Poly1305KeyManagerTest {
 
     XChaCha20Poly1305Key key =
         factory.deriveKey(
-            XChaCha20Poly1305KeyFormat.newBuilder().setVersion(0).build(), fragmentedInputStream);
+            manager,
+            XChaCha20Poly1305KeyFormat.newBuilder().setVersion(0).build(),
+            fragmentedInputStream);
 
     assertThat(key.getKeyValue()).hasSize(keySize);
     for (int i = 0; i < keySize; ++i) {
@@ -150,6 +153,7 @@ public class XChaCha20Poly1305KeyManagerTest {
         GeneralSecurityException.class,
         () ->
             factory.deriveKey(
+                manager,
                 XChaCha20Poly1305KeyFormat.newBuilder().setVersion(0).build(),
                 new ByteArrayInputStream(keyMaterial)));
   }
@@ -161,6 +165,7 @@ public class XChaCha20Poly1305KeyManagerTest {
         GeneralSecurityException.class,
         () ->
             factory.deriveKey(
+                manager,
                 XChaCha20Poly1305KeyFormat.newBuilder().setVersion(1).build(),
                 new ByteArrayInputStream(keyMaterial)));
   }

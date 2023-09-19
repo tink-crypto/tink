@@ -111,7 +111,7 @@ public final class Registry {
           throw new GeneralSecurityException("parsing key format failed in deriveKey", e);
         }
         keyFactory.validateKeyFormat(keyFormat);
-        return keyFactory.deriveKey(keyFormat, stream);
+        return keyFactory.deriveKey(keyManager, keyFormat, stream);
       }
 
       @Override

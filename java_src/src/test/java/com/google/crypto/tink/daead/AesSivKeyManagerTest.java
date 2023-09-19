@@ -148,6 +148,7 @@ public class AesSivKeyManagerTest {
         new AesSivKeyManager()
             .keyFactory()
             .deriveKey(
+                new AesSivKeyManager(),
                 AesSivKeyFormat.newBuilder().setVersion(0).setKeySize(keySize).build(),
                 new ByteArrayInputStream(keyMaterial));
     assertThat(key.getKeyValue()).hasSize(keySize);
@@ -178,6 +179,7 @@ public class AesSivKeyManagerTest {
         new AesSivKeyManager()
             .keyFactory()
             .deriveKey(
+                new AesSivKeyManager(),
                 AesSivKeyFormat.newBuilder().setVersion(0).setKeySize(keySize).build(),
                 fragmentedInputStream);
 
@@ -197,6 +199,7 @@ public class AesSivKeyManagerTest {
             new AesSivKeyManager()
                 .keyFactory()
                 .deriveKey(
+                    new AesSivKeyManager(),
                     AesSivKeyFormat.newBuilder().setVersion(0).setKeySize(keySize).build(),
                     new ByteArrayInputStream(keyMaterial)));
   }
@@ -211,6 +214,7 @@ public class AesSivKeyManagerTest {
             new AesSivKeyManager()
                 .keyFactory()
                 .deriveKey(
+                    new AesSivKeyManager(),
                     AesSivKeyFormat.newBuilder().setVersion(1).setKeySize(keySize).build(),
                     new ByteArrayInputStream(keyMaterial)));
   }

@@ -163,6 +163,7 @@ public class AesGcmSivKeyManagerTest {
     byte[] keyMaterial = Random.randBytes(100);
     AesGcmSivKey key =
         factory.deriveKey(
+            manager,
             AesGcmSivKeyFormat.newBuilder().setVersion(0).setKeySize(keySize).build(),
             new ByteArrayInputStream(keyMaterial));
     assertThat(key.getKeyValue()).hasSize(keySize);
@@ -178,6 +179,7 @@ public class AesGcmSivKeyManagerTest {
     byte[] keyMaterial = Random.randBytes(100);
     AesGcmSivKey key =
         factory.deriveKey(
+            manager,
             AesGcmSivKeyFormat.newBuilder().setVersion(0).setKeySize(keySize).build(),
             new ByteArrayInputStream(keyMaterial));
     assertThat(key.getKeyValue()).hasSize(keySize);
@@ -206,6 +208,7 @@ public class AesGcmSivKeyManagerTest {
 
     AesGcmSivKey key =
         factory.deriveKey(
+            manager,
             AesGcmSivKeyFormat.newBuilder().setVersion(0).setKeySize(keySize).build(),
             fragmentedInputStream);
 
@@ -222,7 +225,7 @@ public class AesGcmSivKeyManagerTest {
         AesGcmSivKeyFormat.newBuilder().setVersion(0).setKeySize(32).build();
     assertThrows(
         GeneralSecurityException.class,
-        () -> factory.deriveKey(format, new ByteArrayInputStream(keyMaterial)));
+        () -> factory.deriveKey(manager, format, new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test
@@ -234,7 +237,7 @@ public class AesGcmSivKeyManagerTest {
         AesGcmSivKeyFormat.newBuilder().setVersion(1).setKeySize(keySize).build();
     assertThrows(
         GeneralSecurityException.class,
-        () -> factory.deriveKey(format, new ByteArrayInputStream(keyMaterial)));
+        () -> factory.deriveKey(manager, format, new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test
@@ -244,6 +247,7 @@ public class AesGcmSivKeyManagerTest {
     byte[] keyMaterial = Random.randBytes(32);
     AesGcmSivKey key =
         factory.deriveKey(
+            manager,
             AesGcmSivKeyFormat.newBuilder().setVersion(0).setKeySize(keySize).build(),
             new ByteArrayInputStream(keyMaterial));
     assertThat(key.getKeyValue()).hasSize(keySize);

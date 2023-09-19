@@ -106,7 +106,8 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
       }
 
       @Override
-      public AesGcmKey deriveKey(AesGcmKeyFormat format, InputStream inputStream)
+      public AesGcmKey deriveKey(
+          KeyTypeManager<AesGcmKey> keyManager, AesGcmKeyFormat format, InputStream inputStream)
           throws GeneralSecurityException {
         Validators.validateVersion(format.getVersion(), getVersion());
 

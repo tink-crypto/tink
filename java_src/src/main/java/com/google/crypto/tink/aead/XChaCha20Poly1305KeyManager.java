@@ -113,7 +113,9 @@ public class XChaCha20Poly1305KeyManager extends KeyTypeManager<XChaCha20Poly130
 
       @Override
       public XChaCha20Poly1305Key deriveKey(
-          XChaCha20Poly1305KeyFormat format, InputStream inputStream)
+          KeyTypeManager<XChaCha20Poly1305Key> keyManager,
+          XChaCha20Poly1305KeyFormat format,
+          InputStream inputStream)
           throws GeneralSecurityException {
         Validators.validateVersion(format.getVersion(), getVersion());
 

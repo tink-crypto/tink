@@ -108,7 +108,10 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
       }
 
       @Override
-      public AesGcmSivKey deriveKey(AesGcmSivKeyFormat format, InputStream inputStream)
+      public AesGcmSivKey deriveKey(
+          KeyTypeManager<AesGcmSivKey> keyManager,
+          AesGcmSivKeyFormat format,
+          InputStream inputStream)
           throws GeneralSecurityException {
         Validators.validateVersion(format.getVersion(), getVersion());
 

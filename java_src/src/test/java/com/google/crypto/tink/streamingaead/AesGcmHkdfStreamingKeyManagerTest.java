@@ -143,7 +143,8 @@ public class AesGcmHkdfStreamingKeyManagerTest {
         createKeyFormat(keySize, derivedKeySize, HashType.SHA256, 1024);
 
     byte[] keyMaterial = Random.randBytes(100);
-    AesGcmHkdfStreamingKey key = factory.deriveKey(format, new ByteArrayInputStream(keyMaterial));
+    AesGcmHkdfStreamingKey key =
+        factory.deriveKey(manager, format, new ByteArrayInputStream(keyMaterial));
     assertThat(key.getKeyValue()).hasSize(32);
     for (int i = 0; i < keySize; ++i) {
       assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
@@ -172,7 +173,7 @@ public class AesGcmHkdfStreamingKeyManagerTest {
     AesGcmHkdfStreamingKeyFormat format =
         createKeyFormat(keySize, derivedKeySize, HashType.SHA256, 1024);
 
-    AesGcmHkdfStreamingKey key = factory.deriveKey(format, fragmentedInputStream);
+    AesGcmHkdfStreamingKey key = factory.deriveKey(manager, format, fragmentedInputStream);
 
     assertThat(key.getKeyValue()).hasSize(keySize);
     for (int i = 0; i < keySize; ++i) {
@@ -190,7 +191,7 @@ public class AesGcmHkdfStreamingKeyManagerTest {
     byte[] keyMaterial = Random.randBytes(31);
     assertThrows(
         GeneralSecurityException.class,
-        () -> factory.deriveKey(format, new ByteArrayInputStream(keyMaterial)));
+        () -> factory.deriveKey(manager, format, new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test
@@ -201,7 +202,8 @@ public class AesGcmHkdfStreamingKeyManagerTest {
         createKeyFormat(keySize, derivedKeySize, HashType.SHA256, 1024);
 
     byte[] keyMaterial = Random.randBytes(32);
-    AesGcmHkdfStreamingKey key = factory.deriveKey(format, new ByteArrayInputStream(keyMaterial));
+    AesGcmHkdfStreamingKey key =
+        factory.deriveKey(manager, format, new ByteArrayInputStream(keyMaterial));
     assertThat(key.getKeyValue()).hasSize(32);
     for (int i = 0; i < keySize; ++i) {
       assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
@@ -222,7 +224,7 @@ public class AesGcmHkdfStreamingKeyManagerTest {
     byte[] keyMaterial = Random.randBytes(32);
     assertThrows(
         GeneralSecurityException.class,
-        () -> factory.deriveKey(format, new ByteArrayInputStream(keyMaterial)));
+        () -> factory.deriveKey(manager, format, new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test

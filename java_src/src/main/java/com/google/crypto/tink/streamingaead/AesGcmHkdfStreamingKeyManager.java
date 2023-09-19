@@ -126,7 +126,9 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
 
       @Override
       public AesGcmHkdfStreamingKey deriveKey(
-          AesGcmHkdfStreamingKeyFormat format, InputStream inputStream)
+          KeyTypeManager<AesGcmHkdfStreamingKey> keyManager,
+          AesGcmHkdfStreamingKeyFormat format,
+          InputStream inputStream)
           throws GeneralSecurityException {
         Validators.validateVersion(format.getVersion(), getVersion());
         byte[] pseudorandomness = new byte[format.getKeySize()];

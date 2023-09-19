@@ -258,6 +258,7 @@ public class HmacKeyManagerTest {
         .build();
     HmacKey key =
         factory.deriveKey(
+            manager,
             HmacKeyFormat.newBuilder().setVersion(0).setParams(params).setKeySize(keySize).build(),
             new ByteArrayInputStream(keyMaterial));
     assertThat(key.getKeyValue()).hasSize(keySize);
@@ -288,6 +289,7 @@ public class HmacKeyManagerTest {
     HmacParams params = HmacParams.newBuilder().setHash(HashType.SHA256).setTagSize(32).build();
     HmacKey key =
         factory.deriveKey(
+            manager,
             HmacKeyFormat.newBuilder().setVersion(0).setParams(params).setKeySize(keySize).build(),
             fragmentedInputStream);
 
@@ -305,7 +307,7 @@ public class HmacKeyManagerTest {
         HmacKeyFormat.newBuilder().setVersion(0).setParams(params).setKeySize(32).build();
     assertThrows(
         GeneralSecurityException.class,
-        () -> factory.deriveKey(format, new ByteArrayInputStream(keyMaterial)));
+        () -> factory.deriveKey(manager, format, new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test
@@ -321,7 +323,7 @@ public class HmacKeyManagerTest {
         HmacKeyFormat.newBuilder().setVersion(1).setParams(params).setKeySize(keySize).build();
     assertThrows(
         GeneralSecurityException.class,
-        () -> factory.deriveKey(format, new ByteArrayInputStream(keyMaterial)));
+        () -> factory.deriveKey(manager, format, new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test
@@ -335,6 +337,7 @@ public class HmacKeyManagerTest {
         .build();
     HmacKey key =
         factory.deriveKey(
+            manager,
             HmacKeyFormat.newBuilder().setVersion(0).setParams(params).setKeySize(keySize).build(),
             new ByteArrayInputStream(keyMaterial));
     assertThat(key.getKeyValue()).hasSize(keySize);

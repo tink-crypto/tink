@@ -135,13 +135,19 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
       // Since HMAC pads the key with zeroes, this same stream will lead to both parties using the
       // same HMAC key but different AES keys.
       @Override
-      public AesCtrHmacAeadKey deriveKey(AesCtrHmacAeadKeyFormat format, InputStream inputStream)
+      public AesCtrHmacAeadKey deriveKey(
+          KeyTypeManager<AesCtrHmacAeadKey> keyManager,
+          AesCtrHmacAeadKeyFormat format,
+          InputStream inputStream)
           throws GeneralSecurityException {
         validateKeyFormat(format);
         byte[] aesCtrKeyBytes = new byte[format.getAesCtrKeyFormat().getKeySize()];
         readFully(inputStream, aesCtrKeyBytes);
+        HmacKeyManager hmacKeyManager = new HmacKeyManager();
         HmacKey hmacKey =
-            new HmacKeyManager().keyFactory().deriveKey(format.getHmacKeyFormat(), inputStream);
+            hmacKeyManager
+                .keyFactory()
+                .deriveKey(hmacKeyManager, format.getHmacKeyFormat(), inputStream);
         AesCtrKey aesCtrKey =
             AesCtrKey.newBuilder()
                 .setParams(format.getAesCtrKeyFormat().getParams())

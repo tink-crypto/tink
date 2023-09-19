@@ -213,7 +213,10 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
      * <p>Not every KeyTypeManager needs to implement this; if not implemented a {@link
      * GeneralSecurityException} will be thrown.
      */
-    public KeyProtoT deriveKey(KeyFormatProtoT keyFormat, InputStream pseudoRandomness)
+    public KeyProtoT deriveKey(
+        KeyTypeManager<KeyProtoT> keyManager,
+        KeyFormatProtoT keyFormat,
+        InputStream pseudoRandomness)
         throws GeneralSecurityException {
       throw new GeneralSecurityException("deriveKey not implemented for key of type " + clazz);
     }

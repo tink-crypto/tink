@@ -123,7 +123,8 @@ public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
       }
 
       @Override
-      public AesSivKey deriveKey(AesSivKeyFormat format, InputStream inputStream)
+      public AesSivKey deriveKey(
+          KeyTypeManager<AesSivKey> keyTypeManager, AesSivKeyFormat format, InputStream inputStream)
           throws GeneralSecurityException {
         Validators.validateVersion(format.getVersion(), getVersion());
 

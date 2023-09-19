@@ -182,6 +182,7 @@ public class Ed25519PrivateKeyManagerTest {
     byte[] keyMaterial = Random.randBytes(100);
     Ed25519PrivateKey key =
         factory.deriveKey(
+            manager,
             Ed25519KeyFormat.newBuilder().setVersion(0).build(),
             new ByteArrayInputStream(keyMaterial));
     assertThat(key.getKeyValue()).hasSize(keySize);
@@ -210,8 +211,7 @@ public class Ed25519PrivateKeyManagerTest {
 
     Ed25519PrivateKey key =
         factory.deriveKey(
-            Ed25519KeyFormat.newBuilder().setVersion(0).build(),
-            fragmentedInputStream);
+            manager, Ed25519KeyFormat.newBuilder().setVersion(0).build(), fragmentedInputStream);
 
     assertThat(key.getKeyValue()).hasSize(keySize);
     for (int i = 0; i < keySize; ++i) {
@@ -224,6 +224,7 @@ public class Ed25519PrivateKeyManagerTest {
     byte[] keyMaterial = Random.randBytes(100);
     Ed25519PrivateKey key =
         factory.deriveKey(
+            manager,
             Ed25519KeyFormat.newBuilder().setVersion(0).build(),
             new ByteArrayInputStream(keyMaterial));
 
@@ -236,17 +237,25 @@ public class Ed25519PrivateKeyManagerTest {
   @Test
   public void testDeriveKeyNotEnoughRandomness() throws Exception {
     byte[] keyMaterial = Random.randBytes(10);
-    assertThrows(GeneralSecurityException.class, () -> factory.deriveKey(
-          Ed25519KeyFormat.newBuilder().setVersion(0).build(),
-          new ByteArrayInputStream(keyMaterial)));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.deriveKey(
+                manager,
+                Ed25519KeyFormat.newBuilder().setVersion(0).build(),
+                new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test
   public void testDeriveKeyWrongVersion() throws Exception {
     byte[] keyMaterial = Random.randBytes(32);
-    assertThrows(GeneralSecurityException.class, () -> factory.deriveKey(
-          Ed25519KeyFormat.newBuilder().setVersion(1).build(),
-          new ByteArrayInputStream(keyMaterial)));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.deriveKey(
+                manager,
+                Ed25519KeyFormat.newBuilder().setVersion(1).build(),
+                new ByteArrayInputStream(keyMaterial)));
   }
 
   @DataPoints("templateNames")

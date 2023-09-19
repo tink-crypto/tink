@@ -181,6 +181,7 @@ public class HmacPrfKeyManagerTest {
     HmacPrfParams params = HmacPrfParams.newBuilder().setHash(HashType.SHA256).build();
     HmacPrfKey key =
         factory.deriveKey(
+            manager,
             HmacPrfKeyFormat.newBuilder()
                 .setVersion(0)
                 .setParams(params)
@@ -215,6 +216,7 @@ public class HmacPrfKeyManagerTest {
     HmacPrfParams params = HmacPrfParams.newBuilder().setHash(HashType.SHA256).build();
     HmacPrfKey key =
         factory.deriveKey(
+            manager,
             HmacPrfKeyFormat.newBuilder()
                 .setVersion(0)
                 .setParams(params)
@@ -236,7 +238,7 @@ public class HmacPrfKeyManagerTest {
         HmacPrfKeyFormat.newBuilder().setVersion(0).setParams(params).setKeySize(32).build();
     assertThrows(
         GeneralSecurityException.class,
-        () -> factory.deriveKey(format, new ByteArrayInputStream(keyMaterial)));
+        () -> factory.deriveKey(manager, format, new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test
@@ -249,7 +251,7 @@ public class HmacPrfKeyManagerTest {
         HmacPrfKeyFormat.newBuilder().setVersion(1).setParams(params).setKeySize(keySize).build();
     assertThrows(
         GeneralSecurityException.class,
-        () -> factory.deriveKey(format, new ByteArrayInputStream(keyMaterial)));
+        () -> factory.deriveKey(manager, format, new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test
@@ -260,6 +262,7 @@ public class HmacPrfKeyManagerTest {
     HmacPrfParams params = HmacPrfParams.newBuilder().setHash(HashType.SHA256).build();
     HmacPrfKey key =
         factory.deriveKey(
+            manager,
             HmacPrfKeyFormat.newBuilder()
                 .setVersion(0)
                 .setParams(params)

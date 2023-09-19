@@ -123,7 +123,10 @@ public final class Ed25519PrivateKeyManager
       }
 
       @Override
-      public Ed25519PrivateKey deriveKey(Ed25519KeyFormat format, InputStream inputStream)
+      public Ed25519PrivateKey deriveKey(
+          KeyTypeManager<Ed25519PrivateKey> keyTypeManager,
+          Ed25519KeyFormat format,
+          InputStream inputStream)
           throws GeneralSecurityException {
         Validators.validateVersion(format.getVersion(), getVersion());
 

@@ -362,6 +362,7 @@ public class AesGcmKeyManagerTest {
     byte[] keyMaterial = Random.randBytes(100);
     AesGcmKey key =
         factory.deriveKey(
+            manager,
             AesGcmKeyFormat.newBuilder().setVersion(0).setKeySize(keySize).build(),
             new ByteArrayInputStream(keyMaterial));
     assertThat(key.getKeyValue()).hasSize(keySize);
@@ -377,6 +378,7 @@ public class AesGcmKeyManagerTest {
     byte[] keyMaterial = Random.randBytes(100);
     AesGcmKey key =
         factory.deriveKey(
+            manager,
             AesGcmKeyFormat.newBuilder().setVersion(0).setKeySize(keySize).build(),
             new ByteArrayInputStream(keyMaterial));
     assertThat(key.getKeyValue()).hasSize(keySize);
@@ -405,6 +407,7 @@ public class AesGcmKeyManagerTest {
 
     AesGcmKey key =
         factory.deriveKey(
+            manager,
             AesGcmKeyFormat.newBuilder().setVersion(0).setKeySize(keySize).build(),
             fragmentedInputStream);
 
@@ -420,7 +423,7 @@ public class AesGcmKeyManagerTest {
     AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder().setVersion(0).setKeySize(32).build();
     assertThrows(
         GeneralSecurityException.class,
-        () -> factory.deriveKey(format, new ByteArrayInputStream(keyMaterial)));
+        () -> factory.deriveKey(manager, format, new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test
@@ -431,7 +434,7 @@ public class AesGcmKeyManagerTest {
     AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder().setVersion(1).setKeySize(keySize).build();
     assertThrows(
         GeneralSecurityException.class,
-        () -> factory.deriveKey(format, new ByteArrayInputStream(keyMaterial)));
+        () -> factory.deriveKey(manager, format, new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test
@@ -441,6 +444,7 @@ public class AesGcmKeyManagerTest {
     byte[] keyMaterial = Random.randBytes(32);
     AesGcmKey key =
         factory.deriveKey(
+            manager,
             AesGcmKeyFormat.newBuilder().setVersion(0).setKeySize(keySize).build(),
             new ByteArrayInputStream(keyMaterial));
     assertThat(key.getKeyValue()).hasSize(keySize);

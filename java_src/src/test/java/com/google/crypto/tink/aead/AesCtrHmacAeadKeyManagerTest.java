@@ -156,7 +156,8 @@ public class AesCtrHmacAeadKeyManagerTest {
     AesCtrHmacAeadKeyFormat keyFormat = createKeyFormatForKeySize(keySize);
     byte[] keyMaterial = Random.randBytes(100);
 
-    AesCtrHmacAeadKey key = factory.deriveKey(keyFormat, new ByteArrayInputStream(keyMaterial));
+    AesCtrHmacAeadKey key =
+        factory.deriveKey(manager, keyFormat, new ByteArrayInputStream(keyMaterial));
 
     assertThat(key.getAesCtrKey().getKeyValue()).isNotEqualTo(key.getHmacKey().getKeyValue());
     assertThat(key.getAesCtrKey().getKeyValue())
@@ -171,7 +172,8 @@ public class AesCtrHmacAeadKeyManagerTest {
     AesCtrHmacAeadKeyFormat keyFormat = createKeyFormatForKeySize(keySize);
     byte[] keyMaterial = Random.randBytes(100);
 
-    AesCtrHmacAeadKey key = factory.deriveKey(keyFormat, new ByteArrayInputStream(keyMaterial));
+    AesCtrHmacAeadKey key =
+        factory.deriveKey(manager, keyFormat, new ByteArrayInputStream(keyMaterial));
 
     assertThat(key.getAesCtrKey().getKeyValue()).isNotEqualTo(key.getHmacKey().getKeyValue());
     assertThat(key.getAesCtrKey().getKeyValue())
@@ -201,7 +203,7 @@ public class AesCtrHmacAeadKeyManagerTest {
           }
         };
 
-    AesCtrHmacAeadKey key = factory.deriveKey(keyFormat, fragmentedInputStream);
+    AesCtrHmacAeadKey key = factory.deriveKey(manager, keyFormat, fragmentedInputStream);
 
     assertThat(key.getAesCtrKey().getKeyValue()).hasSize(keySize);
     assertThat(key.getHmacKey().getKeyValue()).hasSize(keySize);
@@ -219,7 +221,7 @@ public class AesCtrHmacAeadKeyManagerTest {
 
     assertThrows(
         GeneralSecurityException.class,
-        () -> factory.deriveKey(keyFormat, new ByteArrayInputStream(keyMaterial)));
+        () -> factory.deriveKey(manager, keyFormat, new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test
@@ -230,7 +232,7 @@ public class AesCtrHmacAeadKeyManagerTest {
 
     assertThrows(
         GeneralSecurityException.class,
-        () -> factory.deriveKey(keyFormat, new ByteArrayInputStream(keyMaterial)));
+        () -> factory.deriveKey(manager, keyFormat, new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test
@@ -255,7 +257,7 @@ public class AesCtrHmacAeadKeyManagerTest {
 
     assertThrows(
         GeneralSecurityException.class,
-        () -> factory.deriveKey(keyFormat, new ByteArrayInputStream(keyMaterial)));
+        () -> factory.deriveKey(manager, keyFormat, new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test
@@ -277,7 +279,8 @@ public class AesCtrHmacAeadKeyManagerTest {
             .build();
     byte[] keyMaterial = Random.randBytes(keySize + keySize);
 
-    AesCtrHmacAeadKey key = factory.deriveKey(keyFormat, new ByteArrayInputStream(keyMaterial));
+    AesCtrHmacAeadKey key =
+        factory.deriveKey(manager, keyFormat, new ByteArrayInputStream(keyMaterial));
 
     assertThat(key.getAesCtrKey().getKeyValue()).isNotEqualTo(key.getHmacKey().getKeyValue());
     assertThat(key.getAesCtrKey().getKeyValue())

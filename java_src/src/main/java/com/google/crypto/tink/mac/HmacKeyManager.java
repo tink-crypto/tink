@@ -188,7 +188,8 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
       }
 
       @Override
-      public HmacKey deriveKey(HmacKeyFormat format, InputStream inputStream)
+      public HmacKey deriveKey(
+          KeyTypeManager<HmacKey> keyManager, HmacKeyFormat format, InputStream inputStream)
           throws GeneralSecurityException {
         Validators.validateVersion(format.getVersion(), getVersion());
         byte[] pseudorandomness = new byte[format.getKeySize()];

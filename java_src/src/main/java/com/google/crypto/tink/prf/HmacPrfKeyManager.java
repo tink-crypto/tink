@@ -152,7 +152,8 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
       }
 
       @Override
-      public HmacPrfKey deriveKey(HmacPrfKeyFormat format, InputStream inputStream)
+      public HmacPrfKey deriveKey(
+          KeyTypeManager<HmacPrfKey> keyManager, HmacPrfKeyFormat format, InputStream inputStream)
           throws GeneralSecurityException {
         Validators.validateVersion(format.getVersion(), getVersion());
         byte[] pseudorandomness = new byte[format.getKeySize()];

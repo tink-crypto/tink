@@ -730,7 +730,8 @@ public class RegistryTest {
         }
 
         @Override
-        public AesGcmKey deriveKey(AesGcmKeyFormat format, InputStream stream)
+        public AesGcmKey deriveKey(
+            KeyTypeManager<AesGcmKey> keyManager, AesGcmKeyFormat format, InputStream stream)
             throws GeneralSecurityException {
           byte[] pseudorandomness = new byte[format.getKeySize()];
           readFully(stream, pseudorandomness);
@@ -1122,7 +1123,10 @@ public class RegistryTest {
         }
 
         @Override
-        public Ed25519PrivateKey deriveKey(Ed25519KeyFormat format, InputStream inputStream)
+        public Ed25519PrivateKey deriveKey(
+            KeyTypeManager<Ed25519PrivateKey> keyManager,
+            Ed25519KeyFormat format,
+            InputStream inputStream)
             throws GeneralSecurityException {
           return Ed25519PrivateKey.newBuilder()
               .setKeyValue(ByteString.copyFrom("derived", UTF_8))
