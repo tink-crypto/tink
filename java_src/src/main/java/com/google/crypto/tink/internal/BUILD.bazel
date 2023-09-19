@@ -760,3 +760,25 @@ java_library(
     srcs = ["MutableParametersRegistry.java"],
     deps = ["//src/main/java/com/google/crypto/tink:parameters"],
 )
+
+android_library(
+    name = "mutable_key_derivation_registry-android",
+    srcs = ["MutableKeyDerivationRegistry.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink:parameters-android",
+        "//src/main/java/com/google/crypto/tink:secret_key_access-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+    ],
+)
+
+java_library(
+    name = "mutable_key_derivation_registry",
+    srcs = ["MutableKeyDerivationRegistry.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:parameters",
+        "//src/main/java/com/google/crypto/tink:secret_key_access",
+        "@maven//:com_google_code_findbugs_jsr305",
+    ],
+)
