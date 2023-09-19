@@ -16,9 +16,14 @@
 
 package com.google.crypto.tink.internal;
 
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.Key;
+import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
@@ -29,6 +34,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.Nullable;
 
 /**
  * An object which collects all the operations which one can do on for a single key type, identified
@@ -199,26 +205,44 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
     /** Creates a new key from a given format. */
     public abstract KeyProtoT createKey(KeyFormatProtoT keyFormat) throws GeneralSecurityException;
 
-    /**
-     * Derives a new key from a given format, using the given {@code pseudoRandomness}.
-     *
-     * <p>Implementations need to note that the given paramter {@code pseudoRandomness} may only
-     * produce a finite amount of randomness. Hence, proper implementations will first obtain all
-     * the pseudorandom bytes needed; and only after produce the key.
-     *
-     * <p>While {@link validateKeyFormat} is called before this method will be called,
-     * implementations must check the version of the given {@code keyFormat}, as {@link
-     * validateKeyFormat} is also called from {@link createKey}.
+    /*
+     * Derives a new key from a parameters object, using the given {@code inputStream}.
      *
      * <p>Not every KeyTypeManager needs to implement this; if not implemented a {@link
      * GeneralSecurityException} will be thrown.
      */
-    public KeyProtoT deriveKey(
-        KeyTypeManager<KeyProtoT> keyManager,
-        KeyFormatProtoT keyFormat,
-        InputStream pseudoRandomness)
+    public Key createKeyFromRandomness(
+        Parameters parameters,
+        InputStream inputStream,
+        @Nullable Integer idRequirement,
+        SecretKeyAccess access)
         throws GeneralSecurityException {
-      throw new GeneralSecurityException("deriveKey not implemented for key of type " + clazz);
+      throw new GeneralSecurityException(
+          "createKeyFromRandomness not implemented for parameters " + parameters);
+    }
+
+    /** Legacy method: subclasses should implement {@code createKeyWithFixedRandomness} instead. */
+    public KeyProtoT deriveKey(
+        KeyTypeManager<KeyProtoT> manager, KeyFormatProtoT keyFormat, InputStream pseudoRandomness)
+        throws GeneralSecurityException {
+      // We use OutputPrefixType.RAW because we only create the Key Proto which does not contain
+      // the Output prefix.
+      ProtoParametersSerialization parametersSerialization =
+          ProtoParametersSerialization.create(
+              manager.getKeyType(), OutputPrefixType.RAW, keyFormat);
+      Parameters parameters =
+          MutableSerializationRegistry.globalInstance().parseParameters(parametersSerialization);
+      Key key =
+          createKeyFromRandomness(
+              parameters, pseudoRandomness, null, InsecureSecretKeyAccess.get());
+      ProtoKeySerialization keySerialization =
+          MutableSerializationRegistry.globalInstance()
+              .serializeKey(key, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
+      try {
+        return manager.parseKey(keySerialization.getValue());
+      } catch (InvalidProtocolBufferException e) {
+        throw new GeneralSecurityException("Unexpected problem when parsing serialized key");
+      }
     }
 
     /**

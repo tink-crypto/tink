@@ -18,14 +18,17 @@ package com.google.crypto.tink.aead;
 
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
+import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -40,6 +43,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * This key manager generates new {@code AesGcmKey} keys and produces new instances of {@code
@@ -106,17 +110,18 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
       }
 
       @Override
-      public AesGcmKey deriveKey(
-          KeyTypeManager<AesGcmKey> keyManager, AesGcmKeyFormat format, InputStream inputStream)
+      public com.google.crypto.tink.aead.AesGcmKey createKeyFromRandomness(
+          Parameters parameters,
+          InputStream stream,
+          @Nullable Integer idRequirement,
+          SecretKeyAccess access)
           throws GeneralSecurityException {
-        Validators.validateVersion(format.getVersion(), getVersion());
-
-        byte[] pseudorandomness = new byte[format.getKeySize()];
-        readFully(inputStream, pseudorandomness);
-        return AesGcmKey.newBuilder()
-            .setKeyValue(ByteString.copyFrom(pseudorandomness))
-            .setVersion(getVersion())
-            .build();
+        if (parameters instanceof AesGcmParameters) {
+          return createAesGcmKeyFromRandomness(
+              (AesGcmParameters) parameters, stream, idRequirement, access);
+        }
+        throw new GeneralSecurityException(
+            "Unexpected parameters: expected AesGcmParameters, but got: " + parameters);
       }
     };
   }
@@ -142,6 +147,20 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
                 .setVariant(AesGcmParameters.Variant.NO_PREFIX)
                 .build());
     return Collections.unmodifiableMap(result);
+  }
+
+  @AccessesPartialKey
+  static com.google.crypto.tink.aead.AesGcmKey createAesGcmKeyFromRandomness(
+      AesGcmParameters parameters,
+      InputStream stream,
+      @Nullable Integer idRequirement,
+      SecretKeyAccess access)
+      throws GeneralSecurityException {
+    return com.google.crypto.tink.aead.AesGcmKey.builder()
+        .setParameters(parameters)
+        .setIdRequirement(idRequirement)
+        .setKeyBytes(Util.readIntoSecretBytes(stream, parameters.getKeySizeBytes(), access))
+        .build();
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
