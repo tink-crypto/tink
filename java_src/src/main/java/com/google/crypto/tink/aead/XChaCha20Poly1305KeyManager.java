@@ -18,13 +18,16 @@ package com.google.crypto.tink.aead;
 
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
+import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.XChaCha20Poly1305Key;
 import com.google.crypto.tink.proto.XChaCha20Poly1305KeyFormat;
@@ -39,6 +42,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * This instance of {@code KeyManager} generates new {@code XChaCha20Poly1305} keys and produces new
@@ -112,21 +116,33 @@ public class XChaCha20Poly1305KeyManager extends KeyTypeManager<XChaCha20Poly130
       }
 
       @Override
-      public XChaCha20Poly1305Key deriveKey(
-          KeyTypeManager<XChaCha20Poly1305Key> keyManager,
-          XChaCha20Poly1305KeyFormat format,
-          InputStream inputStream)
+      public com.google.crypto.tink.aead.XChaCha20Poly1305Key createKeyFromRandomness(
+          Parameters parameters,
+          InputStream stream,
+          @Nullable Integer idRequirement,
+          SecretKeyAccess access)
           throws GeneralSecurityException {
-        Validators.validateVersion(format.getVersion(), getVersion());
-
-        byte[] pseudorandomness = new byte[KEY_SIZE_IN_BYTES];
-        readFully(inputStream, pseudorandomness);
-        return XChaCha20Poly1305Key.newBuilder()
-            .setKeyValue(ByteString.copyFrom(pseudorandomness))
-            .setVersion(getVersion())
-            .build();
+        if (parameters instanceof XChaCha20Poly1305Parameters) {
+          return createXChaChaKeyFromRandomness(
+              (XChaCha20Poly1305Parameters) parameters, stream, idRequirement, access);
+        }
+        throw new GeneralSecurityException(
+            "Unexpected parameters: expected AesGcmParameters, but got: " + parameters);
       }
     };
+  }
+
+  @AccessesPartialKey
+  static com.google.crypto.tink.aead.XChaCha20Poly1305Key createXChaChaKeyFromRandomness(
+      XChaCha20Poly1305Parameters parameters,
+      InputStream stream,
+      @Nullable Integer idRequirement,
+      SecretKeyAccess access)
+      throws GeneralSecurityException {
+    return com.google.crypto.tink.aead.XChaCha20Poly1305Key.create(
+        parameters.getVariant(),
+        Util.readIntoSecretBytes(stream, KEY_SIZE_IN_BYTES, access),
+        idRequirement);
   }
 
   private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {

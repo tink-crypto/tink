@@ -18,14 +18,17 @@ package com.google.crypto.tink.aead;
 
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.aead.subtle.AesGcmSiv;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
+import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.proto.AesGcmSivKey;
 import com.google.crypto.tink.proto.AesGcmSivKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -40,6 +43,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 
@@ -108,21 +112,34 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
       }
 
       @Override
-      public AesGcmSivKey deriveKey(
-          KeyTypeManager<AesGcmSivKey> keyManager,
-          AesGcmSivKeyFormat format,
-          InputStream inputStream)
+      public com.google.crypto.tink.aead.AesGcmSivKey createKeyFromRandomness(
+          Parameters parameters,
+          InputStream stream,
+          @Nullable Integer idRequirement,
+          SecretKeyAccess access)
           throws GeneralSecurityException {
-        Validators.validateVersion(format.getVersion(), getVersion());
-
-        byte[] pseudorandomness = new byte[format.getKeySize()];
-        readFully(inputStream, pseudorandomness);
-        return AesGcmSivKey.newBuilder()
-            .setKeyValue(ByteString.copyFrom(pseudorandomness))
-            .setVersion(getVersion())
-            .build();
+        if (parameters instanceof AesGcmSivParameters) {
+          return createAesGcmSivKeyFromRandomness(
+              (AesGcmSivParameters) parameters, stream, idRequirement, access);
+        }
+        throw new GeneralSecurityException(
+            "Unexpected parameters: expected AesGcmParameters, but got: " + parameters);
       }
     };
+  }
+
+  @AccessesPartialKey
+  static com.google.crypto.tink.aead.AesGcmSivKey createAesGcmSivKeyFromRandomness(
+      AesGcmSivParameters parameters,
+      InputStream stream,
+      @Nullable Integer idRequirement,
+      SecretKeyAccess access)
+      throws GeneralSecurityException {
+    return com.google.crypto.tink.aead.AesGcmSivKey.builder()
+        .setParameters(parameters)
+        .setIdRequirement(idRequirement)
+        .setKeyBytes(Util.readIntoSecretBytes(stream, parameters.getKeySizeBytes(), access))
+        .build();
   }
 
   private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
@@ -252,6 +269,4 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
                     .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
                     .build()));
   }
-
-
 }
