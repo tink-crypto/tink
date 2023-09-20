@@ -21,7 +21,6 @@ import static com.google.crypto.tink.internal.testing.Asserts.assertEqualWhenVal
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
-import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
@@ -33,6 +32,7 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.proto.RsaSsaPkcs1Params;
 import com.google.crypto.tink.subtle.Base64;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.util.SecretBigInteger;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
@@ -469,67 +469,72 @@ public final class RsaSsaPkcs1ProtoSerializationTest {
   // are encoded using the minimal encoding, and therefore may have the first bit set to 1.
   // In this key here, there are several such values, for example the factor "p". The test below
   // verifies that the value of "p" will get encoded differently.
-  private static final String JSON_KEYSET =
-      ""
-          + "{"
-          + "  \"primaryKeyId\": 1641152230,"
-          + "  \"key\": ["
-          + "    {"
-          + "      \"keyData\": {"
-          + "        \"typeUrl\":"
-          + "\"type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PrivateKey\","
-          + "        \"value\": \"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"
-          + "ovVFKpiE5K6MSAggE\","
-          + "        \"keyMaterialType\": \"ASYMMETRIC_PRIVATE\""
-          + "      },"
-          + "      \"status\": \"ENABLED\","
-          + "      \"keyId\": 1641152230,"
-          + "      \"outputPrefixType\": \"RAW\""
-          + "    }"
-          + "  ]"
-          + "}";
+  private static final String BINARY_HEX_KEYSET =
+      "08e6fdc78e0612f1120ae4120a3c747970652e676f6f676c65617069732e636f6d2f676f6f676c652e6372797074"
+          + "6f2e74696e6b2e527361537361506b637331507269766174654b657912a1124280021b0a2c139bb6920aac"
+          + "82eaf97816144caf2c949e338e3997048db108a222c6ab542c37e05e1d882ee67bcbb332b7f7e68ef03841"
+          + "a8e628c64e1c5b9fea1f99d6440df88a4ac4ceb84616c2a1a00473ec87e57afbe55dffab3b0f5b523170cd"
+          + "d65666cb9fe6e039b937b27001f6c612f2bc8bd58b1ec59702a2c8661f722667f7a0171e9ce28a4f530d63"
+          + "60174ca27e15f91ba4b9b166d9146044e651c3b09987f342a98130cdb753bcf811fa0fca6ebba8eb22cb63"
+          + "80e4b2af73b0cf219613523da1a90a3cdb981b00c13e9ac84ca3bac19671507bf640da237e18dfeec46762"
+          + "7fe279f50f4edb2460af5b3eb4488551179f1b79e52b73e2ce34a007965c74d13a800216b693a9b089b3a9"
+          + "8dfae61a982a3132a262ca8f9895f0f88f0c68ea6b0b3128bec9c4c8baeb585a59cada1a244119ed205129"
+          + "abd5d12fc1fa649cd9f4dfbec1763729db1ca07adb3e80e4e0e5e9859e1749f28ccecd09cc4d01c7bf88c5"
+          + "1d675a9cc8e1ac8d3583427a741b6720b54dc0a838ca96fa1daf1f3b0f174907c4ff70b28fa4464c6ed1b8"
+          + "4c31f0db396316d76b0e3dfc2630cdea0477cd42a1b5dcfcaa33c3e71e4ae5e3d0da86a423bd80b9722a09"
+          + "93631926bbaecfd3f0c9effb952aaa1d92b924362af4459adb3a8addd648c4eb419190761301eeb5b5879f"
+          + "8baa2a158dcd444323226c51d4b214af8f229fc343efbfb60a6efbfad3a028220132800297b0b9cbed3c4d"
+          + "4986e01bae4ade0fb82d59a46f0c93a7847a5ccea29594bc4b6629aa29f93f7fb165e7ef6b6beedb6de90b"
+          + "dfb250b3b5154535e33651f7afbf069193b773b53ec8b5d39862d1afc04c2cf84564dec9d2b3c6ee163f86"
+          + "cd677289ecab1ba5156347120e19eaf7f2dd48825e4c9d594e6521e65871e791806a462bbe69fdb15abf9f"
+          + "269bc717a332a0a67b7d9c0561513c93a06203b9a3c5ff3b22a4732ed2921d6c51ef9fd1c6bef8ac4ac6bc"
+          + "0764b0651be580ed6a81f65d11c0e29c0f34f6b2be5b3484ab1da61f57b32a587ccf150936c1a11e5e256b"
+          + "3d374842904e50ef80877f3ca2d72e6385779e167ed56fb08f70926ba8b51d946a672a8002ef02905ee0bc"
+          + "448834cc0c105ee6e662783fab420faed753b0a02473e9dea19efda315f86caf13789b6cd743d65ef5919a"
+          + "51a2286d0d37de37d82dfa7b0e1ff264a6650bf0b138e0a6e405fe244587a12aea3538737f72fbd725308e"
+          + "bc9d702721e03f12cd7a3f7c22c34576056e2da528330783b09d603c6118c21c48f68c0d633a0dc368c38a"
+          + "3343295c7251a4d7ba0f88892b02f77d4a9901e22596669e1e07337b125e77736df17ac0ad9244230a50af"
+          + "15b14d4df4e511d21b681a38434f4c0dc81b7e0e6cd11b3ab87127849b8e44ffa36eeba5530440c800f8c6"
+          + "821974a4a7b20f9240cc2eec696721dddb91028e57624f5fad5ef530c463f34c47c681228002fdcb088bcc"
+          + "ca2bc29ec1b6db9ee965d139ec282f37fb0f503c226f6ce6cd28f20967a92e460e79c2e0bc91c32d49330a"
+          + "52949b9c382a7096043e16ea258a26a468635a8e2b196b68e78a3183e7c88a4370e71bde39db3715acf908"
+          + "ccfc10b17338ecd340fbb32bf0d8b26ae33fec0fd67c0c4e5eeb99e7f6ece62e19e3ba4092f4c84f49eb0c"
+          + "dc92184ab2bd9bb8c9ed2a6f6d1a49abed648729ecf415257611fc16cebcd20e2e8fb5d5db9b518f8c1bcf"
+          + "af01431e00bb0be100502c5518e31ee133684fa273740b339058fbf83e758ef75a99402e8b607b403fc933"
+          + "b6ae6c12d4ec822a6c549408cee9c2a837a5bb41297b3152942bf04bd2c6b60b1cb508231a8004103ff9a3"
+          + "74be0b78fc9c0be6a640552fdee22298bd1843ad7621b68e01e279d1533cf76f7711082518f07f3cd05257"
+          + "c0505447be4e24c60227c8ff9b859f35413a31e83a889123f6e63f7997e8714677cd66597eab57c0424a47"
+          + "a5c918700fde8e2d388fbffe7bc48c584ff6ef3e6ac22000ec193ab3436a90b55580abad0a9ec4d0b51221"
+          + "7174348033ee5b88891aa31078e026d377b071992e97af149898d3a32ce23f50dcaf628b9461953e086cdc"
+          + "3cdf1d09ef9b5c7020e113cefdc95978743c2b4a79396ea1720b0fb4432e9d266f989e68c4423c160cc08d"
+          + "b706c31deb25967fa29f3ca38e396342cc654bf9b0be553be3b9e290ff9b53714bd720878c5ed82eea7583"
+          + "397dc541f3060ef49170cef1a0b7b73f8d2f9d85871547690046d11614d1329a033e045724277c4cb45210"
+          + "789e79d09c39230c8217a100a773c6fa11337d43b8f0522987b5432b340299d2b39d6f64b1c31a439819b7"
+          + "03e90f8d7667e8137918d24debfaf4ca0d587e204d10b58d879571ce0aced5011e470ec2882b6c7f2ad0fa"
+          + "0af7f747aebb6d122d21981d03a05ffa7680a31a5c5b0c435d2096b26076eb06b886b0b5a92491b29d3307"
+          + "6a7abe0a83905cfb7bdb4247cf64cd6a3ea11c95740664e609653c0ea2055b10eb12dda0dd05a0f4c06ca6"
+          + "171eb89c48c1986f92a66c76fab00be9c35e3bc3468e79a96d9dd824baed524b45c481128c042203010001"
+          + "1a8004ecf317b0d9706b7b84ea20e79a19a802bcee8339a7251872b41cdc2f874686b20e33042771a1cd7c"
+          + "33ec4d6c9f8cb85ae90d137c13e20c69b406afbf23281033758aa1f547b87d89efe6ede16a52d0045241b9"
+          + "5f5e25dacef6000f88f82d5b4113e4ee0726c607f9dadae8bf1b8f38e768a9f851b957b1bab047e4c62b37"
+          + "113819b724c1ea80c35d76b298ca06962706b2e73ae8158f462928e0ebe74bc3d1a62d32a1b770eb982d82"
+          + "00ebac3fc64b81fe155ab59043ab54a142e146596326a29989e5e484b53bd3f3d6f9b97a989c5a9b45a1d0"
+          + "05a393740b32bf870c1ca1c6f4d82b9483138dad2dd9ca9c3e1b1c8c760448d8ffc2a62866ed44823b3371"
+          + "8c7126360b7b5aec2d40285ce1911d959d4a5c55d710165fea1c0b34a939261ecc3a625f31253d2fd2754e"
+          + "a92b7e5b36ebc4f41445260f49dc88b447a1eaa3683f5c5b16a1f3d17aaf552e0a8f8b56c429e32ee0fea5"
+          + "e6c54bcbbc547a24f6701f1f62c936d511ee78fcfd9b7206edb442188ea82ce452edd5c1ba76a8ca885c65"
+          + "0bc48b649b0c835c6964d4d57bb8e9cd7d4eb749caf3263f5262d4ae0ab40071f7d4ddcbf5aeef83abffb8"
+          + "8e64756659a004a30655732cd81e042a10197c0575334435e0d80805971203bae4ad61baadd47282638ef0"
+          + "930f4b65add4cd5fbabdd794d2ddee3dc60253de50784f29c0a36160b3d39d66d6a8bd514aa621392ba312"
+          + "0208041802100118e6fdc78e062003";
 
   @Test
   public void existingTinkKeyset_reencodesNumbersUsingTwoComplement() throws Exception {
-    com.google.crypto.tink.proto.Keyset keyset = JsonKeysetReader.withString(JSON_KEYSET).read();
+    com.google.crypto.tink.proto.Keyset keyset =
+        com.google.crypto.tink.proto.Keyset.parseFrom(
+            Hex.decode(BINARY_HEX_KEYSET), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(keyset.getKeyCount()).isEqualTo(1);
+    assertThat(keyset.getKey(0).getKeyData().getTypeUrl()).isEqualTo(PRIVATE_TYPE_URL);
     com.google.crypto.tink.proto.KeyData keyDataOfExistingKey = keyset.getKey(0).getKeyData();
 
     com.google.crypto.tink.proto.RsaSsaPkcs1PrivateKey existingKey =
