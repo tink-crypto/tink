@@ -18,15 +18,18 @@ package com.google.crypto.tink.aead;
 
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
+import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
@@ -44,6 +47,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * This key manager generates new {@link AesCtrHmacAeadKey} keys and produces new instances of
@@ -125,42 +129,45 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
             .build();
       }
 
-      // To ensure that the derived key can provide key commitment, the AES-CTR key must be derived
-      // before the HMAC key.
-      // Consider the following malicious scenario using a brute-forced key InputStream with a 0 as
-      // its 32nd byte:
-      //     31 bytes || 1 byte of 0s || 16 bytes
-      // We give this stream to party A, saying that it is 32-byte HMAC key || 16-byte AES key. We
-      // also give this stream to party B, saying that it is 31-byte HMAC key || 16-byte AES key.
-      // Since HMAC pads the key with zeroes, this same stream will lead to both parties using the
-      // same HMAC key but different AES keys.
       @Override
-      public AesCtrHmacAeadKey deriveKey(
-          KeyTypeManager<AesCtrHmacAeadKey> keyManager,
-          AesCtrHmacAeadKeyFormat format,
-          InputStream inputStream)
+      public com.google.crypto.tink.aead.AesCtrHmacAeadKey createKeyFromRandomness(
+          Parameters parameters,
+          InputStream stream,
+          @Nullable Integer idRequirement,
+          SecretKeyAccess access)
           throws GeneralSecurityException {
-        validateKeyFormat(format);
-        byte[] aesCtrKeyBytes = new byte[format.getAesCtrKeyFormat().getKeySize()];
-        readFully(inputStream, aesCtrKeyBytes);
-        HmacKeyManager hmacKeyManager = new HmacKeyManager();
-        HmacKey hmacKey =
-            hmacKeyManager
-                .keyFactory()
-                .deriveKey(hmacKeyManager, format.getHmacKeyFormat(), inputStream);
-        AesCtrKey aesCtrKey =
-            AesCtrKey.newBuilder()
-                .setParams(format.getAesCtrKeyFormat().getParams())
-                .setVersion(getVersion())
-                .setKeyValue(ByteString.copyFrom(aesCtrKeyBytes))
-                .build();
-        return AesCtrHmacAeadKey.newBuilder()
-            .setVersion(getVersion())
-            .setAesCtrKey(aesCtrKey)
-            .setHmacKey(hmacKey)
-            .build();
+        if (parameters instanceof AesCtrHmacAeadParameters) {
+          return createAesCtrHmacAeadKeyFromRandomness(
+              (AesCtrHmacAeadParameters) parameters, stream, idRequirement, access);
+        }
+        throw new GeneralSecurityException(
+            "Unexpected parameters: expected AesCtrHmacAeadParameters, but got: " + parameters);
       }
     };
+  }
+
+  // To ensure that the derived key can provide key commitment, the AES-CTR key must be derived
+  // before the HMAC key.
+  // Consider the following malicious scenario using a brute-forced key InputStream with a 0 as
+  // its 32nd byte:
+  //     31 bytes || 1 byte of 0s || 16 bytes
+  // We give this stream to party A, saying that it is 32-byte HMAC key || 16-byte AES key. We
+  // also give this stream to party B, saying that it is 31-byte HMAC key || 16-byte AES key.
+  // Since HMAC pads the key with zeroes, this same stream will lead to both parties using the
+  // same HMAC key but different AES keys.
+  @AccessesPartialKey
+  static com.google.crypto.tink.aead.AesCtrHmacAeadKey createAesCtrHmacAeadKeyFromRandomness(
+      AesCtrHmacAeadParameters parameters,
+      InputStream stream,
+      @Nullable Integer idRequirement,
+      SecretKeyAccess access)
+      throws GeneralSecurityException {
+    return com.google.crypto.tink.aead.AesCtrHmacAeadKey.builder()
+        .setParameters(parameters)
+        .setIdRequirement(idRequirement)
+        .setAesKeyBytes(Util.readIntoSecretBytes(stream, parameters.getAesKeySizeBytes(), access))
+        .setHmacKeyBytes(Util.readIntoSecretBytes(stream, parameters.getHmacKeySizeBytes(), access))
+        .build();
   }
 
   private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {

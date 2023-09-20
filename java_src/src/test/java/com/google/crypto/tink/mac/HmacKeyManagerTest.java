@@ -18,7 +18,10 @@ package com.google.crypto.tink.mac;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.Key;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
@@ -33,10 +36,12 @@ import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.PrfHmacJce;
 import com.google.crypto.tink.subtle.PrfMac;
 import com.google.crypto.tink.subtle.Random;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.crypto.spec.SecretKeySpec;
@@ -434,5 +439,31 @@ public class HmacKeyManagerTest {
     assertThat(h.size()).isEqualTo(1);
     assertThat(h.getAt(0).getKey().getParameters())
         .isEqualTo(KeyTemplates.get(templateName).toParameters());
+  }
+
+  @Theory
+  public void testCreateKeyFromRandomness(@FromDataPoints("templateNames") String templateName)
+      throws Exception {
+    byte[] keyMaterial =
+        new byte[] {
+          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+          25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46,
+          47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68,
+        };
+    HmacParameters parameters = (HmacParameters) KeyTemplates.get(templateName).toParameters();
+    com.google.crypto.tink.mac.HmacKey key =
+        HmacKeyManager.createHmacKeyFromRandomness(
+            parameters,
+            new ByteArrayInputStream(keyMaterial),
+            parameters.hasIdRequirement() ? 123 : null,
+            InsecureSecretKeyAccess.get());
+    byte[] expectedKeyBytes = Arrays.copyOf(keyMaterial, parameters.getKeySizeBytes());
+    Key expectedKey =
+        com.google.crypto.tink.mac.HmacKey.builder()
+            .setParameters(parameters)
+            .setIdRequirement(parameters.hasIdRequirement() ? 123 : null)
+            .setKeyBytes(SecretBytes.copyFrom(expectedKeyBytes, InsecureSecretKeyAccess.get()))
+            .build();
+    assertTrue(key.equalsKey(expectedKey));
   }
 }
