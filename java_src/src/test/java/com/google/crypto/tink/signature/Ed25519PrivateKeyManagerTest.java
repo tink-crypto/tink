@@ -18,7 +18,9 @@ package com.google.crypto.tink.signature;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
@@ -33,6 +35,8 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Ed25519Verify;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
+import com.google.crypto.tink.util.Bytes;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -270,5 +274,65 @@ public class Ed25519PrivateKeyManagerTest {
     assertThat(h.size()).isEqualTo(1);
     assertThat(h.getAt(0).getKey().getParameters())
         .isEqualTo(KeyTemplates.get(templateName).toParameters());
+  }
+
+  @Test
+  public void testCreateRawKeyFromRandomness() throws Exception {
+    byte[] keyMaterial =
+        Hex.decode(
+            ""
+                + "000102030405060708090A0B0C0D0E0F"
+                + "101112131415161718191A1B1C1D1E1F"
+                + "202122232425262728292A2B2C2D2E2F");
+    com.google.crypto.tink.signature.Ed25519PrivateKey key =
+        Ed25519PrivateKeyManager.createEd25519KeyFromRandomness(
+            Ed25519Parameters.create(Ed25519Parameters.Variant.NO_PREFIX),
+            new ByteArrayInputStream(keyMaterial),
+            null,
+            InsecureSecretKeyAccess.get());
+    com.google.crypto.tink.signature.Ed25519PublicKey expectedPublicKey =
+        com.google.crypto.tink.signature.Ed25519PublicKey.create(
+            Ed25519Parameters.Variant.NO_PREFIX,
+            Bytes.copyFrom(
+                Hex.decode("03a107bff3ce10be1d70dd18e74bc09967e4d6309ba50d5f1ddc8664125531b8")),
+            /* idRequirement= */ null);
+
+    com.google.crypto.tink.signature.Ed25519PrivateKey expectedPrivateKey =
+        com.google.crypto.tink.signature.Ed25519PrivateKey.create(
+            expectedPublicKey,
+            SecretBytes.copyFrom(
+                Hex.decode("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F"),
+                InsecureSecretKeyAccess.get()));
+    assertTrue(key.equalsKey(expectedPrivateKey));
+  }
+
+  @Test
+  public void testCreateTinkKeyFromRandomness() throws Exception {
+    byte[] keyMaterial =
+        Hex.decode(
+            ""
+                + "000102030405060708090A0B0C0D0E0F"
+                + "101112131415161718191A1B1C1D1E1F"
+                + "202122232425262728292A2B2C2D2E2F");
+    com.google.crypto.tink.signature.Ed25519PrivateKey key =
+        Ed25519PrivateKeyManager.createEd25519KeyFromRandomness(
+            Ed25519Parameters.create(Ed25519Parameters.Variant.TINK),
+            new ByteArrayInputStream(keyMaterial),
+            2344,
+            InsecureSecretKeyAccess.get());
+    com.google.crypto.tink.signature.Ed25519PublicKey expectedPublicKey =
+        com.google.crypto.tink.signature.Ed25519PublicKey.create(
+            Ed25519Parameters.Variant.TINK,
+            Bytes.copyFrom(
+                Hex.decode("03a107bff3ce10be1d70dd18e74bc09967e4d6309ba50d5f1ddc8664125531b8")),
+            2344);
+
+    com.google.crypto.tink.signature.Ed25519PrivateKey expectedPrivateKey =
+        com.google.crypto.tink.signature.Ed25519PrivateKey.create(
+            expectedPublicKey,
+            SecretBytes.copyFrom(
+                Hex.decode("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F"),
+                InsecureSecretKeyAccess.get()));
+    assertTrue(key.equalsKey(expectedPrivateKey));
   }
 }

@@ -18,20 +18,25 @@ package com.google.crypto.tink.signature;
 
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
+import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.proto.Ed25519KeyFormat;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
 import com.google.crypto.tink.proto.Ed25519PublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Ed25519Sign;
 import com.google.crypto.tink.subtle.Validators;
+import com.google.crypto.tink.util.Bytes;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -40,6 +45,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * This instance of {@code KeyManager} generates new {@code Ed25519PrivateKey} keys and produces new
@@ -123,28 +129,38 @@ public final class Ed25519PrivateKeyManager
       }
 
       @Override
-      public Ed25519PrivateKey deriveKey(
-          KeyTypeManager<Ed25519PrivateKey> keyTypeManager,
-          Ed25519KeyFormat format,
-          InputStream inputStream)
+      public com.google.crypto.tink.signature.Ed25519PrivateKey createKeyFromRandomness(
+          Parameters parameters,
+          InputStream stream,
+          @Nullable Integer idRequirement,
+          SecretKeyAccess access)
           throws GeneralSecurityException {
-        Validators.validateVersion(format.getVersion(), getVersion());
-
-        byte[] pseudorandomness = new byte[Ed25519Sign.SECRET_KEY_LEN];
-        readFully(inputStream, pseudorandomness);
-        Ed25519Sign.KeyPair keyPair = Ed25519Sign.KeyPair.newKeyPairFromSeed(pseudorandomness);
-        Ed25519PublicKey publicKey =
-            Ed25519PublicKey.newBuilder()
-                .setVersion(getVersion())
-                .setKeyValue(ByteString.copyFrom(keyPair.getPublicKey()))
-                .build();
-        return Ed25519PrivateKey.newBuilder()
-            .setVersion(getVersion())
-            .setKeyValue(ByteString.copyFrom(keyPair.getPrivateKey()))
-            .setPublicKey(publicKey)
-            .build();
+        if (parameters instanceof Ed25519Parameters) {
+          return createEd25519KeyFromRandomness(
+              (Ed25519Parameters) parameters, stream, idRequirement, access);
+        }
+        throw new GeneralSecurityException(
+            "Unexpected parameters: expected AesFfxFf1Parameters, but got: " + parameters);
       }
     };
+  }
+
+  @AccessesPartialKey
+  static com.google.crypto.tink.signature.Ed25519PrivateKey createEd25519KeyFromRandomness(
+      Ed25519Parameters parameters,
+      InputStream stream,
+      @Nullable Integer idRequirement,
+      SecretKeyAccess access)
+      throws GeneralSecurityException {
+    SecretBytes pseudorandomness =
+        Util.readIntoSecretBytes(stream, Ed25519Sign.SECRET_KEY_LEN, access);
+    Ed25519Sign.KeyPair keyPair =
+        Ed25519Sign.KeyPair.newKeyPairFromSeed(pseudorandomness.toByteArray(access));
+    com.google.crypto.tink.signature.Ed25519PublicKey publicKey =
+        com.google.crypto.tink.signature.Ed25519PublicKey.create(
+            parameters.getVariant(), Bytes.copyFrom(keyPair.getPublicKey()), idRequirement);
+    return com.google.crypto.tink.signature.Ed25519PrivateKey.create(
+        publicKey, SecretBytes.copyFrom(keyPair.getPrivateKey(), access));
   }
 
   private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
