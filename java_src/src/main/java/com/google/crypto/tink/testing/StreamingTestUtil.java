@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.testing;
 
+import static com.google.common.truth.Truth.assertThat;
 import static java.lang.Math.min;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -448,17 +449,54 @@ public final class StreamingTestUtil {
           decrypted.array());
     }
 
-    // Decrypt ciphertext via InputStream.
+    // Decrypt ciphertext via InputStream using read(byte[])
     {
       InputStream ctStream = new ByteArrayInputStream(ciphertext.toByteArray());
       InputStream decStream = decryptionStreamingAead.newDecryptingStream(ctStream, associatedData);
       byte[] decrypted = new byte[plaintext.length];
       int decryptedLength = decStream.read(decrypted);
 
-      // Compare results;
       assertEquals("Decrypted length should be equal to plaintext length", decryptedLength,
           plaintext.length);
       TestUtil.assertByteArrayEquals(plaintext, decrypted);
+
+      byte[] buf = new byte[1];
+      int n = decStream.read(buf);
+      assertThat(n).isEqualTo(-1);
+    }
+
+    // Decrypt ciphertext via InputStream using read()
+    {
+      InputStream ctStream = new ByteArrayInputStream(ciphertext.toByteArray());
+      InputStream decStream = decryptionStreamingAead.newDecryptingStream(ctStream, associatedData);
+      byte[] decrypted = new byte[plaintext.length];
+      for (int i = 0; i < plaintext.length; i++) {
+        int b = decStream.read();
+        // TODO(b/298951892): A valid output of read() should not be negative.
+        // assertThat(b).isAtLeast(0);
+        assertThat(b).isAtMost(255);
+        decrypted[i] = (byte) b;
+      }
+      assertThat(decrypted).isEqualTo(plaintext);
+
+      int b = decStream.read();
+      assertThat(b).isEqualTo(-1);
+    }
+
+    // Decrypt ciphertext via InputStream using read(byte[], int, int)
+    {
+      InputStream ctStream = new ByteArrayInputStream(ciphertext.toByteArray());
+      InputStream decStream = decryptionStreamingAead.newDecryptingStream(ctStream, associatedData);
+      byte[] decrypted = new byte[plaintext.length];
+      for (int i = 0; i < plaintext.length; i++) {
+        int n = decStream.read(decrypted, i, 1);
+        assertThat(n).isEqualTo(1);
+      }
+      assertThat(decrypted).isEqualTo(plaintext);
+
+      byte[] buf = new byte[1];
+      int n = decStream.read(buf, 0, 1);
+      assertThat(n).isEqualTo(-1);
     }
 
     // Decrypt ciphertext via SmallChunksByteArrayInputStream.

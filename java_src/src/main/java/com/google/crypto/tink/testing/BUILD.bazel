@@ -105,6 +105,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:hex",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "@maven//:com_google_errorprone_error_prone_annotations",
+        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
 )
@@ -118,6 +119,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink/subtle:hex-android",
         "//src/main/java/com/google/crypto/tink/subtle:random-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
+        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
 )
