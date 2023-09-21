@@ -184,9 +184,6 @@ public final class JwkSetConverter {
     }
     String alg;
     String crv;
-    // We currently encode with one extra 0 byte at the beginning, to make sure
-    // that parsing is correct even if passing of a two's complement encoding is used.
-    // See also b/264525021.
     int encLength;
     switch (jwtEcdsaPublicKey.getAlgorithm()) {
       case ES256:
