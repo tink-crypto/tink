@@ -143,6 +143,7 @@ py_library(
     name = "secret_key_access",
     srcs = ["secret_key_access.py"],
     srcs_version = "PY3",
+    visibility = ["//visibility:public"],
     deps = [
         "//tink/core",
     ],
