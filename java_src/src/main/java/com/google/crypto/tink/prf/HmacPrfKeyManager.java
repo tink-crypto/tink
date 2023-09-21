@@ -18,15 +18,18 @@ package com.google.crypto.tink.prf;
 
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.PrimitiveFactory;
+import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.prf.internal.HmacPrfProtoSerialization;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacPrfKey;
@@ -44,6 +47,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
@@ -152,19 +156,33 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
       }
 
       @Override
-      public HmacPrfKey deriveKey(
-          KeyTypeManager<HmacPrfKey> keyManager, HmacPrfKeyFormat format, InputStream inputStream)
+      public com.google.crypto.tink.prf.HmacPrfKey createKeyFromRandomness(
+          Parameters parameters,
+          InputStream stream,
+          @Nullable Integer idRequirement,
+          SecretKeyAccess access)
           throws GeneralSecurityException {
-        Validators.validateVersion(format.getVersion(), getVersion());
-        byte[] pseudorandomness = new byte[format.getKeySize()];
-        readFully(inputStream, pseudorandomness);
-        return HmacPrfKey.newBuilder()
-            .setVersion(getVersion())
-            .setParams(format.getParams())
-            .setKeyValue(ByteString.copyFrom(pseudorandomness))
-            .build();
+        if (parameters instanceof HmacPrfParameters) {
+          return createHmacKeyFromRandomness(
+              (HmacPrfParameters) parameters, stream, idRequirement, access);
+        }
+        throw new GeneralSecurityException(
+            "Unexpected parameters: expected HmacPrfParameters, but got: " + parameters);
       }
     };
+  }
+
+  @AccessesPartialKey
+  static com.google.crypto.tink.prf.HmacPrfKey createHmacKeyFromRandomness(
+      HmacPrfParameters parameters,
+      InputStream stream,
+      @Nullable Integer idRequirement,
+      SecretKeyAccess access)
+      throws GeneralSecurityException {
+    return com.google.crypto.tink.prf.HmacPrfKey.builder()
+        .setParameters(parameters)
+        .setKeyBytes(Util.readIntoSecretBytes(stream, parameters.getKeySizeBytes(), access))
+        .build();
   }
 
   private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {

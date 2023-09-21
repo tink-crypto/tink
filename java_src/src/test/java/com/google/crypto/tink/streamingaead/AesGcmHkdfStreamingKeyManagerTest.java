@@ -18,7 +18,10 @@ package com.google.crypto.tink.streamingaead;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.Key;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
@@ -32,9 +35,11 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.StreamingTestUtil;
+import com.google.crypto.tink.util.SecretBytes;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 import org.junit.Before;
@@ -317,4 +322,24 @@ public class AesGcmHkdfStreamingKeyManagerTest {
         .isEqualTo(KeyTemplates.get(templateName).toParameters());
   }
 
+  @Theory
+  public void testCreateKeyFromRandomness(@FromDataPoints("templateNames") String templateName)
+      throws Exception {
+    byte[] keyMaterial =
+        new byte[] {
+          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+          25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46,
+          47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68,
+        };
+    AesGcmHkdfStreamingParameters parameters =
+        (AesGcmHkdfStreamingParameters) KeyTemplates.get(templateName).toParameters();
+    com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey key =
+        AesGcmHkdfStreamingKeyManager.createAesGcmHkdfStreamingKeyFromRandomness(
+            parameters, new ByteArrayInputStream(keyMaterial), null, InsecureSecretKeyAccess.get());
+    byte[] expectedKeyBytes = Arrays.copyOf(keyMaterial, parameters.getKeySizeBytes());
+    Key expectedKey =
+        com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey.create(
+            parameters, SecretBytes.copyFrom(expectedKeyBytes, InsecureSecretKeyAccess.get()));
+    assertTrue(key.equalsKey(expectedKey));
+  }
 }

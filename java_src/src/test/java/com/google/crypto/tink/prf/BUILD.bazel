@@ -80,6 +80,8 @@ java_test(
     deps = [
         "//proto:common_java_proto",
         "//proto:hmac_prf_java_proto",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink:key",
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:key_templates",
         "//src/main/java/com/google/crypto/tink:parameters",
