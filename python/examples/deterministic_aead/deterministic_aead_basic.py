@@ -14,8 +14,8 @@
 """A minimal example for using the deterministic AEAD API."""
 # [START deterministic-aead-basic-example]
 import tink
-from tink import cleartext_keyset_handle
 from tink import daead
+from tink import secret_key_access
 
 
 def example():
@@ -48,7 +48,9 @@ def example():
   # limit the exposure of accessing the raw key material. WARNING: In practice,
   # it is unlikely you will want to use a cleartext_keyset_handle, as it implies
   # that your key material is passed in cleartext which is a security risk.
-  keyset_handle = cleartext_keyset_handle.read(tink.JsonKeysetReader(keyset))
+  keyset_handle = tink.json_proto_keyset_format.parse(
+      keyset, secret_key_access.TOKEN
+  )
 
   # Retrieve the DeterministicAead primitive we want to use from the keyset
   # handle.

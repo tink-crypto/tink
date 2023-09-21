@@ -20,10 +20,9 @@ It loads cleartext keys from disk - this is not recommended!
 from absl import app
 from absl import flags
 from absl import logging
-
 import tink
 from tink import aead
-from tink import cleartext_keyset_handle
+from tink import secret_key_access
 
 
 FLAGS = flags.FLAGS
@@ -51,7 +50,9 @@ def main(argv):
   with open(FLAGS.keyset_path, 'rt') as keyset_file:
     try:
       text = keyset_file.read()
-      keyset_handle = cleartext_keyset_handle.read(tink.JsonKeysetReader(text))
+      keyset_handle = tink.json_proto_keyset_format.parse(
+          text, secret_key_access.TOKEN
+      )
     except tink.TinkError as e:
       logging.exception('Error reading key: %s', e)
       return 1
