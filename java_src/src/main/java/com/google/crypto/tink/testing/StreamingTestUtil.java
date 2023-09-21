@@ -472,8 +472,7 @@ public final class StreamingTestUtil {
       byte[] decrypted = new byte[plaintext.length];
       for (int i = 0; i < plaintext.length; i++) {
         int b = decStream.read();
-        // TODO(b/298951892): A valid output of read() should not be negative.
-        // assertThat(b).isAtLeast(0);
+        assertThat(b).isAtLeast(0);
         assertThat(b).isAtMost(255);
         decrypted[i] = (byte) b;
       }
