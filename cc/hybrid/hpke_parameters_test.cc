@@ -56,7 +56,7 @@ INSTANTIATE_TEST_SUITE_P(
                    HpkeParameters::KdfId::kHkdfSha512),
             Values(HpkeParameters::AeadId::kAesGcm128,
                    HpkeParameters::AeadId::kAesGcm256,
-                   HpkeParameters::AeadId::kChaChaPoly1305),
+                   HpkeParameters::AeadId::kChaCha20Poly1305),
             Values(VariantWithIdRequirement{HpkeParameters::Variant::kTink,
                                             /*has_id_requirement=*/true},
                    VariantWithIdRequirement{HpkeParameters::Variant::kCrunchy,
@@ -328,7 +328,7 @@ TEST(HpkeParametersTest, AeadIdNotEqual) {
           .SetVariant(HpkeParameters::Variant::kTink)
           .SetKemId(HpkeParameters::KemId::kDhkemX25519HkdfSha256)
           .SetKdfId(HpkeParameters::KdfId::kHkdfSha256)
-          .SetAeadId(HpkeParameters::AeadId::kChaChaPoly1305)
+          .SetAeadId(HpkeParameters::AeadId::kChaCha20Poly1305)
           .Build();
   ASSERT_THAT(other_parameters, IsOk());
 

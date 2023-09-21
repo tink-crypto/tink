@@ -132,7 +132,7 @@ INSTANTIATE_TEST_SUITE_P(
            TestCase{HpkeParameters::Variant::kNoPrefix,
                     HpkeParameters::KemId::kDhkemX25519HkdfSha256,
                     HpkeParameters::KdfId::kHkdfSha256,
-                    HpkeParameters::AeadId::kChaChaPoly1305,
+                    HpkeParameters::AeadId::kChaCha20Poly1305,
                     OutputPrefixType::RAW, HpkeKem::DHKEM_X25519_HKDF_SHA256,
                     HpkeKdf::HKDF_SHA256, HpkeAead::CHACHA20_POLY1305,
                     /*id=*/absl::nullopt, /*output_prefix=*/"",
@@ -202,7 +202,7 @@ TEST_F(HpkeProtoSerializationTest, ParseLegacyAsCrunchy) {
   EXPECT_THAT(hpke_parameters->GetKdfId(),
               Eq(HpkeParameters::KdfId::kHkdfSha256));
   EXPECT_THAT(hpke_parameters->GetAeadId(),
-              Eq(HpkeParameters::AeadId::kChaChaPoly1305));
+              Eq(HpkeParameters::AeadId::kChaCha20Poly1305));
 }
 
 TEST_F(HpkeProtoSerializationTest, ParseParametersWithInvalidSerialization) {

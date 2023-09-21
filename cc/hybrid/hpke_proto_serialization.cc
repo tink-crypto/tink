@@ -173,7 +173,7 @@ util::StatusOr<HpkeParameters::AeadId> ToAeadId(HpkeAead aead) {
     case HpkeAead::AES_256_GCM:
       return HpkeParameters::AeadId::kAesGcm256;
     case HpkeAead::CHACHA20_POLY1305:
-      return HpkeParameters::AeadId::kChaChaPoly1305;
+      return HpkeParameters::AeadId::kChaCha20Poly1305;
     default:
       return util::Status(absl::StatusCode::kInvalidArgument,
                           "Could not determine AEAD.");
@@ -186,7 +186,7 @@ util::StatusOr<HpkeAead> FromAeadId(HpkeParameters::AeadId aead_id) {
       return HpkeAead::AES_128_GCM;
     case HpkeParameters::AeadId::kAesGcm256:
       return HpkeAead::AES_256_GCM;
-    case HpkeParameters::AeadId::kChaChaPoly1305:
+    case HpkeParameters::AeadId::kChaCha20Poly1305:
       return HpkeAead::CHACHA20_POLY1305;
     default:
       return util::Status(absl::StatusCode::kInvalidArgument,
