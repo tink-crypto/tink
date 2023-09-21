@@ -17,21 +17,24 @@
 package com.google.crypto.tink.keyderivation.internal;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
+import static org.junit.Assert.assertTrue;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.KeyStatus;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
-import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.aead.AesCtrHmacAeadKey;
 import com.google.crypto.tink.aead.AesGcmKey;
 import com.google.crypto.tink.aead.AesGcmParameters;
+import com.google.crypto.tink.aead.AesGcmSivKey;
 import com.google.crypto.tink.aead.AesGcmSivParameters;
 import com.google.crypto.tink.aead.PredefinedAeadParameters;
+import com.google.crypto.tink.aead.XChaCha20Poly1305Key;
 import com.google.crypto.tink.aead.XChaCha20Poly1305Parameters;
 import com.google.crypto.tink.config.TinkConfig;
+import com.google.crypto.tink.daead.AesSivKey;
 import com.google.crypto.tink.daead.PredefinedDeterministicAeadParameters;
 import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.jwt.JwtMacConfig;
@@ -40,16 +43,24 @@ import com.google.crypto.tink.keyderivation.KeyDerivationConfig;
 import com.google.crypto.tink.keyderivation.KeysetDeriver;
 import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationKey;
 import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationParameters;
+import com.google.crypto.tink.mac.HmacKey;
 import com.google.crypto.tink.mac.PredefinedMacParameters;
 import com.google.crypto.tink.prf.HkdfPrfKey;
 import com.google.crypto.tink.prf.HkdfPrfParameters;
+import com.google.crypto.tink.prf.HmacPrfKey;
 import com.google.crypto.tink.prf.PredefinedPrfParameters;
 import com.google.crypto.tink.prf.PrfKey;
+import com.google.crypto.tink.signature.Ed25519Parameters;
+import com.google.crypto.tink.signature.Ed25519PrivateKey;
+import com.google.crypto.tink.signature.Ed25519PublicKey;
 import com.google.crypto.tink.signature.PredefinedSignatureParameters;
+import com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey;
 import com.google.crypto.tink.streamingaead.PredefinedStreamingAeadParameters;
 import com.google.crypto.tink.subtle.Hex;
+import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
 import java.security.Security;
+import javax.annotation.Nullable;
 import org.conscrypt.Conscrypt;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -154,92 +165,170 @@ public final class PrfBasedDeriverSecondTest {
                           InsecureSecretKeyAccess.get()))
                   .build());
 
+  private static final SecretBytes secretBytesFromHex(String hex) {
+    return SecretBytes.copyFrom(Hex.decode(hex), InsecureSecretKeyAccess.get());
+  }
+
+  /**
+   * A test vector: if we use prfKey in with derivedKeyParameters and salt Hex.decode(inputHex) we
+   * get expectedKey.
+   *
+   * <p>Note that the test vector doesn't specify the derivation key itself. In particular, the
+   * idRequirement of the derivationKey is obtained from the expected key (since it should always be
+   * the same).
+   */
   private static final class TestVector {
+    final PrfKey prfKey;
     final Parameters derivedKeyParameters;
     final String inputHex;
-    final String resultingKeysetHex;
+    final Key expectedKey;
 
-    TestVector(Parameters derivedKeyParameters, String inputHex, String resultingKeysetHex) {
+    TestVector(PrfKey prfKey, Parameters derivedKeyParameters, String inputHex, Key expectedKey) {
+      this.prfKey = prfKey;
       this.derivedKeyParameters = derivedKeyParameters;
       this.inputHex = inputHex;
-      this.resultingKeysetHex = resultingKeysetHex;
+      this.expectedKey = expectedKey;
     }
   }
 
+  // Note: most test vectors use the FIXED_PRF_KEY and "000102" as seed. In this case, the first
+  // 64 bytes of the output of the PRF are:
+  // 94e397d674deda6e965295698491a3fe b69838a35f1d48143f3c4cbad90eeb24
+  // 9c8ddea6d09adc5f89a9a190122b095d 34e166df93b36f417d63baac78115ac3
   private static final TestVector[] createTestVectors() throws Exception {
     return new TestVector[] {
       new TestVector(
+          FIXED_PRF_KEY,
           PredefinedAeadParameters.AES128_GCM,
           "",
-          "08c26012510a480a30747970652e676f6f676c65617069732e636f6d2f676f6f676c652e63727970746f2e74"
-              + "696e6b2e41657347636d4b657912121a101b73bdf5293cc533d635f263e35913ec1801100118c26020"
-              + "01"),
+          AesGcmKey.builder()
+              .setParameters(PredefinedAeadParameters.AES128_GCM)
+              .setIdRequirement(1234)
+              .setKeyBytes(secretBytesFromHex("1b73bdf5293cc533d635f263e35913ec"))
+              .build()),
       new TestVector(
+          FIXED_PRF_KEY,
           PredefinedAeadParameters.AES128_GCM,
-          "01",
-          "08c26012510a480a30747970652e676f6f676c65617069732e636f6d2f676f6f676c652e63727970746f2e74"
-              + "696e6b2e41657347636d4b657912121a104a8984211468ff8b78399156f0989a311801100118c26020"
-              + "01"),
+          "000102",
+          AesGcmKey.builder()
+              .setParameters(PredefinedAeadParameters.AES128_GCM)
+              .setIdRequirement(1234)
+              .setKeyBytes(secretBytesFromHex("94e397d674deda6e965295698491a3fe"))
+              .build()),
       new TestVector(
+          FIXED_PRF_KEY,
           PredefinedAeadParameters.AES256_GCM,
           "000102",
-          "08c26012610a580a30747970652e676f6f676c65617069732e636f6d2f676f6f676c652e63727970746f2e74"
-              + "696e6b2e41657347636d4b657912221a2094e397d674deda6e965295698491a3feb69838a35f1d4814"
-              + "3f3c4cbad90eeb241801100118c2602001"),
+          AesGcmKey.builder()
+              .setParameters(PredefinedAeadParameters.AES256_GCM)
+              .setIdRequirement(1234)
+              .setKeyBytes(
+                  secretBytesFromHex(
+                      "94e397d674deda6e965295698491a3feb69838a35f1d48143f3c4cbad90eeb24"))
+              .build()),
       new TestVector(
+          FIXED_PRF_KEY,
           PredefinedAeadParameters.AES128_CTR_HMAC_SHA256,
           "000102",
-          "08c260128a010a80010a38747970652e676f6f676c65617069732e636f6d2f676f6f676c652e63727970746f"
-              + "2e74696e6b2e416573437472486d6163416561644b657912421216120208101a1094e397d674deda6e"
-              + "965295698491a3fe1a281204080310101a20b69838a35f1d48143f3c4cbad90eeb249c8ddea6d09adc"
-              + "5f89a9a190122b095d1801100118c2602001"),
+          AesCtrHmacAeadKey.builder()
+              .setParameters(PredefinedAeadParameters.AES128_CTR_HMAC_SHA256)
+              .setIdRequirement(12345)
+              .setAesKeyBytes(secretBytesFromHex("94e397d674deda6e965295698491a3fe"))
+              .setHmacKeyBytes(
+                  secretBytesFromHex(
+                      "b69838a35f1d48143f3c4cbad90eeb249c8ddea6d09adc5f89a9a190122b095d"))
+              .build()),
       new TestVector(
+          FIXED_PRF_KEY,
           AesGcmSivParameters.builder()
               .setKeySizeBytes(16)
               .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
               .build(),
           "000102",
-          "08c26012540a4b0a33747970652e676f6f676c65617069732e636f6d2f676f6f676c652e63727970746f2e74"
-              + "696e6b2e41657347636d5369764b657912121a1094e397d674deda6e965295698491a3fe1801100118"
-              + "c2602003"),
+          AesGcmSivKey.builder()
+              .setParameters(
+                  AesGcmSivParameters.builder()
+                      .setKeySizeBytes(16)
+                      .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+                      .build())
+              .setKeyBytes(secretBytesFromHex("94e397d674deda6e965295698491a3fe"))
+              .build()),
       new TestVector(
-          XChaCha20Poly1305Parameters.create(),
+          FIXED_PRF_KEY,
+          XChaCha20Poly1305Parameters.create(XChaCha20Poly1305Parameters.Variant.TINK),
           "000102",
-          "08c260126c0a630a3b747970652e676f6f676c65617069732e636f6d2f676f6f676c652e63727970746f2e74"
-              + "696e6b2e584368614368613230506f6c79313330354b657912221a2094e397d674deda6e9652956984"
-              + "91a3feb69838a35f1d48143f3c4cbad90eeb241801100118c2602003"),
+          XChaCha20Poly1305Key.create(
+              XChaCha20Poly1305Parameters.Variant.TINK,
+              secretBytesFromHex(
+                  "94e397d674deda6e965295698491a3feb69838a35f1d48143f3c4cbad90eeb24"),
+              1234)),
       new TestVector(
+          FIXED_PRF_KEY,
           PredefinedDeterministicAeadParameters.AES256_SIV,
           "000102",
-          "08c2601281010a780a30747970652e676f6f676c65617069732e636f6d2f676f6f676c652e63727970746f2e"
-              + "74696e6b2e4165735369764b65791242124094e397d674deda6e965295698491a3feb69838a35f1d48"
-              + "143f3c4cbad90eeb249c8ddea6d09adc5f89a9a190122b095d34e166df93b36f417d63baac78115ac3"
-              + "1801100118c2602001"),
+          AesSivKey.builder()
+              .setParameters(PredefinedDeterministicAeadParameters.AES256_SIV)
+              .setIdRequirement(1234)
+              .setKeyBytes(
+                  secretBytesFromHex(
+                      "94e397d674deda6e965295698491a3feb69838a35f1d48143f3c4cbad90eeb24"
+                          + "9c8ddea6d09adc5f89a9a190122b095d34e166df93b36f417d63baac78115ac3"))
+              .build()),
       new TestVector(
+          FIXED_PRF_KEY,
           PredefinedMacParameters.HMAC_SHA256_256BITTAG,
           "000102",
-          "08c26012650a5c0a2e747970652e676f6f676c65617069732e636f6d2f676f6f676c652e63727970746f2e74"
-              + "696e6b2e486d61634b657912281204080310201a2094e397d674deda6e965295698491a3feb69838a3"
-              + "5f1d48143f3c4cbad90eeb241801100118c2602001"),
+          HmacKey.builder()
+              .setParameters(PredefinedMacParameters.HMAC_SHA256_256BITTAG)
+              .setIdRequirement(1234)
+              .setKeyBytes(
+                  secretBytesFromHex(
+                      "94e397d674deda6e965295698491a3feb69838a35f1d48143f3c4cbad90eeb24"))
+              .build()),
       new TestVector(
+          FIXED_PRF_KEY,
           PredefinedPrfParameters.HMAC_SHA256_PRF,
           "000102",
-          "08c26012660a5d0a31747970652e676f6f676c65617069732e636f6d2f676f6f676c652e63727970746f2e74"
-              + "696e6b2e486d61635072664b65791226120208031a2094e397d674deda6e965295698491a3feb69838"
-              + "a35f1d48143f3c4cbad90eeb241801100118c2602003"),
+          HmacPrfKey.builder()
+              .setParameters(PredefinedPrfParameters.HMAC_SHA256_PRF)
+              .setKeyBytes(
+                  secretBytesFromHex(
+                      "94e397d674deda6e965295698491a3feb69838a35f1d48143f3c4cbad90eeb24"))
+              .build()),
       new TestVector(
+          FIXED_PRF_KEY,
           PredefinedSignatureParameters.ED25519,
           "000102",
-          "08c260128e010a84010a38747970652e676f6f676c65617069732e636f6d2f676f6f676c652e63727970746f"
-              + "2e74696e6b2e45643235353139507269766174654b65791246122094e397d674deda6e965295698491"
-              + "a3feb69838a35f1d48143f3c4cbad90eeb241a221220c9855bf7fcb4f975e61eac19a530d490f276dd"
-              + "cb1908fcf2ca13329981d58bab1802100118c2602001"),
+          Ed25519PrivateKey.create(
+              Ed25519PublicKey.create(
+                  Ed25519Parameters.Variant.TINK,
+                  Bytes.copyFrom(
+                      Hex.decode(
+                          "c9855bf7fcb4f975e61eac19a530d490f276ddcb1908fcf2ca13329981d58bab")),
+                  1234),
+              secretBytesFromHex(
+                  "94e397d674deda6e965295698491a3feb69838a35f1d48143f3c4cbad90eeb24"))),
       new TestVector(
+          FIXED_PRF_KEY,
+          Ed25519Parameters.create(Ed25519Parameters.Variant.NO_PREFIX),
+          "000102",
+          Ed25519PrivateKey.create(
+              Ed25519PublicKey.create(
+                  Ed25519Parameters.Variant.NO_PREFIX,
+                  Bytes.copyFrom(
+                      Hex.decode(
+                          "c9855bf7fcb4f975e61eac19a530d490f276ddcb1908fcf2ca13329981d58bab")),
+                  /* idRequirement= */ null),
+              secretBytesFromHex(
+                  "94e397d674deda6e965295698491a3feb69838a35f1d48143f3c4cbad90eeb24"))),
+      new TestVector(
+          FIXED_PRF_KEY,
           PredefinedStreamingAeadParameters.AES256_GCM_HKDF_1MB,
           "000102",
-          "08c26012780a6f0a3d747970652e676f6f676c65617069732e636f6d2f676f6f676c652e63727970746f2e74"
-              + "696e6b2e41657347636d486b646653747265616d696e674b6579122c120808808040102018031a2094"
-              + "e397d674deda6e965295698491a3feb69838a35f1d48143f3c4cbad90eeb241801100118c2602003"),
+          AesGcmHkdfStreamingKey.create(
+              PredefinedStreamingAeadParameters.AES256_GCM_HKDF_1MB,
+              secretBytesFromHex(
+                  "94e397d674deda6e965295698491a3feb69838a35f1d48143f3c4cbad90eeb24"))),
     };
   }
 
@@ -248,41 +337,31 @@ public final class PrfBasedDeriverSecondTest {
 
   @Theory
   public void deriveKeyset_isAsExpected(@FromDataPoints("allTests") TestVector t) throws Exception {
-    Integer idRequirement = null;
-    if (t.derivedKeyParameters.hasIdRequirement()) {
-      idRequirement = 12354;
-    }
     PrfBasedKeyDerivationParameters derivationParameters =
         PrfBasedKeyDerivationParameters.builder()
             .setDerivedKeyParameters(t.derivedKeyParameters)
-            .setPrfParameters(FIXED_PRF_KEY.getParameters())
+            .setPrfParameters(t.prfKey.getParameters())
             .build();
 
+    @Nullable Integer idRequirement = t.expectedKey.getIdRequirementOrNull();
     PrfBasedKeyDerivationKey keyDerivationKey =
-        PrfBasedKeyDerivationKey.create(derivationParameters, FIXED_PRF_KEY, idRequirement);
+        PrfBasedKeyDerivationKey.create(derivationParameters, t.prfKey, idRequirement);
     KeysetHandle keyset =
         KeysetHandle.newBuilder()
-            .addEntry(KeysetHandle.importKey(keyDerivationKey).withFixedId(12354).makePrimary())
+            .addEntry(
+                KeysetHandle.importKey(keyDerivationKey)
+                    .withFixedId(idRequirement == null ? 789789 : idRequirement)
+                    .makePrimary())
             .build();
     KeysetDeriver deriver = keyset.getPrimitive(KeysetDeriver.class);
 
     KeysetHandle derivedKeyset = deriver.deriveKeyset(Hex.decode(t.inputHex));
 
     assertThat(derivedKeyset.size()).isEqualTo(1);
+    // The only thing which we need to test is equalsKey(), but we first test other things to make
+    // test failures have nicer messages.
     assertThat(derivedKeyset.getAt(0).getKey().getParameters()).isEqualTo(t.derivedKeyParameters);
-
-    KeysetHandle expectedKeyset =
-        TinkProtoKeysetFormat.parseKeyset(
-            Hex.decode(t.resultingKeysetHex), InsecureSecretKeyAccess.get());
-
-    String encodedDerivedKeyset =
-        Hex.encode(
-            TinkProtoKeysetFormat.serializeKeyset(derivedKeyset, InsecureSecretKeyAccess.get()));
-
-    assertWithMessage("Correct hex-encoded derived keyset: " + encodedDerivedKeyset)
-        .that(derivedKeyset.equalsKeyset(expectedKeyset))
-        .isTrue();
+    assertThat(derivedKeyset.getAt(0).getKey().getIdRequirementOrNull()).isEqualTo(idRequirement);
+    assertTrue(derivedKeyset.getAt(0).getKey().equalsKey(t.expectedKey));
   }
-
-  // TODO(tholenst): Make sure tests are exhaustive
 }
