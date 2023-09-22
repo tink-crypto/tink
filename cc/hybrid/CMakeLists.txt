@@ -28,8 +28,10 @@ tink_cc_library(
     hpke_config.cc
     hpke_config.h
   DEPS
+    tink::hybrid::hpke_proto_serialization
     tink::hybrid::hybrid_decrypt_wrapper
     tink::hybrid::hybrid_encrypt_wrapper
+    absl::memory
     tink::core::registry
     tink::aead::aead_config
     tink::config::tink_fips
@@ -412,19 +414,34 @@ tink_cc_test(
     hpke_config_test.cc
   DEPS
     tink::hybrid::hpke_config
+    tink::hybrid::hpke_parameters
+    tink::hybrid::hpke_private_key
+    tink::hybrid::hpke_public_key
     tink::hybrid::hybrid_key_templates
     gmock
     absl::status
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt
+    tink::core::insecure_secret_key_access
+    tink::core::key
     tink::core::keyset_handle
+    tink::core::parameters
+    tink::core::partial_key_access
     tink::core::registry
+    tink::core::restricted_data
     tink::config::tink_fips
     tink::hybrid::internal::hpke_private_key_manager
     tink::hybrid::internal::hpke_public_key_manager
-    tink::util::status
+    tink::internal::ec_util
+    tink::internal::mutable_serialization_registry
+    tink::internal::proto_key_serialization
+    tink::internal::proto_parameters_serialization
+    tink::internal::serialization
+    tink::subtle::random
+    tink::util::statusor
     tink::util::test_matchers
-    tink::util::test_util
+    tink::proto::hpke_cc_proto
+    tink::proto::tink_cc_proto
   TAGS
     exclude_if_openssl
 )
