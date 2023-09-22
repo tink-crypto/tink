@@ -95,7 +95,7 @@ public final class PrfBasedDeriverTest {
             .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
             .setKeyValue(ByteString.copyFrom(Random.randBytes(32)))
             .build();
-    KeyTemplate keyTemplate = KeyTemplate.newBuilder().setTypeUrl("non existent type url").build();
+    KeyTemplate keyTemplate = KeyTemplate.newBuilder().setTypeUrl("nonexistenttypeurl").build();
     assertThrows(
         GeneralSecurityException.class,
         () ->

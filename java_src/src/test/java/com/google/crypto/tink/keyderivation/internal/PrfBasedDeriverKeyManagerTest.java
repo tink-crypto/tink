@@ -210,7 +210,7 @@ public class PrfBasedDeriverKeyManagerTest {
             .setParams(
                 PrfBasedDeriverParams.newBuilder()
                     .setDerivedKeyTemplate(
-                        KeyTemplate.newBuilder().setTypeUrl("non existent type url").build()))
+                        KeyTemplate.newBuilder().setTypeUrl("nonexistenttypeurl").build()))
             .build();
     assertThrows(GeneralSecurityException.class, () -> factory.createKey(keyFormat));
   }
