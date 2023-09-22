@@ -29,6 +29,10 @@
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
+#ifdef OPENSSL_IS_BORINGSSL
+#include "openssl/base.h"
+#include "openssl/ec_key.h"
+#endif
 #include "openssl/bn.h"
 #include "openssl/ec.h"
 #include "openssl/ecdsa.h"
@@ -42,7 +46,6 @@
 #include "tink/subtle/subtle_util.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/secret_data.h"
-#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 
@@ -706,6 +709,45 @@ TEST(EcUtilTest, EcSignatureIeeeToDer) {
     }
   }
 }
+
+using EcKeyFromSslEcKeyTestWithParam =
+    testing::TestWithParam<EllipticCurveType>;
+
+TEST_P(EcKeyFromSslEcKeyTestWithParam, EcKeyFromSslEcKeySucceeds) {
+  EllipticCurveType curve_type = GetParam();
+  util::StatusOr<SslUniquePtr<EC_GROUP>> group =
+      EcGroupFromCurveType(curve_type);
+  SslUniquePtr<EC_KEY> key(EC_KEY_new());
+  EC_KEY_set_group(key.get(), group->get());
+  EC_KEY_generate_key(key.get());
+
+  util::StatusOr<EcKey> ec_key = EcKeyFromSslEcKey(curve_type, *key);
+
+  EXPECT_THAT(ec_key, IsOk());
+  EXPECT_THAT(ec_key->curve, Eq(curve_type));
+  EXPECT_THAT(ec_key->priv, Not(IsEmpty()));
+  EXPECT_THAT(ec_key->pub_x, Not(IsEmpty()));
+  EXPECT_THAT(ec_key->pub_y, Not(IsEmpty()));
+}
+
+TEST(EcKeyFromSSLEcKeyTest, EcKeyFromSslKeyFailsWrongCurveType) {
+  util::StatusOr<SslUniquePtr<EC_GROUP>> group =
+      EcGroupFromCurveType(EllipticCurveType::NIST_P256);
+  SslUniquePtr<EC_KEY> key(EC_KEY_new());
+  EC_KEY_set_group(key.get(), group->get());
+  EC_KEY_generate_key(key.get());
+
+  util::StatusOr<EcKey> ec_key =
+      EcKeyFromSslEcKey(EllipticCurveType::NIST_P384, *key);
+
+  EXPECT_THAT(ec_key.status(), StatusIs(absl::StatusCode::kInternal));
+}
+
+INSTANTIATE_TEST_SUITE_P(EcKeyFromSslEcKeyTestWithParams,
+                         EcKeyFromSslEcKeyTestWithParam,
+                         testing::ValuesIn({EllipticCurveType::NIST_P256,
+                                            EllipticCurveType::NIST_P384,
+                                            EllipticCurveType::NIST_P521}));
 
 // ECDH test vector.
 struct EcdhWycheproofTestVector {

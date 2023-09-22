@@ -29,7 +29,12 @@
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "openssl/bn.h"
+#ifdef OPENSSL_IS_BORINGSSL
+#include "openssl/base.h"
+#include "openssl/ec_key.h"
+#else
 #include "openssl/ec.h"
+#endif
 #include "openssl/crypto.h"
 #include "openssl/ecdsa.h"
 #include "openssl/evp.h"
@@ -92,7 +97,7 @@ util::StatusOr<SslUniquePtr<EC_POINT>> SslGetEcPointFromCoordinates(
   }
   SslUniquePtr<EC_POINT> pub_key(EC_POINT_new(group));
   // In BoringSSL and OpenSSL > 1.1.0 EC_POINT_set_affine_coordinates_GFp
-  // already checkes if the point is on the curve.
+  // already checks if the point is on the curve.
   if (EC_POINT_set_affine_coordinates_GFp(group, pub_key.get(), bn_x->get(),
                                           bn_y->get(), nullptr) != 1) {
     return util::Status(absl::StatusCode::kInternal,
@@ -191,49 +196,6 @@ size_t SslEcFieldSizeInBytes(const EC_GROUP *group) {
   return (degree_bits + 7) / 8;
 }
 
-// Given an OpenSSL/BoringSSL key EC_KEY `key` and curve type `curve` return an
-// EcKey.
-util::StatusOr<EcKey> EcKeyFromSslEcKey(EllipticCurveType curve,
-                                        const EC_KEY &key) {
-  util::StatusOr<SslUniquePtr<EC_GROUP>> group = EcGroupFromCurveType(curve);
-  if (!group.ok()) {
-    return group.status();
-  }
-  const BIGNUM *priv_key = EC_KEY_get0_private_key(&key);
-  const EC_POINT *pub_key = EC_KEY_get0_public_key(&key);
-
-  util::StatusOr<EcPointCoordinates> pub_key_bns =
-      SslGetEcPointCoordinates(group->get(), pub_key);
-  if (!pub_key_bns.ok()) {
-    return pub_key_bns.status();
-  }
-
-  const int kFieldElementSizeInBytes = SslEcFieldSizeInBytes(group->get());
-
-  util::StatusOr<std::string> pub_x_str =
-      BignumToString(pub_key_bns->x.get(), kFieldElementSizeInBytes);
-  if (!pub_x_str.ok()) {
-    return pub_x_str.status();
-  }
-  util::StatusOr<std::string> pub_y_str =
-      BignumToString(pub_key_bns->y.get(), kFieldElementSizeInBytes);
-  if (!pub_y_str.ok()) {
-    return pub_y_str.status();
-  }
-  util::StatusOr<util::SecretData> priv_key_data =
-      BignumToSecretData(priv_key, ScalarSizeInBytes(group->get()));
-  if (!priv_key_data.ok()) {
-    return priv_key_data.status();
-  }
-  EcKey ec_key = {
-      /*curve=*/curve,
-      /*pub_x=*/*std::move(pub_x_str),
-      /*pub_y=*/*std::move(pub_y_str),
-      /*priv=*/*std::move(priv_key_data),
-  };
-  return ec_key;
-}
-
 enum SslEvpPkeyType {
   kX25519Key = EVP_PKEY_X25519,
   kEd25519Key = EVP_PKEY_ED25519
@@ -307,6 +269,47 @@ util::StatusOr<std::string> SslEcdsaSignatureToBytes(
 }
 
 }  // namespace
+
+util::StatusOr<EcKey> EcKeyFromSslEcKey(EllipticCurveType curve,
+                                        const EC_KEY &key) {
+  util::StatusOr<SslUniquePtr<EC_GROUP>> group = EcGroupFromCurveType(curve);
+  if (!group.ok()) {
+    return group.status();
+  }
+  const BIGNUM *priv_key = EC_KEY_get0_private_key(&key);
+  const EC_POINT *pub_key = EC_KEY_get0_public_key(&key);
+
+  util::StatusOr<EcPointCoordinates> pub_key_bns =
+      SslGetEcPointCoordinates(group->get(), pub_key);
+  if (!pub_key_bns.ok()) {
+    return pub_key_bns.status();
+  }
+
+  const int kFieldElementSizeInBytes = SslEcFieldSizeInBytes(group->get());
+
+  util::StatusOr<std::string> pub_x_str =
+      BignumToString(pub_key_bns->x.get(), kFieldElementSizeInBytes);
+  if (!pub_x_str.ok()) {
+    return pub_x_str.status();
+  }
+  util::StatusOr<std::string> pub_y_str =
+      BignumToString(pub_key_bns->y.get(), kFieldElementSizeInBytes);
+  if (!pub_y_str.ok()) {
+    return pub_y_str.status();
+  }
+  util::StatusOr<util::SecretData> priv_key_data =
+      BignumToSecretData(priv_key, ScalarSizeInBytes(group->get()));
+  if (!priv_key_data.ok()) {
+    return priv_key_data.status();
+  }
+  EcKey ec_key = {
+      /*curve=*/curve,
+      /*pub_x=*/*std::move(pub_x_str),
+      /*pub_y=*/*std::move(pub_y_str),
+      /*priv=*/*std::move(priv_key_data),
+  };
+  return ec_key;
+}
 
 util::StatusOr<int32_t> EcFieldSizeInBytes(EllipticCurveType curve_type) {
   if (curve_type == EllipticCurveType::CURVE25519) {
