@@ -14,8 +14,8 @@
 """A basic example for using the hybrid encryption API."""
 # [START hybrid-basic-example]
 import tink
-from tink import cleartext_keyset_handle
 from tink import hybrid
+from tink import secret_key_access
 
 
 def example():
@@ -66,9 +66,10 @@ def example():
 
   # Create a keyset handle from the keyset containing the public key. Because
   # this keyset does not contain any secrets, we can use
-  # `tink.read_no_secret_keyset_handle`.
-  public_keyset_handle = tink.read_no_secret_keyset_handle(
-      tink.JsonKeysetReader(public_keyset))
+  # `parse_without_secret`.
+  public_keyset_handle = tink.json_proto_keyset_format.parse_without_secret(
+      public_keyset
+  )
 
   # Retrieve the HybridEncrypt primitive from the keyset handle.
   enc_primitive = public_keyset_handle.primitive(hybrid.HybridEncrypt)
@@ -80,10 +81,10 @@ def example():
   # Create a keyset handle from the private keyset. The keyset handle provides
   # abstract access to the underlying keyset to limit the exposure of accessing
   # the raw key material. WARNING: In practice, it is unlikely you will want to
-  # use a cleartext_keyset_handle, as it implies that your key material is
-  # passed in cleartext which is a security risk.
-  private_keyset_handle = cleartext_keyset_handle.read(
-      tink.JsonKeysetReader(private_keyset)
+  # use a tink.json_proto_keyset_format.parse, as it implies that your key
+  # material is passed in cleartext which is a security risk.
+  private_keyset_handle = tink.json_proto_keyset_format.parse(
+      private_keyset, secret_key_access.TOKEN
   )
 
   # Retrieve the HybridDecrypt primitive from the private keyset handle.

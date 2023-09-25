@@ -40,8 +40,9 @@ def main(argv):
   with open(_PUBLIC_KEYSET_PATH.value, 'rt') as keyset_file:
     try:
       text = keyset_file.read()
-      public_keyset_handle = tink.read_no_secret_keyset_handle(
-          tink.JsonKeysetReader(text))
+      public_keyset_handle = tink.json_proto_keyset_format.parse_without_secret(
+          text
+      )
     except tink.TinkError as e:
       logging.exception('Error reading keyset: %s', e)
       return 1

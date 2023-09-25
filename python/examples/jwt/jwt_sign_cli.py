@@ -24,8 +24,8 @@ from absl import app
 from absl import flags
 from absl import logging
 import tink
-from tink import cleartext_keyset_handle
 from tink import jwt
+from tink import secret_key_access
 
 
 _PRIVATE_KEYSET_PATH = flags.DEFINE_string(
@@ -46,7 +46,9 @@ def main(argv):
   with open(_PRIVATE_KEYSET_PATH.value, 'rt') as keyset_file:
     try:
       text = keyset_file.read()
-      keyset_handle = cleartext_keyset_handle.read(tink.JsonKeysetReader(text))
+      keyset_handle = tink.json_proto_keyset_format.parse(
+          text, secret_key_access.TOKEN
+      )
     except tink.TinkError as e:
       logging.exception('Error reading keyset: %s', e)
       return 1
