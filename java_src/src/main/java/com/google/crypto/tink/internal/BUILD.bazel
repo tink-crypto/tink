@@ -9,7 +9,6 @@ package(default_visibility = ["//:__subpackages__"])
 java_library(
     name = "key_template_proto_converter",
     srcs = ["KeyTemplateProtoConverter.java"],
-    visibility = ["//visibility:public"],
     deps = [
         ":legacy_proto_parameters",
         ":mutable_serialization_registry",
