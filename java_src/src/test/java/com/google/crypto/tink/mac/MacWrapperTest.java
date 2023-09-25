@@ -179,6 +179,9 @@ public class MacWrapperTest {
 
   @Test
   public void testComputeVerifyMac_works() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    MacConfig.register();
+
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     KeysetHandle smallKeysetHandle =
         KeysetHandle.newBuilder()
