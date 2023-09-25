@@ -30,7 +30,7 @@ import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.aead.subtle.AesGcmSiv;
 import com.google.crypto.tink.internal.KeyTypeManager;
-import com.google.crypto.tink.internal.StutteringInputStream;
+import com.google.crypto.tink.internal.SlowInputStream;
 import com.google.crypto.tink.proto.AesGcmSivKey;
 import com.google.crypto.tink.proto.AesGcmSivKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -374,7 +374,7 @@ public class AesGcmSivKeyManagerTest {
     com.google.crypto.tink.aead.AesGcmSivKey key =
         AesGcmSivKeyManager.createAesGcmSivKeyFromRandomness(
             parameters,
-            StutteringInputStream.copyFrom(keyMaterial),
+            SlowInputStream.copyFrom(keyMaterial),
             parameters.hasIdRequirement() ? 123 : null,
             InsecureSecretKeyAccess.get());
     byte[] truncatedKeyMaterial = Arrays.copyOf(keyMaterial, parameters.getKeySizeBytes());

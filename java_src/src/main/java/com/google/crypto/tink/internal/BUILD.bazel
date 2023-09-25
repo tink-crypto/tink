@@ -799,13 +799,13 @@ java_library(
 )
 
 android_library(
-    name = "stuttering_input_stream-android",
+    name = "slow_input_stream-android",
     testonly = 1,
-    srcs = ["StutteringInputStream.java"],
+    srcs = ["SlowInputStream.java"],
 )
 
 java_library(
-    name = "stuttering_input_stream",
+    name = "slow_input_stream",
     testonly = 1,
-    srcs = ["StutteringInputStream.java"],
+    srcs = ["SlowInputStream.java"],
 )

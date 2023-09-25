@@ -24,16 +24,16 @@ import java.util.Arrays;
  * An implementation of ByteArrayInputStream which returns each element separately. Used for testing
  * only.
  */
-public final class StutteringInputStream extends InputStream {
+public final class SlowInputStream extends InputStream {
   private final byte[] result;
   private int pos = 0;
 
-  private StutteringInputStream(byte[] b) {
+  private SlowInputStream(byte[] b) {
     result = b;
   }
 
-  public static StutteringInputStream copyFrom(byte[] b) {
-    return new StutteringInputStream(Arrays.copyOf(b, b.length));
+  public static SlowInputStream copyFrom(byte[] b) {
+    return new SlowInputStream(Arrays.copyOf(b, b.length));
   }
 
   @Override

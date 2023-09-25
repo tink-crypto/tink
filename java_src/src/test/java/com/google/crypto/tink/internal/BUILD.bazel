@@ -570,11 +570,11 @@ java_test(
 )
 
 java_test(
-    name = "StutteringInputStreamTest",
+    name = "SlowInputStreamTest",
     size = "small",
-    srcs = ["StutteringInputStreamTest.java"],
+    srcs = ["SlowInputStreamTest.java"],
     deps = [
-        "//src/main/java/com/google/crypto/tink/internal:stuttering_input_stream",
+        "//src/main/java/com/google/crypto/tink/internal:slow_input_stream",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],

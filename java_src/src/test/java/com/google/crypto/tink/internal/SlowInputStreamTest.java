@@ -23,11 +23,11 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public final class StutteringInputStreamTest {
+public final class SlowInputStreamTest {
   @Test
   public void testNoArgsRead_works() throws Exception {
     byte[] b = new byte[] {(byte) 254, 0, (byte) 255};
-    StutteringInputStream s = StutteringInputStream.copyFrom(b);
+    SlowInputStream s = SlowInputStream.copyFrom(b);
     assertThat(s.read()).isEqualTo(254);
     assertThat(s.read()).isEqualTo(0);
     assertThat(s.read()).isEqualTo(255);
@@ -37,7 +37,7 @@ public final class StutteringInputStreamTest {
   @Test
   public void testWithBuffer_works() throws Exception {
     byte[] b = new byte[] {(byte) 254, 0, (byte) 255};
-    StutteringInputStream s = StutteringInputStream.copyFrom(b);
+    SlowInputStream s = SlowInputStream.copyFrom(b);
 
     byte[] buffer = new byte[10];
     assertThat(s.read(buffer, 0, 10)).isEqualTo(1);
@@ -52,7 +52,7 @@ public final class StutteringInputStreamTest {
   @Test
   public void testWithBuffer_len0() throws Exception {
     byte[] b = new byte[] {(byte) 254, 0, (byte) 255};
-    StutteringInputStream s = StutteringInputStream.copyFrom(b);
+    SlowInputStream s = SlowInputStream.copyFrom(b);
     assertThat(s.read(b, 0, 0)).isEqualTo(0);
   }
 }
