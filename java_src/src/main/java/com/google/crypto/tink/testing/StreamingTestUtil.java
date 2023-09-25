@@ -610,11 +610,16 @@ public final class StreamingTestUtil {
    * returned.
    */
   private static void testEncryptDecryptWithChannel(
-      StreamingAead ags, int firstSegmentOffset, int plaintextSize, int chunkSize)
+      StreamingAead encryptionStreamingAead,
+      StreamingAead decryptionStreamingAead,
+      int firstSegmentOffset,
+      int plaintextSize,
+      int chunkSize)
       throws Exception {
     byte[] associatedData = Hex.decode("aabbccddeeff");
     byte[] plaintext = generatePlaintext(plaintextSize);
-    byte[] ciphertext = encryptWithChannel(ags, plaintext, associatedData, firstSegmentOffset);
+    byte[] ciphertext =
+        encryptWithChannel(encryptionStreamingAead, plaintext, associatedData, firstSegmentOffset);
 
     // Construct an InputStream from the ciphertext where the first
     // firstSegmentOffset bytes have already been read.
@@ -622,7 +627,8 @@ public final class StreamingTestUtil {
         new SeekableByteBufferChannel(ciphertext).position(firstSegmentOffset);
 
     // Construct an InputStream that returns the plaintext.
-    ReadableByteChannel ptChannel = ags.newDecryptingChannel(ctChannel, associatedData);
+    ReadableByteChannel ptChannel =
+        decryptionStreamingAead.newDecryptingChannel(ctChannel, associatedData);
     int decryptedSize = 0;
     while (true) {
       ByteBuffer chunk = ByteBuffer.allocate(chunkSize);
@@ -649,17 +655,24 @@ public final class StreamingTestUtil {
    * Encrypts and decrypts some plaintext in a stream and checks that the expected plaintext is
    * returned.
    *
-   * @param ags the StreamingAead test object.
+   * @param encryptionStreamingAead the StreamingAead test object that encrypts.
+   * @param decryptionStreamingAead the StreamingAead test object that decrypts (can be the same
+   *     object as {@code encryptionStreamingAead}).
    * @param firstSegmentOffset number of bytes prepended to the ciphertext stream.
    * @param plaintextSize the size of the plaintext
    * @param chunkSize decryption read chunks of this size.
    */
   private static void testEncryptDecryptWithStream(
-      StreamingAead ags, int firstSegmentOffset, int plaintextSize, int chunkSize)
+      StreamingAead encryptionStreamingAead,
+      StreamingAead decryptionStreamingAead,
+      int firstSegmentOffset,
+      int plaintextSize,
+      int chunkSize)
       throws Exception {
     byte[] associatedData = Hex.decode("aabbccddeeff");
     byte[] plaintext = generatePlaintext(plaintextSize);
-    byte[] ciphertext = encryptWithStream(ags, plaintext, associatedData, firstSegmentOffset);
+    byte[] ciphertext =
+        encryptWithStream(encryptionStreamingAead, plaintext, associatedData, firstSegmentOffset);
 
     // Construct an InputStream from the ciphertext where the first
     // firstSegmentOffset bytes have already been read.
@@ -667,7 +680,7 @@ public final class StreamingTestUtil {
     ctStream.read(new byte[firstSegmentOffset]);
 
     // Construct an InputStream that returns the plaintext.
-    InputStream ptStream = ags.newDecryptingStream(ctStream, associatedData);
+    InputStream ptStream = decryptionStreamingAead.newDecryptingStream(ctStream, associatedData);
     int decryptedSize = 0;
     while (true) {
       byte[] chunk = new byte[chunkSize];
@@ -688,10 +701,23 @@ public final class StreamingTestUtil {
   }
 
   public static void testEncryptDecrypt(
-       StreamingAead ags, int firstSegmentOffset, int plaintextSize, int chunkSize)
+      StreamingAead ags, int firstSegmentOffset, int plaintextSize, int chunkSize)
       throws Exception {
-    testEncryptDecryptWithChannel(ags, firstSegmentOffset, plaintextSize, chunkSize);
-    testEncryptDecryptWithStream(ags, firstSegmentOffset, plaintextSize, chunkSize);
+    testEncryptDecryptWithChannel(ags, ags, firstSegmentOffset, plaintextSize, chunkSize);
+    testEncryptDecryptWithStream(ags, ags, firstSegmentOffset, plaintextSize, chunkSize);
+  }
+
+  // Methods for testEncryptDecryptDifferentInstances
+
+  public static void testEncryptDecryptDifferentInstances(
+      StreamingAead ags,
+      StreamingAead other,
+      int firstSegmentOffset,
+      int plaintextSize,
+      int chunkSize)
+      throws Exception {
+    testEncryptDecryptWithChannel(ags, other, firstSegmentOffset, plaintextSize, chunkSize);
+    testEncryptDecryptWithStream(ags, other, firstSegmentOffset, plaintextSize, chunkSize);
   }
 
   // Methods for testEncryptDecryptRandomAccess.

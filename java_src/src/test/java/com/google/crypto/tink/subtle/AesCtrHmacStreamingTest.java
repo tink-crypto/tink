@@ -20,6 +20,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.testing.StreamingTestUtil;
 import com.google.crypto.tink.testing.StreamingTestUtil.SeekableByteBufferChannel;
@@ -305,14 +306,13 @@ public class AesCtrHmacStreamingTest {
     int ciphertextLength = (int) ags.expectedCiphertextSize(plaintextSize);
     ByteBuffer ciphertext = ByteBuffer.allocate(ciphertextLength);
     WritableByteChannel ctChannel = new SeekableByteBufferChannel(ciphertext, maxChunkSize);
-    WritableByteChannel encChannel = ags.newEncryptingChannel(ctChannel, aad);
+    WritableByteChannel encChannel = ((StreamingAead) ags).newEncryptingChannel(ctChannel, aad);
     ByteBuffer plaintextBuffer = ByteBuffer.wrap(plaintext);
     int loops = 0;
     while (plaintextBuffer.remaining() > 0) {
       encChannel.write(plaintextBuffer);
       loops += 1;
       if (loops > 100000) {
-        System.out.println(encChannel.toString());
         fail("Too many loops");
       }
     }
