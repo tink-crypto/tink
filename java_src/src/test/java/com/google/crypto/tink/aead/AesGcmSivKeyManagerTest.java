@@ -30,6 +30,7 @@ import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.aead.subtle.AesGcmSiv;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.StutteringInputStream;
 import com.google.crypto.tink.proto.AesGcmSivKey;
 import com.google.crypto.tink.proto.AesGcmSivKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -346,6 +347,34 @@ public class AesGcmSivKeyManagerTest {
         AesGcmSivKeyManager.createAesGcmSivKeyFromRandomness(
             parameters,
             new ByteArrayInputStream(keyMaterial),
+            parameters.hasIdRequirement() ? 123 : null,
+            InsecureSecretKeyAccess.get());
+    byte[] truncatedKeyMaterial = Arrays.copyOf(keyMaterial, parameters.getKeySizeBytes());
+    Key expectedKey =
+        com.google.crypto.tink.aead.AesGcmSivKey.builder()
+            .setParameters(parameters)
+            .setIdRequirement(parameters.hasIdRequirement() ? 123 : null)
+            .setKeyBytes(SecretBytes.copyFrom(truncatedKeyMaterial, InsecureSecretKeyAccess.get()))
+            .build();
+    assertTrue(key.equalsKey(expectedKey));
+  }
+
+  @Test
+  public void testCreateKeyFromRandomness_stuttering() throws Exception {
+    AesGcmSivParameters parameters =
+        AesGcmSivParameters.builder()
+            .setKeySizeBytes(32)
+            .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+            .build();
+    byte[] keyMaterial =
+        new byte[] {
+          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+          25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35
+        };
+    com.google.crypto.tink.aead.AesGcmSivKey key =
+        AesGcmSivKeyManager.createAesGcmSivKeyFromRandomness(
+            parameters,
+            StutteringInputStream.copyFrom(keyMaterial),
             parameters.hasIdRequirement() ? 123 : null,
             InsecureSecretKeyAccess.get());
     byte[] truncatedKeyMaterial = Arrays.copyOf(keyMaterial, parameters.getKeySizeBytes());

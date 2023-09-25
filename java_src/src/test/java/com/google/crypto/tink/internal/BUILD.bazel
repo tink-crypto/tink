@@ -568,3 +568,14 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "StutteringInputStreamTest",
+    size = "small",
+    srcs = ["StutteringInputStreamTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/internal:stuttering_input_stream",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
