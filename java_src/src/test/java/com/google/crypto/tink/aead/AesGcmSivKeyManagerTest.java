@@ -360,7 +360,7 @@ public class AesGcmSivKeyManagerTest {
   }
 
   @Test
-  public void testCreateKeyFromRandomness_stuttering() throws Exception {
+  public void testCreateKeyFromRandomness_slowInputStream_works() throws Exception {
     AesGcmSivParameters parameters =
         AesGcmSivParameters.builder()
             .setKeySizeBytes(32)

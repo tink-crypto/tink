@@ -28,6 +28,7 @@ import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.SlowInputStream;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacPrfKey;
 import com.google.crypto.tink.proto.HmacPrfKeyFormat;
@@ -353,6 +354,31 @@ public class HmacPrfKeyManagerTest {
     com.google.crypto.tink.prf.HmacPrfKey key =
         HmacPrfKeyManager.createHmacKeyFromRandomness(
             parameters, new ByteArrayInputStream(keyMaterial), null, InsecureSecretKeyAccess.get());
+    byte[] expectedKeyBytes = Arrays.copyOf(keyMaterial, parameters.getKeySizeBytes());
+    Key expectedKey =
+        com.google.crypto.tink.prf.HmacPrfKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(SecretBytes.copyFrom(expectedKeyBytes, InsecureSecretKeyAccess.get()))
+            .build();
+    assertTrue(key.equalsKey(expectedKey));
+  }
+
+  @Test
+  public void testCreateKeyFromRandomness_slowInputStream_works() throws Exception {
+    byte[] keyMaterial =
+        new byte[] {
+          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+          25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46,
+          47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68,
+        };
+    HmacPrfParameters parameters =
+        HmacPrfParameters.builder()
+            .setKeySizeBytes(64)
+            .setHashType(HmacPrfParameters.HashType.SHA512)
+            .build();
+    com.google.crypto.tink.prf.HmacPrfKey key =
+        HmacPrfKeyManager.createHmacKeyFromRandomness(
+            parameters, SlowInputStream.copyFrom(keyMaterial), null, InsecureSecretKeyAccess.get());
     byte[] expectedKeyBytes = Arrays.copyOf(keyMaterial, parameters.getKeySizeBytes());
     Key expectedKey =
         com.google.crypto.tink.prf.HmacPrfKey.builder()
