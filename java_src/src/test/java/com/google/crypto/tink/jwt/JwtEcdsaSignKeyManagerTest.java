@@ -20,7 +20,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assume.assumeFalse;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
@@ -30,10 +29,7 @@ import com.google.crypto.tink.proto.JwtEcdsaAlgorithm;
 import com.google.crypto.tink.proto.JwtEcdsaKeyFormat;
 import com.google.crypto.tink.proto.JwtEcdsaPrivateKey;
 import com.google.crypto.tink.proto.JwtEcdsaPublicKey;
-import com.google.crypto.tink.proto.JwtEcdsaPublicKey.CustomKid;
-import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.signature.EcdsaParameters;
 import com.google.crypto.tink.signature.EcdsaPrivateKey;
 import com.google.crypto.tink.signature.EcdsaPublicKey;
@@ -43,7 +39,6 @@ import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Set;
@@ -583,22 +578,25 @@ public class JwtEcdsaSignKeyManagerTest {
   /* Create a new keyset handle with the "custom_kid" value set. */
   private KeysetHandle withCustomKid(KeysetHandle keysetHandle, String customKid)
       throws Exception {
-    Keyset keyset = CleartextKeysetHandle.getKeyset(keysetHandle);
-    JwtEcdsaPrivateKey privateKey =
-        JwtEcdsaPrivateKey.parseFrom(
-            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    JwtEcdsaPublicKey publicKeyWithKid =
-        privateKey.getPublicKey().toBuilder()
-            .setCustomKid(CustomKid.newBuilder().setValue(customKid).build())
+    com.google.crypto.tink.jwt.JwtEcdsaPrivateKey originalPrivateKey =
+        (com.google.crypto.tink.jwt.JwtEcdsaPrivateKey) keysetHandle.getAt(0).getKey();
+    JwtEcdsaParameters customKidParameters =
+        JwtEcdsaParameters.builder()
+            .setAlgorithm(originalPrivateKey.getParameters().getAlgorithm())
+            .setKidStrategy(JwtEcdsaParameters.KidStrategy.CUSTOM)
             .build();
-    JwtEcdsaPrivateKey privateKeyWithKid =
-        privateKey.toBuilder().setPublicKey(publicKeyWithKid).build();
-    KeyData keyDataWithKid =
-        keyset.getKey(0).getKeyData().toBuilder()
-            .setValue(privateKeyWithKid.toByteString())
+    com.google.crypto.tink.jwt.JwtEcdsaPublicKey customKidPublicKey =
+        com.google.crypto.tink.jwt.JwtEcdsaPublicKey.builder()
+            .setParameters(customKidParameters)
+            .setPublicPoint(originalPrivateKey.getPublicKey().getPublicPoint())
+            .setCustomKid(customKid)
             .build();
-    Keyset.Key keyWithKid = keyset.getKey(0).toBuilder().setKeyData(keyDataWithKid).build();
-    return CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
+    com.google.crypto.tink.jwt.JwtEcdsaPrivateKey customKidPrivateKey =
+        com.google.crypto.tink.jwt.JwtEcdsaPrivateKey.create(
+            customKidPublicKey, originalPrivateKey.getPrivateValue());
+    return KeysetHandle.newBuilder()
+        .addEntry(KeysetHandle.importKey(customKidPrivateKey).makePrimary().withRandomId())
+        .build();
   }
 
   @Test

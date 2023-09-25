@@ -657,24 +657,33 @@ public class JwtRsaSsaPssSignKeyManagerTest {
   }
 
   /* Create a new keyset handle with the "custom_kid" value set. */
-  private KeysetHandle withCustomKid(KeysetHandle keysetHandle, String customKid)
-      throws Exception {
-    Keyset keyset = CleartextKeysetHandle.getKeyset(keysetHandle);
-    JwtRsaSsaPssPrivateKey privateKey =
-        JwtRsaSsaPssPrivateKey.parseFrom(
-            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    JwtRsaSsaPssPublicKey publicKeyWithKid =
-        privateKey.getPublicKey().toBuilder()
-            .setCustomKid(CustomKid.newBuilder().setValue(customKid).build())
+  private KeysetHandle withCustomKid(KeysetHandle keysetHandle, String customKid) throws Exception {
+    com.google.crypto.tink.jwt.JwtRsaSsaPssPrivateKey originalPrivateKey =
+        (com.google.crypto.tink.jwt.JwtRsaSsaPssPrivateKey) keysetHandle.getAt(0).getKey();
+    JwtRsaSsaPssParameters customKidParameters =
+        JwtRsaSsaPssParameters.builder()
+            .setAlgorithm(originalPrivateKey.getParameters().getAlgorithm())
+            .setModulusSizeBits(originalPrivateKey.getParameters().getModulusSizeBits())
+            .setKidStrategy(JwtRsaSsaPssParameters.KidStrategy.CUSTOM)
             .build();
-    JwtRsaSsaPssPrivateKey privateKeyWithKid =
-        privateKey.toBuilder().setPublicKey(publicKeyWithKid).build();
-    KeyData keyDataWithKid =
-        keyset.getKey(0).getKeyData().toBuilder()
-            .setValue(privateKeyWithKid.toByteString())
+    com.google.crypto.tink.jwt.JwtRsaSsaPssPublicKey customKidPublicKey =
+        com.google.crypto.tink.jwt.JwtRsaSsaPssPublicKey.builder()
+            .setParameters(customKidParameters)
+            .setModulus(originalPrivateKey.getPublicKey().getModulus())
+            .setCustomKid(customKid)
             .build();
-    Keyset.Key keyWithKid = keyset.getKey(0).toBuilder().setKeyData(keyDataWithKid).build();
-    return CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
+    com.google.crypto.tink.jwt.JwtRsaSsaPssPrivateKey customKidPrivateKey =
+        com.google.crypto.tink.jwt.JwtRsaSsaPssPrivateKey.builder()
+            .setPublicKey(customKidPublicKey)
+            .setPrimes(originalPrivateKey.getPrimeP(), originalPrivateKey.getPrimeQ())
+            .setPrivateExponent(originalPrivateKey.getPrivateExponent())
+            .setPrimeExponents(
+                originalPrivateKey.getPrimeExponentP(), originalPrivateKey.getPrimeExponentQ())
+            .setCrtCoefficient(originalPrivateKey.getCrtCoefficient())
+            .build();
+    return KeysetHandle.newBuilder()
+        .addEntry(KeysetHandle.importKey(customKidPrivateKey).makePrimary().withRandomId())
+        .build();
   }
 
   @Test

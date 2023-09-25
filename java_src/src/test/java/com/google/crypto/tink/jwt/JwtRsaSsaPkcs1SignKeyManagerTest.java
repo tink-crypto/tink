@@ -20,7 +20,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
@@ -31,10 +30,7 @@ import com.google.crypto.tink.proto.JwtRsaSsaPkcs1Algorithm;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1KeyFormat;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1PrivateKey;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1PublicKey;
-import com.google.crypto.tink.proto.JwtRsaSsaPkcs1PublicKey.CustomKid;
-import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.signature.RsaSsaPkcs1Parameters;
 import com.google.crypto.tink.signature.RsaSsaPkcs1PrivateKey;
 import com.google.crypto.tink.signature.RsaSsaPkcs1PublicKey;
@@ -44,7 +40,6 @@ import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.spec.RSAKeyGenParameterSpec;
@@ -696,24 +691,34 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
   }
 
   /* Create a new keyset handle with the "custom_kid" value set. */
-  private KeysetHandle withCustomKid(KeysetHandle keysetHandle, String customKid)
-      throws Exception {
-    Keyset keyset = CleartextKeysetHandle.getKeyset(keysetHandle);
-    JwtRsaSsaPkcs1PrivateKey privateKey =
-        JwtRsaSsaPkcs1PrivateKey.parseFrom(
-            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    JwtRsaSsaPkcs1PublicKey publicKeyWithKid =
-        privateKey.getPublicKey().toBuilder()
-            .setCustomKid(CustomKid.newBuilder().setValue(customKid).build())
+  private KeysetHandle withCustomKid(KeysetHandle keysetHandle, String customKid) throws Exception {
+    com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey originalPrivateKey =
+        (com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey) keysetHandle.getAt(0).getKey();
+    JwtRsaSsaPkcs1Parameters customKidParameters =
+        JwtRsaSsaPkcs1Parameters.builder()
+            .setAlgorithm(originalPrivateKey.getParameters().getAlgorithm())
+            .setModulusSizeBits(originalPrivateKey.getParameters().getModulusSizeBits())
+            .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.CUSTOM)
             .build();
-    JwtRsaSsaPkcs1PrivateKey privateKeyWithKid =
-        privateKey.toBuilder().setPublicKey(publicKeyWithKid).build();
-    KeyData keyDataWithKid =
-        keyset.getKey(0).getKeyData().toBuilder()
-            .setValue(privateKeyWithKid.toByteString())
+    com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PublicKey customKidPublicKey =
+        com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PublicKey.builder()
+            .setParameters(customKidParameters)
+            .setModulus(originalPrivateKey.getPublicKey().getModulus())
+            .setCustomKid(customKid)
             .build();
-    Keyset.Key keyWithKid = keyset.getKey(0).toBuilder().setKeyData(keyDataWithKid).build();
-    return CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
+    com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey customKidPrivateKey =
+        com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey.builder()
+            .setPublicKey(customKidPublicKey)
+            .setPrimes(originalPrivateKey.getPrimeP(), originalPrivateKey.getPrimeQ())
+            .setPrivateExponent(originalPrivateKey.getPrivateExponent())
+            .setPrimeExponents(
+                originalPrivateKey.getPrimeExponentP(), originalPrivateKey.getPrimeExponentQ())
+            .setCrtCoefficient(originalPrivateKey.getCrtCoefficient())
+            .build();
+
+    return KeysetHandle.newBuilder()
+        .addEntry(KeysetHandle.importKey(customKidPrivateKey).makePrimary().withRandomId())
+        .build();
   }
 
   @Test
@@ -783,21 +788,5 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     assertThrows(
         JwtInvalidException.class,
         () -> verifierWithWrongKid.verifyAndDecode(signedCompactWithKid, validator));
-  }
-
-  @Test
-  public void getPrimitiveWithTinkKeyAndCustomKid_fails() throws Exception {
-    if (TestUtil.isTsan()) {
-      // creating keys is too slow in Tsan.
-      // We do not use assume because Theories expects to find something which is not skipped.
-      return;
-    }
-    KeyTemplate template = KeyTemplates.get("JWT_RS256_2048_F4");
-    KeysetHandle handleWithoutKid = KeysetHandle.generateNew(template);
-    KeysetHandle handleWithKid =
-        withCustomKid(handleWithoutKid, "Lorem ipsum dolor sit amet, consectetur adipiscing elit");
-
-    assertThrows(
-        GeneralSecurityException.class, () -> handleWithKid.getPrimitive(JwtPublicKeySign.class));
   }
 }
