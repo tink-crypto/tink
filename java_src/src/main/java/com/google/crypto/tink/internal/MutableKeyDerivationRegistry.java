@@ -16,9 +16,11 @@
 
 package com.google.crypto.tink.internal;
 
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.SecretKeyAccess;
+import com.google.errorprone.annotations.RestrictedApi;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
@@ -72,6 +74,11 @@ public final class MutableKeyDerivationRegistry {
    * <p>Finds the previously added creator (with {@link #add}) for the class given by {@code
    * parameters.getClass()} and uses it.
    */
+  @RestrictedApi(
+      explanation = "Accessing parts of keys can produce unexpected incompatibilities, annotate the function with @AccessesPartialKey",
+      link = "https://developers.google.com/tink/design/access_control#accessing_partial_keys",
+      allowedOnPath = ".*Test\\.java",
+      allowlistAnnotations = {AccessesPartialKey.class})
   public Key createKeyFromRandomness(
       Parameters parameters,
       InputStream inputStream,

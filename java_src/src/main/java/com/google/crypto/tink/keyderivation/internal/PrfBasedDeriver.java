@@ -18,6 +18,7 @@ package com.google.crypto.tink.keyderivation.internal;
 
 import static com.google.crypto.tink.internal.Util.UTF_8;
 
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.KeysetHandle;
@@ -50,6 +51,7 @@ public class PrfBasedDeriver implements KeysetDeriver {
     this.derivedKeyTemplate = derivedKeyTemplate;
   }
 
+  @AccessesPartialKey
   private static KeyData deriveKey(KeyTemplate derivedKeyTemplate, InputStream pseudoRandomness)
       throws GeneralSecurityException {
     // Legacy behavior: deriveKey always ignored the output prefix and assumed "RAW". Hence, to
