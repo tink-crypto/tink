@@ -1,6 +1,6 @@
 load("@build_bazel_rules_android//android:rules.bzl", "android_library")
-load("//:tink_version.bzl", "TINK_VERSION_LABEL")
 load("//:template_rule.bzl", "template_rule")
+load("//:tink_version.bzl", "TINK_VERSION_LABEL")
 
 licenses(["notice"])
 
@@ -235,24 +235,6 @@ android_library(
         ":key_manager-android",
         "//proto:tink_java_proto_lite",
         "@maven//:com_google_protobuf_protobuf_javalite",
-    ],
-)
-
-java_library(
-    name = "privileged_registry",
-    srcs = ["PrivilegedRegistry.java"],
-    deps = [
-        ":registry",
-        "//proto:tink_java_proto",
-    ],
-)
-
-android_library(
-    name = "privileged_registry-android",
-    srcs = ["PrivilegedRegistry.java"],
-    deps = [
-        ":registry-android",
-        "//proto:tink_java_proto_lite",
     ],
 )
 

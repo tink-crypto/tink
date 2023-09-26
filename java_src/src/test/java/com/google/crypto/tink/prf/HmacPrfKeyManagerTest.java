@@ -39,7 +39,6 @@ import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Set;
@@ -176,108 +175,6 @@ public class HmacPrfKeyManagerTest {
             "HMACSHA512", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC"));
     byte[] message = Random.randBytes(50);
     assertThat(managerPrf.compute(message, 33)).isEqualTo(directPrf.compute(message, 33));
-  }
-
-  @Test
-  public void testDeriveKey_size27() throws Exception {
-    final int keySize = 27;
-
-    byte[] keyMaterial = Random.randBytes(100);
-    HmacPrfParams params = HmacPrfParams.newBuilder().setHash(HashType.SHA256).build();
-    HmacPrfKey key =
-        factory.deriveKey(
-            manager,
-            HmacPrfKeyFormat.newBuilder()
-                .setVersion(0)
-                .setParams(params)
-                .setKeySize(keySize)
-                .build(),
-            new ByteArrayInputStream(keyMaterial));
-    assertThat(key.getKeyValue()).hasSize(keySize);
-    for (int i = 0; i < keySize; ++i) {
-      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
-    }
-    assertThat(key.getParams()).isEqualTo(params);
-  }
-
-  @Test
-  public void testDeriveKey_handlesDataFragmentationCorrectly() throws Exception {
-    int keySize = 32;
-    byte randomness = 4;
-    InputStream fragmentedInputStream =
-        new InputStream() {
-          @Override
-          public int read() {
-            return 0;
-          }
-
-          @Override
-          public int read(byte[] b, int off, int len) {
-            b[off] = randomness;
-            return 1;
-          }
-        };
-
-    HmacPrfParams params = HmacPrfParams.newBuilder().setHash(HashType.SHA256).build();
-    HmacPrfKey key =
-        factory.deriveKey(
-            manager,
-            HmacPrfKeyFormat.newBuilder()
-                .setVersion(0)
-                .setParams(params)
-                .setKeySize(keySize)
-                .build(),
-            fragmentedInputStream);
-
-    assertThat(key.getKeyValue()).hasSize(keySize);
-    for (int i = 0; i < keySize; ++i) {
-      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(randomness);
-    }
-  }
-
-  @Test
-  public void testDeriveKey_notEnoughKeyMaterial_throws() throws Exception {
-    byte[] keyMaterial = Random.randBytes(31);
-    HmacPrfParams params = HmacPrfParams.newBuilder().setHash(HashType.SHA256).build();
-    HmacPrfKeyFormat format =
-        HmacPrfKeyFormat.newBuilder().setVersion(0).setParams(params).setKeySize(32).build();
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.deriveKey(manager, format, new ByteArrayInputStream(keyMaterial)));
-  }
-
-  @Test
-  public void testDeriveKey_badVersion_throws() throws Exception {
-    final int keySize = 32;
-
-    byte[] keyMaterial = Random.randBytes(100);
-    HmacPrfParams params = HmacPrfParams.newBuilder().setHash(HashType.SHA256).build();
-    HmacPrfKeyFormat format =
-        HmacPrfKeyFormat.newBuilder().setVersion(1).setParams(params).setKeySize(keySize).build();
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.deriveKey(manager, format, new ByteArrayInputStream(keyMaterial)));
-  }
-
-  @Test
-  public void testDeriveKey_justEnoughKeyMaterial() throws Exception {
-    final int keySize = 32;
-
-    byte[] keyMaterial = Random.randBytes(keySize);
-    HmacPrfParams params = HmacPrfParams.newBuilder().setHash(HashType.SHA256).build();
-    HmacPrfKey key =
-        factory.deriveKey(
-            manager,
-            HmacPrfKeyFormat.newBuilder()
-                .setVersion(0)
-                .setParams(params)
-                .setKeySize(keySize)
-                .build(),
-            new ByteArrayInputStream(keyMaterial));
-    assertThat(key.getKeyValue()).hasSize(keySize);
-    for (int i = 0; i < keySize; ++i) {
-      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
-    }
   }
 
   @Test

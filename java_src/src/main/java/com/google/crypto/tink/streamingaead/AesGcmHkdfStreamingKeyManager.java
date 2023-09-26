@@ -25,6 +25,7 @@ import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.Util;
@@ -127,24 +128,13 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
             .setVersion(getVersion())
             .build();
       }
-
-      @Override
-      public com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey createKeyFromRandomness(
-          Parameters parameters,
-          InputStream stream,
-          @Nullable Integer idRequirement,
-          SecretKeyAccess access)
-          throws GeneralSecurityException {
-        if (parameters instanceof AesGcmHkdfStreamingParameters) {
-          return createAesGcmHkdfStreamingKeyFromRandomness(
-              (AesGcmHkdfStreamingParameters) parameters, stream, idRequirement, access);
-        }
-        throw new GeneralSecurityException(
-            "Unexpected parameters: expected AesGcmHkdfStreamingParameters, but got: "
-                + parameters);
-      }
     };
   }
+
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyDerivationRegistry.InsecureKeyCreator<
+          AesGcmHkdfStreamingParameters>
+      KEY_DERIVER = AesGcmHkdfStreamingKeyManager::createAesGcmHkdfStreamingKeyFromRandomness;
 
   @AccessesPartialKey
   static com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey
@@ -187,6 +177,8 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
     Registry.registerKeyManager(new AesGcmHkdfStreamingKeyManager(), newKeyAllowed);
     AesGcmHkdfStreamingProtoSerialization.register();
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
+    MutableKeyDerivationRegistry.globalInstance()
+        .add(KEY_DERIVER, AesGcmHkdfStreamingParameters.class);
   }
 
   /**

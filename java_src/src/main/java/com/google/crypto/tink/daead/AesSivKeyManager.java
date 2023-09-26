@@ -25,6 +25,7 @@ import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.Util;
@@ -125,23 +126,12 @@ public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
             .setVersion(getVersion())
             .build();
       }
-
-      @Override
-      public com.google.crypto.tink.daead.AesSivKey createKeyFromRandomness(
-          Parameters parameters,
-          InputStream stream,
-          @Nullable Integer idRequirement,
-          SecretKeyAccess access)
-          throws GeneralSecurityException {
-        if (parameters instanceof AesSivParameters) {
-          return createAesSivKeyFromRandomness(
-              (AesSivParameters) parameters, stream, idRequirement, access);
-        }
-        throw new GeneralSecurityException(
-            "Unexpected parameters: expected AesGcmParameters, but got: " + parameters);
-      }
     };
   }
+
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyDerivationRegistry.InsecureKeyCreator<AesSivParameters>
+      KEY_DERIVER = AesSivKeyManager::createAesSivKeyFromRandomness;
 
   @AccessesPartialKey
   static com.google.crypto.tink.daead.AesSivKey createAesSivKeyFromRandomness(
@@ -173,6 +163,7 @@ public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
     Registry.registerKeyManager(new AesSivKeyManager(), newKeyAllowed);
     AesSivProtoSerialization.register();
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
+    MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, AesSivParameters.class);
   }
 
   /**

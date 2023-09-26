@@ -26,6 +26,7 @@ import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
@@ -190,23 +191,12 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
             .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
             .build();
       }
-
-      @Override
-      public com.google.crypto.tink.mac.HmacKey createKeyFromRandomness(
-          Parameters parameters,
-          InputStream stream,
-          @Nullable Integer idRequirement,
-          SecretKeyAccess access)
-          throws GeneralSecurityException {
-        if (parameters instanceof HmacParameters) {
-          return createHmacKeyFromRandomness(
-              (HmacParameters) parameters, stream, idRequirement, access);
-        }
-        throw new GeneralSecurityException(
-            "Unexpected parameters: expected HmacParameters, but got: " + parameters);
-      }
     };
   }
+
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyDerivationRegistry.InsecureKeyCreator<HmacParameters> KEY_DERIVER =
+      HmacKeyManager::createHmacKeyFromRandomness;
 
   @AccessesPartialKey
   static com.google.crypto.tink.mac.HmacKey createHmacKeyFromRandomness(
@@ -301,6 +291,7 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(MAC_PRIMITIVE_CONSTRUCTOR);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
+    MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, HmacParameters.class);
   }
 
   /**

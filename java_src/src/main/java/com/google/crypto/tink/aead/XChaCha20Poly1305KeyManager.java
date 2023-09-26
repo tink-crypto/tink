@@ -25,6 +25,7 @@ import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.Util;
@@ -114,23 +115,12 @@ public class XChaCha20Poly1305KeyManager extends KeyTypeManager<XChaCha20Poly130
             .setKeyValue(ByteString.copyFrom(Random.randBytes(KEY_SIZE_IN_BYTES)))
             .build();
       }
-
-      @Override
-      public com.google.crypto.tink.aead.XChaCha20Poly1305Key createKeyFromRandomness(
-          Parameters parameters,
-          InputStream stream,
-          @Nullable Integer idRequirement,
-          SecretKeyAccess access)
-          throws GeneralSecurityException {
-        if (parameters instanceof XChaCha20Poly1305Parameters) {
-          return createXChaChaKeyFromRandomness(
-              (XChaCha20Poly1305Parameters) parameters, stream, idRequirement, access);
-        }
-        throw new GeneralSecurityException(
-            "Unexpected parameters: expected AesGcmParameters, but got: " + parameters);
-      }
     };
   }
+
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyDerivationRegistry.InsecureKeyCreator<XChaCha20Poly1305Parameters>
+      KEY_DERIVER = XChaCha20Poly1305KeyManager::createXChaChaKeyFromRandomness;
 
   @AccessesPartialKey
   static com.google.crypto.tink.aead.XChaCha20Poly1305Key createXChaChaKeyFromRandomness(
@@ -160,6 +150,8 @@ public class XChaCha20Poly1305KeyManager extends KeyTypeManager<XChaCha20Poly130
     Registry.registerKeyManager(new XChaCha20Poly1305KeyManager(), newKeyAllowed);
     XChaCha20Poly1305ProtoSerialization.register();
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
+    MutableKeyDerivationRegistry.globalInstance()
+        .add(KEY_DERIVER, XChaCha20Poly1305Parameters.class);
   }
 
   /**

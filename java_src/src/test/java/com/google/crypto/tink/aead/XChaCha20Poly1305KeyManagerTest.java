@@ -17,7 +17,6 @@
 package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import com.google.crypto.tink.Aead;
@@ -37,8 +36,6 @@ import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.XChaCha20Poly1305;
 import com.google.crypto.tink.util.SecretBytes;
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
 import org.junit.Before;
@@ -104,75 +101,6 @@ public class XChaCha20Poly1305KeyManagerTest {
                   .toByteArray()));
     }
     assertThat(keys).hasSize(numKeys);
-  }
-
-  @Test
-  public void testDeriveKey() throws Exception {
-    final int keySize = 32;
-    byte[] keyMaterial = Random.randBytes(100);
-    XChaCha20Poly1305Key key =
-        factory.deriveKey(
-            manager,
-            XChaCha20Poly1305KeyFormat.newBuilder().setVersion(0).build(),
-            new ByteArrayInputStream(keyMaterial));
-    assertThat(key.getKeyValue()).hasSize(keySize);
-    for (int i = 0; i < keySize; ++i) {
-      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
-    }
-  }
-
-  @Test
-  public void testDeriveKey_handlesDataFragmentationCorrectly() throws Exception {
-    int keySize = 32;
-    byte randomness = 4;
-    InputStream fragmentedInputStream =
-        new InputStream() {
-          @Override
-          public int read() {
-            return 0;
-          }
-
-          @Override
-          public int read(byte[] b, int off, int len) {
-            b[off] = randomness;
-            return 1;
-          }
-        };
-
-    XChaCha20Poly1305Key key =
-        factory.deriveKey(
-            manager,
-            XChaCha20Poly1305KeyFormat.newBuilder().setVersion(0).build(),
-            fragmentedInputStream);
-
-    assertThat(key.getKeyValue()).hasSize(keySize);
-    for (int i = 0; i < keySize; ++i) {
-      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(randomness);
-    }
-  }
-
-  @Test
-  public void testDeriveKeyNotEnoughRandomness() throws Exception {
-    byte[] keyMaterial = Random.randBytes(10);
-    assertThrows(
-        GeneralSecurityException.class,
-        () ->
-            factory.deriveKey(
-                manager,
-                XChaCha20Poly1305KeyFormat.newBuilder().setVersion(0).build(),
-                new ByteArrayInputStream(keyMaterial)));
-  }
-
-  @Test
-  public void testDeriveKeyWrongVersion() throws Exception {
-    byte[] keyMaterial = Random.randBytes(32);
-    assertThrows(
-        GeneralSecurityException.class,
-        () ->
-            factory.deriveKey(
-                manager,
-                XChaCha20Poly1305KeyFormat.newBuilder().setVersion(1).build(),
-                new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test

@@ -36,7 +36,6 @@ import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.TreeSet;
@@ -144,85 +143,6 @@ public class AesSivKeyManagerTest {
       keys.add(Hex.encode(factory.createKey(format).toByteArray()));
     }
     assertThat(keys).hasSize(numKeys);
-  }
-
-  @Test
-  public void testDeriveKey() throws Exception {
-    final int keySize = 64;
-    byte[] keyMaterial = Random.randBytes(100);
-    AesSivKey key =
-        new AesSivKeyManager()
-            .keyFactory()
-            .deriveKey(
-                new AesSivKeyManager(),
-                AesSivKeyFormat.newBuilder().setVersion(0).setKeySize(keySize).build(),
-                new ByteArrayInputStream(keyMaterial));
-    assertThat(key.getKeyValue()).hasSize(keySize);
-    for (int i = 0; i < keySize; ++i) {
-      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
-    }
-  }
-
-  @Test
-  public void testDeriveKey_handlesDataFragmentationCorrectly() throws Exception {
-    int keySize = 64;
-    byte randomness = 4;
-    InputStream fragmentedInputStream =
-        new InputStream() {
-          @Override
-          public int read() {
-            return 0;
-          }
-
-          @Override
-          public int read(byte[] b, int off, int len) {
-            b[off] = randomness;
-            return 1;
-          }
-        };
-
-    AesSivKey key =
-        new AesSivKeyManager()
-            .keyFactory()
-            .deriveKey(
-                new AesSivKeyManager(),
-                AesSivKeyFormat.newBuilder().setVersion(0).setKeySize(keySize).build(),
-                fragmentedInputStream);
-
-    assertThat(key.getKeyValue()).hasSize(keySize);
-    for (int i = 0; i < keySize; ++i) {
-      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(randomness);
-    }
-  }
-
-  @Test
-  public void testDeriveKeyNotEnoughRandomness() throws Exception {
-    final int keySize = 64;
-    byte[] keyMaterial = Random.randBytes(10);
-    assertThrows(
-        GeneralSecurityException.class,
-        () ->
-            new AesSivKeyManager()
-                .keyFactory()
-                .deriveKey(
-                    new AesSivKeyManager(),
-                    AesSivKeyFormat.newBuilder().setVersion(0).setKeySize(keySize).build(),
-                    new ByteArrayInputStream(keyMaterial)));
-  }
-
-  @Test
-  public void testDeriveKeyWrongVersion() throws Exception {
-    final int keySize = 64;
-    byte[] keyMaterial = Random.randBytes(64);
-    assertThrows(
-        GeneralSecurityException.class,
-        () ->
-            new AesSivKeyManager()
-                .keyFactory()
-                .deriveKey(
-                    new AesSivKeyManager(),
-                    AesSivKeyFormat.newBuilder().setVersion(1).setKeySize(keySize).build(),
-                    new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test

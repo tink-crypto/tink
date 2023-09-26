@@ -26,6 +26,7 @@ import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.aead.subtle.AesGcmSiv;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.Util;
@@ -110,23 +111,12 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
             .setVersion(getVersion())
             .build();
       }
-
-      @Override
-      public com.google.crypto.tink.aead.AesGcmSivKey createKeyFromRandomness(
-          Parameters parameters,
-          InputStream stream,
-          @Nullable Integer idRequirement,
-          SecretKeyAccess access)
-          throws GeneralSecurityException {
-        if (parameters instanceof AesGcmSivParameters) {
-          return createAesGcmSivKeyFromRandomness(
-              (AesGcmSivParameters) parameters, stream, idRequirement, access);
-        }
-        throw new GeneralSecurityException(
-            "Unexpected parameters: expected AesGcmParameters, but got: " + parameters);
-      }
     };
   }
+
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyDerivationRegistry.InsecureKeyCreator<AesGcmSivParameters>
+      KEY_DERIVER = AesGcmSivKeyManager::createAesGcmSivKeyFromRandomness;
 
   @AccessesPartialKey
   static com.google.crypto.tink.aead.AesGcmSivKey createAesGcmSivKeyFromRandomness(
@@ -187,6 +177,7 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
       Registry.registerKeyManager(new AesGcmSivKeyManager(), newKeyAllowed);
       AesGcmSivProtoSerialization.register();
       MutableParametersRegistry.globalInstance().putAll(namedParameters());
+      MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, AesGcmSivParameters.class);
     }
   }
 

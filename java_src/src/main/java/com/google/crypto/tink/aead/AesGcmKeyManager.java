@@ -26,6 +26,7 @@ import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.Util;
@@ -108,21 +109,6 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
             .setVersion(getVersion())
             .build();
       }
-
-      @Override
-      public com.google.crypto.tink.aead.AesGcmKey createKeyFromRandomness(
-          Parameters parameters,
-          InputStream stream,
-          @Nullable Integer idRequirement,
-          SecretKeyAccess access)
-          throws GeneralSecurityException {
-        if (parameters instanceof AesGcmParameters) {
-          return createAesGcmKeyFromRandomness(
-              (AesGcmParameters) parameters, stream, idRequirement, access);
-        }
-        throw new GeneralSecurityException(
-            "Unexpected parameters: expected AesGcmParameters, but got: " + parameters);
-      }
     };
   }
 
@@ -149,6 +135,10 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
     return Collections.unmodifiableMap(result);
   }
 
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyDerivationRegistry.InsecureKeyCreator<AesGcmParameters>
+      KEY_DERIVER = AesGcmKeyManager::createAesGcmKeyFromRandomness;
+
   @AccessesPartialKey
   static com.google.crypto.tink.aead.AesGcmKey createAesGcmKeyFromRandomness(
       AesGcmParameters parameters,
@@ -167,6 +157,7 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
     Registry.registerKeyManager(new AesGcmKeyManager(), newKeyAllowed);
     AesGcmProtoSerialization.register();
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
+    MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, AesGcmParameters.class);
   }
 
   /**

@@ -25,6 +25,7 @@ import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
@@ -154,23 +155,12 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
             .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
             .build();
       }
-
-      @Override
-      public com.google.crypto.tink.prf.HmacPrfKey createKeyFromRandomness(
-          Parameters parameters,
-          InputStream stream,
-          @Nullable Integer idRequirement,
-          SecretKeyAccess access)
-          throws GeneralSecurityException {
-        if (parameters instanceof HmacPrfParameters) {
-          return createHmacKeyFromRandomness(
-              (HmacPrfParameters) parameters, stream, idRequirement, access);
-        }
-        throw new GeneralSecurityException(
-            "Unexpected parameters: expected HmacPrfParameters, but got: " + parameters);
-      }
     };
   }
+
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyDerivationRegistry.InsecureKeyCreator<HmacPrfParameters>
+      KEY_DERIVER = HmacPrfKeyManager::createHmacKeyFromRandomness;
 
   @AccessesPartialKey
   static com.google.crypto.tink.prf.HmacPrfKey createHmacKeyFromRandomness(
@@ -198,6 +188,7 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(PRF_PRIMITIVE_CONSTRUCTOR);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
+    MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, HmacPrfParameters.class);
   }
 
   @Override

@@ -25,6 +25,7 @@ import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
@@ -127,21 +128,6 @@ public final class Ed25519PrivateKeyManager
             .setPublicKey(publicKey)
             .build();
       }
-
-      @Override
-      public com.google.crypto.tink.signature.Ed25519PrivateKey createKeyFromRandomness(
-          Parameters parameters,
-          InputStream stream,
-          @Nullable Integer idRequirement,
-          SecretKeyAccess access)
-          throws GeneralSecurityException {
-        if (parameters instanceof Ed25519Parameters) {
-          return createEd25519KeyFromRandomness(
-              (Ed25519Parameters) parameters, stream, idRequirement, access);
-        }
-        throw new GeneralSecurityException(
-            "Unexpected parameters: expected AesFfxFf1Parameters, but got: " + parameters);
-      }
     };
   }
 
@@ -162,6 +148,10 @@ public final class Ed25519PrivateKeyManager
     return com.google.crypto.tink.signature.Ed25519PrivateKey.create(
         publicKey, SecretBytes.copyFrom(keyPair.getPrivateKey(), access));
   }
+
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyDerivationRegistry.InsecureKeyCreator<Ed25519Parameters>
+      KEY_DERIVER = Ed25519PrivateKeyManager::createEd25519KeyFromRandomness;
 
   private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
         Map<String, Parameters> result = new HashMap<>();
@@ -184,6 +174,7 @@ public final class Ed25519PrivateKeyManager
         new Ed25519PrivateKeyManager(), new Ed25519PublicKeyManager(), newKeyAllowed);
     Ed25519ProtoSerialization.register();
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
+    MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, Ed25519Parameters.class);
   }
 
   /**

@@ -19,10 +19,15 @@ package com.google.crypto.tink.keyderivation.internal;
 import static com.google.crypto.tink.internal.Util.UTF_8;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.Key;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.PrivilegedRegistry;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
+import com.google.crypto.tink.internal.MutableSerializationRegistry;
+import com.google.crypto.tink.internal.ProtoKeySerialization;
+import com.google.crypto.tink.internal.ProtoParametersSerialization;
 import com.google.crypto.tink.keyderivation.KeysetDeriver;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
@@ -45,12 +50,39 @@ public class PrfBasedDeriver implements KeysetDeriver {
     this.derivedKeyTemplate = derivedKeyTemplate;
   }
 
+  private static KeyData deriveKey(KeyTemplate derivedKeyTemplate, InputStream pseudoRandomness)
+      throws GeneralSecurityException {
+    // Legacy behavior: deriveKey always ignored the output prefix and assumed "RAW". Hence, to
+    // emulate previous behavior (we try to be few code changes in cl/567278525) we create the
+    // key from such a template.
+    ProtoParametersSerialization parametersSerialization =
+        ProtoParametersSerialization.create(
+            derivedKeyTemplate.toBuilder().setOutputPrefixType(OutputPrefixType.RAW).build());
+    Parameters parameters =
+        MutableSerializationRegistry.globalInstance().parseParameters(parametersSerialization);
+    Key key =
+        MutableKeyDerivationRegistry.globalInstance()
+            .createKeyFromRandomness(
+                parameters,
+                pseudoRandomness,
+                /* idRequirement= */ null,
+                InsecureSecretKeyAccess.get());
+    ProtoKeySerialization keySerialization =
+        MutableSerializationRegistry.globalInstance()
+            .serializeKey(key, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
+    return KeyData.newBuilder()
+        .setTypeUrl(keySerialization.getTypeUrl())
+        .setValue(keySerialization.getValue())
+        .setKeyMaterialType(keySerialization.getKeyMaterialType())
+        .build();
+  }
+
   public static PrfBasedDeriver create(KeyData streamingPrfKey, KeyTemplate derivedKeyTemplate)
       throws GeneralSecurityException {
     // Validate {@code streamingPrfKey} and {@code derivedKeyTemplate}.
     StreamingPrf prf = Registry.getPrimitive(streamingPrfKey, StreamingPrf.class);
-    KeyData unused =
-        PrivilegedRegistry.deriveKey(derivedKeyTemplate, prf.computePrf("s".getBytes(UTF_8)));
+
+    KeyData unused = deriveKey(derivedKeyTemplate, prf.computePrf("s".getBytes(UTF_8)));
 
     return new PrfBasedDeriver(streamingPrfKey, derivedKeyTemplate);
   }
@@ -62,7 +94,7 @@ public class PrfBasedDeriver implements KeysetDeriver {
   public KeysetHandle deriveKeyset(byte[] salt) throws GeneralSecurityException {
     StreamingPrf prf = Registry.getPrimitive(streamingPrfKey, StreamingPrf.class);
     InputStream randomness = prf.computePrf(salt);
-    KeyData keyData = PrivilegedRegistry.deriveKey(derivedKeyTemplate, randomness);
+    KeyData keyData = deriveKey(derivedKeyTemplate, randomness);
     Keyset.Key key =
         Keyset.Key.newBuilder()
             .setKeyData(keyData)

@@ -26,7 +26,6 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
-import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Locale;
@@ -82,51 +81,11 @@ public final class Registry {
   private static final AtomicReference<KeyManagerRegistry> keyManagerRegistry =
       new AtomicReference<>(new KeyManagerRegistry());
 
-  private static final ConcurrentMap<String, KeyDataDeriver> keyDeriverMap =
-      new ConcurrentHashMap<>(); // typeUrl -> deriver (created out of KeyTypeManager).
-
   private static final ConcurrentMap<String, Boolean> newKeyAllowedMap =
       new ConcurrentHashMap<>(); // typeUrl -> newKeyAllowed mapping
 
   private static final ConcurrentMap<String, Catalogue<?>> catalogueMap =
       new ConcurrentHashMap<>(); //  name -> catalogue mapping
-
-  private static interface KeyDataDeriver {
-    KeyData deriveKeyData(ByteString serializedKeyFormat, InputStream stream)
-        throws GeneralSecurityException;
-  }
-
-  private static <KeyProtoT extends MessageLite> KeyDataDeriver createDeriverFor(
-      final KeyTypeManager<KeyProtoT> keyManager) {
-    return new KeyDataDeriver() {
-      private <KeyFormatProtoT extends MessageLite> MessageLite deriveKeyWithFactory(
-          ByteString serializedKeyFormat,
-          InputStream stream,
-          KeyTypeManager.KeyFactory<KeyFormatProtoT, KeyProtoT> keyFactory)
-          throws GeneralSecurityException {
-        KeyFormatProtoT keyFormat;
-        try {
-          keyFormat = keyFactory.parseKeyFormat(serializedKeyFormat);
-        } catch (InvalidProtocolBufferException e) {
-          throw new GeneralSecurityException("parsing key format failed in deriveKey", e);
-        }
-        keyFactory.validateKeyFormat(keyFormat);
-        return keyFactory.deriveKey(keyManager, keyFormat, stream);
-      }
-
-      @Override
-      public KeyData deriveKeyData(ByteString serializedKeyFormat, InputStream stream)
-          throws GeneralSecurityException {
-        KeyTypeManager.KeyFactory<?, KeyProtoT> keyFactory = keyManager.keyFactory();
-        MessageLite keyValue = deriveKeyWithFactory(serializedKeyFormat, stream, keyFactory);
-        return KeyData.newBuilder()
-            .setTypeUrl(keyManager.getKeyType())
-            .setValue(keyValue.toByteString())
-            .setKeyMaterialType(keyManager.keyMaterialType())
-            .build();
-      }
-    };
-  }
 
   /**
    * Resets the registry.
@@ -139,7 +98,6 @@ public final class Registry {
   static synchronized void reset() {
     keyManagerRegistry.set(new KeyManagerRegistry());
     MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
-    keyDeriverMap.clear();
     newKeyAllowedMap.clear();
     catalogueMap.clear();
   }
@@ -290,9 +248,6 @@ public final class Registry {
     String typeUrl = manager.getKeyType();
     ensureKeyManagerInsertable(typeUrl, newKeyAllowed);
 
-    if (!keyManagerRegistry.get().typeUrlExists(typeUrl)) {
-      keyDeriverMap.put(typeUrl, createDeriverFor(manager));
-    }
     newKeyAllowedMap.put(typeUrl, Boolean.valueOf(newKeyAllowed));
     keyManagerRegistry.set(newKeyManagerRegistry);
   }
@@ -397,9 +352,6 @@ public final class Registry {
     // No key format because a public key manager cannot create new keys
     ensureKeyManagerInsertable(publicTypeUrl, false);
 
-    if (!keyManagerRegistry.get().typeUrlExists(privateTypeUrl)) {
-      keyDeriverMap.put(privateTypeUrl, createDeriverFor(privateKeyTypeManager));
-    }
     newKeyAllowedMap.put(privateTypeUrl, newKeyAllowed);
     newKeyAllowedMap.put(publicTypeUrl, false);
 
@@ -543,28 +495,6 @@ public final class Registry {
     } else {
       throw new GeneralSecurityException("newKey-operation not permitted for key type " + typeUrl);
     }
-  }
-
-  /**
-   * Derives a key, using the given {@code keyTemplate}, with the randomness as provided by the
-   * second argument.
-   *
-   * <p>This method is on purpose not in the public interface. Calling it twice using different key
-   * templates and the same randomness can completely destroy any security in a system, so we
-   * prevent this by making it accessible only to safe call sites.
-   *
-   * <p>This functions ignores {@code keyTemplate.getOutputPrefix()}.
-   */
-  static synchronized KeyData deriveKey(
-      com.google.crypto.tink.proto.KeyTemplate keyTemplate, InputStream randomStream)
-      throws GeneralSecurityException {
-    String typeUrl = keyTemplate.getTypeUrl();
-    if (!keyDeriverMap.containsKey(typeUrl)) {
-      throw new GeneralSecurityException(
-          "No keymanager registered or key manager cannot derive keys for " + typeUrl);
-    }
-    KeyDataDeriver deriver = keyDeriverMap.get(typeUrl);
-    return deriver.deriveKeyData(keyTemplate.getValue(), randomStream);
   }
 
   /**
