@@ -59,6 +59,7 @@ import com.google.crypto.tink.streamingaead.PredefinedStreamingAeadParameters;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
+import java.security.GeneralSecurityException;
 import java.security.Security;
 import javax.annotation.Nullable;
 import org.conscrypt.Conscrypt;
@@ -167,6 +168,151 @@ public final class PrfBasedDeriverSecondTest {
 
   private static final SecretBytes secretBytesFromHex(String hex) {
     return SecretBytes.copyFrom(Hex.decode(hex), InsecureSecretKeyAccess.get());
+  }
+
+  /* Some PrfBasedKeyDerivationKey. */
+  private static PrfBasedKeyDerivationKey getPrfBasedKeyDerivationKey0()
+      throws GeneralSecurityException {
+    HkdfPrfParameters hkdfPrfParameters =
+        HkdfPrfParameters.builder()
+            .setKeySizeBytes(32)
+            .setHashType(HkdfPrfParameters.HashType.SHA256)
+            .build();
+    HkdfPrfKey prfKey =
+        HkdfPrfKey.builder()
+            .setParameters(hkdfPrfParameters)
+            .setKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("0000000000000000000000000000000000000000000000000000000000000000"),
+                    InsecureSecretKeyAccess.get()))
+            .build();
+    AesGcmParameters derivedKeyParameters =
+        AesGcmParameters.builder()
+            .setKeySizeBytes(16)
+            .setIvSizeBytes(12)
+            .setTagSizeBytes(16)
+            .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+            .build();
+    PrfBasedKeyDerivationParameters derivationParameters =
+        PrfBasedKeyDerivationParameters.builder()
+            .setDerivedKeyParameters(derivedKeyParameters)
+            .setPrfParameters(hkdfPrfParameters)
+            .build();
+    return PrfBasedKeyDerivationKey.create(derivationParameters, prfKey, /* idRequirement= */ null);
+  }
+
+  /* Some other PrfBasedKeyDerivationKey -- needs ID = 557 */
+  private static PrfBasedKeyDerivationKey getPrfBasedKeyDerivationKey1()
+      throws GeneralSecurityException {
+    HkdfPrfParameters hkdfPrfParameters =
+        HkdfPrfParameters.builder()
+            .setKeySizeBytes(32)
+            .setHashType(HkdfPrfParameters.HashType.SHA256)
+            .build();
+    HkdfPrfKey prfKey =
+        HkdfPrfKey.builder()
+            .setParameters(hkdfPrfParameters)
+            .setKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("1111111111111111111111111111111111111111111111111111111111111111"),
+                    InsecureSecretKeyAccess.get()))
+            .build();
+    AesGcmParameters derivedKeyParameters =
+        AesGcmParameters.builder()
+            .setKeySizeBytes(16)
+            .setIvSizeBytes(12)
+            .setTagSizeBytes(16)
+            .setVariant(AesGcmParameters.Variant.TINK)
+            .build();
+    PrfBasedKeyDerivationParameters derivationParameters =
+        PrfBasedKeyDerivationParameters.builder()
+            .setDerivedKeyParameters(derivedKeyParameters)
+            .setPrfParameters(hkdfPrfParameters)
+            .build();
+    return PrfBasedKeyDerivationKey.create(derivationParameters, prfKey, /* idRequirement= */ 557);
+  }
+
+  /* A third key -- needs ID = 555 */
+  private static PrfBasedKeyDerivationKey getPrfBasedKeyDerivationKey2()
+      throws GeneralSecurityException {
+    HkdfPrfParameters hkdfPrfParameters =
+        HkdfPrfParameters.builder()
+            .setKeySizeBytes(32)
+            .setHashType(HkdfPrfParameters.HashType.SHA256)
+            .build();
+    HkdfPrfKey prfKey =
+        HkdfPrfKey.builder()
+            .setParameters(hkdfPrfParameters)
+            .setKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("2222222222222222222222222222222222222222222222222222222222222200"),
+                    InsecureSecretKeyAccess.get()))
+            .build();
+    AesGcmParameters derivedKeyParameters =
+        AesGcmParameters.builder()
+            .setKeySizeBytes(16)
+            .setIvSizeBytes(12)
+            .setTagSizeBytes(16)
+            .setVariant(AesGcmParameters.Variant.TINK)
+            .build();
+    PrfBasedKeyDerivationParameters derivationParameters =
+        PrfBasedKeyDerivationParameters.builder()
+            .setDerivedKeyParameters(derivedKeyParameters)
+            .setPrfParameters(hkdfPrfParameters)
+            .build();
+    return PrfBasedKeyDerivationKey.create(derivationParameters, prfKey, /* idRequirement= */ 555);
+  }
+
+  @Test
+  public void testWithMultipleKeys() throws Exception {
+    PrfBasedKeyDerivationKey keyDerivationKey0 = getPrfBasedKeyDerivationKey0();
+    PrfBasedKeyDerivationKey keyDerivationKey1 = getPrfBasedKeyDerivationKey1();
+    PrfBasedKeyDerivationKey keyDerivationKey2 = getPrfBasedKeyDerivationKey2();
+
+    KeysetHandle keyset =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(keyDerivationKey0).withFixedId(558))
+            .addEntry(KeysetHandle.importKey(keyDerivationKey1).withFixedId(557).makePrimary())
+            .addEntry(KeysetHandle.importKey(keyDerivationKey2).withFixedId(555))
+            .build();
+    KeysetDeriver deriver = keyset.getPrimitive(KeysetDeriver.class);
+    KeysetHandle derivedKeyset = deriver.deriveKeyset(new byte[] {1, 0, 1});
+
+    Key expectedKey0 =
+        AesGcmKey.builder()
+            .setParameters(
+                (AesGcmParameters) keyDerivationKey0.getParameters().getDerivedKeyParameters())
+            .setKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("714ee0b48237680103f7712fb02f8008"), InsecureSecretKeyAccess.get()))
+            .build();
+    Key expectedKey1 =
+        AesGcmKey.builder()
+            .setParameters(
+                (AesGcmParameters) keyDerivationKey1.getParameters().getDerivedKeyParameters())
+            .setIdRequirement(557)
+            .setKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("1245823cad59902bc88804d1ad53d251"), InsecureSecretKeyAccess.get()))
+            .build();
+    Key expectedKey2 =
+        AesGcmKey.builder()
+            .setParameters(
+                (AesGcmParameters) keyDerivationKey2.getParameters().getDerivedKeyParameters())
+            .setIdRequirement(555)
+            .setKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("b172d3bb44346382f48e480b061c5624"), InsecureSecretKeyAccess.get()))
+            .build();
+
+    KeysetHandle expectedKeyset =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(expectedKey0).withFixedId(558))
+            .addEntry(KeysetHandle.importKey(expectedKey1).withFixedId(557).makePrimary())
+            .addEntry(KeysetHandle.importKey(expectedKey2).withFixedId(555))
+            .build();
+
+    assertThat(derivedKeyset.equalsKeyset(expectedKeyset)).isTrue();
   }
 
   /**
