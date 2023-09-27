@@ -141,3 +141,53 @@ java_library(
         "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
+
+java_library(
+    name = "key_deriver",
+    srcs = ["KeyDeriver.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "prf_based_key_deriver",
+    srcs = ["PrfBasedKeyDeriver.java"],
+    deps = [
+        ":key_deriver",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_key_derivation_registry",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_primitive_registry",
+        "//src/main/java/com/google/crypto/tink/keyderivation:prf_based_key_derivation_key",
+        "//src/main/java/com/google/crypto/tink/subtle/prf:streaming_prf",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "key_deriver-android",
+    srcs = ["KeyDeriver.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "prf_based_key_deriver-android",
+    srcs = ["PrfBasedKeyDeriver.java"],
+    deps = [
+        ":key_deriver-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_key_derivation_registry-android",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_primitive_registry-android",
+        "//src/main/java/com/google/crypto/tink/keyderivation:prf_based_key_derivation_key-android",
+        "//src/main/java/com/google/crypto/tink/subtle/prf:streaming_prf-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
