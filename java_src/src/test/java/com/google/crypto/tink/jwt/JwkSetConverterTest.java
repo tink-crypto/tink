@@ -1106,6 +1106,34 @@ public final class JwkSetConverterTest {
         GeneralSecurityException.class, () -> JwkSetConverter.toPublicKeysetHandle(psJwksString));
   }
 
+  @Test
+  public void jwksetWithDuplicateMapKey_fails() throws Exception {
+    String jwkSetWithDuplicateMapKey =
+        "{\"keys\":[{"
+            + "\"kty\":\"EC\","
+            + "\"kty\":\"EC\","
+            + "\"crv\":\"P-256\","
+            + "\"x\":\"EM8jrqGMse-PGZQnafIcgEOZ061DiA-y9aBhiBnSDKA\","
+            + "\"y\":\"UxCtK0wAqQG_e5vpr7SSgJNKt5h4z3FGZtAuBLng1uE\","
+            + "\"use\":\"sig\",\"alg\":\"ES256\",\"key_ops\":[\"verify\"]}]}";
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> JwkSetConverter.toPublicKeysetHandle(jwkSetWithDuplicateMapKey));
+  }
+
+  @Test
+  public void jwksetAsJsonArray_fails() throws Exception {
+    String jwksetAsJsonArray =
+        "[{"
+            + "\"kty\":\"EC\","
+            + "\"crv\":\"P-256\","
+            + "\"x\":\"EM8jrqGMse-PGZQnafIcgEOZ061DiA-y9aBhiBnSDKA\","
+            + "\"y\":\"UxCtK0wAqQG_e5vpr7SSgJNKt5h4z3FGZtAuBLng1uE\","
+            + "\"use\":\"sig\",\"alg\":\"ES256\",\"key_ops\":[\"verify\"]}]";
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> JwkSetConverter.toPublicKeysetHandle(jwksetAsJsonArray));
+  }
 
   @Test
   @SuppressWarnings("InlineMeInliner")
@@ -1129,5 +1157,4 @@ public final class JwkSetConverterTest {
       JwkSetConverter.fromPublicKeysetHandle(handle),
       JwkSetConverter.fromPublicKeysetHandle(deprecatedHandle));
   }
-
 }

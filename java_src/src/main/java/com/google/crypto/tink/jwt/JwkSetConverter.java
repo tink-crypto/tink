@@ -19,6 +19,7 @@ package com.google.crypto.tink.jwt;
 import com.google.crypto.tink.KeyStatus;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.internal.BigIntegerEncoding;
+import com.google.crypto.tink.internal.JsonParser;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.proto.JwtEcdsaAlgorithm;
@@ -35,14 +36,10 @@ import com.google.errorprone.annotations.InlineMe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.internal.Streams;
-import com.google.gson.stream.JsonReader;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
-import java.io.StringReader;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
@@ -118,10 +115,8 @@ public final class JwkSetConverter {
     // We never throw a IOException anymore, but keep it in the interface for compatibility.
     JsonObject jsonKeyset;
     try {
-      JsonReader jsonReader = new JsonReader(new StringReader(jwkSet));
-      jsonReader.setLenient(false);
-      jsonKeyset = Streams.parse(jsonReader).getAsJsonObject();
-    } catch (IllegalStateException | JsonParseException | StackOverflowError ex) {
+      jsonKeyset = JsonParser.parse(jwkSet).getAsJsonObject();
+    } catch (IllegalStateException | IOException ex) {
       throw new GeneralSecurityException("JWK set is invalid JSON", ex);
     }
     KeysetHandle.Builder builder = KeysetHandle.newBuilder();
