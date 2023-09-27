@@ -191,3 +191,33 @@ android_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
+
+android_library(
+    name = "keyset_deriver_wrapper-android",
+    srcs = ["KeysetDeriverWrapper.java"],
+    deps = [
+        ":key_deriver-android",
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink:primitive_set-android",
+        "//src/main/java/com/google/crypto/tink:primitive_wrapper-android",
+        "//src/main/java/com/google/crypto/tink:registry-android",
+        "//src/main/java/com/google/crypto/tink:registry_cluster-android",
+        "//src/main/java/com/google/crypto/tink/keyderivation:keyset_deriver-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "keyset_deriver_wrapper",
+    srcs = ["KeysetDeriverWrapper.java"],
+    deps = [
+        ":key_deriver",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:primitive_set",
+        "//src/main/java/com/google/crypto/tink:primitive_wrapper",
+        "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/keyderivation:keyset_deriver",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
