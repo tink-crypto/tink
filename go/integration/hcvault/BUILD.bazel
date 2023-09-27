@@ -10,8 +10,8 @@ go_library(
         "hcvault_aead.go",
         "hcvault_client.go",
     ],
-    visibility = ["//visibility:public"],
     importpath = "github.com/google/tink/go/integration/hcvault",
+    visibility = ["//visibility:public"],
     deps = [
         "//core/registry",
         "//tink",
