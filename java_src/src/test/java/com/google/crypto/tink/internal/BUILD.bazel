@@ -579,3 +579,24 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "MutableKeyCreationRegistryTest",
+    size = "small",
+    srcs = ["MutableKeyCreationRegistryTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/aead:aes_eax_key",
+        "//src/main/java/com/google/crypto/tink/aead:aes_eax_parameters",
+        "//src/main/java/com/google/crypto/tink/aead:aes_gcm_key",
+        "//src/main/java/com/google/crypto/tink/aead:aes_gcm_parameters",
+        "//src/main/java/com/google/crypto/tink/aead:predefined_aead_parameters",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_key_creation_registry",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

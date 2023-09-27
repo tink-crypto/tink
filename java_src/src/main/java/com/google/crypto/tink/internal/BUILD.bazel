@@ -797,3 +797,23 @@ java_library(
     testonly = 1,
     srcs = ["SlowInputStream.java"],
 )
+
+android_library(
+    name = "mutable_key_creation_registry-android",
+    srcs = ["MutableKeyCreationRegistry.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink:parameters-android",
+        "@maven//:com_google_code_findbugs_jsr305",
+    ],
+)
+
+java_library(
+    name = "mutable_key_creation_registry",
+    srcs = ["MutableKeyCreationRegistry.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink:parameters",
+        "@maven//:com_google_code_findbugs_jsr305",
+    ],
+)
