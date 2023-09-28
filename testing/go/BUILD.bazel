@@ -94,6 +94,7 @@ go_binary(
         "@tink_go//core/registry",
         "@tink_go//integration/awskms",
         "@tink_go//integration/gcpkms",
+        "@tink_go//integration/hcvault",
         "@tink_go//testing/fakekms",
     ],
 )

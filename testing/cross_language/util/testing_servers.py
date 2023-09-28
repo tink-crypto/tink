@@ -84,6 +84,7 @@ GCP_KEY_URI_PREFIX = (
     'gcp-kms://projects/tink-test-infrastructure/locations/global/'
     'keyRings/unit-and-integration-testing/cryptoKeys/')
 AWS_KEY_URI_PREFIX = 'aws-kms://arn:aws:kms:us-east-2:235739564943:'
+HCVAULT_KEY_URI_PREFIX = 'hcvault://127.0.0.1:8200/'
 
 GCP_CREDENTIALS_PATH = os.path.join(
     os.environ['TEST_SRCDIR'] if 'TEST_SRCDIR' in os.environ else '',
@@ -94,6 +95,7 @@ AWS_CREDENTIALS_INI_PATH = os.path.join(
 AWS_CREDENTIALS_CRED_PATH = os.path.join(
     os.environ['TEST_SRCDIR'] if 'TEST_SRCDIR' in os.environ else '',
     'cross_language_test/testdata/aws/credentials.cred')
+HCVAULT_TOKEN = os.environ['VAULT_TOKEN'] if 'VAULT_TOKEN' in os.environ else ''
 
 _RELATIVE_ROOT_PATH = 'tink_base/testing'
 
@@ -161,7 +163,9 @@ def _server_cmd(lang: str, port: int) -> List[str]:
     # in go, they are required, but can be a prefix.
     server_args.extend([
         '--gcp_key_uri', GCP_KEY_URI_PREFIX,
-        '--aws_key_uri', AWS_KEY_URI_PREFIX])
+        '--aws_key_uri', AWS_KEY_URI_PREFIX,
+        '--hcvault_key_uri_prefix', HCVAULT_KEY_URI_PREFIX,
+        '--hcvault_token', HCVAULT_TOKEN])
 
   if lang == 'java' and server_path.endswith('.jar'):
     java_path = os.path.join(_root_path(), _JAVA_PATH)

@@ -51,9 +51,12 @@ _GCP_UNKNOWN_KEY_URI = (
     'gcp-kms://projects/tink-test-infrastructure/locations/global/'
     'keyRings/unit-and-integration-testing/cryptoKeys/unknown')
 
+_LOCAL_HCVAULT_KEY_URI = 'hcvault://127.0.0.1:8200/transit/keys/testkey'
+
 _KMS_KEY_URI = {
     'GCP': _GCP_KEY_URI,
     'AWS': _AWS_KEY_URI,
+    'HCVAULT': _LOCAL_HCVAULT_KEY_URI,
 }
 
 _DEK_TEMPLATE = utilities.KEY_TEMPLATE['AES128_GCM']
@@ -81,6 +84,7 @@ _KMS_ENVELOPE_AEAD_KEY_TEMPLATES = _kms_envelope_aead_templates(['GCP', 'AWS'])
 _SUPPORTED_LANGUAGES_FOR_KMS_ENVELOPE_AEAD = {
     'GCP': ('python', 'cc', 'go', 'java'),
     'AWS': ('python', 'cc', 'go', 'java'),
+    'HCVAULT': ('go',),
 }
 
 _SUPPORTED_LANGUAGES_FOR_KMS_AEAD = {
