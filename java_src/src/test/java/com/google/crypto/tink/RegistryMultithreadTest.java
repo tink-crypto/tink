@@ -42,9 +42,7 @@ import org.junit.runners.JUnit4;
 /** Thread safety tests for {@link Registry}. */
 @RunWith(JUnit4.class)
 public final class RegistryMultithreadTest {
-  private static class Primitive {}
-
-  private static class TestKeyManager implements KeyManager<Primitive> {
+  private static class TestKeyManager implements KeyManager<Aead> {
     public TestKeyManager(String typeUrl) {
       this.typeUrl = typeUrl;
     }
@@ -52,7 +50,7 @@ public final class RegistryMultithreadTest {
     private final String typeUrl;
 
     @Override
-    public Primitive getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
+    public Aead getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
       throw new UnsupportedOperationException("Not needed for test");
     }
 
@@ -67,8 +65,8 @@ public final class RegistryMultithreadTest {
     }
 
     @Override
-    public Class<Primitive> getPrimitiveClass() {
-      return Primitive.class;
+    public Class<Aead> getPrimitiveClass() {
+      return Aead.class;
     }
   }
 

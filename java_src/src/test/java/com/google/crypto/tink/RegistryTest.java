@@ -33,6 +33,7 @@ import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
+import com.google.crypto.tink.jwt.JwtMac;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.PredefinedMacParameters;
 import com.google.crypto.tink.proto.AesEaxKey;
@@ -265,6 +266,42 @@ public class RegistryTest {
     IllegalArgumentException e =
         assertThrows(IllegalArgumentException.class, () -> Registry.registerKeyManager(null));
     assertThat(e.toString()).contains("must be non-null");
+  }
+
+  @Test
+  public void testRegisterKeyManager_primitiveIsUnknown_shouldThrowException() throws Exception {
+    KeyManager<JwtMac> unknownPrimitiveKeyManager =
+        new KeyManager<JwtMac>() {
+          @Override
+          public JwtMac getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
+            throw new UnsupportedOperationException();
+          }
+
+          /**
+           * Returns the type URL that identifies the key type of keys managed by this KeyManager.
+           */
+          @Override
+          public String getKeyType() {
+            return "someKeyType";
+          }
+
+          @Override
+          public Class<JwtMac> getPrimitiveClass() {
+            return JwtMac.class;
+          }
+
+          @Override
+          public KeyData newKeyData(ByteString serializedKeyFormat)
+              throws GeneralSecurityException {
+            throw new UnsupportedOperationException();
+          }
+        };
+
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> Registry.registerKeyManager(unknownPrimitiveKeyManager));
+    assertThat(e.toString()).contains("Registration of key managers for class");
   }
 
   @Test

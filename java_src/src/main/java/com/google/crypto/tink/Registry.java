@@ -21,14 +21,18 @@ import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
+import com.google.crypto.tink.prf.Prf;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -189,6 +193,23 @@ public final class Registry {
     registerKeyManager(manager, /* newKeyAllowed= */ true);
   }
 
+  private static Set<Class<?>> createAllowedPrimitives() {
+    HashSet<Class<?>> result = new HashSet<>();
+    result.add(Aead.class);
+    result.add(DeterministicAead.class);
+    result.add(StreamingAead.class);
+    result.add(HybridEncrypt.class);
+    result.add(HybridDecrypt.class);
+    result.add(Mac.class);
+    result.add(Prf.class);
+    result.add(PublicKeySign.class);
+    result.add(PublicKeyVerify.class);
+    return result;
+  }
+
+  private static final Set<Class<?>> ALLOWED_PRIMITIVES =
+      Collections.unmodifiableSet(createAllowedPrimitives());
+
   /**
    * Tries to register {@code manager} for {@code manager.getKeyType()}. If {@code newKeyAllowed} is
    * true, users can generate new keys with this manager using the {@link Registry#newKey} methods.
@@ -205,6 +226,13 @@ public final class Registry {
       final KeyManager<P> manager, boolean newKeyAllowed) throws GeneralSecurityException {
     if (manager == null) {
       throw new IllegalArgumentException("key manager must be non-null.");
+    }
+    if (!ALLOWED_PRIMITIVES.contains(manager.getPrimitiveClass())) {
+      throw new GeneralSecurityException(
+          "Registration of key managers for class "
+              + manager.getPrimitiveClass()
+              + " has been disabled. Please file an issue on"
+              + " https://github.com/tink-crypto/tink-java");
     }
     KeyManagerRegistry newKeyManagerRegistry = new KeyManagerRegistry(keyManagerRegistry.get());
     newKeyManagerRegistry.registerKeyManager(manager);
