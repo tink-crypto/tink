@@ -42,7 +42,7 @@ public final class KeyDerivationConfig {
    */
   public static void register() throws GeneralSecurityException {
     // Register primitive wrappers.
-    KeysetDeriverWrapper.register();
+    com.google.crypto.tink.keyderivation.internal.KeysetDeriverWrapper.register();
 
     if (TinkFips.useOnlyFips()) {
       // If Tink is built in FIPS-mode do not register algorithms which are not compatible.

@@ -18,8 +18,11 @@ package com.google.crypto.tink.keyderivation.internal;
 
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.keyderivation.KeysetDeriver;
+import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationKey;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.PrfBasedDeriverKey;
@@ -32,6 +35,11 @@ import java.security.GeneralSecurityException;
 
 /** {@link com.google.crypto.tink.internal.KeyTypeManager} for {@link PrfBasedDeriverKey}. */
 public final class PrfBasedDeriverKeyManager extends KeyTypeManager<PrfBasedDeriverKey> {
+  private static final PrimitiveConstructor<PrfBasedKeyDerivationKey, KeyDeriver>
+      PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              PrfBasedKeyDeriver::create, PrfBasedKeyDerivationKey.class, KeyDeriver.class);
+
   public PrfBasedDeriverKeyManager() {
     super(
         PrfBasedDeriverKey.class,
@@ -115,6 +123,8 @@ public final class PrfBasedDeriverKeyManager extends KeyTypeManager<PrfBasedDeri
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new PrfBasedDeriverKeyManager(), newKeyAllowed);
+    MutablePrimitiveRegistry.globalInstance().registerPrimitiveConstructor(PRIMITIVE_CONSTRUCTOR);
+
     PrfBasedKeyDerivationKeyProtoSerialization.register();
   }
 }
