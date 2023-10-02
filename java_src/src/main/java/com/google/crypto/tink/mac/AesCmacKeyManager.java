@@ -22,6 +22,7 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
@@ -77,6 +78,11 @@ public final class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
           PrfMac::create,
           com.google.crypto.tink.mac.AesCmacKey.class,
           Mac.class);
+
+  @Override
+  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
+  }
 
   @Override
   public String getKeyType() {

@@ -17,6 +17,7 @@
 package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.PublicKeyVerify;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.Ed25519PublicKey;
@@ -42,6 +43,11 @@ class Ed25519PublicKeyManager extends KeyTypeManager<Ed25519PublicKey> {
             return new Ed25519Verify(keyProto.getKeyValue().toByteArray());
           }
         });
+  }
+
+  @Override
+  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
   }
 
   @Override

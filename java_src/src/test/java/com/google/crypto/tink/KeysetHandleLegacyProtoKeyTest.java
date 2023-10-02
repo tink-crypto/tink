@@ -19,6 +19,7 @@ package com.google.crypto.tink;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.LegacyProtoKey;
 import com.google.crypto.tink.internal.LegacyProtoParameters;
@@ -61,6 +62,11 @@ public final class KeysetHandleLegacyProtoKeyTest {
               return new AesGcmJce(key.getKeyValue().toByteArray());
             }
           });
+    }
+
+    @Override
+    public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+      return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
     }
 
     @Override

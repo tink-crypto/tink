@@ -24,6 +24,7 @@ import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.StreamingAead;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
@@ -71,6 +72,11 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
 
   private static final int NONCE_PREFIX_IN_BYTES = 7;
   private static final int TAG_SIZE_IN_BYTES = 16;
+
+  @Override
+  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
+  }
 
   @Override
   public String getKeyType() {

@@ -19,6 +19,7 @@ package com.google.crypto.tink.hybrid.internal;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.hybrid.HpkeParameters;
 import com.google.crypto.tink.hybrid.HpkeProtoSerialization;
 import com.google.crypto.tink.internal.BigIntegerEncoding;
@@ -73,6 +74,11 @@ public final class HpkePrivateKeyManager
         new HpkePrivateKeyManager(), new HpkePublicKeyManager(), newKeyAllowed);
     HpkeProtoSerialization.register();
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
+  }
+
+  @Override
+  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
   }
 
   @Override

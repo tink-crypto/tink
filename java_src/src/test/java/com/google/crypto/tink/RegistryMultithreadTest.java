@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertNotNull;
 
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.AesGcmKey;
@@ -79,6 +80,11 @@ public final class RegistryMultithreadTest {
     }
 
     @Override
+    public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+      return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
+    }
+
+    @Override
     public String getKeyType() {
       return typeUrl;
     }
@@ -108,6 +114,11 @@ public final class RegistryMultithreadTest {
     public TestPublicKeyTypeManager(String typeUrl) {
       super(Ed25519PublicKey.class);
       this.typeUrl = typeUrl;
+    }
+
+    @Override
+    public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+      return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
     }
 
     @Override
@@ -141,6 +152,11 @@ public final class RegistryMultithreadTest {
     public TestPrivateKeyTypeManager(String typeUrl) {
       super(Ed25519PrivateKey.class, Ed25519PublicKey.class);
       this.typeUrl = typeUrl;
+    }
+
+    @Override
+    public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+      return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
     }
 
     @Override

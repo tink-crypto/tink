@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
@@ -42,6 +43,11 @@ public final class PrivateKeyManagerImplTest {
   private static class TestPublicKeyTypeManager extends KeyTypeManager<Ed25519PublicKey> {
     public TestPublicKeyTypeManager() {
       super(Ed25519PublicKey.class);
+    }
+
+    @Override
+    public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+      return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
     }
 
     @Override
@@ -76,6 +82,11 @@ public final class PrivateKeyManagerImplTest {
       extends PrivateKeyTypeManager<Ed25519PrivateKey, Ed25519PublicKey> {
     public TestPrivateKeyTypeManager() {
       super(Ed25519PrivateKey.class, Ed25519PublicKey.class);
+    }
+
+    @Override
+    public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+      return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
     }
 
     @Override

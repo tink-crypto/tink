@@ -17,6 +17,7 @@
 package com.google.crypto.tink.keyderivation.internal;
 
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
@@ -50,6 +51,11 @@ public final class PrfBasedDeriverKeyManager extends KeyTypeManager<PrfBasedDeri
             return PrfBasedDeriver.create(key.getPrfKey(), key.getParams().getDerivedKeyTemplate());
           }
         });
+  }
+
+  @Override
+  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
   }
 
   @Override

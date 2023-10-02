@@ -17,6 +17,7 @@
 package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.AesCtrKey;
@@ -57,6 +58,11 @@ public class AesCtrKeyManager extends KeyTypeManager<AesCtrKey> {
   // (12-byte) IV, if one encrypts 2^32 messages the probability of IV collision is less than
   // 2^-33 (i.e., less than one in eight billion).
   private static final int MIN_IV_SIZE_IN_BYTES = 12;
+
+  @Override
+  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
+  }
 
   @Override
   public String getKeyType() {

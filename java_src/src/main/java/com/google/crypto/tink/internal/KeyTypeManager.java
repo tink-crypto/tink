@@ -105,9 +105,7 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
   public abstract KeyMaterialType keyMaterialType();
 
   /** Returns the FIPS compatibility of this KeyTypeManager. */
-  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
-    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
-  };
+  public abstract TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus();
 
   /**
    * Parses a serialized key proto.
