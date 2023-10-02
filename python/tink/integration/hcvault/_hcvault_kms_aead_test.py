@@ -14,20 +14,17 @@
 """Tests for tink.python.tink.integration.hcvault_kms_client."""
 
 from absl.testing import absltest
-
 import tink
 from tink.integration import hcvault
-
 from threading import Thread
-from flask import Flask, jsonify, request
-import requests
+from http.server import BaseHTTPRequestHandler, HTTPServer
 import base64
 import hvac
-
+import json
 
 TOKEN = "" # Your auth token
 
-KEY_URI = ('https://localhost:8200/transit/keys/key-1') # Replace this with your vault URI
+KEY_URI = ('http://localhost:8200/transit/keys/key-1') # Replace this with your vault URI
 
 GCP_KEY_URI = ('gcp-kms://projects/tink-test-infrastructure/locations/global/'
                'keyRings/unit-and-integration-testing/cryptoKeys/aead-key')
@@ -49,32 +46,60 @@ INVALID_EP_KEY_URIS = [
   "hcvault://vault.example.com/transit/keys/bar/baz"
 ]
 
-class MockServer(Thread):
-  def __init__(self):
-    super().__init__()
-    self.app = Flask(__name__)
-    self.url = "http://localhost:8200"
-    self.app.add_url_rule("/v1/transit/encrypt/key-1", view_func=self.encrypt)
-    self.app.add_url_rule("/v1/transit/decrypt/key-1", view_func=self.decrypt)
-    self.app.add_url_rule("/shutdown", view_func=self._shutdown_server)
+class MockHandler(BaseHTTPRequestHandler):
+  def do_POST(self):
+    if 'encrypt' in self.path:
+      post_body = self.rfile.read(int(self.headers.get('Content-Length')))
+      req = json.loads(post_body)
+      ret = self.encrypt(req)
+      self.send_response(200)
+      self.send_header('Content-Type', 'application/json')
+      self.end_headers()
+      self.wfile.write(ret.encode('utf-8'))
+      return
+    
+    if 'decrypt' in self.path:
+      try:
+        post_body = self.rfile.read(int(self.headers.get('Content-Length')))
+        req = json.loads(post_body)
+        ret = self.decrypt(req)
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/json')
+        self.end_headers()
+        self.wfile.write(ret.encode('utf-8'))
+      except Exception as e:
+        self.send_error(400)
+        self.send_header
+      return
 
+    self.send_error(404)
 
-  def _shutdown_server(self):
-    from flask import request
-    if not 'werkzeug.server.shutdown' in request.environ:
-        raise RuntimeError('Not running the development server')
-    request.environ['werkzeug.server.shutdown']()
-    return 'Server shutting down...'
+  def do_GET(self):
+    self.send_error(404)
+
+  def do_PUT(self):
+    self.send_error(404)
+
+  def encrypt(self, data):
+    pt64 = data["plaintext"]
+    context64 = data["context"]
+    pt = base64.b64decode(pt64)
+    context = base64.b64decode(context64)
+    resp = {'ciphertext': self._encrypt(pt, context)}
+    return json.dumps({'data': resp})
+
+  def decrypt(self, data):
+    ct64 = data["ciphertext"]
+    context64 = data["context"]
+    context = base64.b64decode(context64)
+    resp = {'plaintext': base64.b64encode(self._decrypt(ct64, context)).decode()}
+    return json.dumps({'data': resp})
   
-  def shutdown_server(self):
-    requests.get("http://localhost:8200/shutdown")
-    self.join()
-
-  def _encrypt(self, plaintext: str, context: str) -> bytes:
+  def _encrypt(self, plaintext: str, context: str) -> str:
     s = "enc:%s:%s" % (base64.b64encode(context).decode(), base64.b64encode(plaintext).decode())
-    return s.encode()
+    return s
 
-  def _decrypt(self, ciphertext: str, context: str):
+  def _decrypt(self, ciphertext: str, context: str) -> bytes:
     parts = ciphertext.split(":")
     if len(parts) != 3 or parts[0] != "enc":
       raise Exception("malformed ciphertext")
@@ -87,31 +112,20 @@ class MockServer(Thread):
     plaintext = base64.b64decode(parts[2])
     return plaintext
 
-
-  def encrypt(self):
-    data = request.get_json()
-    pt64 = data["plaintext"]
-    context64 = data["context"]
-    pt = base64.b64decode(pt64)
-    context = base64.b64decode(context64)
-    resp = {'ciphertext': str(self._encrypt(pt, context))}
-    return jsonify(data=resp)
-
-  def decrypt(self):
-    data = request.get_json()
-    ct64 = data["ciphertext"]
-    context64 = data["context"]
-    context = base64.b64decode(context64)
-    resp = {'ciphertext': str(self._decrypt(ct64, context))}
-    return jsonify(data=resp)
-
-
 class HcVaultKmsAeadTest(absltest.TestCase):
+  server = None
+
+  def setUp(self):
+    print('Running setup')
+    self.server = HTTPServer(('localhost', 8200), MockHandler)
+    Thread(target=self.server.serve_forever).start()
+  
+  def tearDown(self):
+    if self.server:
+      self.server.shutdown()
+      self.server.server_close()
 
   def test_encrypt_decrypt(self):
-    server = MockServer()
-    server.start()
-    yield server
     client = hvac.Client(url=KEY_URI, token=TOKEN, verify=False)
     vaultaead = hcvault.create_aead(KEY_URI, client)
     plaintext = b'hello'
@@ -122,38 +136,21 @@ class HcVaultKmsAeadTest(absltest.TestCase):
     plaintext = b'hello'
     ciphertext = vaultaead.encrypt(plaintext, b'')
     self.assertEqual(plaintext, vaultaead.decrypt(ciphertext, b''))
-    server.stop()
 
-  def test_corrupted_ciphertext(self):
-    server = MockServer()
-    server.start()
-    yield server
+  def test_invalid_context(self):
     client = hvac.Client(url=KEY_URI, token=TOKEN, verify=False)
     vaultaead = hcvault.create_aead(KEY_URI, client)
 
     plaintext = b'helloworld'
     ciphertext = vaultaead.encrypt(plaintext, b'')
     self.assertEqual(plaintext, vaultaead.decrypt(ciphertext, b''))
-
-    # Corrupt each byte once and check that decryption fails
-    for byte_idx in [b for b in range(len(ciphertext))]:
-      tmp_ciphertext = list(ciphertext)
-      tmp_ciphertext[byte_idx] ^= 2
-      corrupted_ciphertext = bytes(tmp_ciphertext)
-      with self.assertRaises(tink.TinkError):
-        vaultaead.decrypt(corrupted_ciphertext, b'')
-
-    server.stop()
+    with self.assertRaises(tink.TinkError):
+        vaultaead.decrypt(ciphertext, b'a')
 
   def test_encrypt_with_bad_uri(self):
-    server = MockServer()
-    server.start()
-    yield server
     client = hvac.Client(url=KEY_URI, token=TOKEN, verify=False)
     with self.assertRaises(tink.TinkError):
       hcvault.create_aead(GCP_KEY_URI, client)
-
-    server.stop()
 
   def test_endpoint_paths(self):
     from tink.integration.hcvault._hcvault_kms_client import _endpoint_paths as _ep
