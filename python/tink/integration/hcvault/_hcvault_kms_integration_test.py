@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,18 +19,14 @@ from absl.testing import absltest
 
 import tink
 from tink import aead
-from tink.aead import _kms_aead_key_manager
 from tink.integration import hcvault
-from tink.integration.hcvault import _hcvault_kms_client
-from tink.testing import helper
 
 
-TOKEN = "hvs.LPUqFLiJZXO3Q8kNtCawP33i" # Your auth token
+TOKEN = "" # Your auth token
 
 BAD_TOKEN = "notavalidtoken"
 
-#KEY_URI = ('hcvault://hcvault.corp.com:8200/transit/keys/key-1') # Replace this with your vault URI
-KEY_URI = ('http://10.10.18.215:8200/transit/keys/key-1') # Replace this with your vault URI
+KEY_URI = ('hcvault://hcvault.corp.com:8200/transit/keys/key-1') # Replace this with your vault URI
 
 GCP_KEY_URI = ('gcp-kms://projects/tink-test-infrastructure/locations/global/'
                'keyRings/unit-and-integration-testing/cryptoKeys/aead-key')

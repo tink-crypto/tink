@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,8 +38,6 @@ and
 
 def _endpoint_paths(key_uri: str) -> Tuple[str, str]:
   u = urllib.parse.urlparse(key_uri)
-  if u.scheme != "hcvault":
-    raise tink.TinkError('malformed URL')
   
   escaped_path = urllib.parse.quote(u.path)
   parts = escaped_path.split('/')
