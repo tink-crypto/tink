@@ -16,7 +16,12 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.AccessesPartialKey;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.streamingaead.AesCtrHmacStreamingKey;
+import com.google.crypto.tink.streamingaead.AesCtrHmacStreamingParameters.HashType;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.GeneralSecurityException;
@@ -45,6 +50,7 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * @since 1.1.0
  */
+@AccessesPartialKey
 public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
   // TODO(bleichen): Some things that are not yet decided:
   //   - What can we assume about the state of objects after getting an exception?
@@ -124,6 +130,41 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
     this.ciphertextSegmentSize = ciphertextSegmentSize;
     this.firstSegmentOffset = firstSegmentOffset;
     this.plaintextSegmentSize = ciphertextSegmentSize - tagSizeInBytes;
+  }
+
+  private AesCtrHmacStreaming(AesCtrHmacStreamingKey key) throws GeneralSecurityException {
+    if (!FIPS.isCompatible()) {
+      throw new GeneralSecurityException("Can not use AES-CTR-HMAC streaming in FIPS-mode.");
+    }
+    this.ikm = key.getInitialKeyMaterial().toByteArray(InsecureSecretKeyAccess.get());
+    String hkdfAlgString = "";
+    if (key.getParameters().getHkdfHashType().equals(HashType.SHA1)) {
+      hkdfAlgString = "HmacSha1";
+    } else if (key.getParameters().getHkdfHashType().equals(HashType.SHA256)) {
+      hkdfAlgString = "HmacSha256";
+    } else if (key.getParameters().getHkdfHashType().equals(HashType.SHA512)) {
+      hkdfAlgString = "HmacSha512";
+    }
+    this.hkdfAlgo = hkdfAlgString;
+    this.keySizeInBytes = key.getParameters().getDerivedKeySizeBytes();
+    String tagAlgString = "";
+    if (key.getParameters().getHmacHashType().equals(HashType.SHA1)) {
+      tagAlgString = "HmacSha1";
+    } else if (key.getParameters().getHmacHashType().equals(HashType.SHA256)) {
+      tagAlgString = "HmacSha256";
+    } else if (key.getParameters().getHmacHashType().equals(HashType.SHA512)) {
+      tagAlgString = "HmacSha512";
+    }
+    this.tagAlgo = tagAlgString;
+    this.tagSizeInBytes = key.getParameters().getHmacTagSizeBytes();
+    this.ciphertextSegmentSize = key.getParameters().getCiphertextSegmentSizeBytes();
+    // Current KeyTypeManager always sets it to 0.
+    this.firstSegmentOffset = 0;
+    this.plaintextSegmentSize = ciphertextSegmentSize - tagSizeInBytes;
+  }
+
+  public static StreamingAead create(AesCtrHmacStreamingKey key) throws GeneralSecurityException {
+    return new AesCtrHmacStreaming(key);
   }
 
   private static void validateParameters(
