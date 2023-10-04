@@ -38,7 +38,10 @@ import java.nio.file.Path;
  * JSON format</a>.
  *
  * @since 1.0.0
+ * @deprecated Serialize the Keyset using {@code TinkJsonProtoKeysetFormat.serializeKeyset()}
+ *     instead.
  */
+@Deprecated
 public final class JsonKeysetWriter implements KeysetWriter {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
 
