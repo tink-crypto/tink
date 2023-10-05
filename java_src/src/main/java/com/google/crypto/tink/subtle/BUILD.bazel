@@ -233,9 +233,14 @@ java_library(
         ":bytes",
         ":prf_aes_cmac",
         ":subtle_util_cluster",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
         "//src/main/java/com/google/crypto/tink:deterministic_aead",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/daead:aes_siv_key",
+        "//src/main/java/com/google/crypto/tink/internal:util",
         "//src/main/java/com/google/crypto/tink/mac/internal:aes_util",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
     ],
 )
 
@@ -607,9 +612,14 @@ android_library(
         ":bytes-android",
         ":prf_aes_cmac-android",
         ":subtle_util_cluster-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
         "//src/main/java/com/google/crypto/tink:deterministic_aead-android",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/daead:aes_siv_key-android",
+        "//src/main/java/com/google/crypto/tink/internal:util-android",
         "//src/main/java/com/google/crypto/tink/mac/internal:aes_util-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
     ],
 )
 
