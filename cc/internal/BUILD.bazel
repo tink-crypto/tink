@@ -1213,3 +1213,33 @@ cc_library(
     name = "call_with_core_dump_protection",
     hdrs = ["call_with_core_dump_protection.h"],
 )
+
+cc_library(
+    name = "bn_encoding_util",
+    srcs = ["bn_encoding_util.cc"],
+    hdrs = ["bn_encoding_util.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        "//util:status",
+        "//util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+        "@com_google_absl//absl/strings:string_view",
+    ],
+)
+
+cc_test(
+    name = "bn_encoding_util_test",
+    srcs = ["bn_encoding_util_test.cc"],
+    deps = [
+        ":bn_encoding_util",
+        "//:big_integer",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

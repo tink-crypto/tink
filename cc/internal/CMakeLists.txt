@@ -1161,3 +1161,32 @@ tink_cc_library(
   SRCS
     call_with_core_dump_protection.h
 )
+
+tink_cc_library(
+  NAME bn_encoding_util
+  SRCS
+    bn_encoding_util.cc
+    bn_encoding_util.h
+  DEPS
+    absl::status
+    absl::strings
+    absl::str_format
+    absl::string_view
+    crypto
+    tink::util::status
+    tink::util::statusor
+)
+
+tink_cc_test(
+  NAME bn_encoding_util_test
+  SRCS
+    bn_encoding_util_test.cc
+  DEPS
+    tink::internal::bn_encoding_util
+    gmock
+    absl::status
+    absl::strings
+    tink::core::big_integer
+    tink::util::statusor
+    tink::util::test_matchers
+)
