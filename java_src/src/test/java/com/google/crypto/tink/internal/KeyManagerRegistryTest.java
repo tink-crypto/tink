@@ -14,17 +14,18 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink;
+package com.google.crypto.tink.internal;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
+import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyManager;
+import com.google.crypto.tink.PrivateKeyManager;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.crypto.tink.internal.KeyTypeManager;
-import com.google.crypto.tink.internal.PrimitiveFactory;
-import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
 import com.google.crypto.tink.proto.Ed25519PublicKey;

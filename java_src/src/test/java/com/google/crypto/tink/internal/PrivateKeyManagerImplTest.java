@@ -14,15 +14,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink;
+package com.google.crypto.tink.internal;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.PrivateKeyManager;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.crypto.tink.internal.KeyTypeManager;
-import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
 import com.google.crypto.tink.proto.Ed25519PublicKey;
 import com.google.crypto.tink.proto.KeyData;

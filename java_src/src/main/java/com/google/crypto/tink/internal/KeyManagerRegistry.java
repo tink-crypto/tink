@@ -14,11 +14,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink;
+package com.google.crypto.tink.internal;
 
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.crypto.tink.internal.KeyTypeManager;
-import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
@@ -39,17 +38,17 @@ import javax.annotation.Nullable;
  *   <li>Parsing keys (only if KeyTypeManagers have been registered)
  * </ul>
  */
-final class KeyManagerRegistry {
+public final class KeyManagerRegistry {
   private static final Logger logger = Logger.getLogger(KeyManagerRegistry.class.getName());
 
   // A map from the TypeUrl to the KeyManagerContainer.
   private final ConcurrentMap<String, KeyManagerContainer> keyManagerMap;
 
-  KeyManagerRegistry(KeyManagerRegistry original) {
+  public KeyManagerRegistry(KeyManagerRegistry original) {
     keyManagerMap = new ConcurrentHashMap<>(original.keyManagerMap);
   }
 
-  KeyManagerRegistry() {
+  public KeyManagerRegistry() {
     keyManagerMap = new ConcurrentHashMap<>();
   }
 
@@ -243,7 +242,7 @@ final class KeyManagerRegistry {
    *
    * <p>If this fails, the KeyManagerRegistry is in an unspecified state and should be discarded.
    */
-  synchronized <P> void registerKeyManager(final KeyManager<P> manager)
+  public synchronized <P> void registerKeyManager(final KeyManager<P> manager)
       throws GeneralSecurityException {
     if (!TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()) {
       throw new GeneralSecurityException("Registering key managers is not supported in FIPS mode");
@@ -251,7 +250,7 @@ final class KeyManagerRegistry {
     registerKeyManagerContainer(createContainerFor(manager), /* forceOverwrite= */ false);
   }
 
-  synchronized <KeyProtoT extends MessageLite> void registerKeyManager(
+  public synchronized <KeyProtoT extends MessageLite> void registerKeyManager(
       final KeyTypeManager<KeyProtoT> manager) throws GeneralSecurityException {
     if (!manager.fipsStatus().isCompatible()) {
       throw new GeneralSecurityException(
@@ -271,7 +270,7 @@ final class KeyManagerRegistry {
    * <p>A call to registerAsymmetricKeyManager takes precedence over other calls (i.e., if the above
    * association is established once, it will stay established).
    */
-  synchronized <KeyProtoT extends MessageLite, PublicKeyProtoT extends MessageLite>
+  public synchronized <KeyProtoT extends MessageLite, PublicKeyProtoT extends MessageLite>
       void registerAsymmetricKeyManagers(
           final PrivateKeyTypeManager<KeyProtoT, PublicKeyProtoT> privateKeyTypeManager,
           final KeyTypeManager<PublicKeyProtoT> publicKeyTypeManager)
@@ -330,7 +329,7 @@ final class KeyManagerRegistry {
         createContainerFor(publicKeyTypeManager), /* forceOverwrite= */ false);
   }
 
-  boolean typeUrlExists(String typeUrl) {
+  public boolean typeUrlExists(String typeUrl) {
     return keyManagerMap.containsKey(typeUrl);
   }
 
@@ -351,7 +350,7 @@ final class KeyManagerRegistry {
    * @return a {@link KeyManager} for the given {@code typeUrl} and {@code primitiveClass}(if found
    *     and this key type supports this primitive).
    */
-  <P> KeyManager<P> getKeyManager(String typeUrl, Class<P> primitiveClass)
+  public <P> KeyManager<P> getKeyManager(String typeUrl, Class<P> primitiveClass)
       throws GeneralSecurityException {
     KeyManagerContainer container = getKeyManagerContainerOrThrow(typeUrl);
     if (container.supportedPrimitives().contains(primitiveClass)) {
@@ -369,12 +368,12 @@ final class KeyManagerRegistry {
   /**
    * @return a {@link KeyManager} for the given {@code typeUrl} (if found).
    */
-  KeyManager<?> getUntypedKeyManager(String typeUrl) throws GeneralSecurityException {
+  public KeyManager<?> getUntypedKeyManager(String typeUrl) throws GeneralSecurityException {
     KeyManagerContainer container = getKeyManagerContainerOrThrow(typeUrl);
     return container.getUntypedKeyManager();
   }
 
-  boolean isEmpty() {
+  public boolean isEmpty() {
     return keyManagerMap.isEmpty();
   }
 }

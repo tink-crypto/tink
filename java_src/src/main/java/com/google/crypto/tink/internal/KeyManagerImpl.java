@@ -14,10 +14,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink;
+package com.google.crypto.tink.internal;
 
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.annotations.Alpha;
-import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
