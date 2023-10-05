@@ -19,22 +19,17 @@ package com.google.crypto.tink.keyderivation.internal;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
-import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.internal.KeyTypeManager;
-import com.google.crypto.tink.keyderivation.KeysetDeriver;
+import com.google.crypto.tink.keyderivation.KeyDerivationConfig;
 import com.google.crypto.tink.prf.HkdfPrfKeyManager;
-import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HkdfPrfKey;
 import com.google.crypto.tink.proto.HkdfPrfKeyFormat;
 import com.google.crypto.tink.proto.HkdfPrfParams;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyTemplate;
-import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.PrfBasedDeriverKey;
 import com.google.crypto.tink.proto.PrfBasedDeriverKeyFormat;
 import com.google.crypto.tink.proto.PrfBasedDeriverParams;
@@ -58,6 +53,7 @@ public class PrfBasedDeriverKeyManagerTest {
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
     TinkConfig.register();
+    KeyDerivationConfig.register();
   }
 
   @Test
@@ -213,49 +209,5 @@ public class PrfBasedDeriverKeyManagerTest {
                         KeyTemplate.newBuilder().setTypeUrl("nonexistenttypeurl").build()))
             .build();
     assertThrows(GeneralSecurityException.class, () -> factory.createKey(keyFormat));
-  }
-
-  @Test
-  public void getPrimitive() throws Exception {
-    HkdfPrfKeyManager.register(true);
-    AesGcmKeyManager.register(true);
-
-    byte[] randomInput = Random.randBytes(20);
-
-    HkdfPrfKey prfKey =
-        HkdfPrfKey.newBuilder()
-            .setVersion(0)
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(32)))
-            .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
-            .build();
-    PrfBasedDeriverKey key =
-        PrfBasedDeriverKey.newBuilder()
-            .setPrfKey(
-                TestUtil.createKeyData(
-                    prfKey, HkdfPrfKeyManager.staticKeyType(), KeyMaterialType.SYMMETRIC))
-            .setParams(
-                PrfBasedDeriverParams.newBuilder()
-                    .setDerivedKeyTemplate(AeadKeyTemplates.AES256_GCM))
-            .build();
-
-    KeysetHandle managerHandle =
-        manager.getPrimitive(key, KeysetDeriver.class).deriveKeyset(randomInput);
-    Keyset managerKeyset = CleartextKeysetHandle.getKeyset(managerHandle);
-    AesGcmKey managerKey =
-        AesGcmKey.parseFrom(
-            managerKeyset.getKey(0).getKeyData().getValue(),
-            ExtensionRegistryLite.getEmptyRegistry());
-
-    KeysetHandle directHandle =
-        PrfBasedDeriver.create(key.getPrfKey(), key.getParams().getDerivedKeyTemplate())
-            .deriveKeyset(randomInput);
-    Keyset directKeyset = CleartextKeysetHandle.getKeyset(directHandle);
-    AesGcmKey directKey =
-        AesGcmKey.parseFrom(
-            directKeyset.getKey(0).getKeyData().getValue(),
-            ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(managerKey.getKeyValue()).hasSize(32);
-    assertThat(directKey.getKeyValue()).isEqualTo(managerKey.getKeyValue());
   }
 }
