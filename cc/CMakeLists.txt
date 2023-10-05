@@ -733,6 +733,16 @@ tink_cc_library(
     tink::internal::key_type_info_store
 )
 
+tink_cc_library(
+  NAME big_integer
+  SRCS
+    core/big_integer.cc
+    big_integer.h
+  DEPS
+    absl::string_view
+    crypto
+)
+
 # tests
 
 tink_cc_test(
@@ -1089,4 +1099,15 @@ tink_cc_test(
     tink::signature::signature_key_templates
     tink::util::secret_data
     tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME big_integer_test
+  SRCS
+    core/big_integer_test.cc
+  DEPS
+    tink::core::big_integer
+    gmock
+    absl::strings
+    absl::string_view
 )

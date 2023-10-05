@@ -1,5 +1,5 @@
-load("//:tink_version.bzl", "TINK_VERSION_LABEL")
 load("//:template_rule.bzl", "template_rule")
+load("//:tink_version.bzl", "TINK_VERSION_LABEL")
 
 package(default_visibility = ["//:__subpackages__"])
 
@@ -785,6 +785,17 @@ cc_library(
     deps = ["//internal:key_type_info_store"],
 )
 
+cc_library(
+    name = "big_integer",
+    srcs = ["core/big_integer.cc"],
+    hdrs = ["big_integer.h"],
+    include_prefix = "tink",
+    deps = [
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings:string_view",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -1153,6 +1164,17 @@ cc_test(
         "//util:secret_data",
         "//util:test_matchers",
         "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "core/big_integer_test",
+    srcs = ["core/big_integer_test.cc"],
+    deps = [
+        ":big_integer",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:string_view",
         "@com_google_googletest//:gtest_main",
     ],
 )
