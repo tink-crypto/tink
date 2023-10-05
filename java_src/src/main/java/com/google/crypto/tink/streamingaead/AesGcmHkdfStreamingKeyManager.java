@@ -28,6 +28,8 @@ import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingKey;
@@ -72,6 +74,13 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
 
   private static final int NONCE_PREFIX_IN_BYTES = 7;
   private static final int TAG_SIZE_IN_BYTES = 16;
+  private static final PrimitiveConstructor<
+          com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey, StreamingAead>
+      AES_GCM_HKDF_STREAMING_AEAD_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              AesGcmHkdfStreaming::create,
+              com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey.class,
+              StreamingAead.class);
 
   @Override
   public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
@@ -185,6 +194,8 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
     MutableKeyDerivationRegistry.globalInstance()
         .add(KEY_DERIVER, AesGcmHkdfStreamingParameters.class);
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(AES_GCM_HKDF_STREAMING_AEAD_PRIMITIVE_CONSTRUCTOR);
   }
 
   /**
