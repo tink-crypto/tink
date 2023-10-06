@@ -743,6 +743,18 @@ tink_cc_library(
     crypto
 )
 
+tink_cc_library(
+  NAME restricted_big_integer
+  SRCS
+    core/restricted_big_integer.cc
+    restricted_big_integer.h
+  DEPS
+    tink::core::secret_key_access_token
+    absl::string_view
+    crypto
+    tink::util::secret_data
+)
+
 # tests
 
 tink_cc_test(
@@ -1107,6 +1119,18 @@ tink_cc_test(
     core/big_integer_test.cc
   DEPS
     tink::core::big_integer
+    gmock
+    absl::strings
+    absl::string_view
+)
+
+tink_cc_test(
+  NAME restricted_big_integer_test
+  SRCS
+    core/restricted_big_integer_test.cc
+  DEPS
+    tink::core::insecure_secret_key_access
+    tink::core::restricted_big_integer
     gmock
     absl::strings
     absl::string_view
