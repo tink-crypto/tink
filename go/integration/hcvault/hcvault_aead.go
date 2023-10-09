@@ -19,11 +19,10 @@ package hcvault
 import (
 	"encoding/base64"
 	"errors"
-	"net/url"
 	"strings"
 
-	"github.com/google/tink/go/tink"
 	"github.com/hashicorp/vault/api"
+	"github.com/google/tink/go/tink"
 )
 
 // vaultAEAD represents a HashiCorp Vault service to a particular URI.
@@ -41,8 +40,8 @@ const (
 )
 
 // newHCVaultAEAD returns a new HashiCorp Vault service.
-func newHCVaultAEAD(keyURI string, client *api.Logical) (tink.AEAD, error) {
-	encKeyPath, decKeyPath, err := getEndpointPaths(keyURI)
+func newHCVaultAEAD(keyPath string, client *api.Logical) (tink.AEAD, error) {
+	encKeyPath, decKeyPath, err := getEndpointPaths(keyPath)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +58,7 @@ func newHCVaultAEAD(keyURI string, client *api.Logical) (tink.AEAD, error) {
 func (a *vaultAEAD) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
 	// Create an encryption request map according to Vault REST API:
 	// https://www.vaultproject.io/api/secret/transit/index.html#encrypt-data.
-	req := map[string]interface{}{
+	req := map[string]any{
 		"plaintext": base64.StdEncoding.EncodeToString(plaintext),
 		"context":   base64.StdEncoding.EncodeToString(associatedData),
 	}
@@ -77,7 +76,7 @@ func (a *vaultAEAD) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
 func (a *vaultAEAD) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
 	// Create a decryption request map according to Vault REST API:
 	// https://www.vaultproject.io/api/secret/transit/index.html#decrypt-data.
-	req := map[string]interface{}{
+	req := map[string]any{
 		"ciphertext": string(ciphertext),
 		"context":    base64.StdEncoding.EncodeToString(associatedData),
 	}
@@ -93,25 +92,15 @@ func (a *vaultAEAD) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
 	return plaintext, nil
 }
 
-// getEndpointPaths transforms keyURL into the Vault transit encrypt and decrypt
-// paths. The keyURL is expected to end in "/{mount}/keys/{keyName}". For
-// example, the keyURL "hcvault:///transit/keys/key-foo" will be transformed to
-// "transit/encrypt/key-foo" and "transit/decrypt/key-foo", and
-// "hcvault://my-vault.example.com/teams/billing/service/cipher/keys/key-bar"
-// will be transformed into
-// "hcvault://my-vault.example.com/teams/billing/service/cipher/encrypt/key-bar"
-// and
-// "hcvault://my-vault.example.com/teams/billing/service/cipher/decrypt/key-bar".
-func getEndpointPaths(keyURL string) (encryptPath, decryptPath string, err error) {
-	u, err := url.Parse(keyURL)
-	if err != nil || u.Scheme != "hcvault" {
-		return "", "", errors.New("malformed keyURL")
-	}
-
-	parts := strings.Split(u.EscapedPath(), "/")
+// getEndpointPaths transforms keyPath into the Vault transit encrypt and decrypt
+// paths. The keyPath is expected to have the form "/{mount-path}/keys/{keyName}", which will
+// be transformed to
+// "{mount-path}/encrypt/{keyName}" and "{mount-path}/decrypt/{keyName}".
+func getEndpointPaths(keyPath string) (encryptPath, decryptPath string, err error) {
+	parts := strings.Split(keyPath, "/")
 	length := len(parts)
-	if length < 4 || parts[length-2] != "keys" {
-		return "", "", errors.New("malformed keyURL")
+	if length < 4 || parts[0] != "" || parts[length-2] != "keys" {
+		return "", "", errors.New("malformed keyPath")
 	}
 
 	parts[length-2] = encryptSegment

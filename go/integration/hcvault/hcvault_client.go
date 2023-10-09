@@ -98,6 +98,10 @@ func (c *vaultClient) GetAEAD(keyURI string) (tink.AEAD, error) {
 	if !c.Supported(keyURI) {
 		return nil, errors.New("unsupported keyURI")
 	}
-
-	return newHCVaultAEAD(keyURI, c.client)
+	u, err := url.Parse(keyURI)
+	if err != nil || u.Scheme != "hcvault" {
+		return nil, errors.New("malformed keyURI")
+	}
+	keyPath := u.EscapedPath()
+	return newHCVaultAEAD(keyPath, c.client)
 }
