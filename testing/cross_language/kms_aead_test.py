@@ -193,6 +193,14 @@ class KmsAeadTest(parameterized.TestCase):
         decrypt_lang, keyset, aead.Aead)
     output = decrypt_primitive.decrypt(ciphertext, associated_data)
     self.assertEqual(output, plaintext)
+    if kms_service == 'HCVAULT':
+      # TODO(b/303547968): Resolve this.
+      self.assertEqual(
+          decrypt_primitive.decrypt(ciphertext, b'other_associated_data'),
+          plaintext)
+      return
+    with self.assertRaises(tink.TinkError):
+      decrypt_primitive.decrypt(ciphertext, b'other_associated_data')
 
   @parameterized.parameters(_kms_aead_test_cases())
   def test_encrypt_decrypt_with_empty_associated_data(
@@ -211,6 +219,14 @@ class KmsAeadTest(parameterized.TestCase):
         decrypt_lang, keyset, aead.Aead)
     output = decrypt_primitive.decrypt(ciphertext, associated_data)
     self.assertEqual(output, plaintext)
+    if kms_service == 'HCVAULT':
+      # TODO(b/303547968): Resolve this.
+      self.assertEqual(
+          decrypt_primitive.decrypt(ciphertext, b'other_associated_data'),
+          plaintext)
+      return
+    with self.assertRaises(tink.TinkError):
+      decrypt_primitive.decrypt(ciphertext, b'other_associated_data')
 
   @parameterized.parameters(_two_key_uris_test_cases())
   def test_cannot_decrypt_ciphertext_of_other_key_uri(self, lang, key_uri,
@@ -369,7 +385,7 @@ class KmsEnvelopeAeadTest(parameterized.TestCase):
     ciphertext = encrypt_primitive.encrypt(plaintext, associated_data)
     decrypt_primitive = testing_servers.remote_primitive(
         decrypt_lang, keyset, aead.Aead)
-    with self.assertRaises(tink.TinkError, msg='decryption failed'):
+    with self.assertRaises(tink.TinkError):
       decrypt_primitive.decrypt(ciphertext, b'wrong aad')
 
 if __name__ == '__main__':
