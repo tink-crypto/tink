@@ -27,6 +27,14 @@ namespace tink {
 // chosen with each instance.
 class Parameters {
  public:
+  Parameters() = default;
+
+  // Copyable and movable.
+  Parameters(const Parameters& other) = default;
+  Parameters& operator=(const Parameters& other) = default;
+  Parameters(Parameters&& other) = default;
+  Parameters& operator=(Parameters&& other) = default;
+
   // Returns true if a key created with these parameters has to have a
   // particular id when it is in a keyset.  Otherwise, returns false.
   //
