@@ -204,31 +204,6 @@ java_test(
 )
 
 java_test(
-    name = "AesGcmHkdfStreamingProtoSerializationTest",
-    size = "small",
-    srcs = ["AesGcmHkdfStreamingProtoSerializationTest.java"],
-    deps = [
-        "//proto:aes_gcm_hkdf_streaming_java_proto",
-        "//proto:common_java_proto",
-        "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
-        "//src/main/java/com/google/crypto/tink:key",
-        "//src/main/java/com/google/crypto/tink:parameters",
-        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
-        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
-        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
-        "//src/main/java/com/google/crypto/tink/internal/testing:asserts",
-        "//src/main/java/com/google/crypto/tink/streamingaead:aes_gcm_hkdf_streaming_key",
-        "//src/main/java/com/google/crypto/tink/streamingaead:aes_gcm_hkdf_streaming_parameters",
-        "//src/main/java/com/google/crypto/tink/streamingaead:aes_gcm_hkdf_streaming_proto_serialization",
-        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
-        "@maven//:com_google_protobuf_protobuf_java",
-        "@maven//:com_google_truth_truth",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
     name = "AesCtrHmacStreamingParametersTest",
     size = "small",
     srcs = ["AesCtrHmacStreamingParametersTest.java"],
