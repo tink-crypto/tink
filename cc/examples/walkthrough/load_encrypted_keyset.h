@@ -24,12 +24,11 @@
 
 namespace tink_walkthrough {
 
-// Loads a JSON-serialized keyset encrypted with a KSM
-// `serialized_encrypted_keyset`. The decryption uses the KMS master key
-// `master_key_uri`.
+// Loads an encrypted JSON-serialized keyset `serialized_encrypted_keyset`.
+// The keyset is decrypted using `keyset_encryption_aead`.
 crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::KeysetHandle>>
 LoadKeyset(absl::string_view serialized_encrypted_keyset,
-           absl::string_view master_key_uri);
+           const crypto::tink::Aead& keyset_encryption_aead);
 
 }  // namespace tink_walkthrough
 

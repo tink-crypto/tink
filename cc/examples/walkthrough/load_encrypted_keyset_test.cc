@@ -17,12 +17,12 @@
 #include "walkthrough/load_encrypted_keyset.h"
 
 #include <memory>
-#include <ostream>
 #include <sstream>
 #include <string>
 #include <utility>
 
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
@@ -86,63 +86,35 @@ using ::crypto::tink::test::StatusIs;
 using ::crypto::tink::util::Status;
 using ::crypto::tink::util::StatusOr;
 using ::testing::Environment;
+using ::testing::Test;
 
-// Test environment used to register KMS clients only once for the whole test.
-class LoadKeysetTestEnvironment : public Environment {
- public:
-  ~LoadKeysetTestEnvironment() override = default;
-
-  // Register FakeKmsClient and AlwaysFailingFakeKmsClient.
+class LoadKeysetTest : public Test {
+ protected:
   void SetUp() override {
-    auto fake_kms =
-        absl::make_unique<FakeKmsClient>(kSerializedMasterKeyKeyset);
-    ASSERT_THAT(crypto::tink::KmsClients::Add(std::move(fake_kms)), IsOk());
-    auto failing_kms = absl::make_unique<AlwaysFailingFakeKmsClient>();
-    ASSERT_THAT(crypto::tink::KmsClients::Add(std::move(failing_kms)), IsOk());
+    ASSERT_THAT(crypto::tink::AeadConfig::Register(), IsOk());
   }
 };
 
-// Unused.
-Environment *const test_env =
-    testing::AddGlobalTestEnvironment(new LoadKeysetTestEnvironment());
-
-class LoadKeysetTest : public ::testing::Test {
- public:
-  void TearDown() override { Registry::Reset(); }
-};
-
-TEST_F(LoadKeysetTest, LoadKeysetFailsWhenNoKmsRegistered) {
-  StatusOr<std::unique_ptr<KeysetHandle>> expected_keyset =
-      LoadKeyset(kEncryptedKeyset, /*master_key_uri=*/"other_kms://some_key");
-  EXPECT_THAT(expected_keyset.status(), StatusIs(absl::StatusCode::kNotFound));
-}
-
-TEST_F(LoadKeysetTest, LoadKeysetFailsWhenKmsClientFails) {
-  StatusOr<std::unique_ptr<KeysetHandle>> expected_keyset =
-      LoadKeyset(kEncryptedKeyset, /*master_key_uri=*/"failing://some_key");
-  EXPECT_THAT(expected_keyset.status(),
-              StatusIs(absl::StatusCode::kUnimplemented));
-}
-
-TEST_F(LoadKeysetTest, LoadKeysetFailsWhenAeadNotRegistered) {
-  StatusOr<std::unique_ptr<KeysetHandle>> expected_keyset =
-      LoadKeyset(kEncryptedKeyset, kFakeKmsKeyUri);
-  EXPECT_THAT(expected_keyset.status(), StatusIs(absl::StatusCode::kNotFound));
-}
-
 TEST_F(LoadKeysetTest, LoadKeysetFailsWhenInvalidKeyset) {
-  ASSERT_THAT(crypto::tink::AeadConfig::Register(), IsOk());
+  auto fake_kms = absl::make_unique<FakeKmsClient>(kSerializedMasterKeyKeyset);
+  StatusOr<std::unique_ptr<Aead>> keyset_encryption_aead =
+      fake_kms->GetAead(kFakeKmsKeyUri);
+  ASSERT_THAT(keyset_encryption_aead, IsOk());
+
   StatusOr<std::unique_ptr<KeysetHandle>> expected_keyset =
-      LoadKeyset("invalid", kFakeKmsKeyUri);
+      LoadKeyset("invalid", **keyset_encryption_aead);
   EXPECT_THAT(expected_keyset.status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
-  Registry::Reset();
 }
 
 TEST_F(LoadKeysetTest, LoadKeysetSucceeds) {
-  ASSERT_THAT(crypto::tink::AeadConfig::Register(), IsOk());
+  auto fake_kms = absl::make_unique<FakeKmsClient>(kSerializedMasterKeyKeyset);
+  StatusOr<std::unique_ptr<Aead>> keyset_encryption_aead =
+      fake_kms->GetAead(kFakeKmsKeyUri);
+  ASSERT_THAT(keyset_encryption_aead, IsOk());
+
   StatusOr<std::unique_ptr<KeysetHandle>> handle =
-      LoadKeyset(kEncryptedKeyset, kFakeKmsKeyUri);
+      LoadKeyset(kEncryptedKeyset, **keyset_encryption_aead);
   ASSERT_THAT(handle, IsOk());
   StatusOr<std::unique_ptr<Aead>> aead =
       (*handle)->GetPrimitive<crypto::tink::Aead>(

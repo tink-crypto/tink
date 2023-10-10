@@ -35,37 +35,28 @@ namespace tink_walkthrough {
 using ::crypto::tink::KeysetHandle;
 using ::crypto::tink::util::StatusOr;
 
-// Loads a JSON-serialized keyset encrypted with a KSM
-// `serialized_encrypted_keyset`. The decryption uses the KMS master key
-// `master_key_uri`.
+// Loads an encrypted JSON-serialized keyset `serialized_encrypted_keyset`.
+// The keyset is decrypted using `keyset_encryption_aead`.
 //
 // Prerequisites for this example:
 //  - Register AEAD implementations of Tink.
-//  - Register a KMS client for the given URI prefix using KmsClients::Add.
 //  - Create a KMS encrypted keyset, for example using Tinkey with Cloud KMS:
 //
 //    tinkey create-keyset --key-template AES128_GCM \
 //      --out-format json --out encrypted_aead_keyset.json \
 //      --master-key-uri gcp-kms://<KMS key uri> \
 //      --credentials gcp_credentials.json
+//  - Get the keyset encryption AEAD for the key URI with KmsClient::GetAead.
 //
 StatusOr<std::unique_ptr<KeysetHandle>> LoadKeyset(
     absl::string_view serialized_encrypted_keyset,
-    absl::string_view master_key_uri) {
-  // Get a KMS client for the given key URI.
-  StatusOr<const crypto::tink::KmsClient*> kms_client =
-      crypto::tink::KmsClients::Get(master_key_uri);
-  if (!kms_client.ok()) return kms_client.status();
-  // A KmsClient can return an Aead primitive.
-  StatusOr<std::unique_ptr<crypto::tink::Aead>> kms_aead =
-      (*kms_client)->GetAead(master_key_uri);
-  if (!kms_aead.ok()) return kms_aead.status();
+    const crypto::tink::Aead& keyset_encryption_aead) {
   // Use a JSON reader to read the encrypted keyset.
   StatusOr<std::unique_ptr<crypto::tink::KeysetReader>> reader =
       crypto::tink::JsonKeysetReader::New(serialized_encrypted_keyset);
   if (!reader.ok()) return reader.status();
   // Decrypt using the KMS, parse the keyset and retuns a handle to it.
-  return KeysetHandle::Read(*std::move(reader), **kms_aead);
+  return KeysetHandle::Read(*std::move(reader), keyset_encryption_aead);
 }
 
 }  // namespace tink_walkthrough
