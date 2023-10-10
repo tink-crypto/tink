@@ -612,7 +612,6 @@ java_test(
 
 java_test(
     name = "KeyConversionTest",
-    size = "small",
     srcs = ["KeyConversionTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
