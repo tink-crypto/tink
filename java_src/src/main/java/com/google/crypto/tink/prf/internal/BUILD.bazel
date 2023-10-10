@@ -108,7 +108,6 @@ android_library(
         "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink/prf:prf_set-android",
         "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce-android",
-        "//src/main/java/com/google/crypto/tink/subtle:validators-android",
         "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
@@ -139,7 +138,6 @@ java_library(
         "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink/prf:prf_set",
         "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
-        "//src/main/java/com/google/crypto/tink/subtle:validators",
         "@maven//:com_google_protobuf_protobuf_java",
     ],
 )

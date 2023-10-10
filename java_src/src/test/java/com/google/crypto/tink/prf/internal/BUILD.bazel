@@ -76,3 +76,21 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "LegacyHmacPrfTestKeyManagerTest",
+    size = "small",
+    srcs = ["LegacyHmacPrfTestKeyManagerTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//proto:hmac_prf_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/prf:prf_set",
+        "//src/main/java/com/google/crypto/tink/prf/internal:legacy_hmac_prf_test_key_manager",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
