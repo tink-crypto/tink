@@ -24,3 +24,23 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "LegacyAesGcmHkdfStreamingTestKeyManagerTest",
+    size = "small",
+    srcs = ["LegacyAesGcmHkdfStreamingTestKeyManagerTest.java"],
+    deps = [
+        "//proto:aes_gcm_hkdf_streaming_java_proto",
+        "//proto:common_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink:streaming_aead",
+        "//src/main/java/com/google/crypto/tink/streamingaead/internal:legacy_aes_gcm_hkdf_streaming_test_key_manager",
+        "//src/main/java/com/google/crypto/tink/subtle:aes_gcm_hkdf_streaming",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/testing:streaming_test_util",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
