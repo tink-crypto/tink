@@ -29,7 +29,7 @@ py_library(
     name = "load_cleartext_keyset",
     srcs = ["load_cleartext_keyset.py"],
     deps = [
-        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:secret_key_access",
         "@tink_py//tink:tink_python",
     ],
 )
@@ -62,7 +62,7 @@ py_test(
     deps = [
         requirement("absl-py"),
         ":load_encrypted_keyset",
-        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:secret_key_access",
         "@tink_py//tink:tink_python",
         "@tink_py//tink/aead",
         "@tink_py//tink/testing:fake_kms",
@@ -117,8 +117,8 @@ py_library(
     name = "write_cleartext_keyset",
     srcs = ["write_cleartext_keyset.py"],
     deps = [
+        "@tink_py//tink:secret_key_access",
         "@tink_py//tink:tink_python",
-        "@tink_py//tink:cleartext_keyset_handle",
     ],
 )
 
