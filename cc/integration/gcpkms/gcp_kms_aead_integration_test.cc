@@ -14,10 +14,25 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <utility>
+
+#include "google/cloud/kms/v1/service.grpc.pb.h"
+#include "grpcpp/channel.h"
+#include "grpcpp/create_channel.h"
+#include "grpcpp/security/credentials.h"
 #include "gtest/gtest.h"
 #include "absl/log/check.h"
+#include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "tink/integration/gcpkms/gcp_kms_aead.h"
 #include "tink/integration/gcpkms/gcp_kms_client.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "tools/cpp/runfiles/runfiles.h"
 
@@ -30,10 +45,16 @@ namespace {
 using ::bazel::tools::cpp::runfiles::Runfiles;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
+using ::google::cloud::kms::v1::KeyManagementService;
 using ::testing::Environment;
+using ::testing::Not;
 
 constexpr absl::string_view kGcpKmsKeyUri =
     "gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/"
+    "unit-and-integration-testing/cryptoKeys/aead-key";
+
+constexpr absl::string_view kGcpKmsKeyName =
+    "projects/tink-test-infrastructure/locations/global/keyRings/"
     "unit-and-integration-testing/cryptoKeys/aead-key";
 
 std::string RunfilesPath(absl::string_view path) {
@@ -76,13 +97,65 @@ TEST(GcpKmsAeadIntegrationTest, EncryptDecrypt) {
   ASSERT_THAT(aead, IsOk());
 
   constexpr absl::string_view kPlaintext = "plaintext";
-  constexpr absl::string_view kAssociatedData = "aad";
+  constexpr absl::string_view kAssociatedData = "associatedData";
 
   util::StatusOr<std::string> ciphertext =
       (*aead)->Encrypt(kPlaintext, kAssociatedData);
   ASSERT_THAT(ciphertext, IsOk());
   EXPECT_THAT((*aead)->Decrypt(*ciphertext, kAssociatedData),
               IsOkAndHolds(kPlaintext));
+
+  EXPECT_THAT((*aead)->Decrypt(*ciphertext, "invalidAssociatedData"),
+              Not(IsOk()));
+}
+
+util::StatusOr<std::string> ReadFile(const std::string& filename) {
+  std::ifstream input_stream;
+  input_stream.open(filename, std::ifstream::in);
+  if (!input_stream.is_open()) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        absl::StrCat("Error opening file ", filename));
+  }
+  std::stringstream input;
+  input << input_stream.rdbuf();
+  input_stream.close();
+  return input.str();
+}
+
+TEST(GcpKmsAeadIntegrationTest, GcpKmsAeadNewWorks) {
+  // Read credentials file.
+  std::string credentials_path = RunfilesPath("testdata/gcp/credential.json");
+  util::StatusOr<std::string> json_creds = ReadFile(credentials_path);
+  ASSERT_THAT(json_creds, IsOk());
+
+  // Create a GCP KMS stub.
+  std::shared_ptr<grpc::CallCredentials> creds =
+      grpc::ServiceAccountJWTAccessCredentials(*json_creds);
+  std::shared_ptr<grpc::ChannelCredentials> channel_creds =
+      grpc::SslCredentials(grpc::SslCredentialsOptions());
+  std::shared_ptr<grpc::ChannelCredentials> credentials =
+      grpc::CompositeChannelCredentials(channel_creds, creds);
+  grpc::ChannelArguments args;
+  args.SetUserAgentPrefix("Tink Test CPP");
+  std::shared_ptr<KeyManagementService::Stub> kms_stub =
+      KeyManagementService::NewStub(grpc::CreateCustomChannel(
+          "cloudkms.googleapis.com", credentials, args));
+
+  util::StatusOr<std::unique_ptr<Aead>> aead =
+      GcpKmsAead::New(kGcpKmsKeyName, kms_stub);
+  ASSERT_THAT(aead, IsOk());
+
+  constexpr absl::string_view kPlaintext = "plaintext";
+  constexpr absl::string_view kAssociatedData = "associatedData";
+
+  util::StatusOr<std::string> ciphertext =
+      (*aead)->Encrypt(kPlaintext, kAssociatedData);
+  ASSERT_THAT(ciphertext, IsOk());
+  EXPECT_THAT((*aead)->Decrypt(*ciphertext, kAssociatedData),
+              IsOkAndHolds(kPlaintext));
+
+  EXPECT_THAT((*aead)->Decrypt(*ciphertext, "invalidAssociatedData"),
+              Not(IsOk()));
 }
 
 }  // namespace
