@@ -18,57 +18,26 @@
 package main
 
 import (
-	"context"
-	// place-holder to import crypto/tls
 	"fmt"
 	"log"
 	"net"
 
 	"flag"
 	// context is used to cancel outstanding requests
-	"google.golang.org/api/option"
 	"google.golang.org/grpc"
-	"github.com/google/tink/go/core/registry"
-	"github.com/google/tink/go/integration/awskms"
-	"github.com/google/tink/go/integration/gcpkms"
-
-	// place-holder to import tink-go-hcvault
-	"github.com/google/tink/go/testing/fakekms"
+	"github.com/google/tink/testing/go/kms"
 	"github.com/google/tink/testing/go/services"
 	pbgrpc "github.com/google/tink/testing/go/protos/testing_api_go_grpc"
 )
 
 var (
-	port                = flag.Int("port", 10000, "The server port")
-	gcpCredFilePath     = flag.String("gcp_credentials_path", "", "Google Cloud KMS credentials path")
-	gcpKeyURI           = flag.String("gcp_key_uri", "", "Google Cloud KMS key URI of the form: gcp-kms://projects/*/locations/*/keyRings/*/cryptoKeys/*.")
-	awsCredFilePath     = flag.String("aws_credentials_path", "", "AWS KMS credentials path")
-	awsKeyURI           = flag.String("aws_key_uri", "", "AWS KMS key URI of the form: aws-kms://arn:aws:kms:<region>:<account-id>:key/<key-id>.")
-	hcvaultKeyURIPrefix = flag.String("hcvault_key_uri_prefix", "", "HC Vault key URI prefix of the form: hcvault://example.com:8200/key/path")
-	hcvaultToken        = flag.String("hcvault_token", "", "HC Vault token")
+	port = flag.Int("port", 10000, "The server port")
 )
 
 func main() {
 	flag.Parse()
-	client, err := fakekms.NewClient("fake-kms://")
-	if err != nil {
-		log.Fatalf("fakekms.NewClient failed: %v", err)
-	}
-	registry.RegisterKMSClient(client)
 
-	gcpClient, err := gcpkms.NewClientWithOptions(context.Background(), *gcpKeyURI, option.WithCredentialsFile(*gcpCredFilePath))
-	if err != nil {
-		log.Fatalf("gcpkms.NewClientWithOptions failed: %v", err)
-	}
-	registry.RegisterKMSClient(gcpClient)
-
-	awsClient, err := awskms.NewClientWithOptions(*awsKeyURI, awskms.WithCredentialPath(*awsCredFilePath))
-	if err != nil {
-		log.Fatalf("awskms.NewClientWithOptions failed: %v", err)
-	}
-	registry.RegisterKMSClient(awsClient)
-
-	// place-holder to register hcvault client
+	kms.RegisterAll()
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {

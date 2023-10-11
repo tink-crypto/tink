@@ -81,20 +81,29 @@ go_test(
     ],
 )
 
+go_library(
+    name = "kms",
+    srcs = ["kms.go"],
+    importpath = "github.com/google/tink/testing/go/kms",
+    deps = [
+        "@org_golang_google_api//option",
+        "@tink_go//core/registry",
+        "@tink_go//integration/awskms",
+        "@tink_go//integration/gcpkms",
+        "@tink_go//integration/hcvault",
+        "@tink_go//testing/fakekms",
+    ],
+)
+
 go_binary(
     name = "testing_server",
     srcs = [
         "testing_server.go",
     ],
     deps = [
+        ":kms",
         ":services",
         ":testing_api_go_grpc",
-        "@org_golang_google_api//option",
         "@org_golang_google_grpc//:grpc",
-        "@tink_go//core/registry",
-        "@tink_go//integration/awskms",
-        "@tink_go//integration/gcpkms",
-        "@tink_go//integration/hcvault",
-        "@tink_go//testing/fakekms",
     ],
 )
