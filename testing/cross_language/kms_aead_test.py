@@ -51,12 +51,30 @@ _GCP_UNKNOWN_KEY_URI = (
     'gcp-kms://projects/tink-test-infrastructure/locations/global/'
     'keyRings/unit-and-integration-testing/cryptoKeys/unknown')
 
-_LOCAL_HCVAULT_KEY_URI = 'hcvault://127.0.0.1:8200/transit/keys/testkey'
+# This key was created with "derived=true" and can only be used with non-empty
+# associated data.
+_LOCAL_HCVAULT_DERIVED_KEY_URI = (
+    'hcvault://127.0.0.1:8200/transit/keys/derived_testkey'
+)
+
+# This key was created with "derived=false" and ignores the associated data. It
+# should only be used with empty associated data.
+_LOCAL_HCVAULT_NON_DERIVED_KEY_URI = (
+    'hcvault://127.0.0.1:8200/transit/keys/testkey'
+)
 
 _KMS_KEY_URI = {
     'GCP': _GCP_KEY_URI,
     'AWS': _AWS_KEY_URI,
-    'HCVAULT': _LOCAL_HCVAULT_KEY_URI,
+    'HCVAULT': _LOCAL_HCVAULT_DERIVED_KEY_URI,
+}
+
+_KMS_KEY_URI_FOR_ENVELOPE_ENCRYPTION = {
+    'GCP': _GCP_KEY_URI,
+    'AWS': _AWS_KEY_URI,
+    # Envelope encryption will always use empty associated data. We therefore
+    # have to use the non-derived key.
+    'HCVAULT': _LOCAL_HCVAULT_NON_DERIVED_KEY_URI,
 }
 
 _DEK_TEMPLATE = utilities.KEY_TEMPLATE['AES128_GCM']
@@ -68,7 +86,7 @@ def _kms_envelope_aead_templates(
   """Generates a map from KMS envelope AEAD template name to key template."""
   kms_key_templates = {}
   for kms_service in kms_services:
-    key_uri = _KMS_KEY_URI[kms_service]
+    key_uri = _KMS_KEY_URI_FOR_ENVELOPE_ENCRYPTION[kms_service]
     kms_envelope_aead_key_template = (
         aead.aead_key_templates.create_kms_envelope_aead_key_template(
             key_uri, _DEK_TEMPLATE))
@@ -193,12 +211,6 @@ class KmsAeadTest(parameterized.TestCase):
         decrypt_lang, keyset, aead.Aead)
     output = decrypt_primitive.decrypt(ciphertext, associated_data)
     self.assertEqual(output, plaintext)
-    if kms_service == 'HCVAULT':
-      # TODO(b/303547968): Resolve this.
-      self.assertEqual(
-          decrypt_primitive.decrypt(ciphertext, b'other_associated_data'),
-          plaintext)
-      return
     with self.assertRaises(tink.TinkError):
       decrypt_primitive.decrypt(ciphertext, b'other_associated_data')
 
@@ -206,27 +218,55 @@ class KmsAeadTest(parameterized.TestCase):
   def test_encrypt_decrypt_with_empty_associated_data(
       self, kms_service, encrypt_lang, decrypt_lang
   ):
-    kms_key_uri = _KMS_KEY_URI[kms_service]
-    key_template = aead.aead_key_templates.create_kms_aead_key_template(
-        kms_key_uri)
-    keyset = testing_servers.new_keyset(encrypt_lang, key_template)
-    encrypt_primitive = testing_servers.remote_primitive(
-        lang=encrypt_lang, keyset=keyset, primitive_class=aead.Aead)
     plaintext = b'plaintext'
     associated_data = b''
-    ciphertext = encrypt_primitive.encrypt(plaintext, associated_data)
-    decrypt_primitive = testing_servers.remote_primitive(
-        decrypt_lang, keyset, aead.Aead)
-    output = decrypt_primitive.decrypt(ciphertext, associated_data)
-    self.assertEqual(output, plaintext)
-    if kms_service == 'HCVAULT':
-      # TODO(b/303547968): Resolve this.
+    if kms_service != 'HCVAULT':
+      kms_key_uri = _KMS_KEY_URI[kms_service]
+      key_template = aead.aead_key_templates.create_kms_aead_key_template(
+          kms_key_uri)
+      keyset = testing_servers.new_keyset(encrypt_lang, key_template)
+      encrypt_primitive = testing_servers.remote_primitive(
+          lang=encrypt_lang, keyset=keyset, primitive_class=aead.Aead)
+      ciphertext = encrypt_primitive.encrypt(plaintext, associated_data)
+      decrypt_primitive = testing_servers.remote_primitive(
+          decrypt_lang, keyset, aead.Aead)
+      output = decrypt_primitive.decrypt(ciphertext, associated_data)
+      self.assertEqual(output, plaintext)
+      with self.assertRaises(tink.TinkError):
+        decrypt_primitive.decrypt(ciphertext, b'other_associated_data')
+    else:
+      # Test that vault rejects empty 'associated_data' for a derived key.
+      key_template = aead.aead_key_templates.create_kms_aead_key_template(
+          _LOCAL_HCVAULT_DERIVED_KEY_URI)
+      with self.assertRaises(tink.TinkError):
+        keyset = testing_servers.new_keyset(encrypt_lang, key_template)
+        with_derived_key = testing_servers.remote_primitive(
+            lang=encrypt_lang, keyset=keyset, primitive_class=aead.Aead)
+        _ = with_derived_key.encrypt(plaintext, b'')
+
+      # Test that encryption and decryption with empty 'associated_data' works
+      # for non-derived keys.
+      key_template = aead.aead_key_templates.create_kms_aead_key_template(
+          _LOCAL_HCVAULT_NON_DERIVED_KEY_URI)
+      keyset = testing_servers.new_keyset(encrypt_lang, key_template)
+      encrypt_primitive = testing_servers.remote_primitive(
+          lang=encrypt_lang, keyset=keyset, primitive_class=aead.Aead)
+      ciphertext = encrypt_primitive.encrypt(
+          plaintext, associated_data
+      )
+      decrypt_primitive = testing_servers.remote_primitive(
+          decrypt_lang, keyset, aead.Aead)
+      output = decrypt_primitive.decrypt(ciphertext, associated_data)
+      self.assertEqual(output, plaintext)
+
+      # Test that this AEAD ignores associated_data, because Vault ignores the
+      # 'context' parameter for non-derived keys.
       self.assertEqual(
-          decrypt_primitive.decrypt(ciphertext, b'other_associated_data'),
-          plaintext)
-      return
-    with self.assertRaises(tink.TinkError):
-      decrypt_primitive.decrypt(ciphertext, b'other_associated_data')
+          decrypt_primitive.decrypt(
+              ciphertext, b'other_associated_data'
+          ),
+          plaintext,
+      )
 
   @parameterized.parameters(_two_key_uris_test_cases())
   def test_cannot_decrypt_ciphertext_of_other_key_uri(self, lang, key_uri,
