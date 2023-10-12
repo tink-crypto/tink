@@ -149,6 +149,43 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "key_gen_config_v0",
+    srcs = ["key_gen_config_v0.cc"],
+    hdrs = ["key_gen_config_v0.h"],
+    include_prefix = "tink/aead/internal",
+    deps = [
+        "//:key_gen_configuration",
+        "//aead:aes_ctr_hmac_aead_key_manager",
+        "//aead:aes_eax_key_manager",
+        "//aead:aes_gcm_key_manager",
+        "//aead:aes_gcm_siv_key_manager",
+        "//aead:xchacha20_poly1305_key_manager",
+        "//internal:key_gen_configuration_impl",
+        "//util:status",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
+cc_library(
+    name = "config_v0",
+    srcs = ["config_v0.cc"],
+    hdrs = ["config_v0.h"],
+    include_prefix = "tink/aead/internal",
+    deps = [
+        "//:configuration",
+        "//aead:aead_wrapper",
+        "//aead:aes_ctr_hmac_aead_key_manager",
+        "//aead:aes_eax_key_manager",
+        "//aead:aes_gcm_key_manager",
+        "//aead:aes_gcm_siv_key_manager",
+        "//aead:xchacha20_poly1305_key_manager",
+        "//internal:configuration_impl",
+        "//util:status",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
 cc_test(
     name = "cord_aes_gcm_boringssl_test",
     size = "small",
@@ -273,6 +310,34 @@ cc_test(
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:span",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "config_v0_test",
+    srcs = ["config_v0_test.cc"],
+    deps = [
+        ":config_v0",
+        ":key_gen_config_v0",
+        "//:aead",
+        "//:configuration",
+        "//:key_gen_configuration",
+        "//:keyset_handle",
+        "//aead:aead_key_templates",
+        "//aead:aes_ctr_hmac_aead_key_manager",
+        "//aead:aes_eax_key_manager",
+        "//aead:aes_gcm_key_manager",
+        "//aead:aes_gcm_siv_key_manager",
+        "//aead:xchacha20_poly1305_key_manager",
+        "//internal:configuration_impl",
+        "//internal:key_gen_configuration_impl",
+        "//internal:key_type_info_store",
+        "//internal:keyset_wrapper_store",
+        "//internal:ssl_util",
+        "//proto:tink_cc_proto",
+        "//util:statusor",
+        "//util:test_matchers",
         "@com_google_googletest//:gtest_main",
     ],
 )

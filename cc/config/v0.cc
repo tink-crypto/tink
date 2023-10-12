@@ -17,7 +17,7 @@
 #include "tink/config/v0.h"
 
 #include "absl/log/check.h"
-#include "tink/config/internal/aead_v0.h"
+#include "tink/aead/internal/config_v0.h"
 #include "tink/configuration.h"
 #include "tink/daead/aes_siv_key_manager.h"
 #include "tink/daead/deterministic_aead_wrapper.h"

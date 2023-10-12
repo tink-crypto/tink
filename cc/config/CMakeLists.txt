@@ -113,7 +113,7 @@ tink_cc_library(
   DEPS
     absl::check
     tink::core::configuration
-    tink::config::internal::aead_v0
+    tink::aead::internal::config_v0
     tink::daead::aes_siv_key_manager
     tink::daead::deterministic_aead_wrapper
     tink::hybrid::ecies_aead_hkdf_private_key_manager

@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "tink/config/internal/aead_v0.h"
+#include "tink/aead/internal/config_v0.h"
 
 #include "absl/memory/memory.h"
 #include "tink/aead/aead_wrapper.h"

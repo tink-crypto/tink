@@ -128,7 +128,7 @@ cc_library(
     tags = ["requires_boringcrypto_update"],
     deps = [
         "//:configuration",
-        "//config/internal:aead_v0",
+        "//aead/internal:config_v0",
         "//daead:aes_siv_key_manager",
         "//daead:deterministic_aead_wrapper",
         "//hybrid:ecies_aead_hkdf_private_key_manager",

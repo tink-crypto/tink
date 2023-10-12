@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "tink/config/internal/key_gen_aead_v0.h"
+#include "tink/aead/internal/key_gen_config_v0.h"
 
 #include "absl/memory/memory.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"

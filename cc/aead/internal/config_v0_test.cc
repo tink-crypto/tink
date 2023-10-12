@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "tink/config/internal/aead_v0.h"
+#include "tink/aead/internal/config_v0.h"
 
 #include <memory>
 #include <string>
@@ -27,8 +27,8 @@
 #include "tink/aead/aes_eax_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead/aes_gcm_siv_key_manager.h"
+#include "tink/aead/internal/key_gen_config_v0.h"
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
-#include "tink/config/internal/key_gen_aead_v0.h"
 #include "tink/configuration.h"
 #include "tink/internal/configuration_impl.h"
 #include "tink/internal/key_gen_configuration_impl.h"
