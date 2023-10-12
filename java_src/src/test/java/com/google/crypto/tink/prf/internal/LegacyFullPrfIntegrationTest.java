@@ -96,15 +96,27 @@ public class LegacyFullPrfIntegrationTest {
     assertThat(prf.compute(t.message, t.tag.length)).isEqualTo(t.tag);
   }
 
+  /* This test verifies that when a wrapper is not registered, primitive creation fails.
+
+    Ideally we should also verify that when the KeyManager for such a primitive is not registered,
+    the object creation fails. However, with the current Registry API this is not possible.
+    Concretely, once a KeyManager is registered, there is no way to deregister it from the
+    Registry (resetting PrimitiveRegistry does not affect this). In the case of these tests, the
+    KeyManager is registered for the endToEnd_works() test, so we would need to do either of the
+    three things:
+        1. make the reset() method public in Registry
+        2. move the test into a separate file
+        3. add a method to deregister KeyManagers from Registry
+    #1 and #3 we really don't want in order not to tempt users to use it, #2 is a bit
+    overcomplicated and is not worth it. */
   @Test
   public void legacyFullPrfNotRegistered_fails() throws Exception {
     MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
-    TestLegacyPrfWrapper.register();
 
     KeysetHandle keysetHandle =
         getKeysetHandleFromKeyNoSerialization(HMAC_LEGACY_PRF_TEST_VECTORS[0].key);
 
-    assertThrows(GeneralSecurityException.class, () -> keysetHandle.getPrimitive(Prf.class));
+    assertThrows(GeneralSecurityException.class, () -> keysetHandle.getPrimitive(PrfSet.class));
   }
 
   private static KeysetHandle getKeysetHandleFromKeyNoSerialization(HmacPrfKey key)

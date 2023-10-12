@@ -98,10 +98,7 @@ public class LegacyFullMacIntegrationTest {
     // This is to ensure that the tests indeed get the objects we are testing for.
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(
-            PrimitiveConstructor.create(
-                (LegacyProtoKey key) -> (LegacyFullMac) LegacyFullMac.create(key),
-                LegacyProtoKey.class,
-                LegacyFullMac.class));
+            PrimitiveConstructor.create(LegacyFullMac::create, LegacyProtoKey.class, Mac.class));
     TestLegacyMacWrapper.register();
 
     KeysetHandle keysetHandle = getKeysetHandleFromKeyNoSerialization(t.key);
@@ -111,10 +108,22 @@ public class LegacyFullMacIntegrationTest {
     mac.verifyMac(t.tag, t.message);
   }
 
+  /* This test verifies that when a wrapper is not registered, primitive creation fails.
+
+    Ideally we should also verify that when the KeyManager for such a primitive is not registered,
+    the object creation fails. However, with the current Registry API this is not possible.
+    Concretely, once a KeyManager is registered, there is no way to deregister it from the
+    Registry (resetting PrimitiveRegistry does not affect this). In the case of these tests, the
+    KeyManager is registered for the endToEnd_works() test, so we would need to do either of the
+    three things:
+        1. make the reset() method public in Registry
+        2. move the test into a separate file
+        3. add a method to deregister KeyManagers from Registry
+    #1 and #3 we really don't want in order not to tempt users to use it, #2 is a bit
+    overcomplicated and is not worth it. */
   @Test
   public void legacyFullMacNotRegistered_fails() throws Exception {
     MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
-    TestLegacyMacWrapper.register();
 
     KeysetHandle keysetHandle =
         getKeysetHandleFromKeyNoSerialization(hmacImplementationTestVectors[0].key);
@@ -163,12 +172,11 @@ public class LegacyFullMacIntegrationTest {
         Keyset.newBuilder().addKey(rawKeysetKey).setPrimaryKeyId(id).build());
   }
 
-  private static final class TestLegacyMacWrapper implements PrimitiveWrapper<LegacyFullMac, Mac> {
+  private static final class TestLegacyMacWrapper implements PrimitiveWrapper<Mac, Mac> {
     static final TestLegacyMacWrapper WRAPPER = new TestLegacyMacWrapper();
 
     @Override
-    public Mac wrap(PrimitiveSet<LegacyFullMac> primitiveSet)
-        throws GeneralSecurityException {
+    public Mac wrap(PrimitiveSet<Mac> primitiveSet) throws GeneralSecurityException {
       // This is a dummy test wrapper that act as a proxy to a single primitive object under test.
       return primitiveSet.getPrimary().getFullPrimitive();
     }
@@ -179,8 +187,8 @@ public class LegacyFullMacIntegrationTest {
     }
 
     @Override
-    public Class<LegacyFullMac> getInputPrimitiveClass() {
-      return LegacyFullMac.class;
+    public Class<Mac> getInputPrimitiveClass() {
+      return Mac.class;
     }
 
     static void register() throws GeneralSecurityException {
