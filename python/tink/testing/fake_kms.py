@@ -18,7 +18,7 @@ from typing import Optional
 
 import tink
 from tink import aead
-from tink import cleartext_keyset_handle
+from tink import secret_key_access
 
 
 FAKE_KMS_PREFIX = 'fake-kms://'
@@ -47,8 +47,8 @@ class FakeKmsClient(tink.KmsClient):
       raise tink.TinkError('invalid key URI')
     key_id = key_uri[len(FAKE_KMS_PREFIX) :]
     serialized_key = base64.urlsafe_b64decode(key_id.encode('utf-8') + b'===')
-    handle = cleartext_keyset_handle.read(
-        tink.BinaryKeysetReader(serialized_key)
+    handle = tink.proto_keyset_format.parse(
+        serialized_key, secret_key_access.TOKEN
     )
     return handle.primitive(aead.Aead)
 
