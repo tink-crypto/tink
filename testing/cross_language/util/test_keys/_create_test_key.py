@@ -15,18 +15,16 @@
 """Provides methods to create keys and keysets in cross language tests.
 """
 
-import io
-from typing import Any
-from typing import Callable
+from typing import Any, Callable
 
 import tink
 from tink import aead
-from tink import cleartext_keyset_handle
 from tink import daead
 from tink import hybrid
 from tink import jwt
 from tink import mac
 from tink import prf
+from tink import secret_key_access
 from tink import signature
 from tink import streaming_aead
 
@@ -94,10 +92,10 @@ def new_or_stored_key(
 
   if not use_stored_key(template):
     handle = tink.new_keyset_handle(template)
-    buf = io.BytesIO()
-    writer = tink.BinaryKeysetWriter(buf)
-    cleartext_keyset_handle.write(writer, handle)
-    keyset = tink_pb2.Keyset.FromString(buf.getvalue())
+    serialized_keyset = tink.proto_keyset_format.serialize(
+        handle, secret_key_access.TOKEN
+    )
+    keyset = tink_pb2.Keyset.FromString(serialized_keyset)
     return keyset.key[0]
 
   try:
@@ -155,13 +153,12 @@ def _some_template_for_primitive(primitive: Any) -> tink_pb2.KeyTemplate:
 
 
 def _get_public_keyset(private_keyset: bytes) -> bytes:
-  reader = tink.BinaryKeysetReader(private_keyset)
-  keyset_handle = cleartext_keyset_handle.read(reader)
-  public_keyset_handle = keyset_handle.public_keyset_handle()
-  public_keyset = io.BytesIO()
-  cleartext_keyset_handle.write(
-      tink.BinaryKeysetWriter(public_keyset), public_keyset_handle)
-  return public_keyset.getvalue()
+  private_keyset_handle = tink.proto_keyset_format.parse(
+      private_keyset, secret_key_access.TOKEN
+  )
+  return tink.proto_keyset_format.serialize_without_secret(
+      private_keyset_handle.public_keyset_handle()
+  )
 
 
 def some_keyset_for_primitive(primitive: Any) -> bytes:

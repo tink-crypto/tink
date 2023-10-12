@@ -50,7 +50,7 @@ py_library(
         ":_test_keys_db",
         "//tink_config",
         "//util:key_util",
-        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:secret_key_access",
         "@tink_py//tink:tink_python",
         "@tink_py//tink/aead",
         "@tink_py//tink/daead",
