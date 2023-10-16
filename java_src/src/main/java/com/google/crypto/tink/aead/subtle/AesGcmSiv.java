@@ -16,14 +16,21 @@
 
 package com.google.crypto.tink.aead.subtle;
 
+import static com.google.crypto.tink.internal.Util.isPrefix;
+
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.aead.AesGcmSivKey;
 import com.google.crypto.tink.annotations.Alpha;
+import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.SubtleUtil;
 import com.google.crypto.tink.subtle.Validators;
 import java.security.GeneralSecurityException;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.Arrays;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
@@ -60,18 +67,26 @@ public final class AesGcmSiv implements Aead {
   private static final boolean HAS_GCM_PARAMETER_SPEC_CLASS = hasGCMParameterSpecClass();
 
   private final SecretKey keySpec;
+  private final byte[] outputPrefix;
 
-  public AesGcmSiv(final byte[] key) throws GeneralSecurityException {
+  @AccessesPartialKey
+  public static Aead create(AesGcmSivKey key) throws GeneralSecurityException {
+    return new AesGcmSiv(
+        key.getKeyBytes().toByteArray(InsecureSecretKeyAccess.get()),
+        key.getOutputPrefix().toByteArray());
+  }
+
+  private AesGcmSiv(byte[] key, byte[] outputPrefix) throws GeneralSecurityException {
+    this.outputPrefix = outputPrefix;
     Validators.validateAesKeySize(key.length);
     keySpec = new SecretKeySpec(key, "AES");
   }
 
-  /**
-   * On Android KitKat (API level 19) this method does not support non null or non empty {@code
-   * associatedData}. It might not work at all in older versions.
-   */
-  @Override
-  public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
+  public AesGcmSiv(final byte[] key) throws GeneralSecurityException {
+    this(key, new byte[0]);
+  }
+
+  private byte[] rawEncrypt(final byte[] plaintext, final byte[] associatedData)
       throws GeneralSecurityException {
     // Check that ciphertext is not longer than the max. size of a Java array.
     if (plaintext.length > Integer.MAX_VALUE - IV_SIZE_IN_BYTES - TAG_SIZE_IN_BYTES) {
@@ -107,7 +122,17 @@ public final class AesGcmSiv implements Aead {
    * associatedData}. It might not work at all in older versions.
    */
   @Override
-  public byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
+  public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
+      throws GeneralSecurityException {
+    // Check that ciphertext is not longer than the max. size of a Java array.
+    byte[] ciphertext = rawEncrypt(plaintext, associatedData);
+    if (outputPrefix.length == 0) {
+      return ciphertext;
+    }
+    return Bytes.concat(outputPrefix, ciphertext);
+  }
+
+  private byte[] rawDecrypt(final byte[] ciphertext, final byte[] associatedData)
       throws GeneralSecurityException {
     if (ciphertext.length < IV_SIZE_IN_BYTES + TAG_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("ciphertext too short");
@@ -121,6 +146,24 @@ public final class AesGcmSiv implements Aead {
     return localCipher
         .get()
         .doFinal(ciphertext, IV_SIZE_IN_BYTES, ciphertext.length - IV_SIZE_IN_BYTES);
+  }
+
+  /**
+   * On Android KitKat (API level 19) this method does not support non null or non empty {@code
+   * associatedData}. It might not work at all in older versions.
+   */
+  @Override
+  public byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
+      throws GeneralSecurityException {
+    if (outputPrefix.length == 0) {
+      return rawDecrypt(ciphertext, associatedData);
+    }
+    if (!isPrefix(outputPrefix, ciphertext)) {
+      throw new GeneralSecurityException("Decryption failed (OutputPrefix mismatch).");
+    }
+    byte[] copiedCiphertext =
+        Arrays.copyOfRange(ciphertext, outputPrefix.length, ciphertext.length);
+    return rawDecrypt(copiedCiphertext, associatedData);
   }
 
   private static AlgorithmParameterSpec getParams(final byte[] iv) throws GeneralSecurityException {

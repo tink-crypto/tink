@@ -16,17 +16,23 @@
 
 package com.google.crypto.tink.aead.subtle;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.aead.AesGcmSivKey;
+import com.google.crypto.tink.aead.AesGcmSivParameters;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.TestUtil.BytesMutation;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
@@ -52,6 +58,9 @@ public class AesGcmSivTest {
 
   @Before
   public void setUpConscrypt() throws Exception {
+    if (TestUtil.isAndroid()) {
+      return;
+    }
     try {
       Conscrypt.checkAvailability();
       Security.addProvider(Conscrypt.newProvider());
@@ -282,5 +291,100 @@ public class AesGcmSivTest {
       assertFalse(ciphertexts.contains(ctHex));
       ciphertexts.add(ctHex);
     }
+  }
+
+  @Test
+  public void testWithAesGcmSivKey_noPrefix_works() throws Exception {
+    // Test vector draft-irtf-cfrg-gcmsiv-09 in Wycheproof
+    byte[] plaintext = Hex.decode("7a806c");
+    byte[] associatedData = Hex.decode("46bb91c3c5");
+    byte[] keyBytes = Hex.decode("36864200e0eaf5284d884a0e77d31646");
+    AesGcmSivParameters parameters =
+        AesGcmSivParameters.builder()
+            .setKeySizeBytes(16)
+            .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+            .build();
+    AesGcmSivKey key =
+        AesGcmSivKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(SecretBytes.copyFrom(keyBytes, InsecureSecretKeyAccess.get()))
+            .build();
+    Aead aead = AesGcmSiv.create(key);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    assertThat(ciphertext).hasLength(/* length= */ 3 + /* ivSize= */ 12 + /* tagSize= */ 16);
+
+    assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+
+    byte[] fixedCiphertext =
+        Hex.decode("bae8e37fc83441b16034566baf60eb711bd85bc1e4d3e0a462e074eea428a8");
+    assertThat(aead.decrypt(fixedCiphertext, associatedData)).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void testWithAesGcmSivKey_tinkPrefix_works() throws Exception {
+    // Test vector draft-irtf-cfrg-gcmsiv-09 in Wycheproof
+    byte[] plaintext = Hex.decode("7a806c");
+    byte[] associatedData = Hex.decode("46bb91c3c5");
+    byte[] keyBytes = Hex.decode("36864200e0eaf5284d884a0e77d31646");
+    AesGcmSivParameters parameters =
+        AesGcmSivParameters.builder()
+            .setKeySizeBytes(16)
+            .setVariant(AesGcmSivParameters.Variant.TINK)
+            .build();
+    AesGcmSivKey key =
+        AesGcmSivKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(SecretBytes.copyFrom(keyBytes, InsecureSecretKeyAccess.get()))
+            .setIdRequirement(0x87654321)
+            .build();
+    Aead aead = AesGcmSiv.create(key);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    assertThat(ciphertext)
+        .hasLength(
+            5 // prefix
+                + 3 // plaintext length
+                + 12 // iv size
+                + 16 // tag size
+            );
+
+    assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+
+    byte[] fixedCiphertext =
+        Hex.decode("0187654321bae8e37fc83441b16034566baf60eb711bd85bc1e4d3e0a462e074eea428a8");
+    assertThat(aead.decrypt(fixedCiphertext, associatedData)).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void testWithAesGcmSivKey_crunchyPrefix_works() throws Exception {
+    // Test vector draft-irtf-cfrg-gcmsiv-09 in Wycheproof
+    byte[] plaintext = Hex.decode("7a806c");
+    byte[] associatedData = Hex.decode("46bb91c3c5");
+    byte[] keyBytes = Hex.decode("36864200e0eaf5284d884a0e77d31646");
+    AesGcmSivParameters parameters =
+        AesGcmSivParameters.builder()
+            .setKeySizeBytes(16)
+            .setVariant(AesGcmSivParameters.Variant.CRUNCHY)
+            .build();
+    AesGcmSivKey key =
+        AesGcmSivKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(SecretBytes.copyFrom(keyBytes, InsecureSecretKeyAccess.get()))
+            .setIdRequirement(0x87654321)
+            .build();
+    Aead aead = AesGcmSiv.create(key);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    assertThat(ciphertext)
+        .hasLength(
+            5 // prefix
+                + 3 // plaintext length
+                + 12 // iv size
+                + 16 // tag size
+            );
+
+    assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+
+    byte[] fixedCiphertext =
+        Hex.decode("0087654321bae8e37fc83441b16034566baf60eb711bd85bc1e4d3e0a462e074eea428a8");
+    assertThat(aead.decrypt(fixedCiphertext, associatedData)).isEqualTo(plaintext);
   }
 }
