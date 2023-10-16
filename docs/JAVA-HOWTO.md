@@ -96,7 +96,6 @@ persist it to a storage system, e.g., writing to a file.
     import com.google.crypto.tink.KeysetHandle;
     import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
     import com.google.crypto.tink.aead.PredefinedAeadParameters;
-    import java.nio.Files;
 
     // Generate the key material...
     KeysetHandle keysetHandle = KeysetHandle.generateNew(
