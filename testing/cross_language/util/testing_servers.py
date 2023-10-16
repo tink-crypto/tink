@@ -307,7 +307,7 @@ class _TestingServers():
       print('=' * length)
       print()
 
-_ts = None
+_ts: _TestingServers = None
 
 
 def start(output_files_prefix: str) -> None:

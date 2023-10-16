@@ -479,10 +479,12 @@ class PrfSet(prf.PrfSet):
 
   def primary_id(self) -> int:
     self._initialize_key_ids()
+    assert self._primary_key_id is not None
     return self._primary_key_id
 
   def all(self) -> Mapping[int, prf.Prf]:
     self._initialize_key_ids()
+    assert self._prfs is not None
     return self._prfs.copy()
 
   def primary(self) -> prf.Prf:
