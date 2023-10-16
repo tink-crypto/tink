@@ -16,7 +16,12 @@
 
 package com.google.crypto.tink.subtle;
 
+import static com.google.crypto.tink.internal.Util.isPrefix;
+
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.aead.AesEaxKey;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -83,11 +88,29 @@ public final class AesEaxJce implements Aead {
   private final byte[] b;
   private final byte[] p;
 
+  private final byte[] outputPrefix;
+
   private final SecretKeySpec keySpec;
   private final int ivSizeInBytes;
 
+  @AccessesPartialKey
   @SuppressWarnings("InsecureCryptoUsage")
-  public AesEaxJce(final byte[] key, int ivSizeInBytes) throws GeneralSecurityException {
+  public static Aead create(AesEaxKey key) throws GeneralSecurityException {
+    if (!FIPS.isCompatible()) {
+      throw new GeneralSecurityException("Can not use AES-EAX in FIPS-mode.");
+    }
+    if (key.getParameters().getTagSizeBytes() != TAG_SIZE_IN_BYTES) {
+      throw new GeneralSecurityException(
+          "AesEaxJce only supports 16 byte tag size, not " + key.getParameters().getTagSizeBytes());
+    }
+    return new AesEaxJce(
+        key.getKeyBytes().toByteArray(InsecureSecretKeyAccess.get()),
+        key.getParameters().getIvSizeBytes(),
+        key.getOutputPrefix().toByteArray());
+  }
+
+  private AesEaxJce(final byte[] key, int ivSizeInBytes, byte[] outputPrefix)
+      throws GeneralSecurityException {
     if (!FIPS.isCompatible()) {
       throw new GeneralSecurityException("Can not use AES-EAX in FIPS-mode.");
     }
@@ -103,6 +126,11 @@ public final class AesEaxJce implements Aead {
     byte[] block = ecb.doFinal(new byte[BLOCK_SIZE_IN_BYTES]);
     b = multiplyByX(block);
     p = multiplyByX(b);
+    this.outputPrefix = outputPrefix;
+  }
+
+  public AesEaxJce(final byte[] key, int ivSizeInBytes) throws GeneralSecurityException {
+    this(key, ivSizeInBytes, new byte[0]);
   }
 
   /** Computes the xor of two byte arrays of equal size. */
@@ -190,8 +218,7 @@ public final class AesEaxJce implements Aead {
   }
 
   @SuppressWarnings("InsecureCryptoUsage")
-  @Override
-  public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
+  private byte[] rawEncrypt(final byte[] plaintext, final byte[] associatedData)
       throws GeneralSecurityException {
     // Check that ciphertext is not longer than the max. size of a Java array.
     if (plaintext.length > Integer.MAX_VALUE - ivSizeInBytes - TAG_SIZE_IN_BYTES) {
@@ -220,9 +247,19 @@ public final class AesEaxJce implements Aead {
     return ciphertext;
   }
 
-  @SuppressWarnings("InsecureCryptoUsage")
   @Override
-  public byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
+  public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
+      throws GeneralSecurityException {
+    // Check that ciphertext is not longer than the max. size of a Java array.
+    byte[] ciphertext = rawEncrypt(plaintext, associatedData);
+    if (outputPrefix.length == 0) {
+      return ciphertext;
+    }
+    return Bytes.concat(outputPrefix, ciphertext);
+  }
+
+  @SuppressWarnings("InsecureCryptoUsage")
+  private byte[] rawDecrypt(final byte[] ciphertext, final byte[] associatedData)
       throws GeneralSecurityException {
     int plaintextLength = ciphertext.length - ivSizeInBytes - TAG_SIZE_IN_BYTES;
     if (plaintextLength < 0) {
@@ -248,5 +285,19 @@ public final class AesEaxJce implements Aead {
     Cipher ctr = localCtrCipher.get();
     ctr.init(Cipher.ENCRYPT_MODE, keySpec, new IvParameterSpec(n));
     return ctr.doFinal(ciphertext, ivSizeInBytes, plaintextLength);
+  }
+
+  @Override
+  public byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
+      throws GeneralSecurityException {
+    if (outputPrefix.length == 0) {
+      return rawDecrypt(ciphertext, associatedData);
+    }
+    if (!isPrefix(outputPrefix, ciphertext)) {
+      throw new GeneralSecurityException("Decryption failed (OutputPrefix mismatch).");
+    }
+    byte[] copiedCiphertext =
+        Arrays.copyOfRange(ciphertext, outputPrefix.length, ciphertext.length);
+    return rawDecrypt(copiedCiphertext, associatedData);
   }
 }
