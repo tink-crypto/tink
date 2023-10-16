@@ -56,6 +56,7 @@ func (km *rsaSSAPSSSignerKeyManager) Primitive(serializedKey []byte) (interface{
 	if err := validateRSAPSSPrivateKey(key); err != nil {
 		return nil, err
 	}
+
 	privKey := &rsa.PrivateKey{
 		PublicKey: rsa.PublicKey{
 			N: bytesToBigInt(key.GetPublicKey().GetN()),
@@ -66,12 +67,13 @@ func (km *rsaSSAPSSSignerKeyManager) Primitive(serializedKey []byte) (interface{
 			bytesToBigInt(key.GetP()),
 			bytesToBigInt(key.GetQ()),
 		},
-		Precomputed: rsa.PrecomputedValues{
-			Dp:   bytesToBigInt(key.GetDp()),
-			Dq:   bytesToBigInt(key.GetDq()),
-			Qinv: bytesToBigInt(key.GetCrt()),
-		},
 	}
+	// Instead of extracting Dp, Dq, and Qinv values from the key proto,
+	// the values must be computed by the Go library.
+	//
+	// See https://pkg.go.dev/crypto/rsa#PrivateKey.
+	privKey.Precompute()
+
 	params := key.GetPublicKey().GetParams()
 	if err := internal.Validate_RSA_SSA_PSS(hashName(params.GetSigHash()), int(params.GetSaltLength()), privKey); err != nil {
 		return nil, err
@@ -154,11 +156,16 @@ func (km *rsaSSAPSSSignerKeyManager) NewKey(serializedKeyFormat []byte) (proto.M
 			N:       privKey.PublicKey.N.Bytes(),
 			E:       big.NewInt(int64(privKey.PublicKey.E)).Bytes(),
 		},
-		D:   privKey.D.Bytes(),
-		P:   privKey.Primes[0].Bytes(),
-		Q:   privKey.Primes[1].Bytes(),
-		Dp:  privKey.Precomputed.Dp.Bytes(),
-		Dq:  privKey.Precomputed.Dq.Bytes(),
+		D:  privKey.D.Bytes(),
+		P:  privKey.Primes[0].Bytes(),
+		Q:  privKey.Primes[1].Bytes(),
+		Dp: privKey.Precomputed.Dp.Bytes(),
+		Dq: privKey.Precomputed.Dq.Bytes(),
+		// In crypto/rsa `Qinv` is the "Chinese Remainder Theorem
+		// coefficient q^(-1) mod p". This corresponds with `Crt` in
+		// the Tink proto. This is unrelated to `CRTValues`, which
+		// contains values specifically for additional primes, which
+		// are not supported by Tink.
 		Crt: privKey.Precomputed.Qinv.Bytes(),
 	}, nil
 }
