@@ -23,10 +23,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.aead.ChaCha20Poly1305Key;
+import com.google.crypto.tink.aead.ChaCha20Poly1305Parameters;
 import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.TestUtil.BytesMutation;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
@@ -301,5 +305,75 @@ public class ChaCha20Poly1305Test {
 
     byte[] key = Random.randBytes(32);
     assertThrows(GeneralSecurityException.class, () -> new ChaCha20Poly1305(key));
+  }
+
+  /**
+   * Test case taken from Wycheproof (testcase 4).
+   * https://github.com/google/wycheproof/blob/b063b4aedae951c69df014cd25fa6d69ae9e8cb9/testvectors/chacha20_poly1305_test.json#L57
+   */
+  @Test
+  public void testWithChaCha20Poly1305Key_noPrefix_works() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+    byte[] plaintext = Hex.decode("2a");
+    byte[] associatedData = Hex.decode("");
+    byte[] keyBytes =
+        Hex.decode("cc56b680552eb75008f5484b4cb803fa5063ebd6eab91f6ab6aef4916a766273");
+    ChaCha20Poly1305Key key =
+        ChaCha20Poly1305Key.create(SecretBytes.copyFrom(keyBytes, InsecureSecretKeyAccess.get()));
+    Aead aead = ChaCha20Poly1305.create(key);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    assertThat(ciphertext).hasLength(29); // msg (1) + iv(12) + tag(16)
+
+    assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+
+    byte[] fixedCiphertext =
+        Hex.decode("99e23ec48985bccdeeab60f13acac27dec0968801e9f6eded69d807522");
+    assertThat(aead.decrypt(fixedCiphertext, associatedData)).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void testWithChaCha20Poly1305Key_tinkPrefix_works() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+    byte[] plaintext = Hex.decode("2a");
+    byte[] associatedData = Hex.decode("");
+    byte[] keyBytes =
+        Hex.decode("cc56b680552eb75008f5484b4cb803fa5063ebd6eab91f6ab6aef4916a766273");
+    ChaCha20Poly1305Key key =
+        ChaCha20Poly1305Key.create(
+            ChaCha20Poly1305Parameters.Variant.TINK,
+            SecretBytes.copyFrom(keyBytes, InsecureSecretKeyAccess.get()),
+            0x99887766);
+    Aead aead = ChaCha20Poly1305.create(key);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    assertThat(ciphertext).hasLength(34); // prefix(5) + msg(1) + iv(12) + tag(16)
+
+    assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+
+    byte[] fixedCiphertext =
+        Hex.decode("019988776699e23ec48985bccdeeab60f13acac27dec0968801e9f6eded69d807522");
+    assertThat(aead.decrypt(fixedCiphertext, associatedData)).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void testWithChaCha20Poly1305Key_crunchyPrefix_works() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+    byte[] plaintext = Hex.decode("2a");
+    byte[] associatedData = Hex.decode("");
+    byte[] keyBytes =
+        Hex.decode("cc56b680552eb75008f5484b4cb803fa5063ebd6eab91f6ab6aef4916a766273");
+    ChaCha20Poly1305Key key =
+        ChaCha20Poly1305Key.create(
+            ChaCha20Poly1305Parameters.Variant.CRUNCHY,
+            SecretBytes.copyFrom(keyBytes, InsecureSecretKeyAccess.get()),
+            0x99887766);
+    Aead aead = ChaCha20Poly1305.create(key);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    assertThat(ciphertext).hasLength(34); // prefix(5) + msg(1) + iv(12) + tag(16)
+
+    assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+
+    byte[] fixedCiphertext =
+        Hex.decode("009988776699e23ec48985bccdeeab60f13acac27dec0968801e9f6eded69d807522");
+    assertThat(aead.decrypt(fixedCiphertext, associatedData)).isEqualTo(plaintext);
   }
 }
