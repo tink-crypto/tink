@@ -26,7 +26,7 @@
 #  source ./kokoro/testutils/install_go.sh
 
 install_temp_go() {
-  local -r go_version="1.19.9"
+  local -r go_version="1.20.10"
 
   local -r platform="$(uname | tr '[:upper:]' '[:lower:]')"
   local go_platform
