@@ -67,6 +67,22 @@ TEST(BigIntegerTest, CreateAndGetPadded) {
   EXPECT_THAT(from_padded_big_integer.GetValue(), Eq(big_integer_bytes));
 }
 
+TEST(BigIntegerTest, CreateAndGetEmptyStringWorks) {
+  const std::string empty_string = "";
+  BigInteger big_integer(empty_string);
+
+  EXPECT_THAT(big_integer.SizeInBytes(), Eq(0));
+  EXPECT_THAT(big_integer.GetValue(), Eq(""));
+}
+
+TEST(BigIntegerTest, CreateAndGetNullCharactersWorks) {
+  const std::string empty_string = "\0\0\0";
+  BigInteger big_integer(empty_string);
+
+  EXPECT_THAT(big_integer.SizeInBytes(), Eq(0));
+  EXPECT_THAT(big_integer.GetValue(), Eq(""));
+}
+
 TEST(BigIntegerTest, Equals) {
   const std::string big_integer_bytes = absl::HexStringToBytes(kHexBigInt);
   BigInteger big_integer(big_integer_bytes);

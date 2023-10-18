@@ -38,9 +38,8 @@ class BigInteger {
   BigInteger& operator=(BigInteger&& other) = default;
 
   // Creates a new BigInteger object that wraps a big endian encoded
-  // string. Note that leading zeros are eliminated.
-  explicit BigInteger(absl::string_view big_integer)
-      : value_(big_integer.substr(big_integer.find_first_not_of('\0'))) {}
+  // string and removes leading zeros.
+  explicit BigInteger(absl::string_view big_integer);
 
   // Returns the value of this BigInteger object.
   absl::string_view GetValue() const { return value_; }

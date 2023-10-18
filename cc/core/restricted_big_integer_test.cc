@@ -73,6 +73,26 @@ TEST(RestrictedBigIntegerTest, CreateAndGetSecretPadded) {
               Eq(secret_bytes));
 }
 
+TEST(RestrictedBigIntegerTest, CreateAndGetEmptyStringWorks) {
+  const std::string empty_string = "";
+  RestrictedBigInteger restricted_big_integer(empty_string,
+                                              InsecureSecretKeyAccess::Get());
+
+  EXPECT_THAT(restricted_big_integer.SizeInBytes(), Eq(0));
+  EXPECT_THAT(restricted_big_integer.GetSecret(InsecureSecretKeyAccess::Get()),
+              Eq(""));
+}
+
+TEST(RestrictedBigIntegerTest, CreateAndGetNullCharactersWorks) {
+  const std::string empty_string = "\0\0\0";
+  RestrictedBigInteger restricted_big_integer(empty_string,
+                                              InsecureSecretKeyAccess::Get());
+
+  EXPECT_THAT(restricted_big_integer.SizeInBytes(), Eq(0));
+  EXPECT_THAT(restricted_big_integer.GetSecret(InsecureSecretKeyAccess::Get()),
+              Eq(""));
+}
+
 TEST(RestrictedBigIntegerTest, Equals) {
   const std::string secret_bytes = absl::HexStringToBytes(kHexBigInt);
   RestrictedBigInteger restricted_big_integer(secret_bytes,
