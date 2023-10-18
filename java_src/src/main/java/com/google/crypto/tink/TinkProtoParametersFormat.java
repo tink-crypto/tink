@@ -27,7 +27,7 @@ import java.security.GeneralSecurityException;
 /** Functions to parse and serialize Parameters in Tink's binary format based on Protobufs. */
 public final class TinkProtoParametersFormat {
   /**
-   * Serializes a parameters object into a byte[] according to Tink's binary format.
+   * Serializes a Parameters object into a byte[] according to Tink's binary format.
    */
   public static byte[] serialize(Parameters parameters) throws GeneralSecurityException {
     if (parameters instanceof LegacyProtoParameters) {
@@ -40,7 +40,7 @@ public final class TinkProtoParametersFormat {
   }
 
   /**
-   * Parses a byte[] into a parameters object into a byte[] according to Tink's binary format.
+   * Parses a byte[] into a Parameters object according to Tink's binary format.
    */
   public static Parameters parse(byte[] serializedParameters) throws GeneralSecurityException {
     KeyTemplate t;
