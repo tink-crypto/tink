@@ -395,7 +395,6 @@ java_test(
 
 java_test(
     name = "RegistryMultithreadTest",
-    size = "small",
     srcs = ["RegistryMultithreadTest.java"],
     deps = [
         "//proto:aes_gcm_java_proto",

@@ -141,7 +141,7 @@ public final class KeyManagerRegistryTest {
     assumeFalse("Unable to test KeyManagers in Fips mode", TinkFipsUtil.useOnlyFips());
     KeyManagerRegistry registry = new KeyManagerRegistry();
     TestKeyManager manager = new TestKeyManager("customTypeUrl");
-    registry.registerKeyManager(manager);
+    registry.registerKeyManager(manager, true);
 
     assertThat(registry.getKeyManager("customTypeUrl", Primitive1.class)).isSameInstanceAs(manager);
     assertThat(registry.typeUrlExists("customTypeUrl")).isTrue();
@@ -153,8 +153,8 @@ public final class KeyManagerRegistryTest {
     KeyManagerRegistry registry = new KeyManagerRegistry();
     TestKeyManager manager1 = new TestKeyManager("customTypeUrl");
     TestKeyManager manager2 = new TestKeyManager("customTypeUrl");
-    registry.registerKeyManager(manager1);
-    registry.registerKeyManager(manager2);
+    registry.registerKeyManager(manager1, true);
+    registry.registerKeyManager(manager2, true);
 
     assertThat(registry.getKeyManager("customTypeUrl", Primitive1.class))
         .isAnyOf(manager1, manager2);
@@ -164,12 +164,12 @@ public final class KeyManagerRegistryTest {
   public void testRegisterKeyManager_differentManagersSameKeyType_fails() throws Exception {
     assumeFalse("Unable to test KeyManagers in Fips mode", TinkFipsUtil.useOnlyFips());
     KeyManagerRegistry registry = new KeyManagerRegistry();
-    registry.registerKeyManager(new TestKeyManager("customTypeUrl"));
+    registry.registerKeyManager(new TestKeyManager("customTypeUrl"), true);
     // Adding {} at the end makes this an anonymous subclass, hence a different class, so this
     // throws.
     assertThrows(
         GeneralSecurityException.class,
-        () -> registry.registerKeyManager(new TestKeyManager("customTypeUrl") {}));
+        () -> registry.registerKeyManager(new TestKeyManager("customTypeUrl") {}, true));
   }
 
   @Test
@@ -178,8 +178,8 @@ public final class KeyManagerRegistryTest {
     KeyManagerRegistry registry = new KeyManagerRegistry();
     TestKeyManager manager1 = new TestKeyManager("customTypeUrl1");
     TestKeyManager manager2 = new TestKeyManager("customTypeUrl2");
-    registry.registerKeyManager(manager1);
-    registry.registerKeyManager(manager2);
+    registry.registerKeyManager(manager1, true);
+    registry.registerKeyManager(manager2, true);
     assertThat(registry.getKeyManager("customTypeUrl1", Primitive1.class))
         .isSameInstanceAs(manager1);
     assertThat(registry.getKeyManager("customTypeUrl2", Primitive1.class))
@@ -198,7 +198,7 @@ public final class KeyManagerRegistryTest {
     KeyTypeManager<AesGcmKey> manager = new TestKeyTypeManager("customTypeUrl1");
     assertThrows(
         GeneralSecurityException.class, () -> registry.getUntypedKeyManager("customTypeUrl1"));
-    registry.registerKeyManager(manager);
+    registry.registerKeyManager(manager, true);
     assertThat(registry.getUntypedKeyManager("customTypeUrl1")).isNotNull();
   }
 
@@ -213,8 +213,8 @@ public final class KeyManagerRegistryTest {
     KeyManagerRegistry registry = new KeyManagerRegistry();
     KeyTypeManager<AesGcmKey> manager1 = new TestKeyTypeManager("customTypeUrl1");
     KeyTypeManager<AesGcmKey> manager2 = new TestKeyTypeManager("customTypeUrl1");
-    registry.registerKeyManager(manager1);
-    registry.registerKeyManager(manager2);
+    registry.registerKeyManager(manager1, true);
+    registry.registerKeyManager(manager2, true);
   }
 
   @Test
@@ -222,17 +222,17 @@ public final class KeyManagerRegistryTest {
     assumeFalse("Unable to test KeyManagers in Fips mode", TinkFipsUtil.useOnlyFips());
     // After a registered KeyTypeManager, the KeyManager registering fails.
     KeyManagerRegistry registry = new KeyManagerRegistry();
-    registry.registerKeyManager(new TestKeyTypeManager("customTypeUrl1"));
+    registry.registerKeyManager(new TestKeyTypeManager("customTypeUrl1"), true);
     assertThrows(
         GeneralSecurityException.class,
-        () -> registry.registerKeyManager(new TestKeyManager("customTypeUrl1")));
+        () -> registry.registerKeyManager(new TestKeyManager("customTypeUrl1"), true));
 
     // After a registered KeyManager, the KeyTypeManager registering fails.
     KeyManagerRegistry registry2 = new KeyManagerRegistry();
-    registry2.registerKeyManager(new TestKeyManager("customTypeUrl1"));
+    registry2.registerKeyManager(new TestKeyManager("customTypeUrl1"), true);
     assertThrows(
         GeneralSecurityException.class,
-        () -> registry2.registerKeyManager(new TestKeyTypeManager("customTypeUrl1")));
+        () -> registry2.registerKeyManager(new TestKeyTypeManager("customTypeUrl1"), true));
   }
 
   @Test
@@ -241,8 +241,8 @@ public final class KeyManagerRegistryTest {
     KeyManagerRegistry registry = new KeyManagerRegistry();
     TestKeyManager manager1 = new TestKeyManager("customTypeUrl1");
     TestKeyManager manager2 = new TestKeyManager("customTypeUrl2");
-    registry.registerKeyManager(manager1);
-    registry.registerKeyManager(manager2);
+    registry.registerKeyManager(manager1, true);
+    registry.registerKeyManager(manager2, true);
     assertThat(registry.typeUrlExists("customTypeUrl1")).isTrue();
     assertThat(registry.typeUrlExists("customTypeUrl2")).isTrue();
     assertThat(registry.typeUrlExists("unknownTypeUrl")).isFalse();
@@ -259,8 +259,8 @@ public final class KeyManagerRegistryTest {
     KeyManagerRegistry registry = new KeyManagerRegistry();
     TestKeyTypeManager manager1 = new TestKeyTypeManager("customTypeUrl1");
     TestKeyTypeManager manager2 = new TestKeyTypeManager("customTypeUrl2");
-    registry.registerKeyManager(manager1);
-    registry.registerKeyManager(manager2);
+    registry.registerKeyManager(manager1, true);
+    registry.registerKeyManager(manager2, true);
     assertThat(registry.typeUrlExists("customTypeUrl1")).isTrue();
     assertThat(registry.typeUrlExists("customTypeUrl2")).isTrue();
     assertThat(registry.typeUrlExists("unknownTypeUrl")).isFalse();
@@ -271,7 +271,7 @@ public final class KeyManagerRegistryTest {
     assumeFalse("Unable to test KeyManagers in Fips mode", TinkFipsUtil.useOnlyFips());
     KeyManagerRegistry registry = new KeyManagerRegistry();
     KeyManager<?> registered = new TestKeyManager("typeUrl");
-    registry.registerKeyManager(registered);
+    registry.registerKeyManager(registered, true);
     KeyManager<Primitive1> aeadManager1 = registry.getKeyManager("typeUrl", Primitive1.class);
     KeyManager<?> manager = registry.getUntypedKeyManager("typeUrl");
     assertThat(aeadManager1).isSameInstanceAs(registered);
@@ -380,7 +380,8 @@ public final class KeyManagerRegistryTest {
     KeyManagerRegistry registry = new KeyManagerRegistry();
     registry.registerAsymmetricKeyManagers(
         new TestPrivateKeyTypeManager("privateTypeUrl"),
-        new TestPublicKeyTypeManager("publicTypeUrl"));
+        new TestPublicKeyTypeManager("publicTypeUrl"),
+        true);
 
     assertThat(registry.getUntypedKeyManager("privateTypeUrl")).isNotNull();
     assertThat(registry.getUntypedKeyManager("publicTypeUrl")).isNotNull();
@@ -397,10 +398,12 @@ public final class KeyManagerRegistryTest {
     KeyManagerRegistry registry = new KeyManagerRegistry();
     registry.registerAsymmetricKeyManagers(
         new TestPrivateKeyTypeManager("privateTypeUrl"),
-        new TestPublicKeyTypeManager("publicTypeUrl"));
+        new TestPublicKeyTypeManager("publicTypeUrl"),
+        true);
     registry.registerAsymmetricKeyManagers(
         new TestPrivateKeyTypeManager("privateTypeUrl"),
-        new TestPublicKeyTypeManager("publicTypeUrl"));
+        new TestPublicKeyTypeManager("publicTypeUrl"),
+        true);
     assertThat(registry.getUntypedKeyManager("privateTypeUrl")).isNotNull();
     assertThat(registry.getUntypedKeyManager("publicTypeUrl")).isNotNull();
   }
@@ -417,21 +420,24 @@ public final class KeyManagerRegistryTest {
     KeyManagerRegistry registry = new KeyManagerRegistry();
     registry.registerAsymmetricKeyManagers(
         new TestPrivateKeyTypeManager("privateTypeUrl"),
-        new TestPublicKeyTypeManager("publicTypeUrl"));
+        new TestPublicKeyTypeManager("publicTypeUrl"),
+        true);
     assertThrows(
         GeneralSecurityException.class,
         () ->
             registry.registerAsymmetricKeyManagers(
                 // Note: due to the {} this is a subclass of TestPrivateKeyTypeManager.
                 new TestPrivateKeyTypeManager("privateTypeUrl") {},
-                new TestPublicKeyTypeManager("publicTypeUrl")));
+                new TestPublicKeyTypeManager("publicTypeUrl"),
+                true));
     assertThrows(
         GeneralSecurityException.class,
         () ->
             registry.registerAsymmetricKeyManagers(
                 new TestPrivateKeyTypeManager("privateTypeUrl"),
                 // Note: due to the {} this is a subclass of TestPublicKeyTypeManager.
-                new TestPublicKeyTypeManager("publicTypeUrl") {}));
+                new TestPublicKeyTypeManager("publicTypeUrl") {},
+                true));
   }
 
   @Test
@@ -446,10 +452,11 @@ public final class KeyManagerRegistryTest {
     KeyManagerRegistry registry = new KeyManagerRegistry();
     registry.registerAsymmetricKeyManagers(
         new TestPrivateKeyTypeManager("privateTypeUrl"),
-        new TestPublicKeyTypeManager("publicTypeUrl"));
+        new TestPublicKeyTypeManager("publicTypeUrl"),
+        true);
     assertThrows(
         GeneralSecurityException.class,
-        () -> registry.registerKeyManager(new TestKeyTypeManager("privateTypeUrl")));
+        () -> registry.registerKeyManager(new TestKeyTypeManager("privateTypeUrl"), true));
   }
 
   @Test
@@ -464,7 +471,7 @@ public final class KeyManagerRegistryTest {
     TestPrivateKeyTypeManager privateKeyTypeManager =
         new TestPrivateKeyTypeManager("privateTypeUrl");
     TestPublicKeyTypeManager publicKeyTypeManager = new TestPublicKeyTypeManager("publicTypeUrl");
-    registry.registerAsymmetricKeyManagers(privateKeyTypeManager, publicKeyTypeManager);
+    registry.registerAsymmetricKeyManagers(privateKeyTypeManager, publicKeyTypeManager, true);
     Ed25519PublicKey publicKey =
         Ed25519PublicKey.newBuilder()
             .setVersion(1)
@@ -498,7 +505,7 @@ public final class KeyManagerRegistryTest {
     TestPrivateKeyTypeManager privateKeyTypeManager =
         new TestPrivateKeyTypeManager("privateTypeUrl");
     TestPublicKeyTypeManager publicKeyTypeManager = new TestPublicKeyTypeManager("publicTypeUrl");
-    registry.registerAsymmetricKeyManagers(privateKeyTypeManager, publicKeyTypeManager);
+    registry.registerAsymmetricKeyManagers(privateKeyTypeManager, publicKeyTypeManager, true);
     // Version 0 will make sure that we get a validation error thrown
     Ed25519PublicKey publicKey = Ed25519PublicKey.newBuilder().setVersion(0).build();
     ByteString serializedPrivateKey =
@@ -527,10 +534,12 @@ public final class KeyManagerRegistryTest {
     // Add parentheses to make sure it's a different class which implements the manager.
     TestPublicKeyTypeManager publicKeyTypeManager2 =
         new TestPublicKeyTypeManager("publicTypeUrl") {};
-    registry.registerAsymmetricKeyManagers(privateKeyTypeManager, publicKeyTypeManager1);
+    registry.registerAsymmetricKeyManagers(privateKeyTypeManager, publicKeyTypeManager1, true);
     assertThrows(
         GeneralSecurityException.class,
-        () -> registry.registerAsymmetricKeyManagers(privateKeyTypeManager, publicKeyTypeManager2));
+        () ->
+            registry.registerAsymmetricKeyManagers(
+                privateKeyTypeManager, publicKeyTypeManager2, true));
   }
 
   /** One is allowed to sometimes register asymmetric key managers without their counterpart. */
@@ -546,11 +555,11 @@ public final class KeyManagerRegistryTest {
     TestPrivateKeyTypeManager privateKeyTypeManager =
         new TestPrivateKeyTypeManager("privateTypeUrl");
     TestPublicKeyTypeManager publicKeyTypeManager = new TestPublicKeyTypeManager("publicTypeUrl");
-    registry.registerKeyManager(privateKeyTypeManager);
-    registry.registerKeyManager(publicKeyTypeManager);
-    registry.registerAsymmetricKeyManagers(privateKeyTypeManager, publicKeyTypeManager);
-    registry.registerKeyManager(privateKeyTypeManager);
-    registry.registerKeyManager(publicKeyTypeManager);
+    registry.registerKeyManager(privateKeyTypeManager, true);
+    registry.registerKeyManager(publicKeyTypeManager, false);
+    registry.registerAsymmetricKeyManagers(privateKeyTypeManager, publicKeyTypeManager, true);
+    registry.registerKeyManager(privateKeyTypeManager, true);
+    registry.registerKeyManager(publicKeyTypeManager, false);
 
     // If one ever registers the two together, we keep that one, so one can get public keys:
     Ed25519PublicKey publicKey =
@@ -584,7 +593,8 @@ public final class KeyManagerRegistryTest {
                   public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
                     return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
                   }
-                }));
+                },
+                true));
   }
 
   @Test
@@ -593,7 +603,7 @@ public final class KeyManagerRegistryTest {
     KeyManagerRegistry registry = new KeyManagerRegistry();
     Registry.restrictToFipsIfEmpty();
 
-    registry.registerKeyManager(new TestKeyTypeManager("typeUrl"));
+    registry.registerKeyManager(new TestKeyTypeManager("typeUrl"), true);
   }
 
   @Test
@@ -612,7 +622,8 @@ public final class KeyManagerRegistryTest {
                     return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
                   }
                 },
-                new TestPublicKeyTypeManager("publicTypeUrl")));
+                new TestPublicKeyTypeManager("publicTypeUrl"),
+                true));
     assertThrows(
         GeneralSecurityException.class,
         () ->
@@ -623,7 +634,8 @@ public final class KeyManagerRegistryTest {
                   public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
                     return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
                   }
-                }));
+                },
+                true));
   }
 
   @Test
@@ -634,6 +646,51 @@ public final class KeyManagerRegistryTest {
 
     registry.registerAsymmetricKeyManagers(
         new TestPrivateKeyTypeManager("privateTypeUrl"),
-        new TestPublicKeyTypeManager("publicTypeUrl"));
+        new TestPublicKeyTypeManager("publicTypeUrl"),
+        true);
+  }
+
+  @Test
+  public void testIsNewKeyAllowed_works() throws Exception {
+    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
+    assumeFalse("Unable to test KeyManagers in Fips mode", TinkFipsUtil.useOnlyFips());
+    KeyManagerRegistry registry = new KeyManagerRegistry();
+    TestKeyManager manager1 = new TestKeyManager("customTypeUrlAllow");
+    registry.registerKeyManager(manager1, true);
+    TestKeyManager manager2 = new TestKeyManager("customTypeUrlDisallow");
+    registry.registerKeyManager(manager2, false);
+    assertThat(registry.isNewKeyAllowed("customTypeUrlAllow")).isTrue();
+    assertThat(registry.isNewKeyAllowed("customTypeUrlDisallow")).isFalse();
+  }
+
+  @Test
+  public void testRegisterKeyManager_sameNewKeyAllowed_shouldWork() throws Exception {
+    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
+    assumeFalse("Unable to test KeyManagers in Fips mode", TinkFipsUtil.useOnlyFips());
+    KeyManagerRegistry registry = new KeyManagerRegistry();
+    TestKeyManager manager = new TestKeyManager("customTypeUrl");
+    registry.registerKeyManager(manager, false);
+    registry.registerKeyManager(manager, false);
+  }
+
+  @Test
+  public void testRegisterKeyManager_moreRestrictedNewKeyAllowed_shouldWork() throws Exception {
+    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
+    assumeFalse("Unable to test KeyManagers in Fips mode", TinkFipsUtil.useOnlyFips());
+    KeyManagerRegistry registry = new KeyManagerRegistry();
+    TestKeyManager manager = new TestKeyManager("customTypeUrl");
+    registry.registerKeyManager(manager, true);
+    registry.registerKeyManager(manager, false);
+  }
+
+  @Test
+  public void testRegisterKeyManager_lessRestrictedNewKeyAllowed_shouldThrowException()
+      throws Exception {
+    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
+    assumeFalse("Unable to test KeyManagers in Fips mode", TinkFipsUtil.useOnlyFips());
+    KeyManagerRegistry registry = new KeyManagerRegistry();
+    TestKeyManager manager = new TestKeyManager("customTypeUrl");
+    registry.registerKeyManager(manager, false);
+    assertThrows(GeneralSecurityException.class, () -> registry.registerKeyManager(manager, true));
   }
 }

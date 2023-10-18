@@ -86,9 +86,6 @@ public final class Registry {
   private static final AtomicReference<KeyManagerRegistry> keyManagerRegistry =
       new AtomicReference<>(new KeyManagerRegistry());
 
-  private static final ConcurrentMap<String, Boolean> newKeyAllowedMap =
-      new ConcurrentHashMap<>(); // typeUrl -> newKeyAllowed mapping
-
   private static final ConcurrentMap<String, Catalogue<?>> catalogueMap =
       new ConcurrentHashMap<>(); //  name -> catalogue mapping
 
@@ -103,7 +100,6 @@ public final class Registry {
   static synchronized void reset() {
     keyManagerRegistry.set(new KeyManagerRegistry());
     MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
-    newKeyAllowedMap.clear();
     catalogueMap.clear();
   }
 
@@ -236,15 +232,11 @@ public final class Registry {
               + " https://github.com/tink-crypto/tink-java");
     }
     KeyManagerRegistry newKeyManagerRegistry = new KeyManagerRegistry(keyManagerRegistry.get());
-    newKeyManagerRegistry.registerKeyManager(manager);
+    newKeyManagerRegistry.registerKeyManager(manager, newKeyAllowed);
 
     if (!TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()) {
       throw new GeneralSecurityException("Registering key managers is not supported in FIPS mode");
     }
-    String typeUrl = manager.getKeyType();
-    // Use an empty key format because old-style key managers don't export their key formats
-    ensureKeyManagerInsertable(typeUrl, newKeyAllowed);
-    newKeyAllowedMap.put(typeUrl, Boolean.valueOf(newKeyAllowed));
     keyManagerRegistry.set(newKeyManagerRegistry);
   }
 
@@ -273,11 +265,7 @@ public final class Registry {
       throw new IllegalArgumentException("key manager must be non-null.");
     }
     KeyManagerRegistry newKeyManagerRegistry = new KeyManagerRegistry(keyManagerRegistry.get());
-    newKeyManagerRegistry.registerKeyManager(manager);
-    String typeUrl = manager.getKeyType();
-    ensureKeyManagerInsertable(typeUrl, newKeyAllowed);
-
-    newKeyAllowedMap.put(typeUrl, Boolean.valueOf(newKeyAllowed));
+    newKeyManagerRegistry.registerKeyManager(manager, newKeyAllowed);
     keyManagerRegistry.set(newKeyManagerRegistry);
   }
 
@@ -324,29 +312,6 @@ public final class Registry {
   }
 
   /**
-   * Throws a general security exception if one of these conditions holds:
-   *
-   * <ul>
-   *   <li>There is already a key manager registered for {@code typeURL}, and at least one of the
-   *       following is true:
-   *       <ul>
-   *         <li>The class implementing the existing key manager differs from the given one.
-   *         <li>The value of {@code newKeyAllowed} currently registered is false, but the input
-   *             parameter is true.
-   *       </ul>
-   *   <li>The {@code newKeyAllowed} flag is true, and at least one of the following is true:
-   *       <ul>
-   *         <li>The key manager was already registered, but it contains new key templates.
-   *         <li>The key manager is new, but it contains existing key templates.
-   */
-  private static synchronized void ensureKeyManagerInsertable(String typeUrl, boolean newKeyAllowed)
-      throws GeneralSecurityException {
-    if (newKeyAllowed && newKeyAllowedMap.containsKey(typeUrl) && !newKeyAllowedMap.get(typeUrl)) {
-      throw new GeneralSecurityException("New keys are already disallowed for key type " + typeUrl);
-    }
-  }
-
-  /**
    * Tries to register {@code manager} for {@code manager.getKeyType()}. If {@code newKeyAllowed} is
    * true, users can generate new keys with this manager using the {@link Registry#newKey} methods.
    *
@@ -373,16 +338,7 @@ public final class Registry {
     }
     KeyManagerRegistry newKeyManagerRegistry = new KeyManagerRegistry(keyManagerRegistry.get());
     newKeyManagerRegistry.registerAsymmetricKeyManagers(
-        privateKeyTypeManager, publicKeyTypeManager);
-
-    String privateTypeUrl = privateKeyTypeManager.getKeyType();
-    String publicTypeUrl = publicKeyTypeManager.getKeyType();
-    ensureKeyManagerInsertable(privateTypeUrl, newKeyAllowed);
-    // No key format because a public key manager cannot create new keys
-    ensureKeyManagerInsertable(publicTypeUrl, false);
-
-    newKeyAllowedMap.put(privateTypeUrl, newKeyAllowed);
-    newKeyAllowedMap.put(publicTypeUrl, false);
+        privateKeyTypeManager, publicKeyTypeManager, newKeyAllowed);
 
     keyManagerRegistry.set(newKeyManagerRegistry);
   }
@@ -455,7 +411,7 @@ public final class Registry {
   public static synchronized KeyData newKeyData(
       com.google.crypto.tink.proto.KeyTemplate keyTemplate) throws GeneralSecurityException {
     KeyManager<?> manager = keyManagerRegistry.get().getUntypedKeyManager(keyTemplate.getTypeUrl());
-    if (newKeyAllowedMap.get(keyTemplate.getTypeUrl()).booleanValue()) {
+    if (keyManagerRegistry.get().isNewKeyAllowed(keyTemplate.getTypeUrl())) {
       return manager.newKeyData(keyTemplate.getValue());
     } else {
       throw new GeneralSecurityException(
@@ -498,7 +454,7 @@ public final class Registry {
   public static synchronized MessageLite newKey(
       com.google.crypto.tink.proto.KeyTemplate keyTemplate) throws GeneralSecurityException {
     KeyManager<?> manager = getUntypedKeyManager(keyTemplate.getTypeUrl());
-    if (newKeyAllowedMap.get(keyTemplate.getTypeUrl()).booleanValue()) {
+    if (keyManagerRegistry.get().isNewKeyAllowed(keyTemplate.getTypeUrl())) {
       return manager.newKey(keyTemplate.getValue());
     } else {
       throw new GeneralSecurityException(
@@ -519,7 +475,7 @@ public final class Registry {
   public static synchronized MessageLite newKey(String typeUrl, MessageLite format)
       throws GeneralSecurityException {
     KeyManager<?> manager = getKeyManager(typeUrl);
-    if (newKeyAllowedMap.get(typeUrl).booleanValue()) {
+    if (keyManagerRegistry.get().isNewKeyAllowed(typeUrl)) {
       return manager.newKey(format);
     } else {
       throw new GeneralSecurityException("newKey-operation not permitted for key type " + typeUrl);

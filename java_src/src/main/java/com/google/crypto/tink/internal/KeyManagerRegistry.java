@@ -43,13 +43,17 @@ public final class KeyManagerRegistry {
 
   // A map from the TypeUrl to the KeyManagerContainer.
   private final ConcurrentMap<String, KeyManagerContainer> keyManagerMap;
+  // typeUrl -> newKeyAllowed mapping
+  private final ConcurrentMap<String, Boolean> newKeyAllowedMap;
 
   public KeyManagerRegistry(KeyManagerRegistry original) {
     keyManagerMap = new ConcurrentHashMap<>(original.keyManagerMap);
+    newKeyAllowedMap = new ConcurrentHashMap<>(original.newKeyAllowedMap);
   }
 
   public KeyManagerRegistry() {
     keyManagerMap = new ConcurrentHashMap<>();
+    newKeyAllowedMap = new ConcurrentHashMap<>();
   }
 
   /**
@@ -216,9 +220,12 @@ public final class KeyManagerRegistry {
   }
 
   private synchronized void registerKeyManagerContainer(
-      final KeyManagerContainer containerToInsert, boolean forceOverwrite)
+      final KeyManagerContainer containerToInsert, boolean forceOverwrite, boolean newKeyAllowed)
       throws GeneralSecurityException {
     String typeUrl = containerToInsert.getUntypedKeyManager().getKeyType();
+    if (newKeyAllowed && newKeyAllowedMap.containsKey(typeUrl) && !newKeyAllowedMap.get(typeUrl)) {
+      throw new GeneralSecurityException("New keys are already disallowed for key type " + typeUrl);
+    }
     KeyManagerContainer container = keyManagerMap.get(typeUrl);
     if (container != null
         && !container.getImplementingClass().equals(containerToInsert.getImplementingClass())) {
@@ -235,6 +242,7 @@ public final class KeyManagerRegistry {
     } else {
       keyManagerMap.put(typeUrl, containerToInsert);
     }
+    newKeyAllowedMap.put(typeUrl, newKeyAllowed);
   }
 
   /**
@@ -242,23 +250,26 @@ public final class KeyManagerRegistry {
    *
    * <p>If this fails, the KeyManagerRegistry is in an unspecified state and should be discarded.
    */
-  public synchronized <P> void registerKeyManager(final KeyManager<P> manager)
-      throws GeneralSecurityException {
+  public synchronized <P> void registerKeyManager(
+      final KeyManager<P> manager, boolean newKeyAllowed) throws GeneralSecurityException {
     if (!TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()) {
       throw new GeneralSecurityException("Registering key managers is not supported in FIPS mode");
     }
-    registerKeyManagerContainer(createContainerFor(manager), /* forceOverwrite= */ false);
+    registerKeyManagerContainer(
+        createContainerFor(manager), /* forceOverwrite= */ false, newKeyAllowed);
   }
 
   public synchronized <KeyProtoT extends MessageLite> void registerKeyManager(
-      final KeyTypeManager<KeyProtoT> manager) throws GeneralSecurityException {
+      final KeyTypeManager<KeyProtoT> manager, boolean newKeyAllowed)
+      throws GeneralSecurityException {
     if (!manager.fipsStatus().isCompatible()) {
       throw new GeneralSecurityException(
           "failed to register key manager "
               + manager.getClass()
               + " as it is not FIPS compatible.");
     }
-    registerKeyManagerContainer(createContainerFor(manager), /* forceOverwrite= */ false);
+    registerKeyManagerContainer(
+        createContainerFor(manager), /* forceOverwrite= */ false, newKeyAllowed);
   }
 
   /**
@@ -273,7 +284,8 @@ public final class KeyManagerRegistry {
   public synchronized <KeyProtoT extends MessageLite, PublicKeyProtoT extends MessageLite>
       void registerAsymmetricKeyManagers(
           final PrivateKeyTypeManager<KeyProtoT, PublicKeyProtoT> privateKeyTypeManager,
-          final KeyTypeManager<PublicKeyProtoT> publicKeyTypeManager)
+          final KeyTypeManager<PublicKeyProtoT> publicKeyTypeManager,
+          boolean newKeyAllowed)
           throws GeneralSecurityException {
     TinkFipsUtil.AlgorithmFipsCompatibility fipsStatusPrivateKey =
         privateKeyTypeManager.fipsStatus();
@@ -324,9 +336,12 @@ public final class KeyManagerRegistry {
     // asymmetric one takes precedence.
     registerKeyManagerContainer(
         createPrivateKeyContainerFor(privateKeyTypeManager, publicKeyTypeManager),
-        /* forceOverwrite= */ true);
+        /* forceOverwrite= */ true,
+        newKeyAllowed);
     registerKeyManagerContainer(
-        createContainerFor(publicKeyTypeManager), /* forceOverwrite= */ false);
+        createContainerFor(publicKeyTypeManager),
+        /* forceOverwrite= */ false,
+        /* newKeyAllowed= */ false);
   }
 
   public boolean typeUrlExists(String typeUrl) {
@@ -371,6 +386,10 @@ public final class KeyManagerRegistry {
   public KeyManager<?> getUntypedKeyManager(String typeUrl) throws GeneralSecurityException {
     KeyManagerContainer container = getKeyManagerContainerOrThrow(typeUrl);
     return container.getUntypedKeyManager();
+  }
+
+  public boolean isNewKeyAllowed(String typeUrl) {
+    return newKeyAllowedMap.get(typeUrl);
   }
 
   public boolean isEmpty() {
