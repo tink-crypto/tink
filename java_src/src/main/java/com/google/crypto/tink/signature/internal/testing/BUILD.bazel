@@ -1,0 +1,62 @@
+load("@build_bazel_rules_android//android:rules.bzl", "android_library")
+
+licenses(["notice"])
+
+package(
+    default_testonly = 1,
+    default_visibility = ["//:__subpackages__"],
+)
+
+android_library(
+    name = "ecdsa_test_util-android",
+    srcs = ["EcdsaTestUtil.java"],
+    deps = [
+        ":signature_test_vector-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access-android",
+        "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception-android",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_parameters-android",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_private_key-android",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_public_key-android",
+        "//src/main/java/com/google/crypto/tink/subtle:hex-android",
+        "//src/main/java/com/google/crypto/tink/util:secret_big_integer-android",
+    ],
+)
+
+android_library(
+    name = "signature_test_vector-android",
+    srcs = ["SignatureTestVector.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/signature:signature_private_key-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "ecdsa_test_util",
+    testonly = 1,
+    srcs = ["EcdsaTestUtil.java"],
+    deps = [
+        ":signature_test_vector",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_parameters",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_private_key",
+        "//src/main/java/com/google/crypto/tink/signature:ecdsa_public_key",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/util:secret_big_integer",
+    ],
+)
+
+java_library(
+    name = "signature_test_vector",
+    testonly = 1,
+    srcs = ["SignatureTestVector.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/signature:signature_private_key",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
