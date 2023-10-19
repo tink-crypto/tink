@@ -140,9 +140,7 @@ tink_cc_library(
     tink::signature::rsa_ssa_pkcs1_verify_key_manager
     tink::signature::rsa_ssa_pss_sign_key_manager
     tink::signature::rsa_ssa_pss_verify_key_manager
-    tink::streamingaead::aes_ctr_hmac_streaming_key_manager
-    tink::streamingaead::aes_gcm_hkdf_streaming_key_manager
-    tink::streamingaead::streaming_aead_wrapper
+    tink::streamingaead::internal::config_v0
     tink::signature::ecdsa_sign_key_manager
   TAGS
     exclude_if_openssl
@@ -180,8 +178,7 @@ tink_cc_library(
     tink::signature::rsa_ssa_pkcs1_verify_key_manager
     tink::signature::rsa_ssa_pss_sign_key_manager
     tink::signature::rsa_ssa_pss_verify_key_manager
-    tink::streamingaead::aes_ctr_hmac_streaming_key_manager
-    tink::streamingaead::aes_gcm_hkdf_streaming_key_manager
+    tink::streamingaead::internal::key_gen_config_v0
     tink::signature::ecdsa_sign_key_manager
   TAGS
     exclude_if_openssl

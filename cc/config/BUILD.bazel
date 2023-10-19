@@ -156,9 +156,7 @@ cc_library(
         "//signature:rsa_ssa_pkcs1_verify_key_manager",
         "//signature:rsa_ssa_pss_sign_key_manager",
         "//signature:rsa_ssa_pss_verify_key_manager",
-        "//streamingaead:aes_ctr_hmac_streaming_key_manager",
-        "//streamingaead:aes_gcm_hkdf_streaming_key_manager",
-        "//streamingaead:streaming_aead_wrapper",
+        "//streamingaead/internal:config_v0",
         "@com_google_absl//absl/log:check",
     ],
 )
@@ -196,8 +194,7 @@ cc_library(
         "//signature:rsa_ssa_pkcs1_verify_key_manager",
         "//signature:rsa_ssa_pss_sign_key_manager",
         "//signature:rsa_ssa_pss_verify_key_manager",
-        "//streamingaead:aes_ctr_hmac_streaming_key_manager",
-        "//streamingaead:aes_gcm_hkdf_streaming_key_manager",
+        "//streamingaead/internal:key_gen_config_v0",
         "@com_google_absl//absl/log:check",
     ],
 )

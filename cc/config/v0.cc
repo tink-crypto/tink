@@ -45,9 +45,7 @@
 #include "tink/signature/rsa_ssa_pkcs1_verify_key_manager.h"
 #include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
-#include "tink/streamingaead/aes_ctr_hmac_streaming_key_manager.h"
-#include "tink/streamingaead/aes_gcm_hkdf_streaming_key_manager.h"
-#include "tink/streamingaead/streaming_aead_wrapper.h"
+#include "tink/streamingaead/internal/config_v0.h"
 #include "tink/signature/ecdsa_sign_key_manager.h"
 
 namespace crypto {
@@ -84,22 +82,6 @@ util::Status AddDeterministicAead(Configuration& config) {
 
   return internal::ConfigurationImpl::AddKeyTypeManager(
       absl::make_unique<AesSivKeyManager>(), config);
-}
-
-util::Status AddStreamingAead(Configuration& config) {
-  util::Status status = internal::ConfigurationImpl::AddPrimitiveWrapper(
-      absl::make_unique<StreamingAeadWrapper>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-
-  status = internal::ConfigurationImpl::AddKeyTypeManager(
-      absl::make_unique<AesGcmHkdfStreamingKeyManager>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  return internal::ConfigurationImpl::AddKeyTypeManager(
-      absl::make_unique<AesCtrHmacStreamingKeyManager>(), config);
 }
 
 util::Status AddHybrid(Configuration& config) {
@@ -189,7 +171,7 @@ const Configuration& ConfigV0() {
     CHECK_OK(AddMac(*config));
     CHECK_OK(internal::AddAeadV0(*config));
     CHECK_OK(AddDeterministicAead(*config));
-    CHECK_OK(AddStreamingAead(*config));
+    CHECK_OK(internal::AddStreamingAeadV0(*config));
     CHECK_OK(AddHybrid(*config));
     CHECK_OK(AddPrf(*config));
     CHECK_OK(AddSignature(*config));

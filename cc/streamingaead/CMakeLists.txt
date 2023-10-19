@@ -1,5 +1,7 @@
 tink_module(streamingaead)
 
+add_subdirectory(internal)
+
 tink_cc_library(
   NAME streaming_aead_wrapper
   SRCS
