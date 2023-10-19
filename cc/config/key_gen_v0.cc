@@ -31,9 +31,7 @@
 #include "tink/internal/key_gen_configuration_impl.h"
 #include "tink/mac/aes_cmac_key_manager.h"
 #include "tink/mac/hmac_key_manager.h"
-#include "tink/prf/aes_cmac_prf_key_manager.h"
-#include "tink/prf/hkdf_prf_key_manager.h"
-#include "tink/prf/hmac_prf_key_manager.h"
+#include "tink/prf/internal/key_gen_config_v0.h"
 #include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/signature/ed25519_sign_key_manager.h"
 #include "tink/signature/ed25519_verify_key_manager.h"
@@ -101,21 +99,6 @@ util::Status AddHybrid(KeyGenConfiguration& config) {
       absl::make_unique<internal::HpkePublicKeyManager>(), config);
 }
 
-util::Status AddPrf(KeyGenConfiguration& config) {
-  util::Status status = internal::KeyGenConfigurationImpl::AddKeyTypeManager(
-      absl::make_unique<HmacPrfKeyManager>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  status = internal::KeyGenConfigurationImpl::AddKeyTypeManager(
-      absl::make_unique<HkdfPrfKeyManager>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  return internal::KeyGenConfigurationImpl::AddKeyTypeManager(
-      absl::make_unique<AesCmacPrfKeyManager>(), config);
-}
-
 util::Status AddSignature(KeyGenConfiguration& config) {
   util::Status status =
       internal::KeyGenConfigurationImpl::AddAsymmetricKeyManagers(
@@ -151,7 +134,7 @@ const KeyGenConfiguration& KeyGenConfigV0() {
     CHECK_OK(AddDeterministicAead(*config));
     CHECK_OK(internal::AddStreamingAeadV0(*config));
     CHECK_OK(AddHybrid(*config));
-    CHECK_OK(AddPrf(*config));
+    CHECK_OK(internal::AddPrfKeyGenV0(*config));
     CHECK_OK(AddSignature(*config));
     return config;
   }();

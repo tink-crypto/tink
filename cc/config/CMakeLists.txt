@@ -127,10 +127,7 @@ tink_cc_library(
     tink::mac::hmac_key_manager
     tink::mac::mac_wrapper
     tink::mac::internal::chunked_mac_wrapper
-    tink::prf::aes_cmac_prf_key_manager
-    tink::prf::hkdf_prf_key_manager
-    tink::prf::hmac_prf_key_manager
-    tink::prf::prf_set_wrapper
+    tink::prf::internal::config_v0
     tink::signature::ecdsa_verify_key_manager
     tink::signature::ed25519_sign_key_manager
     tink::signature::ed25519_verify_key_manager
@@ -168,9 +165,7 @@ tink_cc_library(
     tink::internal::key_gen_configuration_impl
     tink::mac::aes_cmac_key_manager
     tink::mac::hmac_key_manager
-    tink::prf::aes_cmac_prf_key_manager
-    tink::prf::hkdf_prf_key_manager
-    tink::prf::hmac_prf_key_manager
+    tink::prf::internal::key_gen_config_v0
     tink::signature::ecdsa_verify_key_manager
     tink::signature::ed25519_sign_key_manager
     tink::signature::ed25519_verify_key_manager

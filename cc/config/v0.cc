@@ -32,10 +32,7 @@
 #include "tink/mac/hmac_key_manager.h"
 #include "tink/mac/internal/chunked_mac_wrapper.h"
 #include "tink/mac/mac_wrapper.h"
-#include "tink/prf/aes_cmac_prf_key_manager.h"
-#include "tink/prf/hkdf_prf_key_manager.h"
-#include "tink/prf/hmac_prf_key_manager.h"
-#include "tink/prf/prf_set_wrapper.h"
+#include "tink/prf/internal/config_v0.h"
 #include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/signature/ed25519_sign_key_manager.h"
 #include "tink/signature/ed25519_verify_key_manager.h"
@@ -107,27 +104,6 @@ util::Status AddHybrid(Configuration& config) {
       absl::make_unique<internal::HpkePublicKeyManager>(), config);
 }
 
-util::Status AddPrf(Configuration& config) {
-  util::Status status = internal::ConfigurationImpl::AddPrimitiveWrapper(
-      absl::make_unique<PrfSetWrapper>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-
-  status = internal::ConfigurationImpl::AddKeyTypeManager(
-      absl::make_unique<HmacPrfKeyManager>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  status = internal::ConfigurationImpl::AddKeyTypeManager(
-      absl::make_unique<HkdfPrfKeyManager>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  return internal::ConfigurationImpl::AddKeyTypeManager(
-      absl::make_unique<AesCmacPrfKeyManager>(), config);
-}
-
 util::Status AddSignature(Configuration& config) {
   util::Status status = internal::ConfigurationImpl::AddPrimitiveWrapper(
       absl::make_unique<PublicKeySignWrapper>(), config);
@@ -173,7 +149,7 @@ const Configuration& ConfigV0() {
     CHECK_OK(AddDeterministicAead(*config));
     CHECK_OK(internal::AddStreamingAeadV0(*config));
     CHECK_OK(AddHybrid(*config));
-    CHECK_OK(AddPrf(*config));
+    CHECK_OK(internal::AddPrfV0(*config));
     CHECK_OK(AddSignature(*config));
     return config;
   }();

@@ -1,1 +1,61 @@
+package(default_visibility = ["//:__subpackages__"])
+
 licenses(["notice"])
+
+cc_library(
+    name = "config_v0",
+    srcs = ["config_v0.cc"],
+    hdrs = ["config_v0.h"],
+    include_prefix = "tink/prf/internal",
+    deps = [
+        "//:configuration",
+        "//internal:configuration_impl",
+        "//prf:aes_cmac_prf_key_manager",
+        "//prf:hkdf_prf_key_manager",
+        "//prf:hmac_prf_key_manager",
+        "//prf:prf_set_wrapper",
+        "//util:status",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
+cc_library(
+    name = "key_gen_config_v0",
+    srcs = ["key_gen_config_v0.cc"],
+    hdrs = ["key_gen_config_v0.h"],
+    include_prefix = "tink/prf/internal",
+    deps = [
+        "//:key_gen_configuration",
+        "//internal:key_gen_configuration_impl",
+        "//prf:aes_cmac_prf_key_manager",
+        "//prf:hkdf_prf_key_manager",
+        "//prf:hmac_prf_key_manager",
+        "//util:status",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
+cc_test(
+    name = "config_v0_test",
+    srcs = ["config_v0_test.cc"],
+    deps = [
+        ":config_v0",
+        ":key_gen_config_v0",
+        "//:configuration",
+        "//:key_gen_configuration",
+        "//:keyset_handle",
+        "//internal:configuration_impl",
+        "//internal:key_gen_configuration_impl",
+        "//internal:key_type_info_store",
+        "//internal:keyset_wrapper_store",
+        "//prf:aes_cmac_prf_key_manager",
+        "//prf:hkdf_prf_key_manager",
+        "//prf:hmac_prf_key_manager",
+        "//prf:prf_key_templates",
+        "//prf:prf_set",
+        "//proto:tink_cc_proto",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

@@ -1,5 +1,7 @@
 tink_module(prf)
 
+add_subdirectory(internal)
+
 tink_cc_library(
   NAME hkdf_prf_key_manager
   SRCS
