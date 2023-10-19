@@ -34,6 +34,8 @@ import com.google.crypto.tink.proto.RsaSsaPssParams;
 import com.google.crypto.tink.proto.RsaSsaPssPrivateKey;
 import com.google.crypto.tink.proto.RsaSsaPssPublicKey;
 import com.google.crypto.tink.signature.internal.SigUtil;
+import com.google.crypto.tink.signature.internal.testing.RsaSsaPssTestUtil;
+import com.google.crypto.tink.signature.internal.testing.SignatureTestVector;
 import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
@@ -48,6 +50,7 @@ import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Set;
 import java.util.TreeSet;
+import javax.annotation.Nullable;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
@@ -66,6 +69,8 @@ public class RsaSsaPssSignKeyManagerTest {
   @BeforeClass
   public static void beforeClass() throws Exception {
     RsaSsaPssSignKeyManager.registerPair(/* newKeyAllowed= */ true);
+    PublicKeySignWrapper.register();
+    PublicKeyVerifyWrapper.register();
   }
 
   private static RsaSsaPssKeyFormat createKeyFormat(
@@ -440,4 +445,51 @@ public class RsaSsaPssSignKeyManagerTest {
     assertThat(h.getAt(0).getKey().getParameters())
         .isEqualTo(KeyTemplates.get(templateName).toParameters());
   }
+
+  /**
+   * Tests that the verifier can verify a the signature for the message and key in the test vector.
+   */
+  @Theory
+  public void test_validateSignatureInTestVector(
+      @FromDataPoints("allTests") SignatureTestVector testVector) throws Exception {
+    com.google.crypto.tink.signature.RsaSsaPssPrivateKey key =
+        (com.google.crypto.tink.signature.RsaSsaPssPrivateKey) testVector.getPrivateKey();
+    KeysetHandle.Builder.Entry entry = KeysetHandle.importKey(key).makePrimary();
+    @Nullable Integer id = key.getIdRequirementOrNull();
+    if (id == null) {
+      entry.withRandomId();
+    } else {
+      entry.withFixedId(id);
+    }
+    KeysetHandle handle = KeysetHandle.newBuilder().addEntry(entry).build();
+    PublicKeyVerify verifier = handle.getPublicKeysetHandle().getPrimitive(PublicKeyVerify.class);
+    verifier.verify(testVector.getSignature(), testVector.getMessage());
+  }
+
+  /**
+   * Tests that the verifier can verify a newly generated signature for the message and key in the
+   * test vector.
+   */
+  @Theory
+  public void test_computeAndValidateFreshSignatureWithTestVector(
+      @FromDataPoints("allTests") SignatureTestVector testVector) throws Exception {
+    com.google.crypto.tink.signature.RsaSsaPssPrivateKey key =
+        (com.google.crypto.tink.signature.RsaSsaPssPrivateKey) testVector.getPrivateKey();
+    KeysetHandle.Builder.Entry entry = KeysetHandle.importKey(key).makePrimary();
+    @Nullable Integer id = key.getIdRequirementOrNull();
+    if (id == null) {
+      entry.withRandomId();
+    } else {
+      entry.withFixedId(id);
+    }
+    KeysetHandle handle = KeysetHandle.newBuilder().addEntry(entry).build();
+    PublicKeySign signer = handle.getPrimitive(PublicKeySign.class);
+    byte[] signature = signer.sign(testVector.getMessage());
+    PublicKeyVerify verifier = handle.getPublicKeysetHandle().getPrimitive(PublicKeyVerify.class);
+    verifier.verify(signature, testVector.getMessage());
+  }
+
+  @DataPoints("allTests")
+  public static final SignatureTestVector[] ALL_TEST_VECTORS =
+      RsaSsaPssTestUtil.createRsaPssTestVectors();
 }
