@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.jwt;
 
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.KeyStatus;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.internal.BigIntegerEncoding;
@@ -24,10 +25,6 @@ import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.proto.JwtEcdsaAlgorithm;
 import com.google.crypto.tink.proto.JwtEcdsaPublicKey;
-import com.google.crypto.tink.proto.JwtRsaSsaPkcs1Algorithm;
-import com.google.crypto.tink.proto.JwtRsaSsaPkcs1PublicKey;
-import com.google.crypto.tink.proto.JwtRsaSsaPssAlgorithm;
-import com.google.crypto.tink.proto.JwtRsaSsaPssPublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Base64;
@@ -124,26 +121,24 @@ public final class JwkSetConverter {
     for (JsonElement element : jsonKeys) {
       JsonObject jsonKey = element.getAsJsonObject();
       String algPrefix = getStringItem(jsonKey, "alg").substring(0, 2);
-      ProtoKeySerialization keySerialization;
       switch (algPrefix) {
         case "RS":
-          keySerialization = convertToRsaSsaPkcs1Key(jsonKey);
+          builder.addEntry(KeysetHandle.importKey(convertToRsaSsaPkcs1Key(jsonKey)).withRandomId());
           break;
         case "PS":
-          keySerialization = convertToRsaSsaPssKey(jsonKey);
+          builder.addEntry(KeysetHandle.importKey(convertToRsaSsaPssKey(jsonKey)).withRandomId());
           break;
         case "ES":
-          keySerialization = convertToEcdsaKey(jsonKey);
+          builder.addEntry(
+              KeysetHandle.importKey(
+                      MutableSerializationRegistry.globalInstance()
+                          .parseKeyWithLegacyFallback(convertToEcdsaKey(jsonKey), null))
+                  .withRandomId());
           break;
         default:
           throw new GeneralSecurityException(
               "unexpected alg value: " + getStringItem(jsonKey, "alg"));
       }
-      builder.addEntry(
-          KeysetHandle.importKey(
-                  MutableSerializationRegistry.globalInstance()
-                      .parseKeyWithLegacyFallback(keySerialization, null))
-              .withRandomId());
     }
     if (builder.size() <= 0) {
       throw new GeneralSecurityException("empty keyset");
@@ -226,11 +221,11 @@ public final class JwkSetConverter {
 
   private static JsonObject convertJwtRsaSsaPkcs1(ProtoKeySerialization protoKeySerialization)
       throws GeneralSecurityException {
-    JwtRsaSsaPkcs1PublicKey jwtRsaSsaPkcs1PublicKey;
+    com.google.crypto.tink.proto.JwtRsaSsaPkcs1PublicKey jwtRsaSsaPkcs1PublicKey;
     try {
       jwtRsaSsaPkcs1PublicKey =
-        JwtRsaSsaPkcs1PublicKey.parseFrom(
-            protoKeySerialization.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+          com.google.crypto.tink.proto.JwtRsaSsaPkcs1PublicKey.parseFrom(
+              protoKeySerialization.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException(
           "failed to parse value as JwtRsaSsaPkcs1PublicKey proto", e);
@@ -269,11 +264,11 @@ public final class JwkSetConverter {
 
   private static JsonObject convertJwtRsaSsaPss(ProtoKeySerialization protoKeySerialization)
       throws GeneralSecurityException {
-    JwtRsaSsaPssPublicKey jwtRsaSsaPssPublicKey;
+    com.google.crypto.tink.proto.JwtRsaSsaPssPublicKey jwtRsaSsaPssPublicKey;
     try {
       jwtRsaSsaPssPublicKey =
-        JwtRsaSsaPssPublicKey.parseFrom(
-            protoKeySerialization.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+          com.google.crypto.tink.proto.JwtRsaSsaPssPublicKey.parseFrom(
+              protoKeySerialization.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("failed to parse value as JwtRsaSsaPssPublicKey proto", e);
     }
@@ -353,18 +348,19 @@ public final class JwkSetConverter {
     }
   }
 
-  private static ProtoKeySerialization convertToRsaSsaPkcs1Key(JsonObject jsonKey)
+  @AccessesPartialKey
+  private static JwtRsaSsaPkcs1PublicKey convertToRsaSsaPkcs1Key(JsonObject jsonKey)
       throws GeneralSecurityException {
-    JwtRsaSsaPkcs1Algorithm algorithm;
+    JwtRsaSsaPkcs1Parameters.Algorithm algorithm;
     switch (getStringItem(jsonKey, "alg")) {
       case "RS256":
-        algorithm = JwtRsaSsaPkcs1Algorithm.RS256;
+        algorithm = JwtRsaSsaPkcs1Parameters.Algorithm.RS256;
         break;
       case "RS384":
-        algorithm = JwtRsaSsaPkcs1Algorithm.RS384;
+        algorithm = JwtRsaSsaPkcs1Parameters.Algorithm.RS384;
         break;
       case "RS512":
-        algorithm = JwtRsaSsaPkcs1Algorithm.RS512;
+        algorithm = JwtRsaSsaPkcs1Parameters.Algorithm.RS512;
         break;
       default:
         throw new GeneralSecurityException(
@@ -381,38 +377,50 @@ public final class JwkSetConverter {
     expectStringItem(jsonKey, "kty", "RSA");
     validateUseIsSig(jsonKey);
     validateKeyOpsIsVerify(jsonKey);
-    JwtRsaSsaPkcs1PublicKey.Builder pkcs1PubKeyBuilder =
-        JwtRsaSsaPkcs1PublicKey.newBuilder()
-            .setVersion(0)
-            .setAlgorithm(algorithm)
-            .setE(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "e"))))
-            .setN(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "n"))));
+
+    BigInteger publicExponent =
+        new BigInteger(1, Base64.urlSafeDecode(getStringItem(jsonKey, "e")));
+    BigInteger modulus = new BigInteger(1, Base64.urlSafeDecode(getStringItem(jsonKey, "n")));
+
     if (jsonKey.has("kid")) {
-      pkcs1PubKeyBuilder.setCustomKid(
-          JwtRsaSsaPkcs1PublicKey.CustomKid.newBuilder()
-              .setValue(getStringItem(jsonKey, "kid"))
-              .build());
+      return JwtRsaSsaPkcs1PublicKey.builder()
+          .setParameters(
+              JwtRsaSsaPkcs1Parameters.builder()
+                  .setModulusSizeBits(modulus.bitLength())
+                  .setPublicExponent(publicExponent)
+                  .setAlgorithm(algorithm)
+                  .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.CUSTOM)
+                  .build())
+          .setModulus(modulus)
+          .setCustomKid(getStringItem(jsonKey, "kid"))
+          .build();
+    } else {
+      return JwtRsaSsaPkcs1PublicKey.builder()
+          .setParameters(
+              JwtRsaSsaPkcs1Parameters.builder()
+                  .setModulusSizeBits(modulus.bitLength())
+                  .setPublicExponent(publicExponent)
+                  .setAlgorithm(algorithm)
+                  .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
+                  .build())
+          .setModulus(modulus)
+          .build();
     }
-    return ProtoKeySerialization.create(
-        JWT_RSA_SSA_PKCS1_PUBLIC_KEY_URL,
-        pkcs1PubKeyBuilder.build().toByteString(),
-        KeyMaterialType.ASYMMETRIC_PUBLIC,
-        OutputPrefixType.RAW,
-        null);
   }
 
-  private static ProtoKeySerialization convertToRsaSsaPssKey(JsonObject jsonKey)
+  @AccessesPartialKey
+  private static JwtRsaSsaPssPublicKey convertToRsaSsaPssKey(JsonObject jsonKey)
       throws GeneralSecurityException {
-    JwtRsaSsaPssAlgorithm algorithm;
+    JwtRsaSsaPssParameters.Algorithm algorithm;
     switch (getStringItem(jsonKey, "alg")) {
       case "PS256":
-        algorithm = JwtRsaSsaPssAlgorithm.PS256;
+        algorithm = JwtRsaSsaPssParameters.Algorithm.PS256;
         break;
       case "PS384":
-        algorithm = JwtRsaSsaPssAlgorithm.PS384;
+        algorithm = JwtRsaSsaPssParameters.Algorithm.PS384;
         break;
       case "PS512":
-        algorithm = JwtRsaSsaPssAlgorithm.PS512;
+        algorithm = JwtRsaSsaPssParameters.Algorithm.PS512;
         break;
       default:
         throw new GeneralSecurityException(
@@ -429,24 +437,35 @@ public final class JwkSetConverter {
     expectStringItem(jsonKey, "kty", "RSA");
     validateUseIsSig(jsonKey);
     validateKeyOpsIsVerify(jsonKey);
-    JwtRsaSsaPssPublicKey.Builder pssPubKeyBuilder =
-        JwtRsaSsaPssPublicKey.newBuilder()
-            .setVersion(0)
-            .setAlgorithm(algorithm)
-            .setE(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "e"))))
-            .setN(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "n"))));
+
+    BigInteger publicExponent =
+        new BigInteger(1, Base64.urlSafeDecode(getStringItem(jsonKey, "e")));
+    BigInteger modulus = new BigInteger(1, Base64.urlSafeDecode(getStringItem(jsonKey, "n")));
+
     if (jsonKey.has("kid")) {
-      pssPubKeyBuilder.setCustomKid(
-          JwtRsaSsaPssPublicKey.CustomKid.newBuilder()
-              .setValue(getStringItem(jsonKey, "kid"))
-              .build());
+      return JwtRsaSsaPssPublicKey.builder()
+          .setParameters(
+              JwtRsaSsaPssParameters.builder()
+                  .setModulusSizeBits(modulus.bitLength())
+                  .setPublicExponent(publicExponent)
+                  .setAlgorithm(algorithm)
+                  .setKidStrategy(JwtRsaSsaPssParameters.KidStrategy.CUSTOM)
+                  .build())
+          .setModulus(modulus)
+          .setCustomKid(getStringItem(jsonKey, "kid"))
+          .build();
+    } else {
+      return JwtRsaSsaPssPublicKey.builder()
+          .setParameters(
+              JwtRsaSsaPssParameters.builder()
+                  .setModulusSizeBits(modulus.bitLength())
+                  .setPublicExponent(publicExponent)
+                  .setAlgorithm(algorithm)
+                  .setKidStrategy(JwtRsaSsaPssParameters.KidStrategy.IGNORED)
+                  .build())
+          .setModulus(modulus)
+          .build();
     }
-    return ProtoKeySerialization.create(
-        JWT_RSA_SSA_PSS_PUBLIC_KEY_URL,
-        pssPubKeyBuilder.build().toByteString(),
-        KeyMaterialType.ASYMMETRIC_PUBLIC,
-        OutputPrefixType.RAW,
-        null);
   }
 
   private static ProtoKeySerialization convertToEcdsaKey(JsonObject jsonKey)
