@@ -23,10 +23,10 @@ import com.google.errorprone.annotations.Immutable;
 /** Test vectors for signatures. */
 @Immutable
 public final class SignatureTestVector {
-  public SignatureTestVector(SignaturePrivateKey privateKey, byte[] message, byte[] signature) {
+  public SignatureTestVector(SignaturePrivateKey privateKey, byte[] signature, byte[] message) {
     this.privateKey = privateKey;
-    this.message = Bytes.copyFrom(message);
     this.signature = Bytes.copyFrom(signature);
+    this.message = Bytes.copyFrom(message);
   }
 
   private final SignaturePrivateKey privateKey;
