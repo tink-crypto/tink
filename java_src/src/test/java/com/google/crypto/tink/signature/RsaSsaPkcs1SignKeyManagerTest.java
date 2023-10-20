@@ -34,6 +34,8 @@ import com.google.crypto.tink.proto.RsaSsaPkcs1Params;
 import com.google.crypto.tink.proto.RsaSsaPkcs1PrivateKey;
 import com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey;
 import com.google.crypto.tink.signature.internal.SigUtil;
+import com.google.crypto.tink.signature.internal.testing.RsaSsaPkcs1TestUtil;
+import com.google.crypto.tink.signature.internal.testing.SignatureTestVector;
 import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
@@ -48,6 +50,7 @@ import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Set;
 import java.util.TreeSet;
+import javax.annotation.Nullable;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
@@ -63,6 +66,8 @@ public class RsaSsaPkcs1SignKeyManagerTest {
   @BeforeClass
   public static void beforeClass() throws Exception {
     RsaSsaPkcs1SignKeyManager.registerPair(/* newKeyAllowed= */ true);
+    PublicKeySignWrapper.register();
+    PublicKeyVerifyWrapper.register();
   }
 
   private final RsaSsaPkcs1SignKeyManager manager = new RsaSsaPkcs1SignKeyManager();
@@ -398,5 +403,40 @@ public class RsaSsaPkcs1SignKeyManagerTest {
     assertThat(h.size()).isEqualTo(1);
     assertThat(h.getAt(0).getKey().getParameters())
         .isEqualTo(KeyTemplates.get(templateName).toParameters());
+  }
+
+  @DataPoints("testVectors")
+  public static final SignatureTestVector[] SIGNATURE_TEST_VECTORS =
+      RsaSsaPkcs1TestUtil.createRsaSsaPkcs1TestVectors();
+
+  @Theory
+  public void test_computeSignatureInTestVector(
+      @FromDataPoints("testVectors") SignatureTestVector v) throws Exception {
+    KeysetHandle.Builder.Entry entry = KeysetHandle.importKey(v.getPrivateKey()).makePrimary();
+    @Nullable Integer id = v.getPrivateKey().getIdRequirementOrNull();
+    if (id == null) {
+      entry.withRandomId();
+    } else {
+      entry.withFixedId(id);
+    }
+    KeysetHandle handle = KeysetHandle.newBuilder().addEntry(entry).build();
+    PublicKeySign signer = handle.getPrimitive(PublicKeySign.class);
+    byte[] signature = signer.sign(v.getMessage());
+    assertThat(Hex.encode(signature)).isEqualTo(Hex.encode(v.getSignature()));
+  }
+
+  @Theory
+  public void test_validateSignatureInTestVector(
+      @FromDataPoints("testVectors") SignatureTestVector v) throws Exception {
+    KeysetHandle.Builder.Entry entry = KeysetHandle.importKey(v.getPrivateKey()).makePrimary();
+    @Nullable Integer id = v.getPrivateKey().getIdRequirementOrNull();
+    if (id == null) {
+      entry.withRandomId();
+    } else {
+      entry.withFixedId(id);
+    }
+    KeysetHandle handle = KeysetHandle.newBuilder().addEntry(entry).build();
+    PublicKeyVerify verifier = handle.getPublicKeysetHandle().getPrimitive(PublicKeyVerify.class);
+    verifier.verify(v.getSignature(), v.getMessage());
   }
 }
