@@ -33,17 +33,8 @@
 #include "tink/mac/internal/chunked_mac_wrapper.h"
 #include "tink/mac/mac_wrapper.h"
 #include "tink/prf/internal/config_v0.h"
-#include "tink/signature/ecdsa_verify_key_manager.h"
-#include "tink/signature/ed25519_sign_key_manager.h"
-#include "tink/signature/ed25519_verify_key_manager.h"
-#include "tink/signature/public_key_sign_wrapper.h"
-#include "tink/signature/public_key_verify_wrapper.h"
-#include "tink/signature/rsa_ssa_pkcs1_sign_key_manager.h"
-#include "tink/signature/rsa_ssa_pkcs1_verify_key_manager.h"
-#include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
-#include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
+#include "tink/signature/internal/config_v0.h"
 #include "tink/streamingaead/internal/config_v0.h"
-#include "tink/signature/ecdsa_sign_key_manager.h"
 
 namespace crypto {
 namespace tink {
@@ -104,41 +95,6 @@ util::Status AddHybrid(Configuration& config) {
       absl::make_unique<internal::HpkePublicKeyManager>(), config);
 }
 
-util::Status AddSignature(Configuration& config) {
-  util::Status status = internal::ConfigurationImpl::AddPrimitiveWrapper(
-      absl::make_unique<PublicKeySignWrapper>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  status = internal::ConfigurationImpl::AddPrimitiveWrapper(
-      absl::make_unique<PublicKeyVerifyWrapper>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-
-  status = internal::ConfigurationImpl::AddAsymmetricKeyManagers(
-      absl::make_unique<EcdsaSignKeyManager>(),
-      absl::make_unique<EcdsaVerifyKeyManager>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  status = internal::ConfigurationImpl::AddAsymmetricKeyManagers(
-      absl::make_unique<RsaSsaPssSignKeyManager>(),
-      absl::make_unique<RsaSsaPssVerifyKeyManager>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  status = internal::ConfigurationImpl::AddAsymmetricKeyManagers(
-      absl::make_unique<RsaSsaPkcs1SignKeyManager>(),
-      absl::make_unique<RsaSsaPkcs1VerifyKeyManager>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  return internal::ConfigurationImpl::AddAsymmetricKeyManagers(
-      absl::make_unique<Ed25519SignKeyManager>(),
-      absl::make_unique<Ed25519VerifyKeyManager>(), config);
-}
-
 }  // namespace
 
 const Configuration& ConfigV0() {
@@ -150,7 +106,7 @@ const Configuration& ConfigV0() {
     CHECK_OK(internal::AddStreamingAeadV0(*config));
     CHECK_OK(AddHybrid(*config));
     CHECK_OK(internal::AddPrfV0(*config));
-    CHECK_OK(AddSignature(*config));
+    CHECK_OK(internal::AddSignatureV0(*config));
     return config;
   }();
   return *instance;

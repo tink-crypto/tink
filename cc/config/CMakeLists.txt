@@ -128,17 +128,8 @@ tink_cc_library(
     tink::mac::mac_wrapper
     tink::mac::internal::chunked_mac_wrapper
     tink::prf::internal::config_v0
-    tink::signature::ecdsa_verify_key_manager
-    tink::signature::ed25519_sign_key_manager
-    tink::signature::ed25519_verify_key_manager
-    tink::signature::public_key_sign_wrapper
-    tink::signature::public_key_verify_wrapper
-    tink::signature::rsa_ssa_pkcs1_sign_key_manager
-    tink::signature::rsa_ssa_pkcs1_verify_key_manager
-    tink::signature::rsa_ssa_pss_sign_key_manager
-    tink::signature::rsa_ssa_pss_verify_key_manager
+    tink::signature::internal::config_v0
     tink::streamingaead::internal::config_v0
-    tink::signature::ecdsa_sign_key_manager
   TAGS
     exclude_if_openssl
 )
@@ -150,7 +141,6 @@ tink_cc_library(
     key_gen_v0.h
   DEPS
     absl::check
-    tink::core::configuration
     tink::core::key_gen_configuration
     tink::aead::aes_ctr_hmac_aead_key_manager
     tink::aead::aes_eax_key_manager
@@ -166,15 +156,8 @@ tink_cc_library(
     tink::mac::aes_cmac_key_manager
     tink::mac::hmac_key_manager
     tink::prf::internal::key_gen_config_v0
-    tink::signature::ecdsa_verify_key_manager
-    tink::signature::ed25519_sign_key_manager
-    tink::signature::ed25519_verify_key_manager
-    tink::signature::rsa_ssa_pkcs1_sign_key_manager
-    tink::signature::rsa_ssa_pkcs1_verify_key_manager
-    tink::signature::rsa_ssa_pss_sign_key_manager
-    tink::signature::rsa_ssa_pss_verify_key_manager
+    tink::signature::internal::key_gen_config_v0
     tink::streamingaead::internal::key_gen_config_v0
-    tink::signature::ecdsa_sign_key_manager
   TAGS
     exclude_if_openssl
 )

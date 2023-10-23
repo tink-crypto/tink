@@ -22,7 +22,6 @@
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead/aes_gcm_siv_key_manager.h"
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
-#include "tink/configuration.h"
 #include "tink/daead/aes_siv_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
@@ -32,15 +31,8 @@
 #include "tink/mac/aes_cmac_key_manager.h"
 #include "tink/mac/hmac_key_manager.h"
 #include "tink/prf/internal/key_gen_config_v0.h"
-#include "tink/signature/ecdsa_verify_key_manager.h"
-#include "tink/signature/ed25519_sign_key_manager.h"
-#include "tink/signature/ed25519_verify_key_manager.h"
-#include "tink/signature/rsa_ssa_pkcs1_sign_key_manager.h"
-#include "tink/signature/rsa_ssa_pkcs1_verify_key_manager.h"
-#include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
-#include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
+#include "tink/signature/internal/key_gen_config_v0.h"
 #include "tink/streamingaead/internal/key_gen_config_v0.h"
-#include "tink/signature/ecdsa_sign_key_manager.h"
 
 namespace crypto {
 namespace tink {
@@ -99,31 +91,6 @@ util::Status AddHybrid(KeyGenConfiguration& config) {
       absl::make_unique<internal::HpkePublicKeyManager>(), config);
 }
 
-util::Status AddSignature(KeyGenConfiguration& config) {
-  util::Status status =
-      internal::KeyGenConfigurationImpl::AddAsymmetricKeyManagers(
-          absl::make_unique<EcdsaSignKeyManager>(),
-          absl::make_unique<EcdsaVerifyKeyManager>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  status = internal::KeyGenConfigurationImpl::AddAsymmetricKeyManagers(
-      absl::make_unique<RsaSsaPssSignKeyManager>(),
-      absl::make_unique<RsaSsaPssVerifyKeyManager>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  status = internal::KeyGenConfigurationImpl::AddAsymmetricKeyManagers(
-      absl::make_unique<RsaSsaPkcs1SignKeyManager>(),
-      absl::make_unique<RsaSsaPkcs1VerifyKeyManager>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  return internal::KeyGenConfigurationImpl::AddAsymmetricKeyManagers(
-      absl::make_unique<Ed25519SignKeyManager>(),
-      absl::make_unique<Ed25519VerifyKeyManager>(), config);
-}
-
 }  // namespace
 
 const KeyGenConfiguration& KeyGenConfigV0() {
@@ -135,7 +102,7 @@ const KeyGenConfiguration& KeyGenConfigV0() {
     CHECK_OK(internal::AddStreamingAeadV0(*config));
     CHECK_OK(AddHybrid(*config));
     CHECK_OK(internal::AddPrfKeyGenV0(*config));
-    CHECK_OK(AddSignature(*config));
+    CHECK_OK(internal::AddSignatureKeyGenV0(*config));
     return config;
   }();
   return *instance;

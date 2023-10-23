@@ -26,6 +26,50 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "config_v0",
+    srcs = ["config_v0.cc"],
+    hdrs = ["config_v0.h"],
+    include_prefix = "tink/signature/internal",
+    deps = [
+        "//:configuration",
+        "//internal:configuration_impl",
+        "//signature:ecdsa_sign_key_manager",
+        "//signature:ecdsa_verify_key_manager",
+        "//signature:ed25519_sign_key_manager",
+        "//signature:ed25519_verify_key_manager",
+        "//signature:public_key_sign_wrapper",
+        "//signature:public_key_verify_wrapper",
+        "//signature:rsa_ssa_pkcs1_sign_key_manager",
+        "//signature:rsa_ssa_pkcs1_verify_key_manager",
+        "//signature:rsa_ssa_pss_sign_key_manager",
+        "//signature:rsa_ssa_pss_verify_key_manager",
+        "//util:status",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
+cc_library(
+    name = "key_gen_config_v0",
+    srcs = ["key_gen_config_v0.cc"],
+    hdrs = ["key_gen_config_v0.h"],
+    include_prefix = "tink/signature/internal",
+    deps = [
+        "//:key_gen_configuration",
+        "//internal:key_gen_configuration_impl",
+        "//signature:ecdsa_sign_key_manager",
+        "//signature:ecdsa_verify_key_manager",
+        "//signature:ed25519_sign_key_manager",
+        "//signature:ed25519_verify_key_manager",
+        "//signature:rsa_ssa_pkcs1_sign_key_manager",
+        "//signature:rsa_ssa_pkcs1_verify_key_manager",
+        "//signature:rsa_ssa_pss_sign_key_manager",
+        "//signature:rsa_ssa_pss_verify_key_manager",
+        "//util:status",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
 cc_test(
     name = "ecdsa_raw_sign_boringssl_test",
     size = "small",
@@ -44,6 +88,33 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "config_v0_test",
+    srcs = ["config_v0_test.cc"],
+    deps = [
+        ":config_v0",
+        ":key_gen_config_v0",
+        "//:configuration",
+        "//:key_gen_configuration",
+        "//:keyset_handle",
+        "//:public_key_sign",
+        "//:public_key_verify",
+        "//internal:configuration_impl",
+        "//internal:key_gen_configuration_impl",
+        "//internal:key_type_info_store",
+        "//internal:keyset_wrapper_store",
+        "//proto:tink_cc_proto",
+        "//signature:ecdsa_verify_key_manager",
+        "//signature:ed25519_verify_key_manager",
+        "//signature:rsa_ssa_pkcs1_verify_key_manager",
+        "//signature:rsa_ssa_pss_verify_key_manager",
+        "//signature:signature_key_templates",
+        "//util:statusor",
+        "//util:test_matchers",
         "@com_google_googletest//:gtest_main",
     ],
 )
