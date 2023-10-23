@@ -23,8 +23,6 @@ import com.google.crypto.tink.internal.BigIntegerEncoding;
 import com.google.crypto.tink.internal.JsonParser;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
-import com.google.crypto.tink.proto.JwtEcdsaAlgorithm;
-import com.google.crypto.tink.proto.JwtEcdsaPublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Base64;
@@ -33,13 +31,13 @@ import com.google.errorprone.annotations.InlineMe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
+import java.security.spec.ECPoint;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
@@ -129,11 +127,7 @@ public final class JwkSetConverter {
           builder.addEntry(KeysetHandle.importKey(convertToRsaSsaPssKey(jsonKey)).withRandomId());
           break;
         case "ES":
-          builder.addEntry(
-              KeysetHandle.importKey(
-                      MutableSerializationRegistry.globalInstance()
-                          .parseKeyWithLegacyFallback(convertToEcdsaKey(jsonKey), null))
-                  .withRandomId());
+          builder.addEntry(KeysetHandle.importKey(convertToEcdsaKey(jsonKey)).withRandomId());
           break;
         default:
           throw new GeneralSecurityException(
@@ -164,11 +158,11 @@ public final class JwkSetConverter {
 
   private static JsonObject convertJwtEcdsaKey(ProtoKeySerialization protoKeySerialization)
       throws GeneralSecurityException {
-    JwtEcdsaPublicKey jwtEcdsaPublicKey;
+    com.google.crypto.tink.proto.JwtEcdsaPublicKey jwtEcdsaPublicKey;
     try {
       jwtEcdsaPublicKey =
-        JwtEcdsaPublicKey.parseFrom(
-            protoKeySerialization.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+          com.google.crypto.tink.proto.JwtEcdsaPublicKey.parseFrom(
+              protoKeySerialization.getValue(), ExtensionRegistryLite.getEmptyRegistry());
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("failed to parse value as JwtEcdsaPublicKey proto", e);
     }
@@ -468,21 +462,22 @@ public final class JwkSetConverter {
     }
   }
 
-  private static ProtoKeySerialization convertToEcdsaKey(JsonObject jsonKey)
+  @AccessesPartialKey
+  private static JwtEcdsaPublicKey convertToEcdsaKey(JsonObject jsonKey)
       throws GeneralSecurityException {
-    JwtEcdsaAlgorithm algorithm;
+    JwtEcdsaParameters.Algorithm algorithm;
     switch (getStringItem(jsonKey, "alg")) {
       case "ES256":
         expectStringItem(jsonKey, "crv", "P-256");
-        algorithm = JwtEcdsaAlgorithm.ES256;
+        algorithm = JwtEcdsaParameters.Algorithm.ES256;
         break;
       case "ES384":
         expectStringItem(jsonKey, "crv", "P-384");
-        algorithm = JwtEcdsaAlgorithm.ES384;
+        algorithm = JwtEcdsaParameters.Algorithm.ES384;
         break;
       case "ES512":
         expectStringItem(jsonKey, "crv", "P-521");
-        algorithm = JwtEcdsaAlgorithm.ES512;
+        algorithm = JwtEcdsaParameters.Algorithm.ES512;
         break;
       default:
         throw new GeneralSecurityException(
@@ -494,22 +489,31 @@ public final class JwkSetConverter {
     expectStringItem(jsonKey, "kty", "EC");
     validateUseIsSig(jsonKey);
     validateKeyOpsIsVerify(jsonKey);
-    JwtEcdsaPublicKey.Builder ecdsaPubKeyBuilder =
-        JwtEcdsaPublicKey.newBuilder()
-            .setVersion(0)
-            .setAlgorithm(algorithm)
-            .setX(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "x"))))
-            .setY(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "y"))));
+
+    BigInteger x = new BigInteger(1, Base64.urlSafeDecode(getStringItem(jsonKey, "x")));
+    BigInteger y = new BigInteger(1, Base64.urlSafeDecode(getStringItem(jsonKey, "y")));
+    ECPoint publicPoint = new ECPoint(x, y);
+
     if (jsonKey.has("kid")) {
-      ecdsaPubKeyBuilder.setCustomKid(
-          JwtEcdsaPublicKey.CustomKid.newBuilder().setValue(getStringItem(jsonKey, "kid")).build());
+      return JwtEcdsaPublicKey.builder()
+          .setParameters(
+              JwtEcdsaParameters.builder()
+                  .setKidStrategy(JwtEcdsaParameters.KidStrategy.CUSTOM)
+                  .setAlgorithm(algorithm)
+                  .build())
+          .setPublicPoint(publicPoint)
+          .setCustomKid(getStringItem(jsonKey, "kid"))
+          .build();
+    } else {
+      return JwtEcdsaPublicKey.builder()
+          .setParameters(
+              JwtEcdsaParameters.builder()
+                  .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
+                  .setAlgorithm(algorithm)
+                  .build())
+          .setPublicPoint(publicPoint)
+          .build();
     }
-    return ProtoKeySerialization.create(
-        JWT_ECDSA_PUBLIC_KEY_URL,
-        ecdsaPubKeyBuilder.build().toByteString(),
-        KeyMaterialType.ASYMMETRIC_PUBLIC,
-        OutputPrefixType.RAW,
-        null);
   }
 
   /**

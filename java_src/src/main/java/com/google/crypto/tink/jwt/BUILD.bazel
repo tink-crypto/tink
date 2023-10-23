@@ -398,6 +398,8 @@ java_library(
     name = "jwk_set_converter",
     srcs = ["JwkSetConverter.java"],
     deps = [
+        ":jwt_ecdsa_parameters",
+        ":jwt_ecdsa_public_key",
         ":jwt_rsa_ssa_pkcs1_parameters",
         ":jwt_rsa_ssa_pkcs1_public_key",
         ":jwt_rsa_ssa_pss_parameters",
@@ -426,6 +428,8 @@ android_library(
     name = "jwk_set_converter-android",
     srcs = ["JwkSetConverter.java"],
     deps = [
+        ":jwt_ecdsa_parameters-android",
+        ":jwt_ecdsa_public_key-android",
         ":jwt_rsa_ssa_pkcs1_parameters-android",
         ":jwt_rsa_ssa_pkcs1_public_key-android",
         ":jwt_rsa_ssa_pss_parameters-android",
