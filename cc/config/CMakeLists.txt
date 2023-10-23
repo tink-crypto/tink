@@ -115,12 +115,7 @@ tink_cc_library(
     tink::core::configuration
     tink::aead::internal::config_v0
     tink::daead::internal::config_v0
-    tink::hybrid::ecies_aead_hkdf_private_key_manager
-    tink::hybrid::ecies_aead_hkdf_public_key_manager
-    tink::hybrid::hybrid_decrypt_wrapper
-    tink::hybrid::hybrid_encrypt_wrapper
-    tink::hybrid::internal::hpke_private_key_manager
-    tink::hybrid::internal::hpke_public_key_manager
+    tink::hybrid::internal::config_v0
     tink::internal::configuration_impl
     tink::mac::internal::config_v0
     tink::prf::internal::config_v0
@@ -144,10 +139,7 @@ tink_cc_library(
     tink::aead::aes_gcm_siv_key_manager
     tink::aead::xchacha20_poly1305_key_manager
     tink::daead::internal::key_gen_config_v0
-    tink::hybrid::ecies_aead_hkdf_private_key_manager
-    tink::hybrid::ecies_aead_hkdf_public_key_manager
-    tink::hybrid::internal::hpke_private_key_manager
-    tink::hybrid::internal::hpke_public_key_manager
+    tink::hybrid::internal::key_gen_config_v0
     tink::internal::key_gen_configuration_impl
     tink::mac::internal::key_gen_config_v0
     tink::prf::internal::key_gen_config_v0

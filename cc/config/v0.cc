@@ -20,12 +20,7 @@
 #include "tink/aead/internal/config_v0.h"
 #include "tink/configuration.h"
 #include "tink/daead/internal/config_v0.h"
-#include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
-#include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
-#include "tink/hybrid/hybrid_decrypt_wrapper.h"
-#include "tink/hybrid/hybrid_encrypt_wrapper.h"
-#include "tink/hybrid/internal/hpke_private_key_manager.h"
-#include "tink/hybrid/internal/hpke_public_key_manager.h"
+#include "tink/hybrid/internal/config_v0.h"
 #include "tink/internal/configuration_impl.h"
 #include "tink/mac/internal/config_v0.h"
 #include "tink/prf/internal/config_v0.h"
@@ -34,32 +29,6 @@
 
 namespace crypto {
 namespace tink {
-namespace {
-
-util::Status AddHybrid(Configuration& config) {
-  util::Status status = internal::ConfigurationImpl::AddPrimitiveWrapper(
-      absl::make_unique<HybridEncryptWrapper>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  status = internal::ConfigurationImpl::AddPrimitiveWrapper(
-      absl::make_unique<HybridDecryptWrapper>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-
-  status = internal::ConfigurationImpl::AddAsymmetricKeyManagers(
-      absl::make_unique<EciesAeadHkdfPrivateKeyManager>(),
-      absl::make_unique<EciesAeadHkdfPublicKeyManager>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  return internal::ConfigurationImpl::AddAsymmetricKeyManagers(
-      absl::make_unique<internal::HpkePrivateKeyManager>(),
-      absl::make_unique<internal::HpkePublicKeyManager>(), config);
-}
-
-}  // namespace
 
 const Configuration& ConfigV0() {
   static const Configuration* instance = [] {
@@ -68,7 +37,7 @@ const Configuration& ConfigV0() {
     CHECK_OK(internal::AddAeadV0(*config));
     CHECK_OK(internal::AddDeterministicAeadV0(*config));
     CHECK_OK(internal::AddStreamingAeadV0(*config));
-    CHECK_OK(AddHybrid(*config));
+    CHECK_OK(internal::AddHybridConfigV0(*config));
     CHECK_OK(internal::AddPrfV0(*config));
     CHECK_OK(internal::AddSignatureV0(*config));
     return config;
