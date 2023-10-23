@@ -22,7 +22,7 @@
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead/aes_gcm_siv_key_manager.h"
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
-#include "tink/daead/aes_siv_key_manager.h"
+#include "tink/daead/internal/key_gen_config_v0.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/hybrid/internal/hpke_private_key_manager.h"
@@ -73,11 +73,6 @@ util::Status AddAead(KeyGenConfiguration& config) {
       absl::make_unique<XChaCha20Poly1305KeyManager>(), config);
 }
 
-util::Status AddDeterministicAead(KeyGenConfiguration& config) {
-  return internal::KeyGenConfigurationImpl::AddKeyTypeManager(
-      absl::make_unique<AesSivKeyManager>(), config);
-}
-
 util::Status AddHybrid(KeyGenConfiguration& config) {
   util::Status status =
       internal::KeyGenConfigurationImpl::AddAsymmetricKeyManagers(
@@ -98,7 +93,7 @@ const KeyGenConfiguration& KeyGenConfigV0() {
     static KeyGenConfiguration* config = new KeyGenConfiguration();
     CHECK_OK(AddMac(*config));
     CHECK_OK(AddAead(*config));
-    CHECK_OK(AddDeterministicAead(*config));
+    CHECK_OK(internal::AddDeterministicAeadKeyGenV0(*config));
     CHECK_OK(internal::AddStreamingAeadV0(*config));
     CHECK_OK(AddHybrid(*config));
     CHECK_OK(internal::AddPrfKeyGenV0(*config));

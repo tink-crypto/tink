@@ -1,6 +1,7 @@
-add_subdirectory(subtle)
-
 tink_module(daead)
+
+add_subdirectory(subtle)
+add_subdirectory(internal)
 
 tink_cc_library(
   NAME aes_siv_key_manager

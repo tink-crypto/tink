@@ -114,8 +114,7 @@ tink_cc_library(
     absl::check
     tink::core::configuration
     tink::aead::internal::config_v0
-    tink::daead::aes_siv_key_manager
-    tink::daead::deterministic_aead_wrapper
+    tink::daead::internal::config_v0
     tink::hybrid::ecies_aead_hkdf_private_key_manager
     tink::hybrid::ecies_aead_hkdf_public_key_manager
     tink::hybrid::hybrid_decrypt_wrapper
@@ -147,7 +146,7 @@ tink_cc_library(
     tink::aead::aes_gcm_key_manager
     tink::aead::aes_gcm_siv_key_manager
     tink::aead::xchacha20_poly1305_key_manager
-    tink::daead::aes_siv_key_manager
+    tink::daead::internal::key_gen_config_v0
     tink::hybrid::ecies_aead_hkdf_private_key_manager
     tink::hybrid::ecies_aead_hkdf_public_key_manager
     tink::hybrid::internal::hpke_private_key_manager

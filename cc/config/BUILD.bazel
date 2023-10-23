@@ -129,8 +129,7 @@ cc_library(
     deps = [
         "//:configuration",
         "//aead/internal:config_v0",
-        "//daead:aes_siv_key_manager",
-        "//daead:deterministic_aead_wrapper",
+        "//daead/internal:config_v0",
         "//hybrid:ecies_aead_hkdf_private_key_manager",
         "//hybrid:ecies_aead_hkdf_public_key_manager",
         "//hybrid:hybrid_decrypt_wrapper",
@@ -162,7 +161,7 @@ cc_library(
         "//aead:aes_gcm_key_manager",
         "//aead:aes_gcm_siv_key_manager",
         "//aead:xchacha20_poly1305_key_manager",
-        "//daead:aes_siv_key_manager",
+        "//daead/internal:key_gen_config_v0",
         "//hybrid:ecies_aead_hkdf_private_key_manager",
         "//hybrid:ecies_aead_hkdf_public_key_manager",
         "//hybrid/internal:hpke_private_key_manager",

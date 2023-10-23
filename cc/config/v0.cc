@@ -19,8 +19,7 @@
 #include "absl/log/check.h"
 #include "tink/aead/internal/config_v0.h"
 #include "tink/configuration.h"
-#include "tink/daead/aes_siv_key_manager.h"
-#include "tink/daead/deterministic_aead_wrapper.h"
+#include "tink/daead/internal/config_v0.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/hybrid/hybrid_decrypt_wrapper.h"
@@ -61,17 +60,6 @@ util::Status AddMac(Configuration& config) {
       absl::make_unique<AesCmacKeyManager>(), config);
 }
 
-util::Status AddDeterministicAead(Configuration& config) {
-  util::Status status = internal::ConfigurationImpl::AddPrimitiveWrapper(
-      absl::make_unique<DeterministicAeadWrapper>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-
-  return internal::ConfigurationImpl::AddKeyTypeManager(
-      absl::make_unique<AesSivKeyManager>(), config);
-}
-
 util::Status AddHybrid(Configuration& config) {
   util::Status status = internal::ConfigurationImpl::AddPrimitiveWrapper(
       absl::make_unique<HybridEncryptWrapper>(), config);
@@ -102,7 +90,7 @@ const Configuration& ConfigV0() {
     static Configuration* config = new Configuration();
     CHECK_OK(AddMac(*config));
     CHECK_OK(internal::AddAeadV0(*config));
-    CHECK_OK(AddDeterministicAead(*config));
+    CHECK_OK(internal::AddDeterministicAeadV0(*config));
     CHECK_OK(internal::AddStreamingAeadV0(*config));
     CHECK_OK(AddHybrid(*config));
     CHECK_OK(internal::AddPrfV0(*config));
