@@ -22,7 +22,7 @@
 namespace crypto {
 namespace tink {
 
-// Configuration used to generate primitives with recommended AEAD key types.
+// Configuration used to generate AEAD primitives with recommended key managers.
 const Configuration& ConfigAeadV0();
 
 }  // namespace tink

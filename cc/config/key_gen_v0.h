@@ -22,8 +22,7 @@
 namespace crypto {
 namespace tink {
 
-// KeyGenConfiguration used to generate keys using ISE Crypto-approved key types
-// as of July 2023.
+// KeyGenConfiguration used to generate keys with recommended key managers.
 const KeyGenConfiguration& KeyGenConfigV0();
 
 }  // namespace tink

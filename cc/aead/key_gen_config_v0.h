@@ -22,7 +22,7 @@
 namespace crypto {
 namespace tink {
 
-// KeyGenConfiguration used to generate keys with recommended AEAD key types.
+// KeyGenConfiguration used to generate AEAD keys with recommended key managers.
 const KeyGenConfiguration& KeyGenConfigAeadV0();
 
 }  // namespace tink
