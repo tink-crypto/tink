@@ -27,10 +27,7 @@
 #include "tink/hybrid/internal/hpke_private_key_manager.h"
 #include "tink/hybrid/internal/hpke_public_key_manager.h"
 #include "tink/internal/configuration_impl.h"
-#include "tink/mac/aes_cmac_key_manager.h"
-#include "tink/mac/hmac_key_manager.h"
-#include "tink/mac/internal/chunked_mac_wrapper.h"
-#include "tink/mac/mac_wrapper.h"
+#include "tink/mac/internal/config_v0.h"
 #include "tink/prf/internal/config_v0.h"
 #include "tink/signature/internal/config_v0.h"
 #include "tink/streamingaead/internal/config_v0.h"
@@ -38,27 +35,6 @@
 namespace crypto {
 namespace tink {
 namespace {
-
-util::Status AddMac(Configuration& config) {
-  util::Status status = internal::ConfigurationImpl::AddPrimitiveWrapper(
-      absl::make_unique<MacWrapper>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  status = internal::ConfigurationImpl::AddPrimitiveWrapper(
-      absl::make_unique<internal::ChunkedMacWrapper>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-
-  status = internal::ConfigurationImpl::AddKeyTypeManager(
-      absl::make_unique<HmacKeyManager>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  return internal::ConfigurationImpl::AddKeyTypeManager(
-      absl::make_unique<AesCmacKeyManager>(), config);
-}
 
 util::Status AddHybrid(Configuration& config) {
   util::Status status = internal::ConfigurationImpl::AddPrimitiveWrapper(
@@ -88,7 +64,7 @@ util::Status AddHybrid(Configuration& config) {
 const Configuration& ConfigV0() {
   static const Configuration* instance = [] {
     static Configuration* config = new Configuration();
-    CHECK_OK(AddMac(*config));
+    CHECK_OK(internal::AddMacV0(*config));
     CHECK_OK(internal::AddAeadV0(*config));
     CHECK_OK(internal::AddDeterministicAeadV0(*config));
     CHECK_OK(internal::AddStreamingAeadV0(*config));

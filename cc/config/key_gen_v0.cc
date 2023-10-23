@@ -28,8 +28,7 @@
 #include "tink/hybrid/internal/hpke_private_key_manager.h"
 #include "tink/hybrid/internal/hpke_public_key_manager.h"
 #include "tink/internal/key_gen_configuration_impl.h"
-#include "tink/mac/aes_cmac_key_manager.h"
-#include "tink/mac/hmac_key_manager.h"
+#include "tink/mac/internal/key_gen_config_v0.h"
 #include "tink/prf/internal/key_gen_config_v0.h"
 #include "tink/signature/internal/key_gen_config_v0.h"
 #include "tink/streamingaead/internal/key_gen_config_v0.h"
@@ -37,16 +36,6 @@
 namespace crypto {
 namespace tink {
 namespace {
-
-util::Status AddMac(KeyGenConfiguration& config) {
-  util::Status status = internal::KeyGenConfigurationImpl::AddKeyTypeManager(
-      absl::make_unique<HmacKeyManager>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  return internal::KeyGenConfigurationImpl::AddKeyTypeManager(
-      absl::make_unique<AesCmacKeyManager>(), config);
-}
 
 util::Status AddAead(KeyGenConfiguration& config) {
   util::Status status = internal::KeyGenConfigurationImpl::AddKeyTypeManager(
@@ -91,7 +80,7 @@ util::Status AddHybrid(KeyGenConfiguration& config) {
 const KeyGenConfiguration& KeyGenConfigV0() {
   static const KeyGenConfiguration* instance = [] {
     static KeyGenConfiguration* config = new KeyGenConfiguration();
-    CHECK_OK(AddMac(*config));
+    CHECK_OK(internal::AddMacKeyGenV0(*config));
     CHECK_OK(AddAead(*config));
     CHECK_OK(internal::AddDeterministicAeadKeyGenV0(*config));
     CHECK_OK(internal::AddStreamingAeadV0(*config));

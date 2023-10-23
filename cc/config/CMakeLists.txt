@@ -122,10 +122,7 @@ tink_cc_library(
     tink::hybrid::internal::hpke_private_key_manager
     tink::hybrid::internal::hpke_public_key_manager
     tink::internal::configuration_impl
-    tink::mac::aes_cmac_key_manager
-    tink::mac::hmac_key_manager
-    tink::mac::mac_wrapper
-    tink::mac::internal::chunked_mac_wrapper
+    tink::mac::internal::config_v0
     tink::prf::internal::config_v0
     tink::signature::internal::config_v0
     tink::streamingaead::internal::config_v0
@@ -152,8 +149,7 @@ tink_cc_library(
     tink::hybrid::internal::hpke_private_key_manager
     tink::hybrid::internal::hpke_public_key_manager
     tink::internal::key_gen_configuration_impl
-    tink::mac::aes_cmac_key_manager
-    tink::mac::hmac_key_manager
+    tink::mac::internal::key_gen_config_v0
     tink::prf::internal::key_gen_config_v0
     tink::signature::internal::key_gen_config_v0
     tink::streamingaead::internal::key_gen_config_v0
