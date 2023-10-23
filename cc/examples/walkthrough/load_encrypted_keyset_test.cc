@@ -79,13 +79,11 @@ constexpr absl::string_view kFakeKmsKeyUri = "fake://some_key";
 
 using ::crypto::tink::Aead;
 using ::crypto::tink::KeysetHandle;
-using ::crypto::tink::Registry;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
 using ::crypto::tink::test::StatusIs;
 using ::crypto::tink::util::Status;
 using ::crypto::tink::util::StatusOr;
-using ::testing::Environment;
 using ::testing::Test;
 
 class LoadKeysetTest : public Test {
