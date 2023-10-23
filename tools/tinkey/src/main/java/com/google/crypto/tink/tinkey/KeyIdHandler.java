@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,15 +16,19 @@
 
 package com.google.crypto.tink.tinkey;
 
-import org.kohsuke.args4j.Option;
+import org.kohsuke.args4j.CmdLineParser;
+import org.kohsuke.args4j.OptionDef;
+import org.kohsuke.args4j.spi.OneArgumentOptionHandler;
+import org.kohsuke.args4j.spi.Setter;
 
-/** Options for commands that take a key id option, e.g., enable, disable or destroy. */
-class KeyIdOptions extends OutOptions {
-  @Option(
-      name = "--key-id",
-      metaVar = "number",
-      required = true,
-      usage = "The target key id",
-      handler = KeyIdHandler.class)
-  int keyId;
+/** A {@link OneArgumentOptionHandler} to parse key ID from an unsigned int. */
+public class KeyIdHandler extends OneArgumentOptionHandler<Integer> {
+  public KeyIdHandler(CmdLineParser parser, OptionDef option, Setter<? super Integer> setter) {
+    super(parser, option, setter);
+  }
+
+  @Override
+  protected Integer parse(String argument) {
+    return Integer.parseUnsignedInt(argument);
+  }
 }
