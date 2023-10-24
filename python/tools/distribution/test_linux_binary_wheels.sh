@@ -65,7 +65,7 @@ for v in "${!PYTHON_VERSIONS[@]}"; do
   (
     # Executing in a subshell to make the PATH modification temporary.
     export PATH="${PATH}:/opt/python/${PYTHON_VERSIONS[$v]}/bin"
-    python3 -m pip install --require-hashes -r requirements_all.txt
+    python3 -m pip install --require-hashes --no-deps -r requirements_all.txt
     WHEEL="$(echo release/*-"${PYTHON_VERSIONS[$v]}"-"${PLATFORM_TAG_SET}".whl)"
     python3 -m pip install --no-deps --no-index "${WHEEL}[all]"
     find tink/ "${TEST_IGNORE_PATHS[@]}" -type f -name "*_test.py" -print0 \

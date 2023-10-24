@@ -122,7 +122,7 @@ __create_and_test_sdist_for_linux() {
   python3 --version
   python3 -m pip list
   # Install Tink dependencies.
-  python3 -m pip install --require-hashes -r requirements_all.txt
+  python3 -m pip install --require-hashes --no-deps -r requirements_all.txt
   python3 -m pip install --no-deps --no-index -v \
     "release/${sdist_filename}[all]"
   python3 -m pip list
