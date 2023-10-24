@@ -17,6 +17,7 @@
 #include "tink/config/key_gen_v0.h"
 
 #include "absl/log/check.h"
+#include "absl/memory/memory.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_eax_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
@@ -29,6 +30,7 @@
 #include "tink/prf/internal/key_gen_config_v0.h"
 #include "tink/signature/internal/key_gen_config_v0.h"
 #include "tink/streamingaead/internal/key_gen_config_v0.h"
+#include "tink/util/status.h"
 
 namespace crypto {
 namespace tink {

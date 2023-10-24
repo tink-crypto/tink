@@ -1035,7 +1035,12 @@ tink_cc_library(
   DEPS
     tink::internal::key_type_info_store
     tink::internal::keyset_wrapper_store
+    absl::status
+    absl::string_view
     tink::core::configuration
+    tink::core::key_manager
+    tink::util::status
+    tink::util::statusor
 )
 
 tink_cc_test(
@@ -1044,12 +1049,28 @@ tink_cc_test(
     configuration_impl_test.cc
   DEPS
     tink::internal::configuration_impl
+    tink::internal::key_type_info_store
+    tink::internal::keyset_wrapper
     tink::internal::keyset_wrapper_store
     gmock
+    absl::memory
     absl::status
     tink::core::cleartext_keyset_handle
     tink::core::configuration
+    tink::core::key_type_manager
+    tink::core::private_key_type_manager
+    tink::core::template_util
+    tink::core::input_stream
+    tink::core::key_manager
+    tink::core::keyset_handle
+    tink::core::primitive_set
+    tink::core::primitive_wrapper
+    tink::core::public_key_sign
+    tink::core::public_key_verify
+    tink::core::registry
     tink::subtle::random
+    tink::util::status
+    tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::aes_gcm_cc_proto
@@ -1138,7 +1159,11 @@ tink_cc_library(
     key_gen_configuration_impl.h
   DEPS
     tink::internal::key_type_info_store
+    absl::status
+    absl::string_view
     tink::core::key_gen_configuration
+    tink::util::status
+    tink::util::statusor
 )
 
 tink_cc_test(
@@ -1147,9 +1172,22 @@ tink_cc_test(
     key_gen_configuration_impl_test.cc
   DEPS
     tink::internal::key_gen_configuration_impl
+    tink::internal::key_type_info_store
     gmock
+    absl::memory
+    absl::status
+    tink::core::key_type_manager
+    tink::core::private_key_type_manager
+    tink::core::template_util
+    tink::core::input_stream
     tink::core::key_gen_configuration
+    tink::core::key_manager
+    tink::core::public_key_sign
+    tink::core::public_key_verify
+    tink::core::registry
     tink::aead::aead_key_templates
+    tink::util::status
+    tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::aes_gcm_cc_proto

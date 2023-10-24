@@ -132,6 +132,7 @@ tink_cc_library(
     key_gen_v0.h
   DEPS
     absl::check
+    absl::memory
     tink::core::key_gen_configuration
     tink::aead::aes_ctr_hmac_aead_key_manager
     tink::aead::aes_eax_key_manager
@@ -145,6 +146,7 @@ tink_cc_library(
     tink::prf::internal::key_gen_config_v0
     tink::signature::internal::key_gen_config_v0
     tink::streamingaead::internal::key_gen_config_v0
+    tink::util::status
   TAGS
     exclude_if_openssl
 )
@@ -291,6 +293,8 @@ tink_cc_test(
     tink::hybrid::ecies_aead_hkdf_public_key_manager
     tink::hybrid::internal::hpke_public_key_manager
     tink::internal::configuration_impl
+    tink::internal::key_gen_configuration_impl
+    tink::internal::key_type_info_store
     tink::internal::keyset_wrapper_store
     tink::mac::aes_cmac_key_manager
     tink::mac::hmac_key_manager
@@ -304,41 +308,7 @@ tink_cc_test(
     tink::signature::rsa_ssa_pss_verify_key_manager
     tink::streamingaead::aes_ctr_hmac_streaming_key_manager
     tink::streamingaead::aes_gcm_hkdf_streaming_key_manager
-    tink::util::test_matchers
-  TAGS
-    exclude_if_openssl
-)
-
-tink_cc_test(
-  NAME key_gen_v0_test
-  SRCS
-    key_gen_v0_test.cc
-  DEPS
-    tink::config::key_gen_v0
-    gmock
-    tink::core::key_gen_configuration
-    tink::core::keyset_handle
-    tink::aead::aead_key_templates
-    tink::aead::aes_ctr_hmac_aead_key_manager
-    tink::aead::aes_eax_key_manager
-    tink::aead::aes_gcm_key_manager
-    tink::aead::aes_gcm_siv_key_manager
-    tink::aead::xchacha20_poly1305_key_manager
-    tink::daead::aes_siv_key_manager
-    tink::hybrid::ecies_aead_hkdf_public_key_manager
-    tink::hybrid::internal::hpke_public_key_manager
-    tink::internal::key_gen_configuration_impl
-    tink::mac::aes_cmac_key_manager
-    tink::mac::hmac_key_manager
-    tink::prf::aes_cmac_prf_key_manager
-    tink::prf::hkdf_prf_key_manager
-    tink::prf::hmac_prf_key_manager
-    tink::signature::ecdsa_verify_key_manager
-    tink::signature::ed25519_verify_key_manager
-    tink::signature::rsa_ssa_pkcs1_verify_key_manager
-    tink::signature::rsa_ssa_pss_verify_key_manager
-    tink::streamingaead::aes_ctr_hmac_streaming_key_manager
-    tink::streamingaead::aes_gcm_hkdf_streaming_key_manager
+    tink::util::statusor
     tink::util::test_matchers
   TAGS
     exclude_if_openssl

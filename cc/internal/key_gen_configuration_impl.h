@@ -17,8 +17,14 @@
 #ifndef TINK_INTERNAL_KEY_GEN_CONFIGURATION_IMPL_H_
 #define TINK_INTERNAL_KEY_GEN_CONFIGURATION_IMPL_H_
 
+#include <memory>
+
+#include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "tink/internal/key_type_info_store.h"
 #include "tink/key_gen_configuration.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
