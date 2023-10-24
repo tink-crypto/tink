@@ -16,14 +16,23 @@
 
 package com.google.crypto.tink.subtle;
 
+import static com.google.crypto.tink.internal.Util.isPrefix;
+
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.internal.EnumTypeProtoConverter;
+import com.google.crypto.tink.signature.RsaSsaPkcs1Parameters;
+import com.google.crypto.tink.signature.RsaSsaPkcs1PublicKey;
 import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.errorprone.annotations.Immutable;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.RSAPublicKeySpec;
+import java.util.Arrays;
 
 /**
  * RsaSsaPkcs1 (i.e. RSA Signature Schemes with Appendix (SSA) using PKCS1-v1_5 encoding) verifying
@@ -39,12 +48,45 @@ public final class RsaSsaPkcs1VerifyJce implements PublicKeyVerify {
   private static final String ASN_PREFIX_SHA384 = "3041300d060960864801650304020205000430";
   private static final String ASN_PREFIX_SHA512 = "3051300d060960864801650304020305000440";
 
+  // This converter is not used with a proto but rather with an ordinary enum type.
+  static final EnumTypeProtoConverter<HashType, RsaSsaPkcs1Parameters.HashType>
+      HASH_TYPE_CONVERTER =
+          EnumTypeProtoConverter.<HashType, RsaSsaPkcs1Parameters.HashType>builder()
+              .add(HashType.SHA256, RsaSsaPkcs1Parameters.HashType.SHA256)
+              .add(HashType.SHA384, RsaSsaPkcs1Parameters.HashType.SHA384)
+              .add(HashType.SHA512, RsaSsaPkcs1Parameters.HashType.SHA512)
+              .build();
+
   @SuppressWarnings("Immutable")
   private final RSAPublicKey publicKey;
 
   private final HashType hash;
 
-  public RsaSsaPkcs1VerifyJce(final RSAPublicKey pubKey, HashType hash)
+  @SuppressWarnings("Immutable")
+  private final byte[] outputPrefix;
+
+  @SuppressWarnings("Immutable")
+  private final byte[] messageSuffix;
+
+  @AccessesPartialKey
+  public static PublicKeyVerify create(RsaSsaPkcs1PublicKey key) throws GeneralSecurityException {
+    KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("RSA");
+    RSAPublicKey publicKey =
+        (RSAPublicKey)
+            kf.generatePublic(
+                new RSAPublicKeySpec(key.getModulus(), key.getParameters().getPublicExponent()));
+
+    return new RsaSsaPkcs1VerifyJce(
+        publicKey,
+        HASH_TYPE_CONVERTER.toProtoEnum(key.getParameters().getHashType()),
+        key.getOutputPrefix().toByteArray(),
+        key.getParameters().getVariant().equals(RsaSsaPkcs1Parameters.Variant.LEGACY)
+            ? new byte[] {0}
+            : new byte[0]);
+  }
+
+  private RsaSsaPkcs1VerifyJce(
+      final RSAPublicKey pubKey, HashType hash, byte[] outputPrefix, byte[] messageSuffix)
       throws GeneralSecurityException {
     if (!FIPS.isCompatible()) {
       throw new GeneralSecurityException(
@@ -56,10 +98,17 @@ public final class RsaSsaPkcs1VerifyJce implements PublicKeyVerify {
     Validators.validateRsaPublicExponent(pubKey.getPublicExponent());
     this.publicKey = pubKey;
     this.hash = hash;
+    this.outputPrefix = outputPrefix;
+    this.messageSuffix = messageSuffix;
   }
 
-  @Override
-  public void verify(final byte[] signature, final byte[] data) throws GeneralSecurityException {
+  public RsaSsaPkcs1VerifyJce(final RSAPublicKey pubKey, HashType hash)
+      throws GeneralSecurityException {
+    this(pubKey, hash, new byte[0], new byte[0]);
+  }
+
+  private void noPrefixVerify(final byte[] signature, final byte[] data)
+      throws GeneralSecurityException {
     // The algorithm is described at (https://tools.ietf.org/html/rfc8017#section-8.2). As signature
     // verification is a public operation,  throwing different exception messages doesn't give
     // attacker any useful information.
@@ -114,6 +163,7 @@ public final class RsaSsaPkcs1VerifyJce implements PublicKeyVerify {
     return em;
   }
 
+  
   private byte[] toAsnPrefix(HashType hash) throws GeneralSecurityException {
     switch (hash) {
       case SHA256:
@@ -125,5 +175,22 @@ public final class RsaSsaPkcs1VerifyJce implements PublicKeyVerify {
       default:
         throw new GeneralSecurityException("Unsupported hash " + hash);
     }
+  }
+
+  @Override
+  public void verify(final byte[] signature, final byte[] data) throws GeneralSecurityException {
+    if (outputPrefix.length == 0 && messageSuffix.length == 0) {
+      noPrefixVerify(signature, data);
+      return;
+    }
+    if (!isPrefix(outputPrefix, signature)) {
+      throw new GeneralSecurityException("Invalid signature (output prefix mismatch)");
+    }
+    byte[] dataCopy = data;
+    if (messageSuffix.length != 0) {
+      dataCopy = Bytes.concat(data, messageSuffix);
+    }
+    byte[] signatureNoPrefix = Arrays.copyOfRange(signature, outputPrefix.length, signature.length);
+    noPrefixVerify(signatureNoPrefix, dataCopy);
   }
 }
