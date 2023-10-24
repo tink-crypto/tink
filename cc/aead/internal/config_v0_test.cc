@@ -69,7 +69,7 @@ TEST(AeadV0Test, KeyManagers) {
   ASSERT_THAT(store, IsOk());
 
   KeyGenConfiguration key_gen_config;
-  ASSERT_THAT(AddAeadV0(key_gen_config), IsOk());
+  ASSERT_THAT(AddAeadKeyGenV0(key_gen_config), IsOk());
   util::StatusOr<const internal::KeyTypeInfoStore*> key_gen_store =
       internal::KeyGenConfigurationImpl::GetKeyTypeInfoStore(key_gen_config);
   ASSERT_THAT(key_gen_store, IsOk());
@@ -85,7 +85,7 @@ TEST(AeadV0Test, KeyManagers) {
 
 TEST(AeadV0Test, GetPrimitive) {
   KeyGenConfiguration key_gen_config;
-  ASSERT_THAT(AddAeadV0(key_gen_config), IsOk());
+  ASSERT_THAT(AddAeadKeyGenV0(key_gen_config), IsOk());
   Configuration config;
   ASSERT_THAT(AddAeadV0(config), IsOk());
 
@@ -113,7 +113,7 @@ TEST(AeadV0Test, GetPrimitiveBoringSsl) {
   }
 
   KeyGenConfiguration key_gen_config;
-  ASSERT_THAT(AddAeadV0(key_gen_config), IsOk());
+  ASSERT_THAT(AddAeadKeyGenV0(key_gen_config), IsOk());
   Configuration config;
   ASSERT_THAT(AddAeadV0(config), IsOk());
 
@@ -140,7 +140,7 @@ TEST(AeadV0Test, GetPrimitiveOpenSsl) {
   }
 
   KeyGenConfiguration key_gen_config;
-  ASSERT_THAT(AddAeadV0(key_gen_config), IsOk());
+  ASSERT_THAT(AddAeadKeyGenV0(key_gen_config), IsOk());
   Configuration config;
   ASSERT_THAT(AddAeadV0(config), IsOk());
 

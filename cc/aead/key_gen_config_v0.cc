@@ -26,7 +26,7 @@ namespace tink {
 const KeyGenConfiguration& KeyGenConfigAeadV0() {
   static const KeyGenConfiguration* instance = [] {
     static KeyGenConfiguration* config = new KeyGenConfiguration();
-    CHECK_OK(internal::AddAeadV0(*config));
+    CHECK_OK(internal::AddAeadKeyGenV0(*config));
     return config;
   }();
   return *instance;

@@ -73,7 +73,7 @@ TEST(StreamingAeadV0Test, KeyManagers) {
   ASSERT_THAT(store, IsOk());
 
   KeyGenConfiguration key_gen_config;
-  ASSERT_THAT(AddStreamingAeadV0(key_gen_config), IsOk());
+  ASSERT_THAT(AddStreamingAeadKeyGenV0(key_gen_config), IsOk());
   util::StatusOr<const KeyTypeInfoStore*> key_gen_store =
       KeyGenConfigurationImpl::GetKeyTypeInfoStore(key_gen_config);
   ASSERT_THAT(key_gen_store, IsOk());
@@ -86,7 +86,7 @@ TEST(StreamingAeadV0Test, KeyManagers) {
 
 TEST(StreamingAeadV0Test, GetPrimitive) {
   KeyGenConfiguration key_gen_config;
-  ASSERT_THAT(AddStreamingAeadV0(key_gen_config), IsOk());
+  ASSERT_THAT(AddStreamingAeadKeyGenV0(key_gen_config), IsOk());
   Configuration config;
   ASSERT_THAT(AddStreamingAeadV0(config), IsOk());
 

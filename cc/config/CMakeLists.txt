@@ -132,21 +132,14 @@ tink_cc_library(
     key_gen_v0.h
   DEPS
     absl::check
-    absl::memory
     tink::core::key_gen_configuration
-    tink::aead::aes_ctr_hmac_aead_key_manager
-    tink::aead::aes_eax_key_manager
-    tink::aead::aes_gcm_key_manager
-    tink::aead::aes_gcm_siv_key_manager
-    tink::aead::xchacha20_poly1305_key_manager
+    tink::aead::internal::key_gen_config_v0
     tink::daead::internal::key_gen_config_v0
     tink::hybrid::internal::key_gen_config_v0
-    tink::internal::key_gen_configuration_impl
     tink::mac::internal::key_gen_config_v0
     tink::prf::internal::key_gen_config_v0
     tink::signature::internal::key_gen_config_v0
     tink::streamingaead::internal::key_gen_config_v0
-    tink::util::status
   TAGS
     exclude_if_openssl
 )

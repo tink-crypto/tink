@@ -14,8 +14,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_AEAD_INTERNAL_KEY_GEN_CONFIG_V0_H_
-#define TINK_AEAD_INTERNAL_KEY_GEN_CONFIG_V0_H_
+#ifndef TINK_STREAMING_AEAD_INTERNAL_KEY_GEN_CONFIG_V0_H_
+#define TINK_STREAMING_AEAD_INTERNAL_KEY_GEN_CONFIG_V0_H_
 
 #include "tink/key_gen_configuration.h"
 #include "tink/util/status.h"
@@ -26,10 +26,10 @@ namespace internal {
 
 // Add recommended Streaming AEAD key managers to `config`, used to generate
 // keys.
-util::Status AddStreamingAeadV0(KeyGenConfiguration& config);
+util::Status AddStreamingAeadKeyGenV0(KeyGenConfiguration& config);
 
 }  // namespace internal
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_AEAD_INTERNAL_KEY_GEN_CONFIG_V0_H_
+#endif  // TINK_STREAMING_AEAD_INTERNAL_KEY_GEN_CONFIG_V0_H_

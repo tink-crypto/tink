@@ -29,7 +29,7 @@ namespace crypto {
 namespace tink {
 namespace internal {
 
-util::Status AddHybridKeyGenConfigV0(KeyGenConfiguration& config) {
+util::Status AddHybridKeyGenV0(KeyGenConfiguration& config) {
   util::Status status = KeyGenConfigurationImpl::AddAsymmetricKeyManagers(
       absl::make_unique<EciesAeadHkdfPrivateKeyManager>(),
       absl::make_unique<EciesAeadHkdfPublicKeyManager>(), config);

@@ -68,7 +68,7 @@ TEST(HybridV0Test, KeyManagers) {
   ASSERT_THAT(store, IsOk());
 
   KeyGenConfiguration key_gen_config;
-  ASSERT_THAT(AddHybridKeyGenConfigV0(key_gen_config), IsOk());
+  ASSERT_THAT(AddHybridKeyGenV0(key_gen_config), IsOk());
   util::StatusOr<const KeyTypeInfoStore*> key_gen_store =
       KeyGenConfigurationImpl::GetKeyTypeInfoStore(key_gen_config);
   ASSERT_THAT(key_gen_store, IsOk());
@@ -89,7 +89,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(HybridV0KeyTypesTest, GetPrimitive) {
   KeyGenConfiguration key_gen_config;
-  ASSERT_THAT(AddHybridKeyGenConfigV0(key_gen_config), IsOk());
+  ASSERT_THAT(AddHybridKeyGenV0(key_gen_config), IsOk());
   Configuration config;
   ASSERT_THAT(AddHybridConfigV0(config), IsOk());
 

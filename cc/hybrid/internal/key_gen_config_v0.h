@@ -26,7 +26,7 @@ namespace internal {
 
 // Add recommended Hybrid Encryption key managers to `config`, used to generate
 // keys.
-util::Status AddHybridKeyGenConfigV0(KeyGenConfiguration& config);
+util::Status AddHybridKeyGenV0(KeyGenConfiguration& config);
 
 }  // namespace internal
 }  // namespace tink

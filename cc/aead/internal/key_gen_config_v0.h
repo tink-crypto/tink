@@ -25,7 +25,7 @@ namespace tink {
 namespace internal {
 
 // Add recommended AEAD key managers to `config`, used to generate keys.
-util::Status AddAeadV0(KeyGenConfiguration& config);
+util::Status AddAeadKeyGenV0(KeyGenConfiguration& config);
 
 }  // namespace internal
 }  // namespace tink
