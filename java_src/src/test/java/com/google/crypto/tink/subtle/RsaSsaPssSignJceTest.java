@@ -18,7 +18,12 @@ package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.PublicKeySign;
+import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.signature.RsaSsaPssPrivateKey;
+import com.google.crypto.tink.signature.internal.testing.RsaSsaPssTestUtil;
+import com.google.crypto.tink.signature.internal.testing.SignatureTestVector;
 import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.crypto.tink.testing.TestUtil;
 import java.nio.charset.Charset;
@@ -28,15 +33,19 @@ import java.security.KeyPairGenerator;
 import java.security.Security;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Arrays;
 import org.conscrypt.Conscrypt;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Unit tests for RsaSsaPssSignJce. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public class RsaSsaPssSignJceTest {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
 
@@ -164,4 +173,64 @@ public class RsaSsaPssSignJceTest {
       throw new AssertionError("Valid signature, shouldn't throw exception", e);
     }
   }
+
+  /**
+   * Tests that the verifier can verify a the signature for the message and key in the test vector.
+   */
+  @Theory
+  public void test_validateSignatureInTestVector(
+      @FromDataPoints("testVectors") SignatureTestVector testVector) throws Exception {
+    RsaSsaPssPrivateKey key = (RsaSsaPssPrivateKey) testVector.getPrivateKey();
+    PublicKeyVerify verifier = RsaSsaPssVerifyJce.create(key.getPublicKey());
+    verifier.verify(testVector.getSignature(), testVector.getMessage());
+  }
+
+  /**
+   * Tests that the verifier can verify a newly generated signature for the message and key in the
+   * test vector.
+   */
+  @Theory
+  public void test_computeAndValidateFreshSignatureWithTestVector(
+      @FromDataPoints("testVectors") SignatureTestVector testVector) throws Exception {
+    RsaSsaPssPrivateKey key = (RsaSsaPssPrivateKey) testVector.getPrivateKey();
+    PublicKeySign signer = RsaSsaPssSignJce.create(key);
+    byte[] signature = signer.sign(testVector.getMessage());
+    PublicKeyVerify verifier = RsaSsaPssVerifyJce.create(key.getPublicKey());
+    verifier.verify(signature, testVector.getMessage());
+  }
+
+  /** Tests that the verification fails for a different message. */
+  @Theory
+  public void test_computeAndValidate_modifiedMessage_throws(
+      @FromDataPoints("testVectors") SignatureTestVector testVector) throws Exception {
+    RsaSsaPssPrivateKey key = (RsaSsaPssPrivateKey) testVector.getPrivateKey();
+    byte[] modifiedMessage = Bytes.concat(testVector.getMessage(), new byte[] {1});
+    PublicKeyVerify verifier = RsaSsaPssVerifyJce.create(key.getPublicKey());
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> verifier.verify(testVector.getSignature(), modifiedMessage));
+  }
+
+  /** Tests that the verification fails if we modify the output prefix. */
+  @Theory
+  public void test_computeAndValidate_modifiedOutputPrefix_throws(
+      @FromDataPoints("testVectors") SignatureTestVector testVector) throws Exception {
+    RsaSsaPssPrivateKey key = (RsaSsaPssPrivateKey) testVector.getPrivateKey();
+    if (key.getOutputPrefix().size() == 0) {
+      return;
+    }
+    byte[] modifiedSignature = testVector.getSignature();
+    modifiedSignature[1] ^= 0x01;
+    PublicKeyVerify verifier = RsaSsaPssVerifyJce.create(key.getPublicKey());
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            verifier.verify(
+                Arrays.copyOf(modifiedSignature, modifiedSignature.length),
+                testVector.getMessage()));
+  }
+
+  @DataPoints("testVectors")
+  public static final SignatureTestVector[] SIGNATURE_TEST_VECTORS =
+      RsaSsaPssTestUtil.createRsaPssTestVectors();
 }

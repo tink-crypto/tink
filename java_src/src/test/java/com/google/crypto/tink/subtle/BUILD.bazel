@@ -199,7 +199,13 @@ java_test(
     size = "large",
     srcs = ["RsaSsaPssSignJceTest.java"],
     deps = [
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
+        "//src/main/java/com/google/crypto/tink:public_key_verify",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pss_private_key",
+        "//src/main/java/com/google/crypto/tink/signature/internal/testing:rsa_ssa_pss_test_util",
+        "//src/main/java/com/google/crypto/tink/signature/internal/testing:signature_test_vector",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
         "//src/main/java/com/google/crypto/tink/subtle:enums",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pss_sign_jce",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pss_verify_jce",

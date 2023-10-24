@@ -16,8 +16,12 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.AccessesPartialKey;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.signature.RsaSsaPssParameters;
+import com.google.crypto.tink.signature.RsaSsaPssPrivateKey;
 import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.errorprone.annotations.Immutable;
 import java.math.BigInteger;
@@ -26,6 +30,7 @@ import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import javax.crypto.Cipher;
 
@@ -46,10 +51,28 @@ public final class RsaSsaPssSignJce implements PublicKeySign {
   private final HashType sigHash;
   private final HashType mgf1Hash;
   private final int saltLength;
+
+  @SuppressWarnings("Immutable")
+  private final byte[] outputPrefix;
+
+  @SuppressWarnings("Immutable")
+  private final byte[] messageSuffix;
+
   private static final String RAW_RSA_ALGORITHM = "RSA/ECB/NOPADDING";
 
   public RsaSsaPssSignJce(
       final RSAPrivateCrtKey priv, HashType sigHash, HashType mgf1Hash, int saltLength)
+      throws GeneralSecurityException {
+    this(priv, sigHash, mgf1Hash, saltLength, new byte[0], new byte[0]);
+  }
+
+  private RsaSsaPssSignJce(
+      final RSAPrivateCrtKey priv,
+      HashType sigHash,
+      HashType mgf1Hash,
+      int saltLength,
+      byte[] outputPrefix,
+      byte[] messageSuffix)
       throws GeneralSecurityException {
     if (!FIPS.isCompatible()) {
       throw new GeneralSecurityException(
@@ -67,15 +90,58 @@ public final class RsaSsaPssSignJce implements PublicKeySign {
     this.sigHash = sigHash;
     this.mgf1Hash = mgf1Hash;
     this.saltLength = saltLength;
+    this.outputPrefix = outputPrefix;
+    this.messageSuffix = messageSuffix;
   }
 
-  @Override
-  public byte[] sign(final byte[] data) throws GeneralSecurityException {
-    // https://tools.ietf.org/html/rfc8017#section-8.1.1.
+  @AccessesPartialKey
+  public static PublicKeySign create(RsaSsaPssPrivateKey key) throws GeneralSecurityException {
+    KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("RSA");
+    RSAPrivateCrtKey privateKey =
+        (RSAPrivateCrtKey)
+            kf.generatePrivate(
+                new RSAPrivateCrtKeySpec(
+                    key.getPublicKey().getModulus(),
+                    key.getParameters().getPublicExponent(),
+                    key.getPrivateExponent().getBigInteger(InsecureSecretKeyAccess.get()),
+                    key.getPrimeP().getBigInteger(InsecureSecretKeyAccess.get()),
+                    key.getPrimeQ().getBigInteger(InsecureSecretKeyAccess.get()),
+                    key.getPrimeExponentP().getBigInteger(InsecureSecretKeyAccess.get()),
+                    key.getPrimeExponentQ().getBigInteger(InsecureSecretKeyAccess.get()),
+                    key.getCrtCoefficient().getBigInteger(InsecureSecretKeyAccess.get())));
+    RsaSsaPssParameters params = key.getParameters();
+    return new RsaSsaPssSignJce(
+        privateKey,
+        RsaSsaPssVerifyJce.HASH_TYPE_CONVERTER.toProtoEnum(params.getSigHashType()),
+        RsaSsaPssVerifyJce.HASH_TYPE_CONVERTER.toProtoEnum(params.getMgf1HashType()),
+        params.getSaltLengthBytes(),
+        key.getOutputPrefix().toByteArray(),
+        key.getParameters().getVariant().equals(RsaSsaPssParameters.Variant.LEGACY)
+            ? new byte[] {0}
+            : new byte[0]);
+  }
+
+  private byte[] noPrefixSign(final byte[] data)
+      throws GeneralSecurityException { // https://tools.ietf.org/html/rfc8017#section-8.1.1.
     int modBits = publicKey.getModulus().bitLength();
 
     byte[] em = emsaPssEncode(data, modBits - 1);
     return rsasp1(em);
+  }
+
+  @Override
+  public byte[] sign(final byte[] data) throws GeneralSecurityException {
+    byte[] signature;
+    if (messageSuffix.length == 0) {
+      signature = noPrefixSign(data);
+    } else {
+      signature = noPrefixSign(Bytes.concat(data, messageSuffix));
+    }
+    if (outputPrefix.length == 0) {
+      return signature;
+    } else {
+      return Bytes.concat(outputPrefix, signature);
+    }
   }
 
   private byte[] rsasp1(byte[] m) throws GeneralSecurityException {
