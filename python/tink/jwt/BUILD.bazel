@@ -356,7 +356,7 @@ py_test(
     deps = [
         ":jwt",
         requirement("absl-py"),
-        "//tink:cleartext_keyset_handle",
+        "//tink:secret_key_access",
         "//tink:tink_python",
     ],
 )

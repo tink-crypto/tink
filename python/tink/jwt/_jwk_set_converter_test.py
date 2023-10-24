@@ -18,8 +18,8 @@ from absl.testing import parameterized
 
 from tink.proto import tink_pb2
 import tink
-from tink import cleartext_keyset_handle
 from tink import jwt
+from tink import secret_key_access
 
 ES256_KEYSET = (
     '{"primaryKeyId":282600252,"key":[{"keyData":{'
@@ -389,8 +389,9 @@ class JwkSetConverterTest(parameterized.TestCase):
       ('TWO_KEYS', KEYSET_WITH_TWO_KEYS, JWK_SET_WITH_TWO_KEYS)
   ])
   def test_convert_from_jwt_key(self, tink_keyset, expected_jwk_set):
-    reader = tink.JsonKeysetReader(tink_keyset)
-    keyset_handle = cleartext_keyset_handle.read(reader)
+    keyset_handle = tink.json_proto_keyset_format.parse_without_secret(
+        tink_keyset
+    )
     jwk_set = jwt.jwk_set_from_public_keyset_handle(keyset_handle)
     self.assertEqual(jwk_set, expected_jwk_set)
 
@@ -427,8 +428,7 @@ class JwkSetConverterTest(parameterized.TestCase):
 
   def test_primary_key_id_missing_success(self):
     keyset = ES256_KEYSET.replace('"primaryKeyId":282600252,', '')
-    reader = tink.JsonKeysetReader(keyset)
-    keyset_handle = cleartext_keyset_handle.read(reader)
+    keyset_handle = tink.json_proto_keyset_format.parse_without_secret(keyset)
     jwk_set = jwt.jwk_set_from_public_keyset_handle(keyset_handle)
     self.assertEqual(jwk_set, ES256_JWK_SET)
 
@@ -439,8 +439,9 @@ class JwkSetConverterTest(parameterized.TestCase):
   ])
   def test_from_legacy_ecdsa_keyset_fails(self, keyset):
     legacy_keyset = keyset.replace('RAW', 'LEGACY')
-    reader = tink.JsonKeysetReader(legacy_keyset)
-    keyset_handle = cleartext_keyset_handle.read(reader)
+    keyset_handle = tink.json_proto_keyset_format.parse_without_secret(
+        legacy_keyset
+    )
     with self.assertRaises(tink.TinkError):
       jwt.jwk_set_from_public_keyset_handle(keyset_handle)
 
@@ -451,20 +452,23 @@ class JwkSetConverterTest(parameterized.TestCase):
   ])
   def test_from_crunchy_ecdsa_keyset_fails(self, keyset):
     crunchy_keyset = keyset.replace('RAW', 'CRUNCHY')
-    reader = tink.JsonKeysetReader(crunchy_keyset)
-    keyset_handle = cleartext_keyset_handle.read(reader)
+    keyset_handle = tink.json_proto_keyset_format.parse_without_secret(
+        crunchy_keyset
+    )
     with self.assertRaises(tink.TinkError):
       jwt.jwk_set_from_public_keyset_handle(keyset_handle)
 
   def test_from_hs256_keyset_fails(self):
-    reader = tink.JsonKeysetReader(HS256_KEYSET)
-    keyset_handle = cleartext_keyset_handle.read(reader)
+    keyset_handle = tink.json_proto_keyset_format.parse(
+        HS256_KEYSET, secret_key_access.TOKEN
+    )
     with self.assertRaises(tink.TinkError):
       jwt.jwk_set_from_public_keyset_handle(keyset_handle)
 
   def test_from_private_keyset_fails(self):
-    reader = tink.JsonKeysetReader(PRIVATEKEY_KEYSET)
-    keyset_handle = cleartext_keyset_handle.read(reader)
+    keyset_handle = tink.json_proto_keyset_format.parse(
+        PRIVATEKEY_KEYSET, secret_key_access.TOKEN
+    )
     with self.assertRaises(tink.TinkError):
       jwt.jwk_set_from_public_keyset_handle(keyset_handle)
 

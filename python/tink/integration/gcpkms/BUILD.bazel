@@ -67,7 +67,7 @@ py_test(
     tags = ["manual"],
     deps = [
         ":gcpkms",
-        "//tink:cleartext_keyset_handle",
+        "//tink:secret_key_access",
         "//tink:tink_python",
         "//tink/aead",
         "//tink/aead:_kms_aead_key_manager",

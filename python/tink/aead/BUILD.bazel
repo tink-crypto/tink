@@ -45,7 +45,6 @@ py_test(
     deps = [
         ":aead",
         requirement("absl-py"),
-        "//tink:cleartext_keyset_handle",
         "//tink:tink_python",
         "//tink/core",
         "//tink/mac",
