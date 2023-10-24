@@ -552,6 +552,30 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "rsa_ssa_pkcs1_private_key",
+    srcs = ["rsa_ssa_pkcs1_private_key.cc"],
+    hdrs = ["rsa_ssa_pkcs1_private_key.h"],
+    include_prefix = "tink/signature",
+    deps = [
+        ":rsa_ssa_pkcs1_public_key",
+        ":signature_private_key",
+        "//:big_integer",
+        "//:insecure_secret_key_access",
+        "//:key",
+        "//:partial_key_access_token",
+        "//:restricted_big_integer",
+        "//internal:bn_util",
+        "//internal:ssl_unique_ptr",
+        "//util:status",
+        "//util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -1022,6 +1046,30 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "rsa_ssa_pkcs1_private_key_test",
+    srcs = ["rsa_ssa_pkcs1_private_key_test.cc"],
+    deps = [
+        ":rsa_ssa_pkcs1_parameters",
+        ":rsa_ssa_pkcs1_private_key",
+        ":rsa_ssa_pkcs1_public_key",
+        "//:big_integer",
+        "//:insecure_secret_key_access",
+        "//:partial_key_access",
+        "//:restricted_big_integer",
+        "//internal:bn_util",
+        "//internal:ssl_unique_ptr",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/log:check",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",
