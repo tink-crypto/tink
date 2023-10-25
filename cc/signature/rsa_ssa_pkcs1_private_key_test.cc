@@ -126,18 +126,23 @@ std::string Base64WebSafeDecode(absl::string_view base64_string) {
 
 PrivateValues GetValidPrivateValues() {
   return PrivateValues{
-      .p = RestrictedBigInteger(Base64WebSafeDecode(kP),
-                                InsecureSecretKeyAccess::Get()),
-      .q = RestrictedBigInteger(Base64WebSafeDecode(kQ),
-                                InsecureSecretKeyAccess::Get()),
-      .dp = RestrictedBigInteger(Base64WebSafeDecode(kDp),
+      /*p=*/RestrictedBigInteger(Base64WebSafeDecode(kP),
                                  InsecureSecretKeyAccess::Get()),
-      .dq = RestrictedBigInteger(Base64WebSafeDecode(kDq),
-                                 InsecureSecretKeyAccess::Get()),
-      .d = RestrictedBigInteger(Base64WebSafeDecode(kD),
-                                InsecureSecretKeyAccess::Get()),
-      .q_inv = RestrictedBigInteger(Base64WebSafeDecode(kQInv),
-                                    InsecureSecretKeyAccess::Get())};
+      /*q=*/
+      RestrictedBigInteger(Base64WebSafeDecode(kQ),
+                           InsecureSecretKeyAccess::Get()),
+      /*dp=*/
+      RestrictedBigInteger(Base64WebSafeDecode(kDp),
+                           InsecureSecretKeyAccess::Get()),
+      /*dq=*/
+      RestrictedBigInteger(Base64WebSafeDecode(kDq),
+                           InsecureSecretKeyAccess::Get()),
+      /*d=*/
+      RestrictedBigInteger(Base64WebSafeDecode(kD),
+                           InsecureSecretKeyAccess::Get()),
+      /*q_inv=*/
+      RestrictedBigInteger(Base64WebSafeDecode(kQInv),
+                           InsecureSecretKeyAccess::Get())};
 }
 
 RsaSsaPkcs1PublicKey GetValidPublicKey() {
