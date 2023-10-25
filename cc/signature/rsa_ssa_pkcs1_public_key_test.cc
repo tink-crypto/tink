@@ -16,7 +16,6 @@
 
 #include "tink/signature/rsa_ssa_pkcs1_public_key.h"
 
-#include <cstdint>
 #include <string>
 
 #include "gmock/gmock.h"
@@ -25,13 +24,7 @@
 #include "absl/strings/escaping.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
-#include "openssl/bn.h"
 #include "tink/big_integer.h"
-#ifdef OPENSSL_IS_BORINGSSL
-#include "openssl/base.h"
-#endif
-#include "tink/internal/bn_util.h"
-#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/partial_key_access.h"
 #include "tink/signature/rsa_ssa_pkcs1_parameters.h"
 #include "tink/util/statusor.h"
@@ -49,21 +42,13 @@ using ::testing::Values;
 
 struct TestCase {
   int modulus_size_in_bits;
-  absl::string_view public_exponent;
   RsaSsaPkcs1Parameters::HashType hash_type;
   RsaSsaPkcs1Parameters::Variant variant;
   absl::optional<int> id_requirement;
   std::string output_prefix;
 };
 
-std::string PublicExponentToString(int64_t public_exponent) {
-  internal::SslUniquePtr<BIGNUM> e(BN_new());
-  BN_set_word(e.get(), public_exponent);
-
-  return internal::BignumToString(e.get(), BN_num_bytes(e.get())).value();
-}
-
-const std::string& kF4Str = *(new std::string(PublicExponentToString(65537)));
+const BigInteger& kF4 = *new BigInteger(std::string("\x1\0\x1", 3));  // 65537
 
 // Test vector from
 // https://github.com/google/wycheproof/blob/master/testvectors/rsa_pkcs1_2048_test.json
@@ -80,22 +65,22 @@ using RsaSsaPkcs1PublicKeyTest = TestWithParam<TestCase>;
 
 INSTANTIATE_TEST_SUITE_P(
     RsaSsaPkcs1PublicKeyTestSuite, RsaSsaPkcs1PublicKeyTest,
-    Values(TestCase{/*modulus_size=*/2048, kF4Str,
+    Values(TestCase{/*modulus_size=*/2048,
                     RsaSsaPkcs1Parameters::HashType::kSha256,
                     RsaSsaPkcs1Parameters::Variant::kTink,
                     /*id_requirement=*/0x02030400,
                     /*output_prefix=*/std::string("\x01\x02\x03\x04\x00", 5)},
-           TestCase{/*modulus_size=*/2048, kF4Str,
+           TestCase{/*modulus_size=*/2048,
                     RsaSsaPkcs1Parameters::HashType::kSha256,
                     RsaSsaPkcs1Parameters::Variant::kCrunchy,
                     /*id_requirement=*/0x01030005,
                     /*output_prefix=*/std::string("\x00\x01\x03\x00\x05", 5)},
-           TestCase{/*modulus_size=*/2048, kF4Str,
+           TestCase{/*modulus_size=*/2048,
                     RsaSsaPkcs1Parameters::HashType::kSha384,
                     RsaSsaPkcs1Parameters::Variant::kLegacy,
                     /*id_requirement=*/0x07080910,
                     /*output_prefix=*/std::string("\x00\x07\x08\x09\x10", 5)},
-           TestCase{/*modulus_size=*/2048, kF4Str,
+           TestCase{/*modulus_size=*/2048,
                     RsaSsaPkcs1Parameters::HashType::kSha512,
                     RsaSsaPkcs1Parameters::Variant::kNoPrefix,
                     /*id_requirement=*/absl::nullopt,
@@ -107,7 +92,7 @@ TEST_P(RsaSsaPkcs1PublicKeyTest, CreatePublicKeySucceeds) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(test_case.modulus_size_in_bits)
-          .SetPublicExponent(test_case.public_exponent)
+          .SetPublicExponent(kF4)
           .SetHashType(test_case.hash_type)
           .SetVariant(test_case.variant)
           .Build();
@@ -130,7 +115,7 @@ TEST(RsaSsaPkcs1PublicKeyTest, CreateWithNonMatchingModulusSizeFails) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(3072)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kNoPrefix)
           .Build();
@@ -149,7 +134,7 @@ TEST(Ed25519PublicKeyTest, CreateKeyWithInvalidIdRequirementFails) {
   util::StatusOr<RsaSsaPkcs1Parameters> no_prefix_parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kNoPrefix)
           .Build();
@@ -158,7 +143,7 @@ TEST(Ed25519PublicKeyTest, CreateKeyWithInvalidIdRequirementFails) {
   util::StatusOr<RsaSsaPkcs1Parameters> tink_parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kTink)
           .Build();
@@ -185,7 +170,7 @@ TEST_P(RsaSsaPkcs1PublicKeyTest, KeyEquals) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(test_case.modulus_size_in_bits)
-          .SetPublicExponent(test_case.public_exponent)
+          .SetPublicExponent(kF4)
           .SetHashType(test_case.hash_type)
           .SetVariant(test_case.variant)
           .Build();
@@ -214,7 +199,7 @@ TEST(RsaSsaPkcs1PublicKeyTest, DifferentParametersNotEqual) {
   util::StatusOr<RsaSsaPkcs1Parameters> tink_parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kTink)
           .Build();
@@ -223,7 +208,7 @@ TEST(RsaSsaPkcs1PublicKeyTest, DifferentParametersNotEqual) {
   util::StatusOr<RsaSsaPkcs1Parameters> crunchy_parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kCrunchy)
           .Build();
@@ -251,7 +236,7 @@ TEST(RsaSsaPkcs1PublicKeyTest, DifferentModulusNotEqual) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kNoPrefix)
           .Build();
@@ -291,7 +276,7 @@ TEST(RsaSsaPkcs1PublicKeyTest, DifferentIdRequirementNotEqual) {
   util::StatusOr<RsaSsaPkcs1Parameters> tink_parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kTink)
           .Build();
@@ -319,7 +304,7 @@ TEST(RsaSsaPkcs1PublicKeyTest, PaddedWithZerosModulusEqual) {
   util::StatusOr<RsaSsaPkcs1Parameters> tink_parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kTink)
           .Build();

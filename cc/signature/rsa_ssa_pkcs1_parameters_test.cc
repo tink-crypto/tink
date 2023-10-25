@@ -22,12 +22,12 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
-#include "absl/strings/string_view.h"
 #ifdef OPENSSL_IS_BORINGSSL
 #include "openssl/base.h"
 #else
 #include "openssl/bn.h"
 #endif
+#include "tink/big_integer.h"
 #include "tink/internal/bn_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/util/statusor.h"
@@ -46,7 +46,6 @@ using ::testing::Values;
 
 struct TestCase {
   int modulus_size_in_bits;
-  absl::string_view public_exponent;
   RsaSsaPkcs1Parameters::HashType hash_type;
   RsaSsaPkcs1Parameters::Variant variant;
   bool has_id_requirement;
@@ -58,28 +57,26 @@ std::string PublicExponentToString(int64_t public_exponent) {
   internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
 
-  std::string public_exponent_string =
-      internal::BignumToString(e.get(), BN_num_bytes(e.get())).value();
-  return public_exponent_string;
+  return internal::BignumToString(e.get(), BN_num_bytes(e.get())).value();
 }
 
-const std::string& kF4Str = *(new std::string(PublicExponentToString(65537)));
+const BigInteger& kF4 = *(new BigInteger(PublicExponentToString(65537)));
 
 INSTANTIATE_TEST_SUITE_P(
     RsaSsaPkcs1ParametersTestSuite, RsaSsaPkcs1ParametersTest,
-    Values(TestCase{/*modulus_size=*/2048, kF4Str,
+    Values(TestCase{/*modulus_size=*/2048,
                     RsaSsaPkcs1Parameters::HashType::kSha256,
                     RsaSsaPkcs1Parameters::Variant::kTink,
                     /*has_id_requirement=*/true},
-           TestCase{/*modulus_size=*/3072, kF4Str,
+           TestCase{/*modulus_size=*/3072,
                     RsaSsaPkcs1Parameters::HashType::kSha256,
                     RsaSsaPkcs1Parameters::Variant::kCrunchy,
                     /*has_id_requirement=*/true},
-           TestCase{/*modulus_size=*/2048, kF4Str,
+           TestCase{/*modulus_size=*/2048,
                     RsaSsaPkcs1Parameters::HashType::kSha256,
                     RsaSsaPkcs1Parameters::Variant::kLegacy,
                     /*has_id_requirement=*/true},
-           TestCase{/*modulus_size=*/3072, kF4Str,
+           TestCase{/*modulus_size=*/3072,
                     RsaSsaPkcs1Parameters::HashType::kSha256,
                     RsaSsaPkcs1Parameters::Variant::kNoPrefix,
                     /*has_id_requirement=*/false}));
@@ -90,7 +87,7 @@ TEST_P(RsaSsaPkcs1ParametersTest, Build) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(test_case.modulus_size_in_bits)
-          .SetPublicExponent(test_case.public_exponent)
+          .SetPublicExponent(kF4)
           .SetHashType(test_case.hash_type)
           .SetVariant(test_case.variant)
           .Build();
@@ -98,7 +95,7 @@ TEST_P(RsaSsaPkcs1ParametersTest, Build) {
 
   EXPECT_THAT(parameters->GetModulusSizeInBits(),
               Eq(test_case.modulus_size_in_bits));
-  EXPECT_THAT(parameters->GetPublicExponent(), Eq(test_case.public_exponent));
+  EXPECT_THAT(parameters->GetPublicExponent(), Eq(kF4));
   EXPECT_THAT(parameters->GetHashType(), Eq(test_case.hash_type));
   EXPECT_THAT(parameters->GetVariant(), Eq(test_case.variant));
   EXPECT_THAT(parameters->HasIdRequirement(), Eq(test_case.has_id_requirement));
@@ -108,7 +105,7 @@ TEST(RsaSsaPkcs1ParametersTest, BuildWithInvalidVariantFails) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::
                           kDoNotUseInsteadUseDefaultWhenWritingSwitchStatements)
@@ -121,7 +118,7 @@ TEST(RsaSsaPkcs1ParametersTest, BuildWithoutVariantFails) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .Build();
   EXPECT_THAT(parameters.status(),
@@ -132,7 +129,7 @@ TEST(RsaSsaPkcs1ParametersTest, BuildWithInvalidHashTypeFails) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(
               RsaSsaPkcs1Parameters::HashType::
                   kDoNotUseInsteadUseDefaultWhenWritingSwitchStatements)
@@ -146,7 +143,7 @@ TEST(RsaSsaPkcs1ParametersTest, BuildWithoutHashTypeFails) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kNoPrefix)
           .Build();
   EXPECT_THAT(parameters.status(),
@@ -157,7 +154,7 @@ TEST(RsaSsaPkcs1ParametersTest, BuildWithLargeModulusSize) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(16789)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kNoPrefix)
           .Build();
@@ -169,7 +166,7 @@ TEST(RsaSsaPkcs1ParametersTest, BuildWithTooSmallModulusSize) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2047)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kNoPrefix)
           .Build();
@@ -180,7 +177,7 @@ TEST(RsaSsaPkcs1ParametersTest, BuildWithTooSmallModulusSize) {
 TEST(RsaSsaPkcs1ParametersTest, BuildWithoutModulusSize) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kNoPrefix)
           .Build();
@@ -189,7 +186,8 @@ TEST(RsaSsaPkcs1ParametersTest, BuildWithoutModulusSize) {
 }
 
 TEST(RsaSsaPkcs1ParametersTest, BuildWithValidNonF4PublicExponent) {
-  std::string nonF4_public_exponent = PublicExponentToString(1234567);
+  BigInteger nonF4_public_exponent =
+      BigInteger(PublicExponentToString(1234567));
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
@@ -209,11 +207,11 @@ TEST(RsaSsaPkcs1ParametersTest, BuildWithoutPublicExponentDefaultsToF4) {
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kNoPrefix)
           .Build();
   ASSERT_THAT(parameters, IsOk());
-  EXPECT_THAT(parameters->GetPublicExponent(), Eq(kF4Str));
+  EXPECT_THAT(parameters->GetPublicExponent(), Eq(kF4));
 }
 
 TEST(RsaSsaPkcs1ParametersTest, BuildWithSmallPublicExponentFails) {
-  std::string small_public_exponent = PublicExponentToString(3);
+  BigInteger small_public_exponent = BigInteger(PublicExponentToString(3));
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
@@ -226,7 +224,7 @@ TEST(RsaSsaPkcs1ParametersTest, BuildWithSmallPublicExponentFails) {
 }
 
 TEST(RsaSsaPkcs1ParametersTest, BuildWithEvenPublicExponentFails) {
-  std::string even_public_exponent = PublicExponentToString(123456);
+  BigInteger even_public_exponent = BigInteger(PublicExponentToString(123456));
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
@@ -239,7 +237,8 @@ TEST(RsaSsaPkcs1ParametersTest, BuildWithEvenPublicExponentFails) {
 }
 
 TEST(RsaSsaPkcs1ParametersTest, BuildWithLargePublicExponent) {
-  std::string large_public_exponent = PublicExponentToString(100000001L);
+  BigInteger large_public_exponent =
+      BigInteger(PublicExponentToString(100000001L));
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
@@ -253,7 +252,8 @@ TEST(RsaSsaPkcs1ParametersTest, BuildWithLargePublicExponent) {
 
 TEST(RsaSsaPkcs1ParametersTest, BuildWithTooLargePublicExponent) {
   // Public exponent must be smaller than 32 bits.
-  std::string too_large_public_exponent = PublicExponentToString(4294967297L);
+  BigInteger too_large_public_exponent =
+      BigInteger(PublicExponentToString(4294967297L));
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
@@ -269,7 +269,7 @@ TEST(RsaSsaPkcs1ParametersTest, CopyConstructor) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha512)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kTink)
           .Build();
@@ -280,7 +280,7 @@ TEST(RsaSsaPkcs1ParametersTest, CopyConstructor) {
   EXPECT_THAT(copy.GetVariant(), Eq(RsaSsaPkcs1Parameters::Variant::kTink));
   EXPECT_THAT(copy.HasIdRequirement(), IsTrue());
   EXPECT_THAT(parameters->GetModulusSizeInBits(), Eq(2048));
-  EXPECT_THAT(parameters->GetPublicExponent(), Eq(kF4Str));
+  EXPECT_THAT(parameters->GetPublicExponent(), Eq(kF4));
   EXPECT_THAT(parameters->GetHashType(),
               Eq(RsaSsaPkcs1Parameters::HashType::kSha512));
 }
@@ -289,7 +289,7 @@ TEST(RsaSsaPkcs1ParametersTest, CopyAssignment) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha512)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kTink)
           .Build();
@@ -300,7 +300,7 @@ TEST(RsaSsaPkcs1ParametersTest, CopyAssignment) {
   EXPECT_THAT(copy.GetVariant(), Eq(RsaSsaPkcs1Parameters::Variant::kTink));
   EXPECT_THAT(copy.HasIdRequirement(), IsTrue());
   EXPECT_THAT(parameters->GetModulusSizeInBits(), Eq(2048));
-  EXPECT_THAT(parameters->GetPublicExponent(), Eq(kF4Str));
+  EXPECT_THAT(parameters->GetPublicExponent(), Eq(kF4));
   EXPECT_THAT(parameters->GetHashType(),
               Eq(RsaSsaPkcs1Parameters::HashType::kSha512));
 }
@@ -311,7 +311,7 @@ TEST_P(RsaSsaPkcs1ParametersTest, ParametersEquals) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(test_case.modulus_size_in_bits)
-          .SetPublicExponent(test_case.public_exponent)
+          .SetPublicExponent(kF4)
           .SetHashType(test_case.hash_type)
           .SetVariant(test_case.variant)
           .Build();
@@ -320,7 +320,7 @@ TEST_P(RsaSsaPkcs1ParametersTest, ParametersEquals) {
   util::StatusOr<RsaSsaPkcs1Parameters> other_parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(test_case.modulus_size_in_bits)
-          .SetPublicExponent(test_case.public_exponent)
+          .SetPublicExponent(kF4)
           .SetHashType(test_case.hash_type)
           .SetVariant(test_case.variant)
           .Build();
@@ -336,7 +336,7 @@ TEST(RsaSsaPkcs1ParametersTest, VariantNotEqual) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha512)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kTink)
           .Build();
@@ -345,7 +345,7 @@ TEST(RsaSsaPkcs1ParametersTest, VariantNotEqual) {
   util::StatusOr<RsaSsaPkcs1Parameters> other_parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha512)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kCrunchy)
           .Build();
@@ -359,7 +359,7 @@ TEST(RsaSsaPkcs1ParametersTest, HashTypeNotEqual) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kTink)
           .Build();
@@ -368,7 +368,7 @@ TEST(RsaSsaPkcs1ParametersTest, HashTypeNotEqual) {
   util::StatusOr<RsaSsaPkcs1Parameters> other_parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha512)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kTink)
           .Build();
@@ -382,7 +382,7 @@ TEST(RsaSsaPkcs1ParametersTest, ModulusSizeNotEqual) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kTink)
           .Build();
@@ -391,7 +391,7 @@ TEST(RsaSsaPkcs1ParametersTest, ModulusSizeNotEqual) {
   util::StatusOr<RsaSsaPkcs1Parameters> other_parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(3072)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kTink)
           .Build();
@@ -406,12 +406,13 @@ TEST(RsaSsaPkcs1ParametersTest, PublicExponentNotEqual) {
       RsaSsaPkcs1Parameters::Builder()
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kTink)
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .Build();
   ASSERT_THAT(parameters, IsOk());
 
-  std::string nonF4_public_exponent = PublicExponentToString(1234567);
+  BigInteger nonF4_public_exponent =
+      BigInteger(PublicExponentToString(1234567));
   util::StatusOr<RsaSsaPkcs1Parameters> other_parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kTink)

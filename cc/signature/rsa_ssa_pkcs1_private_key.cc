@@ -17,7 +17,6 @@
 #include "tink/signature/rsa_ssa_pkcs1_private_key.h"
 
 #include "absl/status/status.h"
-#include "absl/strings/string_view.h"
 #ifdef OPENSSL_IS_BORINGSSL
 #include "openssl/base.h"
 #endif
@@ -38,7 +37,7 @@ namespace tink {
 namespace {
 
 util::Status ValidateKeyPair(
-    absl::string_view public_exponent, const BigInteger& modulus,
+    const BigInteger& public_exponent, const BigInteger& modulus,
     const RestrictedBigInteger& p, const RestrictedBigInteger& q,
     const RestrictedBigInteger& d, const RestrictedBigInteger& dp,
     const RestrictedBigInteger& dq, const RestrictedBigInteger& q_inv) {
@@ -55,7 +54,7 @@ util::Status ValidateKeyPair(
   }
 
   util::StatusOr<internal::SslUniquePtr<BIGNUM>> e =
-      internal::StringToBignum(public_exponent);
+      internal::StringToBignum(public_exponent.GetValue());
   if (!e.ok()) {
     return e.status();
   }

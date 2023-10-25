@@ -496,6 +496,7 @@ tink_cc_library(
     absl::strings
     absl::optional
     crypto
+    tink::core::big_integer
     tink::core::parameters
     tink::internal::bn_util
     tink::internal::rsa_util
@@ -535,7 +536,6 @@ tink_cc_library(
     tink::signature::rsa_ssa_pkcs1_public_key
     tink::signature::signature_private_key
     absl::status
-    absl::strings
     absl::optional
     crypto
     tink::core::big_integer
@@ -993,8 +993,8 @@ tink_cc_test(
     tink::signature::rsa_ssa_pkcs1_parameters
     gmock
     absl::status
-    absl::strings
     crypto
+    tink::core::big_integer
     tink::internal::bn_util
     tink::internal::ssl_unique_ptr
     tink::util::statusor
@@ -1015,8 +1015,6 @@ tink_cc_test(
     crypto
     tink::core::big_integer
     tink::core::partial_key_access
-    tink::internal::bn_util
-    tink::internal::ssl_unique_ptr
     tink::util::statusor
     tink::util::test_matchers
 )

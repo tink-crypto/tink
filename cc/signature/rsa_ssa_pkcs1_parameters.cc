@@ -27,6 +27,7 @@
 #else
 #include "openssl/bn.h"
 #endif
+#include "tink/big_integer.h"
 #include "tink/internal/bn_util.h"
 #include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
@@ -50,8 +51,8 @@ RsaSsaPkcs1Parameters::Builder::SetModulusSizeInBits(int modulus_size_in_bits) {
 
 RsaSsaPkcs1Parameters::Builder&
 RsaSsaPkcs1Parameters::Builder::SetPublicExponent(
-    absl::string_view public_exponent) {
-  public_exponent_ = std::string(public_exponent);
+    const BigInteger& public_exponent) {
+  public_exponent_ = public_exponent;
   return *this;
 }
 
@@ -94,7 +95,7 @@ util::StatusOr<RsaSsaPkcs1Parameters> RsaSsaPkcs1Parameters::Builder::Build() {
   // Validate the public exponent: public exponent needs to be odd, greater than
   // 65536 and (for consistency with BoringSSL), smaller that 32 bits.
   util::Status exponent_status =
-      internal::ValidateRsaPublicExponent(public_exponent_);
+      internal::ValidateRsaPublicExponent(public_exponent_.GetValue());
   if (!exponent_status.ok()) {
     return exponent_status;
   }
@@ -143,13 +144,13 @@ bool RsaSsaPkcs1Parameters::operator==(const Parameters& other) const {
 }
 
 // Returns the big endian encoded F4 value as a public exponent default.
-std::string RsaSsaPkcs1Parameters::Builder::CreateDefaultPublicExponent() {
+BigInteger RsaSsaPkcs1Parameters::Builder::CreateDefaultPublicExponent() {
   internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), kF4);
 
   std::string F4_string =
       internal::BignumToString(e.get(), BN_num_bytes(e.get())).value();
-  return F4_string;
+  return BigInteger(F4_string);
 }
 
 }  // namespace tink

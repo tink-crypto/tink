@@ -19,8 +19,8 @@
 
 #include <string>
 
-#include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
+#include "tink/big_integer.h"
 #include "tink/parameters.h"
 #include "tink/signature/signature_parameters.h"
 #include "tink/util/statusor.h"
@@ -67,7 +67,7 @@ class RsaSsaPkcs1Parameters : public SignatureParameters {
     Builder() = default;
 
     Builder& SetModulusSizeInBits(int modulus_size_in_bits);
-    Builder& SetPublicExponent(absl::string_view public_exponent);
+    Builder& SetPublicExponent(const BigInteger& public_exponent);
     Builder& SetHashType(HashType hash_type);
     Builder& SetVariant(Variant variant);
 
@@ -75,11 +75,11 @@ class RsaSsaPkcs1Parameters : public SignatureParameters {
     util::StatusOr<RsaSsaPkcs1Parameters> Build();
 
    private:
-    static std::string CreateDefaultPublicExponent();
+    static BigInteger CreateDefaultPublicExponent();
 
     absl::optional<int> modulus_size_in_bits_ = absl::nullopt;
     // Defaults to F4.
-    std::string public_exponent_ = CreateDefaultPublicExponent();
+    BigInteger public_exponent_ = CreateDefaultPublicExponent();
     absl::optional<HashType> hash_type_ = absl::nullopt;
     absl::optional<Variant> variant_ = absl::nullopt;
   };
@@ -93,7 +93,7 @@ class RsaSsaPkcs1Parameters : public SignatureParameters {
 
   int GetModulusSizeInBits() const { return modulus_size_in_bits_; }
 
-  absl::string_view GetPublicExponent() const { return public_exponent_; }
+  const BigInteger& GetPublicExponent() const { return public_exponent_; }
 
   HashType GetHashType() const { return hash_type_; }
 
@@ -107,7 +107,7 @@ class RsaSsaPkcs1Parameters : public SignatureParameters {
 
  private:
   explicit RsaSsaPkcs1Parameters(int modulus_size_in_bits,
-                                 absl::string_view public_exponent,
+                                 const BigInteger& public_exponent,
                                  HashType hash_type, Variant variant)
       : modulus_size_in_bits_(modulus_size_in_bits),
         public_exponent_(public_exponent),
@@ -115,7 +115,7 @@ class RsaSsaPkcs1Parameters : public SignatureParameters {
         variant_(variant) {}
 
   int modulus_size_in_bits_;
-  std::string public_exponent_;
+  BigInteger public_exponent_;
   HashType hash_type_;
   Variant variant_;
 };

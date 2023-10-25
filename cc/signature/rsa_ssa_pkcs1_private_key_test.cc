@@ -114,7 +114,7 @@ constexpr absl::string_view kQInv =
     "rflwwOVSThKeiquscgk069wlIKoz5tYcCKgCx8HIttQ8zyybcIN0iRdUmXfYe4pg8k4whZ9zuE"
     "h_EtEecI35yjPYzq2CowOzQT85-O6pVk";
 
-const std::string& kF4Str = *new std::string("\x1\0\x1", 3);
+const BigInteger& kF4 = *new BigInteger(std::string("\x1\0\x1", 3));  // 65537
 
 std::string Base64WebSafeDecode(absl::string_view base64_string) {
   std::string dest;
@@ -149,7 +149,7 @@ RsaSsaPkcs1PublicKey GetValidPublicKey() {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(kModulusSizeInBits)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kNoPrefix)
           .Build();
@@ -197,7 +197,7 @@ TEST_P(RsaSsaPkcs1PrivateKeyTest, BuildPrivateKeySucceeds) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(kModulusSizeInBits)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(test_case.hash_type)
           .SetVariant(test_case.variant)
           .Build();
@@ -282,7 +282,7 @@ TEST(RsaSsaPkcs1PrivateKeyTest, BuildPrivateKeyFromBoringSsl) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(*e_str)
+          .SetPublicExponent(BigInteger(*e_str))
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kNoPrefix)
           .Build();
@@ -611,7 +611,7 @@ TEST(RsaSsaPkcs1PrivateKeyTest, CreateMismatchedKeyPairFails) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kTink)
           .Build();
@@ -655,7 +655,7 @@ TEST_P(RsaSsaPkcs1PrivateKeyTest, PrivateKeyEquals) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(kModulusSizeInBits)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(test_case.hash_type)
           .SetVariant(test_case.variant)
           .Build();
@@ -706,7 +706,7 @@ TEST(RsaSsaPkcs1PrivateKeyTest, DifferentPublicKeyNotEqual) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kTink)
           .Build();
@@ -763,7 +763,7 @@ TEST(RsaSsaPkcs1PrivateKeyTest, DifferentKeyTypesNotEqual) {
   util::StatusOr<RsaSsaPkcs1Parameters> parameters =
       RsaSsaPkcs1Parameters::Builder()
           .SetModulusSizeInBits(2048)
-          .SetPublicExponent(kF4Str)
+          .SetPublicExponent(kF4)
           .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
           .SetVariant(RsaSsaPkcs1Parameters::Variant::kNoPrefix)
           .Build();
