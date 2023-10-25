@@ -930,6 +930,7 @@ tink_cc_test(
     gmock
     tink::core::aead
     tink::core::keyset_handle
+    tink::internal::ssl_util
     tink::util::statusor
     tink::util::test_matchers
 )

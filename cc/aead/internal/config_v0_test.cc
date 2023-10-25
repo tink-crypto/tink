@@ -50,6 +50,8 @@ using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
 using ::google::crypto::tink::KeyTemplate;
 using ::testing::Not;
+using ::testing::TestWithParam;
+using ::testing::Values;
 
 TEST(AeadV0Test, PrimitiveWrappers) {
   Configuration config;
@@ -76,82 +78,71 @@ TEST(AeadV0Test, KeyManagers) {
 
   for (const internal::KeyTypeInfoStore* s : {*store, *key_gen_store}) {
     EXPECT_THAT(s->Get(AesCtrHmacAeadKeyManager().get_key_type()), IsOk());
+    EXPECT_THAT(s->Get(AesEaxKeyManager().get_key_type()), IsOk());
     EXPECT_THAT(s->Get(AesGcmKeyManager().get_key_type()), IsOk());
     EXPECT_THAT(s->Get(AesGcmSivKeyManager().get_key_type()), IsOk());
-    EXPECT_THAT(s->Get(AesEaxKeyManager().get_key_type()), IsOk());
     EXPECT_THAT(s->Get(XChaCha20Poly1305KeyManager().get_key_type()), IsOk());
   }
 }
 
-TEST(AeadV0Test, GetPrimitive) {
+using AeadV0KeyTypesTest = TestWithParam<KeyTemplate>;
+using AeadV0BoringSslKeyTypesTest = TestWithParam<KeyTemplate>;
+
+// For key type support when using BoringSSL or OpenSSL, see
+// https://developers.google.com/tink/supported-key-types#aead.
+INSTANTIATE_TEST_SUITE_P(AeadV0KeyTypesTestSuite, AeadV0KeyTypesTest,
+                         Values(AeadKeyTemplates::Aes128CtrHmacSha256(),
+                                AeadKeyTemplates::Aes128Eax(),
+                                AeadKeyTemplates::Aes128Gcm()));
+INSTANTIATE_TEST_SUITE_P(AeadV0BoringSslKeyTypesTestSuite,
+                         AeadV0BoringSslKeyTypesTest,
+                         Values(AeadKeyTemplates::Aes128GcmSiv(),
+                                AeadKeyTemplates::XChaCha20Poly1305()));
+
+TEST_P(AeadV0KeyTypesTest, GetPrimitive) {
   KeyGenConfiguration key_gen_config;
   ASSERT_THAT(AddAeadKeyGenV0(key_gen_config), IsOk());
   Configuration config;
   ASSERT_THAT(AddAeadV0(config), IsOk());
 
-  for (const KeyTemplate& temp :
-       {AeadKeyTemplates::Aes128CtrHmacSha256(), AeadKeyTemplates::Aes128Gcm(),
-        AeadKeyTemplates::Aes128Eax()}) {
-    util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
-        KeysetHandle::GenerateNew(temp, key_gen_config);
-    ASSERT_THAT(handle, IsOk());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      KeysetHandle::GenerateNew(GetParam(), key_gen_config);
+  ASSERT_THAT(handle, IsOk());
 
-    util::StatusOr<std::unique_ptr<Aead>> aead =
-        (*handle)->GetPrimitive<Aead>(config);
-    ASSERT_THAT(aead, IsOk());
+  util::StatusOr<std::unique_ptr<Aead>> aead =
+      (*handle)->GetPrimitive<Aead>(config);
+  ASSERT_THAT(aead, IsOk());
 
-    std::string plaintext = "plaintext";
-    util::StatusOr<std::string> ciphertext = (*aead)->Encrypt(plaintext, "ad");
-    ASSERT_THAT(ciphertext, IsOk());
-    EXPECT_THAT((*aead)->Decrypt(*ciphertext, "ad"), IsOkAndHolds(plaintext));
-  }
+  std::string plaintext = "plaintext";
+  util::StatusOr<std::string> ciphertext = (*aead)->Encrypt(plaintext, "ad");
+  ASSERT_THAT(ciphertext, IsOk());
+  EXPECT_THAT((*aead)->Decrypt(*ciphertext, "ad"), IsOkAndHolds(plaintext));
 }
 
-TEST(AeadV0Test, GetPrimitiveBoringSsl) {
+TEST_P(AeadV0BoringSslKeyTypesTest, GetPrimitive) {
+  KeyGenConfiguration key_gen_config;
+  ASSERT_THAT(AddAeadKeyGenV0(key_gen_config), IsOk());
+  Configuration config;
+  ASSERT_THAT(AddAeadV0(config), IsOk());
+
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      KeysetHandle::GenerateNew(GetParam(), key_gen_config);
+  ASSERT_THAT(handle, IsOk());
+
+  // Fails if using OpenSSL.
   if (!internal::IsBoringSsl()) {
-    GTEST_SKIP() << "BoringSSL-only test.";
-  }
-
-  KeyGenConfiguration key_gen_config;
-  ASSERT_THAT(AddAeadKeyGenV0(key_gen_config), IsOk());
-  Configuration config;
-  ASSERT_THAT(AddAeadV0(config), IsOk());
-
-  for (const KeyTemplate& temp : {AeadKeyTemplates::Aes128GcmSiv(),
-                                  AeadKeyTemplates::XChaCha20Poly1305()}) {
-    util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
-        KeysetHandle::GenerateNew(temp, key_gen_config);
-    ASSERT_THAT(handle, IsOk());
-
-    util::StatusOr<std::unique_ptr<Aead>> aead =
-        (*handle)->GetPrimitive<Aead>(config);
-    ASSERT_THAT(aead, IsOk());
-
-    std::string plaintext = "plaintext";
-    util::StatusOr<std::string> ciphertext = (*aead)->Encrypt(plaintext, "ad");
-    ASSERT_THAT(ciphertext, IsOk());
-    EXPECT_THAT((*aead)->Decrypt(*ciphertext, "ad"), IsOkAndHolds(plaintext));
-  }
-}
-
-TEST(AeadV0Test, GetPrimitiveOpenSsl) {
-  if (internal::IsBoringSsl()) {
-    GTEST_SKIP() << "OpenSSL-only test.";
-  }
-
-  KeyGenConfiguration key_gen_config;
-  ASSERT_THAT(AddAeadKeyGenV0(key_gen_config), IsOk());
-  Configuration config;
-  ASSERT_THAT(AddAeadV0(config), IsOk());
-
-  for (const KeyTemplate& temp : {AeadKeyTemplates::Aes128GcmSiv(),
-                                  AeadKeyTemplates::XChaCha20Poly1305()}) {
-    util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
-        KeysetHandle::GenerateNew(temp, key_gen_config);
-    ASSERT_THAT(handle, IsOk());
-
     EXPECT_THAT((*handle)->GetPrimitive<Aead>(config), Not(IsOk()));
+    return;
   }
+
+  util::StatusOr<std::unique_ptr<Aead>> aead =
+      (*handle)->GetPrimitive<Aead>(config);
+  ASSERT_THAT(aead, IsOk());
+
+  std::string plaintext = "plaintext";
+  util::StatusOr<std::string> ciphertext = (*aead)->Encrypt(plaintext, "ad");
+  ASSERT_THAT(ciphertext, IsOk());
+  EXPECT_THAT((*aead)->Decrypt(*ciphertext, "ad"), IsOkAndHolds(plaintext));
 }
 
 }  // namespace

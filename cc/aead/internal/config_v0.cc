@@ -44,17 +44,17 @@ util::Status AddAeadV0(Configuration& config) {
     return status;
   }
   status = internal::ConfigurationImpl::AddKeyTypeManager(
+      absl::make_unique<AesEaxKeyManager>(), config);
+  if (!status.ok()) {
+    return status;
+  }
+  status = internal::ConfigurationImpl::AddKeyTypeManager(
       absl::make_unique<AesGcmKeyManager>(), config);
   if (!status.ok()) {
     return status;
   }
   status = internal::ConfigurationImpl::AddKeyTypeManager(
       absl::make_unique<AesGcmSivKeyManager>(), config);
-  if (!status.ok()) {
-    return status;
-  }
-  status = internal::ConfigurationImpl::AddKeyTypeManager(
-      absl::make_unique<AesEaxKeyManager>(), config);
   if (!status.ok()) {
     return status;
   }
