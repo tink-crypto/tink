@@ -292,6 +292,18 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "config_v0",
+    srcs = ["config_v0.cc"],
+    hdrs = ["config_v0.h"],
+    include_prefix = "tink/mac",
+    deps = [
+        "//:configuration",
+        "//mac/internal:config_v0",
+        "@com_google_absl//absl/log:check",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -532,6 +544,23 @@ cc_test(
         "//proto:hmac_cc_proto",
         "//proto:tink_cc_proto",
         "//subtle:random",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "config_v0_test",
+    srcs = ["config_v0_test.cc"],
+    deps = [
+        ":config_v0",
+        ":mac_key_templates",
+        "//:chunked_mac",
+        "//:key_gen_configuration",
+        "//:keyset_handle",
+        "//:mac",
+        "//mac/internal:key_gen_config_v0",
+        "//util:statusor",
         "//util:test_matchers",
         "@com_google_googletest//:gtest_main",
     ],

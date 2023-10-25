@@ -276,6 +276,17 @@ tink_cc_library(
     tink::proto::tink_cc_proto
 )
 
+tink_cc_library(
+  NAME config_v0
+  SRCS
+    config_v0.cc
+    config_v0.h
+  DEPS
+    absl::check
+    tink::core::configuration
+    tink::mac::internal::config_v0
+)
+
 # tests
 
 tink_cc_test(
@@ -508,4 +519,21 @@ tink_cc_test(
     tink::proto::common_cc_proto
     tink::proto::hmac_cc_proto
     tink::proto::tink_cc_proto
+)
+
+tink_cc_test(
+  NAME config_v0_test
+  SRCS
+    config_v0_test.cc
+  DEPS
+    tink::mac::config_v0
+    tink::mac::mac_key_templates
+    gmock
+    tink::core::chunked_mac
+    tink::core::key_gen_configuration
+    tink::core::keyset_handle
+    tink::core::mac
+    tink::mac::internal::key_gen_config_v0
+    tink::util::statusor
+    tink::util::test_matchers
 )

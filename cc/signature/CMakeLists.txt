@@ -549,6 +549,17 @@ tink_cc_library(
     tink::util::statusor
 )
 
+tink_cc_library(
+  NAME config_v0
+  SRCS
+    config_v0.cc
+    config_v0.h
+  DEPS
+    absl::check
+    tink::core::configuration
+    tink::signature::internal::config_v0
+)
+
 # tests
 
 tink_cc_test(
@@ -1032,4 +1043,22 @@ tink_cc_test(
     tink::internal::ssl_unique_ptr
     tink::util::statusor
     tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME config_v0_test
+  SRCS
+    config_v0_test.cc
+  DEPS
+    tink::signature::config_v0
+    tink::signature::signature_key_templates
+    gmock
+    tink::core::key_gen_configuration
+    tink::core::keyset_handle
+    tink::core::public_key_sign
+    tink::core::public_key_verify
+    tink::signature::internal::key_gen_config_v0
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::proto::tink_cc_proto
 )

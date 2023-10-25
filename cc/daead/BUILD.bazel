@@ -182,6 +182,18 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "config_v0",
+    srcs = ["config_v0.cc"],
+    hdrs = ["config_v0.h"],
+    include_prefix = "tink/daead",
+    deps = [
+        "//:configuration",
+        "//daead/internal:config_v0",
+        "@com_google_absl//absl/log:check",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -340,6 +352,23 @@ cc_test(
         "//proto:aes_siv_cc_proto",
         "//proto:tink_cc_proto",
         "//subtle:random",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "config_v0_test",
+    srcs = ["config_v0_test.cc"],
+    deps = [
+        ":config_v0",
+        ":deterministic_aead_key_templates",
+        "//:deterministic_aead",
+        "//:key_gen_configuration",
+        "//:keyset_handle",
+        "//daead/internal:key_gen_config_v0",
+        "//proto:tink_cc_proto",
+        "//util:statusor",
         "//util:test_matchers",
         "@com_google_googletest//:gtest_main",
     ],

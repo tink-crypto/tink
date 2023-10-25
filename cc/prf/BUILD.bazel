@@ -305,3 +305,32 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "config_v0",
+    srcs = ["config_v0.cc"],
+    hdrs = ["config_v0.h"],
+    include_prefix = "tink/prf",
+    deps = [
+        "//:configuration",
+        "//prf/internal:config_v0",
+        "@com_google_absl//absl/log:check",
+    ],
+)
+
+cc_test(
+    name = "config_v0_test",
+    srcs = ["config_v0_test.cc"],
+    deps = [
+        ":config_v0",
+        ":prf_key_templates",
+        ":prf_set",
+        "//:key_gen_configuration",
+        "//:keyset_handle",
+        "//prf/internal:key_gen_config_v0",
+        "//proto:tink_cc_proto",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

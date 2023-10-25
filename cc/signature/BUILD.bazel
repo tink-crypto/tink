@@ -576,6 +576,18 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "config_v0",
+    srcs = ["config_v0.cc"],
+    hdrs = ["config_v0.h"],
+    include_prefix = "tink/signature",
+    deps = [
+        "//:configuration",
+        "//signature/internal:config_v0",
+        "@com_google_absl//absl/log:check",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -1073,6 +1085,24 @@ cc_test(
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "config_v0_test",
+    srcs = ["config_v0_test.cc"],
+    deps = [
+        ":config_v0",
+        ":signature_key_templates",
+        "//:key_gen_configuration",
+        "//:keyset_handle",
+        "//:public_key_sign",
+        "//:public_key_verify",
+        "//proto:tink_cc_proto",
+        "//signature/internal:key_gen_config_v0",
+        "//util:statusor",
+        "//util:test_matchers",
         "@com_google_googletest//:gtest_main",
     ],
 )
