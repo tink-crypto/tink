@@ -22,9 +22,8 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "tink/key_gen_configuration.h"
 #include "tink/keyset_handle.h"
-#include "tink/prf/internal/key_gen_config_v0.h"
+#include "tink/prf/key_gen_config_v0.h"
 #include "tink/prf/prf_key_templates.h"
 #include "tink/prf/prf_set.h"
 #include "tink/util/statusor.h"
@@ -49,11 +48,8 @@ INSTANTIATE_TEST_SUITE_P(PrfV0KeyTypesTestSuite, PrfV0KeyTypesTest,
                                 PrfKeyTemplates::HmacSha256()));
 
 TEST_P(PrfV0KeyTypesTest, GetPrimitive) {
-  KeyGenConfiguration key_gen_config;
-  ASSERT_THAT(internal::AddPrfKeyGenV0(key_gen_config), IsOk());
-
   util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
-      KeysetHandle::GenerateNew(GetParam(), key_gen_config);
+      KeysetHandle::GenerateNew(GetParam(), KeyGenConfigPrfV0());
   ASSERT_THAT(handle, IsOk());
 
   util::StatusOr<std::unique_ptr<PrfSet>> prf =

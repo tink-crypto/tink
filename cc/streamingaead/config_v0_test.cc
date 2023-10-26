@@ -25,11 +25,10 @@
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "tink/input_stream.h"
-#include "tink/key_gen_configuration.h"
 #include "tink/keyset_handle.h"
 #include "tink/output_stream.h"
 #include "tink/streaming_aead.h"
-#include "tink/streamingaead/internal/key_gen_config_v0.h"
+#include "tink/streamingaead/key_gen_config_v0.h"
 #include "tink/streamingaead/streaming_aead_key_templates.h"
 #include "tink/subtle/test_util.h"
 #include "tink/util/istream_input_stream.h"
@@ -57,11 +56,8 @@ INSTANTIATE_TEST_SUITE_P(
            StreamingAeadKeyTemplates::Aes128GcmHkdf4KB()));
 
 TEST_P(ConfigV0Test, GetPrimitive) {
-  KeyGenConfiguration key_gen_config;
-  ASSERT_THAT(internal::AddStreamingAeadKeyGenV0(key_gen_config), IsOk());
-
   util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
-      KeysetHandle::GenerateNew(GetParam(), key_gen_config);
+      KeysetHandle::GenerateNew(GetParam(), KeyGenConfigStreamingAeadV0());
   ASSERT_THAT(handle, IsOk());
 
   util::StatusOr<std::unique_ptr<StreamingAead>> saead =

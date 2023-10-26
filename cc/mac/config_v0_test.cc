@@ -25,7 +25,7 @@
 #include "tink/key_gen_configuration.h"
 #include "tink/keyset_handle.h"
 #include "tink/mac.h"
-#include "tink/mac/internal/key_gen_config_v0.h"
+#include "tink/mac/key_gen_config_v0.h"
 #include "tink/mac/mac_key_templates.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -46,11 +46,8 @@ INSTANTIATE_TEST_SUITE_P(ConfigV0TestSuite, ConfigV0Test,
                                 MacKeyTemplates::HmacSha256()));
 
 TEST_P(ConfigV0Test, GetPrimitive) {
-  KeyGenConfiguration key_gen_config;
-  ASSERT_THAT(internal::AddMacKeyGenV0(key_gen_config), IsOk());
-
   util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
-      KeysetHandle::GenerateNew(GetParam(), key_gen_config);
+      KeysetHandle::GenerateNew(GetParam(), KeyGenConfigMacV0());
   ASSERT_THAT(handle, IsOk());
 
   util::StatusOr<std::unique_ptr<Mac>> mac =
@@ -64,11 +61,8 @@ TEST_P(ConfigV0Test, GetPrimitive) {
 }
 
 TEST_P(ConfigV0Test, GetPrimitiveChunkedMac) {
-  KeyGenConfiguration key_gen_config;
-  ASSERT_THAT(internal::AddMacKeyGenV0(key_gen_config), IsOk());
-
   util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
-      KeysetHandle::GenerateNew(GetParam(), key_gen_config);
+      KeysetHandle::GenerateNew(GetParam(), KeyGenConfigMacV0());
   ASSERT_THAT(handle, IsOk());
 
   util::StatusOr<std::unique_ptr<ChunkedMac>> chunked_mac =

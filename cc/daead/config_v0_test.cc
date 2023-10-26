@@ -22,9 +22,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/daead/deterministic_aead_key_templates.h"
-#include "tink/daead/internal/key_gen_config_v0.h"
+#include "tink/daead/key_gen_config_v0.h"
 #include "tink/deterministic_aead.h"
-#include "tink/key_gen_configuration.h"
 #include "tink/keyset_handle.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -38,12 +37,9 @@ using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
 
 TEST(ConfigV0Test, GetPrimitive) {
-  KeyGenConfiguration key_gen_config;
-  ASSERT_THAT(internal::AddDeterministicAeadKeyGenV0(key_gen_config), IsOk());
-
   util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
       KeysetHandle::GenerateNew(DeterministicAeadKeyTemplates::Aes256Siv(),
-                                key_gen_config);
+                                KeyGenConfigDeterministicAeadV0());
   ASSERT_THAT(handle, IsOk());
 
   util::StatusOr<std::unique_ptr<DeterministicAead>> daead =

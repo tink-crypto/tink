@@ -560,6 +560,17 @@ tink_cc_library(
     tink::signature::internal::config_v0
 )
 
+tink_cc_library(
+  NAME key_gen_config_v0
+  SRCS
+    key_gen_config_v0.cc
+    key_gen_config_v0.h
+  DEPS
+    absl::check
+    tink::core::key_gen_configuration
+    tink::signature::internal::key_gen_config_v0
+)
+
 # tests
 
 tink_cc_test(
@@ -1049,13 +1060,12 @@ tink_cc_test(
     config_v0_test.cc
   DEPS
     tink::signature::config_v0
+    tink::signature::key_gen_config_v0
     tink::signature::signature_key_templates
     gmock
-    tink::core::key_gen_configuration
     tink::core::keyset_handle
     tink::core::public_key_sign
     tink::core::public_key_verify
-    tink::signature::internal::key_gen_config_v0
     tink::util::statusor
     tink::util::test_matchers
     tink::proto::tink_cc_proto

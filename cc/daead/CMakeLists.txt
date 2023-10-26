@@ -183,6 +183,17 @@ tink_cc_library(
     tink::daead::internal::config_v0
 )
 
+tink_cc_library(
+  NAME key_gen_config_v0
+  SRCS
+    key_gen_config_v0.cc
+    key_gen_config_v0.h
+  DEPS
+    absl::check
+    tink::core::key_gen_configuration
+    tink::daead::internal::key_gen_config_v0
+)
+
 # tests
 
 tink_cc_test(
@@ -346,11 +357,10 @@ tink_cc_test(
   DEPS
     tink::daead::config_v0
     tink::daead::deterministic_aead_key_templates
+    tink::daead::key_gen_config_v0
     gmock
     tink::core::deterministic_aead
-    tink::core::key_gen_configuration
     tink::core::keyset_handle
-    tink::daead::internal::key_gen_config_v0
     tink::util::statusor
     tink::util::test_matchers
     tink::proto::tink_cc_proto

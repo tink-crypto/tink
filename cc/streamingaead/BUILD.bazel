@@ -207,6 +207,18 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "key_gen_config_v0",
+    srcs = ["key_gen_config_v0.cc"],
+    hdrs = ["key_gen_config_v0.h"],
+    include_prefix = "tink/streamingaead",
+    deps = [
+        "//:key_gen_configuration",
+        "//streamingaead/internal:key_gen_config_v0",
+        "@com_google_absl//absl/log:check",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -449,14 +461,13 @@ cc_test(
     srcs = ["config_v0_test.cc"],
     deps = [
         ":config_v0",
+        ":key_gen_config_v0",
         ":streaming_aead_key_templates",
         "//:input_stream",
-        "//:key_gen_configuration",
         "//:keyset_handle",
         "//:output_stream",
         "//:streaming_aead",
         "//proto:tink_cc_proto",
-        "//streamingaead/internal:key_gen_config_v0",
         "//subtle:test_util",
         "//util:istream_input_stream",
         "//util:ostream_output_stream",

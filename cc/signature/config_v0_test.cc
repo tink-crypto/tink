@@ -21,11 +21,10 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "tink/key_gen_configuration.h"
 #include "tink/keyset_handle.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
-#include "tink/signature/internal/key_gen_config_v0.h"
+#include "tink/signature/key_gen_config_v0.h"
 #include "tink/signature/signature_key_templates.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -49,14 +48,11 @@ INSTANTIATE_TEST_SUITE_P(
            SignatureKeyTemplates::RsaSsaPss3072Sha256Sha256F4()));
 
 TEST_P(ConfigV0Test, GetPrimitive) {
-  KeyGenConfiguration key_gen_config;
-  ASSERT_THAT(internal::AddSignatureKeyGenV0(key_gen_config), IsOk());
-
   util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
-      KeysetHandle::GenerateNew(GetParam(), key_gen_config);
+      KeysetHandle::GenerateNew(GetParam(), KeyGenConfigSignatureV0());
   ASSERT_THAT(handle, IsOk());
   util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
-      (*handle)->GetPublicKeysetHandle(key_gen_config);
+      (*handle)->GetPublicKeysetHandle(KeyGenConfigSignatureV0());
   ASSERT_THAT(public_handle, IsOk());
 
   util::StatusOr<std::unique_ptr<PublicKeySign>> sign =

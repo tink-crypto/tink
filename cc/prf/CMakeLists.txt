@@ -303,18 +303,28 @@ tink_cc_library(
     tink::prf::internal::config_v0
 )
 
+tink_cc_library(
+  NAME key_gen_config_v0
+  SRCS
+    key_gen_config_v0.cc
+    key_gen_config_v0.h
+  DEPS
+    absl::check
+    tink::core::key_gen_configuration
+    tink::prf::internal::key_gen_config_v0
+)
+
 tink_cc_test(
   NAME config_v0_test
   SRCS
     config_v0_test.cc
   DEPS
     tink::prf::config_v0
+    tink::prf::key_gen_config_v0
     tink::prf::prf_key_templates
     tink::prf::prf_set
     gmock
-    tink::core::key_gen_configuration
     tink::core::keyset_handle
-    tink::prf::internal::key_gen_config_v0
     tink::util::statusor
     tink::util::test_matchers
     tink::proto::tink_cc_proto

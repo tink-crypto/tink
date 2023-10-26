@@ -287,6 +287,17 @@ tink_cc_library(
     tink::mac::internal::config_v0
 )
 
+tink_cc_library(
+  NAME key_gen_config_v0
+  SRCS
+    key_gen_config_v0.cc
+    key_gen_config_v0.h
+  DEPS
+    absl::check
+    tink::core::key_gen_configuration
+    tink::mac::internal::key_gen_config_v0
+)
+
 # tests
 
 tink_cc_test(
@@ -527,13 +538,13 @@ tink_cc_test(
     config_v0_test.cc
   DEPS
     tink::mac::config_v0
+    tink::mac::key_gen_config_v0
     tink::mac::mac_key_templates
     gmock
     tink::core::chunked_mac
     tink::core::key_gen_configuration
     tink::core::keyset_handle
     tink::core::mac
-    tink::mac::internal::key_gen_config_v0
     tink::util::statusor
     tink::util::test_matchers
 )

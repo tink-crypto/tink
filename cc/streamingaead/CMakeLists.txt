@@ -194,6 +194,17 @@ tink_cc_library(
     tink::streamingaead::internal::config_v0
 )
 
+tink_cc_library(
+  NAME key_gen_config_v0
+  SRCS
+    key_gen_config_v0.cc
+    key_gen_config_v0.h
+  DEPS
+    absl::check
+    tink::core::key_gen_configuration
+    tink::streamingaead::internal::key_gen_config_v0
+)
+
 # tests
 
 tink_cc_test(
@@ -426,15 +437,14 @@ tink_cc_test(
     config_v0_test.cc
   DEPS
     tink::streamingaead::config_v0
+    tink::streamingaead::key_gen_config_v0
     tink::streamingaead::streaming_aead_key_templates
     gmock
     absl::memory
     tink::core::input_stream
-    tink::core::key_gen_configuration
     tink::core::keyset_handle
     tink::core::output_stream
     tink::core::streaming_aead
-    tink::streamingaead::internal::key_gen_config_v0
     tink::subtle::test_util
     tink::util::istream_input_stream
     tink::util::ostream_output_stream
