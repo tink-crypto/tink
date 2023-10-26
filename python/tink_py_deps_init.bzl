@@ -7,6 +7,7 @@ def tink_py_deps_init(workspace_name):
     pip_install(
         name = "tink_py_pip_deps",
         quiet = False,
+        extra_pip_args = ["--no-deps"],
         requirements = "@" + workspace_name + "//:requirements_all.txt",
     )
 
