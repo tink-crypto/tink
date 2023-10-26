@@ -22,25 +22,17 @@ import com.google.crypto.tink.KeyStatus;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.internal.BigIntegerEncoding;
 import com.google.crypto.tink.internal.JsonParser;
-import com.google.crypto.tink.internal.MutableSerializationRegistry;
-import com.google.crypto.tink.internal.ProtoKeySerialization;
-import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.tinkkey.KeyAccess;
 import com.google.errorprone.annotations.InlineMe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.spec.ECPoint;
 import java.util.Optional;
-import javax.annotation.Nullable;
 
 /**
  * Provides functions to import and export public Json Web Key (JWK) sets.
@@ -71,29 +63,13 @@ public final class JwkSetConverter {
       Key key = entry.getKey();
       if (key instanceof JwtEcdsaPublicKey) {
         keys.add(convertJwtEcdsaKey((JwtEcdsaPublicKey) key));
+      } else if (key instanceof JwtRsaSsaPkcs1PublicKey) {
+        keys.add(convertJwtRsaSsaPkcs1Key((JwtRsaSsaPkcs1PublicKey) key));
+      } else if (key instanceof JwtRsaSsaPssPublicKey) {
+        keys.add(convertJwtRsaSsaPssKey((JwtRsaSsaPssPublicKey) key));
       } else {
-        ProtoKeySerialization protoKeySerialization =
-            MutableSerializationRegistry.globalInstance()
-                .serializeKey(entry.getKey(), ProtoKeySerialization.class, /* access= */ null);
-
-        if ((protoKeySerialization.getOutputPrefixType() != OutputPrefixType.RAW)
-            && (protoKeySerialization.getOutputPrefixType() != OutputPrefixType.TINK)) {
-          throw new GeneralSecurityException("only OutputPrefixType RAW and TINK are supported");
-        }
-        if (protoKeySerialization.getKeyMaterialType() != KeyMaterialType.ASYMMETRIC_PUBLIC) {
-          throw new GeneralSecurityException("only public keys can be converted");
-        }
-        switch (protoKeySerialization.getTypeUrl()) {
-          case JWT_RSA_SSA_PKCS1_PUBLIC_KEY_URL:
-            keys.add(convertJwtRsaSsaPkcs1(protoKeySerialization));
-            break;
-          case JWT_RSA_SSA_PSS_PUBLIC_KEY_URL:
-            keys.add(convertJwtRsaSsaPss(protoKeySerialization));
-            break;
-          default:
-            throw new GeneralSecurityException(
-                String.format("key type %s is not supported", protoKeySerialization.getTypeUrl()));
-        }
+        throw new GeneralSecurityException(
+            "unsupported key with parameters " + key.getParameters());
       }
     }
     JsonObject jwkSet = new JsonObject();
@@ -144,19 +120,6 @@ public final class JwkSetConverter {
     return builder.build();
   }
 
-  private static final String JWT_RSA_SSA_PKCS1_PUBLIC_KEY_URL =
-      "type.googleapis.com/google.crypto.tink.JwtRsaSsaPkcs1PublicKey";
-  private static final String JWT_RSA_SSA_PSS_PUBLIC_KEY_URL =
-      "type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPublicKey";
-
-  private static Optional<String> getKid(@Nullable Integer idRequirement) {
-    if (idRequirement == null) {
-      return Optional.empty();
-    }
-    byte[] bigEndianKeyId = ByteBuffer.allocate(4).putInt(idRequirement).array();
-    return Optional.of(Base64.urlSafeEncode(bigEndianKeyId));
-  }
-
   @AccessesPartialKey
   private static JsonObject convertJwtEcdsaKey(JwtEcdsaPublicKey key)
       throws GeneralSecurityException {
@@ -200,87 +163,50 @@ public final class JwkSetConverter {
     return jsonKey;
   }
 
-  private static JsonObject convertJwtRsaSsaPkcs1(ProtoKeySerialization protoKeySerialization)
+  @AccessesPartialKey
+  private static JsonObject convertJwtRsaSsaPkcs1Key(JwtRsaSsaPkcs1PublicKey key)
       throws GeneralSecurityException {
-    com.google.crypto.tink.proto.JwtRsaSsaPkcs1PublicKey jwtRsaSsaPkcs1PublicKey;
-    try {
-      jwtRsaSsaPkcs1PublicKey =
-          com.google.crypto.tink.proto.JwtRsaSsaPkcs1PublicKey.parseFrom(
-              protoKeySerialization.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException(
-          "failed to parse value as JwtRsaSsaPkcs1PublicKey proto", e);
-    }
-    String alg;
-    switch (jwtRsaSsaPkcs1PublicKey.getAlgorithm()) {
-      case RS256:
-        alg = "RS256";
-        break;
-      case RS384:
-        alg = "RS384";
-        break;
-      case RS512:
-        alg = "RS512";
-        break;
-      default:
-        throw new GeneralSecurityException("unknown algorithm");
-    }
+    String alg = key.getParameters().getAlgorithm().getStandardName();
     JsonObject jsonKey = new JsonObject();
     jsonKey.addProperty("kty", "RSA");
-    jsonKey.addProperty("n", Base64.urlSafeEncode(jwtRsaSsaPkcs1PublicKey.getN().toByteArray()));
-    jsonKey.addProperty("e", Base64.urlSafeEncode(jwtRsaSsaPkcs1PublicKey.getE().toByteArray()));
+    jsonKey.addProperty(
+        "n", Base64.urlSafeEncode(BigIntegerEncoding.toBigEndianBytes(key.getModulus())));
+    jsonKey.addProperty(
+        "e",
+        Base64.urlSafeEncode(
+            BigIntegerEncoding.toBigEndianBytes(key.getParameters().getPublicExponent())));
     jsonKey.addProperty("use", "sig");
     jsonKey.addProperty("alg", alg);
     JsonArray keyOps = new JsonArray();
     keyOps.add("verify");
     jsonKey.add("key_ops", keyOps);
-    Optional<String> kid = getKid(protoKeySerialization.getIdRequirementOrNull());
+    Optional<String> kid = key.getKid();
     if (kid.isPresent()) {
       jsonKey.addProperty("kid", kid.get());
-    } else if (jwtRsaSsaPkcs1PublicKey.hasCustomKid()) {
-      jsonKey.addProperty("kid", jwtRsaSsaPkcs1PublicKey.getCustomKid().getValue());
     }
     return jsonKey;
   }
 
-  private static JsonObject convertJwtRsaSsaPss(ProtoKeySerialization protoKeySerialization)
+  @AccessesPartialKey
+  private static JsonObject convertJwtRsaSsaPssKey(JwtRsaSsaPssPublicKey key)
       throws GeneralSecurityException {
-    com.google.crypto.tink.proto.JwtRsaSsaPssPublicKey jwtRsaSsaPssPublicKey;
-    try {
-      jwtRsaSsaPssPublicKey =
-          com.google.crypto.tink.proto.JwtRsaSsaPssPublicKey.parseFrom(
-              protoKeySerialization.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("failed to parse value as JwtRsaSsaPssPublicKey proto", e);
-    }
-    String alg;
-    switch (jwtRsaSsaPssPublicKey.getAlgorithm()) {
-      case PS256:
-        alg = "PS256";
-        break;
-      case PS384:
-        alg = "PS384";
-        break;
-      case PS512:
-        alg = "PS512";
-        break;
-      default:
-        throw new GeneralSecurityException("unknown algorithm");
-    }
+    String alg = key.getParameters().getAlgorithm().getStandardName();
     JsonObject jsonKey = new JsonObject();
     jsonKey.addProperty("kty", "RSA");
-    jsonKey.addProperty("n", Base64.urlSafeEncode(jwtRsaSsaPssPublicKey.getN().toByteArray()));
-    jsonKey.addProperty("e", Base64.urlSafeEncode(jwtRsaSsaPssPublicKey.getE().toByteArray()));
+    jsonKey.addProperty(
+        "n", Base64.urlSafeEncode(BigIntegerEncoding.toBigEndianBytes(key.getModulus())));
+    jsonKey.addProperty(
+        "e",
+        Base64.urlSafeEncode(
+            BigIntegerEncoding.toBigEndianBytes(key.getParameters().getPublicExponent())));
     jsonKey.addProperty("use", "sig");
     jsonKey.addProperty("alg", alg);
     JsonArray keyOps = new JsonArray();
     keyOps.add("verify");
     jsonKey.add("key_ops", keyOps);
-    Optional<String> kid = getKid(protoKeySerialization.getIdRequirementOrNull());
+    Optional<String> kid = key.getKid();
     if (kid.isPresent()) {
       jsonKey.addProperty("kid", kid.get());
-    } else if (jwtRsaSsaPssPublicKey.hasCustomKid()) {
-      jsonKey.addProperty("kid", jwtRsaSsaPssPublicKey.getCustomKid().getValue());
     }
     return jsonKey;
   }
