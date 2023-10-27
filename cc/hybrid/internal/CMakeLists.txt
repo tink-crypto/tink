@@ -280,6 +280,24 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME config_v0_openssl
+  SRCS
+    config_v0.cc
+    config_v0.h
+  DEPS
+    absl::memory
+    tink::core::configuration
+    tink::hybrid::ecies_aead_hkdf_private_key_manager
+    tink::hybrid::ecies_aead_hkdf_public_key_manager
+    tink::hybrid::hybrid_decrypt_wrapper
+    tink::hybrid::hybrid_encrypt_wrapper
+    tink::internal::configuration_impl
+    tink::util::status
+  TAGS
+    exclude_if_boringssl
+)
+
+tink_cc_library(
   NAME key_gen_config_v0
   SRCS
     key_gen_config_v0.cc
@@ -295,6 +313,22 @@ tink_cc_library(
     tink::util::status
   TAGS
     exclude_if_openssl
+)
+
+tink_cc_library(
+  NAME key_gen_config_v0_openssl
+  SRCS
+    key_gen_config_v0.cc
+    key_gen_config_v0.h
+  DEPS
+    absl::memory
+    tink::core::key_gen_configuration
+    tink::hybrid::ecies_aead_hkdf_private_key_manager
+    tink::hybrid::ecies_aead_hkdf_public_key_manager
+    tink::internal::key_gen_configuration_impl
+    tink::util::status
+  TAGS
+    exclude_if_boringssl
 )
 
 # tests
@@ -532,4 +566,30 @@ tink_cc_test(
     tink::proto::tink_cc_proto
   TAGS
     exclude_if_openssl
+)
+
+tink_cc_test(
+  NAME config_v0_openssl_test
+  SRCS
+    config_v0_test.cc
+  DEPS
+    tink::hybrid::internal::config_v0_openssl
+    tink::hybrid::internal::key_gen_config_v0_openssl
+    gmock
+    tink::core::configuration
+    tink::core::hybrid_decrypt
+    tink::core::hybrid_encrypt
+    tink::core::key_gen_configuration
+    tink::core::keyset_handle
+    tink::hybrid::ecies_aead_hkdf_private_key_manager
+    tink::hybrid::hybrid_key_templates
+    tink::internal::configuration_impl
+    tink::internal::key_gen_configuration_impl
+    tink::internal::key_type_info_store
+    tink::internal::keyset_wrapper_store
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::proto::tink_cc_proto
+  TAGS
+    exclude_if_boringssl
 )

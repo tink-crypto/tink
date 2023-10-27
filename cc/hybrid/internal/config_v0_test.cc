@@ -24,7 +24,9 @@
 #include "tink/configuration.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 #include "tink/hybrid/hybrid_key_templates.h"
+#ifdef OPENSSL_IS_BORINGSSL
 #include "tink/hybrid/internal/hpke_private_key_manager.h"
+#endif
 #include "tink/hybrid/internal/key_gen_config_v0.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
@@ -76,16 +78,24 @@ TEST(HybridV0Test, KeyManagers) {
   for (const KeyTypeInfoStore* s : {*store, *key_gen_store}) {
     EXPECT_THAT(s->Get(EciesAeadHkdfPrivateKeyManager().get_key_type()),
                 IsOk());
+#ifdef OPENSSL_IS_BORINGSSL
     EXPECT_THAT(s->Get(HpkePrivateKeyManager().get_key_type()), IsOk());
+#endif
   }
 }
 
 using HybridV0KeyTypesTest = TestWithParam<KeyTemplate>;
 
+#ifdef OPENSSL_IS_BORINGSSL
 INSTANTIATE_TEST_SUITE_P(
     HybridV0KeyTypesTestSuite, HybridV0KeyTypesTest,
     Values(HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128Gcm(),
            HybridKeyTemplates::HpkeX25519HkdfSha256Aes128Gcm()));
+#else
+INSTANTIATE_TEST_SUITE_P(
+    HybridV0KeyTypesTestSuite, HybridV0KeyTypesTest,
+    Values(HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128Gcm()));
+#endif
 
 TEST_P(HybridV0KeyTypesTest, GetPrimitive) {
   KeyGenConfiguration key_gen_config;

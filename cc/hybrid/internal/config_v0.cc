@@ -22,8 +22,10 @@
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/hybrid/hybrid_decrypt_wrapper.h"
 #include "tink/hybrid/hybrid_encrypt_wrapper.h"
+#ifdef OPENSSL_IS_BORINGSSL
 #include "tink/hybrid/internal/hpke_private_key_manager.h"
 #include "tink/hybrid/internal/hpke_public_key_manager.h"
+#endif
 #include "tink/internal/configuration_impl.h"
 #include "tink/util/status.h"
 
@@ -43,15 +45,17 @@ util::Status AddHybridConfigV0(Configuration& config) {
     return status;
   }
 
+#ifdef OPENSSL_IS_BORINGSSL
   status = ConfigurationImpl::AddAsymmetricKeyManagers(
-      absl::make_unique<EciesAeadHkdfPrivateKeyManager>(),
-      absl::make_unique<EciesAeadHkdfPublicKeyManager>(), config);
+      absl::make_unique<HpkePrivateKeyManager>(),
+      absl::make_unique<HpkePublicKeyManager>(), config);
   if (!status.ok()) {
     return status;
   }
+#endif
   return ConfigurationImpl::AddAsymmetricKeyManagers(
-      absl::make_unique<HpkePrivateKeyManager>(),
-      absl::make_unique<HpkePublicKeyManager>(), config);
+      absl::make_unique<EciesAeadHkdfPrivateKeyManager>(),
+      absl::make_unique<EciesAeadHkdfPublicKeyManager>(), config);
 }
 
 }  // namespace internal
