@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+package(default_visibility = ["//:__subpackages__"])  # keep
+
+go_library(
+    name = "internalapitoken",
+    srcs = ["internalapitoken.go"],
+    importpath = "github.com/google/tink/go/internal/internalapitoken",
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":internalapitoken",
+    visibility = ["//:__subpackages__"],
+)
