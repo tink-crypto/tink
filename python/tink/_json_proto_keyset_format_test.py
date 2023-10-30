@@ -14,6 +14,8 @@
 
 """Tests for tink.python.tink.json_json_proto_keyset_format."""
 
+import io
+
 from absl.testing import absltest
 
 import tink
@@ -108,6 +110,116 @@ class TinkJsonProtoKeysetFormatTest(absltest.TestCase):
           keyset_encryption_aead,
           b'invalid_associated_data',
       )
+
+  def test_serialize_encrypted_read_keyset_handle_with_associated_data(self):
+    keyset_encryption_aead = tink.new_keyset_handle(
+        aead.aead_key_templates.AES128_GCM
+    ).primitive(aead.Aead)
+
+    keyset_encryption_associated_data = b'keyset_encryption_associated_data'
+    keyset_handle = tink.new_keyset_handle(aead.aead_key_templates.AES128_GCM)
+    encrypted_keyset = tink.json_proto_keyset_format.serialize_encrypted(
+        keyset_handle,
+        keyset_encryption_aead,
+        keyset_encryption_associated_data,
+    )
+
+    reader = tink.JsonKeysetReader(encrypted_keyset)
+    parsed_keyset_handle = tink.read_keyset_handle_with_associated_data(
+        reader, keyset_encryption_aead, keyset_encryption_associated_data
+    )
+
+    # check that keyset_handle and parse_handle are the same.
+    plaintext = b'plaintext'
+    associated_data = b'associated_data'
+    primitive1 = keyset_handle.primitive(aead.Aead)
+    ciphertext = primitive1.encrypt(plaintext, associated_data)
+    primitive2 = parsed_keyset_handle.primitive(aead.Aead)
+    self.assertEqual(primitive2.decrypt(ciphertext, associated_data), plaintext)
+
+  def test_write_with_associated_data_parse_encrypted(self):
+    keyset_encryption_aead = tink.new_keyset_handle(
+        aead.aead_key_templates.AES128_GCM
+    ).primitive(aead.Aead)
+
+    keyset_encryption_associated_data = b'keyset_encryption_associated_data'
+    keyset_handle = tink.new_keyset_handle(aead.aead_key_templates.AES128_GCM)
+
+    output_stream = io.StringIO()
+    writer = tink.JsonKeysetWriter(output_stream)
+    keyset_handle.write_with_associated_data(
+        writer, keyset_encryption_aead, keyset_encryption_associated_data
+    )
+    encrypted_keyset = output_stream.getvalue()
+
+    parsed_keyset_handle = tink.json_proto_keyset_format.parse_encrypted(
+        encrypted_keyset,
+        keyset_encryption_aead,
+        keyset_encryption_associated_data,
+    )
+
+    # check that keyset_handle and parse_handle are the same.
+    plaintext = b'plaintext'
+    associated_data = b'associated_data'
+    primitive1 = keyset_handle.primitive(aead.Aead)
+    ciphertext = primitive1.encrypt(plaintext, associated_data)
+    primitive2 = parsed_keyset_handle.primitive(aead.Aead)
+    self.assertEqual(primitive2.decrypt(ciphertext, associated_data), plaintext)
+
+  def test_serialize_encrypted_read_keyset_handle(self):
+    keyset_encryption_aead = tink.new_keyset_handle(
+        aead.aead_key_templates.AES128_GCM
+    ).primitive(aead.Aead)
+
+    # read_keyset_handle uses empty associated_data
+    empty_keyset_encryption_associated_data = b''
+    keyset_handle = tink.new_keyset_handle(aead.aead_key_templates.AES128_GCM)
+    encrypted_keyset = tink.json_proto_keyset_format.serialize_encrypted(
+        keyset_handle,
+        keyset_encryption_aead,
+        empty_keyset_encryption_associated_data,
+    )
+
+    reader = tink.JsonKeysetReader(encrypted_keyset)
+    parsed_keyset_handle = tink.read_keyset_handle(
+        reader, keyset_encryption_aead
+    )
+
+    # check that keyset_handle and parse_handle are the same.
+    plaintext = b'plaintext'
+    associated_data = b'associated_data'
+    primitive1 = keyset_handle.primitive(aead.Aead)
+    ciphertext = primitive1.encrypt(plaintext, associated_data)
+    primitive2 = parsed_keyset_handle.primitive(aead.Aead)
+    self.assertEqual(primitive2.decrypt(ciphertext, associated_data), plaintext)
+
+  def test_write_parse_encrypted(self):
+    keyset_encryption_aead = tink.new_keyset_handle(
+        aead.aead_key_templates.AES128_GCM
+    ).primitive(aead.Aead)
+
+    keyset_handle = tink.new_keyset_handle(aead.aead_key_templates.AES128_GCM)
+
+    output_stream = io.StringIO()
+    writer = tink.JsonKeysetWriter(output_stream)
+    keyset_handle.write(writer, keyset_encryption_aead)
+    encrypted_keyset = output_stream.getvalue()
+
+    # keyset_handle.write uses empty associated_data
+    empty_keyset_encryption_associated_data = b''
+    parsed_keyset_handle = tink.json_proto_keyset_format.parse_encrypted(
+        encrypted_keyset,
+        keyset_encryption_aead,
+        empty_keyset_encryption_associated_data,
+    )
+
+    # check that keyset_handle and parse_handle are the same.
+    plaintext = b'plaintext'
+    associated_data = b'associated_data'
+    primitive1 = keyset_handle.primitive(aead.Aead)
+    ciphertext = primitive1.encrypt(plaintext, associated_data)
+    primitive2 = parsed_keyset_handle.primitive(aead.Aead)
+    self.assertEqual(primitive2.decrypt(ciphertext, associated_data), plaintext)
 
 
 if __name__ == '__main__':
