@@ -99,12 +99,11 @@ class RawJwt:
       if not all(isinstance(value, str) for value in audiences):
         raise _jwt_error.JwtInvalidError('audiences must only contain strings')
 
-  # TODO(juerg): Consider adding a raw_ prefix to all access methods
   def has_type_header(self) -> bool:
     return self._type_header is not None
 
   def type_header(self) -> str:
-    if not self.has_type_header():
+    if self._type_header is None:
       raise KeyError('type header is not set')
     return self._type_header
 

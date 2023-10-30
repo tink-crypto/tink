@@ -13,7 +13,6 @@
 # limitations under the License.
 """Convert Tink Keyset with JWT keys from and to JWK sets."""
 
-import io
 import json
 import random
 
@@ -98,11 +97,10 @@ def from_public_keyset_handle(keyset_handle: tink.KeysetHandle) -> str:
     TinkError if the keys are not of the expected type, or if they have a
     ouput prefix type that is not supported.
   """
-  output_stream = io.BytesIO()
-  writer = tink.BinaryKeysetWriter(output_stream)
-  keyset_handle.write_no_secret(writer)
-  keyset = tink_pb2.Keyset.FromString(output_stream.getvalue())
-
+  serialization = tink.proto_keyset_format.serialize_without_secret(
+      keyset_handle
+  )
+  keyset = tink_pb2.Keyset.FromString(serialization)
   keys = []
   for key in keyset.key:
     if key.status != tink_pb2.ENABLED:

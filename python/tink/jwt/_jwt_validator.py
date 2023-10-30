@@ -112,7 +112,7 @@ class JwtValidator:
   def has_fixed_now(self) -> bool:
     return self._fixed_now is not None
 
-  def fixed_now(self) -> datetime.datetime:
+  def fixed_now(self) -> Optional[datetime.datetime]:
     return self._fixed_now
 
 
