@@ -76,19 +76,19 @@ class JwtValidator:
   def has_expected_type_header(self) -> bool:
     return self._expected_type_header is not None
 
-  def expected_type_header(self) -> str:
+  def expected_type_header(self) -> Optional[str]:
     return self._expected_type_header
 
   def has_expected_issuer(self) -> bool:
     return self._expected_issuer is not None
 
-  def expected_issuer(self) -> str:
+  def expected_issuer(self) -> Optional[str]:
     return self._expected_issuer
 
   def has_expected_audience(self) -> bool:
     return self._expected_audience is not None
 
-  def expected_audience(self) -> str:
+  def expected_audience(self) -> Optional[str]:
     return self._expected_audience
 
   def ignore_type_header(self) -> bool:
