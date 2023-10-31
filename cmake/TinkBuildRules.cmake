@@ -121,7 +121,7 @@ function(tink_cc_library)
 
   # Check if this target must be skipped.
   foreach(_tink_cc_library_tag ${tink_cc_library_TAGS})
-    # Exclude if using OpenSSL.
+    # Exclude if using BoringSSL.
     if (${_tink_cc_library_tag} STREQUAL ${TINK_TARGET_EXCLUDE_IF_BORINGSSL} AND NOT TINK_USE_SYSTEM_OPENSSL)
       return()
     endif()
@@ -206,7 +206,7 @@ function(tink_cc_test)
 
   # Check if this target must be skipped.
   foreach(_tink_cc_test_tag ${tink_cc_test_TAGS})
-    # Exclude if using OpenSSL.
+    # Exclude if using BoringSSL.
     if (${_tink_cc_test_tag} STREQUAL ${TINK_TARGET_EXCLUDE_IF_BORINGSSL} AND NOT TINK_USE_SYSTEM_OPENSSL)
       return()
     endif()
