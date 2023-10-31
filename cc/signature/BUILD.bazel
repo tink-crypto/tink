@@ -607,10 +607,12 @@ cc_library(
     include_prefix = "tink/signature",
     deps = [
         ":rsa_ssa_pkcs1_parameters",
+        ":rsa_ssa_pkcs1_private_key",
         ":rsa_ssa_pkcs1_public_key",
         "//:big_integer",
         "//:insecure_secret_key_access",
         "//:partial_key_access",
+        "//:restricted_big_integer",
         "//:restricted_data",
         "//:secret_key_access_token",
         "//internal:key_parser",
@@ -1153,6 +1155,7 @@ cc_test(
     srcs = ["rsa_ssa_pkcs1_proto_serialization_test.cc"],
     deps = [
         ":rsa_ssa_pkcs1_parameters",
+        ":rsa_ssa_pkcs1_private_key",
         ":rsa_ssa_pkcs1_proto_serialization",
         ":rsa_ssa_pkcs1_public_key",
         "//:big_integer",
@@ -1160,6 +1163,7 @@ cc_test(
         "//:key",
         "//:parameters",
         "//:partial_key_access",
+        "//:restricted_big_integer",
         "//:restricted_data",
         "//internal:bn_util",
         "//internal:mutable_serialization_registry",

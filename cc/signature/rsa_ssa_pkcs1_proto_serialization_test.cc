@@ -40,8 +40,10 @@
 #include "tink/key.h"
 #include "tink/parameters.h"
 #include "tink/partial_key_access.h"
+#include "tink/restricted_big_integer.h"
 #include "tink/restricted_data.h"
 #include "tink/signature/rsa_ssa_pkcs1_parameters.h"
+#include "tink/signature/rsa_ssa_pkcs1_private_key.h"
 #include "tink/signature/rsa_ssa_pkcs1_public_key.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -524,6 +526,311 @@ TEST_P(RsaSsaPkcs1ProtoSerializationTest, SerializePublicKeySucceeds) {
   EXPECT_THAT(proto_key.e(), Eq(key_values.e));
   EXPECT_THAT(proto_key.has_params(), IsTrue());
   EXPECT_THAT(proto_key.params().hash_type(), Eq(test_case.proto_hash_type));
+}
+
+TEST_P(RsaSsaPkcs1ProtoSerializationTest, ParsePrivateKeySucceeds) {
+  TestCase test_case = GetParam();
+  ASSERT_THAT(RegisterRsaSsaPkcs1ProtoSerialization(), IsOk());
+
+  RsaSsaPkcs1Params params;
+  params.set_hash_type(test_case.proto_hash_type);
+
+  KeyValues key_values = GenerateKeyValues(test_case.modulus_size_in_bits);
+
+  google::crypto::tink::RsaSsaPkcs1PublicKey public_key_proto;
+  public_key_proto.set_version(0);
+  public_key_proto.set_n(key_values.n);
+  public_key_proto.set_e(key_values.e);
+  *public_key_proto.mutable_params() = params;
+
+  google::crypto::tink::RsaSsaPkcs1PrivateKey private_key_proto;
+  private_key_proto.set_version(0);
+  *private_key_proto.mutable_public_key() = public_key_proto;
+  private_key_proto.set_p(key_values.p);
+  private_key_proto.set_q(key_values.q);
+  private_key_proto.set_dp(key_values.dp);
+  private_key_proto.set_dq(key_values.dq);
+  private_key_proto.set_d(key_values.d);
+  private_key_proto.set_crt(key_values.q_inv);
+
+  RestrictedData serialized_key = RestrictedData(
+      private_key_proto.SerializeAsString(), InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(
+          kPrivateTypeUrl, serialized_key, KeyData::ASYMMETRIC_PRIVATE,
+          test_case.output_prefix_type, test_case.id);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(key, IsOk());
+  EXPECT_THAT((*key)->GetIdRequirement(), Eq(test_case.id));
+  EXPECT_THAT((*key)->GetParameters().HasIdRequirement(),
+              test_case.id.has_value());
+
+  util::StatusOr<RsaSsaPkcs1Parameters> expected_parameters =
+      RsaSsaPkcs1Parameters::Builder()
+          .SetVariant(test_case.variant)
+          .SetHashType(test_case.hash_type)
+          .SetModulusSizeInBits(test_case.modulus_size_in_bits)
+          .SetPublicExponent(BigInteger(key_values.e))
+          .Build();
+  ASSERT_THAT(expected_parameters, IsOk());
+
+  util::StatusOr<RsaSsaPkcs1PublicKey> expected_public_key =
+      RsaSsaPkcs1PublicKey::Create(*expected_parameters,
+                                   BigInteger(key_values.n), test_case.id,
+                                   GetPartialKeyAccess());
+  ASSERT_THAT(expected_public_key, IsOk());
+
+  util::StatusOr<RsaSsaPkcs1PrivateKey> expected_private_key =
+      RsaSsaPkcs1PrivateKey::Builder()
+          .SetPublicKey(*expected_public_key)
+          .SetPrimeP(RestrictedBigInteger(key_values.p,
+                                          InsecureSecretKeyAccess::Get()))
+          .SetPrimeQ(RestrictedBigInteger(key_values.q,
+                                          InsecureSecretKeyAccess::Get()))
+          .SetPrimeExponentP(RestrictedBigInteger(
+              key_values.dp, InsecureSecretKeyAccess::Get()))
+          .SetPrimeExponentQ(RestrictedBigInteger(
+              key_values.dq, InsecureSecretKeyAccess::Get()))
+          .SetPrivateExponent(RestrictedBigInteger(
+              key_values.d, InsecureSecretKeyAccess::Get()))
+          .SetCrtCoefficient(RestrictedBigInteger(
+              key_values.q_inv, InsecureSecretKeyAccess::Get()))
+          .Build(GetPartialKeyAccess());
+
+  EXPECT_THAT(**key, Eq(*expected_private_key));
+}
+
+TEST_F(RsaSsaPkcs1ProtoSerializationTest,
+       ParsePrivateKeyWithInvalidSerializationFails) {
+  ASSERT_THAT(RegisterRsaSsaPkcs1ProtoSerialization(), IsOk());
+
+  RestrictedData serialized_key =
+      RestrictedData("invalid_serialization", InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(kPrivateTypeUrl, serialized_key,
+                                              KeyData::ASYMMETRIC_PRIVATE,
+                                              OutputPrefixType::TINK,
+                                              /*id_requirement=*/0x23456789);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, InsecureSecretKeyAccess::Get());
+  EXPECT_THAT(key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST_F(RsaSsaPkcs1ProtoSerializationTest,
+       ParsePrivateKeyWithInvalidVersionFails) {
+  ASSERT_THAT(RegisterRsaSsaPkcs1ProtoSerialization(), IsOk());
+
+  RsaSsaPkcs1Params params;
+  params.set_hash_type(HashType::SHA256);
+
+  KeyValues key_values = GenerateKeyValues(2048);
+
+  google::crypto::tink::RsaSsaPkcs1PublicKey public_key_proto;
+  public_key_proto.set_version(0);
+  public_key_proto.set_n(key_values.n);
+  public_key_proto.set_e(key_values.e);
+  *public_key_proto.mutable_params() = params;
+
+  google::crypto::tink::RsaSsaPkcs1PrivateKey private_key_proto;
+  private_key_proto.set_version(1);
+  *private_key_proto.mutable_public_key() = public_key_proto;
+  private_key_proto.set_p(key_values.p);
+  private_key_proto.set_q(key_values.q);
+  private_key_proto.set_dp(key_values.dp);
+  private_key_proto.set_dq(key_values.dq);
+  private_key_proto.set_d(key_values.d);
+  private_key_proto.set_crt(key_values.q_inv);
+
+  RestrictedData serialized_key = RestrictedData(
+      private_key_proto.SerializeAsString(), InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(kPrivateTypeUrl, serialized_key,
+                                              KeyData::ASYMMETRIC_PRIVATE,
+                                              OutputPrefixType::TINK,
+                                              /*id_requirement=*/0x23456789);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, InsecureSecretKeyAccess::Get());
+  EXPECT_THAT(key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST_F(RsaSsaPkcs1ProtoSerializationTest,
+       ParsePrivateKeyNoSecretKeyAccessFails) {
+  ASSERT_THAT(RegisterRsaSsaPkcs1ProtoSerialization(), IsOk());
+
+  RsaSsaPkcs1Params params;
+  params.set_hash_type(HashType::SHA256);
+
+  KeyValues key_values = GenerateKeyValues(2048);
+
+  google::crypto::tink::RsaSsaPkcs1PublicKey public_key_proto;
+  public_key_proto.set_version(0);
+  public_key_proto.set_n(key_values.n);
+  public_key_proto.set_e(key_values.e);
+  *public_key_proto.mutable_params() = params;
+
+  google::crypto::tink::RsaSsaPkcs1PrivateKey private_key_proto;
+  private_key_proto.set_version(0);
+  *private_key_proto.mutable_public_key() = public_key_proto;
+  private_key_proto.set_p(key_values.p);
+  private_key_proto.set_q(key_values.q);
+  private_key_proto.set_dp(key_values.dp);
+  private_key_proto.set_dq(key_values.dq);
+  private_key_proto.set_d(key_values.d);
+  private_key_proto.set_crt(key_values.q_inv);
+
+  RestrictedData serialized_key = RestrictedData(
+      private_key_proto.SerializeAsString(), InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(kPrivateTypeUrl, serialized_key,
+                                              KeyData::ASYMMETRIC_PRIVATE,
+                                              OutputPrefixType::TINK,
+                                              /*id_requirement=*/0x23456789);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, /*token=*/absl::nullopt);
+  EXPECT_THAT(key.status(), StatusIs(absl::StatusCode::kPermissionDenied));
+}
+
+TEST_P(RsaSsaPkcs1ProtoSerializationTest, SerializePrivateKeySucceeds) {
+  TestCase test_case = GetParam();
+  ASSERT_THAT(RegisterRsaSsaPkcs1ProtoSerialization(), IsOk());
+
+  KeyValues key_values = GenerateKeyValues(test_case.modulus_size_in_bits);
+
+  util::StatusOr<RsaSsaPkcs1Parameters> parameters =
+      RsaSsaPkcs1Parameters::Builder()
+          .SetVariant(test_case.variant)
+          .SetHashType(test_case.hash_type)
+          .SetModulusSizeInBits(test_case.modulus_size_in_bits)
+          .SetPublicExponent(BigInteger(key_values.e))
+          .Build();
+  ASSERT_THAT(parameters, IsOk());
+
+  util::StatusOr<RsaSsaPkcs1PublicKey> public_key =
+      RsaSsaPkcs1PublicKey::Create(*parameters, BigInteger(key_values.n),
+                                   test_case.id, GetPartialKeyAccess());
+  ASSERT_THAT(public_key, IsOk());
+
+  util::StatusOr<RsaSsaPkcs1PrivateKey> private_key =
+      RsaSsaPkcs1PrivateKey::Builder()
+          .SetPublicKey(*public_key)
+          .SetPrimeP(RestrictedBigInteger(key_values.p,
+                                          InsecureSecretKeyAccess::Get()))
+          .SetPrimeQ(RestrictedBigInteger(key_values.q,
+                                          InsecureSecretKeyAccess::Get()))
+          .SetPrimeExponentP(RestrictedBigInteger(
+              key_values.dp, InsecureSecretKeyAccess::Get()))
+          .SetPrimeExponentQ(RestrictedBigInteger(
+              key_values.dq, InsecureSecretKeyAccess::Get()))
+          .SetPrivateExponent(RestrictedBigInteger(
+              key_values.d, InsecureSecretKeyAccess::Get()))
+          .SetCrtCoefficient(RestrictedBigInteger(
+              key_values.q_inv, InsecureSecretKeyAccess::Get()))
+          .Build(GetPartialKeyAccess());
+  ASSERT_THAT(private_key, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialization =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeKey<internal::ProtoKeySerialization>(
+              *private_key, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(serialization, IsOk());
+  EXPECT_THAT((*serialization)->ObjectIdentifier(), Eq(kPrivateTypeUrl));
+
+  const internal::ProtoKeySerialization* proto_serialization =
+      dynamic_cast<const internal::ProtoKeySerialization*>(
+          serialization->get());
+  ASSERT_THAT(proto_serialization, NotNull());
+  EXPECT_THAT(proto_serialization->TypeUrl(), Eq(kPrivateTypeUrl));
+  EXPECT_THAT(proto_serialization->KeyMaterialType(),
+              Eq(KeyData::ASYMMETRIC_PRIVATE));
+  EXPECT_THAT(proto_serialization->GetOutputPrefixType(),
+              Eq(test_case.output_prefix_type));
+  EXPECT_THAT(proto_serialization->IdRequirement(), Eq(test_case.id));
+
+  google::crypto::tink::RsaSsaPkcs1PrivateKey proto_key;
+  // OSS proto library complains if input is not converted to a string.
+  ASSERT_THAT(proto_key.ParseFromString(std::string(
+                  proto_serialization->SerializedKeyProto().GetSecret(
+                      InsecureSecretKeyAccess::Get()))),
+              IsTrue());
+
+  EXPECT_THAT(proto_key.version(), Eq(0));
+  EXPECT_THAT(proto_key.p(), Eq(key_values.p));
+  EXPECT_THAT(proto_key.q(), Eq(key_values.q));
+  EXPECT_THAT(proto_key.dp(), Eq(key_values.dp));
+  EXPECT_THAT(proto_key.dq(), Eq(key_values.dq));
+  EXPECT_THAT(proto_key.d(), Eq(key_values.d));
+  EXPECT_THAT(proto_key.crt(), Eq(key_values.q_inv));
+  EXPECT_THAT(proto_key.has_public_key(), IsTrue());
+  EXPECT_THAT(proto_key.public_key().version(), Eq(0));
+  EXPECT_THAT(proto_key.public_key().n(), Eq(key_values.n));
+  EXPECT_THAT(proto_key.public_key().e(), Eq(key_values.e));
+  EXPECT_THAT(proto_key.public_key().has_params(), IsTrue());
+  EXPECT_THAT(proto_key.public_key().params().hash_type(),
+              Eq(test_case.proto_hash_type));
+}
+
+TEST_F(RsaSsaPkcs1ProtoSerializationTest,
+       SerializePrivateKeyNoSecretKeyAccessFails) {
+  ASSERT_THAT(RegisterRsaSsaPkcs1ProtoSerialization(), IsOk());
+
+  KeyValues key_values = GenerateKeyValues(2048);
+
+  util::StatusOr<RsaSsaPkcs1Parameters> parameters =
+      RsaSsaPkcs1Parameters::Builder()
+          .SetVariant(RsaSsaPkcs1Parameters::Variant::kTink)
+          .SetHashType(RsaSsaPkcs1Parameters::HashType::kSha256)
+          .SetModulusSizeInBits(2048)
+          .SetPublicExponent(BigInteger(kF4Str))
+          .Build();
+  ASSERT_THAT(parameters, IsOk());
+
+  util::StatusOr<RsaSsaPkcs1PublicKey> public_key =
+      RsaSsaPkcs1PublicKey::Create(*parameters, BigInteger(key_values.n),
+                                   /*id_requirement=*/0x23456789,
+                                   GetPartialKeyAccess());
+  ASSERT_THAT(public_key, IsOk());
+
+  util::StatusOr<RsaSsaPkcs1PrivateKey> private_key =
+      RsaSsaPkcs1PrivateKey::Builder()
+          .SetPublicKey(*public_key)
+          .SetPrimeP(RestrictedBigInteger(key_values.p,
+                                          InsecureSecretKeyAccess::Get()))
+          .SetPrimeQ(RestrictedBigInteger(key_values.q,
+                                          InsecureSecretKeyAccess::Get()))
+          .SetPrimeExponentP(RestrictedBigInteger(
+              key_values.dp, InsecureSecretKeyAccess::Get()))
+          .SetPrimeExponentQ(RestrictedBigInteger(
+              key_values.dq, InsecureSecretKeyAccess::Get()))
+          .SetPrivateExponent(RestrictedBigInteger(
+              key_values.d, InsecureSecretKeyAccess::Get()))
+          .SetCrtCoefficient(RestrictedBigInteger(
+              key_values.q_inv, InsecureSecretKeyAccess::Get()))
+          .Build(GetPartialKeyAccess());
+  ASSERT_THAT(private_key, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialization =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeKey<internal::ProtoKeySerialization>(
+              *private_key, /*token=*/absl::nullopt);
+  ASSERT_THAT(serialization.status(),
+              StatusIs(absl::StatusCode::kPermissionDenied));
 }
 
 }  // namespace
