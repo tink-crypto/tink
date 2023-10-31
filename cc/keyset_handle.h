@@ -153,10 +153,10 @@ class KeysetHandle {
   GenerateNew(const google::crypto::tink::KeyTemplate& key_template,
               const crypto::tink::KeyGenConfiguration& config);
 
-  // TODO(b/265865177): Deprecate and inline.
   // Returns a KeysetHandle containing one new key generated according to
   // `key_template` using the global registry. When specified, the keyset is
   //  annotated for monitoring with `monitoring_annotations`.
+  ABSL_DEPRECATED("Inline this function's body at its call sites")
   static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
   GenerateNew(const google::crypto::tink::KeyTemplate& key_template,
               const absl::flat_hash_map<std::string, std::string>&
@@ -164,6 +164,7 @@ class KeysetHandle {
     return GenerateNew(key_template, crypto::tink::KeyGenConfigGlobalRegistry(),
                        monitoring_annotations);
   }
+  ABSL_DEPRECATED("Inline this function's body at its call sites")
   static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
   GenerateNew(const google::crypto::tink::KeyTemplate& key_template) {
     return GenerateNew(key_template,
