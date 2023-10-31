@@ -23,7 +23,7 @@ from tink.proto import jwt_rsa_ssa_pkcs1_pb2
 from tink.proto import jwt_rsa_ssa_pss_pb2
 from tink.proto import tink_pb2
 import tink
-from tink import cleartext_keyset_handle
+from tink import secret_key_access
 from tink.jwt import _jwt_format
 
 _JWT_ECDSA_PUBLIC_KEY_TYPE = (
@@ -252,7 +252,8 @@ def to_public_keyset_handle(jwk_set: str) -> tink.KeysetHandle:
     # To verify signature, it also does not matter which key is primary. We
     # simply set it to the last key.
     proto_keyset.primary_key_id = new_id
-  return cleartext_keyset_handle.from_keyset(proto_keyset)
+  return tink.proto_keyset_format.parse(
+      proto_keyset.SerializeToString(), secret_key_access.TOKEN)
 
 
 # Deprecated. Use to_public_keyset_handle instead.
