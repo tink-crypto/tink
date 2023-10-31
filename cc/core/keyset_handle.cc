@@ -428,11 +428,6 @@ KeysetHandle::GetPublicKeysetHandle(const KeyGenConfiguration& config) const {
       new KeysetHandle(std::move(public_keyset), *entries));
 }
 
-util::StatusOr<std::unique_ptr<KeysetHandle>>
-KeysetHandle::GetPublicKeysetHandle() const {
-  return GetPublicKeysetHandle(KeyGenConfigGlobalRegistry());
-}
-
 crypto::tink::util::StatusOr<uint32_t> KeysetHandle::AddToKeyset(
     const google::crypto::tink::KeyTemplate& key_template, bool as_primary,
     const KeyGenConfiguration& config, Keyset* keyset) {

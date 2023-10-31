@@ -206,8 +206,11 @@ class KeysetHandle {
   // private keys in this handle. Relies on key type managers stored in the
   // global registry to do so. Returns an error if this handle contains keys
   // that are not private keys.
+  ABSL_DEPRECATED("Inline this function's body at its call sites")
   crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
-  GetPublicKeysetHandle() const;
+  GetPublicKeysetHandle() const {
+    return GetPublicKeysetHandle(crypto::tink::KeyGenConfigGlobalRegistry());
+  }
 
   // Creates a wrapped primitive using this keyset handle and config, which
   // stores necessary primitive wrappers and key type managers.
