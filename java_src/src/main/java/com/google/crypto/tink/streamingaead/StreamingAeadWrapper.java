@@ -20,6 +20,10 @@ import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.StreamingAead;
+import com.google.crypto.tink.internal.LegacyProtoKey;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
+import com.google.crypto.tink.streamingaead.internal.LegacyFullStreamingAead;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +39,10 @@ import java.util.List;
 public class StreamingAeadWrapper implements PrimitiveWrapper<StreamingAead, StreamingAead> {
 
   private static final StreamingAeadWrapper WRAPPER = new StreamingAeadWrapper();
+  private static final PrimitiveConstructor<LegacyProtoKey, StreamingAead>
+      LEGACY_FULL_STREAMING_AEAD_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              LegacyFullStreamingAead::create, LegacyProtoKey.class, StreamingAead.class);
 
   StreamingAeadWrapper() {}
 
@@ -50,14 +58,18 @@ public class StreamingAeadWrapper implements PrimitiveWrapper<StreamingAead, Str
       // For legacy reasons (Tink always encrypted with non-RAW keys) we use all
       // primitives, even those which have output_prefix_type != RAW.
       for (PrimitiveSet.Entry<StreamingAead> entry : entryList) {
-        allStreamingAeads.add(entry.getPrimitive());
+        if (entry.getFullPrimitive() == null) {
+          throw new GeneralSecurityException(
+              "No full primitive set for key id " + entry.getKeyId());
+        }
+        allStreamingAeads.add(entry.getFullPrimitive());
       }
     }
     PrimitiveSet.Entry<StreamingAead> primary = primitives.getPrimary();
-    if (primary == null || primary.getPrimitive() == null) {
+    if (primary == null || primary.getFullPrimitive() == null) {
       throw new GeneralSecurityException("No primary set");
     }
-    return new StreamingAeadHelper(allStreamingAeads, primary.getPrimitive());
+    return new StreamingAeadHelper(allStreamingAeads, primary.getFullPrimitive());
   }
 
   @Override
@@ -72,5 +84,7 @@ public class StreamingAeadWrapper implements PrimitiveWrapper<StreamingAead, Str
 
   public static void register() throws GeneralSecurityException {
     Registry.registerPrimitiveWrapper(WRAPPER);
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(LEGACY_FULL_STREAMING_AEAD_PRIMITIVE_CONSTRUCTOR);
   }
 }

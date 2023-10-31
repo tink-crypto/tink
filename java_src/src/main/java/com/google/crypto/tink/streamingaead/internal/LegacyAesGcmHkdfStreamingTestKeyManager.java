@@ -109,7 +109,7 @@ public class LegacyAesGcmHkdfStreamingTestKeyManager implements KeyManager<Strea
     throw new UnsupportedOperationException("not needed for tests");
   }
 
-  static void register() throws GeneralSecurityException {
+  public static void register() throws GeneralSecurityException {
     Registry.registerKeyManager(new LegacyAesGcmHkdfStreamingTestKeyManager(), true);
   }
 }
