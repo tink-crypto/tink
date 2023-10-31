@@ -16,27 +16,21 @@
 
 package com.google.crypto.tink.streamingaead;
 
-import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
-import com.google.crypto.tink.daead.DeterministicAeadConfig;
-import com.google.crypto.tink.proto.AesGcmHkdfStreamingKey;
-import com.google.crypto.tink.proto.AesGcmHkdfStreamingParams;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
-import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.Random;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.testing.StreamingTestUtil;
-import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import java.io.IOException;
 import org.junit.BeforeClass;
@@ -46,137 +40,207 @@ import org.junit.runners.JUnit4;
 
 /** Tests for StreamingAeadWrapper. */
 @RunWith(JUnit4.class)
+// Fully specifying proto key/parameters types to distinguish from the programmatic ones.
+@SuppressWarnings("UnnecessarilyFullyQualified")
 public class StreamingAeadWrapperTest {
-  private static final int KDF_KEY_SIZE = 16;
-  private static final int AES_KEY_SIZE = 16;
-
   private static final String AES_GCM_HKDF_TYPE_URL =
       "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey";
-  private static final ByteString KEY_BYTES_1 =
-      ByteString.copyFromUtf8("0123456789012345");
-  private static final ByteString KEY_BYTES_2 =
-      ByteString.copyFromUtf8("0123456789abcdef");
 
   @BeforeClass
   public static void setUp() throws Exception {
     StreamingAeadConfig.register();
-    DeterministicAeadConfig.register(); // need this for testInvalidKeyMaterial.
   }
 
   @Test
-  public void testBasicAesCtrHmacStreamingAead() throws Exception {
-    byte[] keyValue = Random.randBytes(KDF_KEY_SIZE);
-    int derivedKeySize = AES_KEY_SIZE;
-    int ciphertextSegmentSize = 128;
-    PrimitiveSet<StreamingAead> primitives =
-        TestUtil.createPrimitiveSet(
-            TestUtil.createKeyset(
-                TestUtil.createKey(
-                    TestUtil.createAesCtrHmacStreamingKeyData(
-                        keyValue, derivedKeySize, ciphertextSegmentSize),
-                    42,
-                    KeyStatusType.ENABLED,
-                    OutputPrefixType.RAW)),
-            StreamingAead.class);
-    StreamingAead streamingAead = new StreamingAeadWrapper().wrap(primitives);
-    StreamingTestUtil.testEncryptionAndDecryption(streamingAead);
+  public void encryptDecrypt_works() throws Exception {
+    AesCtrHmacStreamingParameters parameters =
+        AesCtrHmacStreamingParameters.builder()
+            .setKeySizeBytes(32)
+            .setDerivedKeySizeBytes(32)
+            .setHkdfHashType(AesCtrHmacStreamingParameters.HashType.SHA256)
+            .setHmacHashType(AesCtrHmacStreamingParameters.HashType.SHA256)
+            .setHmacTagSizeBytes(16)
+            .setCiphertextSegmentSizeBytes(64)
+            .build();
+    AesCtrHmacStreamingKey key =
+        AesCtrHmacStreamingKey.create(
+            parameters,
+            SecretBytes.copyFrom(
+                Hex.decode("abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd"),
+                InsecureSecretKeyAccess.get()));
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).withFixedId(42).makePrimary())
+            .build();
+
+    StreamingAead streamingAead = keysetHandle.getPrimitive(StreamingAead.class);
+
+    StreamingTestUtil.testEncryptDecrypt(streamingAead, 0, 20, 5);
   }
 
   @Test
-  public void testBasicAesGcmHkdfStreamingAead() throws Exception {
-    byte[] keyValue = Random.randBytes(KDF_KEY_SIZE);
-    int derivedKeySize = AES_KEY_SIZE;
-    int ciphertextSegmentSize = 128;
-    PrimitiveSet<StreamingAead> primitives =
-        TestUtil.createPrimitiveSet(
-            TestUtil.createKeyset(
-                TestUtil.createKey(
-                    TestUtil.createAesGcmHkdfStreamingKeyData(
-                        keyValue, derivedKeySize, ciphertextSegmentSize),
-                    42,
-                    KeyStatusType.ENABLED,
-                    OutputPrefixType.RAW)),
-            StreamingAead.class);
-    StreamingAead streamingAead = new StreamingAeadWrapper().wrap(primitives);
-    StreamingTestUtil.testEncryptionAndDecryption(streamingAead);
+  public void encryptDecrypt_usesPrimary() throws Exception {
+    AesGcmHkdfStreamingParameters aesGcmHkdfStreamingParameters =
+        AesGcmHkdfStreamingParameters.builder()
+            .setKeySizeBytes(32)
+            .setDerivedAesGcmKeySizeBytes(32)
+            .setHkdfHashType(AesGcmHkdfStreamingParameters.HashType.SHA256)
+            .setCiphertextSegmentSizeBytes(64)
+            .build();
+    AesGcmHkdfStreamingKey aesGcmHkdfStreamingKey =
+        AesGcmHkdfStreamingKey.create(
+            aesGcmHkdfStreamingParameters,
+            SecretBytes.copyFrom(
+                Hex.decode("abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd"),
+                InsecureSecretKeyAccess.get()));
+    AesCtrHmacStreamingParameters aesCtrHmacStreamingParameters =
+        AesCtrHmacStreamingParameters.builder()
+            .setKeySizeBytes(32)
+            .setDerivedKeySizeBytes(32)
+            .setHkdfHashType(AesCtrHmacStreamingParameters.HashType.SHA256)
+            .setHmacHashType(AesCtrHmacStreamingParameters.HashType.SHA256)
+            .setHmacTagSizeBytes(16)
+            .setCiphertextSegmentSizeBytes(64)
+            .build();
+    AesCtrHmacStreamingKey aesCtrHmacStreamingKey =
+        AesCtrHmacStreamingKey.create(
+            aesCtrHmacStreamingParameters,
+            SecretBytes.copyFrom(
+                Hex.decode("abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd"),
+                InsecureSecretKeyAccess.get()));
+    KeysetHandle fullKeysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(aesCtrHmacStreamingKey).withFixedId(43))
+            .addEntry(KeysetHandle.importKey(aesGcmHkdfStreamingKey).withFixedId(42).makePrimary())
+            .build();
+    KeysetHandle onlyPrimaryKeysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(aesGcmHkdfStreamingKey).withFixedId(42).makePrimary())
+            .build();
+
+    StreamingAead fullStreamingAead = fullKeysetHandle.getPrimitive(StreamingAead.class);
+    StreamingAead onlyPrimaryStreamingAead =
+        onlyPrimaryKeysetHandle.getPrimitive(StreamingAead.class);
+
+    StreamingTestUtil.testEncryptDecryptDifferentInstances(
+        fullStreamingAead, onlyPrimaryStreamingAead, 0, 20, 5);
+    StreamingTestUtil.testEncryptDecryptDifferentInstances(
+        onlyPrimaryStreamingAead, fullStreamingAead, 0, 20, 5);
   }
 
   @Test
-  public void testMultipleKeys() throws Exception {
-    byte[] primaryKeyValue = Random.randBytes(KDF_KEY_SIZE);
-    byte[] otherKeyValue = Random.randBytes(KDF_KEY_SIZE);
-    byte[] anotherKeyValue = Random.randBytes(KDF_KEY_SIZE);
-    int derivedKeySize = AES_KEY_SIZE;
+  public void encryptDecrypt_shiftedPrimaryWorks() throws Exception {
+    AesGcmHkdfStreamingParameters aesGcmHkdfStreamingParameters =
+        AesGcmHkdfStreamingParameters.builder()
+            .setKeySizeBytes(32)
+            .setDerivedAesGcmKeySizeBytes(32)
+            .setHkdfHashType(AesGcmHkdfStreamingParameters.HashType.SHA256)
+            .setCiphertextSegmentSizeBytes(64)
+            .build();
+    AesGcmHkdfStreamingKey aesGcmHkdfStreamingKey =
+        AesGcmHkdfStreamingKey.create(
+            aesGcmHkdfStreamingParameters,
+            SecretBytes.copyFrom(
+                Hex.decode("abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd"),
+                InsecureSecretKeyAccess.get()));
+    AesCtrHmacStreamingParameters aesCtrHmacStreamingParameters =
+        AesCtrHmacStreamingParameters.builder()
+            .setKeySizeBytes(32)
+            .setDerivedKeySizeBytes(32)
+            .setHkdfHashType(AesCtrHmacStreamingParameters.HashType.SHA256)
+            .setHmacHashType(AesCtrHmacStreamingParameters.HashType.SHA256)
+            .setHmacTagSizeBytes(16)
+            .setCiphertextSegmentSizeBytes(64)
+            .build();
+    AesCtrHmacStreamingKey aesCtrHmacStreamingKey =
+        AesCtrHmacStreamingKey.create(
+            aesCtrHmacStreamingParameters,
+            SecretBytes.copyFrom(
+                Hex.decode("abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd"),
+                InsecureSecretKeyAccess.get()));
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(aesCtrHmacStreamingKey).withFixedId(43))
+            .addEntry(KeysetHandle.importKey(aesGcmHkdfStreamingKey).withFixedId(42).makePrimary())
+            .build();
+    KeysetHandle shiftedPrimaryKeysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(aesCtrHmacStreamingKey).withFixedId(43).makePrimary())
+            .addEntry(KeysetHandle.importKey(aesGcmHkdfStreamingKey).withFixedId(42))
+            .build();
 
-    Key primaryKey =
-        TestUtil.createKey(
-            TestUtil.createAesGcmHkdfStreamingKeyData(primaryKeyValue, derivedKeySize, 512),
-            42,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.RAW);
-    // Another key with a smaller segment size than the primary key
-    Key otherKey =
-        TestUtil.createKey(
-            TestUtil.createAesCtrHmacStreamingKeyData(otherKeyValue, derivedKeySize, 256),
-            43,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.RAW);
-    // Another key with a larger segment size than the primary key
-    Key anotherKey =
-        TestUtil.createKey(
-            TestUtil.createAesGcmHkdfStreamingKeyData(anotherKeyValue, derivedKeySize, 1024),
-            72,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.RAW);
+    StreamingAead streamingAead = keysetHandle.getPrimitive(StreamingAead.class);
+    StreamingAead shiftedPrimaryStreamingAead =
+        shiftedPrimaryKeysetHandle.getPrimitive(StreamingAead.class);
 
-    PrimitiveSet<StreamingAead> primitives =
-        TestUtil.createPrimitiveSet(
-            TestUtil.createKeyset(primaryKey, otherKey, anotherKey), StreamingAead.class);
-    StreamingAead streamingAead = new StreamingAeadWrapper().wrap(primitives);
+    StreamingTestUtil.testEncryptDecryptDifferentInstances(
+        streamingAead, shiftedPrimaryStreamingAead, 0, 20, 5);
+    StreamingTestUtil.testEncryptDecryptDifferentInstances(
+        shiftedPrimaryStreamingAead, streamingAead, 0, 20, 5);
+  }
 
-    StreamingAead primaryAead =
-        new StreamingAeadWrapper()
-            .wrap(
-                TestUtil.createPrimitiveSet(
-                    TestUtil.createKeyset(primaryKey), StreamingAead.class));
-    StreamingAead otherAead =
-        new StreamingAeadWrapper()
-            .wrap(
-                TestUtil.createPrimitiveSet(TestUtil.createKeyset(otherKey), StreamingAead.class));
-    StreamingAead anotherAead =
-        new StreamingAeadWrapper()
-            .wrap(
-                TestUtil.createPrimitiveSet(
-                    TestUtil.createKeyset(anotherKey), StreamingAead.class));
+  @Test
+  public void wrongKey_throws() throws Exception {
+    AesGcmHkdfStreamingParameters aesGcmHkdfStreamingParameters =
+        AesGcmHkdfStreamingParameters.builder()
+            .setKeySizeBytes(32)
+            .setDerivedAesGcmKeySizeBytes(32)
+            .setHkdfHashType(AesGcmHkdfStreamingParameters.HashType.SHA256)
+            .setCiphertextSegmentSizeBytes(64)
+            .build();
+    AesGcmHkdfStreamingKey aesGcmHkdfStreamingKey =
+        AesGcmHkdfStreamingKey.create(
+            aesGcmHkdfStreamingParameters,
+            SecretBytes.copyFrom(
+                Hex.decode("abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd"),
+                InsecureSecretKeyAccess.get()));
+    AesCtrHmacStreamingParameters aesCtrHmacStreamingParameters =
+        AesCtrHmacStreamingParameters.builder()
+            .setKeySizeBytes(32)
+            .setDerivedKeySizeBytes(32)
+            .setHkdfHashType(AesCtrHmacStreamingParameters.HashType.SHA256)
+            .setHmacHashType(AesCtrHmacStreamingParameters.HashType.SHA256)
+            .setHmacTagSizeBytes(16)
+            .setCiphertextSegmentSizeBytes(64)
+            .build();
+    AesCtrHmacStreamingKey aesCtrHmacStreamingKey =
+        AesCtrHmacStreamingKey.create(
+            aesCtrHmacStreamingParameters,
+            SecretBytes.copyFrom(
+                Hex.decode("abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd"),
+                InsecureSecretKeyAccess.get()));
+    KeysetHandle aesCtrHmacKeysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(aesCtrHmacStreamingKey).withFixedId(43).makePrimary())
+            .build();
+    KeysetHandle aesGcmHkdfKeysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(aesGcmHkdfStreamingKey).withFixedId(42).makePrimary())
+            .build();
 
-    StreamingTestUtil.testEncryptionAndDecryption(streamingAead, streamingAead);
-    StreamingTestUtil.testEncryptionAndDecryption(streamingAead, primaryAead);
-    StreamingTestUtil.testEncryptionAndDecryption(primaryAead, streamingAead);
-    StreamingTestUtil.testEncryptionAndDecryption(otherAead, streamingAead);
-    StreamingTestUtil.testEncryptionAndDecryption(anotherAead, streamingAead);
-    StreamingTestUtil.testEncryptionAndDecryption(primaryAead, primaryAead);
-    StreamingTestUtil.testEncryptionAndDecryption(otherAead, otherAead);
-    StreamingTestUtil.testEncryptionAndDecryption(anotherAead, anotherAead);
-    IOException expected =
-        assertThrows(
-            IOException.class,
-            () -> StreamingTestUtil.testEncryptionAndDecryption(otherAead, primaryAead));
-    assertExceptionContains(expected, "No matching key");
-    IOException expected2 =
-        assertThrows(
-            IOException.class,
-            () -> StreamingTestUtil.testEncryptionAndDecryption(anotherAead, primaryAead));
-    assertExceptionContains(expected2, "No matching key");
+    StreamingAead aesCtrHmac = aesCtrHmacKeysetHandle.getPrimitive(StreamingAead.class);
+    StreamingAead aesGcmHkdf = aesGcmHkdfKeysetHandle.getPrimitive(StreamingAead.class);
+
+    assertThrows(
+        IOException.class,
+        () ->
+            StreamingTestUtil.testEncryptDecryptDifferentInstances(
+                aesCtrHmac, aesGcmHkdf, 0, 20, 5));
+    assertThrows(
+        IOException.class,
+        () ->
+            StreamingTestUtil.testEncryptDecryptDifferentInstances(
+                aesGcmHkdf, aesCtrHmac, 0, 20, 5));
   }
 
   @Test
   public void testEncryptDecryptWithTinkKey() throws Exception {
-    AesGcmHkdfStreamingKey protoKey1 =
-        AesGcmHkdfStreamingKey.newBuilder()
+    com.google.crypto.tink.proto.AesGcmHkdfStreamingKey protoKey1 =
+        com.google.crypto.tink.proto.AesGcmHkdfStreamingKey.newBuilder()
             .setVersion(0)
-            .setKeyValue(KEY_BYTES_1)
+            .setKeyValue(ByteString.copyFromUtf8("0123456789012345"))
             .setParams(
-                AesGcmHkdfStreamingParams.newBuilder()
+                com.google.crypto.tink.proto.AesGcmHkdfStreamingParams.newBuilder()
                     .setHkdfHashType(HashType.SHA1)
                     .setDerivedKeySize(16)
                     .setCiphertextSegmentSize(512 * 1024))
@@ -188,16 +252,16 @@ public class StreamingAeadWrapperTest {
                     .setTypeUrl(AES_GCM_HKDF_TYPE_URL)
                     .setValue(protoKey1.toByteString())
                     .setKeyMaterialType(KeyMaterialType.SYMMETRIC))
-        .setKeyId(1)
-        .setOutputPrefixType(OutputPrefixType.TINK)
-        .setStatus(KeyStatusType.ENABLED)
-        .build();
-    AesGcmHkdfStreamingKey protoKey2 =
-        AesGcmHkdfStreamingKey.newBuilder()
+            .setKeyId(1)
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .setStatus(KeyStatusType.ENABLED)
+            .build();
+    com.google.crypto.tink.proto.AesGcmHkdfStreamingKey protoKey2 =
+        com.google.crypto.tink.proto.AesGcmHkdfStreamingKey.newBuilder()
             .setVersion(0)
-            .setKeyValue(KEY_BYTES_2)
+            .setKeyValue(ByteString.copyFromUtf8("0123456789abcdef"))
             .setParams(
-                AesGcmHkdfStreamingParams.newBuilder()
+                com.google.crypto.tink.proto.AesGcmHkdfStreamingParams.newBuilder()
                     .setHkdfHashType(HashType.SHA1)
                     .setDerivedKeySize(16)
                     .setCiphertextSegmentSize(512 * 1024))
@@ -209,10 +273,10 @@ public class StreamingAeadWrapperTest {
                     .setTypeUrl(AES_GCM_HKDF_TYPE_URL)
                     .setValue(protoKey2.toByteString())
                     .setKeyMaterialType(KeyMaterialType.SYMMETRIC))
-        .setKeyId(2)
-        .setOutputPrefixType(OutputPrefixType.RAW)
-        .setStatus(KeyStatusType.ENABLED)
-        .build();
+            .setKeyId(2)
+            .setOutputPrefixType(OutputPrefixType.RAW)
+            .setStatus(KeyStatusType.ENABLED)
+            .build();
 
     Keyset keyset =
         Keyset.newBuilder().addKey(keysetKey1).addKey(keysetKey2).setPrimaryKeyId(1).build();
