@@ -384,6 +384,58 @@ tink_cc_library(
     tink::proto::tink_cc_proto
 )
 
+tink_cc_library(
+  NAME config_v0
+  SRCS
+    config_v0.cc
+    config_v0.h
+  DEPS
+    absl::check
+    tink::core::configuration
+    tink::hybrid::internal::config_v0
+  TAGS
+    exclude_if_openssl
+)
+
+tink_cc_library(
+  NAME config_v0_openssl
+  SRCS
+    config_v0.cc
+    config_v0.h
+  DEPS
+    absl::check
+    tink::core::configuration
+    tink::hybrid::internal::config_v0_openssl
+  TAGS
+    exclude_if_boringssl
+)
+
+tink_cc_library(
+  NAME key_gen_config_v0
+  SRCS
+    key_gen_config_v0.cc
+    key_gen_config_v0.h
+  DEPS
+    absl::check
+    tink::core::key_gen_configuration
+    tink::hybrid::internal::key_gen_config_v0
+  TAGS
+    exclude_if_openssl
+)
+
+tink_cc_library(
+  NAME key_gen_config_v0_openssl
+  SRCS
+    key_gen_config_v0.cc
+    key_gen_config_v0.h
+  DEPS
+    absl::check
+    tink::core::key_gen_configuration
+    tink::hybrid::internal::key_gen_config_v0_openssl
+  TAGS
+    exclude_if_boringssl
+)
+
 # tests
 
 tink_cc_test(
@@ -757,4 +809,42 @@ tink_cc_test(
     tink::util::test_matchers
     tink::proto::hpke_cc_proto
     tink::proto::tink_cc_proto
+)
+
+tink_cc_test(
+  NAME config_v0_test
+  SRCS
+    config_v0_test.cc
+  DEPS
+    tink::hybrid::config_v0
+    tink::hybrid::hybrid_key_templates
+    tink::hybrid::key_gen_config_v0
+    gmock
+    tink::core::hybrid_decrypt
+    tink::core::hybrid_encrypt
+    tink::core::keyset_handle
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::proto::tink_cc_proto
+  TAGS
+    exclude_if_openssl
+)
+
+tink_cc_test(
+  NAME config_v0_openssl_test
+  SRCS
+    config_v0_test.cc
+  DEPS
+    tink::hybrid::config_v0_openssl
+    tink::hybrid::hybrid_key_templates
+    tink::hybrid::key_gen_config_v0_openssl
+    gmock
+    tink::core::hybrid_decrypt
+    tink::core::hybrid_encrypt
+    tink::core::keyset_handle
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::proto::tink_cc_proto
+  TAGS
+    exclude_if_boringssl
 )

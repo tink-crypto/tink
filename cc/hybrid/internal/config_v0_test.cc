@@ -53,7 +53,7 @@ using ::testing::Values;
 
 TEST(HybridV0Test, PrimitiveWrappers) {
   Configuration config;
-  ASSERT_THAT(AddHybridConfigV0(config), IsOk());
+  ASSERT_THAT(AddHybridV0(config), IsOk());
   util::StatusOr<const KeysetWrapperStore*> store =
       ConfigurationImpl::GetKeysetWrapperStore(config);
   ASSERT_THAT(store, IsOk());
@@ -64,7 +64,7 @@ TEST(HybridV0Test, PrimitiveWrappers) {
 
 TEST(HybridV0Test, KeyManagers) {
   Configuration config;
-  ASSERT_THAT(AddHybridConfigV0(config), IsOk());
+  ASSERT_THAT(AddHybridV0(config), IsOk());
   util::StatusOr<const KeyTypeInfoStore*> store =
       ConfigurationImpl::GetKeyTypeInfoStore(config);
   ASSERT_THAT(store, IsOk());
@@ -101,7 +101,7 @@ TEST_P(HybridV0KeyTypesTest, GetPrimitive) {
   KeyGenConfiguration key_gen_config;
   ASSERT_THAT(AddHybridKeyGenV0(key_gen_config), IsOk());
   Configuration config;
-  ASSERT_THAT(AddHybridConfigV0(config), IsOk());
+  ASSERT_THAT(AddHybridV0(config), IsOk());
 
   util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
       KeysetHandle::GenerateNew(GetParam(), key_gen_config);

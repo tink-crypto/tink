@@ -14,32 +14,19 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "tink/config/v0.h"
+#include "tink/hybrid/config_v0.h"
 
 #include "absl/log/check.h"
-#include "tink/aead/internal/config_v0.h"
 #include "tink/configuration.h"
-#include "tink/daead/internal/config_v0.h"
 #include "tink/hybrid/internal/config_v0.h"
-#include "tink/internal/configuration_impl.h"
-#include "tink/mac/internal/config_v0.h"
-#include "tink/prf/internal/config_v0.h"
-#include "tink/signature/internal/config_v0.h"
-#include "tink/streamingaead/internal/config_v0.h"
 
 namespace crypto {
 namespace tink {
 
-const Configuration& ConfigV0() {
+const Configuration& ConfigHybridV0() {
   static const Configuration* instance = [] {
     static Configuration* config = new Configuration();
-    CHECK_OK(internal::AddMacV0(*config));
-    CHECK_OK(internal::AddAeadV0(*config));
-    CHECK_OK(internal::AddDeterministicAeadV0(*config));
-    CHECK_OK(internal::AddStreamingAeadV0(*config));
     CHECK_OK(internal::AddHybridV0(*config));
-    CHECK_OK(internal::AddPrfV0(*config));
-    CHECK_OK(internal::AddSignatureV0(*config));
     return config;
   }();
   return *instance;

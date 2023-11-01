@@ -14,22 +14,23 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_HYBRID_INTERNAL_CONFIG_V0_H_
-#define TINK_HYBRID_INTERNAL_CONFIG_V0_H_
+#include "tink/hybrid/key_gen_config_v0.h"
 
-#include "tink/configuration.h"
-#include "tink/util/status.h"
+#include "absl/log/check.h"
+#include "tink/hybrid/internal/key_gen_config_v0.h"
+#include "tink/key_gen_configuration.h"
 
 namespace crypto {
 namespace tink {
-namespace internal {
 
-// Add recommended Hybrid Encryption primitive wrappers and key managers to
-// `config`, used to generate primitives.
-util::Status AddHybridV0(Configuration& config);
+const KeyGenConfiguration& KeyGenConfigHybridV0() {
+  static const KeyGenConfiguration* instance = [] {
+    static KeyGenConfiguration* config = new KeyGenConfiguration();
+    CHECK_OK(internal::AddHybridKeyGenV0(*config));
+    return config;
+  }();
+  return *instance;
+}
 
-}  // namespace internal
 }  // namespace tink
 }  // namespace crypto
-
-#endif  // TINK_HYBRID_INTERNAL_CONFIG_V0_H_
