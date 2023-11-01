@@ -99,12 +99,13 @@ class PrimitiveSetTest(absltest.TestCase):
     self.assertEqual(core.crypto_format.output_prefix(key), entry.identifier)
     self.assertEqual(1, entry.key_id)
 
-  def test_primary_returns_none(self):
+  def test_primary_not_set_primary_fails(self):
     primitive_set = core.new_primitive_set(mac.Mac)
     key = new_key(MAC_TEMPLATE, key_id=1)
     primitive = core.Registry.primitive(key.key_data, mac.Mac)
     primitive_set.add_primitive(primitive, key)
-    self.assertIsNone(primitive_set.primary())
+    with self.assertRaises(core.TinkError):
+      primitive_set.primary()
 
   def test_same_key_id_and_prefix_type(self):
     primitive_set = core.new_primitive_set(mac.Mac)

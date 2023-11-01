@@ -153,10 +153,11 @@ class PrfToPrfWrapper(core.PrimitiveWrapper[prf.Prf, prf.Prf]):
   """A PrimitiveWrapper that wraps Prfs into a Prf."""
 
   def wrap(self, primitives_set: core.PrimitiveSet) -> prf.Prf:
-    if primitives_set.primary():
-      return primitives_set.primary().primitive
-    else:
+    # This is needed because register_primitive_wrapper calls wrap with
+    # an empty PrimitiveSet.
+    if not primitives_set.raw_primitives():
       return _InvalidPrf()
+    return primitives_set.primary().primitive
 
   def primitive_class(self) -> Type[prf.Prf]:
     return prf.Prf
