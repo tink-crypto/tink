@@ -63,8 +63,7 @@ class KeysetHandle {
   class Entry {
    public:
     // May return an internal class in case there is no implementation of the
-    // corresponding key class yet.  Returned value only valid for lifetime
-    // of entry object.
+    // corresponding key class yet.
     std::shared_ptr<const Key> GetKey() const { return key_; }
 
     // Status indicates whether or not a key should still be used.
