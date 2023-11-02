@@ -138,3 +138,23 @@ func TestKMSEnvelopeShortCiphertext(t *testing.T) {
 		t.Error("a.Decrypt([]byte{1}, nil) err = nil, want error")
 	}
 }
+
+type invalidAEAD struct {
+}
+
+func (a *invalidAEAD) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
+	return []byte{}, nil
+}
+
+func (a *invalidAEAD) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
+	return []byte{}, nil
+}
+
+func TestKMSEnvelopeEncryptWithInvalidAEADFails(t *testing.T) {
+	invalidKEKAEAD := &invalidAEAD{}
+	envAEADWithInvalidKEK := aead.NewKMSEnvelopeAEAD2(aead.AES256GCMKeyTemplate(), invalidKEKAEAD)
+
+	if _, err := envAEADWithInvalidKEK.Encrypt([]byte("plaintext"), []byte("associatedData")); err == nil {
+		t.Error("envAEADWithInvalidKEK.Encrypt(plaintext, associatedData) err = nil, want error")
+	}
+}
