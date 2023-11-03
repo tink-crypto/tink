@@ -109,8 +109,8 @@ INSTANTIATE_TEST_SUITE_P(
                     RsaSsaPkcs1Parameters::HashType::kSha256, HashType::SHA256,
                     /*modulus_size=*/2048, /*id=*/0x01030005,
                     /*output_prefix=*/std::string("\x00\x01\x03\x00\x05", 5)},
-           TestCase{RsaSsaPkcs1Parameters::Variant::kCrunchy,
-                    OutputPrefixType::CRUNCHY,
+           TestCase{RsaSsaPkcs1Parameters::Variant::kLegacy,
+                    OutputPrefixType::LEGACY,
                     RsaSsaPkcs1Parameters::HashType::kSha384, HashType::SHA384,
                     /*modulus_size=*/3072, /*id=*/0x07080910,
                     /*output_prefix=*/std::string("\x00\x07\x08\x09\x10", 5)},
@@ -148,40 +148,6 @@ TEST_P(RsaSsaPkcs1ProtoSerializationTest, ParseParametersSucceeds) {
   EXPECT_THAT(rsa_ssa_pkcs1_parameters->GetModulusSizeInBits(),
               Eq(test_case.modulus_size_in_bits));
   EXPECT_THAT(rsa_ssa_pkcs1_parameters->GetHashType(), Eq(test_case.hash_type));
-  EXPECT_THAT(rsa_ssa_pkcs1_parameters->GetPublicExponent(),
-              Eq(BigInteger(kF4Str)));
-}
-
-TEST_F(RsaSsaPkcs1ProtoSerializationTest, ParseParametersLegacyAsCrunchy) {
-  ASSERT_THAT(RegisterRsaSsaPkcs1ProtoSerialization(), IsOk());
-
-  RsaSsaPkcs1KeyFormat key_format_proto;
-  key_format_proto.set_modulus_size_in_bits(2048);
-  key_format_proto.set_public_exponent(kF4Str);
-  key_format_proto.mutable_params()->set_hash_type(HashType::SHA256);
-
-  util::StatusOr<internal::ProtoParametersSerialization> serialization =
-      internal::ProtoParametersSerialization::Create(
-          kPrivateTypeUrl, OutputPrefixType::LEGACY,
-          key_format_proto.SerializeAsString());
-  ASSERT_THAT(serialization, IsOk());
-
-  util::StatusOr<std::unique_ptr<Parameters>> parameters =
-      internal::MutableSerializationRegistry::GlobalInstance().ParseParameters(
-          *serialization);
-  ASSERT_THAT(parameters, IsOk());
-
-  EXPECT_THAT((*parameters)->HasIdRequirement(), IsTrue());
-
-  const RsaSsaPkcs1Parameters* rsa_ssa_pkcs1_parameters =
-      dynamic_cast<const RsaSsaPkcs1Parameters*>(parameters->get());
-
-  ASSERT_THAT(rsa_ssa_pkcs1_parameters, NotNull());
-  EXPECT_THAT(rsa_ssa_pkcs1_parameters->GetVariant(),
-              Eq(RsaSsaPkcs1Parameters::Variant::kCrunchy));
-  EXPECT_THAT(rsa_ssa_pkcs1_parameters->GetModulusSizeInBits(), Eq(2048));
-  EXPECT_THAT(rsa_ssa_pkcs1_parameters->GetHashType(),
-              Eq(RsaSsaPkcs1Parameters::HashType::kSha256));
   EXPECT_THAT(rsa_ssa_pkcs1_parameters->GetPublicExponent(),
               Eq(BigInteger(kF4Str)));
 }

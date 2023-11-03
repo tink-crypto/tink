@@ -82,7 +82,7 @@ util::StatusOr<RsaSsaPkcs1Parameters::Variant> ToVariant(
     OutputPrefixType output_prefix_type) {
   switch (output_prefix_type) {
     case OutputPrefixType::LEGACY:
-      ABSL_FALLTHROUGH_INTENDED;  // Parse LEGACY output prefix as CRUNCHY.
+      return RsaSsaPkcs1Parameters::Variant::kLegacy;
     case OutputPrefixType::CRUNCHY:
       return RsaSsaPkcs1Parameters::Variant::kCrunchy;
     case OutputPrefixType::RAW:
@@ -98,6 +98,8 @@ util::StatusOr<RsaSsaPkcs1Parameters::Variant> ToVariant(
 util::StatusOr<OutputPrefixType> ToOutputPrefixType(
     RsaSsaPkcs1Parameters::Variant variant) {
   switch (variant) {
+    case RsaSsaPkcs1Parameters::Variant::kLegacy:
+      return OutputPrefixType::LEGACY;
     case RsaSsaPkcs1Parameters::Variant::kCrunchy:
       return OutputPrefixType::CRUNCHY;
     case RsaSsaPkcs1Parameters::Variant::kNoPrefix:
