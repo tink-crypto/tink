@@ -327,6 +327,7 @@ tink_cc_library(
     tink::signature::ed25519_verify_key_manager
     tink::signature::public_key_sign_wrapper
     tink::signature::public_key_verify_wrapper
+    tink::signature::rsa_ssa_pkcs1_proto_serialization
     tink::signature::rsa_ssa_pkcs1_sign_key_manager
     tink::signature::rsa_ssa_pkcs1_verify_key_manager
     tink::signature::rsa_ssa_pss_sign_key_manager
@@ -876,22 +877,43 @@ tink_cc_test(
   SRCS
     signature_config_test.cc
   DEPS
+    tink::signature::rsa_ssa_pkcs1_parameters
+    tink::signature::rsa_ssa_pkcs1_private_key
+    tink::signature::rsa_ssa_pkcs1_public_key
     tink::signature::rsa_ssa_pss_sign_key_manager
     tink::signature::rsa_ssa_pss_verify_key_manager
     tink::signature::signature_config
     tink::signature::signature_key_templates
     gmock
+    absl::check
     absl::memory
     absl::status
     crypto
+    tink::core::big_integer
+    tink::core::insecure_secret_key_access
+    tink::core::key
     tink::core::keyset_handle
+    tink::core::parameters
+    tink::core::partial_key_access
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::core::registry
+    tink::core::restricted_big_integer
+    tink::core::restricted_data
+    tink::internal::bn_util
     tink::internal::fips_utils
+    tink::internal::mutable_serialization_registry
+    tink::internal::proto_key_serialization
+    tink::internal::proto_parameters_serialization
+    tink::internal::serialization
+    tink::internal::ssl_unique_ptr
     tink::util::status
+    tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
+    tink::proto::common_cc_proto
+    tink::proto::rsa_ssa_pkcs1_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
