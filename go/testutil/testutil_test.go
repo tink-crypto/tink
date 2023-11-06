@@ -78,17 +78,20 @@ func TestDummyMAC(t *testing.T) {
 	// Assert that DummyMAC implements the MAC interface.
 	var _ tink.MAC = (*testutil.DummyMAC)(nil)
 	// try to compute mac
-	data := []byte{1, 2, 3, 4, 5}
+	data := []byte("data")
 	dummyMAC := &testutil.DummyMAC{Name: "Mac12347"}
 	digest, err := dummyMAC.ComputeMAC(data)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
-	if !bytes.Equal(append(data, dummyMAC.Name...), digest) {
-		t.Errorf("incorrect digest")
+	if want := []byte("dataMac12347"); !bytes.Equal(digest, want) {
+		t.Errorf("digest = %x, want %x", digest, want)
 	}
-	if err := dummyMAC.VerifyMAC(nil, nil); err != nil {
-		t.Errorf("unexpected result of VerifyMAC")
+	if err := dummyMAC.VerifyMAC(digest, data); err != nil {
+		t.Errorf("VerifyMAC(%x, %x) = %v, want nil", digest, data, err)
+	}
+	if dummyMAC.VerifyMAC(digest, []byte("other data")) == nil {
+		t.Errorf("VerifyMAC(%x, %x) = nil, want error", digest, data)
 	}
 }
 
