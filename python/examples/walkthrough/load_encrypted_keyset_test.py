@@ -60,7 +60,7 @@ _ENCRYPTED_KEYSET = r"""{
 
 # Fake KMS keys are base64-encoded keysets. This was generated from
 # _FAKE_KMS_AEAD_KEYSET by first serializing it to bytes using a
-# tink.BinaryKeysetWriter, and then encoding it as base64.
+# tink.proto_keyset_format.serialize, and then encoding it as base64.
 _FAKE_KMS_KEY_URI = (
     'fake-kms://COiSsYwBEmQKWAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRvLnR'
     'pbmsuQWVzR2NtS2V5EiIaIFbJR8aBiTdFNGGP8shTNK50haXKMJ-0I7KlOvSMI1IuGAEQARjok'
