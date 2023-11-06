@@ -16,6 +16,8 @@
 
 package com.google.crypto.tink.signature;
 
+import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
+
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
@@ -181,10 +183,8 @@ public final class Ed25519PrivateKeyManager
    * @return A {@link KeyTemplate} that generates new instances of ED25519 keys.
    */
   public static final KeyTemplate ed25519Template() {
-    return KeyTemplate.create(
-        new Ed25519PrivateKeyManager().getKeyType(),
-        /*value=*/ new byte[0],
-        KeyTemplate.OutputPrefixType.TINK);
+    return exceptionIsBug(
+        () -> KeyTemplate.createFrom(Ed25519Parameters.create(Ed25519Parameters.Variant.TINK)));
   }
 
   /**
@@ -193,9 +193,8 @@ public final class Ed25519PrivateKeyManager
    *     libraries.
    */
   public static final KeyTemplate rawEd25519Template() {
-    return KeyTemplate.create(
-        new Ed25519PrivateKeyManager().getKeyType(),
-        /*value=*/ new byte[0],
-        KeyTemplate.OutputPrefixType.RAW);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(Ed25519Parameters.create(Ed25519Parameters.Variant.NO_PREFIX)));
   }
 }

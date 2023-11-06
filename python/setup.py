@@ -20,7 +20,6 @@ from __future__ import print_function
 import glob
 import os
 import posixpath
-import re
 import shutil
 import subprocess
 import textwrap
@@ -131,11 +130,7 @@ def _patch_workspace(workspace_file):
   with open(workspace_file, 'r') as f:
     workspace_content = f.read()
 
-  if 'TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH' in os.environ:
-    base_path = os.environ['TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH']
-    workspace_content = _patch_with_local_path(workspace_content, base_path)
-
-  elif 'TINK_PYTHON_SETUPTOOLS_TAGGED_VERSION' in os.environ:
+  if 'TINK_PYTHON_SETUPTOOLS_TAGGED_VERSION' in os.environ:
     tagged_version = os.environ['TINK_PYTHON_SETUPTOOLS_TAGGED_VERSION']
     archive_filename = 'v{}.zip'.format(tagged_version)
     archive_prefix = 'tink-{}'.format(tagged_version)
@@ -148,15 +143,6 @@ def _patch_workspace(workspace_file):
 
   with open(workspace_file, 'w') as f:
     f.write(workspace_content)
-
-
-def _patch_with_local_path(workspace_content, base_path):
-  """Replaces the base paths in the local_repository() rules."""
-  return re.sub(
-      r'(?<="tink_cc",\n    path = ").*(?=\n)',
-      base_path + '/cc",  # Modified by setup.py',
-      workspace_content,
-  )
 
 
 def _patch_with_http_archive(workspace_content, filename, prefix):

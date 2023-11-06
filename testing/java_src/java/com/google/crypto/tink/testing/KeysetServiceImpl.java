@@ -23,9 +23,10 @@ import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
-import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
+import com.google.crypto.tink.TinkProtoParametersFormat;
 import com.google.crypto.tink.testing.proto.KeysetFromJsonRequest;
 import com.google.crypto.tink.testing.proto.KeysetFromJsonResponse;
 import com.google.crypto.tink.testing.proto.KeysetGenerateRequest;
@@ -61,7 +62,8 @@ public final class KeysetServiceImpl extends KeysetImplBase {
       KeyTemplate template = KeyTemplates.get(request.getTemplateName());
       response =
           KeysetTemplateResponse.newBuilder()
-              .setKeyTemplate(ByteString.copyFrom(KeyTemplateProtoConverter.toByteArray(template)))
+              .setKeyTemplate(
+                  ByteString.copyFrom(TinkProtoParametersFormat.serialize(template.toParameters())))
               .build();
     } catch (GeneralSecurityException e) {
       response = KeysetTemplateResponse.newBuilder().setErr(e.toString()).build();
@@ -75,9 +77,8 @@ public final class KeysetServiceImpl extends KeysetImplBase {
       KeysetGenerateRequest request, StreamObserver<KeysetGenerateResponse> responseObserver) {
     KeysetGenerateResponse response;
     try {
-      KeyTemplate template =
-          KeyTemplateProtoConverter.fromByteArray(request.getTemplate().toByteArray());
-      KeysetHandle keysetHandle = KeysetHandle.generateNew(template);
+      Parameters parameters = TinkProtoParametersFormat.parse(request.getTemplate().toByteArray());
+      KeysetHandle keysetHandle = KeysetHandle.generateNew(parameters);
       byte[] serializedPublicKeyset =
           TinkProtoKeysetFormat.serializeKeyset(keysetHandle, InsecureSecretKeyAccess.get());
       response =

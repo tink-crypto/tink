@@ -20,9 +20,9 @@ import com.google.crypto.tink.proto.HpkePrivateKey;
 import java.security.GeneralSecurityException;
 
 /** Helper class for creating HPKE KEM asymmetric keys. */
-final class HpkeKemKeyFactory {
+public final class HpkeKemKeyFactory {
 
-  static HpkeKemPrivateKey createPrivate(HpkePrivateKey privateKey)
+  public static HpkeKemPrivateKey createPrivate(HpkePrivateKey privateKey)
       throws GeneralSecurityException {
     switch (privateKey.getPublicKey().getParams().getKem()) {
       case DHKEM_X25519_HKDF_SHA256:

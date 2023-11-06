@@ -16,6 +16,8 @@
 
 package com.google.crypto.tink.aead;
 
+import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
+
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Registry;
@@ -163,7 +165,13 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
    * </ul>
    */
   public static final KeyTemplate aes128GcmSivTemplate() {
-    return createKeyTemplate(16, KeyTemplate.OutputPrefixType.TINK);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                AesGcmSivParameters.builder()
+                    .setKeySizeBytes(16)
+                    .setVariant(AesGcmSivParameters.Variant.TINK)
+                    .build()));
   }
 
   /**
@@ -178,7 +186,13 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
    * <p>Keys generated from this template should create ciphertexts compatible with other libraries.
    */
   public static final KeyTemplate rawAes128GcmSivTemplate() {
-    return createKeyTemplate(16, KeyTemplate.OutputPrefixType.RAW);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                AesGcmSivParameters.builder()
+                    .setKeySizeBytes(16)
+                    .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+                    .build()));
   }
 
   /**
@@ -191,7 +205,13 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
    * </ul>
    */
   public static final KeyTemplate aes256GcmSivTemplate() {
-    return createKeyTemplate(32, KeyTemplate.OutputPrefixType.TINK);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                AesGcmSivParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setVariant(AesGcmSivParameters.Variant.TINK)
+                    .build()));
   }
 
   /**
@@ -206,19 +226,15 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
    * <p>Keys generated from this template should create ciphertexts compatible with other libraries.
    */
   public static final KeyTemplate rawAes256GcmSivTemplate() {
-    return createKeyTemplate(32, KeyTemplate.OutputPrefixType.RAW);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                AesGcmSivParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+                    .build()));
   }
 
-  /**
-   * Returns a {@link KeyTemplate} containing a {@link AesGcmSivKeyFormat} with some specified
-   * parameters.
-   */
-  private static KeyTemplate createKeyTemplate(
-      int keySize, KeyTemplate.OutputPrefixType prefixType) {
-    AesGcmSivKeyFormat format = AesGcmSivKeyFormat.newBuilder().setKeySize(keySize).build();
-    return KeyTemplate.create(
-        new AesGcmSivKeyManager().getKeyType(), format.toByteArray(), prefixType);
-  }
 
   private static KeyFactory.KeyFormat<AesGcmSivKeyFormat> createKeyFormat(
       int keySize, KeyTemplate.OutputPrefixType prefixType) {

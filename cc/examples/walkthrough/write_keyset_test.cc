@@ -137,7 +137,8 @@ TEST_F(WriteKeysetTest, WriteEncryptedKeysetWithValidInputs) {
                            master_kms_key_uri),
       IsOk());
   StatusOr<std::unique_ptr<Aead>> expected_aead =
-      keyset_handle_to_encrypt_->GetPrimitive<Aead>();
+      keyset_handle_to_encrypt_->GetPrimitive<crypto::tink::Aead>(
+          crypto::tink::ConfigGlobalRegistry());
   ASSERT_THAT(expected_aead, IsOk());
   constexpr absl::string_view associated_data = "Some associated data";
   constexpr absl::string_view plaintext = "Some plaintext";
@@ -152,7 +153,9 @@ TEST_F(WriteKeysetTest, WriteEncryptedKeysetWithValidInputs) {
       LoadKeyset(buffer.str(), master_kms_key_uri);
   ASSERT_THAT(loaded_keyset, IsOk());
   StatusOr<std::unique_ptr<Aead>> loaded_keyset_aead =
-      (*loaded_keyset)->GetPrimitive<Aead>();
+      (*loaded_keyset)
+          ->GetPrimitive<crypto::tink::Aead>(
+              crypto::tink::ConfigGlobalRegistry());
   ASSERT_THAT(loaded_keyset_aead, IsOk());
   EXPECT_THAT((*loaded_keyset_aead)->Decrypt(*ciphertext, associated_data),
               IsOkAndHolds(plaintext));

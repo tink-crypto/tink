@@ -28,7 +28,7 @@ fi
 # Sourcing required to update callers environment.
 source ./kokoro/testutils/install_python3.sh
 source ./kokoro/testutils/install_protoc.sh
-./kokoro/testutils/install_tink_via_pip.sh "${PWD}/python" "${PWD}"
+./kokoro/testutils/install_tink_via_pip.sh "${PWD}/python"
 
 cd python
 

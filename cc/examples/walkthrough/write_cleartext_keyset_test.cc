@@ -62,7 +62,9 @@ TEST(WriteCleartextKeysetTest, WriteKeysetSerializesCorrectly) {
   auto output_stream = absl::make_unique<std::ostream>(&buffer);
   ASSERT_THAT(WriteKeyset(**keyset, std::move(output_stream)), IsOk());
 
-  StatusOr<std::unique_ptr<Aead>> aead = (*keyset)->GetPrimitive<Aead>();
+  StatusOr<std::unique_ptr<Aead>> aead =
+      (*keyset)->GetPrimitive<crypto::tink::Aead>(
+          crypto::tink::ConfigGlobalRegistry());
 
   // Make sure the encrypted keyset was written correctly by loading it and
   // trying to decrypt ciphertext.
@@ -70,7 +72,9 @@ TEST(WriteCleartextKeysetTest, WriteKeysetSerializesCorrectly) {
       LoadKeyset(buffer.str());
   ASSERT_THAT(loaded_keyset, IsOk());
   StatusOr<std::unique_ptr<Aead>> loaded_keyset_aead =
-      (*loaded_keyset)->GetPrimitive<Aead>();
+      (*loaded_keyset)
+          ->GetPrimitive<crypto::tink::Aead>(
+              crypto::tink::ConfigGlobalRegistry());
   ASSERT_THAT(loaded_keyset_aead, IsOk());
 
   constexpr absl::string_view kPlaintext = "Some plaintext";

@@ -22,7 +22,9 @@ import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates;
+import com.google.crypto.tink.hybrid.HybridKeyTemplates;
 import com.google.crypto.tink.mac.MacKeyTemplates;
+import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.streamingaead.StreamingAeadKeyTemplates;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -71,5 +73,33 @@ public final class TinkUser {
     Object f = KeysetHandle.generateNew(StreamingAeadKeyTemplates.AES128_GCM_HKDF_1MB);
     Object g = KeysetHandle.generateNew(StreamingAeadKeyTemplates.AES256_GCM_HKDF_4KB);
     Object h = KeysetHandle.generateNew(StreamingAeadKeyTemplates.AES256_GCM_HKDF_1MB);
+  }
+
+  public void signatureKeyTemplateUser() throws Exception {
+    Object a = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
+    Object b = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P384);
+    Object c = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P521);
+    Object d = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256_IEEE_P1363);
+    Object e = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P384_IEEE_P1363);
+    Object f = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256_IEEE_P1363_WITHOUT_PREFIX);
+    Object g = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P521_IEEE_P1363);
+    Object h = KeysetHandle.generateNew(SignatureKeyTemplates.ED25519);
+    Object i = KeysetHandle.generateNew(SignatureKeyTemplates.ED25519WithRawOutput);
+    Object j = KeysetHandle.generateNew(SignatureKeyTemplates.RSA_SSA_PKCS1_3072_SHA256_F4);
+    Object k =
+        KeysetHandle.generateNew(SignatureKeyTemplates.RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX);
+    Object l = KeysetHandle.generateNew(SignatureKeyTemplates.RSA_SSA_PKCS1_4096_SHA512_F4);
+    Object m = KeysetHandle.generateNew(SignatureKeyTemplates.RSA_SSA_PSS_3072_SHA256_SHA256_32_F4);
+    Object n = KeysetHandle.generateNew(SignatureKeyTemplates.RSA_SSA_PSS_4096_SHA512_SHA512_64_F4);
+  }
+
+  public void hybridKeyTemplateUser() throws Exception {
+    Object a = KeysetHandle.generateNew(HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM);
+    Object b =
+        KeysetHandle.generateNew(
+            HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM_COMPRESSED_WITHOUT_PREFIX);
+    Object c =
+        KeysetHandle.generateNew(
+            HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256);
   }
 }

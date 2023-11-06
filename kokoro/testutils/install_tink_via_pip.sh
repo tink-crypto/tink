@@ -24,14 +24,13 @@ set -eo pipefail
 
 usage() {
   cat <<EOF
-Usage:  $0 <path to tink python root> <tink python deps dir>
+Usage:  $0 <path to tink python root>
   -h: Help. Print this usage information.
 EOF
   exit 1
 }
 
 TINK_PY_ROOT_DIR=
-TINK_PY_DEPS_BASE_DIR=
 
 #######################################
 # Process command line arguments.
@@ -49,14 +48,7 @@ process_args() {
     echo "ERROR: The root folder of Tink Python must be specified" >&2
     usage
   fi
-  TINK_PY_DEPS_BASE_DIR="$2"
-  if [[ -z "${TINK_PY_DEPS_BASE_DIR}" ]]; then
-    echo "ERROR: The folder containing Tink Python's dependencies must be \
-specified" >&2
-    usage
-  fi
   readonly TINK_PY_ROOT_DIR
-  readonly TINK_PY_DEPS_BASE_DIR
 }
 
 
@@ -77,13 +69,11 @@ main() {
     fi
     readonly pip_flags
 
-    # Set base path to the Tink Python's dependencies.
-    export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH="${TINK_PY_DEPS_BASE_DIR}"
-    pip3 install "${pip_flags[@]}" --upgrade pip setuptools
+    python3 -m pip install "${pip_flags[@]}" --upgrade pip setuptools
     # Install Tink Python requirements.
-    pip3 install "${pip_flags[@]}" --require-hashes -r requirements.txt
+    python3 -m pip install "${pip_flags[@]}" --require-hashes -r requirements.txt
     # Install Tink Python
-    pip3 install "${pip_flags[@]}" .
+    python3 -m pip install "${pip_flags[@]}" .
   )
 }
 

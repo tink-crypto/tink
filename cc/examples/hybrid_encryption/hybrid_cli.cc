@@ -96,7 +96,9 @@ Status HybridCli(absl::string_view mode, const std::string& keyset_filename,
   if (mode == kEncrypt) {
     // Get the hybrid encryption primitive.
     StatusOr<std::unique_ptr<HybridEncrypt>> hybrid_encrypt_primitive =
-        (*keyset_handle)->GetPrimitive<HybridEncrypt>();
+        (*keyset_handle)
+            ->GetPrimitive<crypto::tink::HybridEncrypt>(
+                crypto::tink::ConfigGlobalRegistry());
     if (!hybrid_encrypt_primitive.ok()) {
       return hybrid_encrypt_primitive.status();
     }
@@ -108,7 +110,9 @@ Status HybridCli(absl::string_view mode, const std::string& keyset_filename,
   } else {  // operation == kDecrypt.
     // Get the hybrid decryption primitive.
     StatusOr<std::unique_ptr<HybridDecrypt>> hybrid_decrypt_primitive =
-        (*keyset_handle)->GetPrimitive<HybridDecrypt>();
+        (*keyset_handle)
+            ->GetPrimitive<crypto::tink::HybridDecrypt>(
+                crypto::tink::ConfigGlobalRegistry());
     if (!hybrid_decrypt_primitive.ok()) {
       return hybrid_decrypt_primitive.status();
     }

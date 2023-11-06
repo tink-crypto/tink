@@ -59,10 +59,10 @@ android_library(
         "//src/main/java/com/google/crypto/tink:key_template-android",
         "//src/main/java/com/google/crypto/tink:keyset_writer-android",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
+        "//src/main/java/com/google/crypto/tink:tink_proto_parameters_format-android",
         "//src/main/java/com/google/crypto/tink/subtle:hex-android",
         "@maven//:androidx_annotation_annotation",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
-        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )

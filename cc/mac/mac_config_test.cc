@@ -360,7 +360,7 @@ TEST_P(ChunkedMacConfigTest, ChunkedMacWrappersRegistered) {
   ASSERT_THAT(key, IsOk());
 
   util::StatusOr<std::unique_ptr<ChunkedMac>> chunked_mac =
-      (*key)->GetPrimitive<ChunkedMac>();
+      (*key)->GetPrimitive<crypto::tink::ChunkedMac>(ConfigGlobalRegistry());
   ASSERT_THAT(chunked_mac, IsOk());
 
   util::StatusOr<std::unique_ptr<ChunkedMacComputation>> computation =

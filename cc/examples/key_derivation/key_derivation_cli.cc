@@ -61,7 +61,9 @@ void ValidateParams() {
 // Verifies `handle` contains a valid AEAD primitive.
 Status VerifyDerivedAeadKeyset(const KeysetHandle& handle) {
   // [START_EXCLUDE]
-  StatusOr<std::unique_ptr<Aead>> aead = handle.GetPrimitive<Aead>();
+  StatusOr<std::unique_ptr<Aead>> aead =
+      handle.GetPrimitive<crypto::tink::Aead>(
+          crypto::tink::ConfigGlobalRegistry());
   if (!aead.ok()) return aead.status();
 
   std::string plaintext = "plaintext";
@@ -100,7 +102,9 @@ Status KeyDerivationCli(const std::string& keyset_filename,
 
   // Get the primitive.
   StatusOr<std::unique_ptr<KeysetDeriver>> deriver =
-      (*keyset_handle)->GetPrimitive<KeysetDeriver>();
+      (*keyset_handle)
+          ->GetPrimitive<crypto::tink::KeysetDeriver>(
+              crypto::tink::ConfigGlobalRegistry());
   if (!deriver.ok()) return deriver.status();
 
   // Read the salt.

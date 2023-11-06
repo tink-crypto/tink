@@ -174,6 +174,52 @@ func TestKMSEnvelopeAEADKeyTemplateMultipleKeysSameKEK(t *testing.T) {
 	}
 }
 
+// This test shows how migrate away from CreateKMSEnvelopeAEADKeyTemplate.
+func TestMigrateFromCreateKMSEnvelopeAEADKeyTemplateToNewKMSEnvelopeAEAD2(t *testing.T) {
+	kmsClient, err := fakekms.NewClient("fake-kms://")
+	if err != nil {
+		t.Fatalf("fakekms.NewClient('fake-kms://') failed: %v", err)
+	}
+	kekURI := "fake-kms://CM2b3_MDElQKSAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRvLnRpbmsuQWVzR2NtS2V5EhIaEIK75t5L-adlUwVhWvRuWUwYARABGM2b3_MDIAE"
+
+	// This code:
+	registry.RegisterKMSClient(kmsClient)
+	kmsEnvelopeAEADTemplate, err := aead.CreateKMSEnvelopeAEADKeyTemplate(kekURI, aead.AES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("CreateKMSEnvelopeAEADKeyTemplate() failed: %v", err)
+	}
+	handle, err := keyset.NewHandle(kmsEnvelopeAEADTemplate)
+	if err != nil {
+		t.Fatalf("keyset.NewHandle(kmsEnvelopeAEADTemplate) failed: %v", err)
+	}
+	aead1, err := aead.New(handle)
+	if err != nil {
+		t.Fatalf("aead.New(handle) failed: %v", err)
+	}
+	// can be replace by this:
+	kekAEAD, err := kmsClient.GetAEAD(kekURI)
+	if err != nil {
+		t.Fatalf("kmsClient.GetAEAD(kekURI) failed: %v", err)
+	}
+	aead2 := aead.NewKMSEnvelopeAEAD2(aead.AES128GCMKeyTemplate(), kekAEAD)
+
+	// Check that aead1 and aead2 are compatible.
+	plaintext := []byte("plaintext")
+	associatedData := []byte("associatedData")
+
+	ciphertext, err := aead1.Encrypt(plaintext, associatedData)
+	if err != nil {
+		t.Fatalf("aead1.Encrypt(plaintext, associatedData) failed: %v", err)
+	}
+	decrypted, err := aead2.Decrypt(ciphertext, associatedData)
+	if err != nil {
+		t.Fatalf("aead2.Decrypt(ciphertext, associatedData) failed: %v", err)
+	}
+	if !bytes.Equal(plaintext, decrypted) {
+		t.Fatalf("decrypted data doesn't match plaintext, got: %q, want: %q", decrypted, plaintext)
+	}
+}
+
 // Testing deprecated function, ignoring GoDeprecated.
 func TestCreateKMSEnvelopeAEADKeyTemplateCompatibleWithKMSEnevelopeAEADKeyTemplate(t *testing.T) {
 	fakeKmsClient, err := fakekms.NewClient("fake-kms://")

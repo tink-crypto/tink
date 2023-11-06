@@ -18,16 +18,15 @@ package com.google.crypto.tink.hybrid;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
-import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
+import com.google.crypto.tink.aead.AesCtrHmacAeadParameters;
+import com.google.crypto.tink.aead.AesGcmParameters;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.EcPointFormat;
 import com.google.crypto.tink.proto.EciesAeadHkdfKeyFormat;
@@ -43,7 +42,6 @@ import com.google.crypto.tink.subtle.EciesAeadHkdfHybridEncrypt;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
-import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
 import org.junit.BeforeClass;
@@ -57,6 +55,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
   @BeforeClass
   public static void setUp() throws Exception {
     AeadConfig.register();
+    HybridConfig.register();
   }
 
   private final EciesAeadHkdfPrivateKeyManager manager = new EciesAeadHkdfPrivateKeyManager();
@@ -230,56 +229,42 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
   public void testEciesP256HkdfHmacSha256Aes128GcmTemplate() throws Exception {
     KeyTemplate template =
         EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate();
-
-    com.google.crypto.tink.proto.KeyTemplate protoTemplate =
-        KeyTemplateProtoConverter.toProto(template);
-    assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), protoTemplate.getTypeUrl());
-    assertEquals(
-        com.google.crypto.tink.proto.OutputPrefixType.TINK, protoTemplate.getOutputPrefixType());
-    EciesAeadHkdfKeyFormat format =
-        EciesAeadHkdfKeyFormat.parseFrom(
-            protoTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.hasParams()).isTrue();
-    assertThat(format.getParams().hasKemParams()).isTrue();
-    assertThat(format.getParams().hasDemParams()).isTrue();
-    assertThat(format.getParams().getDemParams().hasAeadDem()).isTrue();
-    assertThat(format.getParams().getEcPointFormat()).isEqualTo(EcPointFormat.UNCOMPRESSED);
-
-    EciesHkdfKemParams kemParams = format.getParams().getKemParams();
-    assertThat(kemParams.getCurveType()).isEqualTo(EllipticCurveType.NIST_P256);
-    assertThat(kemParams.getHkdfHashType()).isEqualTo(HashType.SHA256);
-    assertThat(kemParams.getHkdfSalt()).isEmpty();
-    assertThat(format.getParams().getDemParams().getAeadDem().toString())
-        .isEqualTo(AeadKeyTemplates.AES128_GCM.toString());
+    assertThat(template.toParameters())
+        .isEqualTo(
+            EciesParameters.builder()
+                .setCurveType(EciesParameters.CurveType.NIST_P256)
+                .setHashType(EciesParameters.HashType.SHA256)
+                .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+                .setVariant(EciesParameters.Variant.TINK)
+                .setDemParameters(
+                    AesGcmParameters.builder()
+                        .setIvSizeBytes(12)
+                        .setKeySizeBytes(16)
+                        .setTagSizeBytes(16)
+                        .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+                        .build())
+                .build());
   }
 
   @Test
   public void testRawEciesP256HkdfHmacSha256Aes128GcmCompressedTemplate() throws Exception {
     KeyTemplate template =
         EciesAeadHkdfPrivateKeyManager.rawEciesP256HkdfHmacSha256Aes128GcmCompressedTemplate();
-
-    com.google.crypto.tink.proto.KeyTemplate protoTemplate =
-        KeyTemplateProtoConverter.toProto(template);
-    assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), protoTemplate.getTypeUrl());
-    assertEquals(
-        com.google.crypto.tink.proto.OutputPrefixType.RAW, protoTemplate.getOutputPrefixType());
-    EciesAeadHkdfKeyFormat format =
-        EciesAeadHkdfKeyFormat.parseFrom(
-            protoTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.hasParams()).isTrue();
-    assertThat(format.getParams().hasKemParams()).isTrue();
-    assertThat(format.getParams().hasDemParams()).isTrue();
-    assertThat(format.getParams().getDemParams().hasAeadDem()).isTrue();
-    assertThat(format.getParams().getEcPointFormat()).isEqualTo(EcPointFormat.COMPRESSED);
-
-    EciesHkdfKemParams kemParams = format.getParams().getKemParams();
-    assertThat(kemParams.getCurveType()).isEqualTo(EllipticCurveType.NIST_P256);
-    assertThat(kemParams.getHkdfHashType()).isEqualTo(HashType.SHA256);
-    assertThat(kemParams.getHkdfSalt()).isEmpty();
-    assertThat(format.getParams().getDemParams().getAeadDem().toString())
-        .isEqualTo(AeadKeyTemplates.AES128_GCM.toString());
+    assertThat(template.toParameters())
+        .isEqualTo(
+            EciesParameters.builder()
+                .setCurveType(EciesParameters.CurveType.NIST_P256)
+                .setHashType(EciesParameters.HashType.SHA256)
+                .setNistCurvePointFormat(EciesParameters.PointFormat.COMPRESSED)
+                .setVariant(EciesParameters.Variant.NO_PREFIX)
+                .setDemParameters(
+                    AesGcmParameters.builder()
+                        .setIvSizeBytes(12)
+                        .setKeySizeBytes(16)
+                        .setTagSizeBytes(16)
+                        .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+                        .build())
+                .build());
   }
 
   @Test
@@ -287,27 +272,23 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     KeyTemplate template =
         EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128CtrHmacSha256Template();
 
-    com.google.crypto.tink.proto.KeyTemplate protoTemplate =
-        KeyTemplateProtoConverter.toProto(template);
-    assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), protoTemplate.getTypeUrl());
-    assertEquals(
-        com.google.crypto.tink.proto.OutputPrefixType.TINK, protoTemplate.getOutputPrefixType());
-    EciesAeadHkdfKeyFormat format =
-        EciesAeadHkdfKeyFormat.parseFrom(
-            protoTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.hasParams()).isTrue();
-    assertThat(format.getParams().hasKemParams()).isTrue();
-    assertThat(format.getParams().hasDemParams()).isTrue();
-    assertThat(format.getParams().getDemParams().hasAeadDem()).isTrue();
-    assertThat(format.getParams().getEcPointFormat()).isEqualTo(EcPointFormat.UNCOMPRESSED);
-
-    EciesHkdfKemParams kemParams = format.getParams().getKemParams();
-    assertThat(kemParams.getCurveType()).isEqualTo(EllipticCurveType.NIST_P256);
-    assertThat(kemParams.getHkdfHashType()).isEqualTo(HashType.SHA256);
-    assertThat(kemParams.getHkdfSalt()).isEmpty();
-    assertThat(format.getParams().getDemParams().getAeadDem().toString())
-        .isEqualTo(AeadKeyTemplates.AES128_CTR_HMAC_SHA256.toString());
+    assertThat(template.toParameters())
+        .isEqualTo(
+            EciesParameters.builder()
+                .setCurveType(EciesParameters.CurveType.NIST_P256)
+                .setHashType(EciesParameters.HashType.SHA256)
+                .setNistCurvePointFormat(EciesParameters.PointFormat.UNCOMPRESSED)
+                .setVariant(EciesParameters.Variant.TINK)
+                .setDemParameters(
+                    AesCtrHmacAeadParameters.builder()
+                        .setAesKeySizeBytes(16)
+                        .setHmacKeySizeBytes(32)
+                        .setTagSizeBytes(16)
+                        .setIvSizeBytes(16)
+                        .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
+                        .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
+                        .build())
+                .build());
   }
 
   @Test
@@ -317,27 +298,23 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
         EciesAeadHkdfPrivateKeyManager
             .rawEciesP256HkdfHmacSha256Aes128CtrHmacSha256CompressedTemplate();
 
-    com.google.crypto.tink.proto.KeyTemplate protoTemplate =
-        KeyTemplateProtoConverter.toProto(template);
-    assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), protoTemplate.getTypeUrl());
-    assertEquals(
-        com.google.crypto.tink.proto.OutputPrefixType.RAW, protoTemplate.getOutputPrefixType());
-    EciesAeadHkdfKeyFormat format =
-        EciesAeadHkdfKeyFormat.parseFrom(
-            protoTemplate.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.hasParams()).isTrue();
-    assertThat(format.getParams().hasKemParams()).isTrue();
-    assertThat(format.getParams().hasDemParams()).isTrue();
-    assertThat(format.getParams().getDemParams().hasAeadDem()).isTrue();
-    assertThat(format.getParams().getEcPointFormat()).isEqualTo(EcPointFormat.COMPRESSED);
-
-    EciesHkdfKemParams kemParams = format.getParams().getKemParams();
-    assertThat(kemParams.getCurveType()).isEqualTo(EllipticCurveType.NIST_P256);
-    assertThat(kemParams.getHkdfHashType()).isEqualTo(HashType.SHA256);
-    assertThat(kemParams.getHkdfSalt()).isEmpty();
-    assertThat(format.getParams().getDemParams().getAeadDem().toString())
-        .isEqualTo(AeadKeyTemplates.AES128_CTR_HMAC_SHA256.toString());
+    assertThat(template.toParameters())
+        .isEqualTo(
+            EciesParameters.builder()
+                .setCurveType(EciesParameters.CurveType.NIST_P256)
+                .setHashType(EciesParameters.HashType.SHA256)
+                .setNistCurvePointFormat(EciesParameters.PointFormat.COMPRESSED)
+                .setVariant(EciesParameters.Variant.NO_PREFIX)
+                .setDemParameters(
+                    AesCtrHmacAeadParameters.builder()
+                        .setAesKeySizeBytes(16)
+                        .setHmacKeySizeBytes(32)
+                        .setTagSizeBytes(16)
+                        .setIvSizeBytes(16)
+                        .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
+                        .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
+                        .build())
+                .build());
   }
 
   @Test

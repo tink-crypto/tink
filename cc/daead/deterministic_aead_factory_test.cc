@@ -31,17 +31,18 @@
 #include "tink/util/test_util.h"
 #include "proto/aes_siv.pb.h"
 
+namespace crypto {
+namespace tink {
+namespace {
+
+// NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
+// TINK-PENDING-REMOVAL-IN-3.0.0-START
 using crypto::tink::test::AddRawKey;
 using crypto::tink::test::AddTinkKey;
 using google::crypto::tink::AesSivKeyFormat;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
-
-
-namespace crypto {
-namespace tink {
-namespace {
 
 class DeterministicAeadFactoryTest : public ::testing::Test {};
 
@@ -126,6 +127,8 @@ TEST_F(DeterministicAeadFactoryTest, testPrimitive) {
   EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
   EXPECT_EQ(plaintext, decrypt_result.value());
 }
+// TINK-PENDING-REMOVAL-IN-3.0.0-END
+// NOLINTEND(whitespace/line_length)
 
 }  // namespace
 }  // namespace tink

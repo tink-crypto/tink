@@ -16,7 +16,6 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.crypto.tink.internal.KeyTemplateProtoConverter.getOutputPrefixType;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
@@ -26,7 +25,6 @@ import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1Algorithm;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1KeyFormat;
@@ -95,10 +93,13 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
   public static final String[] TEMPLATES =
       new String[] {
         "JWT_RS256_2048_F4",
-        "JWT_RS256_3072_F4",
-        "JWT_RS384_3072_F4",
-        "JWT_RS512_4096_F4",
         "JWT_RS256_2048_F4_RAW",
+        "JWT_RS256_3072_F4",
+        "JWT_RS256_3072_F4_RAW",
+        "JWT_RS384_3072_F4",
+        "JWT_RS384_3072_F4_RAW",
+        "JWT_RS512_4096_F4",
+        "JWT_RS512_4096_F4_RAW",
       };
 
   @Test
@@ -126,12 +127,17 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     factory.validateKeyFormat(format);
   }
 
-  @Test
-  public void testKeyFormatsAreValid() throws Exception {
-    for (KeyTypeManager.KeyFactory.KeyFormat<JwtRsaSsaPkcs1KeyFormat> format :
-        factory.keyFormats().values()) {
-      factory.validateKeyFormat(format.keyFormat);
+  @Theory
+  public void testTemplates(@FromDataPoints("templates") String templateName) throws Exception {
+    if (TestUtil.isTsan()) {
+      // creating keys is too slow in Tsan.
+      // We do not use assume because Theories expects to find something which is not skipped.
+      return;
     }
+    KeysetHandle h = KeysetHandle.generateNew(KeyTemplates.get(templateName));
+    assertThat(h.size()).isEqualTo(1);
+    assertThat(h.getAt(0).getKey().getParameters())
+        .isEqualTo(KeyTemplates.get(templateName).toParameters());
   }
 
   // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
@@ -259,55 +265,84 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
         () -> manager.getPrimitive(corruptedKey, JwtPublicKeySignInternal.class));
   }
 
-  private static void checkTemplate(
-      KeyTemplate javaTemplate,
-      JwtRsaSsaPkcs1Algorithm algorithm,
-      int moduloSize,
-      int publicExponent)
-      throws Exception {
-    com.google.crypto.tink.proto.KeyTemplate template =
-        KeyTemplateProtoConverter.toProto(javaTemplate);
-
-    assertThat(template.getTypeUrl()).isEqualTo(new JwtRsaSsaPkcs1SignKeyManager().getKeyType());
-    JwtRsaSsaPkcs1KeyFormat format =
-        JwtRsaSsaPkcs1KeyFormat.parseFrom(
-            template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    assertThat(format.getAlgorithm()).isEqualTo(algorithm);
-    assertThat(format.getModulusSizeInBits()).isEqualTo(moduloSize);
-    assertThat(new BigInteger(1, format.getPublicExponent().toByteArray()))
-        .isEqualTo(BigInteger.valueOf(publicExponent));
-  }
-
   @Test
   public void testJwtRsa2048AlgoRS256F4Template_ok() throws Exception {
-    checkTemplate(
-        KeyTemplates.get("JWT_RS256_2048_F4"), JwtRsaSsaPkcs1Algorithm.RS256, 2048, 65537);
-    checkTemplate(
-        KeyTemplates.get("JWT_RS256_2048_F4_RAW"), JwtRsaSsaPkcs1Algorithm.RS256, 2048, 65537);
+    assertThat(KeyTemplates.get("JWT_RS256_2048_F4").toParameters())
+        .isEqualTo(
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(2048)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
+    assertThat(KeyTemplates.get("JWT_RS256_2048_F4_RAW").toParameters())
+        .isEqualTo(
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(2048)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
+                .build());
   }
 
   @Test
   public void testJwtRsa4096AlgoRS512F4Template_ok() throws Exception {
-    checkTemplate(
-        KeyTemplates.get("JWT_RS512_4096_F4"), JwtRsaSsaPkcs1Algorithm.RS512, 4096, 65537);
-    checkTemplate(
-        KeyTemplates.get("JWT_RS512_4096_F4_RAW"), JwtRsaSsaPkcs1Algorithm.RS512, 4096, 65537);
+    assertThat(KeyTemplates.get("JWT_RS512_4096_F4").toParameters())
+        .isEqualTo(
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(4096)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS512)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
+    assertThat(KeyTemplates.get("JWT_RS512_4096_F4_RAW").toParameters())
+        .isEqualTo(
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(4096)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS512)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
+                .build());
   }
 
   @Test
   public void testJwtRsa3072AlgoRS384F4Template_ok() throws Exception {
-    checkTemplate(
-        KeyTemplates.get("JWT_RS384_3072_F4"), JwtRsaSsaPkcs1Algorithm.RS384, 3072, 65537);
-    checkTemplate(
-        KeyTemplates.get("JWT_RS384_3072_F4_RAW"), JwtRsaSsaPkcs1Algorithm.RS384, 3072, 65537);
+    assertThat(KeyTemplates.get("JWT_RS384_3072_F4").toParameters())
+        .isEqualTo(
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(3072)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS384)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
+    assertThat(KeyTemplates.get("JWT_RS384_3072_F4_RAW").toParameters())
+        .isEqualTo(
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(3072)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS384)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
+                .build());
   }
 
   @Test
   public void testJwtRsa3072AlgoRS256F4Template_ok() throws Exception {
-    checkTemplate(
-        KeyTemplates.get("JWT_RS256_3072_F4"), JwtRsaSsaPkcs1Algorithm.RS256, 3072, 65537);
-    checkTemplate(
-        KeyTemplates.get("JWT_RS256_3072_F4_RAW"), JwtRsaSsaPkcs1Algorithm.RS256, 3072, 65537);
+    assertThat(KeyTemplates.get("JWT_RS256_3072_F4").toParameters())
+        .isEqualTo(
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(3072)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
+    assertThat(KeyTemplates.get("JWT_RS256_3072_F4_RAW").toParameters())
+        .isEqualTo(
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(3072)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
+                .build());
   }
 
   @Test
@@ -331,30 +366,6 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
                 .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
                 .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
                 .build());
-  }
-
-  @Test
-  public void testTinkTemplatesAreTink() throws Exception {
-    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_RS256_2048_F4")))
-        .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
-    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_RS256_3072_F4")))
-        .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
-    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_RS384_3072_F4")))
-        .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
-    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_RS512_4096_F4")))
-        .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
-  }
-
-  @Test
-  public void testRawTemplatesAreRaw() throws Exception {
-    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_RS256_2048_F4_RAW")))
-        .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_RS256_3072_F4_RAW")))
-        .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_RS384_3072_F4_RAW")))
-        .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    assertThat(getOutputPrefixType(KeyTemplates.get("JWT_RS512_4096_F4_RAW")))
-        .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
   }
 
   @Test

@@ -30,7 +30,7 @@ import javax.annotation.concurrent.ThreadSafe;
  * <p>https://www.rfc-editor.org/rfc/rfc9180.html#name-creating-the-encryption-con
  */
 @ThreadSafe
-final class HpkeContext {
+public final class HpkeContext {
   private static final byte[] EMPTY_IKM = new byte[0];
 
   private final HpkeAead aead;
@@ -137,7 +137,7 @@ final class HpkeContext {
    * @param aead authenticated encryption with associated data primitive
    * @param info application-specific information parameter to influence key generation
    */
-  static HpkeContext createRecipientContext(
+  public static HpkeContext createRecipientContext(
       byte[] encapsulatedKey,
       HpkeKemPrivateKey recipientPrivateKey,
       HpkeKem kem,
@@ -161,7 +161,7 @@ final class HpkeContext {
    * @param info application-specific information parameter to influence key generation
    * @param senderPublicKey sender's public key (pkS)
    */
-  static HpkeContext createAuthRecipientContext(
+  public static HpkeContext createAuthRecipientContext(
       byte[] encapsulatedKey,
       HpkeKemPrivateKey recipientPrivateKey,
       HpkeKem kem,
@@ -233,7 +233,7 @@ final class HpkeContext {
    *
    * @return plaintext
    */
-  byte[] open(byte[] ciphertext, byte[] associatedData) throws GeneralSecurityException {
+  public byte[] open(byte[] ciphertext, byte[] associatedData) throws GeneralSecurityException {
     byte[] nonce = computeNonceAndIncrementSequenceNumber();
     return aead.open(key, nonce, ciphertext, associatedData);
   }

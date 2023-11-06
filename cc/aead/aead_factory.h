@@ -37,6 +37,8 @@ namespace tink {
 // * AeadConfig::Register()
 // * HybridConfig::Register()
 // * TinkConfig::Register()
+// NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
+// TINK-PENDING-REMOVAL-IN-3.0.0-START
 class ABSL_DEPRECATED(
     "Call GetPrimitive<Aead>() on the keyset_handle after registering the "
     "AeadWrapper instead.") AeadFactory {
@@ -56,6 +58,8 @@ class ABSL_DEPRECATED(
  private:
   AeadFactory() {}
 };
+// TINK-PENDING-REMOVAL-IN-3.0.0-END
+// NOLINTEND(whitespace/line_length)
 
 }  // namespace tink
 }  // namespace crypto

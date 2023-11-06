@@ -82,6 +82,7 @@ go_test(
         "//insecurecleartextkeyset",
         "//keyset",
         "//mac/subtle",
+        "//proto/ecdsa_go_proto",
         "//proto/jwt_ecdsa_go_proto",
         "//proto/jwt_hmac_go_proto",
         "//proto/jwt_rsa_ssa_pkcs1_go_proto",

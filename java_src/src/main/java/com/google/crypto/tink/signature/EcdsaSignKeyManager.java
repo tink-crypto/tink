@@ -16,6 +16,8 @@
 
 package com.google.crypto.tink.signature;
 
+import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
+
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
@@ -273,11 +275,15 @@ public final class EcdsaSignKeyManager
    *     </ul>
    */
   public static final KeyTemplate ecdsaP256Template() {
-    return createKeyTemplate(
-        HashType.SHA256,
-        EllipticCurveType.NIST_P256,
-        EcdsaSignatureEncoding.DER,
-        KeyTemplate.OutputPrefixType.TINK);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                EcdsaParameters.builder()
+                    .setSignatureEncoding(EcdsaParameters.SignatureEncoding.DER)
+                    .setCurveType(EcdsaParameters.CurveType.NIST_P256)
+                    .setHashType(EcdsaParameters.HashType.SHA256)
+                    .setVariant(EcdsaParameters.Variant.TINK)
+                    .build()));
   }
 
   /**
@@ -293,31 +299,15 @@ public final class EcdsaSignKeyManager
    *     compatible with JWS and most other libraries.
    */
   public static final KeyTemplate rawEcdsaP256Template() {
-    return createKeyTemplate(
-        HashType.SHA256,
-        EllipticCurveType.NIST_P256,
-        EcdsaSignatureEncoding.IEEE_P1363,
-        KeyTemplate.OutputPrefixType.RAW);
-  }
-
-  /**
-   * @return a {@link KeyTemplate} containing a {@link EcdsaKeyFormat} with some specified
-   *     parameters.
-   */
-  public static KeyTemplate createKeyTemplate(
-      HashType hashType,
-      EllipticCurveType curve,
-      EcdsaSignatureEncoding encoding,
-      KeyTemplate.OutputPrefixType prefixType) {
-    EcdsaParams params =
-        EcdsaParams.newBuilder()
-            .setHashType(hashType)
-            .setCurve(curve)
-            .setEncoding(encoding)
-            .build();
-    EcdsaKeyFormat format = EcdsaKeyFormat.newBuilder().setParams(params).build();
-    return KeyTemplate.create(
-        new EcdsaSignKeyManager().getKeyType(), format.toByteArray(), prefixType);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                EcdsaParameters.builder()
+                    .setSignatureEncoding(EcdsaParameters.SignatureEncoding.IEEE_P1363)
+                    .setCurveType(EcdsaParameters.CurveType.NIST_P256)
+                    .setHashType(EcdsaParameters.HashType.SHA256)
+                    .setVariant(EcdsaParameters.Variant.NO_PREFIX)
+                    .build()));
   }
 
   private static KeyFactory.KeyFormat<EcdsaKeyFormat> createKeyFormat(

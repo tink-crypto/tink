@@ -452,7 +452,9 @@ TEST_P(JwkSetToPublicKeysetHandleTest, VerifyValidJwtWithSuccess) {
   EXPECT_THAT(private_handle, IsOk());
 
   util::StatusOr<std::unique_ptr<JwtPublicKeySign>> sign =
-      (*private_handle)->GetPrimitive<JwtPublicKeySign>();
+      (*private_handle)
+          ->GetPrimitive<crypto::tink::JwtPublicKeySign>(
+              ConfigGlobalRegistry());
   ASSERT_THAT(sign, IsOk());
 
   util::StatusOr<RawJwt> raw_jwt =
@@ -468,7 +470,9 @@ TEST_P(JwkSetToPublicKeysetHandleTest, VerifyValidJwtWithSuccess) {
   ASSERT_THAT(public_handle, IsOk());
 
   util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> verify =
-      (*public_handle)->GetPrimitive<JwtPublicKeyVerify>();
+      (*public_handle)
+          ->GetPrimitive<crypto::tink::JwtPublicKeyVerify>(
+              ConfigGlobalRegistry());
   ASSERT_THAT(verify, IsOk());
 
   util::StatusOr<JwtValidator> validator = JwtValidatorBuilder()
@@ -536,7 +540,9 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Rs256WithSmallModulusGetPrimitiveFails) {
       JwkSetToPublicKeysetHandle(jwt_set);
   ASSERT_THAT(public_handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> verify =
-      (*public_handle)->GetPrimitive<JwtPublicKeyVerify>();
+      (*public_handle)
+          ->GetPrimitive<crypto::tink::JwtPublicKeyVerify>(
+              ConfigGlobalRegistry());
   EXPECT_THAT(verify, Not(IsOk()));
 }
 
@@ -724,7 +730,9 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Es256WithSmallXFails) {
       JwkSetToPublicKeysetHandle(jwt_set);
   ASSERT_THAT(public_handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> verify =
-      (*public_handle)->GetPrimitive<JwtPublicKeyVerify>();
+      (*public_handle)
+          ->GetPrimitive<crypto::tink::JwtPublicKeyVerify>(
+              ConfigGlobalRegistry());
   EXPECT_THAT(verify, Not(IsOk()));
 }
 
@@ -744,7 +752,9 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Es256WithSmallYFails) {
       JwkSetToPublicKeysetHandle(jwt_set);
   ASSERT_THAT(public_handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> verify =
-      (*public_handle)->GetPrimitive<JwtPublicKeyVerify>();
+      (*public_handle)
+          ->GetPrimitive<crypto::tink::JwtPublicKeyVerify>(
+              ConfigGlobalRegistry());
   EXPECT_THAT(verify, Not(IsOk()));
 }
 

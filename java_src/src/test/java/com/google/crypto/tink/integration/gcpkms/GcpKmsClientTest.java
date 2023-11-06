@@ -30,20 +30,19 @@ import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.KmsClientsTestUtil;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.KmsAeadKeyManager;
+import com.google.crypto.tink.aead.KmsEnvelopeAead;
 import com.google.crypto.tink.aead.KmsEnvelopeAeadKeyManager;
+import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import java.security.GeneralSecurityException;
-import java.util.Optional;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Unit tests for {@link GcpKmsClient}.*/
+/** Unit tests for {@link GcpKmsClient}. */
 @RunWith(JUnit4.class)
 public final class GcpKmsClientTest {
-  private static final String CREDENTIAL_FILE_PATH =
-      "testdata/gcp/credential.json";
 
   @BeforeClass
   public static void setUpClass() throws Exception {
@@ -56,12 +55,12 @@ public final class GcpKmsClientTest {
   }
 
   @Test
-  public void registerWithKeyUriAndCredentials_success() throws Exception {
-    // Register a client bound to a single key.
-    String keyUri = "gcp-kms://register";
-    GcpKmsClient.register(Optional.of(keyUri), Optional.of(CREDENTIAL_FILE_PATH));
+  public void clientBoundToASingleKey_onlySupportsSpecifiedKeyUri() throws Exception {
+    String keyId = "projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key";
+    String keyUri =
+        "gcp-kms://projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key";
 
-    KmsClient client = KmsClients.get(keyUri);
+    KmsClient client = new GcpKmsClient(keyUri).withCloudKms(new FakeCloudKms(asList(keyId)));
     assertThat(client.doesSupport(keyUri)).isTrue();
 
     String modifiedKeyUri = keyUri + "1";
@@ -69,29 +68,19 @@ public final class GcpKmsClientTest {
   }
 
   @Test
-  public void registerOnlyWithCredentials_success() throws Exception {
-    // Register an unbound client.
-    GcpKmsClient.register(Optional.empty(), Optional.of(CREDENTIAL_FILE_PATH));
+  public void clientNoBoundToKey_supportsAllAwsKeys() throws Exception {
+    String keyId = "projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key";
+    String keyUri =
+        "gcp-kms://projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key";
 
-    // This should return the above unbound client.
-    String keyUri = "gcp-kms://register-unbound";
-    KmsClient client = KmsClients.get(keyUri);
+    KmsClient client = new GcpKmsClient().withCloudKms(new FakeCloudKms(asList(keyId)));
     assertThat(client.doesSupport(keyUri)).isTrue();
-
-    String modifiedKeyUri = keyUri + "1";
-    assertThat(client.doesSupport(modifiedKeyUri)).isTrue();
+    assertThat(client.doesSupport("gcp-kms://some-other-key")).isTrue();
   }
 
   @Test
-  public void registerWithCredentialsAndBadKeyUri_fail() throws Exception {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> GcpKmsClient.register(Optional.of("blah"), Optional.of(CREDENTIAL_FILE_PATH)));
-  }
-
-  @SuppressWarnings("deprecation") // We can't use register because we need to inject a FakeCloudKms
-  private void registerGcpKmsClient(FakeCloudKms cloudKms) {
-    KmsClients.add(new GcpKmsClient().withCloudKms(cloudKms));
+  public void invalidKeyUri_throws() throws Exception {
+    assertThrows(IllegalArgumentException.class, () -> new GcpKmsClient("invalid://key-uri"));
   }
 
   @SuppressWarnings("deprecation") // We can't use register because we need to inject a FakeCloudKms
@@ -100,18 +89,13 @@ public final class GcpKmsClientTest {
   }
 
   @Test
-  public void registerWithKeyUriAndFakeCloudKms_kmsAeadWorks() throws Exception {
+  public void clientBoundToKeyUri_getAead_works() throws Exception {
     String keyId = "projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key";
     String keyUri =
         "gcp-kms://projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key";
 
-    // Register a client bound to a single key.
-    registerGcpKmsClient(keyUri, new FakeCloudKms(asList(keyId)));
-
-    // Create a KmsAead primitive
-    KeyTemplate kmsTemplate = KmsAeadKeyManager.createKeyTemplate(keyUri);
-    KeysetHandle handle = KeysetHandle.generateNew(kmsTemplate);
-    Aead kmsAead = handle.getPrimitive(Aead.class);
+    KmsClient client = new GcpKmsClient(keyUri).withCloudKms(new FakeCloudKms(asList(keyId)));
+    Aead kmsAead = client.getAead(keyUri);
 
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);
@@ -121,19 +105,16 @@ public final class GcpKmsClientTest {
   }
 
   @Test
-  public void registerWithKeyUriAndFakeCloudKms_kmsEnvelopeAeadWorks() throws Exception {
+  public void clientBoundToKeyUri_createKmsEnvelopeAead_works() throws Exception {
     String keyId = "projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key";
     String keyUri =
         "gcp-kms://projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key";
 
-    // Register a client bound to a single key.
-    registerGcpKmsClient(keyUri, new FakeCloudKms(asList(keyId)));
+    KmsClient client = new GcpKmsClient(keyUri).withCloudKms(new FakeCloudKms(asList(keyId)));
 
-    // Create an envelope encryption AEAD primitive
-    KeyTemplate dekTemplate = KeyTemplates.get("AES128_CTR_HMAC_SHA256_RAW");
-    KeyTemplate envelopeTemplate = KmsEnvelopeAeadKeyManager.createKeyTemplate(keyUri, dekTemplate);
-    KeysetHandle handle = KeysetHandle.generateNew(envelopeTemplate);
-    Aead kmsEnvelopeAead = handle.getPrimitive(Aead.class);
+    Aead kmsEnvelopeAead =
+        KmsEnvelopeAead.create(
+            PredefinedAeadParameters.AES128_CTR_HMAC_SHA256, client.getAead(keyUri));
 
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);
@@ -143,8 +124,7 @@ public final class GcpKmsClientTest {
   }
 
   @Test
-  public void registerWithKeyUriAndFakeCloudKms_kmsAeadCanOnlyBeCreatedForRegisteredKeyUri()
-      throws Exception {
+  public void getAead_onlyWorksForSupportedKeyUri() throws Exception {
     String keyId = "projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key";
     String keyId2 = "projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key2";
     String keyUri =
@@ -152,17 +132,10 @@ public final class GcpKmsClientTest {
     String keyUri2 =
         "gcp-kms://projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key2";
 
-    registerGcpKmsClient(keyUri, new FakeCloudKms(asList(keyId, keyId2)));
-
-    // getPrimitive works for keyUri
-    KeyTemplate kmsTemplate = KmsAeadKeyManager.createKeyTemplate(keyUri);
-    KeysetHandle handle = KeysetHandle.generateNew(kmsTemplate);
-    Aead unused = handle.getPrimitive(Aead.class);
-
-    // getPrimitive does not work for keyUri2
-    KeyTemplate kmsTemplate2 = KmsAeadKeyManager.createKeyTemplate(keyUri2);
-    KeysetHandle handle2 = KeysetHandle.generateNew(kmsTemplate2);
-    assertThrows(GeneralSecurityException.class, () -> handle2.getPrimitive(Aead.class));
+    KmsClient client =
+        new GcpKmsClient(keyUri).withCloudKms(new FakeCloudKms(asList(keyId, keyId2)));
+    Aead unused = client.getAead(keyUri);
+    assertThrows(GeneralSecurityException.class, () -> client.getAead(keyUri2));
   }
 
   @Test
@@ -222,16 +195,13 @@ public final class GcpKmsClientTest {
   }
 
   @Test
-  public void registerWithoutKeyUri_kmsAeadWorks() throws Exception {
+  public void clientUnboundToKeyUri_getAead_works() throws Exception {
     String keyId = "projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key";
     String keyUri =
         "gcp-kms://projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key";
 
-    registerGcpKmsClient(new FakeCloudKms(asList(keyId)));
-
-    KeyTemplate kmsTemplate = KmsAeadKeyManager.createKeyTemplate(keyUri);
-    KeysetHandle handle = KeysetHandle.generateNew(kmsTemplate);
-    Aead aead = handle.getPrimitive(Aead.class);
+    KmsClient client = new GcpKmsClient(keyUri).withCloudKms(new FakeCloudKms(asList(keyId)));
+    Aead aead = client.getAead(keyUri);
 
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);
@@ -246,11 +216,8 @@ public final class GcpKmsClientTest {
     String keyUri =
         "gcp-kms://projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key";
 
-    registerGcpKmsClient(new FakeCloudKms(asList(keyId)));
-
-    KeyTemplate kmsTemplate = KmsAeadKeyManager.createKeyTemplate(keyUri);
-    KeysetHandle handle = KeysetHandle.generateNew(kmsTemplate);
-    Aead aead = handle.getPrimitive(Aead.class);
+    KmsClient client = new GcpKmsClient().withCloudKms(new FakeCloudKms(asList(keyId)));
+    Aead aead = client.getAead(keyUri);
 
     byte[] plaintext = "".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);
@@ -268,18 +235,14 @@ public final class GcpKmsClientTest {
     String keyUri2 =
         "gcp-kms://projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key2";
 
-    registerGcpKmsClient(new FakeCloudKms(asList(keyId, keyId2)));
+    KmsClient client = new GcpKmsClient().withCloudKms(new FakeCloudKms(asList(keyId, keyId2)));
+    Aead kmsAead = client.getAead(keyUri);
 
-    KeyTemplate kmsTemplate = KmsAeadKeyManager.createKeyTemplate(keyUri);
-    KeysetHandle handle = KeysetHandle.generateNew(kmsTemplate);
-    Aead kmsAead = handle.getPrimitive(Aead.class);
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);
     byte[] ciphertext = kmsAead.encrypt(plaintext, associatedData);
 
-    KeyTemplate kmsTemplate2 = KmsAeadKeyManager.createKeyTemplate(keyUri2);
-    KeysetHandle handle2 = KeysetHandle.generateNew(kmsTemplate2);
-    Aead kmsAead2 = handle2.getPrimitive(Aead.class);
+    Aead kmsAead2 = client.getAead(keyUri2);
     assertThrows(
         GeneralSecurityException.class, () -> kmsAead2.decrypt(ciphertext, associatedData));
   }
@@ -291,18 +254,13 @@ public final class GcpKmsClientTest {
         "gcp-kms://projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key";
     String invalidUri = "gcp-kms://@#$%&";
 
-    registerGcpKmsClient(new FakeCloudKms(asList(keyId)));
-
-    KeyTemplate kmsTemplate = KmsAeadKeyManager.createKeyTemplate(keyUri);
-    KeysetHandle handle = KeysetHandle.generateNew(kmsTemplate);
-    Aead kmsAead = handle.getPrimitive(Aead.class);
+    KmsClient client = new GcpKmsClient().withCloudKms(new FakeCloudKms(asList(keyId)));
+    Aead kmsAead = client.getAead(keyUri);
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);
     byte[] ciphertext = kmsAead.encrypt(plaintext, associatedData);
 
-    KeyTemplate templateWithInvalidUri = KmsAeadKeyManager.createKeyTemplate(invalidUri);
-    KeysetHandle handleWithInvalidUri = KeysetHandle.generateNew(templateWithInvalidUri);
-    Aead kmsAeadWithInvalidUri = handleWithInvalidUri.getPrimitive(Aead.class);
+    Aead kmsAeadWithInvalidUri = client.getAead(invalidUri);
     assertThrows(IllegalArgumentException.class,
         () -> kmsAeadWithInvalidUri.decrypt(ciphertext, associatedData));
   }

@@ -25,7 +25,7 @@ import java.security.GeneralSecurityException;
  * <p>HPKE RFC is available at https://www.rfc-editor.org/rfc/rfc9180.html.
  */
 @Immutable
-interface HpkeKem {
+public interface HpkeKem {
   /**
    * Generates and encapsulates a shared secret using the {@code recipientPublicKey}. Returns a
    * {@link com.google.crypto.tink.hybrid.internal.HpkeKemEncapOutput} object that contains the raw

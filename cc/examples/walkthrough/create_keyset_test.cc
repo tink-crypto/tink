@@ -54,7 +54,9 @@ TEST_F(CreateAead128GcmKeysetTest, CreateAead128GcmKeysetSucceeds) {
   constexpr absl::string_view plaintext = "Some plaintext";
   constexpr absl::string_view associated_data = "Some associated_data";
   StatusOr<std::unique_ptr<crypto::tink::Aead>> aead =
-      (*keyset_handle)->GetPrimitive<crypto::tink::Aead>();
+      (*keyset_handle)
+          ->GetPrimitive<crypto::tink::Aead>(
+              crypto::tink::ConfigGlobalRegistry());
   ASSERT_THAT(aead, IsOk());
   StatusOr<std::string> ciphertext =
       (*aead)->Encrypt(plaintext, associated_data);

@@ -16,6 +16,8 @@
 
 package com.google.crypto.tink.prf;
 
+import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
+
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
@@ -212,7 +214,13 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
    * </ul>
    */
   public static final KeyTemplate hmacSha256Template() {
-    return createTemplate(32, HashType.SHA256);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                HmacPrfParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setHashType(HmacPrfParameters.HashType.SHA256)
+                    .build()));
   }
 
   /**
@@ -226,20 +234,12 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
    * </ul>
    */
   public static final KeyTemplate hmacSha512Template() {
-    return createTemplate(64, HashType.SHA512);
-  }
-
-  /**
-   * @return a {@link KeyTemplate} containing a {@link HmacKeyFormat} with some specified
-   *     parameters.
-   */
-  private static KeyTemplate createTemplate(int keySize, HashType hashType) {
-    HmacPrfParams params = HmacPrfParams.newBuilder().setHash(hashType).build();
-    HmacPrfKeyFormat format =
-        HmacPrfKeyFormat.newBuilder().setParams(params).setKeySize(keySize).build();
-    return KeyTemplate.create(
-        new HmacPrfKeyManager().getKeyType(),
-        format.toByteArray(),
-        KeyTemplate.OutputPrefixType.RAW);
+    return exceptionIsBug(
+        () ->
+            KeyTemplate.createFrom(
+                HmacPrfParameters.builder()
+                    .setKeySizeBytes(64)
+                    .setHashType(HmacPrfParameters.HashType.SHA512)
+                    .build()));
   }
 }

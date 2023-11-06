@@ -135,6 +135,24 @@ class AwsKmsAeadTest(absltest.TestCase):
       gcp_aead = handle2.primitive(aead.Aead)
       gcp_aead.encrypt(b'plaintext', b'associated_data')
 
+  def test_get_aead_is_compatible_with_kms_aead_key(self):
+    # Get Aead directly from AwsKmsClient
+    aws_aead = awskms.AwsKmsClient(KEY_URI, CREDENTIAL_PATH).get_aead(KEY_URI)
+
+    # Use KmsAeadKey: Register client, create keyset and then Aead.
+    awskms.AwsKmsClient.register_client(KEY_URI, CREDENTIAL_PATH)
+    handle = tink.new_keyset_handle(
+        aead.aead_key_templates.create_kms_aead_key_template(KEY_URI)
+    )
+    aead_from_kms_aead_key = handle.primitive(aead.Aead)
+
+    # check that they are compatible.
+    ciphertext = aws_aead.encrypt(b'plaintext', b'associated_data')
+    self.assertEqual(
+        b'plaintext',
+        aead_from_kms_aead_key.decrypt(ciphertext, b'associated_data'),
+    )
+
   def test_encrypt_with_default_credentials(self):
     # If no credentials_path is provided, this path here is used by default.
     os.environ['AWS_SHARED_CREDENTIALS_FILE'] = CREDENTIAL_PATH

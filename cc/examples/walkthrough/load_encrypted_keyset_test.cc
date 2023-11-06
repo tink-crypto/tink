@@ -144,14 +144,18 @@ TEST_F(LoadKeysetTest, LoadKeysetSucceeds) {
   StatusOr<std::unique_ptr<KeysetHandle>> handle =
       LoadKeyset(kEncryptedKeyset, kFakeKmsKeyUri);
   ASSERT_THAT(handle, IsOk());
-  StatusOr<std::unique_ptr<Aead>> aead = (*handle)->GetPrimitive<Aead>();
+  StatusOr<std::unique_ptr<Aead>> aead =
+      (*handle)->GetPrimitive<crypto::tink::Aead>(
+          crypto::tink::ConfigGlobalRegistry());
   ASSERT_THAT(aead, IsOk());
 
   StatusOr<std::unique_ptr<KeysetHandle>> expected_keyset =
       LoadKeyset(kSerializedKeysetToEncrypt);
   ASSERT_THAT(expected_keyset, IsOk());
   StatusOr<std::unique_ptr<Aead>> expected_aead =
-      (*expected_keyset)->GetPrimitive<Aead>();
+      (*expected_keyset)
+          ->GetPrimitive<crypto::tink::Aead>(
+              crypto::tink::ConfigGlobalRegistry());
   ASSERT_THAT(expected_aead, IsOk());
 
   std::string associated_data = "Some associated data";

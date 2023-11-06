@@ -14,6 +14,7 @@
 """A client for Google Cloud KMS."""
 
 from typing import Optional
+import warnings
 
 from google.api_core import exceptions as core_exceptions
 from google.cloud import kms_v1
@@ -131,11 +132,21 @@ class GcpKmsClient(_kms_aead_key_manager.KmsClient):
     key_id = key_uri[len(GCP_KEYURI_PREFIX) :]
     return _GcpKmsAead(self._client, key_id)
 
+  # Deprecated. It is preferable to not register KMS clients. Instead, create
+  # a KMS AEAD with
+  # kms_aead = gcpkms.GcpKmsClient(key_uri, credentials_path).get_aead(key_uri)
+  # and then use it to encrypt a keyset with KeysetHandle.write, or to create
+  # an envelope AEAD using aead.KmsEnvelopeAead.
   @classmethod
   def register_client(
       cls, key_uri: Optional[str], credentials_path: Optional[str]
   ) -> None:
     """Registers the KMS client internally."""
+    warnings.warn(
+        'The "gcpkms.GcpKmsClient.register_client" function is deprecated.',
+        DeprecationWarning,
+        2,
+    )
     _kms_aead_key_manager.register_kms_client(  # pylint: disable=protected-access
         GcpKmsClient(key_uri, credentials_path)
     )

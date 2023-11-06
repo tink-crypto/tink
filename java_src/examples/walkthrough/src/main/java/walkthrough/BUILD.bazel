@@ -26,7 +26,6 @@ java_library(
     srcs = ["WriteKeysetExample.java"],
     deps = [
         "@tink_java//src/main/java/com/google/crypto/tink:aead",
-        "@tink_java//src/main/java/com/google/crypto/tink:kms_clients",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
         "@tink_java//src/main/java/com/google/crypto/tink:tink_json_proto_keyset_format",
     ],
@@ -37,7 +36,6 @@ java_library(
     srcs = ["ReadKeysetExample.java"],
     deps = [
         "@tink_java//src/main/java/com/google/crypto/tink:aead",
-        "@tink_java//src/main/java/com/google/crypto/tink:kms_clients",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
         "@tink_java//src/main/java/com/google/crypto/tink:tink_json_proto_keyset_format",
     ],

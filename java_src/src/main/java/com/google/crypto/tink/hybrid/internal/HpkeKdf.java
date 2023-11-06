@@ -25,7 +25,7 @@ import java.security.GeneralSecurityException;
  * <p>HPKE RFC is available at https://www.rfc-editor.org/rfc/rfc9180.html.
  */
 @Immutable
-interface HpkeKdf {
+public interface HpkeKdf {
   /**
    * Extracts pseudorandom key from {@code salt} and {@code ikm} using the HPKE-specific values
    * {@code ikmLabel} and {@code suiteId} to facilitate domain separation and context binding.
