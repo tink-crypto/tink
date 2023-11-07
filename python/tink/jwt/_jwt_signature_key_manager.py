@@ -62,7 +62,7 @@ class _JwtPublicKeySign(_jwt_public_key_sign.JwtPublicKeySignInternal):
   """Implementation of JwtPublicKeySignInternal using a PublicKeySign."""
 
   def __init__(self, cc_primitive: tink_bindings.PublicKeySign, algorithm: str,
-               custom_kid: str):
+               custom_kid: Optional[str]):
     self._public_key_sign = cc_primitive
     self._algorithm = algorithm
     self._custom_kid = custom_kid
