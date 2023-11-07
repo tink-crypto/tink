@@ -132,3 +132,37 @@ java_library(
         "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
+
+android_library(
+    name = "ed25519_test_util-android",
+    srcs = ["Ed25519TestUtil.java"],
+    deps = [
+        ":signature_test_vector-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access-android",
+        "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception-android",
+        "//src/main/java/com/google/crypto/tink/signature:ed25519_parameters-android",
+        "//src/main/java/com/google/crypto/tink/signature:ed25519_private_key-android",
+        "//src/main/java/com/google/crypto/tink/signature:ed25519_public_key-android",
+        "//src/main/java/com/google/crypto/tink/subtle:hex-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes-android",
+    ],
+)
+
+java_library(
+    name = "ed25519_test_util",
+    srcs = ["Ed25519TestUtil.java"],
+    deps = [
+        ":signature_test_vector",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception",
+        "//src/main/java/com/google/crypto/tink/signature:ed25519_parameters",
+        "//src/main/java/com/google/crypto/tink/signature:ed25519_private_key",
+        "//src/main/java/com/google/crypto/tink/signature:ed25519_public_key",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+    ],
+)
