@@ -32,7 +32,6 @@ import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.KmsAeadKeyManager;
 import com.google.crypto.tink.aead.KmsEnvelopeAeadKeyManager;
 import com.google.crypto.tink.subtle.Base64;
-import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import java.util.Optional;
 import org.junit.Before;
@@ -44,23 +43,25 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class GcpKmsIntegrationTest {
 
+  // This integration test can be successfully executed when this file contains credentials for a
+  // service account which has access to the keys specified in {@link #GCP_KMS_TEST_KEY_URI} and
+  // {@link #GCP_KMS_TEST_KEY_URI_2}.
+  private static final String GCP_CREDENTIALS_FILE =
+      "testdata/gcp/credential.json";
+
   // A valid GCP KMS AEAD key URI.
-  // It is restricted to the service account in {@link
-  // com.google.crypto.tink.testing.TestUtil#SERVICE_ACCOUNT_FILE}.
   private static final String GCP_KMS_TEST_KEY_URI =
       "gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/"
           + "unit-and-integration-testing/cryptoKeys/aead-key";
 
   // Another valid GCP KMS AEAD key URI in the same key ring as {@link #GCP_KMS_TEST_KEY_URI}.
-  // It is restricted to the service account in {@link
-  // com.google.crypto.tink.testing.TestUtil#SERVICE_ACCOUNT_FILE}.
   private static final String GCP_KMS_TEST_KEY_URI_2 =
       "gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/"
           + "unit-and-integration-testing/cryptoKeys/aead2-key";
 
   @Before
   public void setUp() throws Exception {
-    GcpKmsClient.register(Optional.empty(), Optional.of(TestUtil.SERVICE_ACCOUNT_FILE));
+    GcpKmsClient.register(Optional.empty(), Optional.of(GCP_CREDENTIALS_FILE));
     AeadConfig.register();
   }
 
