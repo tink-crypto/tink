@@ -16,6 +16,7 @@
 
 #include "tink/subtle/aes_siv_boringssl.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
@@ -43,7 +44,7 @@ TEST(AesSivBoringSslTest, testCarryComputation) {
   }
   uint8_t value = 0;
   for (int i = 0; i < 256; i++) {
-    uint8_t carry = *reinterpret_cast<int8_t*>(&value) >> 7;
+    uint8_t carry = static_cast<int8_t>(value) >> 7;
     if (i < 128) {
       EXPECT_EQ(carry, 0x00);
     } else {
