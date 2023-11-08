@@ -29,6 +29,8 @@ import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
 import com.google.crypto.tink.aead.AesCtrHmacAeadParameters;
 import com.google.crypto.tink.aead.AesGcmParameters;
+import com.google.crypto.tink.hybrid.internal.testing.EciesAeadHkdfTestUtil;
+import com.google.crypto.tink.hybrid.internal.testing.HybridTestVector;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.EcPointFormat;
 import com.google.crypto.tink.proto.EciesAeadDemParams;
@@ -49,6 +51,8 @@ import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
+import java.util.Arrays;
+import javax.annotation.Nullable;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
@@ -376,5 +380,68 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     assertThat(h.size()).isEqualTo(1);
     assertThat(h.getAt(0).getKey().getParameters())
         .isEqualTo(KeyTemplates.get(templateName).toParameters());
+  }
+
+  @DataPoints("testVectors")
+  public static final HybridTestVector[] HYBRID_TEST_VECTORS =
+      EciesAeadHkdfTestUtil.createEciesTestVectors();
+
+  @Theory
+  public void test_decryptCiphertext_works(@FromDataPoints("testVectors") HybridTestVector v)
+      throws Exception {
+    KeysetHandle.Builder.Entry entry = KeysetHandle.importKey(v.getPrivateKey()).makePrimary();
+    @Nullable Integer id = v.getPrivateKey().getIdRequirementOrNull();
+    if (id == null) {
+      entry.withRandomId();
+    } else {
+      entry.withFixedId(id);
+    }
+    KeysetHandle handle = KeysetHandle.newBuilder().addEntry(entry).build();
+    HybridDecrypt hybridDecrypt = handle.getPrimitive(HybridDecrypt.class);
+    byte[] plaintext = hybridDecrypt.decrypt(v.getCiphertext(), v.getContextInfo());
+    assertThat(Hex.encode(plaintext)).isEqualTo(Hex.encode(v.getPlaintext()));
+  }
+
+  @Theory
+  public void test_decryptWrongContextInfo_throws(@FromDataPoints("testVectors") HybridTestVector v)
+      throws Exception {
+    KeysetHandle.Builder.Entry entry = KeysetHandle.importKey(v.getPrivateKey()).makePrimary();
+    @Nullable Integer id = v.getPrivateKey().getIdRequirementOrNull();
+    if (id == null) {
+      entry.withRandomId();
+    } else {
+      entry.withFixedId(id);
+    }
+    KeysetHandle handle = KeysetHandle.newBuilder().addEntry(entry).build();
+    HybridDecrypt hybridDecrypt = handle.getPrimitive(HybridDecrypt.class);
+    byte[] contextInfo = v.getContextInfo();
+    if (contextInfo.length > 0) {
+      contextInfo[0] ^= 1;
+    } else {
+      contextInfo = new byte[] {1};
+    }
+    // local variables referenced from a lambda expression must be final or effectively final
+    final byte[] contextInfoCopy = Arrays.copyOf(contextInfo, contextInfo.length);
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> hybridDecrypt.decrypt(v.getCiphertext(), contextInfoCopy));
+  }
+
+  @Theory
+  public void test_encryptThenDecryptMessage_works(
+      @FromDataPoints("testVectors") HybridTestVector v) throws Exception {
+    KeysetHandle.Builder.Entry entry = KeysetHandle.importKey(v.getPrivateKey()).makePrimary();
+    @Nullable Integer id = v.getPrivateKey().getIdRequirementOrNull();
+    if (id == null) {
+      entry.withRandomId();
+    } else {
+      entry.withFixedId(id);
+    }
+    KeysetHandle handle = KeysetHandle.newBuilder().addEntry(entry).build();
+    HybridDecrypt hybridDecrypt = handle.getPrimitive(HybridDecrypt.class);
+    HybridEncrypt hybridEncrypt = handle.getPublicKeysetHandle().getPrimitive(HybridEncrypt.class);
+    byte[] ciphertext = hybridEncrypt.encrypt(v.getPlaintext(), v.getContextInfo());
+    byte[] plaintext = hybridDecrypt.decrypt(ciphertext, v.getContextInfo());
+    assertThat(Hex.encode(plaintext)).isEqualTo(Hex.encode(v.getPlaintext()));
   }
 }

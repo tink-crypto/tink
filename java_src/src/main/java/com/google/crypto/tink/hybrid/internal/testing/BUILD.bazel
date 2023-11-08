@@ -1,0 +1,66 @@
+load("@build_bazel_rules_android//android:rules.bzl", "android_library")
+
+licenses(["notice"])
+
+package(
+    default_testonly = 1,
+    default_visibility = ["//:__subpackages__"],
+)
+
+android_library(
+    name = "ecies_aead_hkdf_test_util-android",
+    srcs = ["EciesAeadHkdfTestUtil.java"],
+    deps = [
+        ":hybrid_test_vector-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access-android",
+        "//src/main/java/com/google/crypto/tink/aead:aes_ctr_hmac_aead_parameters-android",
+        "//src/main/java/com/google/crypto/tink/aead:aes_gcm_parameters-android",
+        "//src/main/java/com/google/crypto/tink/daead:aes_siv_parameters-android",
+        "//src/main/java/com/google/crypto/tink/hybrid:ecies_parameters-android",
+        "//src/main/java/com/google/crypto/tink/hybrid:ecies_private_key-android",
+        "//src/main/java/com/google/crypto/tink/hybrid:ecies_public_key-android",
+        "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception-android",
+        "//src/main/java/com/google/crypto/tink/subtle:hex-android",
+        "//src/main/java/com/google/crypto/tink/util:secret_big_integer-android",
+    ],
+)
+
+android_library(
+    name = "hybrid_test_vector-android",
+    srcs = ["HybridTestVector.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/hybrid:hybrid_private_key-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "ecies_aead_hkdf_test_util",
+    srcs = ["EciesAeadHkdfTestUtil.java"],
+    deps = [
+        ":hybrid_test_vector",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink/aead:aes_ctr_hmac_aead_parameters",
+        "//src/main/java/com/google/crypto/tink/aead:aes_gcm_parameters",
+        "//src/main/java/com/google/crypto/tink/daead:aes_siv_parameters",
+        "//src/main/java/com/google/crypto/tink/hybrid:ecies_parameters",
+        "//src/main/java/com/google/crypto/tink/hybrid:ecies_private_key",
+        "//src/main/java/com/google/crypto/tink/hybrid:ecies_public_key",
+        "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/util:secret_big_integer",
+    ],
+)
+
+java_library(
+    name = "hybrid_test_vector",
+    srcs = ["HybridTestVector.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/hybrid:hybrid_private_key",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
