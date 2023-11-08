@@ -58,8 +58,7 @@ class RawJwt:
   def __new__(cls):
     raise core.TinkError('RawJwt cannot be instantiated directly.')
 
-  def __init__(self, type_header: Optional[str], payload: Dict[str,
-                                                               Any]) -> None:
+  def __init__(self, type_header: Optional[str], payload: Any) -> None:
     # No need to copy payload, because only create and from_json_payload
     # call this method.
     if not isinstance(payload, Dict):
