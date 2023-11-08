@@ -1328,28 +1328,6 @@ public class RegistryTest {
         () -> Registry.registerKeyManager(new TestPublicKeyTypeManager() {}, false));
   }
 
-  @Test
-  public void testRegisterAssymmetricKeyManagers_throwsWithDifferentPublicKeyManager()
-      throws Exception {
-    Registry.reset();
-    Registry.registerAsymmetricKeyManagers(
-        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), false);
-    GeneralSecurityException e =
-        assertThrows(
-            GeneralSecurityException.class,
-            () ->
-                Registry.registerAsymmetricKeyManagers(
-                    new TestPrivateKeyTypeManager(),
-                    new TestPublicKeyTypeManager() {
-                      @Override
-                      public String getKeyType() {
-                        return "bla";
-                      }
-                    },
-                    false));
-    assertExceptionContains(e, "public key manager corresponding to");
-  }
-
   private static class Catalogue1 implements Catalogue<Aead> {
     @Override
     public KeyManager<Aead> getKeyManager(String typeUrl, String primitiveName, int minVersion) {

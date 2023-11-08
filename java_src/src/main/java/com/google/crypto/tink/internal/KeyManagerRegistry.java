@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
 
 /**
  * An internal API to register KeyManagers and KeyTypeManagers.
@@ -83,13 +82,6 @@ public final class KeyManagerRegistry {
      * The primitives supported by the underlying {@link KeyTypeManager} resp. {@link KeyManager}.
      */
     Set<Class<?>> supportedPrimitives();
-
-    /**
-     * The Class object corresponding to the public key manager when this key manager was registered
-     * as first argument with "registerAsymmetricKeyManagers". Null otherwise.
-     */
-    Class<?> publicKeyManagerClassOrNull();
-
   }
 
   private static <P> KeyManagerContainer createContainerFor(KeyManager<P> keyManager) {
@@ -119,12 +111,6 @@ public final class KeyManagerRegistry {
       @Override
       public Set<Class<?>> supportedPrimitives() {
         return Collections.<Class<?>>singleton(localKeyManager.getPrimitiveClass());
-      }
-
-      @Override
-      @Nullable
-      public Class<?> publicKeyManagerClassOrNull() {
-        return null;
       }
     };
   }
@@ -157,12 +143,6 @@ public final class KeyManagerRegistry {
       @Override
       public Set<Class<?>> supportedPrimitives() {
         return localKeyManager.supportedPrimitives();
-      }
-
-      @Override
-      @Nullable
-      public Class<?> publicKeyManagerClassOrNull() {
-        return null;
       }
     };
   }
@@ -202,11 +182,6 @@ public final class KeyManagerRegistry {
       @Override
       public Set<Class<?>> supportedPrimitives() {
         return localPrivateKeyManager.supportedPrimitives();
-      }
-
-      @Override
-      public Class<?> publicKeyManagerClassOrNull() {
-        return localPublicKeyManager.getClass();
       }
     };
   }
@@ -305,32 +280,6 @@ public final class KeyManagerRegistry {
               + " as it is not FIPS compatible.");
     }
 
-    String privateTypeUrl = privateKeyTypeManager.getKeyType();
-    String publicTypeUrl = publicKeyTypeManager.getKeyType();
-
-    if (keyManagerMap.containsKey(privateTypeUrl)
-        && keyManagerMap.get(privateTypeUrl).publicKeyManagerClassOrNull() != null) {
-      Class<?> existingPublicKeyManagerClass =
-          keyManagerMap.get(privateTypeUrl).publicKeyManagerClassOrNull();
-      if (existingPublicKeyManagerClass != null) {
-        if (!existingPublicKeyManagerClass
-            .getName()
-            .equals(publicKeyTypeManager.getClass().getName())) {
-          logger.warning(
-              "Attempted overwrite of a registered key manager for key type "
-                  + privateTypeUrl
-                  + " with inconsistent public key type "
-                  + publicTypeUrl);
-          throw new GeneralSecurityException(
-              String.format(
-                  "public key manager corresponding to %s is already registered with %s, cannot"
-                      + " be re-registered with %s",
-                  privateKeyTypeManager.getClass().getName(),
-                  existingPublicKeyManagerClass.getName(),
-                  publicKeyTypeManager.getClass().getName()));
-        }
-      }
-    }
 
     // We overwrite such that if we once register asymmetrically and once symmetrically, the
     // asymmetric one takes precedence.
