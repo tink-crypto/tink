@@ -1027,23 +1027,7 @@ public final class KeysetHandle {
     }
     KeyData publicKeyData =
         Registry.getPublicKeyData(privateKeyData.getTypeUrl(), privateKeyData.getValue());
-    validate(publicKeyData);
     return publicKeyData;
-  }
-
-  @SuppressWarnings("deprecation")
-  private static void validate(KeyData keyData) throws GeneralSecurityException {
-    // This will throw GeneralSecurityException if the keyData is invalid.
-    // Note: this calls a deprecated function to validate the "KeyData" proto. The usage of this
-    // deprecated function is unfortunate. However, in the end we simply want to remove this call.
-    // The only usage of this is in "getPublicKeysetHandle". This should go away, in principle
-    // the code of getPublicKeysetHandle should simply look at each entry, cast each key to
-    // {@link PrivateKey} (throw a GeneralSecurityException if this fails), call getPublicKey()
-    // and insert the result into a new keyset with the same ID and status, then return the result.
-    // If done like this, there is no reason to validate the returned Key object.
-    // (However, also note that this particular call here isn't very problematic; the problematic
-    // part of Registry.getPrimitive is that it misuses generics, but here we just want any Object).
-    Object unused = Registry.getPrimitive(keyData);
   }
 
   /**
