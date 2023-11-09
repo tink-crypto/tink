@@ -356,7 +356,7 @@ TEST_P(ChunkedMacConfigTest, ChunkedMacWrappersRegistered) {
 
   KeyTemplate key_template = GetParam();
   util::StatusOr<std::unique_ptr<KeysetHandle>> key =
-      KeysetHandle::GenerateNew(key_template);
+      KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry());
   ASSERT_THAT(key, IsOk());
 
   util::StatusOr<std::unique_ptr<ChunkedMac>> chunked_mac =
@@ -390,8 +390,10 @@ TEST_F(MacConfigTest, RegisterNonFipsTemplates) {
   non_fips_key_templates.push_back(MacKeyTemplates::AesCmac());
 
   for (auto key_template : non_fips_key_templates) {
-    EXPECT_THAT(KeysetHandle::GenerateNew(key_template).status(),
-                StatusIs(absl::StatusCode::kNotFound));
+    EXPECT_THAT(
+        KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry())
+            .status(),
+        StatusIs(absl::StatusCode::kNotFound));
   }
 }
 
@@ -409,7 +411,9 @@ TEST_F(MacConfigTest, RegisterFipsValidTemplates) {
   fips_key_templates.push_back(MacKeyTemplates::HmacSha512HalfSizeTag());
 
   for (auto key_template : fips_key_templates) {
-    EXPECT_THAT(KeysetHandle::GenerateNew(key_template), IsOk());
+    EXPECT_THAT(
+        KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry()),
+        IsOk());
   }
 }
 
