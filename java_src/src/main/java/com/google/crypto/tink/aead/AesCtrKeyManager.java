@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.aead;
 
-import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
@@ -36,6 +35,9 @@ import java.security.GeneralSecurityException;
 /**
  * This key manager generates new {@code AesCtrKey} keys and produces new instances of {@code
  * AesCtrJceCipher}.
+ *
+ * <p>Note: {@code AesCtrKeyManager} provides components for {@code AesCtrHmacAead} but is not
+ * itself a part of the public API.
  */
 public class AesCtrKeyManager extends KeyTypeManager<AesCtrKey> {
   AesCtrKeyManager() {
@@ -121,9 +123,5 @@ public class AesCtrKeyManager extends KeyTypeManager<AesCtrKey> {
     if (params.getIvSize() < MIN_IV_SIZE_IN_BYTES || params.getIvSize() > 16) {
       throw new GeneralSecurityException("invalid IV size");
     }
-  }
-
-  public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
-    Registry.registerKeyManager(new AesCtrKeyManager(), newKeyAllowed);
   }
 }
