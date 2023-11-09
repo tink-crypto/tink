@@ -217,7 +217,7 @@ TEST_F(SerializeKeysetToProtoKeysetFormatTest, SerializeAndParsePublicKey) {
           .Build();
   ASSERT_THAT(handle, IsOk());
   util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
-      handle->GetPublicKeysetHandle();
+      handle->GetPublicKeysetHandle(KeyGenConfigGlobalRegistry());
   ASSERT_THAT(public_handle, IsOk());
 
 
