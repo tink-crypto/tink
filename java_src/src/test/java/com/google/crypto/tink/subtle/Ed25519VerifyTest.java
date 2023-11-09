@@ -19,20 +19,22 @@ package com.google.crypto.tink.subtle;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.signature.Ed25519PrivateKey;
+import com.google.crypto.tink.signature.internal.testing.Ed25519TestUtil;
+import com.google.crypto.tink.signature.internal.testing.SignatureTestVector;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Unit tests for {@link Ed25519Verify}.
- *
- */
+/** Unit tests for {@link Ed25519Verify}. */
 @RunWith(JUnit4.class)
 public final class Ed25519VerifyTest {
   @Test
@@ -103,5 +105,59 @@ public final class Ed25519VerifyTest {
     Assume.assumeTrue(TinkFips.useOnlyFips());
 
     assertThrows(RuntimeException.class, () -> new Ed25519Verify(new byte[32]));
+  }
+
+  /**
+   * Tests that the verifier can verify a the signature for the message and key in the test vector.
+   */
+  @Test
+  public void test_validateSignatureInTestVector() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+    // We are not using parameterized tests because the next line cannot be run if useOnlyFips.
+    SignatureTestVector[] testVectors = Ed25519TestUtil.createEd25519TestVectors();
+    for (SignatureTestVector testVector : testVectors) {
+
+      Ed25519PrivateKey key = (Ed25519PrivateKey) testVector.getPrivateKey();
+      PublicKeyVerify verifier = Ed25519Verify.create(key.getPublicKey());
+      verifier.verify(testVector.getSignature(), testVector.getMessage());
+    }
+  }
+
+  @Test
+  public void test_computeAndValidate_modifiedMessage_throws() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+    // We are not using parameterized tests because the next line cannot be run if useOnlyFips.
+    SignatureTestVector[] testVectors = Ed25519TestUtil.createEd25519TestVectors();
+    for (SignatureTestVector testVector : testVectors) {
+      Ed25519PrivateKey key = (Ed25519PrivateKey) testVector.getPrivateKey();
+      byte[] modifiedMessage = Bytes.concat(testVector.getMessage(), new byte[] {1});
+      PublicKeyVerify verifier = Ed25519Verify.create(key.getPublicKey());
+      assertThrows(
+          GeneralSecurityException.class,
+          () -> verifier.verify(testVector.getSignature(), modifiedMessage));
+    }
+  }
+
+  /** Tests that the verification fails if we modify the output prefix. */
+  @Test
+  public void test_computeAndValidate_modifiedOutputPrefix_throws() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+    // We are not using parameterized tests because the next line cannot be run if useOnlyFips.
+    SignatureTestVector[] testVectors = Ed25519TestUtil.createEd25519TestVectors();
+    for (SignatureTestVector testVector : testVectors) {
+      Ed25519PrivateKey key = (Ed25519PrivateKey) testVector.getPrivateKey();
+      if (key.getOutputPrefix().size() == 0) {
+        return;
+      }
+      byte[] modifiedSignature = testVector.getSignature();
+      modifiedSignature[1] ^= 0x01;
+      PublicKeyVerify verifier = Ed25519Verify.create(key.getPublicKey());
+      assertThrows(
+          GeneralSecurityException.class,
+          () ->
+              verifier.verify(
+                  Arrays.copyOf(modifiedSignature, modifiedSignature.length),
+                  testVector.getMessage()));
+    }
   }
 }
