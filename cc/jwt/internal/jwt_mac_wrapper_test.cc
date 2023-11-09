@@ -109,7 +109,8 @@ TEST_F(JwtMacWrapperTest, CannotWrapPrimitivesFromNonRawOrTinkKeys) {
   KeyTemplate tink_key_template = createTemplate(OutputPrefixType::LEGACY);
 
   util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
-      KeysetHandle::GenerateNew(tink_key_template);
+      KeysetHandle::GenerateNew(tink_key_template,
+                                KeyGenConfigGlobalRegistry());
   EXPECT_THAT(keyset_handle, IsOk());
 
   EXPECT_FALSE((*keyset_handle)
@@ -121,7 +122,7 @@ TEST_F(JwtMacWrapperTest, CannotWrapPrimitivesFromNonRawOrTinkKeys) {
 TEST_F(JwtMacWrapperTest, GenerateRawComputeVerifySuccess) {
   KeyTemplate key_template = createTemplate(OutputPrefixType::RAW);
   util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
-      KeysetHandle::GenerateNew(key_template);
+      KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry());
   EXPECT_THAT(keyset_handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtMac>> jwt_mac =
       (*keyset_handle)
@@ -175,7 +176,7 @@ TEST_F(JwtMacWrapperTest, GenerateRawComputeVerifySuccess) {
 TEST_F(JwtMacWrapperTest, GenerateTinkComputeVerifySuccess) {
   KeyTemplate key_template = createTemplate(OutputPrefixType::TINK);
   util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
-      KeysetHandle::GenerateNew(key_template);
+      KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry());
   EXPECT_THAT(keyset_handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtMac>> jwt_mac =
       (*keyset_handle)
