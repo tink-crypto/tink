@@ -32,6 +32,7 @@
 #include "tink/aead.h"
 #include "tink/aead/aead_config.h"
 #include "tink/aead/aead_key_templates.h"
+#include "tink/config/global_registry.h"
 #include "tink/internal/ssl_util.h"
 #include "tink/keyset_handle.h"
 #include "tink/mac/mac_key_templates.h"
@@ -64,15 +65,14 @@ constexpr absl::string_view kRemoteAeadName = "kms-backed-aead";
 
 class KmsEnvelopeAeadTest : public Test {
  protected:
-  void TearDown() override { Registry::Reset(); }
+  void SetUp() override { ASSERT_THAT(AeadConfig::Register(), IsOk()); }
 };
 
 TEST_F(KmsEnvelopeAeadTest, EncryptDecryptSucceed) {
-  ASSERT_THAT(AeadConfig::Register(), IsOk());
-
   // Use an AES-128-GCM primitive as the remote one.
   util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
-      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm());
+      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm(),
+                                KeyGenConfigGlobalRegistry());
   ASSERT_THAT(keyset_handle, IsOk());
   KeyTemplate dek_template = AeadKeyTemplates::Aes128Eax();
   util::StatusOr<std::unique_ptr<Aead>> remote_aead =
@@ -101,6 +101,7 @@ TEST_F(KmsEnvelopeAeadTest, NewFailsIfReamoteAeadIsNull) {
 }
 
 TEST_F(KmsEnvelopeAeadTest, NewFailsIfDekKeyManagerIsNotRegistered) {
+  Registry::Reset();
   KeyTemplate dek_template = AeadKeyTemplates::Aes128Eax();
   auto remote_aead = absl::make_unique<DummyAead>(kRemoteAeadName);
   EXPECT_THAT(
@@ -109,7 +110,6 @@ TEST_F(KmsEnvelopeAeadTest, NewFailsIfDekKeyManagerIsNotRegistered) {
 }
 
 TEST_F(KmsEnvelopeAeadTest, NewFailsIfUsingDekTemplateOfUnsupportedKeyType) {
-  ASSERT_THAT(AeadConfig::Register(), IsOk());
   KeyTemplate dek_template = MacKeyTemplates::HmacSha256();
   auto remote_aead = absl::make_unique<DummyAead>(kRemoteAeadName);
   EXPECT_THAT(
@@ -119,8 +119,6 @@ TEST_F(KmsEnvelopeAeadTest, NewFailsIfUsingDekTemplateOfUnsupportedKeyType) {
 }
 
 TEST_F(KmsEnvelopeAeadTest, DecryptFailsWithInvalidCiphertextOrAad) {
-  ASSERT_THAT(AeadConfig::Register(), IsOk());
-
   KeyTemplate dek_template = AeadKeyTemplates::Aes128Gcm();
   auto remote_aead = absl::make_unique<DummyAead>(kRemoteAeadName);
   util::StatusOr<std::unique_ptr<Aead>> aead =
@@ -165,8 +163,6 @@ TEST_F(KmsEnvelopeAeadTest, DecryptFailsWithInvalidCiphertextOrAad) {
 }
 
 TEST_F(KmsEnvelopeAeadTest, DekMaintainsCorrectKeyFormat) {
-  ASSERT_THAT(AeadConfig::Register(), IsOk());
-
   KeyTemplate dek_template = AeadKeyTemplates::Aes128Gcm();
   auto kms_remote_aead = absl::make_unique<DummyAead>(kRemoteAeadName);
   util::StatusOr<std::unique_ptr<Aead>> aead =
@@ -198,8 +194,6 @@ TEST_F(KmsEnvelopeAeadTest, DekMaintainsCorrectKeyFormat) {
 }
 
 TEST_F(KmsEnvelopeAeadTest, MultipleEncryptionsProduceDifferentDeks) {
-  ASSERT_THAT(AeadConfig::Register(), IsOk());
-
   KeyTemplate dek_template = AeadKeyTemplates::Aes128Gcm();
   auto kms_remote_aead = absl::make_unique<DummyAead>(kRemoteAeadName);
   util::StatusOr<std::unique_ptr<Aead>> aead =
@@ -246,7 +240,8 @@ class KmsEnvelopeAeadDekTemplatesTest
 TEST_P(KmsEnvelopeAeadDekTemplatesTest, EncryptDecrypt) {
   // Use an AES-128-GCM primitive as the remote AEAD.
   util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
-      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm());
+      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm(),
+                                KeyGenConfigGlobalRegistry());
   ASSERT_THAT(keyset_handle, IsOk());
   util::StatusOr<std::unique_ptr<Aead>> remote_aead =
       (*keyset_handle)
@@ -287,8 +282,6 @@ INSTANTIATE_TEST_SUITE_P(
     testing::ValuesIn(GetTestTemplates()));
 
 TEST_F(KmsEnvelopeAeadTest, PrimitiveFromTemplateAndFromNewAreCompatible) {
-  ASSERT_THAT(AeadConfig::Register(), IsOk());
-
   util::StatusOr<std::string> kek_uri_result =
       test::FakeKmsClient::CreateFakeKeyUri();
   ASSERT_THAT(kek_uri_result, IsOk());
@@ -304,7 +297,7 @@ TEST_F(KmsEnvelopeAeadTest, PrimitiveFromTemplateAndFromNewAreCompatible) {
       AeadKeyTemplates::KmsEnvelopeAead(kek_uri, dek_template);
   // Get KMS envelope AEAD primitive.
   util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
-      KeysetHandle::GenerateNew(env_template);
+      KeysetHandle::GenerateNew(env_template, KeyGenConfigGlobalRegistry());
   ASSERT_THAT(handle, IsOk());
   util::StatusOr<std::unique_ptr<Aead>> envelope_aead_from_template =
       (*handle)->GetPrimitive<crypto::tink::Aead>(ConfigGlobalRegistry());

@@ -788,6 +788,7 @@ cc_test(
         "//:aead",
         "//:keyset_handle",
         "//:registry",
+        "//config:global_registry",
         "//internal:ssl_util",
         "//mac:mac_key_templates",
         "//proto:aes_gcm_cc_proto",

@@ -749,6 +749,7 @@ tink_cc_test(
     tink::core::aead
     tink::core::keyset_handle
     tink::core::registry
+    tink::config::global_registry
     tink::internal::ssl_util
     tink::mac::mac_key_templates
     tink::util::fake_kms_client
