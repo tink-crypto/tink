@@ -18,13 +18,12 @@ package hcvault_test
 import (
 	"bytes"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"net"
 	"net/http"
-	"os"
-	"path/filepath"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -32,30 +31,20 @@ import (
 )
 
 const (
-	keyURITmpl = "hcvault://localhost:%d/transit/keys/key-1"
+	keyURITmpl = "%s/transit/keys/key-1"
 	token      = "mytoken"
 )
 
-var (
-	vaultKey  = filepath.Join(os.Getenv("TEST_WORKSPACE"), "/integration/hcvault/testdata/server.key")
-	vaultCert = filepath.Join(os.Getenv("TEST_WORKSPACE"), "/integration/hcvault/testdata/server.crt")
-)
+func TestVaultAEAD_EncryptDecrypt(t *testing.T) {
+	server, uriPrefix, tlsConfig := newServer(t)
+	defer server.Close()
 
-func TestVaultClientGetAEAD_EncryptDecrypt(t *testing.T) {
-	port, stopFunc := newServer(t)
-	defer stopFunc()
-
-	client, err := hcvault.NewClient(
-		fmt.Sprintf("hcvault://localhost:%d/", port),
-		// Using InsecureSkipVerify is fine here, since this is just a test running locally.
-		&tls.Config{InsecureSkipVerify: true}, // NOLINT
-		token,
-	)
+	client, err := hcvault.NewClient(uriPrefix, tlsConfig, token)
 	if err != nil {
 		t.Fatal("Cannot initialize a client:", err)
 	}
 
-	keyURI := fmt.Sprintf(keyURITmpl, port)
+	keyURI := fmt.Sprintf(keyURITmpl, uriPrefix)
 	aead, err := client.GetAEAD(keyURI)
 	if err != nil {
 		t.Fatal("Cannot obtain Vault AEAD:", err)
@@ -81,21 +70,16 @@ func TestVaultClientGetAEAD_EncryptDecrypt(t *testing.T) {
 	}
 }
 
-func TestVaultClientGetAEAD_DecryptWithFixedCiphertext(t *testing.T) {
-	port, stopFunc := newServer(t)
-	defer stopFunc()
+func TestVaultAEAD_DecryptWithFixedCiphertext(t *testing.T) {
+	server, uriPrefix, tlsConfig := newServer(t)
+	defer server.Close()
 
-	client, err := hcvault.NewClient(
-		fmt.Sprintf("hcvault://localhost:%d/", port),
-		// Using InsecureSkipVerify is fine here, since this is just a test running locally.
-		&tls.Config{InsecureSkipVerify: true}, // NOLINT
-		token,
-	)
+	client, err := hcvault.NewClient(uriPrefix, tlsConfig, token)
 	if err != nil {
 		t.Fatal("Cannot initialize a client:", err)
 	}
 
-	keyURI := fmt.Sprintf(keyURITmpl, port)
+	keyURI := fmt.Sprintf(keyURITmpl, uriPrefix)
 	aead, err := client.GetAEAD(keyURI)
 	if err != nil {
 		t.Fatal("Cannot obtain Vault AEAD:", err)
@@ -113,15 +97,10 @@ func TestVaultClientGetAEAD_DecryptWithFixedCiphertext(t *testing.T) {
 }
 
 func TestGetAEADFailWithBadKeyURI(t *testing.T) {
-	port, stopFunc := newServer(t)
-	defer stopFunc()
+	server, uriPrefix, tlsConfig := newServer(t)
+	defer server.Close()
 
-	client, err := hcvault.NewClient(
-		fmt.Sprintf("hcvault://localhost:%d/", port),
-		// Using InsecureSkipVerify is fine here, since this is just a test running locally.
-		&tls.Config{InsecureSkipVerify: true}, // NOLINT
-		token,
-	)
+	client, err := hcvault.NewClient(uriPrefix, tlsConfig, token)
 	if err != nil {
 		t.Fatalf("hcvault.NewClient() err = %v, want nil", err)
 	}
@@ -132,19 +111,19 @@ func TestGetAEADFailWithBadKeyURI(t *testing.T) {
 	}{
 		{
 			name:   "empty",
-			keyURI: fmt.Sprintf("hcvault://localhost:%d/", port),
+			keyURI: fmt.Sprintf("%s/", uriPrefix),
 		},
 		{
 			name:   "without slash",
-			keyURI: fmt.Sprintf("hcvault://localhost:%d/badKeyUri", port),
+			keyURI: fmt.Sprintf("%s/badKeyUri", uriPrefix),
 		},
 		{
 			name:   "with one slash",
-			keyURI: fmt.Sprintf("hcvault://localhost:%d/bad/KeyUri", port),
+			keyURI: fmt.Sprintf("%s/bad/KeyUri", uriPrefix),
 		},
 		{
 			name:   "with three slash",
-			keyURI: fmt.Sprintf("hcvault://localhost:%d/one/two/three/four", port),
+			keyURI: fmt.Sprintf("%s/one/two/three/four", uriPrefix),
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -157,8 +136,17 @@ func TestGetAEADFailWithBadKeyURI(t *testing.T) {
 
 type closeFunc func() error
 
-func newServer(t *testing.T) (int, closeFunc) {
-	handler := func(w http.ResponseWriter, r *http.Request) {
+// newServer returns a fake, TLS-enabled Vault server, an "hcvault://" URI
+// prefix for accessing it, and a TLS configuration which trusts the servers
+// certificate.
+//
+// Once finished with the server, it's Close() method should be called.
+//
+// The URL and TLS configuration can be passed to hcvault.NewClient().
+//
+// The URL can also be used to construct valid key URIs for the server.
+func newServer(t *testing.T) (server *httptest.Server, uriPrefix string, clientTLSConfig *tls.Config) {
+	server = httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.RequestURI {
 
 		// Encrypt
@@ -238,42 +226,27 @@ func newServer(t *testing.T) (int, closeFunc) {
 		default:
 			http.NotFound(w, r)
 		}
-	}
+	}))
 
-	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
-	if !ok {
-		t.Skip("TEST_SRCDIR not set")
-	}
+	uriPrefix = strings.Replace(server.URL, "https", "hcvault", 1)
 
-	vaultCertPath := filepath.Join(srcDir, vaultCert)
-	if _, err := os.Stat(vaultCertPath); err != nil {
-		t.Fatal("Cannot load Vault certificate file:", err)
-	}
-	vaultKeyPath := filepath.Join(srcDir, vaultKey)
-	if _, err := os.Stat(vaultKeyPath); err != nil {
-		t.Fatal("Cannot load Vault key file:", err)
-	}
+	certpool := x509.NewCertPool()
+	certpool.AddCert(server.Certificate())
+	clientTLSConfig = &tls.Config{RootCAs: certpool}
 
-	l, err := net.Listen("tcp", ":0")
-	if err != nil {
-		t.Fatal("Cannot start Vault mock server:", err)
-	}
-	go http.ServeTLS(l, http.HandlerFunc(handler), vaultCertPath, vaultKeyPath)
-
-	port := l.Addr().(*net.TCPAddr).Port
-	return port, l.Close
+	return server, uriPrefix, clientTLSConfig
 }
 
 // The ciphertext returned by HC Vault is of the form:
 //
-//   vault:v1:<ciphertext>
+//	vault:v1:<ciphertext>
 //
 // where ciphertext is base64-encoded. See:
 // https://developer.hashicorp.com/vault/api-docs/secret/transit#sample-request-13
 //
 // The ciphertext returned by this fake implementation is of the form:
 //
-//   enc:<context>:<associatedData>:<plaintext>
+//	enc:<context>:<associatedData>:<plaintext>
 //
 // where context, associatedData and plaintext are base64-encoded.
 // It is deterministic and not secure.
