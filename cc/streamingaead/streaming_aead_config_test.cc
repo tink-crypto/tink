@@ -120,8 +120,10 @@ TEST_F(StreamingAeadConfigTest, RegisterNonFipsTemplates) {
       StreamingAeadKeyTemplates::Aes256GcmHkdf4KB());
 
   for (auto key_template : non_fips_key_templates) {
-    EXPECT_THAT(KeysetHandle::GenerateNew(key_template).status(),
-                StatusIs(absl::StatusCode::kNotFound));
+    EXPECT_THAT(
+        KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry())
+            .status(),
+        StatusIs(absl::StatusCode::kNotFound));
   }
 }
 
