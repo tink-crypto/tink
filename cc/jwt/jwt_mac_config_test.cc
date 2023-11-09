@@ -45,12 +45,17 @@ TEST_F(JwtMacConfigTest, FailIfAndOnlyIfInInvalidFipsState) {
   if (invalid_fips_state) {
     EXPECT_THAT(JwtMacRegister(), Not(IsOk()));
 
-    EXPECT_THAT(KeysetHandle::GenerateNew(JwtHs256Template()).status(),
+    EXPECT_THAT(KeysetHandle::GenerateNew(JwtHs256Template(),
+                                          KeyGenConfigGlobalRegistry())
+                    .status(),
                 Not(IsOk()));
   } else {
     EXPECT_THAT(JwtMacRegister(), IsOk());
 
-    EXPECT_THAT(KeysetHandle::GenerateNew(JwtHs256Template()).status(), IsOk());
+    EXPECT_THAT(KeysetHandle::GenerateNew(JwtHs256Template(),
+                                          KeyGenConfigGlobalRegistry())
+                    .status(),
+                IsOk());
   }
 }
 

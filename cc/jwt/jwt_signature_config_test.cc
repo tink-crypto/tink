@@ -45,19 +45,32 @@ TEST_F(JwtSignatureConfigTest, FailIfAndOnlyIfInInvalidFipsState) {
   if (invalid_fips_state) {
     EXPECT_THAT(JwtSignatureRegister(), Not(IsOk()));
 
-    EXPECT_THAT(KeysetHandle::GenerateNew(JwtEs256Template()).status(),
+    EXPECT_THAT(KeysetHandle::GenerateNew(JwtEs256Template(),
+                                          KeyGenConfigGlobalRegistry())
+                    .status(),
                 Not(IsOk()));
-    EXPECT_THAT(KeysetHandle::GenerateNew(JwtRs256_2048_F4_Template()).status(),
+    EXPECT_THAT(KeysetHandle::GenerateNew(JwtRs256_2048_F4_Template(),
+                                          KeyGenConfigGlobalRegistry())
+                    .status(),
                 Not(IsOk()));
-    EXPECT_THAT(KeysetHandle::GenerateNew(JwtPs256_2048_F4_Template()).status(),
+    EXPECT_THAT(KeysetHandle::GenerateNew(JwtPs256_2048_F4_Template(),
+                                          KeyGenConfigGlobalRegistry())
+                    .status(),
                 Not(IsOk()));
   } else {
     EXPECT_THAT(JwtSignatureRegister(), IsOk());
 
-    EXPECT_THAT(KeysetHandle::GenerateNew(JwtEs256Template()).status(), IsOk());
-    EXPECT_THAT(KeysetHandle::GenerateNew(JwtRs256_2048_F4_Template()).status(),
+    EXPECT_THAT(KeysetHandle::GenerateNew(JwtEs256Template(),
+                                          KeyGenConfigGlobalRegistry())
+                    .status(),
                 IsOk());
-    EXPECT_THAT(KeysetHandle::GenerateNew(JwtPs256_2048_F4_Template()).status(),
+    EXPECT_THAT(KeysetHandle::GenerateNew(JwtRs256_2048_F4_Template(),
+                                          KeyGenConfigGlobalRegistry())
+                    .status(),
+                IsOk());
+    EXPECT_THAT(KeysetHandle::GenerateNew(JwtPs256_2048_F4_Template(),
+                                          KeyGenConfigGlobalRegistry())
+                    .status(),
                 IsOk());
   }
 }
