@@ -41,26 +41,26 @@ func TestVaultAEAD_EncryptDecrypt(t *testing.T) {
 
 	client, err := hcvault.NewClient(uriPrefix, tlsConfig, token)
 	if err != nil {
-		t.Fatal("Cannot initialize a client:", err)
+		t.Fatalf("hcvault.NewClient() err = %v, want nil", err)
 	}
 
 	keyURI := fmt.Sprintf(keyURITmpl, uriPrefix)
 	aead, err := client.GetAEAD(keyURI)
 	if err != nil {
-		t.Fatal("Cannot obtain Vault AEAD:", err)
+		t.Fatalf("client.GetAEAD(%q) err = %v, want nil", keyURI, err)
 	}
 	plaintext := []byte("plaintext")
 	context := []byte("context")
 	ciphertext, err := aead.Encrypt(plaintext, context)
 	if err != nil {
-		t.Fatal("Error encrypting data:", err)
+		t.Fatalf("aead.Encrypt(plaintext, context) err = %v, want nil", err)
 	}
 	gotPlaintext, err := aead.Decrypt(ciphertext, context)
 	if err != nil {
-		t.Fatal("Error decrypting data:", err)
+		t.Fatalf("aead.Decrypt(ciphertext, context) err = %v, want nil", err)
 	}
 	if !bytes.Equal(gotPlaintext, plaintext) {
-		t.Fatalf("Incorrect plain text, want=%s;got=%s", string(plaintext), string(gotPlaintext))
+		t.Fatalf("aead.Decrypt(ciphertext, context) = %s, want %s", gotPlaintext, plaintext)
 	}
 
 	invalidContext := []byte("invalidContext")
@@ -76,23 +76,24 @@ func TestVaultAEAD_DecryptWithFixedCiphertext(t *testing.T) {
 
 	client, err := hcvault.NewClient(uriPrefix, tlsConfig, token)
 	if err != nil {
-		t.Fatal("Cannot initialize a client:", err)
+		t.Fatalf("hcvault.NewClient() err = %v, want nil", err)
 	}
 
 	keyURI := fmt.Sprintf(keyURITmpl, uriPrefix)
 	aead, err := client.GetAEAD(keyURI)
 	if err != nil {
-		t.Fatal("Cannot obtain Vault AEAD:", err)
+		t.Fatalf("client.GetAEAD(%q) err = %v, want nil", keyURI, err)
 	}
 	// associatedData is passed as "context" parameter to vault decrypt.
-	ciphertext := fakeEncrypt([]byte("plaintext"), nil, []byte("context"))
+	plaintext := []byte("plaintext")
 	context := []byte("context")
-	plaintext, err := aead.Decrypt(ciphertext, context)
+	ciphertext := fakeEncrypt(plaintext, nil, context)
+	gotPlaintext, err := aead.Decrypt(ciphertext, context)
 	if err != nil {
-		t.Fatal("Error decrypting data:", err)
+		t.Fatalf("aead.Decrypt(ciphertext, context) err = %v, want nil", err)
 	}
-	if !bytes.Equal(plaintext, []byte("plaintext")) {
-		t.Fatalf("plaintext = %q, want \"plaintext\"", string(plaintext))
+	if !bytes.Equal(gotPlaintext, plaintext) {
+		t.Fatalf("aead.Decrypt(ciphertext, context) = %s, want %s", gotPlaintext, plaintext)
 	}
 }
 
@@ -159,7 +160,7 @@ func newServer(t *testing.T) (server *httptest.Server, uriPrefix string, clientT
 			}
 			plaintext, err := base64.StdEncoding.DecodeString(encReq["plaintext"])
 			if err != nil {
-				http.Error(w, "Plaintext must be base64 encoded", 400)
+				http.Error(w, "plaintext must be base64 encoded", 400)
 				return
 			}
 			context, err := base64.StdEncoding.DecodeString(encReq["context"])
@@ -180,10 +181,10 @@ func newServer(t *testing.T) (server *httptest.Server, uriPrefix string, clientT
 			}
 			respBytes, err := json.Marshal(resp)
 			if err != nil {
-				t.Fatal("Cannot encode encrypted data:", err)
+				t.Fatalf("Cannot encode encrypted data: %v", err)
 			}
 			if _, err := w.Write(respBytes); err != nil {
-				t.Fatal("Cannot send encrypted data response:", err)
+				t.Fatalf("Cannot send encrypted data response: %v", err)
 			}
 
 		// Decrypt
@@ -217,10 +218,10 @@ func newServer(t *testing.T) (server *httptest.Server, uriPrefix string, clientT
 			}
 			respBytes, err := json.Marshal(resp)
 			if err != nil {
-				t.Fatal("Cannot encode encrypted data:", err)
+				t.Fatalf("Cannot encode encrypted data: %v", err)
 			}
 			if _, err := w.Write(respBytes); err != nil {
-				t.Fatal("Cannot send encrypted data response:", err)
+				t.Fatalf("Cannot send encrypted data response: %v", err)
 			}
 
 		default:
@@ -264,7 +265,7 @@ func TestFakeEncrypt(t *testing.T) {
 	want := []byte("enc:Y29udGV4dA==:YXNzb2NpYXRlZERhdGE=:cGxhaW50ZXh0")
 	got := fakeEncrypt([]byte("plaintext"), []byte("associatedData"), []byte("context"))
 	if !bytes.Equal(got, want) {
-		t.Errorf("got = %q, want %q", string(got), string(want))
+		t.Errorf("fakeEncrypt(plaintext, associatedData, context) = %q, want %q", got, want)
 	}
 }
 
@@ -272,7 +273,7 @@ func TestFakeEncryptWithoutAssociatedData(t *testing.T) {
 	want := []byte("enc:Y29udGV4dA==::cGxhaW50ZXh0")
 	got := fakeEncrypt([]byte("plaintext"), nil, []byte("context"))
 	if !bytes.Equal(got, want) {
-		t.Errorf("got = %q, want %q", string(got), string(want))
+		t.Errorf("fakeEncrypt(plaintext, nil, context) = %q, want %q", got, want)
 	}
 }
 
@@ -280,7 +281,7 @@ func TestFakeEncryptWithoutContext(t *testing.T) {
 	want := []byte("enc::YXNzb2NpYXRlZERhdGE=:cGxhaW50ZXh0")
 	got := fakeEncrypt([]byte("plaintext"), []byte("associatedData"), nil)
 	if !bytes.Equal(got, want) {
-		t.Errorf("got = %q, want %q", string(got), string(want))
+		t.Errorf("fakeEncrypt(plaintext, associatedData, nil) = %q, want %q", got, want)
 	}
 }
 
@@ -315,9 +316,9 @@ func TestFakeEncryptDecrypt(t *testing.T) {
 	ciphertext := fakeEncrypt([]byte("plaintext"), []byte("associatedData"), []byte("context"))
 	got, err := fakeDecrypt(ciphertext, []byte("associatedData"), []byte("context"))
 	if err != nil {
-		t.Errorf("fakeDecrypt() err = %s, want nil", err)
+		t.Errorf("fakeDecrypt() err = %v, want nil", err)
 	}
 	if want := []byte("plaintext"); !bytes.Equal(got, want) {
-		t.Errorf("fakeDecrypt() = %q, want %q", string(got), string(want))
+		t.Errorf("fakeDecrypt() = %q, want %q", got, want)
 	}
 }
