@@ -85,7 +85,7 @@ util::StatusOr<RsaSsaPkcs1Parameters> RsaSsaPkcs1Parameters::Builder::Build() {
   }
 
   // Validate modulus size.
-  if (modulus_size_in_bits_ < 2048) {
+  if (*modulus_size_in_bits_ < 2048) {
     return util::Status(
         absl::StatusCode::kInvalidArgument,
         absl::StrCat("Invalid key size: must be at least 2048 bits, got ",
