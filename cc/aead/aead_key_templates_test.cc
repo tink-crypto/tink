@@ -411,7 +411,8 @@ TEST(AeadKeyTemplatesTest, testKmsEnvelopeAeadMultipleKeysSameKek) {
 
   const KeyTemplate& key_template1 =
       AeadKeyTemplates::KmsEnvelopeAead(kek_uri, dek_template);
-  auto handle_result1 = KeysetHandle::GenerateNew(key_template1);
+  auto handle_result1 =
+      KeysetHandle::GenerateNew(key_template1, KeyGenConfigGlobalRegistry());
   EXPECT_TRUE(handle_result1.ok());
   auto handle1 = std::move(handle_result1.value());
   auto aead_result1 =
@@ -421,7 +422,8 @@ TEST(AeadKeyTemplatesTest, testKmsEnvelopeAeadMultipleKeysSameKek) {
 
   const KeyTemplate& key_template2 =
       AeadKeyTemplates::KmsEnvelopeAead(kek_uri, dek_template);
-  auto handle_result2 = KeysetHandle::GenerateNew(key_template2);
+  auto handle_result2 =
+      KeysetHandle::GenerateNew(key_template2, KeyGenConfigGlobalRegistry());
   EXPECT_TRUE(handle_result2.ok());
   auto handle2 = std::move(handle_result2.value());
   auto aead_result2 =

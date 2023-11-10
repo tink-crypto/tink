@@ -96,7 +96,8 @@ TEST_F(AeadConfigTest, WrappersRegistered) {
   ASSERT_THAT(AeadConfig::Register(), IsOk());
 
   StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
-      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm());
+      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm(),
+                                KeyGenConfigGlobalRegistry());
   ASSERT_THAT(keyset_handle.status(), IsOk());
   StatusOr<std::unique_ptr<Aead>> aead =
       (*keyset_handle)
@@ -120,7 +121,8 @@ TEST_F(AeadConfigTest, RegisterNonFipsTemplates) {
   };
 
   for (auto key_template : non_fips_key_templates) {
-    auto new_keyset_handle_result = KeysetHandle::GenerateNew(key_template);
+    auto new_keyset_handle_result =
+        KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry());
     EXPECT_THAT(new_keyset_handle_result.status(),
                 StatusIs(absl::StatusCode::kNotFound));
   }
@@ -141,7 +143,8 @@ TEST_F(AeadConfigTest, RegisterFipsValidTemplates) {
   };
 
   for (auto key_template : fips_key_templates) {
-    auto new_keyset_handle_result = KeysetHandle::GenerateNew(key_template);
+    auto new_keyset_handle_result =
+        KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry());
     EXPECT_THAT(new_keyset_handle_result, IsOk());
   }
 }

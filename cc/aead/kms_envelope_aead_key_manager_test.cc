@@ -259,7 +259,7 @@ TEST_P(KmsEnvelopeAeadKeyManagerDekTemplatesTest, EncryptDecryp) {
   KeyTemplate env_template =
       AeadKeyTemplates::KmsEnvelopeAead(kek_uri, dek_template);
   util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
-      KeysetHandle::GenerateNew(env_template);
+      KeysetHandle::GenerateNew(env_template, KeyGenConfigGlobalRegistry());
   ASSERT_THAT(handle, IsOk());
   util::StatusOr<std::unique_ptr<Aead>> envelope_aead =
       (*handle)->GetPrimitive<crypto::tink::Aead>(ConfigGlobalRegistry());
