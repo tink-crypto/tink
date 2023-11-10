@@ -25,6 +25,8 @@ import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.hybrid.HybridConfig;
+import com.google.crypto.tink.hybrid.internal.testing.HpkeTestUtil;
+import com.google.crypto.tink.hybrid.internal.testing.HybridTestVector;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.HpkeAead;
 import com.google.crypto.tink.proto.HpkeKdf;
@@ -34,9 +36,12 @@ import com.google.crypto.tink.proto.HpkeParams;
 import com.google.crypto.tink.proto.HpkePrivateKey;
 import com.google.crypto.tink.proto.HpkePublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
+import javax.annotation.Nullable;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -274,5 +279,67 @@ public final class HpkePrivateKeyManagerTest {
     KeysetHandle publicHandle = privateHandle.getPublicKeysetHandle();
     assertNotNull(privateHandle.getPrimitive(HybridDecrypt.class));
     assertNotNull(publicHandle.getPrimitive(HybridEncrypt.class));
+  }
+
+  @DataPoints("testVectors")
+  public static final HybridTestVector[] HYBRID_TEST_VECTORS = HpkeTestUtil.createHpkeTestVectors();
+
+  @Theory
+  public void decryptCiphertext_works(@FromDataPoints("testVectors") HybridTestVector v)
+      throws Exception {
+    KeysetHandle.Builder.Entry entry = KeysetHandle.importKey(v.getPrivateKey()).makePrimary();
+    @Nullable Integer id = v.getPrivateKey().getIdRequirementOrNull();
+    if (id == null) {
+      entry.withRandomId();
+    } else {
+      entry.withFixedId(id);
+    }
+    KeysetHandle handle = KeysetHandle.newBuilder().addEntry(entry).build();
+    HybridDecrypt hybridDecrypt = handle.getPrimitive(HybridDecrypt.class);
+    byte[] plaintext = hybridDecrypt.decrypt(v.getCiphertext(), v.getContextInfo());
+    assertThat(Hex.encode(plaintext)).isEqualTo(Hex.encode(v.getPlaintext()));
+  }
+
+  @Theory
+  public void decryptWrongContextInfo_throws(@FromDataPoints("testVectors") HybridTestVector v)
+      throws Exception {
+    KeysetHandle.Builder.Entry entry = KeysetHandle.importKey(v.getPrivateKey()).makePrimary();
+    @Nullable Integer id = v.getPrivateKey().getIdRequirementOrNull();
+    if (id == null) {
+      entry.withRandomId();
+    } else {
+      entry.withFixedId(id);
+    }
+    KeysetHandle handle = KeysetHandle.newBuilder().addEntry(entry).build();
+    HybridDecrypt hybridDecrypt = handle.getPrimitive(HybridDecrypt.class);
+    byte[] contextInfo = v.getContextInfo();
+    if (contextInfo.length > 0) {
+      contextInfo[0] ^= 1;
+    } else {
+      contextInfo = new byte[] {1};
+    }
+    // local variables referenced from a lambda expression must be final or effectively final
+    final byte[] contextInfoCopy = Arrays.copyOf(contextInfo, contextInfo.length);
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> hybridDecrypt.decrypt(v.getCiphertext(), contextInfoCopy));
+  }
+
+  @Theory
+  public void encryptThenDecryptMessage_works(
+      @FromDataPoints("testVectors") HybridTestVector v) throws Exception {
+    KeysetHandle.Builder.Entry entry = KeysetHandle.importKey(v.getPrivateKey()).makePrimary();
+    @Nullable Integer id = v.getPrivateKey().getIdRequirementOrNull();
+    if (id == null) {
+      entry.withRandomId();
+    } else {
+      entry.withFixedId(id);
+    }
+    KeysetHandle handle = KeysetHandle.newBuilder().addEntry(entry).build();
+    HybridDecrypt hybridDecrypt = handle.getPrimitive(HybridDecrypt.class);
+    HybridEncrypt hybridEncrypt = handle.getPublicKeysetHandle().getPrimitive(HybridEncrypt.class);
+    byte[] ciphertext = hybridEncrypt.encrypt(v.getPlaintext(), v.getContextInfo());
+    byte[] plaintext = hybridDecrypt.decrypt(ciphertext, v.getContextInfo());
+    assertThat(Hex.encode(plaintext)).isEqualTo(Hex.encode(v.getPlaintext()));
   }
 }

@@ -26,16 +26,6 @@ android_library(
     ],
 )
 
-android_library(
-    name = "hybrid_test_vector-android",
-    srcs = ["HybridTestVector.java"],
-    deps = [
-        "//src/main/java/com/google/crypto/tink/hybrid:hybrid_private_key-android",
-        "//src/main/java/com/google/crypto/tink/util:bytes-android",
-        "@maven//:com_google_errorprone_error_prone_annotations",
-    ],
-)
-
 java_library(
     name = "ecies_aead_hkdf_test_util",
     srcs = ["EciesAeadHkdfTestUtil.java"],
@@ -55,6 +45,16 @@ java_library(
     ],
 )
 
+android_library(
+    name = "hybrid_test_vector-android",
+    srcs = ["HybridTestVector.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/hybrid:hybrid_private_key-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
 java_library(
     name = "hybrid_test_vector",
     srcs = ["HybridTestVector.java"],
@@ -62,5 +62,41 @@ java_library(
         "//src/main/java/com/google/crypto/tink/hybrid:hybrid_private_key",
         "//src/main/java/com/google/crypto/tink/util:bytes",
         "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "hpke_test_util-android",
+    srcs = ["HpkeTestUtil.java"],
+    deps = [
+        ":hybrid_test_vector-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access-android",
+        "//src/main/java/com/google/crypto/tink/hybrid:hpke_parameters-android",
+        "//src/main/java/com/google/crypto/tink/hybrid:hpke_private_key-android",
+        "//src/main/java/com/google/crypto/tink/hybrid:hpke_public_key-android",
+        "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception-android",
+        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves-android",
+        "//src/main/java/com/google/crypto/tink/subtle:hex-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes-android",
+    ],
+)
+
+java_library(
+    name = "hpke_test_util",
+    srcs = ["HpkeTestUtil.java"],
+    deps = [
+        ":hybrid_test_vector",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink/hybrid:hpke_parameters",
+        "//src/main/java/com/google/crypto/tink/hybrid:hpke_private_key",
+        "//src/main/java/com/google/crypto/tink/hybrid:hpke_public_key",
+        "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception",
+        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
     ],
 )
