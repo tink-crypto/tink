@@ -307,8 +307,10 @@ TEST_F(HpkeConfigTest, RegisterNonFipsTemplates) {
       HybridKeyTemplates::HpkeX25519HkdfSha256ChaCha20Poly1305());
 
   for (auto key_template : non_fips_key_templates) {
-    EXPECT_THAT(KeysetHandle::GenerateNew(key_template).status(),
-                StatusIs(absl::StatusCode::kNotFound));
+    EXPECT_THAT(
+        KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry())
+            .status(),
+        StatusIs(absl::StatusCode::kNotFound));
   }
 }
 
