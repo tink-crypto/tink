@@ -501,23 +501,6 @@ public final class Registry {
   }
 
   /**
-   * Creates a new primitive for the key given in {@code proto}.
-   *
-   * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls {@link
-   * KeyManager#getPrimitive} with {@code key} as the parameter.
-   *
-   * @return a new primitive
-   * @deprecated Use {@code getPrimitive(typeUrl, serializedKey, P.class)} instead.
-   */
-  @SuppressWarnings("TypeParameterUnusedInFormals")
-  @Deprecated
-  public static <P> P getPrimitive(String typeUrl, MessageLite key)
-      throws GeneralSecurityException {
-    KeyManager<P> manager = getKeyManager(typeUrl);
-    return manager.getPrimitive(key.toByteString());
-  }
-
-  /**
    * Creates a new primitive for the key given in {@code key}.
    *
    * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls {@link
@@ -531,23 +514,6 @@ public final class Registry {
       String typeUrl, MessageLite key, Class<P> primitiveClass) throws GeneralSecurityException {
     KeyManager<P> manager = keyManagerRegistry.get().getKeyManager(typeUrl, primitiveClass);
     return manager.getPrimitive(key.toByteString());
-  }
-
-  /**
-   * Creates a new primitive for the key given in {@code proto}.
-   *
-   * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls {@link
-   * KeyManager#getPrimitive} with {@code serializedKey} as the parameter.
-   *
-   * @return a new primitive
-   * @deprecated Use {@code getPrimitive(typeUrl, serializedKey, Primitive.class} instead.
-   */
-  @SuppressWarnings("TypeParameterUnusedInFormals")
-  @Deprecated
-  public static <P> P getPrimitive(String typeUrl, ByteString serializedKey)
-      throws GeneralSecurityException {
-    KeyManager<P> manager = getKeyManager(typeUrl);
-    return manager.getPrimitive(serializedKey);
   }
 
   /**
@@ -571,42 +537,11 @@ public final class Registry {
    * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls {@link
    * KeyManager#getPrimitive} with {@code serialized} as the parameter.
    *
-   * @deprecated Use {@code getPrimitive(typeUrl, serializedKey, Primitive.class)} instead.
-   * @return a new primitive
-   */
-  @SuppressWarnings("TypeParameterUnusedInFormals")
-  @Deprecated
-  public static <P> P getPrimitive(String typeUrl, byte[] serializedKey)
-      throws GeneralSecurityException {
-    return getPrimitive(typeUrl, ByteString.copyFrom(serializedKey));
-  }
-
-  /**
-   * Creates a new primitive for the key given in {@code serializedKey}.
-   *
-   * <p>It looks up a {@link KeyManager} identified by {@code type_url}, and calls {@link
-   * KeyManager#getPrimitive} with {@code serialized} as the parameter.
-   *
    * @return a new primitive
    */
   public static <P> P getPrimitive(String typeUrl, byte[] serializedKey, Class<P> primitiveClass)
       throws GeneralSecurityException {
     return getPrimitive(typeUrl, ByteString.copyFrom(serializedKey), primitiveClass);
-  }
-
-  /**
-   * Creates a new primitive for the key given in {@code keyData}.
-   *
-   * <p>It looks up a {@link KeyManager} identified by {@code keyData.type_url}, and calls {@link
-   * KeyManager#getPrimitive} with {@code keyData.value} as the parameter.
-   *
-   * @return a new primitive
-   * @deprecated Use {@code getPrimitive(keyData, Primitive.class)} instead.
-   */
-  @SuppressWarnings("TypeParameterUnusedInFormals")
-  @Deprecated
-  public static <P> P getPrimitive(KeyData keyData) throws GeneralSecurityException {
-    return getPrimitive(keyData.getTypeUrl(), keyData.getValue());
   }
 
   /**

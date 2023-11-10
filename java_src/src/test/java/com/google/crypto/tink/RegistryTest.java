@@ -440,8 +440,8 @@ public class RegistryTest {
     KeyData privateKeyData = Registry.newKeyData(SignatureKeyTemplates.ECDSA_P256);
     KeyData publicKeyData = Registry.getPublicKeyData(privateKeyData.getTypeUrl(),
         privateKeyData.getValue());
-    PublicKeyVerify verifier = Registry.<PublicKeyVerify>getPrimitive(publicKeyData);
-    PublicKeySign signer = Registry.<PublicKeySign>getPrimitive(privateKeyData);
+    PublicKeyVerify verifier = Registry.getPrimitive(publicKeyData, PublicKeyVerify.class);
+    PublicKeySign signer = Registry.getPrimitive(privateKeyData, PublicKeySign.class);
     byte[] message = "Nice test message".getBytes(UTF_8);
     verifier.verify(signer.sign(message), message);
   }
@@ -467,22 +467,6 @@ public class RegistryTest {
   }
 
   @Test
-  public void testGetPrimitive_legacy_aesGcm_shouldWork() throws Exception {
-    // Skip test if in FIPS mode, as EAX is not allowed in FipsMode.
-    Assume.assumeFalse(TinkFips.useOnlyFips());
-
-    AesEaxKey aesEaxKey =
-        (AesEaxKey) Registry.newKey(AesEaxKeyManager.aes128EaxTemplate().getProto());
-    KeyData aesEaxKeyData = Registry.newKeyData(AesEaxKeyManager.aes128EaxTemplate().getProto());
-    Aead aead = Registry.getPrimitive(aesEaxKeyData);
-
-    assertThat(aesEaxKey.getKeyValue().size()).isEqualTo(16);
-    assertThat(aesEaxKeyData.getTypeUrl()).isEqualTo(AeadConfig.AES_EAX_TYPE_URL);
-    // This might break when we add native implementations.
-    assertThat(aead.getClass()).isEqualTo(AesEaxJce.class);
-  }
-
-  @Test
   public void testGetPrimitive_aesGcm_shouldWork() throws Exception {
     // Skip test if in FIPS mode, as EAX is not supported in FIPS mode.
     Assume.assumeFalse(TinkFips.useOnlyFips());
@@ -496,27 +480,6 @@ public class RegistryTest {
     assertThat(aesEaxKeyData.getTypeUrl()).isEqualTo(AeadConfig.AES_EAX_TYPE_URL);
     // This might break when we add native implementations.
     assertThat(aead.getClass()).isEqualTo(AesEaxJce.class);
-  }
-
-  @Test
-  public void testGetPrimitive_legacy_hmac_shouldWork() throws Exception {
-    // Skip test if in FIPS mode, as no provider available to instantiate.
-    Assume.assumeFalse(TinkFips.useOnlyFips());
-
-    com.google.crypto.tink.proto.KeyTemplate template =
-        com.google.crypto.tink.proto.KeyTemplate.parseFrom(
-            TinkProtoParametersFormat.serialize(PredefinedMacParameters.HMAC_SHA256_128BITTAG),
-            ExtensionRegistryLite.getEmptyRegistry());
-    HmacKey hmacKey = (HmacKey) Registry.newKey(template);
-    KeyData hmacKeyData = Registry.newKeyData(template);
-    Mac mac = Registry.getPrimitive(hmacKeyData);
-
-    assertThat(hmacKey.getKeyValue().size()).isEqualTo(32);
-    assertThat(hmacKey.getParams().getTagSize()).isEqualTo(16);
-    assertThat(hmacKey.getParams().getHash()).isEqualTo(HashType.SHA256);
-    assertThat(hmacKeyData.getTypeUrl()).isEqualTo(MacConfig.HMAC_TYPE_URL);
-    // This might break when we add native implementations.
-    assertThat(mac.getClass()).isEqualTo(PrfMac.class);
   }
 
   @Test
