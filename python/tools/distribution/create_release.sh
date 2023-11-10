@@ -21,10 +21,10 @@
 set -euox pipefail
 
 declare -a PYTHON_VERSIONS=
-PYTHON_VERSIONS+=("3.7")
 PYTHON_VERSIONS+=("3.8")
 PYTHON_VERSIONS+=("3.9")
 PYTHON_VERSIONS+=("3.10")
+PYTHON_VERSIONS+=("3.11")
 readonly PYTHON_VERSIONS
 
 readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"

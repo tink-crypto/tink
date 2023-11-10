@@ -37,10 +37,12 @@ def _get_tink_version():
   with open(os.path.join(_PROJECT_BASE_DIR, 'VERSION')) as f:
     try:
       version_line = next(
-          line for line in f if line.startswith('TINK_VERSION_LABEL'))
-    except StopIteration:
+          line for line in f if line.startswith('TINK_VERSION_LABEL')
+      )
+    except StopIteration as e:
       raise ValueError(
-          'Version not defined in {}/VERSION'.format(_PROJECT_BASE_DIR))
+          f'Version not defined in {_PROJECT_BASE_DIR}/VERSION'
+      ) from e
     else:
       return version_line.split(' = ')[-1].strip('\n \'"')
 
@@ -54,8 +56,10 @@ def _get_bazel_command():
     return 'bazelisk'
   elif shutil.which('bazel'):
     return 'bazel'
-  raise FileNotFoundError('Could not find bazel executable. Please install '
-                          'bazel to compile the Tink Python package.')
+  raise FileNotFoundError(
+      'Could not find bazel executable. Please install '
+      'bazel to compile the Tink Python package.'
+  )
 
 
 def _get_protoc_command():
@@ -64,8 +68,10 @@ def _get_protoc_command():
     return os.environ['PROTOC']
   protoc_path = shutil.which('protoc')
   if protoc_path is None:
-    raise FileNotFoundError('Could not find protoc executable. Please install '
-                            'protoc to compile the Tink Python package.')
+    raise FileNotFoundError(
+        'Could not find protoc executable. Please install '
+        'protoc to compile the Tink Python package.'
+    )
   return protoc_path
 
 
@@ -77,8 +83,9 @@ def _generate_proto(protoc, source):
 
   output = source.replace('.proto', '_pb2.py')
 
-  if (os.path.exists(output) and
-      os.path.getmtime(source) < os.path.getmtime(output)):
+  if os.path.exists(output) and os.path.getmtime(source) < os.path.getmtime(
+      output
+  ):
     # No need to regenerate if output is newer than source.
     return
 
@@ -134,12 +141,13 @@ def _patch_workspace(workspace_file):
     tagged_version = os.environ['TINK_PYTHON_SETUPTOOLS_TAGGED_VERSION']
     archive_filename = 'v{}.zip'.format(tagged_version)
     archive_prefix = 'tink-{}'.format(tagged_version)
-    workspace_content = _patch_with_http_archive(workspace_content,
-                                                 archive_filename,
-                                                 archive_prefix)
+    workspace_content = _patch_with_http_archive(
+        workspace_content, archive_filename, archive_prefix
+    )
   else:
-    workspace_content = _patch_with_http_archive(workspace_content,
-                                                 'master.zip', 'tink-master')
+    workspace_content = _patch_with_http_archive(
+        workspace_content, 'master.zip', 'tink-master'
+    )
 
   with open(workspace_file, 'w') as f:
     f.write(workspace_content)
@@ -150,29 +158,29 @@ def _patch_with_http_archive(workspace_content, filename, prefix):
 
   workspace_lines = workspace_content.split('\n')
   http_archive_load = (
-      'load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")')
+      'load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")'
+  )
 
   if http_archive_load not in workspace_content:
-    workspace_content = '\n'.join([workspace_lines[0], http_archive_load] +
-                                  workspace_lines[1:])
+    workspace_content = '\n'.join(
+        [workspace_lines[0], http_archive_load] + workspace_lines[1:]
+    )
 
-  cc = textwrap.dedent(
-      '''\
+  cc = textwrap.dedent("""\
       local_repository(
           name = "tink_cc",
           path = "../cc",
       )
-      ''')
+      """)
 
-  cc_patched = textwrap.dedent(
-      '''\
+  cc_patched = textwrap.dedent("""\
       # Modified by setup.py
       http_archive(
           name = "tink_cc",
           urls = ["https://github.com/google/tink/archive/{}"],
           strip_prefix = "{}/cc",
       )
-      '''.format(filename, prefix))
+      """.format(filename, prefix))
 
   return workspace_content.replace(cc, cc_patched)
 
@@ -182,12 +190,14 @@ class BazelExtension(setuptools.Extension):
 
   def __init__(self, bazel_target, target_name=''):
     self.bazel_target = bazel_target
-    self.relpath, self.target_name = (
-        posixpath.relpath(bazel_target, '//').split(':'))
+    self.relpath, self.target_name = posixpath.relpath(
+        bazel_target, '//'
+    ).split(':')
     if target_name:
       self.target_name = target_name
     ext_name = os.path.join(
-        self.relpath.replace(posixpath.sep, os.path.sep), self.target_name)
+        self.relpath.replace(posixpath.sep, os.path.sep), self.target_name
+    )
     setuptools.Extension.__init__(self, ext_name, sources=[])
 
 
@@ -216,12 +226,15 @@ class BuildBazelExtension(build_ext.build_ext):
     self.spawn(bazel_clean_argv)
 
     bazel_argv = [
-        self.bazel_command, 'build', ext.bazel_target,
-        '--compilation_mode=' + ('dbg' if self.debug else 'opt')
+        self.bazel_command,
+        'build',
+        ext.bazel_target,
+        '--compilation_mode=' + ('dbg' if self.debug else 'opt'),
     ]
     self.spawn(bazel_argv)
-    ext_bazel_bin_path = os.path.join('bazel-bin', ext.relpath,
-                                      ext.target_name + '.so')
+    ext_bazel_bin_path = os.path.join(
+        'bazel-bin', ext.relpath, ext.target_name + '.so'
+    )
     ext_dest_path = self.get_ext_fullpath(ext.name)
     ext_dest_dir = os.path.dirname(ext_dest_path)
     if not os.path.exists(ext_dest_dir):
@@ -277,14 +290,17 @@ def main():
       zip_safe=False,
       # PyPI package information.
       classifiers=[
-          'Programming Language :: Python :: 3.7',
+          'Programming Language :: Python',
+          'Programming Language :: Python :: 3',
           'Programming Language :: Python :: 3.8',
           'Programming Language :: Python :: 3.9',
           'Programming Language :: Python :: 3.10',
+          'Programming Language :: Python :: 3.11',
           'Topic :: Software Development :: Libraries',
       ],
       license='Apache 2.0',
       keywords='tink cryptography',
+      python_requires='>=3.8',
   )
 
 

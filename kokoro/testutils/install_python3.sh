@@ -15,7 +15,7 @@
 # limitations under the License.
 ################################################################################
 
-readonly DEFAULT_PYTHON_VERSION=3.7.1
+readonly DEFAULT_PYTHON_VERSION=3.8.18
 
 # This scripts installs Python 3 at a given version; if the version is not
 # specified, DEFAULT_PYTHON_VERSION is used.
