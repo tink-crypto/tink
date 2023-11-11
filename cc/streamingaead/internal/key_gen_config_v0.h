@@ -14,8 +14,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_STREAMING_AEAD_INTERNAL_KEY_GEN_CONFIG_V0_H_
-#define TINK_STREAMING_AEAD_INTERNAL_KEY_GEN_CONFIG_V0_H_
+#ifndef TINK_STREAMINGAEAD_INTERNAL_KEY_GEN_CONFIG_V0_H_
+#define TINK_STREAMINGAEAD_INTERNAL_KEY_GEN_CONFIG_V0_H_
 
 #include "tink/key_gen_configuration.h"
 #include "tink/util/status.h"
@@ -32,4 +32,4 @@ util::Status AddStreamingAeadKeyGenV0(KeyGenConfiguration& config);
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_STREAMING_AEAD_INTERNAL_KEY_GEN_CONFIG_V0_H_
+#endif  // TINK_STREAMINGAEAD_INTERNAL_KEY_GEN_CONFIG_V0_H_
