@@ -64,7 +64,7 @@ TEST_P(ChunkedMacCompatibilityTest, ComputeAndVerify) {
   ASSERT_THAT(MacConfig::Register(), IsOk());
 
   util::StatusOr<std::unique_ptr<KeysetHandle>> key =
-      KeysetHandle::GenerateNew(key_template);
+      KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry());
   ASSERT_THAT(key, IsOk());
 
   util::StatusOr<std::unique_ptr<Mac>> mac =
@@ -104,8 +104,8 @@ TEST_P(ChunkedMacCompatibilityTest, ComputeAndVerify) {
 TEST(ChunkedMacSlicingTest, DifferentChunkSizes) {
   ASSERT_THAT(MacConfig::Register(), IsOk());
 
-  util::StatusOr<std::unique_ptr<KeysetHandle>> key =
-      KeysetHandle::GenerateNew(MacKeyTemplates::HmacSha256());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> key = KeysetHandle::GenerateNew(
+      MacKeyTemplates::HmacSha256(), KeyGenConfigGlobalRegistry());
   ASSERT_THAT(key, IsOk());
 
   util::StatusOr<std::unique_ptr<ChunkedMac>> chunked_mac =
@@ -134,8 +134,8 @@ TEST(ChunkedMacSlicingTest, DifferentChunkSizes) {
 TEST(ChunkedMacTest, VerifyPrefixFails) {
   ASSERT_THAT(MacConfig::Register(), IsOk());
 
-  util::StatusOr<std::unique_ptr<KeysetHandle>> key =
-      KeysetHandle::GenerateNew(MacKeyTemplates::HmacSha256());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> key = KeysetHandle::GenerateNew(
+      MacKeyTemplates::HmacSha256(), KeyGenConfigGlobalRegistry());
   ASSERT_THAT(key, IsOk());
 
   util::StatusOr<std::unique_ptr<ChunkedMac>> chunked_mac =
@@ -160,8 +160,8 @@ TEST(ChunkedMacTest, VerifyPrefixFails) {
 TEST(ChunkedMacTest, UpdateWrongOrderFails) {
   ASSERT_THAT(MacConfig::Register(), IsOk());
 
-  util::StatusOr<std::unique_ptr<KeysetHandle>> key =
-      KeysetHandle::GenerateNew(MacKeyTemplates::HmacSha256());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> key = KeysetHandle::GenerateNew(
+      MacKeyTemplates::HmacSha256(), KeyGenConfigGlobalRegistry());
   ASSERT_THAT(key, IsOk());
 
   util::StatusOr<std::unique_ptr<ChunkedMac>> chunked_mac =
@@ -188,8 +188,8 @@ TEST(ChunkedMacTest, UpdateWrongOrderFails) {
 TEST(ChunkedMacTest, OperationsFailAfterComputeVerifyMac) {
   ASSERT_THAT(MacConfig::Register(), IsOk());
 
-  util::StatusOr<std::unique_ptr<KeysetHandle>> key =
-      KeysetHandle::GenerateNew(MacKeyTemplates::HmacSha256());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> key = KeysetHandle::GenerateNew(
+      MacKeyTemplates::HmacSha256(), KeyGenConfigGlobalRegistry());
   ASSERT_THAT(key, IsOk());
 
   util::StatusOr<std::unique_ptr<ChunkedMac>> chunked_mac =
