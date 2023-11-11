@@ -45,7 +45,7 @@ KeyDerivationKeyTemplates::CreatePrfBasedKeyTemplate(
 
   // Verify `key_template` is derivable.
   util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
-      KeysetHandle::GenerateNew(key_template);
+      KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry());
   if (!handle.ok()) {
     return handle.status();
   }

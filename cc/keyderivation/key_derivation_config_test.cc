@@ -57,7 +57,7 @@ TEST(KeyDerivationConfigTest, Register) {
           PrfKeyTemplates::HkdfSha256(), AeadKeyTemplates::Aes256Gcm());
   ASSERT_THAT(templ, IsOk());
   util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
-      KeysetHandle::GenerateNew(*templ);
+      KeysetHandle::GenerateNew(*templ, KeyGenConfigGlobalRegistry());
   ASSERT_THAT(handle, IsOk());
   util::StatusOr<std::unique_ptr<KeysetDeriver>> deriver =
       (*handle)->GetPrimitive<crypto::tink::KeysetDeriver>(
