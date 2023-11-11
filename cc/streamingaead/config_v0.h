@@ -14,8 +14,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_STREAMING_AEAD_CONFIG_V0_H_
-#define TINK_STREAMING_AEAD_CONFIG_V0_H_
+#ifndef TINK_STREAMINGAEAD_CONFIG_V0_H_
+#define TINK_STREAMINGAEAD_CONFIG_V0_H_
 
 #include "tink/configuration.h"
 
@@ -29,4 +29,4 @@ const Configuration& ConfigStreamingAeadV0();
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_STREAMING_AEAD_CONFIG_V0_H_
+#endif  // TINK_STREAMINGAEAD_CONFIG_V0_H_
