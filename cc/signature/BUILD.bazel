@@ -657,6 +657,29 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "rsa_ssa_pss_public_key",
+    srcs = ["rsa_ssa_pss_public_key.cc"],
+    hdrs = ["rsa_ssa_pss_public_key.h"],
+    include_prefix = "tink/signature",
+    deps = [
+        ":rsa_ssa_pss_parameters",
+        ":signature_public_key",
+        "//:big_integer",
+        "//:key",
+        "//:partial_key_access_token",
+        "//subtle:subtle_util",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+        "@com_google_absl//absl/strings:string_view",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -1241,6 +1264,24 @@ cc_test(
         "//util:test_matchers",
         "@boringssl//:crypto",
         "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "rsa_ssa_pss_public_key_test",
+    srcs = ["rsa_ssa_pss_public_key_test.cc"],
+    deps = [
+        ":rsa_ssa_pss_parameters",
+        ":rsa_ssa_pss_public_key",
+        "//:big_integer",
+        "//:partial_key_access",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:string_view",
+        "@com_google_absl//absl/types:optional",
         "@com_google_googletest//:gtest_main",
     ],
 )

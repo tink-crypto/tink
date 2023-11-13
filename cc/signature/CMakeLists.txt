@@ -626,6 +626,28 @@ tink_cc_library(
     tink::util::statusor
 )
 
+tink_cc_library(
+  NAME rsa_ssa_pss_public_key
+  SRCS
+    rsa_ssa_pss_public_key.cc
+    rsa_ssa_pss_public_key.h
+  DEPS
+    tink::signature::rsa_ssa_pss_parameters
+    tink::signature::signature_public_key
+    absl::core_headers
+    absl::status
+    absl::strings
+    absl::str_format
+    absl::string_view
+    absl::optional
+    tink::core::big_integer
+    tink::core::key
+    tink::core::partial_key_access_token
+    tink::subtle::subtle_util
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -1194,6 +1216,24 @@ tink_cc_test(
     tink::core::big_integer
     tink::internal::bn_util
     tink::internal::ssl_unique_ptr
+    tink::util::statusor
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME rsa_ssa_pss_public_key_test
+  SRCS
+    rsa_ssa_pss_public_key_test.cc
+  DEPS
+    tink::signature::rsa_ssa_pss_parameters
+    tink::signature::rsa_ssa_pss_public_key
+    gmock
+    absl::status
+    absl::strings
+    absl::string_view
+    absl::optional
+    tink::core::big_integer
+    tink::core::partial_key_access
     tink::util::statusor
     tink::util::test_matchers
 )
