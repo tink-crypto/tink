@@ -454,6 +454,7 @@ tink_cc_test(
     tink::core::hybrid_encrypt
     tink::core::keyset_handle
     tink::core::registry
+    tink::config::global_registry
     tink::internal::fips_utils
     tink::util::status
     tink::util::test_matchers
@@ -481,6 +482,7 @@ tink_cc_test(
     tink::core::partial_key_access
     tink::core::registry
     tink::core::restricted_data
+    tink::config::global_registry
     tink::config::tink_fips
     tink::hybrid::internal::hpke_private_key_manager
     tink::hybrid::internal::hpke_public_key_manager

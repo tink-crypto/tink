@@ -30,6 +30,7 @@
 #include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_eax_key_manager.h"
 #include "tink/aead/kms_envelope_aead.h"
+#include "tink/config/global_registry.h"
 #include "tink/kms_client.h"
 #include "tink/kms_clients.h"
 #include "tink/mac/mac_key_templates.h"

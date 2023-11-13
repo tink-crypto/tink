@@ -31,6 +31,7 @@
 #include "tink/aead/aes_gcm_parameters.h"
 #include "tink/aead/aes_gcm_siv_key.h"
 #include "tink/aead/aes_gcm_siv_parameters.h"
+#include "tink/config/global_registry.h"
 #include "tink/config/tink_fips.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/fips_utils.h"

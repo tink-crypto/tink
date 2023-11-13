@@ -32,6 +32,7 @@
 #include "tink/aead/aes_gcm_siv_key_manager.h"
 #include "tink/aead/kms_envelope_aead_key_manager.h"
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
+#include "tink/config/global_registry.h"
 #include "tink/core/key_manager_impl.h"
 #include "tink/key_manager.h"
 #include "tink/keyset_handle.h"

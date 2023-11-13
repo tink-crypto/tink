@@ -531,6 +531,7 @@ tink_cc_test(
     tink::core::partial_key_access
     tink::core::registry
     tink::core::restricted_data
+    tink::config::global_registry
     tink::config::tink_fips
     tink::internal::fips_utils
     tink::internal::mutable_serialization_registry
@@ -588,6 +589,7 @@ tink_cc_test(
     tink::core::key_manager_impl
     tink::core::key_manager
     tink::core::keyset_handle
+    tink::config::global_registry
     tink::subtle::aead_test_util
     tink::util::fake_kms_client
     tink::util::status
@@ -777,6 +779,7 @@ tink_cc_test(
     tink::core::kms_client
     tink::core::kms_clients
     tink::core::registry
+    tink::config::global_registry
     tink::mac::mac_key_templates
     tink::subtle::aead_test_util
     tink::util::fake_kms_client

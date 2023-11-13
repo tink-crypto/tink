@@ -24,6 +24,7 @@
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "openssl/crypto.h"
+#include "tink/config/global_registry.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/hybrid/hybrid_key_templates.h"

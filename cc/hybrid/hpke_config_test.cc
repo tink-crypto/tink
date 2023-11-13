@@ -23,6 +23,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "tink/config/global_registry.h"
 #include "tink/config/tink_fips.h"
 #include "tink/hybrid/hpke_parameters.h"
 #include "tink/hybrid/hpke_private_key.h"
