@@ -16,16 +16,20 @@
 
 package com.google.crypto.tink.hybrid.internal;
 
+import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
 import com.google.common.truth.Expect;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
+import com.google.crypto.tink.hybrid.internal.testing.HpkeTestUtil;
+import com.google.crypto.tink.hybrid.internal.testing.HybridTestVector;
 import com.google.crypto.tink.proto.HpkeParams;
 import com.google.crypto.tink.proto.HpkePrivateKey;
 import com.google.crypto.tink.proto.HpkePublicKey;
 import com.google.crypto.tink.subtle.Bytes;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.X25519;
 import com.google.protobuf.ByteString;
@@ -34,11 +38,14 @@ import java.util.Arrays;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Unit tests for {@link HpkeEncrypt} and {@link HpkeDecrypt}. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public final class HpkeEncryptDecryptTest {
   private static byte[] privateKeyBytes;
   private static byte[] publicKeyBytes;
@@ -332,5 +339,48 @@ public final class HpkeEncryptDecryptTest {
     ciphertext[31] = (byte) (ciphertext[31] ^ 128);
     assertThrows(
         GeneralSecurityException.class, () -> hpkeDecrypt.decrypt(ciphertext, contextInfo));
+  }
+
+  @DataPoints("testVectors")
+  public static final HybridTestVector[] HYBRID_TEST_VECTORS = HpkeTestUtil.createHpkeTestVectors();
+
+  @Theory
+  public void decryptCiphertext_works(@FromDataPoints("testVectors") HybridTestVector v)
+      throws Exception {
+    HybridDecrypt hybridDecrypt =
+        HpkeDecrypt.create((com.google.crypto.tink.hybrid.HpkePrivateKey) v.getPrivateKey());
+    byte[] plaintext = hybridDecrypt.decrypt(v.getCiphertext(), v.getContextInfo());
+    assertThat(Hex.encode(plaintext)).isEqualTo(Hex.encode(v.getPlaintext()));
+  }
+
+  @Theory
+  public void decryptWrongContextInfo_throws(@FromDataPoints("testVectors") HybridTestVector v)
+      throws Exception {
+    HybridDecrypt hybridDecrypt =
+        HpkeDecrypt.create((com.google.crypto.tink.hybrid.HpkePrivateKey) v.getPrivateKey());
+    byte[] contextInfo = v.getContextInfo();
+    if (contextInfo.length > 0) {
+      contextInfo[0] ^= 1;
+    } else {
+      contextInfo = new byte[] {1};
+    }
+    // local variables referenced from a lambda expression must be final or effectively final
+    final byte[] contextInfoCopy = Arrays.copyOf(contextInfo, contextInfo.length);
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> hybridDecrypt.decrypt(v.getCiphertext(), contextInfoCopy));
+  }
+
+  @Theory
+  public void encryptThenDecryptMessage_works(@FromDataPoints("testVectors") HybridTestVector v)
+      throws Exception {
+    HybridDecrypt hybridDecrypt =
+        HpkeDecrypt.create((com.google.crypto.tink.hybrid.HpkePrivateKey) v.getPrivateKey());
+    HybridEncrypt hybridEncrypt =
+        HpkeEncrypt.create(
+            (com.google.crypto.tink.hybrid.HpkePublicKey) v.getPrivateKey().getPublicKey());
+    byte[] ciphertext = hybridEncrypt.encrypt(v.getPlaintext(), v.getContextInfo());
+    byte[] plaintext = hybridDecrypt.decrypt(ciphertext, v.getContextInfo());
+    assertThat(Hex.encode(plaintext)).isEqualTo(Hex.encode(v.getPlaintext()));
   }
 }

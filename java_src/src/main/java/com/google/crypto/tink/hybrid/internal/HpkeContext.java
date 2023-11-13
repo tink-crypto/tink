@@ -91,10 +91,9 @@ public final class HpkeContext {
    * @param info application-specific information parameter to influence key generation
    */
   static HpkeContext createSenderContext(
-      HpkePublicKey recipientPublicKey, HpkeKem kem, HpkeKdf kdf, HpkeAead aead, byte[] info)
+      byte[] recipientPublicKey, HpkeKem kem, HpkeKdf kdf, HpkeAead aead, byte[] info)
       throws GeneralSecurityException {
-    HpkeKemEncapOutput encapOutput =
-        kem.encapsulate(recipientPublicKey.getPublicKey().toByteArray());
+    HpkeKemEncapOutput encapOutput = kem.encapsulate(recipientPublicKey);
     byte[] encapsulatedKey = encapOutput.getEncapsulatedKey();
     byte[] sharedSecret = encapOutput.getSharedSecret();
     return createContext(HpkeUtil.BASE_MODE, encapsulatedKey, sharedSecret, kem, kdf, aead, info);

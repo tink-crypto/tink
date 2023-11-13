@@ -154,7 +154,8 @@ public final class HpkeContextTest {
             .build();
 
     HpkeContext senderContext =
-        HpkeContext.createSenderContext(recipientPublicKey, kem, kdf, aead, testSetup.info);
+        HpkeContext.createSenderContext(
+            recipientPublicKey.getPublicKey().toByteArray(), kem, kdf, aead, testSetup.info);
 
     HpkeKemPrivateKey recipientKemPrivateKey = HpkeKemKeyFactory.createPrivate(recipientPrivateKey);
     HpkeContext recipientContext =
