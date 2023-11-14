@@ -171,7 +171,7 @@ public class RegistryTest {
   }
 
   private void testGetKeyManagerShouldWork(String typeUrl, String className) throws Exception {
-    assertThat(Registry.getKeyManager(typeUrl).getClass().toString()).contains(className);
+    assertThat(Registry.getUntypedKeyManager(typeUrl).getClass().toString()).contains(className);
   }
 
   @Test
@@ -201,30 +201,6 @@ public class RegistryTest {
   }
 
   @Test
-  public void testGetKeyManager_legacy_wrongType_shouldThrowException() throws Exception {
-    // Skip test if in FIPS mode, as no provider available to instantiate.
-    Assume.assumeFalse(TinkFips.useOnlyFips());
-
-    KeyManager<Aead> wrongType = Registry.getKeyManager(MacConfig.HMAC_TYPE_URL);
-    HmacKey hmacKey =
-        (HmacKey)
-            Registry.newKey(
-                com.google.crypto.tink.proto.KeyTemplate.parseFrom(
-                    TinkProtoParametersFormat.serialize(
-                        PredefinedMacParameters.HMAC_SHA256_128BITTAG),
-                    ExtensionRegistryLite.getEmptyRegistry()));
-
-    ClassCastException e =
-        assertThrows(
-            ClassCastException.class,
-            () -> {
-              Aead unused = wrongType.getPrimitive(hmacKey);
-            });
-    assertExceptionContains(e, "com.google.crypto.tink.Aead");
-    assertExceptionContains(e, "com.google.crypto.tink.subtle.PrfMac");
-  }
-
-  @Test
   public void testGetKeyManager_wrongType_shouldThrowException() throws Exception {
     GeneralSecurityException e =
         assertThrows(
@@ -239,7 +215,8 @@ public class RegistryTest {
     String badTypeUrl = "bad type URL";
 
     GeneralSecurityException e =
-        assertThrows(GeneralSecurityException.class, () -> Registry.getKeyManager(badTypeUrl));
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(badTypeUrl));
     assertExceptionContains(e, "No key manager found");
     assertExceptionContains(e, badTypeUrl);
   }
@@ -353,7 +330,7 @@ public class RegistryTest {
                     new CustomAeadKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL)));
     assertThat(e.toString()).contains("already registered");
 
-    KeyManager<Aead> manager = Registry.getKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL);
+    KeyManager<?> manager = Registry.getUntypedKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL);
     assertThat(manager.getClass().toString()).contains("KeyManagerImpl");
   }
 
@@ -428,7 +405,7 @@ public class RegistryTest {
                     new CustomAeadKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL)));
     assertThat(e.toString()).contains("already registered");
 
-    KeyManager<Aead> manager = Registry.getKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL);
+    KeyManager<?> manager = Registry.getUntypedKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL);
     assertThat(manager.getClass().toString()).contains("KeyManagerImpl");
   }
 

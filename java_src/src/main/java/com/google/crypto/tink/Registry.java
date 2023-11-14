@@ -367,20 +367,6 @@ public final class Registry {
    *     getPrimitive} instead.
    */
   @Deprecated
-  public static <P> KeyManager<P> getKeyManager(String typeUrl)
-      throws GeneralSecurityException {
-    @SuppressWarnings("unchecked") // Unavoidable for the API we implement (hence it is deprecated)
-    KeyManager<P> result = (KeyManager<P>) getUntypedKeyManager(typeUrl);
-    return result;
-  }
-
-  /**
-   * Returns a {@link KeyManager} for the given {@code typeUrl} (if found).
-   *
-   * @deprecated KeyManagers should not be used directly. Use {@code newKeyData} or {@code
-   *     getPrimitive} instead.
-   */
-  @Deprecated
   public static <P> KeyManager<P> getKeyManager(String typeUrl, Class<P> primitiveClass)
       throws GeneralSecurityException {
     return keyManagerRegistry.get().getKeyManager(typeUrl, primitiveClass);
@@ -474,7 +460,7 @@ public final class Registry {
   @Deprecated
   public static synchronized MessageLite newKey(String typeUrl, MessageLite format)
       throws GeneralSecurityException {
-    KeyManager<?> manager = getKeyManager(typeUrl);
+    KeyManager<?> manager = getUntypedKeyManager(typeUrl);
     if (keyManagerRegistry.get().isNewKeyAllowed(typeUrl)) {
       return manager.newKey(format);
     } else {
@@ -492,7 +478,7 @@ public final class Registry {
    */
   public static KeyData getPublicKeyData(String typeUrl, ByteString serializedPrivateKey)
       throws GeneralSecurityException {
-    KeyManager<?> manager = getKeyManager(typeUrl);
+    KeyManager<?> manager = getUntypedKeyManager(typeUrl);
     if (!(manager instanceof PrivateKeyManager)) {
       throw new GeneralSecurityException(
           "manager for key type " + typeUrl + " is not a PrivateKeyManager");
