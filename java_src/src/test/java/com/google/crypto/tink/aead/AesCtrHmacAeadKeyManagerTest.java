@@ -17,6 +17,7 @@
 package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
@@ -184,6 +185,99 @@ public class AesCtrHmacAeadKeyManagerTest {
     byte[] associatedData = Random.randBytes(20);
     assertThat(directAead.decrypt(managerAead.encrypt(plaintext, associatedData), associatedData))
         .isEqualTo(plaintext);
+  }
+
+  @Test
+  public void getPrimtive_encryptDecryptTink_worksAsDirectlyCreated() throws Exception {
+    AesCtrHmacAeadParameters parameters =
+        AesCtrHmacAeadParameters.builder()
+            .setAesKeySizeBytes(32)
+            .setHmacKeySizeBytes(32)
+            .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
+            .setTagSizeBytes(17)
+            .setIvSizeBytes(14)
+            .setVariant(AesCtrHmacAeadParameters.Variant.TINK)
+            .build();
+    com.google.crypto.tink.aead.AesCtrHmacAeadKey key =
+        com.google.crypto.tink.aead.AesCtrHmacAeadKey.builder()
+            .setAesKeyBytes(SecretBytes.randomBytes(32))
+            .setHmacKeyBytes(SecretBytes.randomBytes(32))
+            .setParameters(parameters)
+            .setIdRequirement(42)
+            .build();
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder().addEntry(KeysetHandle.importKey(key).makePrimary()).build();
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] aad = "aad".getBytes(UTF_8);
+
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
+    Aead directAead = EncryptThenAuthenticate.create(key);
+
+    assertThat(directAead.decrypt(aead.encrypt(plaintext, aad), aad)).isEqualTo(plaintext);
+    assertThat(aead.decrypt(directAead.encrypt(plaintext, aad), aad)).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void getPrimitive_encryptDecryptCrunchy_works() throws Exception {
+    AesCtrHmacAeadParameters parameters =
+        AesCtrHmacAeadParameters.builder()
+            .setAesKeySizeBytes(16)
+            .setHmacKeySizeBytes(32)
+            .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
+            .setTagSizeBytes(18)
+            .setIvSizeBytes(13)
+            .setVariant(AesCtrHmacAeadParameters.Variant.CRUNCHY)
+            .build();
+    com.google.crypto.tink.aead.AesCtrHmacAeadKey key =
+        com.google.crypto.tink.aead.AesCtrHmacAeadKey.builder()
+            .setAesKeyBytes(SecretBytes.randomBytes(16))
+            .setHmacKeyBytes(SecretBytes.randomBytes(32))
+            .setParameters(parameters)
+            .setIdRequirement(42)
+            .build();
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder().addEntry(KeysetHandle.importKey(key).makePrimary()).build();
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] aad = "aad".getBytes(UTF_8);
+
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
+
+    assertThat(aead.decrypt(aead.encrypt(plaintext, aad), aad)).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void getPrimitive_bitFlipCiphertext_throws() throws Exception {
+    AesCtrHmacAeadParameters parameters =
+        AesCtrHmacAeadParameters.builder()
+            .setAesKeySizeBytes(32)
+            .setHmacKeySizeBytes(16)
+            .setHashType(AesCtrHmacAeadParameters.HashType.SHA512)
+            .setTagSizeBytes(16)
+            .setIvSizeBytes(12)
+            .setVariant(AesCtrHmacAeadParameters.Variant.CRUNCHY)
+            .build();
+    com.google.crypto.tink.aead.AesCtrHmacAeadKey key =
+        com.google.crypto.tink.aead.AesCtrHmacAeadKey.builder()
+            .setAesKeyBytes(SecretBytes.randomBytes(32))
+            .setHmacKeyBytes(SecretBytes.randomBytes(16))
+            .setParameters(parameters)
+            .setIdRequirement(42)
+            .build();
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder().addEntry(KeysetHandle.importKey(key).makePrimary()).build();
+    byte[] plaintext = Random.randBytes(1001);
+    byte[] aad = Random.randBytes(13);
+
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
+    byte[] ciphertext = aead.encrypt(plaintext, aad);
+
+    for (int i = 0; i < ciphertext.length; i++) {
+      for (int j = 0; j < 8; j++) {
+        byte[] c1 = Arrays.copyOf(ciphertext, ciphertext.length);
+        c1[i] = (byte) (c1[i] ^ (1 << j));
+        assertThrows(GeneralSecurityException.class, () -> aead.decrypt(c1, aad));
+      }
+    }
   }
 
   @Test

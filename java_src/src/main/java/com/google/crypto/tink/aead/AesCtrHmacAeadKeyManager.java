@@ -29,6 +29,8 @@ import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.mac.HmacKeyManager;
@@ -55,6 +57,13 @@ import javax.annotation.Nullable;
  * {@link EncryptThenAuthenticate}.
  */
 public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAeadKey> {
+  private static final PrimitiveConstructor<com.google.crypto.tink.aead.AesCtrHmacAeadKey, Aead>
+      AES_CTR_HMAC_AEAD_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              EncryptThenAuthenticate::create,
+              com.google.crypto.tink.aead.AesCtrHmacAeadKey.class,
+              Aead.class);
+
   AesCtrHmacAeadKeyManager() {
     super(
         AesCtrHmacAeadKey.class,
@@ -193,6 +202,8 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesCtrHmacAeadKeyManager(), newKeyAllowed);
     AesCtrHmacAeadProtoSerialization.register();
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(AES_CTR_HMAC_AEAD_PRIMITIVE_CONSTRUCTOR);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
     MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, AesCtrHmacAeadParameters.class);
   }
