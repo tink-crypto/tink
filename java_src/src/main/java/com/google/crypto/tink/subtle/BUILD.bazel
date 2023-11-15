@@ -135,8 +135,12 @@ java_library(
         ":ind_cpa_cipher",
         ":prf_hmac_jce",
         ":prf_mac",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
         "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
         "//src/main/java/com/google/crypto/tink:mac",
+        "//src/main/java/com/google/crypto/tink/aead:aes_ctr_hmac_aead_key",
+        "//src/main/java/com/google/crypto/tink/internal:util",
     ],
 )
 
@@ -882,8 +886,12 @@ android_library(
         ":ind_cpa_cipher-android",
         ":prf_hmac_jce-android",
         ":prf_mac-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
         "//src/main/java/com/google/crypto/tink:aead-android",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access-android",
         "//src/main/java/com/google/crypto/tink:mac-android",
+        "//src/main/java/com/google/crypto/tink/aead:aes_ctr_hmac_aead_key-android",
+        "//src/main/java/com/google/crypto/tink/internal:util-android",
     ],
 )
 

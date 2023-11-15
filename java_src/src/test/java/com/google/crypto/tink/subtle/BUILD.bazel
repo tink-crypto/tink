@@ -312,9 +312,15 @@ java_test(
     srcs = ["EncryptThenAuthenticateTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:crypto_format",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink/aead:aes_ctr_hmac_aead_key",
+        "//src/main/java/com/google/crypto/tink/aead:aes_ctr_hmac_aead_parameters",
         "//src/main/java/com/google/crypto/tink/subtle:encrypt_then_authenticate",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
         "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
 )

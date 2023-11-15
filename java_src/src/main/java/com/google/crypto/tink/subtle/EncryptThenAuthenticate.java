@@ -16,8 +16,12 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.aead.AesCtrHmacAeadKey;
+import com.google.crypto.tink.internal.Util;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -34,18 +38,50 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * @since 1.0.0
  */
+@AccessesPartialKey
 public final class EncryptThenAuthenticate implements Aead {
   private final IndCpaCipher cipher;
   private final Mac mac;
   private final int macLength;
+  private final byte[] outputPrefix;
 
   public EncryptThenAuthenticate(final IndCpaCipher cipher, final Mac mac, int macLength) {
+    this(cipher, mac, macLength, new byte[] {});
+  }
+
+  private EncryptThenAuthenticate(
+      IndCpaCipher cipher, Mac mac, int macLength, byte[] outputPrefix) {
     this.cipher = cipher;
     this.mac = mac;
     this.macLength = macLength;
+    this.outputPrefix = outputPrefix;
   }
 
-  /** Returns a new EncryptThenAuthenticate instance using AES-CTR and HMAC. */
+  /**
+   * Create an AES CTR HMAC instance. This instance is *full*, meaning that, if the key is of the
+   * type TINK or CRUNCHY, the ciphertexts created by this instance will be prefixed with
+   * `outputPrefix` containing some important Tink metadata.
+   */
+  public static Aead create(AesCtrHmacAeadKey key) throws GeneralSecurityException {
+    return new EncryptThenAuthenticate(
+        new AesCtrJceCipher(
+            key.getAesKeyBytes().toByteArray(InsecureSecretKeyAccess.get()),
+            key.getParameters().getIvSizeBytes()),
+        new PrfMac(
+            new PrfHmacJce(
+                "HMAC" + key.getParameters().getHashType(),
+                new SecretKeySpec(
+                    key.getHmacKeyBytes().toByteArray(InsecureSecretKeyAccess.get()), "HMAC")),
+            key.getParameters().getTagSizeBytes()),
+        key.getParameters().getTagSizeBytes(),
+        key.getOutputPrefix().toByteArray());
+  }
+
+  /**
+   * Returns a new {@code EncryptThenAuthenticate} instance using AES-CTR and HMAC. This is an older
+   * method that doesn't use the new Tink keys API, thus the returned instance is not a full
+   * primitive. This means that `outputPrefix` is always empty even for TINK/CRUNCHY type keys.
+   */
   public static Aead newAesCtrHmac(
       final byte[] aesCtrKey, int ivSize, String hmacAlgorithm, final byte[] hmacKey, int tagSize)
       throws GeneralSecurityException {
@@ -62,7 +98,7 @@ public final class EncryptThenAuthenticate implements Aead {
    *
    * <p>The plaintext is encrypted with an {@code IndCpaCipher}, then MAC is computed over (ad ||
    * ciphertext || t) where t is ad's length in bits represented as 64-bit bigendian unsigned
-   * integer. The final ciphertext format is (ind-cpa ciphertext || mac).
+   * integer. The final ciphertext format is (output prefix || ind-cpa ciphertext || mac).
    *
    * @return resulting ciphertext.
    */
@@ -77,7 +113,7 @@ public final class EncryptThenAuthenticate implements Aead {
     byte[] adLengthInBits =
         Arrays.copyOf(ByteBuffer.allocate(8).putLong(8L * ad.length).array(), 8);
     byte[] macValue = mac.computeMac(Bytes.concat(ad, ciphertext, adLengthInBits));
-    return Bytes.concat(ciphertext, macValue);
+    return Bytes.concat(outputPrefix, ciphertext, macValue);
   }
 
   /**
@@ -85,18 +121,23 @@ public final class EncryptThenAuthenticate implements Aead {
    * verifies the authenticity and integrity of associated data (ad), but there are no guarantees
    * with respect to secrecy of that data.
    *
-   * <p>The ciphertext format is ciphertext || mac. The MAC is verified against (ad || ciphertext||
-   * t) where t is ad's length in bits represented as 64-bit bigendian unsigned integer.
+   * <p>The ciphertext format is output prefix || ciphertext || mac. If present, the correctness of
+   * output prefix is verified. The MAC is verified against (ad || ciphertext || t) where t is ad's
+   * length in bits represented as 64-bit big-endian unsigned integer.
    *
    * @return resulting plaintext.
    */
   @Override
   public byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
       throws GeneralSecurityException {
-    if (ciphertext.length < macLength) {
-      throw new GeneralSecurityException("ciphertext too short");
+    if (ciphertext.length < macLength + outputPrefix.length) {
+      throw new GeneralSecurityException("Decryption failed (ciphertext too short).");
     }
-    byte[] rawCiphertext = Arrays.copyOfRange(ciphertext, 0, ciphertext.length - macLength);
+    if (!Util.isPrefix(outputPrefix, ciphertext)) {
+      throw new GeneralSecurityException("Decryption failed (OutputPrefix mismatch).");
+    }
+    byte[] rawCiphertext =
+        Arrays.copyOfRange(ciphertext, outputPrefix.length, ciphertext.length - macLength);
     byte[] macValue =
         Arrays.copyOfRange(ciphertext, ciphertext.length - macLength, ciphertext.length);
     byte[] ad = associatedData;
