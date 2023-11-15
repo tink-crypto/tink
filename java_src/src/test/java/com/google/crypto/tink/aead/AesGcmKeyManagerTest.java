@@ -492,4 +492,31 @@ public class AesGcmKeyManagerTest {
             .build();
     assertTrue(key.equalsKey(expectedKey));
   }
+
+  @Test
+  public void getPrimitiveFromKeysetHandle() throws Exception {
+    AesGcmParameters parameters =
+        AesGcmParameters.builder()
+            .setIvSizeBytes(12)
+            .setTagSizeBytes(16)
+            .setKeySizeBytes(16)
+            .setVariant(AesGcmParameters.Variant.TINK)
+            .build();
+    com.google.crypto.tink.aead.AesGcmKey key =
+        com.google.crypto.tink.aead.AesGcmKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(SecretBytes.randomBytes(16))
+            .setIdRequirement(31)
+            .build();
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder().addEntry(KeysetHandle.importKey(key).makePrimary()).build();
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] aad = "aad".getBytes(UTF_8);
+
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
+    Aead directAead = AesGcmJce.create(key);
+
+    Object unused = directAead.decrypt(aead.encrypt(plaintext, aad), aad);
+    unused = aead.decrypt(directAead.encrypt(plaintext, aad), aad);
+  }
 }

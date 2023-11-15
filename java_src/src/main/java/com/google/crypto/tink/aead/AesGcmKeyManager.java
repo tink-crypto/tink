@@ -28,6 +28,8 @@ import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.proto.AesGcmKey;
@@ -51,6 +53,11 @@ import javax.annotation.Nullable;
  * AesGcmJce}.
  */
 public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
+  private static final PrimitiveConstructor<com.google.crypto.tink.aead.AesGcmKey, Aead>
+      AES_GCM_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              AesGcmJce::create, com.google.crypto.tink.aead.AesGcmKey.class, Aead.class);
+
   AesGcmKeyManager() {
     super(
         AesGcmKey.class,
@@ -156,6 +163,8 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesGcmKeyManager(), newKeyAllowed);
     AesGcmProtoSerialization.register();
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(AES_GCM_PRIMITIVE_CONSTRUCTOR);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
     MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, AesGcmParameters.class);
   }
