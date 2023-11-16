@@ -37,10 +37,12 @@ import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
 import com.google.crypto.tink.proto.AesCtrKey;
+import com.google.crypto.tink.proto.AesCtrParams;
 import com.google.crypto.tink.proto.HmacKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.subtle.AesCtrJceCipher;
 import com.google.crypto.tink.subtle.EncryptThenAuthenticate;
-import com.google.crypto.tink.subtle.IndCpaCipher;
+import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
@@ -64,6 +66,15 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
               com.google.crypto.tink.aead.AesCtrHmacAeadKey.class,
               Aead.class);
 
+  // In counter mode each message is encrypted with an initialization vector (IV) that must be
+  // unique. If one single IV is ever used to encrypt two or more messages, the confidentiality of
+  // these messages might be lost. This cipher uses a randomly generated IV for each message. The
+  // birthday paradox says that if one encrypts 2^k messages, the probability that the random IV
+  // will repeat is roughly 2^{2k - t}, where t is the size in bits of the IV. Thus with 96-bit
+  // (12-byte) IV, if one encrypts 2^32 messages the probability of IV collision is less than
+  // 2^-33 (i.e., less than one in eight billion).
+  private static final int MIN_AES_CTR_IV_SIZE_IN_BYTES = 12;
+
   AesCtrHmacAeadKeyManager() {
     super(
         AesCtrHmacAeadKey.class,
@@ -71,7 +82,9 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
           @Override
           public Aead getPrimitive(AesCtrHmacAeadKey key) throws GeneralSecurityException {
             return new EncryptThenAuthenticate(
-                new AesCtrKeyManager().getPrimitive(key.getAesCtrKey(), IndCpaCipher.class),
+                new AesCtrJceCipher(
+                    key.getAesCtrKey().getKeyValue().toByteArray(),
+                    key.getAesCtrKey().getParams().getIvSize()),
                 new HmacKeyManager().getPrimitive(key.getHmacKey(), Mac.class),
                 key.getHmacKey().getParams().getTagSize());
           }
@@ -90,6 +103,10 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
     return 0;
   }
 
+  private int getAesCtrVersion() {
+    return 0;
+  }
+
   @Override
   public KeyMaterialType keyMaterialType() {
     return KeyMaterialType.SYMMETRIC;
@@ -97,8 +114,19 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
 
   @Override
   public void validateKey(AesCtrHmacAeadKey key) throws GeneralSecurityException {
+    // Validate overall.
     Validators.validateVersion(key.getVersion(), getVersion());
-    new AesCtrKeyManager().validateKey(key.getAesCtrKey());
+
+    // Validate AesCtrKey.
+    AesCtrKey aesCtrKey = key.getAesCtrKey();
+    Validators.validateVersion(aesCtrKey.getVersion(), getAesCtrVersion());
+    Validators.validateAesKeySize(aesCtrKey.getKeyValue().size());
+    AesCtrParams aesCtrParams = aesCtrKey.getParams();
+    if (aesCtrParams.getIvSize() < MIN_AES_CTR_IV_SIZE_IN_BYTES || aesCtrParams.getIvSize() > 16) {
+      throw new GeneralSecurityException("invalid AES STR IV size");
+    }
+
+    // Validate HmacKey.
     new HmacKeyManager().validateKey(key.getHmacKey());
   }
 
@@ -114,7 +142,14 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
       @Override
       public void validateKeyFormat(AesCtrHmacAeadKeyFormat format)
           throws GeneralSecurityException {
-        new AesCtrKeyManager().keyFactory().validateKeyFormat(format.getAesCtrKeyFormat());
+        // Validate AesCtrKeyFormat.
+        Validators.validateAesKeySize(format.getAesCtrKeyFormat().getKeySize());
+        AesCtrParams aesCtrParams = format.getAesCtrKeyFormat().getParams();
+        if (aesCtrParams.getIvSize() < MIN_AES_CTR_IV_SIZE_IN_BYTES
+            || aesCtrParams.getIvSize() > 16) {
+          throw new GeneralSecurityException("invalid AES STR IV size");
+        }
+
         new HmacKeyManager().keyFactory().validateKeyFormat(format.getHmacKeyFormat());
         Validators.validateAesKeySize(format.getAesCtrKeyFormat().getKeySize());
       }
@@ -130,7 +165,12 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
       public AesCtrHmacAeadKey createKey(AesCtrHmacAeadKeyFormat format)
           throws GeneralSecurityException {
         AesCtrKey aesCtrKey =
-            new AesCtrKeyManager().keyFactory().createKey(format.getAesCtrKeyFormat());
+            AesCtrKey.newBuilder()
+                .setParams(format.getAesCtrKeyFormat().getParams())
+                .setKeyValue(
+                    ByteString.copyFrom(Random.randBytes(format.getAesCtrKeyFormat().getKeySize())))
+                .setVersion(getVersion())
+                .build();
         HmacKey hmacKey = new HmacKeyManager().keyFactory().createKey(format.getHmacKeyFormat());
         return AesCtrHmacAeadKey.newBuilder()
             .setAesCtrKey(aesCtrKey)
