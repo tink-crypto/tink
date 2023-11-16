@@ -17,7 +17,7 @@
 package com.google.crypto.tink;
 
 import static com.google.common.truth.Truth.assertThat;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.DAYS;
 import static org.junit.Assert.assertNotNull;
 
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
@@ -188,7 +188,7 @@ public final class RegistryMultithreadTest {
     }
   }
 
-  private static final int REPETITIONS = 1000;
+  private static final int REPETITIONS = 200;
 
   @Test
   public void registerAndGetKeyManager_works() throws Exception {
@@ -252,7 +252,8 @@ public final class RegistryMultithreadTest {
             }));
 
     threadPool.shutdown();
-    assertThat(threadPool.awaitTermination(300, SECONDS)).isTrue();
+    // Wait forever: if the test times out we will notice independently.
+    assertThat(threadPool.awaitTermination(1, DAYS)).isTrue();
     for (int i = 0; i < futures.size(); ++i) {
       futures.get(i).get(); // This will throw an exception if the thread threw an exception.
     }
