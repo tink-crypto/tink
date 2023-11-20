@@ -210,6 +210,8 @@ func genInvalidCMACKeys() []proto.Message {
 	badVersionKey.Version++
 	shortKey := testutil.NewAESCMACKey(16)
 	shortKey.KeyValue = []byte{1, 1}
+	nilParams := testutil.NewAESCMACKey(16)
+	nilParams.Params = nil
 	return []proto.Message{
 		// not a AESCMACKey
 		testutil.NewAESCMACParams(16),
@@ -221,12 +223,16 @@ func genInvalidCMACKeys() []proto.Message {
 		testutil.NewAESCMACKey(1),
 		// key too short
 		shortKey,
+		// params field is unset
+		nilParams,
 	}
 }
 
 func genInvalidCMACKeyFormats() []proto.Message {
 	shortKeyFormat := testutil.NewAESCMACKeyFormat(16)
 	shortKeyFormat.KeySize = 1
+	nilParams := testutil.NewAESCMACKeyFormat(16)
+	nilParams.Params = nil
 	return []proto.Message{
 		// not a AESCMACKeyFormat
 		testutil.NewAESCMACParams(16),
@@ -236,6 +242,8 @@ func genInvalidCMACKeyFormats() []proto.Message {
 		testutil.NewAESCMACKeyFormat(1),
 		// key too short
 		shortKeyFormat,
+		// params field is unset
+		nilParams,
 	}
 }
 

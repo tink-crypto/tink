@@ -424,6 +424,8 @@ func genInvalidHMACKeys() []proto.Message {
 	badVersionKey.Version++
 	shortKey := testutil.NewHMACKey(commonpb.HashType_SHA256, 32)
 	shortKey.KeyValue = []byte{1, 1}
+	nilParams := testutil.NewHMACKey(commonpb.HashType_SHA256, 32)
+	nilParams.Params = nil
 	return []proto.Message{
 		// not a HMACKey
 		testutil.NewHMACParams(commonpb.HashType_SHA256, 32),
@@ -439,12 +441,16 @@ func genInvalidHMACKeys() []proto.Message {
 		shortKey,
 		// unknown hash type
 		testutil.NewHMACKey(commonpb.HashType_UNKNOWN_HASH, 32),
+		// params field is unset
+		nilParams,
 	}
 }
 
 func genInvalidHMACKeyFormats() []proto.Message {
 	shortKeyFormat := testutil.NewHMACKeyFormat(commonpb.HashType_SHA256, 32)
 	shortKeyFormat.KeySize = 1
+	nilParams := testutil.NewHMACKeyFormat(commonpb.HashType_SHA256, 32)
+	nilParams.Params = nil
 	return []proto.Message{
 		// not a HMACKeyFormat
 		testutil.NewHMACParams(commonpb.HashType_SHA256, 32),
@@ -458,6 +464,8 @@ func genInvalidHMACKeyFormats() []proto.Message {
 		shortKeyFormat,
 		// unknown hash type
 		testutil.NewHMACKeyFormat(commonpb.HashType_UNKNOWN_HASH, 32),
+		// params field is unset
+		nilParams,
 	}
 }
 
