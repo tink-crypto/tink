@@ -18,7 +18,6 @@ package aead_test
 
 import (
 	"bytes"
-	"log"
 	"testing"
 
 	"github.com/google/tink/go/aead"
@@ -30,11 +29,11 @@ func TestKMSEnvelopeWorksWithTinkKeyTemplatesAsDekTemplate(t *testing.T) {
 	keyURI := "fake-kms://CM2b3_MDElQKSAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRvLnRpbmsuQWVzR2NtS2V5EhIaEIK75t5L-adlUwVhWvRuWUwYARABGM2b3_MDIAE"
 	client, err := fakekms.NewClient(keyURI)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 	kekAEAD, err := client.GetAEAD(keyURI)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 	plaintext := []byte("plaintext")
 	associatedData := []byte("associatedData")
@@ -127,11 +126,11 @@ func TestKMSEnvelopeShortCiphertext(t *testing.T) {
 	keyURI := "fake-kms://CM2b3_MDElQKSAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRvLnRpbmsuQWVzR2NtS2V5EhIaEIK75t5L-adlUwVhWvRuWUwYARABGM2b3_MDIAE"
 	client, err := fakekms.NewClient(keyURI)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 	kekAEAD, err := client.GetAEAD(keyURI)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 	a := aead.NewKMSEnvelopeAEAD2(aead.AES256GCMKeyTemplate(), kekAEAD)
 	if _, err = a.Decrypt([]byte{1}, nil); err == nil {

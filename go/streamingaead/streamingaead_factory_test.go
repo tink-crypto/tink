@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"log"
 	"strings"
 	"testing"
 
@@ -46,7 +45,7 @@ func TestFactoryMultipleKeys(t *testing.T) {
 
 	keysetHandle, err := testkeyset.NewHandle(keyset)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	a, err := streamingaead.New(keysetHandle)
