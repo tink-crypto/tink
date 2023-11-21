@@ -28,6 +28,7 @@
 #include "tink/signature/rsa_ssa_pkcs1_proto_serialization.h"
 #include "tink/signature/rsa_ssa_pkcs1_sign_key_manager.h"
 #include "tink/signature/rsa_ssa_pkcs1_verify_key_manager.h"
+#include "tink/signature/rsa_ssa_pss_proto_serialization.h"
 #include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
 #include "tink/util/status.h"
@@ -59,6 +60,9 @@ util::Status SignatureConfig::Register() {
   status = Registry::RegisterAsymmetricKeyManagers(
       absl::make_unique<RsaSsaPssSignKeyManager>(),
       absl::make_unique<RsaSsaPssVerifyKeyManager>(), true);
+  if (!status.ok()) return status;
+
+  status = RegisterRsaSsaPssProtoSerialization();
   if (!status.ok()) return status;
 
   // RSA SSA PKCS1

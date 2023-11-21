@@ -52,6 +52,9 @@
 #include "tink/signature/rsa_ssa_pkcs1_parameters.h"
 #include "tink/signature/rsa_ssa_pkcs1_private_key.h"
 #include "tink/signature/rsa_ssa_pkcs1_public_key.h"
+#include "tink/signature/rsa_ssa_pss_parameters.h"
+#include "tink/signature/rsa_ssa_pss_private_key.h"
+#include "tink/signature/rsa_ssa_pss_public_key.h"
 #include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
 #include "tink/signature/signature_key_templates.h"
@@ -456,6 +459,217 @@ TEST_F(SignatureConfigTest, RsaSsaPkcs1ProtoPrivateKeySerializationRegistered) {
 
   util::StatusOr<RsaSsaPkcs1PrivateKey> private_key =
       RsaSsaPkcs1PrivateKey::Builder()
+          .SetPublicKey(*public_key)
+          .SetPrimeP(RestrictedBigInteger(key_values.p,
+                                          InsecureSecretKeyAccess::Get()))
+          .SetPrimeQ(RestrictedBigInteger(key_values.q,
+                                          InsecureSecretKeyAccess::Get()))
+          .SetPrimeExponentP(RestrictedBigInteger(
+              key_values.dp, InsecureSecretKeyAccess::Get()))
+          .SetPrimeExponentQ(RestrictedBigInteger(
+              key_values.dq, InsecureSecretKeyAccess::Get()))
+          .SetPrivateExponent(RestrictedBigInteger(
+              key_values.d, InsecureSecretKeyAccess::Get()))
+          .SetCrtCoefficient(RestrictedBigInteger(
+              key_values.q_inv, InsecureSecretKeyAccess::Get()))
+          .Build(GetPartialKeyAccess());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialized_key =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeKey<internal::ProtoKeySerialization>(
+              *private_key, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(serialized_key.status(), StatusIs(absl::StatusCode::kNotFound));
+
+  ASSERT_THAT(SignatureConfig::Register(), IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> parsed_key2 =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *proto_key_serialization, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(parsed_key2, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialized_key2 =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeKey<internal::ProtoKeySerialization>(
+              *private_key, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(serialized_key2, IsOk());
+}
+
+TEST_F(SignatureConfigTest, RsaSsaPssProtoParamsSerializationRegistered) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
+    GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
+                    "not available";
+  }
+
+  util::StatusOr<internal::ProtoParametersSerialization>
+      proto_params_serialization =
+          internal::ProtoParametersSerialization::Create(
+              SignatureKeyTemplates::RsaSsaPss3072Sha256Sha256F4());
+  ASSERT_THAT(proto_params_serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Parameters>> parsed_params =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseParameters(
+          *proto_params_serialization);
+  ASSERT_THAT(parsed_params.status(), StatusIs(absl::StatusCode::kNotFound));
+
+  util::StatusOr<RsaSsaPssParameters> params =
+      RsaSsaPssParameters::Builder()
+          .SetVariant(RsaSsaPssParameters::Variant::kTink)
+          .SetSigHashType(RsaSsaPssParameters::HashType::kSha256)
+          .SetMgf1HashType(RsaSsaPssParameters::HashType::kSha256)
+          .SetSaltLengthInBytes(32)
+          .SetModulusSizeInBits(3072)
+          .Build();
+  ASSERT_THAT(params, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialized_params =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeParameters<internal::ProtoParametersSerialization>(*params);
+  ASSERT_THAT(serialized_params.status(),
+              StatusIs(absl::StatusCode::kNotFound));
+
+  // Register serialization.
+  ASSERT_THAT(SignatureConfig::Register(), IsOk());
+
+  util::StatusOr<std::unique_ptr<Parameters>> parsed_params2 =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseParameters(
+          *proto_params_serialization);
+  ASSERT_THAT(parsed_params2, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialized_params2 =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeParameters<internal::ProtoParametersSerialization>(*params);
+  ASSERT_THAT(serialized_params2, IsOk());
+}
+
+TEST_F(SignatureConfigTest, RsaSsaPssProtoPublicKeySerializationRegistered) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
+    GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
+                    "not available";
+  }
+
+  RsaKeyValues key_values = GenerateRsaKeyValues(/*modulus_size_in_bits=*/2048);
+
+  google::crypto::tink::RsaSsaPssParams params;
+  params.set_sig_hash(HashType::SHA256);
+  params.set_mgf1_hash(HashType::SHA256);
+  params.set_salt_length(32);
+
+  google::crypto::tink::RsaSsaPssPublicKey key_proto;
+  key_proto.set_version(0);
+  key_proto.set_n(key_values.n);
+  key_proto.set_e(key_values.e);
+  *key_proto.mutable_params() = params;
+
+  util::StatusOr<internal::ProtoKeySerialization> proto_key_serialization =
+      internal::ProtoKeySerialization::Create(
+          "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PublicKey",
+          RestrictedData(key_proto.SerializeAsString(),
+                         InsecureSecretKeyAccess::Get()),
+          KeyData::ASYMMETRIC_PUBLIC, OutputPrefixType::TINK,
+          /*id_requirement=*/123);
+  ASSERT_THAT(proto_key_serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> parsed_key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *proto_key_serialization, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(parsed_key.status(), StatusIs(absl::StatusCode::kNotFound));
+
+  util::StatusOr<RsaSsaPssParameters> parameters =
+      RsaSsaPssParameters::Builder()
+          .SetVariant(RsaSsaPssParameters::Variant::kTink)
+          .SetSigHashType(RsaSsaPssParameters::HashType::kSha256)
+          .SetMgf1HashType(RsaSsaPssParameters::HashType::kSha256)
+          .SetSaltLengthInBytes(32)
+          .SetModulusSizeInBits(2048)
+          .Build();
+  ASSERT_THAT(parameters, IsOk());
+
+  util::StatusOr<RsaSsaPssPublicKey> key =
+      RsaSsaPssPublicKey::Create(*parameters, BigInteger(key_values.n),
+                                 /*id_requirement=*/123, GetPartialKeyAccess());
+  ASSERT_THAT(key, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialized_key =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeKey<internal::ProtoKeySerialization>(
+              *key, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(serialized_key.status(), StatusIs(absl::StatusCode::kNotFound));
+
+  // Register serialization.
+  ASSERT_THAT(SignatureConfig::Register(), IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> parsed_key2 =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *proto_key_serialization, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(parsed_key2, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialized_key2 =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeKey<internal::ProtoKeySerialization>(
+              *key, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(serialized_key2, IsOk());
+}
+
+TEST_F(SignatureConfigTest, RsaSsaPssProtoPrivateKeySerializationRegistered) {
+  if (internal::IsFipsModeEnabled() && !internal::IsFipsEnabledInSsl()) {
+    GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
+                    "not available";
+  }
+
+  RsaKeyValues key_values = GenerateRsaKeyValues(/*modulus_size_in_bits=*/2048);
+
+  google::crypto::tink::RsaSsaPssParams params;
+  params.set_sig_hash(HashType::SHA256);
+  params.set_mgf1_hash(HashType::SHA256);
+  params.set_salt_length(32);
+
+  google::crypto::tink::RsaSsaPssPublicKey public_key_proto;
+  public_key_proto.set_version(0);
+  public_key_proto.set_n(key_values.n);
+  public_key_proto.set_e(key_values.e);
+  *public_key_proto.mutable_params() = params;
+
+  google::crypto::tink::RsaSsaPssPrivateKey private_key_proto;
+  private_key_proto.set_version(0);
+  *private_key_proto.mutable_public_key() = public_key_proto;
+  private_key_proto.set_p(key_values.p);
+  private_key_proto.set_q(key_values.q);
+  private_key_proto.set_dp(key_values.dp);
+  private_key_proto.set_dq(key_values.dq);
+  private_key_proto.set_d(key_values.d);
+  private_key_proto.set_crt(key_values.q_inv);
+
+  util::StatusOr<internal::ProtoKeySerialization> proto_key_serialization =
+      internal::ProtoKeySerialization::Create(
+          "type.googleapis.com/google.crypto.tink.RsaSsaPssPrivateKey",
+          RestrictedData(private_key_proto.SerializeAsString(),
+                         InsecureSecretKeyAccess::Get()),
+          KeyData::ASYMMETRIC_PRIVATE, OutputPrefixType::TINK,
+          /*id_requirement=*/123);
+  ASSERT_THAT(proto_key_serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> parsed_key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *proto_key_serialization, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(parsed_key.status(), StatusIs(absl::StatusCode::kNotFound));
+
+  util::StatusOr<RsaSsaPssParameters> parameters =
+      RsaSsaPssParameters::Builder()
+          .SetVariant(RsaSsaPssParameters::Variant::kTink)
+          .SetSigHashType(RsaSsaPssParameters::HashType::kSha256)
+          .SetMgf1HashType(RsaSsaPssParameters::HashType::kSha256)
+          .SetSaltLengthInBytes(32)
+          .SetModulusSizeInBits(2048)
+          .Build();
+  ASSERT_THAT(parameters, IsOk());
+
+  util::StatusOr<RsaSsaPssPublicKey> public_key =
+      RsaSsaPssPublicKey::Create(*parameters, BigInteger(key_values.n),
+                                 /*id_requirement=*/123, GetPartialKeyAccess());
+  ASSERT_THAT(public_key, IsOk());
+
+  util::StatusOr<RsaSsaPssPrivateKey> private_key =
+      RsaSsaPssPrivateKey::Builder()
           .SetPublicKey(*public_key)
           .SetPrimeP(RestrictedBigInteger(key_values.p,
                                           InsecureSecretKeyAccess::Get()))
