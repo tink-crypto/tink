@@ -226,6 +226,7 @@ tink_cc_test(
     tink::core::proto_keyset_format
     tink::core::random_access_stream
     tink::core::streaming_aead
+    tink::config::global_registry
     tink::internal::test_random_access_stream
     tink::subtle::random
     tink::subtle::streaming_aead_test_util

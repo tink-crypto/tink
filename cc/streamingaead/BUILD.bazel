@@ -236,6 +236,7 @@ cc_test(
         "//:proto_keyset_format",
         "//:random_access_stream",
         "//:streaming_aead",
+        "//config:global_registry",
         "//internal:test_random_access_stream",
         "//proto:aes_gcm_hkdf_streaming_cc_proto",
         "//proto:common_cc_proto",
