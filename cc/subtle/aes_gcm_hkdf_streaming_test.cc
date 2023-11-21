@@ -1,4 +1,4 @@
-// Copyright 2019 Google Inc.
+// Copyright 2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,16 +16,22 @@
 
 #include "tink/subtle/aes_gcm_hkdf_streaming.h"
 
+#include <memory>
 #include <sstream>
 #include <string>
 #include <utility>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
+#include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "tink/config/tink_fips.h"
+#include "tink/internal/test_random_access_stream.h"
 #include "tink/output_stream.h"
+#include "tink/random_access_stream.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/streaming_aead_test_util.h"
@@ -42,7 +48,9 @@ namespace subtle {
 namespace {
 
 using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::IsOkAndHolds;
 using ::crypto::tink::test::StatusIs;
+using ::testing::Eq;
 
 TEST(AesGcmHkdfStreamingTest, testBasic) {
   if (IsFipsModeEnabled()) {
@@ -211,6 +219,37 @@ TEST(AesGcmHkdfStreamingTest, testWrongCiphertextSegmentSize) {
                       std::string(result.status().message()));
 }
 
+TEST(AesGcmHkdfStreamingTest, SizeIsUnauthenticated) {
+  if (IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+  AesGcmHkdfStreaming::Params params;
+  params.ikm = Random::GetRandomKeyBytes(16);
+  params.hkdf_hash = SHA1;
+  params.derived_key_size = 16;
+  params.ciphertext_segment_size = 100;
+  params.ciphertext_offset = 0;
+  util::StatusOr<std::unique_ptr<AesGcmHkdfStreaming>> streaming_aead =
+      AesGcmHkdfStreaming::New(std::move(params));
+  ASSERT_THAT(streaming_aead.status(), IsOk());
+
+  std::string associated_data = "some associated data";
+  // The header is 24 = 0x18 bytes for this key and Tink verifies that the
+  // ciphertext starts with 0x18 in the first byte.
+  std::string wrong_ciphertext =
+      absl::StrCat(absl::HexStringToBytes("18"),
+                   "some arbitrary text which does not matter at all but needs "
+                   "to be at least of length 24 bytes");
+  absl::StatusOr<std::unique_ptr<RandomAccessStream>> plaintext_stream =
+      (*streaming_aead)
+          ->NewDecryptingRandomAccessStream(
+              absl::make_unique<internal::TestRandomAccessStream>(
+                  wrong_ciphertext),
+              associated_data);
+  ASSERT_THAT(plaintext_stream.status(), IsOk());
+  // 53 is the length of "wrong_ciphertext" minus the overhead (header + tag).
+  EXPECT_THAT((*plaintext_stream)->size(), IsOkAndHolds(Eq(53)));
+}
 
 // FIPS only mode tests
 TEST(AesGcmHkdfStreamingTest, TestFipsOnly) {
