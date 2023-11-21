@@ -29,6 +29,7 @@ go_test(
     embed = [":hcvault"],
     deps = [
         "//aead",
+        "@com_github_hashicorp_vault_api//:api",
     ],
 )
 

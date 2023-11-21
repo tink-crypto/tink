@@ -122,5 +122,5 @@ func (c *vaultClient) GetAEAD(keyURI string) (tink.AEAD, error) {
 		return nil, errors.New("malformed keyURI")
 	}
 	keyPath := u.EscapedPath()
-	return newHCVaultAEAD(keyPath, c.client)
+	return NewAEAD(keyPath, c.client, WithLegacyContextParamater())
 }

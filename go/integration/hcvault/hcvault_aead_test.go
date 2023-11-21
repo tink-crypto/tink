@@ -27,6 +27,7 @@ import (
 	"strings"
 	"testing"
 
+	vault_api "github.com/hashicorp/vault/api"
 	"github.com/google/tink/go/integration/hcvault"
 )
 
@@ -35,7 +36,114 @@ const (
 	token      = "mytoken"
 )
 
-func TestVaultAEAD_EncryptDecrypt(t *testing.T) {
+func TestVaultNewAEAD_EncryptDecrypt(t *testing.T) {
+	server, _, tlsConfig := newServer(t)
+	defer server.Close()
+
+	client := newVaultAPIClient(t, server.URL, token, tlsConfig)
+
+	aead, err := hcvault.NewAEAD("/transit/keys/key-1", client.Logical())
+	if err != nil {
+		t.Fatalf("hcvault.NewAEAD() err = %v, want nil", err)
+	}
+
+	plaintext := []byte("plaintext")
+	associatedData := []byte("associatedData")
+	ciphertext, err := aead.Encrypt(plaintext, associatedData)
+	if err != nil {
+		t.Fatalf("aead.Encrypt(plaintext, associatedData) err = %v, want nil", err)
+	}
+	gotPlaintext, err := aead.Decrypt(ciphertext, associatedData)
+	if err != nil {
+		t.Fatalf("aead.Decrypt(ciphertext, associatedData) err = %v, want nil", err)
+	}
+	if !bytes.Equal(gotPlaintext, plaintext) {
+		t.Fatalf("aead.Decrypt(ciphertext, associatedData) = %s, want %s", gotPlaintext, plaintext)
+	}
+
+	otherAssociatedData := []byte("otherAssociatedData")
+	_, err = aead.Decrypt(ciphertext, otherAssociatedData)
+	if err == nil {
+		t.Error("aead.Decrypt(ciphertext, otherAssociatedData) err = nil, want error")
+	}
+}
+
+func TestVaultNewAEAD_DecryptWithFixedCiphertext(t *testing.T) {
+	server, _, tlsConfig := newServer(t)
+	defer server.Close()
+
+	client := newVaultAPIClient(t, server.URL, token, tlsConfig)
+
+	aead, err := hcvault.NewAEAD("/transit/keys/key-1", client.Logical())
+	if err != nil {
+		t.Fatalf("hcvault.NewAEAD() err = %v, want nil", err)
+	}
+
+	// associatedData is passed as "context" parameter to vault decrypt.
+	plaintext := []byte("plaintext")
+	associatedData := []byte("associatedData")
+	ciphertext := fakeEncrypt(plaintext, associatedData, nil)
+
+	gotPlaintext, err := aead.Decrypt(ciphertext, associatedData)
+	if err != nil {
+		t.Fatalf("aead.Decrypt(ciphertext, associatedData) err = %v, want nil", err)
+	}
+	if !bytes.Equal(gotPlaintext, plaintext) {
+		t.Fatalf("aead.Decrypt(ciphertext, associatedData) = %s, want %s", gotPlaintext, associatedData)
+	}
+}
+
+func TestVaultNewAEADWithLegacyContextParamater_isCompatible(t *testing.T) {
+	server, uriPrefix, tlsConfig := newServer(t)
+	defer server.Close()
+
+	client := newVaultAPIClient(t, server.URL, token, tlsConfig)
+
+	// Create AEAD with WithLegacyContextParamater.
+	aead1, err := hcvault.NewAEAD("/transit/keys/key-1", client.Logical(), hcvault.WithLegacyContextParamater())
+	if err != nil {
+		t.Fatalf("hcvault.NewAEAD() err = %v, want nil", err)
+	}
+
+	// Create AEAD with hcvault.NewClient and GetAEAD.
+	hcvaultClient, err := hcvault.NewClient(uriPrefix, tlsConfig, token)
+	if err != nil {
+		t.Fatalf("hcvault.NewClient() err = %v, want nil", err)
+	}
+	keyURI := fmt.Sprintf("%s/transit/keys/key-1", uriPrefix)
+	aead2, err := hcvaultClient.GetAEAD(keyURI)
+	if err != nil {
+		t.Fatalf("hcvaultClient.GetAEAD(%q) err = %v, want nil", keyURI, err)
+	}
+
+	plaintext := []byte("plaintext")
+	associatedData := []byte("associatedData")
+	ciphertext2, err := aead2.Encrypt(plaintext, associatedData)
+	if err != nil {
+		t.Fatalf("aead2.Encrypt(plaintext, associatedData) err = %v, want nil", err)
+	}
+	gotPlaintext1, err := aead1.Decrypt(ciphertext2, associatedData)
+	if err != nil {
+		t.Fatalf("aead1.Decrypt(ciphertext, associatedData) err = %v, want nil", err)
+	}
+	if !bytes.Equal(gotPlaintext1, plaintext) {
+		t.Fatalf("aead1.Decrypt(ciphertext2, associatedData) = %s, want %s", gotPlaintext1, plaintext)
+	}
+
+	ciphertext1, err := aead1.Encrypt(plaintext, associatedData)
+	if err != nil {
+		t.Fatalf("aead2.Encrypt(plaintext, associatedData) err = %v, want nil", err)
+	}
+	gotPlaintext2, err := aead2.Decrypt(ciphertext1, associatedData)
+	if err != nil {
+		t.Fatalf("aead2.Decrypt(ciphertext1, associatedData) err = %v, want nil", err)
+	}
+	if !bytes.Equal(gotPlaintext2, plaintext) {
+		t.Fatalf("aead2.Decrypt(ciphertext1, associatedData) = %s, want %s", gotPlaintext2, plaintext)
+	}
+}
+
+func TestVaultClientAEAD_EncryptDecrypt(t *testing.T) {
 	server, uriPrefix, tlsConfig := newServer(t)
 	defer server.Close()
 
@@ -70,7 +178,7 @@ func TestVaultAEAD_EncryptDecrypt(t *testing.T) {
 	}
 }
 
-func TestVaultAEAD_DecryptWithFixedCiphertext(t *testing.T) {
+func TestVaultClientAEAD_DecryptWithFixedCiphertext(t *testing.T) {
 	server, uriPrefix, tlsConfig := newServer(t)
 	defer server.Close()
 
@@ -133,6 +241,24 @@ func TestGetAEADFailWithBadKeyURI(t *testing.T) {
 			}
 		})
 	}
+}
+
+// newVaultAPIClient creates a new vault API client
+func newVaultAPIClient(t *testing.T, url string, token string, tlsConfig *tls.Config) *vault_api.Client {
+	t.Helper()
+	httpClient := vault_api.DefaultConfig().HttpClient
+	transport := httpClient.Transport.(*http.Transport)
+	transport.TLSClientConfig = tlsConfig.Clone()
+	cfg := &vault_api.Config{
+		Address:    url,
+		HttpClient: httpClient,
+	}
+	client, err := vault_api.NewClient(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	client.SetToken(token)
+	return client
 }
 
 type closeFunc func() error

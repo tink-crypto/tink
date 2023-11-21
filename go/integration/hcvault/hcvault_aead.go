@@ -19,6 +19,7 @@ package hcvault
 import (
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/hashicorp/vault/api"
@@ -27,40 +28,82 @@ import (
 
 // vaultAEAD represents a HashiCorp Vault service to a particular URI.
 type vaultAEAD struct {
-	encKeyPath string
-	decKeyPath string
-	client     *api.Logical
+	encKeyPath         string
+	decKeyPath         string
+	client             *api.Logical
+	associatedDataName string
 }
 
 var _ tink.AEAD = (*vaultAEAD)(nil)
 
 const (
-	encryptSegment = "encrypt"
-	decryptSegment = "decrypt"
+	encryptSegment            = "encrypt"
+	decryptSegment            = "decrypt"
+	defaultAssociatedDataName = "associated_data"
+	legacyAssociatedDataName  = "context"
 )
 
-// newHCVaultAEAD returns a new HashiCorp Vault service.
-func newHCVaultAEAD(keyPath string, client *api.Logical) (tink.AEAD, error) {
+// AEADOption is an interface for defining options that are passed to [NewAEAD].
+type AEADOption interface{ set(*vaultAEAD) error }
+
+type option func(*vaultAEAD) error
+
+func (o option) set(a *vaultAEAD) error { return o(a) }
+
+// WithLegacyContextParamater lets the remote AEAD populate the "context" parameter
+// in encrypt and decrypt requests instead of the "associated_data".
+//
+// Using this option makes the AEAD compatible with the instance returned by GetAEAD
+// from the KMSClient returned by NewClient. For new keys, this option should not be used.
+//
+// ## Warning
+//
+// Vault only uses the "context" parameter for keys which have derivation enabled
+// (with "derived=true") and ignores it otherwise. For such keys, the "context"
+// parameter is required to be non-empty.
+//
+// Therefore:
+// - for keys with "derived=false", you should only use empty associated data.
+// - for keys with "derived=true", you should only use non-empty associated data.
+//
+// With Tink's "KMS envelope AEAD", always use a key with "derived=false".
+//
+// For reference, see https://developer.hashicorp.com/vault/api-docs/secret/transit.
+func WithLegacyContextParamater() AEADOption {
+	return option(func(a *vaultAEAD) error {
+		a.associatedDataName = legacyAssociatedDataName
+		return nil
+	})
+}
+
+// NewAEAD returns a new remote AEAD primitive for a HashiCorp Vault service.
+func NewAEAD(keyPath string, client *api.Logical, opts ...AEADOption) (tink.AEAD, error) {
 	encKeyPath, decKeyPath, err := getEndpointPaths(keyPath)
 	if err != nil {
 		return nil, err
 	}
-	return &vaultAEAD{
-		encKeyPath: encKeyPath,
-		decKeyPath: decKeyPath,
-		client:     client,
-	}, nil
+	a := &vaultAEAD{
+		encKeyPath:         encKeyPath,
+		decKeyPath:         decKeyPath,
+		client:             client,
+		associatedDataName: defaultAssociatedDataName,
+	}
+	// Process options, if any.
+	for _, opt := range opts {
+		if err := opt.set(a); err != nil {
+			return nil, fmt.Errorf("failed setting option: %v", err)
+		}
+	}
+	return a, nil
 }
 
 // Encrypt encrypts the plaintext data using a key stored in HashiCorp Vault.
-// associatedData parameter is used as a context for key derivation, more
-// information available https://www.vaultproject.io/docs/secrets/transit/index.html.
 func (a *vaultAEAD) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
 	// Create an encryption request map according to Vault REST API:
 	// https://www.vaultproject.io/api/secret/transit/index.html#encrypt-data.
 	req := map[string]any{
-		"plaintext": base64.StdEncoding.EncodeToString(plaintext),
-		"context":   base64.StdEncoding.EncodeToString(associatedData),
+		"plaintext":          base64.StdEncoding.EncodeToString(plaintext),
+		a.associatedDataName: base64.StdEncoding.EncodeToString(associatedData),
 	}
 	secret, err := a.client.Write(a.encKeyPath, req)
 	if err != nil {
@@ -71,14 +114,12 @@ func (a *vaultAEAD) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
 }
 
 // Decrypt decrypts the ciphertext using a key stored in HashiCorp Vault.
-// associatedData parameter is used as a context for key derivation, more
-// information available https://www.vaultproject.io/docs/secrets/transit/index.html.
 func (a *vaultAEAD) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
 	// Create a decryption request map according to Vault REST API:
 	// https://www.vaultproject.io/api/secret/transit/index.html#decrypt-data.
 	req := map[string]any{
-		"ciphertext": string(ciphertext),
-		"context":    base64.StdEncoding.EncodeToString(associatedData),
+		"ciphertext":         string(ciphertext),
+		a.associatedDataName: base64.StdEncoding.EncodeToString(associatedData),
 	}
 	secret, err := a.client.Write(a.decKeyPath, req)
 	if err != nil {
