@@ -26,6 +26,7 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.aead.AesGcmSivKey;
 import com.google.crypto.tink.aead.AesGcmSivParameters;
+import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
@@ -39,7 +40,9 @@ import java.security.GeneralSecurityException;
 import java.security.Security;
 import java.util.Arrays;
 import java.util.HashSet;
+import javax.annotation.Nullable;
 import org.conscrypt.Conscrypt;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -142,6 +145,9 @@ public class AesGcmSivTest {
 
   @Test
   public void testWycheproofVectors() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
     JsonObject json =
         WycheproofTestUtil.readJson("../wycheproof/testvectors/aes_gcm_siv_test.json");
     int errors = 0;
@@ -294,7 +300,36 @@ public class AesGcmSivTest {
   }
 
   @Test
+  public void testCreateImplementsAesGcmBeforeAndroid30() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeNotNull(apiLevel);
+    Assume.assumeTrue(apiLevel < 30);
+
+    // TODO(b/303637541) This is a bug, it should instead throw an error.
+
+    // Use an AES GCM test vector from AesGcmJceTest.testWithAesGcmKey_noPrefix_works
+    byte[] keyBytes = Hex.decode("5b9604fe14eadba931b0ccf34843dab9");
+    AesGcmSivParameters parameters =
+        AesGcmSivParameters.builder()
+            .setKeySizeBytes(16)
+            .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+            .build();
+    AesGcmSivKey key =
+        AesGcmSivKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(SecretBytes.copyFrom(keyBytes, InsecureSecretKeyAccess.get()))
+            .build();
+    Aead aead = AesGcmSiv.create(key);
+
+    byte[] fixedCiphertext = Hex.decode("c3561ce7f48b8a6b9b8d5ef957d2e512368f7da837bcf2aeebe176e3");
+    assertThat(aead.decrypt(fixedCiphertext, new byte[] {})).isEmpty();
+  }
+
+  @Test
   public void testWithAesGcmSivKey_noPrefix_works() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
     // Test vector draft-irtf-cfrg-gcmsiv-09 in Wycheproof
     byte[] plaintext = Hex.decode("7a806c");
     byte[] associatedData = Hex.decode("46bb91c3c5");
@@ -322,6 +357,9 @@ public class AesGcmSivTest {
 
   @Test
   public void testWithAesGcmSivKey_tinkPrefix_works() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
     // Test vector draft-irtf-cfrg-gcmsiv-09 in Wycheproof
     byte[] plaintext = Hex.decode("7a806c");
     byte[] associatedData = Hex.decode("46bb91c3c5");
@@ -356,6 +394,10 @@ public class AesGcmSivTest {
 
   @Test
   public void testWithAesGcmSivKey_crunchyPrefix_works() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeNotNull(apiLevel);
+    Assume.assumeTrue(apiLevel >= 30);
+
     // Test vector draft-irtf-cfrg-gcmsiv-09 in Wycheproof
     byte[] plaintext = Hex.decode("7a806c");
     byte[] associatedData = Hex.decode("46bb91c3c5");
