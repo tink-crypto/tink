@@ -57,6 +57,7 @@ cc_library(
     srcs = ["global_registry.cc"],
     hdrs = ["global_registry.h"],
     include_prefix = "tink/config",
+    visibility = ["//visibility:public"],
     deps = [
         "//:configuration",
         "//:key_gen_configuration",
