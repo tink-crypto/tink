@@ -173,6 +173,7 @@ tink_cc_library(
     tink::streamingaead::shared_random_access_stream
     absl::memory
     absl::status
+    absl::string_view
     absl::synchronization
     tink::core::primitive_set
     tink::core::random_access_stream
@@ -392,8 +393,10 @@ tink_cc_test(
     tink::internal::test_random_access_stream
     tink::subtle::random
     tink::subtle::test_util
+    tink::util::buffer
     tink::util::ostream_output_stream
     tink::util::status
+    tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
