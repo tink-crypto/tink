@@ -513,6 +513,23 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "aes_eax_parameters",
+    srcs = ["aes_eax_parameters.cc"],
+    hdrs = ["aes_eax_parameters.h"],
+    include_prefix = "tink/aead",
+    deps = [
+        ":aead_parameters",
+        "//:parameters",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -985,6 +1002,18 @@ cc_test(
         "//internal:ssl_util",
         "//util:statusor",
         "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "aes_eax_parameters_test",
+    srcs = ["aes_eax_parameters_test.cc"],
+    deps = [
+        ":aes_eax_parameters",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )

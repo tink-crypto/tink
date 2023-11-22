@@ -480,6 +480,22 @@ tink_cc_library(
     tink::aead::internal::key_gen_config_v0
 )
 
+tink_cc_library(
+  NAME aes_eax_parameters
+  SRCS
+    aes_eax_parameters.cc
+    aes_eax_parameters.h
+  DEPS
+    tink::aead::aead_parameters
+    absl::flat_hash_set
+    absl::status
+    absl::strings
+    absl::optional
+    tink::core::parameters
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -935,6 +951,18 @@ tink_cc_test(
     tink::core::aead
     tink::core::keyset_handle
     tink::internal::ssl_util
+    tink::util::statusor
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME aes_eax_parameters_test
+  SRCS
+    aes_eax_parameters_test.cc
+  DEPS
+    tink::aead::aes_eax_parameters
+    gmock
+    absl::status
     tink::util::statusor
     tink::util::test_matchers
 )
