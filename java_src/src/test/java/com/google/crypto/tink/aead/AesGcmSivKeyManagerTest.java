@@ -31,6 +31,7 @@ import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.aead.subtle.AesGcmSiv;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.SlowInputStream;
+import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.proto.AesGcmSivKey;
 import com.google.crypto.tink.proto.AesGcmSivKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -43,7 +44,9 @@ import java.security.Security;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
+import javax.annotation.Nullable;
 import org.conscrypt.Conscrypt;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
@@ -52,7 +55,7 @@ import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
-/** Test for AesGcmJce and its key manager. */
+/** Test for AesGcmSivKeyManagerTest. */
 @RunWith(Theories.class)
 public class AesGcmSivKeyManagerTest {
   private final AesGcmSivKeyManager manager = new AesGcmSivKeyManager();
@@ -65,8 +68,7 @@ public class AesGcmSivKeyManagerTest {
       Conscrypt.checkAvailability();
       Security.addProvider(Conscrypt.newProvider());
     } catch (Throwable cause) {
-      throw new IllegalStateException(
-          "Cannot test AesGcmSivKeyManager without Conscrypt Provider", cause);
+      // Ignore. This fails on android, in which case Conscrypt is already installed by default.
     }
     AeadConfig.register();
   }
@@ -284,5 +286,62 @@ public class AesGcmSivKeyManagerTest {
             .setKeyBytes(SecretBytes.copyFrom(truncatedKeyMaterial, InsecureSecretKeyAccess.get()))
             .build();
     assertTrue(key.equalsKey(expectedKey));
+  }
+
+  @Test
+  public void testEncryptDecrypt_works() throws Exception {
+    com.google.crypto.tink.aead.AesGcmSivKey aesGcmSivKey =
+        com.google.crypto.tink.aead.AesGcmSivKey.builder()
+            .setParameters(
+                AesGcmSivParameters.builder()
+                    .setKeySizeBytes(16)
+                    .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+                    .build())
+            .setKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("5b9604fe14eadba931b0ccf34843dab9"), InsecureSecretKeyAccess.get()))
+            .build();
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(aesGcmSivKey).withRandomId().makePrimary())
+            .build();
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
+
+    // Encrypt an empty plaintext, and verify that it can be decrypted.
+    byte[] ciphertext = aead.encrypt(new byte[] {1, 2, 3}, new byte[] {4, 5, 6});
+    byte[] decrypted = aead.decrypt(ciphertext, new byte[] {4, 5, 6});
+    assertThat(decrypted).isEqualTo(new byte[] {1, 2, 3});
+    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(ciphertext, new byte[] {4, 5}));
+  }
+
+  @Test
+  public void testGetPrimitiveReturnsAesGcmBeforeAndroid30() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeNotNull(apiLevel);
+    Assume.assumeTrue(apiLevel < 30);
+
+    // TODO(b/303637541) This is a bug, it should instead throw an error.
+
+    // Use an AES GCM test vector from AesGcmJceTest.testWithAesGcmKey_noPrefix_works
+    byte[] keyBytes = Hex.decode("5b9604fe14eadba931b0ccf34843dab9");
+    AesGcmSivParameters parameters =
+        AesGcmSivParameters.builder()
+            .setKeySizeBytes(16)
+            .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+            .build();
+    com.google.crypto.tink.aead.AesGcmSivKey key =
+        com.google.crypto.tink.aead.AesGcmSivKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(SecretBytes.copyFrom(keyBytes, InsecureSecretKeyAccess.get()))
+            .build();
+    // Create an AEAD primitive for aesGcmSivKey.
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).withRandomId().makePrimary())
+            .build();
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
+
+    byte[] fixedCiphertext = Hex.decode("c3561ce7f48b8a6b9b8d5ef957d2e512368f7da837bcf2aeebe176e3");
+    assertThat(aead.decrypt(fixedCiphertext, new byte[] {})).isEmpty();
   }
 }
