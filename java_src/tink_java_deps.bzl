@@ -75,12 +75,12 @@ def tink_java_deps():
     # Transitive Maven artifact resolution and publishing rules for Bazel.
     # -------------------------------------------------------------------------
     if not native.existing_rule("rules_jvm_external"):
-        # Release from 2023-04-13
+        # Release from 2023-06-23
         http_archive(
             name = "rules_jvm_external",
-            strip_prefix = "rules_jvm_external-5.2",
-            url = "https://github.com/bazelbuild/rules_jvm_external/archive/5.2.zip",
-            sha256 = "3824ac95d9edf8465c7a42b7fcb88a5c6b85d2bac0e98b941ba13f235216f313",
+            strip_prefix = "rules_jvm_external-5.3",
+            url = "https://github.com/bazelbuild/rules_jvm_external/archive/5.3.zip",
+            sha256 = "6cc8444b20307113a62b676846c29ff018402fd4c7097fcd6d0a0fd5f2e86429",
         )
 
     # -------------------------------------------------------------------------
