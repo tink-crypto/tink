@@ -16,6 +16,7 @@ go_library(
         "xchacha20poly1305.go",
     ],
     importpath = "github.com/google/tink/go/aead/subtle",
+    visibility = ["//visibility:public"],
     deps = [
         "//internal/aead",
         "//subtle/random",
