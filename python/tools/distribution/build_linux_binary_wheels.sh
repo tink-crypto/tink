@@ -36,13 +36,13 @@ readonly -A PYTHON_VERSIONS
 export TINK_PYTHON_ROOT_PATH="${PWD}"
 export ARCH="$(uname -m)"
 
-# Install Bazelisk 1.17.0.
-readonly BAZELISK_VERSION="1.17.0"
+# Install Bazelisk 1.19.0.
+readonly BAZELISK_VERSION="1.19.0"
 BAZELISK_URL="https://github.com/bazelbuild/bazelisk/releases/download/v${BAZELISK_VERSION}/bazelisk-linux-amd64"
-BAZELISK_SHA256="61699e22abb2a26304edfa1376f65ad24191f94a4ffed68a58d42b6fee01e124"
+BAZELISK_SHA256="d28b588ac0916abd6bf02defb5433f6eddf7cba35ffa808eabb65a44aab226f7"
 if [[ "${ARCH}" == "aarch64" || "${ARCH}" == "arm64" ]]; then
   BAZELISK_URL="https://github.com/bazelbuild/bazelisk/releases/download/v${BAZELISK_VERSION}/bazelisk-linux-arm64"
-  BAZELISK_SHA256="a836972b8a7c34970fb9ecc44768ece172f184c5f7e2972c80033fcdcf8c1870"
+  BAZELISK_SHA256="861a16ba9979613e70bd3d2f9d9ab5e3b59fe79471c5753acdc9c431ab6c9d94"
 fi
 readonly BAZELISK_URL
 readonly BAZELISK_SHA256
@@ -50,14 +50,13 @@ curl -LsS "${BAZELISK_URL}" -o /usr/local/bin/bazelisk
 echo "${BAZELISK_SHA256} /usr/local/bin/bazelisk" | sha256sum -c
 chmod +x /usr/local/bin/bazelisk
 
-# Install protoc 21.12 (python version 4.21.12). Needed for protocol buffer
-# compilation.
-readonly PROTOC_RELEASE_TAG="21.12"
+# Install protoc 25.1. Needed for protocol buffer compilation.
+readonly PROTOC_RELEASE_TAG="25.1"
 PROTOC_URL="https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_RELEASE_TAG}/protoc-${PROTOC_RELEASE_TAG}-linux-x86_64.zip"
-PROTOC_SHA256="3a4c1e5f2516c639d3079b1586e703fc7bcfa2136d58bda24d1d54f949c315e8"
+PROTOC_SHA256="ed8fca87a11c888fed329d6a59c34c7d436165f662a2c875246ddb1ac2b6dd50"
 if [[ "${ARCH}" == "aarch64" || "${ARCH}" == "arm64" ]]; then
   PROTOC_URL="https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_RELEASE_TAG}/protoc-${PROTOC_RELEASE_TAG}-linux-aarch_64.zip"
-  PROTOC_SHA256="2dd17f75d66a682640b136e31848da9fb2eefe68d55303baf8b32617374f6711"
+  PROTOC_SHA256="99975a8c11b83cd65c3e1151ae1714bf959abc0521acb659bf720524276ab0c8"
 fi
 readonly PROTOC_URL
 readonly PROTOC_SHA256
