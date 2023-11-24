@@ -41,9 +41,22 @@ public final class KeyManagerRegistry {
   private static final Logger logger = Logger.getLogger(KeyManagerRegistry.class.getName());
 
   // A map from the TypeUrl to the KeyManagerContainer.
-  private final ConcurrentMap<String, KeyManagerContainer> keyManagerMap;
+  private ConcurrentMap<String, KeyManagerContainer> keyManagerMap;
   // typeUrl -> newKeyAllowed mapping
-  private final ConcurrentMap<String, Boolean> newKeyAllowedMap;
+  private ConcurrentMap<String, Boolean> newKeyAllowedMap;
+
+  private static final KeyManagerRegistry GLOBAL_INSTANCE = new KeyManagerRegistry();
+
+  /** Returns the global instance. */
+  public static KeyManagerRegistry globalInstance() {
+    return GLOBAL_INSTANCE;
+  }
+
+  /** Resets the global instance. Should only be used in tests. Not thread safe. */
+  public static void resetGlobalInstanceTestOnly() {
+    GLOBAL_INSTANCE.keyManagerMap = new ConcurrentHashMap<>();
+    GLOBAL_INSTANCE.newKeyAllowedMap = new ConcurrentHashMap<>();
+  }
 
   public KeyManagerRegistry(KeyManagerRegistry original) {
     keyManagerMap = new ConcurrentHashMap<>(original.keyManagerMap);
@@ -343,5 +356,28 @@ public final class KeyManagerRegistry {
 
   public boolean isEmpty() {
     return keyManagerMap.isEmpty();
+  }
+
+  /**
+   * Restricts Tink to FIPS if this is the global instance.
+   *
+   * <p>We make this a member method (instead of a static one which gets the global instance)
+   * because the call to "useOnlyFips" needs to happen under the same mutex lock which protects the
+   * registerKeyManager methods.
+   */
+  public synchronized void restrictToFipsIfEmptyAndGlobalInstance()
+      throws GeneralSecurityException {
+    if (this != globalInstance()) {
+      throw new GeneralSecurityException("Only the global instance can be restricted to FIPS.");
+    }
+    // If we are already using FIPS mode, do nothing.
+    if (TinkFipsUtil.useOnlyFips()) {
+      return;
+    }
+
+    if (!isEmpty()) {
+      throw new GeneralSecurityException("Could not enable FIPS mode as Registry is not empty.");
+    }
+    TinkFipsUtil.setFipsRestricted();
   }
 }

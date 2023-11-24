@@ -36,7 +36,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
@@ -83,9 +82,6 @@ import javax.annotation.Nullable;
 public final class Registry {
   private static final Logger logger = Logger.getLogger(Registry.class.getName());
 
-  private static final AtomicReference<KeyManagerRegistry> keyManagerRegistry =
-      new AtomicReference<>(new KeyManagerRegistry());
-
   private static final ConcurrentMap<String, Catalogue<?>> catalogueMap =
       new ConcurrentHashMap<>(); //  name -> catalogue mapping
 
@@ -98,7 +94,7 @@ public final class Registry {
    * <p>This method is intended for testing.
    */
   static synchronized void reset() {
-    keyManagerRegistry.set(new KeyManagerRegistry());
+    KeyManagerRegistry.resetGlobalInstanceTestOnly();
     MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
     catalogueMap.clear();
   }
@@ -231,13 +227,10 @@ public final class Registry {
               + " has been disabled. Please file an issue on"
               + " https://github.com/tink-crypto/tink-java");
     }
-    KeyManagerRegistry newKeyManagerRegistry = new KeyManagerRegistry(keyManagerRegistry.get());
-    newKeyManagerRegistry.registerKeyManager(manager, newKeyAllowed);
-
     if (!TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()) {
       throw new GeneralSecurityException("Registering key managers is not supported in FIPS mode");
     }
-    keyManagerRegistry.set(newKeyManagerRegistry);
+    KeyManagerRegistry.globalInstance().registerKeyManager(manager, newKeyAllowed);
   }
 
   /**
@@ -264,9 +257,7 @@ public final class Registry {
     if (manager == null) {
       throw new IllegalArgumentException("key manager must be non-null.");
     }
-    KeyManagerRegistry newKeyManagerRegistry = new KeyManagerRegistry(keyManagerRegistry.get());
-    newKeyManagerRegistry.registerKeyManager(manager, newKeyAllowed);
-    keyManagerRegistry.set(newKeyManagerRegistry);
+    KeyManagerRegistry.globalInstance().registerKeyManager(manager, newKeyAllowed);
   }
 
   /**
@@ -336,11 +327,8 @@ public final class Registry {
     if (privateKeyTypeManager == null || publicKeyTypeManager == null) {
       throw new IllegalArgumentException("given key managers must be non-null.");
     }
-    KeyManagerRegistry newKeyManagerRegistry = new KeyManagerRegistry(keyManagerRegistry.get());
-    newKeyManagerRegistry.registerAsymmetricKeyManagers(
-        privateKeyTypeManager, publicKeyTypeManager, newKeyAllowed);
-
-    keyManagerRegistry.set(newKeyManagerRegistry);
+    KeyManagerRegistry.globalInstance()
+        .registerAsymmetricKeyManagers(privateKeyTypeManager, publicKeyTypeManager, newKeyAllowed);
   }
 
   /**
@@ -369,7 +357,7 @@ public final class Registry {
   @Deprecated
   public static <P> KeyManager<P> getKeyManager(String typeUrl, Class<P> primitiveClass)
       throws GeneralSecurityException {
-    return keyManagerRegistry.get().getKeyManager(typeUrl, primitiveClass);
+    return KeyManagerRegistry.globalInstance().getKeyManager(typeUrl, primitiveClass);
   }
 
   /**
@@ -381,7 +369,7 @@ public final class Registry {
   @Deprecated
   public static KeyManager<?> getUntypedKeyManager(String typeUrl)
       throws GeneralSecurityException {
-    return keyManagerRegistry.get().getUntypedKeyManager(typeUrl);
+    return KeyManagerRegistry.globalInstance().getUntypedKeyManager(typeUrl);
   }
 
   /**
@@ -396,8 +384,9 @@ public final class Registry {
    */
   public static synchronized KeyData newKeyData(
       com.google.crypto.tink.proto.KeyTemplate keyTemplate) throws GeneralSecurityException {
-    KeyManager<?> manager = keyManagerRegistry.get().getUntypedKeyManager(keyTemplate.getTypeUrl());
-    if (keyManagerRegistry.get().isNewKeyAllowed(keyTemplate.getTypeUrl())) {
+    KeyManager<?> manager =
+        KeyManagerRegistry.globalInstance().getUntypedKeyManager(keyTemplate.getTypeUrl());
+    if (KeyManagerRegistry.globalInstance().isNewKeyAllowed(keyTemplate.getTypeUrl())) {
       return manager.newKeyData(keyTemplate.getValue());
     } else {
       throw new GeneralSecurityException(
@@ -440,7 +429,7 @@ public final class Registry {
   public static synchronized MessageLite newKey(
       com.google.crypto.tink.proto.KeyTemplate keyTemplate) throws GeneralSecurityException {
     KeyManager<?> manager = getUntypedKeyManager(keyTemplate.getTypeUrl());
-    if (keyManagerRegistry.get().isNewKeyAllowed(keyTemplate.getTypeUrl())) {
+    if (KeyManagerRegistry.globalInstance().isNewKeyAllowed(keyTemplate.getTypeUrl())) {
       return manager.newKey(keyTemplate.getValue());
     } else {
       throw new GeneralSecurityException(
@@ -461,7 +450,7 @@ public final class Registry {
   public static synchronized MessageLite newKey(String typeUrl, MessageLite format)
       throws GeneralSecurityException {
     KeyManager<?> manager = getUntypedKeyManager(typeUrl);
-    if (keyManagerRegistry.get().isNewKeyAllowed(typeUrl)) {
+    if (KeyManagerRegistry.globalInstance().isNewKeyAllowed(typeUrl)) {
       return manager.newKey(format);
     } else {
       throw new GeneralSecurityException("newKey-operation not permitted for key type " + typeUrl);
@@ -498,7 +487,8 @@ public final class Registry {
   @Deprecated
   public static <P> P getPrimitive(
       String typeUrl, MessageLite key, Class<P> primitiveClass) throws GeneralSecurityException {
-    KeyManager<P> manager = keyManagerRegistry.get().getKeyManager(typeUrl, primitiveClass);
+    KeyManager<P> manager =
+        KeyManagerRegistry.globalInstance().getKeyManager(typeUrl, primitiveClass);
     return manager.getPrimitive(key.toByteString());
   }
 
@@ -513,7 +503,8 @@ public final class Registry {
   public static <P> P getPrimitive(
       String typeUrl, ByteString serializedKey, Class<P> primitiveClass)
       throws GeneralSecurityException {
-    KeyManager<P> manager = keyManagerRegistry.get().getKeyManager(typeUrl, primitiveClass);
+    KeyManager<P> manager =
+        KeyManagerRegistry.globalInstance().getKeyManager(typeUrl, primitiveClass);
     return manager.getPrimitive(serializedKey);
   }
 
@@ -594,15 +585,7 @@ public final class Registry {
    * @throws GeneralSecurityException if any key manager has already been registered.
    */
   public static synchronized void restrictToFipsIfEmpty() throws GeneralSecurityException {
-    // If we are already using FIPS mode, do nothing.
-    if (TinkFipsUtil.useOnlyFips()) {
-      return;
-    }
-    if (keyManagerRegistry.get().isEmpty()) {
-      TinkFipsUtil.setFipsRestricted();
-      return;
-    }
-    throw new GeneralSecurityException("Could not enable FIPS mode as Registry is not empty.");
+    KeyManagerRegistry.globalInstance().restrictToFipsIfEmptyAndGlobalInstance();
   }
 
   private Registry() {}

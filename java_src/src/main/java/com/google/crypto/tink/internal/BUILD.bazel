@@ -876,7 +876,6 @@ android_library(
         ":private_key_type_manager-android",
         "//src/main/java/com/google/crypto/tink:key_manager-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
-        "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
@@ -917,7 +916,6 @@ java_library(
         ":private_key_type_manager",
         "//src/main/java/com/google/crypto/tink:key_manager",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
-        "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
