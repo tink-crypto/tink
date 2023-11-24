@@ -16,8 +16,14 @@
 
 package com.google.crypto.tink.subtle;
 
+import static com.google.crypto.tink.internal.Util.isPrefix;
+
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.HybridDecrypt;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.hybrid.EciesPrivateKey;
 import com.google.crypto.tink.hybrid.subtle.AeadOrDaead;
+import com.google.crypto.tink.internal.BigIntegerEncoding;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.spec.EllipticCurve;
@@ -37,6 +43,7 @@ public final class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
   private final byte[] hkdfSalt;
   private final EllipticCurves.PointFormatType ecPointFormat;
   private final EciesAeadHkdfDemHelper demHelper;
+  private final byte[] outputPrefix;
 
   public EciesAeadHkdfHybridDecrypt(
       final ECPrivateKey recipientPrivateKey,
@@ -45,16 +52,51 @@ public final class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
       EllipticCurves.PointFormatType ecPointFormat,
       EciesAeadHkdfDemHelper demHelper)
       throws GeneralSecurityException {
+    this(recipientPrivateKey, hkdfSalt, hkdfHmacAlgo, ecPointFormat, demHelper, new byte[0]);
+  }
+
+  private EciesAeadHkdfHybridDecrypt(
+      final ECPrivateKey recipientPrivateKey,
+      final byte[] hkdfSalt,
+      String hkdfHmacAlgo,
+      EllipticCurves.PointFormatType ecPointFormat,
+      EciesAeadHkdfDemHelper demHelper,
+      byte[] outputPrefix)
+      throws GeneralSecurityException {
     this.recipientPrivateKey = recipientPrivateKey;
     this.recipientKem = new EciesHkdfRecipientKem(recipientPrivateKey);
     this.hkdfSalt = hkdfSalt;
     this.hkdfHmacAlgo = hkdfHmacAlgo;
     this.ecPointFormat = ecPointFormat;
     this.demHelper = demHelper;
+    this.outputPrefix = outputPrefix;
   }
 
-  @Override
-  public byte[] decrypt(final byte[] ciphertext, final byte[] contextInfo)
+  @AccessesPartialKey
+  public static HybridDecrypt create(EciesPrivateKey key) throws GeneralSecurityException {
+    EllipticCurves.CurveType curveType =
+        EciesAeadHkdfHybridEncrypt.CURVE_TYPE_CONVERTER.toProtoEnum(
+            key.getParameters().getCurveType());
+    ECPrivateKey recipientPrivateKey =
+        EllipticCurves.getEcPrivateKey(
+            curveType,
+            BigIntegerEncoding.toBigEndianBytes(
+                key.getNistPrivateKeyValue().getBigInteger(InsecureSecretKeyAccess.get())));
+    byte[] hkdfSalt = new byte[0];
+    if (key.getParameters().getSalt() != null) {
+      hkdfSalt = key.getParameters().getSalt().toByteArray();
+    }
+    return new EciesAeadHkdfHybridDecrypt(
+        recipientPrivateKey,
+        hkdfSalt,
+        EciesAeadHkdfHybridEncrypt.toHmacAlgo(key.getParameters().getHashType()),
+        EciesAeadHkdfHybridEncrypt.POINT_FORMAT_TYPE_CONVERTER.toProtoEnum(
+            key.getParameters().getNistCurvePointFormat()),
+        EciesAeadHkdfHybridEncrypt.createHelper(key.getParameters().getDemParameters()),
+        key.getOutputPrefix().toByteArray());
+  }
+
+  private byte[] decryptNoPrefix(final byte[] ciphertext, final byte[] contextInfo)
       throws GeneralSecurityException {
     EllipticCurve curve = recipientPrivateKey.getParams().getCurve();
     int headerSize = EllipticCurves.encodingSizeInBytes(curve, ecPointFormat);
@@ -72,5 +114,19 @@ public final class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
             ecPointFormat);
     AeadOrDaead aead = demHelper.getAeadOrDaead(symmetricKey);
     return aead.decrypt(Arrays.copyOfRange(ciphertext, headerSize, ciphertext.length), EMPTY_AAD);
+  }
+
+  @Override
+  public byte[] decrypt(final byte[] ciphertext, final byte[] contextInfo)
+      throws GeneralSecurityException {
+    if (outputPrefix.length == 0) {
+      return decryptNoPrefix(ciphertext, contextInfo);
+    }
+    if (!isPrefix(outputPrefix, ciphertext)) {
+      throw new GeneralSecurityException("Invalid ciphertext (output prefix mismatch)");
+    }
+    byte[] ciphertextNoPrefix =
+        Arrays.copyOfRange(ciphertext, outputPrefix.length, ciphertext.length);
+    return decryptNoPrefix(ciphertextNoPrefix, contextInfo);
   }
 }

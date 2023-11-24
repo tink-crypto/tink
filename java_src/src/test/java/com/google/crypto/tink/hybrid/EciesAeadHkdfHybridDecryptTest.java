@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.hybrid;
 
+import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertThrows;
@@ -26,6 +27,8 @@ import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.TinkProtoParametersFormat;
 import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.daead.PredefinedDeterministicAeadParameters;
+import com.google.crypto.tink.hybrid.internal.testing.EciesAeadHkdfTestUtil;
+import com.google.crypto.tink.hybrid.internal.testing.HybridTestVector;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridDecrypt;
@@ -44,11 +47,14 @@ import java.security.interfaces.ECPublicKey;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Unit tests for {@link EciesAeadHkdfHybridDecrypt}. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public class EciesAeadHkdfHybridDecryptTest {
   @Before
   public void setUp() throws GeneralSecurityException {
@@ -466,5 +472,47 @@ public class EciesAeadHkdfHybridDecryptTest {
       byte[] decrypted = hybridDecrypt.decrypt(vector.ciphertext, vector.context);
       assertArrayEquals(vector.plaintext, decrypted);
     }
-}
+  }
+
+  @DataPoints("testVectors")
+  public static final HybridTestVector[] HYBRID_TEST_VECTORS =
+      EciesAeadHkdfTestUtil.createEciesTestVectors();
+
+  @Theory
+  public void test_decryptCiphertext_works(@FromDataPoints("testVectors") HybridTestVector v)
+      throws Exception {
+    HybridDecrypt hybridDecrypt =
+        EciesAeadHkdfHybridDecrypt.create((EciesPrivateKey) v.getPrivateKey());
+    byte[] plaintext = hybridDecrypt.decrypt(v.getCiphertext(), v.getContextInfo());
+    assertThat(Hex.encode(plaintext)).isEqualTo(Hex.encode(v.getPlaintext()));
+  }
+
+  @Theory
+  public void test_decryptWrongContextInfo_throws(@FromDataPoints("testVectors") HybridTestVector v)
+      throws Exception {
+    HybridDecrypt hybridDecrypt =
+        EciesAeadHkdfHybridDecrypt.create((EciesPrivateKey) v.getPrivateKey());
+    byte[] contextInfo = v.getContextInfo();
+    if (contextInfo.length > 0) {
+      contextInfo[0] ^= 1;
+    } else {
+      contextInfo = new byte[] {1};
+    }
+    // local variables referenced from a lambda expression must be final or effectively final
+    final byte[] contextInfoCopy = Arrays.copyOf(contextInfo, contextInfo.length);
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> hybridDecrypt.decrypt(v.getCiphertext(), contextInfoCopy));
+  }
+
+  @Theory
+  public void test_encryptThenDecryptMessage_works(
+      @FromDataPoints("testVectors") HybridTestVector v) throws Exception {
+    EciesPrivateKey eciesPrivateKey = (EciesPrivateKey) v.getPrivateKey();
+    HybridDecrypt hybridDecrypt = EciesAeadHkdfHybridDecrypt.create(eciesPrivateKey);
+    HybridEncrypt hybridEncrypt = EciesAeadHkdfHybridEncrypt.create(eciesPrivateKey.getPublicKey());
+    byte[] ciphertext = hybridEncrypt.encrypt(v.getPlaintext(), v.getContextInfo());
+    byte[] plaintext = hybridDecrypt.decrypt(ciphertext, v.getContextInfo());
+    assertThat(Hex.encode(plaintext)).isEqualTo(Hex.encode(v.getPlaintext()));
+  }
 }
