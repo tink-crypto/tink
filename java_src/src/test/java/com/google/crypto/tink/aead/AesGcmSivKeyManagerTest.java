@@ -28,6 +28,7 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.aead.AesGcmSivParameters.Variant;
 import com.google.crypto.tink.aead.subtle.AesGcmSiv;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.SlowInputStream;
@@ -404,5 +405,30 @@ public class AesGcmSivKeyManagerTest {
     // Check that backwardsCompatibleAead can decrypt both valid and legacy ciphertexts.
     assertThat(backwardsCompatibleAead.decrypt(validCiphertext, new byte[] {})).isEmpty();
     assertThat(backwardsCompatibleAead.decrypt(legacyCiphertext, new byte[] {})).isEmpty();
+  }
+
+  @Test
+  public void getPrimitiveFromKeysetHandle() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
+    AesGcmSivParameters parameters =
+        AesGcmSivParameters.builder().setKeySizeBytes(16).setVariant(Variant.TINK).build();
+    com.google.crypto.tink.aead.AesGcmSivKey key =
+        com.google.crypto.tink.aead.AesGcmSivKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(SecretBytes.randomBytes(16))
+            .setIdRequirement(42)
+            .build();
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder().addEntry(KeysetHandle.importKey(key).makePrimary()).build();
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] aad = "aad".getBytes(UTF_8);
+
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
+    Aead directAead = AesGcmSiv.create(key);
+
+    assertThat(aead.decrypt(directAead.encrypt(plaintext, aad), aad)).isEqualTo(plaintext);
+    assertThat(directAead.decrypt(aead.encrypt(plaintext, aad), aad)).isEqualTo(plaintext);
   }
 }
