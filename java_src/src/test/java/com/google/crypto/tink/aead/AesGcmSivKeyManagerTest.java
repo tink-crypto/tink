@@ -142,6 +142,9 @@ public class AesGcmSivKeyManagerTest {
 
   @Test
   public void getPrimitive() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
     AesGcmSivKey key = factory.createKey(AesGcmSivKeyFormat.newBuilder().setKeySize(16).build());
     Aead managerAead = manager.getPrimitive(key, Aead.class);
     Aead directAead = new AesGcmSiv(key.getKeyValue().toByteArray());
@@ -154,6 +157,9 @@ public class AesGcmSivKeyManagerTest {
 
   @Test
   public void testCiphertextSize() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
     AesGcmSivKey key = factory.createKey(AesGcmSivKeyFormat.newBuilder().setKeySize(32).build());
     Aead aead = new AesGcmSivKeyManager().getPrimitive(key, Aead.class);
     byte[] plaintext = "plaintext".getBytes(UTF_8);
@@ -290,6 +296,9 @@ public class AesGcmSivKeyManagerTest {
 
   @Test
   public void testEncryptDecrypt_works() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
     com.google.crypto.tink.aead.AesGcmSivKey aesGcmSivKey =
         com.google.crypto.tink.aead.AesGcmSivKey.builder()
             .setParameters(
@@ -315,12 +324,10 @@ public class AesGcmSivKeyManagerTest {
   }
 
   @Test
-  public void testGetPrimitiveReturnsAesGcmBeforeAndroid30() throws Exception {
+  public void testEncryptAndDecryptFailBeforeAndroid30() throws Exception {
     @Nullable Integer apiLevel = Util.getAndroidApiLevel();
     Assume.assumeNotNull(apiLevel);
     Assume.assumeTrue(apiLevel < 30);
-
-    // TODO(b/303637541) This is a bug, it should instead throw an error.
 
     // Use an AES GCM test vector from AesGcmJceTest.testWithAesGcmKey_noPrefix_works
     byte[] keyBytes = Hex.decode("5b9604fe14eadba931b0ccf34843dab9");
@@ -341,7 +348,61 @@ public class AesGcmSivKeyManagerTest {
             .build();
     Aead aead = keysetHandle.getPrimitive(Aead.class);
 
+    assertThrows(GeneralSecurityException.class, () -> aead.encrypt(new byte[] {}, new byte[] {}));
     byte[] fixedCiphertext = Hex.decode("c3561ce7f48b8a6b9b8d5ef957d2e512368f7da837bcf2aeebe176e3");
-    assertThat(aead.decrypt(fixedCiphertext, new byte[] {})).isEmpty();
+    assertThrows(
+        GeneralSecurityException.class, () -> aead.decrypt(fixedCiphertext, new byte[] {}));
+  }
+
+  // This test shows how ciphertexts created with older versions of Tink on older versions of
+  // Android can still be decrypted with the current version of Tink.
+  @Test
+  public void testDecryptCiphertextCreatedOnOlderVersionOfAndroid() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
+    // A valid AES GCM SIV key.
+    com.google.crypto.tink.aead.AesGcmSivKey aesGcmSivKey =
+        com.google.crypto.tink.aead.AesGcmSivKey.builder()
+            .setParameters(
+                AesGcmSivParameters.builder()
+                    .setKeySizeBytes(16)
+                    .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+                    .build())
+            .setKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("5b9604fe14eadba931b0ccf34843dab9"), InsecureSecretKeyAccess.get()))
+            .build();
+
+    // Valid ciphertext of an empty plaintext created with aesGcmSivKey.
+    byte[] validCiphertext = Hex.decode("17871550708697c27881d04753337526f2bed57b7e2eac30ecde0202");
+
+    // Ciphertext created with aesGcmSivKey on Android version 29 before
+    // https://github.com/tink-crypto/tink-java/issues/18 was fixed.
+    byte[] legacyCiphertext =
+        Hex.decode("c3561ce7f48b8a6b9b8d5ef957d2e512368f7da837bcf2aeebe176e3");
+
+    // Create an Aead instance that can decrypt in both AES GCM and AES GCM SIV.
+    com.google.crypto.tink.aead.AesGcmKey legacyKey =
+        com.google.crypto.tink.aead.AesGcmKey.builder()
+            .setParameters(
+                AesGcmParameters.builder()
+                    .setIvSizeBytes(12)
+                    .setKeySizeBytes(16)
+                    .setTagSizeBytes(16)
+                    .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+                    .build())
+            .setKeyBytes(aesGcmSivKey.getKeyBytes())
+            .build();
+    KeysetHandle backwardsCompatibleKeysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(aesGcmSivKey).withRandomId().makePrimary())
+            .addEntry(KeysetHandle.importKey(legacyKey).withRandomId())
+            .build();
+    Aead backwardsCompatibleAead = backwardsCompatibleKeysetHandle.getPrimitive(Aead.class);
+
+    // Check that backwardsCompatibleAead can decrypt both valid and legacy ciphertexts.
+    assertThat(backwardsCompatibleAead.decrypt(validCiphertext, new byte[] {})).isEmpty();
+    assertThat(backwardsCompatibleAead.decrypt(legacyCiphertext, new byte[] {})).isEmpty();
   }
 }

@@ -74,6 +74,9 @@ public class AesGcmSivTest {
 
   @Test
   public void testEncryptDecrypt() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
     byte[] aad = new byte[] {1, 2, 3};
     for (int keySize : keySizeInBytes) {
       byte[] key = Random.randBytes(keySize);
@@ -111,6 +114,9 @@ public class AesGcmSivTest {
 
   @Test
   public void testModifyCiphertext() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
     byte[] aad = Random.randBytes(33);
     byte[] key = Random.randBytes(16);
     byte[] message = Random.randBytes(32);
@@ -215,6 +221,9 @@ public class AesGcmSivTest {
 
   @Test
   public void testNullPlaintextOrCiphertext() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
     for (int keySize : keySizeInBytes) {
       AesGcmSiv gcm = new AesGcmSiv(Random.randBytes(keySize));
       byte[] aad = new byte[] {1, 2, 3};
@@ -243,6 +252,9 @@ public class AesGcmSivTest {
 
   @Test
   public void testEmptyAssociatedData() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
     byte[] aad = new byte[0];
     for (int keySize : keySizeInBytes) {
       byte[] key = Random.randBytes(keySize);
@@ -285,6 +297,9 @@ public class AesGcmSivTest {
    * multiple ciphertexts of the same message are distinct.
    */
   public void testRandomNonce() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
     final int samples = 1 << 17;
     byte[] key = Random.randBytes(16);
     byte[] message = new byte[0];
@@ -300,12 +315,10 @@ public class AesGcmSivTest {
   }
 
   @Test
-  public void testCreateImplementsAesGcmBeforeAndroid30() throws Exception {
+  public void testCreate_encryptAndDecryptFailBeforeAndroid30() throws Exception {
     @Nullable Integer apiLevel = Util.getAndroidApiLevel();
     Assume.assumeNotNull(apiLevel);
     Assume.assumeTrue(apiLevel < 30);
-
-    // TODO(b/303637541) This is a bug, it should instead throw an error.
 
     // Use an AES GCM test vector from AesGcmJceTest.testWithAesGcmKey_noPrefix_works
     byte[] keyBytes = Hex.decode("5b9604fe14eadba931b0ccf34843dab9");
@@ -321,8 +334,10 @@ public class AesGcmSivTest {
             .build();
     Aead aead = AesGcmSiv.create(key);
 
+    assertThrows(GeneralSecurityException.class, () -> aead.encrypt(new byte[] {}, new byte[] {}));
     byte[] fixedCiphertext = Hex.decode("c3561ce7f48b8a6b9b8d5ef957d2e512368f7da837bcf2aeebe176e3");
-    assertThat(aead.decrypt(fixedCiphertext, new byte[] {})).isEmpty();
+    assertThrows(
+        GeneralSecurityException.class, () -> aead.decrypt(fixedCiphertext, new byte[] {}));
   }
 
   @Test
@@ -395,8 +410,7 @@ public class AesGcmSivTest {
   @Test
   public void testWithAesGcmSivKey_crunchyPrefix_works() throws Exception {
     @Nullable Integer apiLevel = Util.getAndroidApiLevel();
-    Assume.assumeNotNull(apiLevel);
-    Assume.assumeTrue(apiLevel >= 30);
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
 
     // Test vector draft-irtf-cfrg-gcmsiv-09 in Wycheproof
     byte[] plaintext = Hex.decode("7a806c");
