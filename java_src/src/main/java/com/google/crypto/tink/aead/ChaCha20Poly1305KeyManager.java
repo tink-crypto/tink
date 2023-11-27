@@ -25,6 +25,8 @@ import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.ChaCha20Poly1305Key;
 import com.google.crypto.tink.proto.ChaCha20Poly1305KeyFormat;
@@ -45,6 +47,13 @@ import java.util.Map;
  * instances of {@code ChaCha20Poly1305}.
  */
 public class ChaCha20Poly1305KeyManager extends KeyTypeManager<ChaCha20Poly1305Key> {
+  private static final PrimitiveConstructor<com.google.crypto.tink.aead.ChaCha20Poly1305Key, Aead>
+      CHA_CHA_20_POLY_1305_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              ChaCha20Poly1305::create,
+              com.google.crypto.tink.aead.ChaCha20Poly1305Key.class,
+              Aead.class);
+
   ChaCha20Poly1305KeyManager() {
     super(
         ChaCha20Poly1305Key.class,
@@ -131,6 +140,8 @@ public class ChaCha20Poly1305KeyManager extends KeyTypeManager<ChaCha20Poly1305K
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new ChaCha20Poly1305KeyManager(), newKeyAllowed);
     ChaCha20Poly1305ProtoSerialization.register();
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(CHA_CHA_20_POLY_1305_PRIMITIVE_CONSTRUCTOR);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 
