@@ -254,23 +254,6 @@ java_library(
 )
 
 java_library(
-    name = "aes_ctr_key_manager",
-    srcs = ["AesCtrKeyManager.java"],
-    deps = [
-        "//proto:aes_ctr_java_proto",
-        "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
-        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
-        "//src/main/java/com/google/crypto/tink/internal:primitive_factory",
-        "//src/main/java/com/google/crypto/tink/subtle:aes_ctr_jce_cipher",
-        "//src/main/java/com/google/crypto/tink/subtle:ind_cpa_cipher",
-        "//src/main/java/com/google/crypto/tink/subtle:random",
-        "//src/main/java/com/google/crypto/tink/subtle:validators",
-        "@maven//:com_google_protobuf_protobuf_java",
-    ],
-)
-
-java_library(
     name = "cha_cha20_poly1305_key_manager",
     srcs = ["ChaCha20Poly1305KeyManager.java"],
     deps = [
@@ -762,23 +745,6 @@ android_library(
         "//src/main/java/com/google/crypto/tink/internal:key_template_proto_converter-android",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
-        "//src/main/java/com/google/crypto/tink/subtle:validators-android",
-        "@maven//:com_google_protobuf_protobuf_javalite",
-    ],
-)
-
-android_library(
-    name = "aes_ctr_key_manager-android",
-    srcs = ["AesCtrKeyManager.java"],
-    deps = [
-        "//proto:aes_ctr_java_proto_lite",
-        "//proto:tink_java_proto_lite",
-        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
-        "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
-        "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
-        "//src/main/java/com/google/crypto/tink/subtle:aes_ctr_jce_cipher-android",
-        "//src/main/java/com/google/crypto/tink/subtle:ind_cpa_cipher-android",
-        "//src/main/java/com/google/crypto/tink/subtle:random-android",
         "//src/main/java/com/google/crypto/tink/subtle:validators-android",
         "@maven//:com_google_protobuf_protobuf_javalite",
     ],

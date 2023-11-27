@@ -303,24 +303,6 @@ java_test(
 )
 
 java_test(
-    name = "AesCtrKeyManagerTest",
-    size = "small",
-    srcs = ["AesCtrKeyManagerTest.java"],
-    deps = [
-        "//proto:aes_ctr_java_proto",
-        "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink/aead:aes_ctr_key_manager",
-        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
-        "//src/main/java/com/google/crypto/tink/subtle:aes_ctr_jce_cipher",
-        "//src/main/java/com/google/crypto/tink/subtle:hex",
-        "//src/main/java/com/google/crypto/tink/subtle:ind_cpa_cipher",
-        "//src/main/java/com/google/crypto/tink/subtle:random",
-        "@maven//:com_google_truth_truth",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
     name = "XChaCha20Poly1305KeyManagerTest",
     size = "small",
     srcs = ["XChaCha20Poly1305KeyManagerTest.java"],
