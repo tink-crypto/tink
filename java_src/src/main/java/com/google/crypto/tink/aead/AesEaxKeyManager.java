@@ -25,6 +25,8 @@ import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.AesEaxKeyFormat;
@@ -45,14 +47,18 @@ import java.util.Map;
  * AesEaxJce}.
  */
 public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
+  private static final PrimitiveConstructor<com.google.crypto.tink.aead.AesEaxKey, Aead>
+      AES_EAX_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              AesEaxJce::create, com.google.crypto.tink.aead.AesEaxKey.class, Aead.class);
+
   AesEaxKeyManager() {
     super(
         AesEaxKey.class,
         new PrimitiveFactory<Aead, AesEaxKey>(Aead.class) {
           @Override
           public Aead getPrimitive(AesEaxKey key) throws GeneralSecurityException {
-            return new AesEaxJce(
-                key.getKeyValue().toByteArray(), key.getParams().getIvSize());
+            return new AesEaxJce(key.getKeyValue().toByteArray(), key.getParams().getIvSize());
           }
         });
   }
@@ -147,6 +153,8 @@ public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesEaxKeyManager(), newKeyAllowed);
     AesEaxProtoSerialization.register();
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(AES_EAX_PRIMITIVE_CONSTRUCTOR);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 

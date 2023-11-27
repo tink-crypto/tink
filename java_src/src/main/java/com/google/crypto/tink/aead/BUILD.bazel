@@ -296,6 +296,7 @@ java_library(
     name = "aes_eax_key_manager",
     srcs = ["AesEaxKeyManager.java"],
     deps = [
+        ":aes_eax_key",
         ":aes_eax_parameters",
         ":aes_eax_proto_serialization",
         ":predefined_aead_parameters",
@@ -308,6 +309,8 @@ java_library(
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "//src/main/java/com/google/crypto/tink/internal:mutable_parameters_registry",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_primitive_registry",
+        "//src/main/java/com/google/crypto/tink/internal:primitive_constructor",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory",
         "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception",
         "//src/main/java/com/google/crypto/tink/subtle:aes_eax_jce",
@@ -802,6 +805,7 @@ android_library(
     name = "aes_eax_key_manager-android",
     srcs = ["AesEaxKeyManager.java"],
     deps = [
+        ":aes_eax_key-android",
         ":aes_eax_parameters-android",
         ":aes_eax_proto_serialization-android",
         ":predefined_aead_parameters-android",
@@ -814,6 +818,8 @@ android_library(
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink/internal:mutable_parameters_registry-android",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_primitive_registry-android",
+        "//src/main/java/com/google/crypto/tink/internal:primitive_constructor-android",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
         "//src/main/java/com/google/crypto/tink/internal:tink_bug_exception-android",
         "//src/main/java/com/google/crypto/tink/subtle:aes_eax_jce-android",

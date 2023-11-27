@@ -28,6 +28,7 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.aead.AesEaxParameters.Variant;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.AesEaxKeyFormat;
@@ -37,6 +38,7 @@ import com.google.crypto.tink.subtle.AesEaxJce;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import java.util.Set;
@@ -377,5 +379,32 @@ public class AesEaxKeyManagerTest {
     assertThat(h.size()).isEqualTo(1);
     assertThat(h.getAt(0).getKey().getParameters())
         .isEqualTo(KeyTemplates.get(templateName).toParameters());
+  }
+
+  @Test
+  public void getPrimitiveFromKeysetHandle() throws Exception {
+    AesEaxParameters parameters =
+        AesEaxParameters.builder()
+            .setKeySizeBytes(16)
+            .setTagSizeBytes(16)
+            .setIvSizeBytes(12)
+            .setVariant(Variant.TINK)
+            .build();
+    com.google.crypto.tink.aead.AesEaxKey key =
+        com.google.crypto.tink.aead.AesEaxKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(SecretBytes.randomBytes(16))
+            .setIdRequirement(42)
+            .build();
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder().addEntry(KeysetHandle.importKey(key).makePrimary()).build();
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] aad = "aad".getBytes(UTF_8);
+
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
+    Aead directAead = AesEaxJce.create(key);
+
+    assertThat(aead.decrypt(directAead.encrypt(plaintext, aad), aad)).isEqualTo(plaintext);
+    assertThat(directAead.decrypt(aead.encrypt(plaintext, aad), aad)).isEqualTo(plaintext);
   }
 }
