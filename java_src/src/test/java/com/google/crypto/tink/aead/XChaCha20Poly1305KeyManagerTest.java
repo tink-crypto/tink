@@ -17,6 +17,7 @@
 package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertTrue;
 
 import com.google.crypto.tink.Aead;
@@ -26,6 +27,7 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.aead.XChaCha20Poly1305Parameters.Variant;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.SlowInputStream;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -225,5 +227,23 @@ public class XChaCha20Poly1305KeyManagerTest {
             SecretBytes.copyFrom(truncatedKeyMaterial, InsecureSecretKeyAccess.get()),
             1237);
     assertTrue(key.equalsKey(expectedKey));
+  }
+
+  @Test
+  public void getPrimitiveKeysetHandle() throws Exception {
+    com.google.crypto.tink.aead.XChaCha20Poly1305Key key =
+        com.google.crypto.tink.aead.XChaCha20Poly1305Key.create(
+            Variant.TINK, SecretBytes.randomBytes(32), 42);
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder().addEntry(KeysetHandle.importKey(key).makePrimary()).build();
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] aad = "aad".getBytes(UTF_8);
+
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
+    Aead directAead = XChaCha20Poly1305.create(key);
+
+
+    assertThat(aead.decrypt(directAead.encrypt(plaintext, aad), aad)).isEqualTo(plaintext);
+    assertThat(directAead.decrypt(aead.encrypt(plaintext, aad), aad)).isEqualTo(plaintext);
   }
 }
