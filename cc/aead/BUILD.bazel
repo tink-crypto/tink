@@ -530,6 +530,27 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "aes_eax_key",
+    srcs = ["aes_eax_key.cc"],
+    hdrs = ["aes_eax_key.h"],
+    include_prefix = "tink/aead",
+    deps = [
+        ":aead_key",
+        ":aes_eax_parameters",
+        "//:key",
+        "//:partial_key_access_token",
+        "//:restricted_data",
+        "//subtle:subtle_util",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:string_view",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -1014,6 +1035,22 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "aes_eax_key_test",
+    srcs = ["aes_eax_key_test.cc"],
+    deps = [
+        ":aes_eax_key",
+        ":aes_eax_parameters",
+        "//:partial_key_access",
+        "//:restricted_data",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/types:optional",
         "@com_google_googletest//:gtest_main",
     ],
 )
