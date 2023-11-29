@@ -39,8 +39,6 @@ import (
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
-const eciesAEADHKDFPrivateKeyTypeURL = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey"
-
 func TestHybridFactoryTest(t *testing.T) {
 	c := commonpb.EllipticCurveType_NIST_P256
 	ht := commonpb.HashType_SHA256
