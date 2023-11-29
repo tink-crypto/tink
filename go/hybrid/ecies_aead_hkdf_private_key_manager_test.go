@@ -225,7 +225,7 @@ func mustMarshal(t *testing.T, msg proto.Message) []byte {
 	t.Helper()
 	serialized, err := proto.Marshal(msg)
 	if err != nil {
-		t.Fatalf("proto.Marshal(%v) err = %v, wan nil", msg, err)
+		t.Fatalf("proto.Marshal(%v) err = %v, want nil", msg, err)
 	}
 	return serialized
 }
