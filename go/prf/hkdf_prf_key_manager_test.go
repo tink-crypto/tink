@@ -421,6 +421,8 @@ func genInvalidHKDFKeys() []proto.Message {
 	badVersionKey.Version++
 	shortKey := testutil.NewHKDFPRFKey(commonpb.HashType_SHA256, make([]byte, 0))
 	shortKey.KeyValue = []byte{1, 1}
+	nilParams := testutil.NewHKDFPRFKey(commonpb.HashType_SHA256, make([]byte, 0))
+	nilParams.Params = nil
 	return []proto.Message{
 		// not a HKDFPRFKey
 		testutil.NewHKDFPRFParams(commonpb.HashType_SHA256, make([]byte, 0)),
@@ -432,12 +434,16 @@ func genInvalidHKDFKeys() []proto.Message {
 		testutil.NewHKDFPRFKey(commonpb.HashType_SHA1, make([]byte, 0)),
 		// unknown hash type
 		testutil.NewHKDFPRFKey(commonpb.HashType_UNKNOWN_HASH, make([]byte, 0)),
+		// params field is unset
+		nilParams,
 	}
 }
 
 func genInvalidHKDFKeyFormats() []proto.Message {
 	shortKeyFormat := testutil.NewHKDFPRFKeyFormat(commonpb.HashType_SHA256, make([]byte, 0))
 	shortKeyFormat.KeySize = 1
+	nilParams := testutil.NewHKDFPRFKeyFormat(commonpb.HashType_SHA256, make([]byte, 0))
+	nilParams.Params = nil
 	return []proto.Message{
 		// not a HKDFPRFKeyFormat
 		testutil.NewHMACParams(commonpb.HashType_SHA256, 32),
@@ -447,6 +453,8 @@ func genInvalidHKDFKeyFormats() []proto.Message {
 		testutil.NewHKDFPRFKeyFormat(commonpb.HashType_SHA1, make([]byte, 0)),
 		// unknown hash type
 		testutil.NewHKDFPRFKeyFormat(commonpb.HashType_UNKNOWN_HASH, make([]byte, 0)),
+		// params field is unset
+		nilParams,
 	}
 }
 
