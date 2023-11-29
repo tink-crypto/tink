@@ -299,6 +299,7 @@ function(tink_cc_proto)
     NAME ${tink_cc_proto_NAME}
     SRCS ${tink_cc_proto_GEN_SRCS}
     DEPS
+      protobuf::libprotobuf
       protobuf::libprotoc
       ${tink_cc_proto_DEPS}
   )

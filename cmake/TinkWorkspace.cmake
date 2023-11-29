@@ -134,10 +134,10 @@ target_include_directories(rapidjson INTERFACE "${rapidjson_SOURCE_DIR}")
 
 set(protobuf_BUILD_TESTS OFF CACHE BOOL "Tink dependency override" FORCE)
 set(protobuf_BUILD_EXAMPLES OFF CACHE BOOL "Tink dependency override" FORCE)
-## Use protobuf X.21.9.
+set(protobuf_INSTALL OFF CACHE BOOL "Tink dependency override" FORCE)
+
 http_archive(
   NAME com_google_protobuf
-  URL https://github.com/protocolbuffers/protobuf/archive/v21.9.zip
-  SHA256 5babb8571f1cceafe0c18e13ddb3be556e87e12ceea3463d6b0d0064e6cc1ac3
-  CMAKE_SUBDIR cmake
+  URL https://github.com/protocolbuffers/protobuf/releases/download/v25.1/protobuf-25.1.zip
+  SHA256 5c86c077b0794c3e9bb30cac872cf883043febfb0f992137f0a8b1c3d534617c
 )

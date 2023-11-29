@@ -18,63 +18,58 @@
 
 #include <string>
 
-#include <google/protobuf/util/json_util.h>
 #include "absl/status/status.h"
-#include "absl/strings/substitute.h"
+#include "absl/strings/string_view.h"
+#include "google/protobuf/json/json.h"
+#include "google/protobuf/util/json_util.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
 namespace jwt_internal {
 
-namespace {
+using ::google::protobuf::ListValue;
+using ::google::protobuf::Struct;
+using ::google::protobuf::util::JsonParseOptions;
+using ::google::protobuf::util::JsonStringToMessage;
+using ::google::protobuf::util::MessageToJsonString;
 
-util::Status ConvertProtoStatus(const google::protobuf::util::Status& status) {
-  return util::Status(static_cast<absl::StatusCode>(status.code()),
-                                    std::string(status.message().data(), status.message().length()));
-}
-
-}  // namespace
-
-util::StatusOr<google::protobuf::Struct> JsonStringToProtoStruct(
-    absl::string_view json_string) {
-  google::protobuf::Struct proto;
-  google::protobuf::util::JsonParseOptions json_parse_options;
-  auto status = google::protobuf::util::JsonStringToMessage(google::protobuf::StringPiece(json_string.data(), json_string.length()), &proto,
-                                                  json_parse_options);
+util::StatusOr<Struct> JsonStringToProtoStruct(absl::string_view json_string) {
+  Struct proto;
+  JsonParseOptions json_parse_options;
+  absl::Status status =
+      JsonStringToMessage(json_string, &proto, json_parse_options);
   if (!status.ok()) {
     return util::Status(absl::StatusCode::kInvalidArgument, "invalid JSON");
   }
   return proto;
 }
 
-util::StatusOr<google::protobuf::ListValue> JsonStringToProtoList(
-    absl::string_view json_string) {
-  google::protobuf::ListValue proto;
-  google::protobuf::util::JsonParseOptions json_parse_options;
-  auto status = google::protobuf::util::JsonStringToMessage(google::protobuf::StringPiece(json_string.data(), json_string.length()), &proto,
-                                                  json_parse_options);
+util::StatusOr<ListValue> JsonStringToProtoList(absl::string_view json_string) {
+  ListValue proto;
+  JsonParseOptions json_parse_options;
+  absl::Status status =
+      JsonStringToMessage(json_string, &proto, json_parse_options);
   if (!status.ok()) {
     return util::Status(absl::StatusCode::kInvalidArgument, "invalid JSON");
   }
   return proto;
 }
 
-util::StatusOr<std::string> ProtoStructToJsonString(
-    const google::protobuf::Struct& proto) {
+util::StatusOr<std::string> ProtoStructToJsonString(const Struct& proto) {
   std::string output;
-  auto status = google::protobuf::util::MessageToJsonString(proto, &output);
+  absl::Status status = MessageToJsonString(proto, &output);
   if (!status.ok()) {
-    return ConvertProtoStatus(status);
+    return status;
   }
   return output;
 }
 
-util::StatusOr<std::string> ProtoListToJsonString(
-    const google::protobuf::ListValue& proto) {
+util::StatusOr<std::string> ProtoListToJsonString(const ListValue& proto) {
   std::string output;
-  auto status = google::protobuf::util::MessageToJsonString(proto, &output);
+  absl::Status status = MessageToJsonString(proto, &output);
   if (!status.ok()) {
-    return ConvertProtoStatus(status);
+    return status;
   }
   return output;
 }

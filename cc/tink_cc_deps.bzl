@@ -27,12 +27,12 @@ def tink_cc_deps():
     #   * @com_google_protobuf//:java_toolchain
     # This statement defines the @com_google_protobuf repo.
     if not native.existing_rule("com_google_protobuf"):
-        # Release X.21.9 from 2022-10-26.
+        # Release X.25.1 from 2023-11-15.
         http_archive(
             name = "com_google_protobuf",
-            strip_prefix = "protobuf-21.9",
-            urls = ["https://github.com/protocolbuffers/protobuf/archive/refs/tags/v21.9.zip"],
-            sha256 = "5babb8571f1cceafe0c18e13ddb3be556e87e12ceea3463d6b0d0064e6cc1ac3",
+            strip_prefix = "protobuf-25.1",
+            urls = ["https://github.com/protocolbuffers/protobuf/releases/download/v25.1/protobuf-25.1.zip"],
+            sha256 = "5c86c077b0794c3e9bb30cac872cf883043febfb0f992137f0a8b1c3d534617c",
         )
 
     # -------------------------------------------------------------------------
