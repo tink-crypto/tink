@@ -93,4 +93,12 @@ func TestECDSAVerifyGetPrimitiveWithInvalidInput(t *testing.T) {
 	if _, err := km.Primitive([]byte{}); err == nil {
 		t.Errorf("expect an error when input is empty slice")
 	}
+	// params field is nil
+	keyNilParams := testutil.NewRandomECDSAPublicKey(commonpb.HashType_SHA256,
+		commonpb.EllipticCurveType_NIST_P256)
+	keyNilParams.Params = nil
+	serializedKeyNilParams, _ := proto.Marshal(keyNilParams)
+	if _, err := km.Primitive(serializedKeyNilParams); err == nil {
+		t.Errorf("km.Primitive(serializedKeyNilParams); err = nil, want non-nil")
+	}
 }

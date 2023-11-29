@@ -160,6 +160,15 @@ func TestRSASSAPKCS1VerifierPrimitiveWithInvalidInput(t *testing.T) {
 			},
 		},
 		{
+			name: "params field is unset",
+			pubKey: &rsassapkcs1pb.RsaSsaPkcs1PublicKey{
+				Version: privKey.GetPublicKey().GetVersion(),
+				N:       privKey.GetPublicKey().GetN(),
+				E:       privKey.GetPublicKey().GetE(),
+				Params:  nil,
+			},
+		},
+		{
 			name: "exponent larger than 64 bits",
 			pubKey: &rsassapkcs1pb.RsaSsaPkcs1PublicKey{
 				Version: privKey.GetPublicKey().GetVersion(),

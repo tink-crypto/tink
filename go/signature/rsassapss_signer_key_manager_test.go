@@ -227,6 +227,17 @@ func TestRSASSAPSSSignerGetPrimitiveWithInvalidInput(t *testing.T) {
 			privKey: mergePrivPub(validPrivKey, &rsppb.RsaSsaPssPublicKey{}),
 		},
 		{
+			tag: "nil public key params",
+			privKey: mergePrivPub(
+				validPrivKey,
+				&rsppb.RsaSsaPssPublicKey{
+					Version: validPrivKey.GetPublicKey().GetVersion(),
+					Params:  nil,
+					N:       validPrivKey.GetPublicKey().GetN(),
+					E:       validPrivKey.GetPublicKey().GetE(),
+				}),
+		},
+		{
 			tag: "invalid public key version",
 			privKey: mergePrivPub(
 				validPrivKey,
@@ -516,6 +527,14 @@ func TestRSASSAPSSSignerNewKeyFailsWithInvalidFormat(t *testing.T) {
 		t.Fatalf("NewKeyData() err = %v, want nil", err)
 	}
 	for _, tc := range []testCase{
+		{
+			tag: "nil params",
+			keyFormat: &rsppb.RsaSsaPssKeyFormat{
+				Params:            nil,
+				ModulusSizeInBits: validKeyFormat.GetModulusSizeInBits(),
+				PublicExponent:    validKeyFormat.GetPublicExponent(),
+			},
+		},
 		{
 			tag: "unsafe hash function",
 			keyFormat: &rsppb.RsaSsaPssKeyFormat{

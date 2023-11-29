@@ -89,6 +89,14 @@ func TestECDSASignGetPrimitiveWithInvalidInput(t *testing.T) {
 	if _, err := km.Primitive([]byte{}); err == nil {
 		t.Errorf("expect an error when input is empty slice")
 	}
+	// nil params field
+	keyNilParams := testutil.NewRandomECDSAPrivateKey(commonpb.HashType_SHA256,
+		commonpb.EllipticCurveType_NIST_P256)
+	keyNilParams.GetPublicKey().Params = nil
+	serializedKeyNilParams, _ := proto.Marshal(keyNilParams)
+	if _, err := km.Primitive(serializedKeyNilParams); err == nil {
+		t.Errorf("km.Primitive(serializedKeyNilParams) err = nil, want not nil")
+	}
 }
 
 func TestECDSASignNewKeyBasic(t *testing.T) {
@@ -144,6 +152,13 @@ func TestECDSASignNewKeyWithInvalidInput(t *testing.T) {
 	if _, err := km.NewKey([]byte{}); err == nil {
 		t.Errorf("expect an error when input is empty slice")
 	}
+	// nil params field
+	keyFormatNilParams := testutil.NewECDSAKeyFormat(nil)
+	serializedKeyFormatNilParams, _ := proto.Marshal(keyFormatNilParams)
+	if _, err := km.NewKey(serializedKeyFormatNilParams); err == nil {
+		t.Errorf("km.newKey(serializedKeyFormatNilParams) err = nil, want not nil")
+	}
+
 }
 
 func TestECDSASignNewKeyMultipleTimes(t *testing.T) {

@@ -82,7 +82,7 @@ func (km *rsaSSAPKCS1SignerKeyManager) Primitive(serializedKey []byte) (interfac
 }
 
 func validateRSAPKCS1PrivateKey(privKey *rsassapkcs1pb.RsaSsaPkcs1PrivateKey) error {
-	if err := keyset.ValidateKeyVersion(privKey.Version, rsaSSAPKCS1SignerKeyVersion); err != nil {
+	if err := keyset.ValidateKeyVersion(privKey.GetVersion(), rsaSSAPKCS1SignerKeyVersion); err != nil {
 		return err
 	}
 	if len(privKey.GetD()) == 0 ||
@@ -112,14 +112,14 @@ func (km *rsaSSAPKCS1SignerKeyManager) NewKey(serializedKeyFormat []byte) (proto
 		keyFormat.GetPublicExponent()); err != nil {
 		return nil, err
 	}
-	rsaKey, err := rsa.GenerateKey(rand.Reader, int(keyFormat.ModulusSizeInBits))
+	rsaKey, err := rsa.GenerateKey(rand.Reader, int(keyFormat.GetModulusSizeInBits()))
 	if err != nil {
 		return nil, fmt.Errorf("generating RSA key: %s", err)
 	}
 	pubKey := &rsassapkcs1pb.RsaSsaPkcs1PublicKey{
 		Version: rsaSSAPKCS1SignerKeyVersion,
 		Params: &rsassapkcs1pb.RsaSsaPkcs1Params{
-			HashType: keyFormat.Params.HashType,
+			HashType: keyFormat.GetParams().GetHashType(),
 		},
 		N: rsaKey.PublicKey.N.Bytes(),
 		E: big.NewInt(int64(rsaKey.PublicKey.E)).Bytes(),

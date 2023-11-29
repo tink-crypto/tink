@@ -51,7 +51,7 @@ func (km *ecdsaVerifierKeyManager) Primitive(serializedKey []byte) (interface{},
 	if err := km.validateKey(key); err != nil {
 		return nil, fmt.Errorf("ecdsa_verifier_key_manager: %s", err)
 	}
-	hash, curve, encoding := getECDSAParamNames(key.Params)
+	hash, curve, encoding := getECDSAParamNames(key.GetParams())
 	ret, err := subtle.NewECDSAVerifier(hash, curve, encoding, key.X, key.Y)
 	if err != nil {
 		return nil, fmt.Errorf("ecdsa_verifier_key_manager: invalid key: %s", err)
@@ -85,6 +85,6 @@ func (km *ecdsaVerifierKeyManager) validateKey(key *ecdsapb.EcdsaPublicKey) erro
 	if err := keyset.ValidateKeyVersion(key.Version, ecdsaVerifierKeyVersion); err != nil {
 		return fmt.Errorf("ecdsa_verifier_key_manager: %s", err)
 	}
-	hash, curve, encoding := getECDSAParamNames(key.Params)
+	hash, curve, encoding := getECDSAParamNames(key.GetParams())
 	return subtle.ValidateECDSAParams(hash, curve, encoding)
 }
