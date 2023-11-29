@@ -28,6 +28,8 @@ import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.proto.AesSivKey;
@@ -53,6 +55,14 @@ import javax.annotation.Nullable;
  * AesSiv}.
  */
 public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
+  private static final PrimitiveConstructor<
+          com.google.crypto.tink.daead.AesSivKey, DeterministicAead>
+      AES_SIV_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              AesSiv::create,
+              com.google.crypto.tink.daead.AesSivKey.class,
+              DeterministicAead.class);
+
   AesSivKeyManager() {
     super(
         AesSivKey.class,
@@ -168,6 +178,8 @@ public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new AesSivKeyManager(), newKeyAllowed);
     AesSivProtoSerialization.register();
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(AES_SIV_PRIMITIVE_CONSTRUCTOR);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
     MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, AesSivParameters.class);
   }

@@ -17,6 +17,7 @@
 package com.google.crypto.tink.daead;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
@@ -31,6 +32,7 @@ import com.google.crypto.tink.internal.SlowInputStream;
 import com.google.crypto.tink.proto.AesSivKey;
 import com.google.crypto.tink.proto.AesSivKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.subtle.AesSiv;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.util.SecretBytes;
@@ -254,5 +256,32 @@ public class AesSivKeyManagerTest {
             .setKeyBytes(SecretBytes.copyFrom(truncatedKeyMaterial, InsecureSecretKeyAccess.get()))
             .build();
     assertTrue(key.equalsKey(expectedKey));
+  }
+
+  @Test
+  public void getPrimitiveFromKeysetHandle() throws Exception {
+    AesSivParameters parameters =
+        AesSivParameters.builder()
+            .setKeySizeBytes(64)
+            .setVariant(AesSivParameters.Variant.TINK)
+            .build();
+    com.google.crypto.tink.daead.AesSivKey key =
+        com.google.crypto.tink.daead.AesSivKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(SecretBytes.randomBytes(64))
+            .setIdRequirement(31)
+            .build();
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder().addEntry(KeysetHandle.importKey(key).makePrimary()).build();
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] aad = "aad".getBytes(UTF_8);
+
+    DeterministicAead daead = keysetHandle.getPrimitive(DeterministicAead.class);
+    DeterministicAead directDaead = AesSiv.create(key);
+
+    Object unused =
+        directDaead.decryptDeterministically(daead.encryptDeterministically(plaintext, aad), aad);
+    unused =
+        daead.decryptDeterministically(directDaead.encryptDeterministically(plaintext, aad), aad);
   }
 }
