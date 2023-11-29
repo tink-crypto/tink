@@ -170,6 +170,27 @@ TEST_F(HmacProtoSerializationTest, ParseParametersWithInvalidVersion) {
   ASSERT_THAT(params.status(), StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
+TEST_F(HmacProtoSerializationTest, ParseParametersWithUnknownHashType) {
+  ASSERT_THAT(RegisterHmacProtoSerialization(), IsOk());
+
+  HmacKeyFormat key_format_proto;
+  key_format_proto.set_key_size(16);
+  key_format_proto.set_version(0);
+  key_format_proto.mutable_params()->set_tag_size(10);
+  key_format_proto.mutable_params()->set_hash(HashType::UNKNOWN_HASH);
+
+  util::StatusOr<internal::ProtoParametersSerialization> serialization =
+      internal::ProtoParametersSerialization::Create(
+          "type.googleapis.com/google.crypto.tink.HmacKey",
+          OutputPrefixType::RAW, key_format_proto.SerializeAsString());
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Parameters>> params =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseParameters(
+          *serialization);
+  ASSERT_THAT(params.status(), StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
 TEST_F(HmacProtoSerializationTest, ParseParametersWithUnkownOutputPrefix) {
   ASSERT_THAT(RegisterHmacProtoSerialization(), IsOk());
 
