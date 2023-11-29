@@ -86,7 +86,12 @@ public final class CleartextKeysetHandle {
     return keysetHandle.getKeyset();
   }
 
-  /** Returns a KeysetHandle for {@code keyset}. */
+  /**
+   * Returns a KeysetHandle for {@code keyset}.
+   *
+   * @deprecated Instead, use a {@link KeysetHandle.Builder}.
+   */
+  @Deprecated
   public static KeysetHandle fromKeyset(Keyset keyset) throws GeneralSecurityException {
     return KeysetHandle.fromKeyset(keyset);
   }

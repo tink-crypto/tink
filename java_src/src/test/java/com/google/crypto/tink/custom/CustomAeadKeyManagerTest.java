@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeysetHandle;
@@ -146,7 +145,7 @@ public final class CustomAeadKeyManagerTest {
                       .build())
               .setPrimaryKeyId(keyId)
               .build();
-      return CleartextKeysetHandle.fromKeyset(keyset);
+      return TinkProtoKeysetFormat.parseKeyset(keyset.toByteArray(), InsecureSecretKeyAccess.get());
     }
   }
 

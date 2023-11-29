@@ -19,12 +19,12 @@ package com.google.crypto.tink.mac.internal;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.internal.EnumTypeProtoConverter;
 import com.google.crypto.tink.internal.LegacyProtoKey;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
@@ -160,16 +160,9 @@ public class LegacyFullMacIntegrationTest {
             .setOutputPrefixType(
                 OUTPUT_PREFIX_TYPE_CONVERTER.toProtoEnum(key.getParameters().getVariant()))
             .build();
-    /* Here, a to-be-removed API (CleartextKeysetHandle) is used due to the need to create the
-     * KeysetHandle from a Keyset (and security is of no concern since it's a test).
-     *
-     * The other way to do this would be through registering only the serialization part of
-     * HmacProtoSerialization (without parsing), and then creating the KeysetHandle from the
-     * Key object -- however, this seems unnecessarily complicated since this test covers legacy
-     * functionality anyway.
-     */
-    return CleartextKeysetHandle.fromKeyset(
-        Keyset.newBuilder().addKey(rawKeysetKey).setPrimaryKeyId(id).build());
+    return TinkProtoKeysetFormat.parseKeyset(
+        Keyset.newBuilder().addKey(rawKeysetKey).setPrimaryKeyId(id).build().toByteArray(),
+        InsecureSecretKeyAccess.get());
   }
 
   private static final class TestLegacyMacWrapper implements PrimitiveWrapper<Mac, Mac> {
