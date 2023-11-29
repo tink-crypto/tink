@@ -95,7 +95,7 @@ util::StatusOr<AesEaxParameters> AesEaxParameters::Builder::Build() {
   if (!kSupportedVariants->contains(*variant_)) {
     return util::Status(
         absl::StatusCode::kInvalidArgument,
-        "Cannot create AES-Eax parameters with unknown variant.");
+        "Cannot create AES-EAX parameters with unknown variant.");
   }
   return AesEaxParameters(*key_size_in_bytes_, *iv_size_in_bytes_,
                           *tag_size_in_bytes_, *variant_);
