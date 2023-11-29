@@ -49,15 +49,17 @@ public interface Aead {
       throws GeneralSecurityException;
 
   /**
-   * Decrypts {@code ciphertext} with {@code associatedData} as associated authenticated data.
-   * The decryption verifies the authenticity and integrity of the associated data, but there are
-   * no guarantees wrt. secrecy of that data.
+   * Decrypts {@code ciphertext} with {@code associatedData} as associated authenticated data. The
+   * decryption verifies the authenticity and integrity of the associated data, but there are no
+   * guarantees wrt. secrecy of that data.
    *
-   * @param ciphertext      the plaintext to be decrypted. It must be non-null.
-   * @param associatedData  associated data to be authenticated.  For successful decryption
-   *                        it must be the same as associatedData used during encryption.
-   *                        Can be null, which is equivalent to an empty (zero-length) byte array.
+   * @param ciphertext the plaintext to be decrypted. It must be non-null.
+   * @param associatedData associated data to be authenticated. For successful decryption it must be
+   *     the same as associatedData used during encryption. Can be null, which is equivalent to an
+   *     empty (zero-length) byte array.
    * @return resulting plaintext
+   * @throws GeneralSecurityException if decryption fails. Decryption must fail if {@code
+   *     ciphertext} is not correctly authenticated for the given {@code associatedData}.
    */
   byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
       throws GeneralSecurityException;
