@@ -129,8 +129,9 @@ public final class MacKeyTemplates {
               AesCmacKeyFormat.newBuilder()
                   .setKeySize(32)
                   .setParams(AesCmacParams.newBuilder().setTagSize(16).build())
-                  .build().toByteString())
-          .setTypeUrl(new AesCmacKeyManager().getKeyType())
+                  .build()
+                  .toByteString())
+          .setTypeUrl("type.googleapis.com/google.crypto.tink.AesCmacKey")
           .setOutputPrefixType(OutputPrefixType.TINK)
           .build();
 
