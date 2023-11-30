@@ -30,7 +30,13 @@ java_library(
     srcs = ["GcpKmsAead.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:aead",
+        "@maven//:com_google_api_gax",
+        "@maven//:com_google_api_grpc_proto_google_cloud_kms_v1",
         "@maven//:com_google_apis_google_api_services_cloudkms",
+        "@maven//:com_google_cloud_google_cloud_kms",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 
