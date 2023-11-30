@@ -240,8 +240,24 @@ public final class KeyManagerRegistry {
    */
   public synchronized <P> void registerKeyManager(
       final KeyManager<P> manager, boolean newKeyAllowed) throws GeneralSecurityException {
-    if (!TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()) {
-      throw new GeneralSecurityException("Registering key managers is not supported in FIPS mode");
+    registerKeyManagerWithFipsCompatibility(
+        manager, TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS, newKeyAllowed);
+  }
+
+  /**
+   * Attempts to insert the given KeyManager into the object; the caller guarantees that the given
+   * key manager satisfies the given FIPS compatibility.
+   *
+   * <p>If this fails, the KeyManagerRegistry is in an unspecified state and should be discarded.
+   */
+  public synchronized <P> void registerKeyManagerWithFipsCompatibility(
+      final KeyManager<P> manager,
+      TinkFipsUtil.AlgorithmFipsCompatibility compatibility,
+      boolean newKeyAllowed)
+      throws GeneralSecurityException {
+    if (!compatibility.isCompatible()) {
+      throw new GeneralSecurityException(
+          "Cannot register key manager: FIPS compatibility insufficient");
     }
     registerKeyManagerContainer(
         createContainerFor(manager), /* forceOverwrite= */ false, newKeyAllowed);

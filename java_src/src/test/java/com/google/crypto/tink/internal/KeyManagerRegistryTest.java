@@ -203,6 +203,39 @@ public final class KeyManagerRegistryTest {
   }
 
   @Test
+  public void testFipsCompatibleKeyManager_works() throws Exception {
+    if (TinkFipsUtil.useOnlyFips()) {
+      assumeTrue(
+          "If FIPS is required, we can only register managers if the fips module is available",
+          TinkFipsUtil.fipsModuleAvailable());
+    }
+
+    KeyManagerRegistry registry = new KeyManagerRegistry();
+    TestKeyManager manager = new TestKeyManager("customTypeUrl1");
+    assertThrows(
+        GeneralSecurityException.class, () -> registry.getUntypedKeyManager("customTypeUrl1"));
+    registry.registerKeyManagerWithFipsCompatibility(
+        manager, TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO, true);
+    assertThat(registry.getUntypedKeyManager("customTypeUrl1")).isNotNull();
+  }
+
+  @Test
+  public void testFipsCompatibleKeyManager_noFipsAvailable_fails() throws Exception {
+    assumeTrue(TinkFipsUtil.useOnlyFips());
+    assumeFalse(TinkFipsUtil.fipsModuleAvailable());
+
+    KeyManagerRegistry registry = new KeyManagerRegistry();
+    TestKeyManager manager = new TestKeyManager("customTypeUrl1");
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            registry.registerKeyManagerWithFipsCompatibility(
+                manager,
+                TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO,
+                true));
+  }
+
+  @Test
   public void testRegisterKeyTypeManager_twice_works() throws Exception {
     if (TinkFipsUtil.useOnlyFips()) {
       assumeTrue(
