@@ -58,10 +58,10 @@ func (km *aesGCMHKDFKeyManager) Primitive(serializedKey []byte) (interface{}, er
 		return nil, err
 	}
 	ret, err := subtle.NewAESGCMHKDF(
-		key.KeyValue,
-		key.Params.HkdfHashType.String(),
-		int(key.Params.DerivedKeySize),
-		int(key.Params.CiphertextSegmentSize),
+		key.GetKeyValue(),
+		key.GetParams().GetHkdfHashType().String(),
+		int(key.GetParams().GetDerivedKeySize()),
+		int(key.GetParams().GetCiphertextSegmentSize()),
 		// no first segment offset
 		0)
 	if err != nil {
@@ -85,7 +85,7 @@ func (km *aesGCMHKDFKeyManager) NewKey(serializedKeyFormat []byte) (proto.Messag
 	}
 	return &ghpb.AesGcmHkdfStreamingKey{
 		Version:  aesGCMHKDFKeyVersion,
-		KeyValue: random.GetRandomBytes(keyFormat.KeySize),
+		KeyValue: random.GetRandomBytes(keyFormat.GetKeySize()),
 		Params:   keyFormat.Params,
 	}, nil
 }
@@ -146,7 +146,7 @@ func (km *aesGCMHKDFKeyManager) DeriveKey(serializedKeyFormat []byte, pseudorand
 	return &ghpb.AesGcmHkdfStreamingKey{
 		Version:  aesGCMHKDFKeyVersion,
 		KeyValue: keyValue,
-		Params:   keyFormat.Params,
+		Params:   keyFormat.GetParams(),
 	}, nil
 }
 
@@ -155,11 +155,11 @@ func (km *aesGCMHKDFKeyManager) validateKey(key *ghpb.AesGcmHkdfStreamingKey) er
 	if err := keyset.ValidateKeyVersion(key.Version, aesGCMHKDFKeyVersion); err != nil {
 		return fmt.Errorf("aes_gcm_hkdf_key_manager: %s", err)
 	}
-	keySize := uint32(len(key.KeyValue))
+	keySize := uint32(len(key.GetKeyValue()))
 	if err := subtleaead.ValidateAESKeySize(keySize); err != nil {
 		return fmt.Errorf("aes_gcm_hkdf_key_manager: %s", err)
 	}
-	if err := km.validateParams(key.Params); err != nil {
+	if err := km.validateParams(key.GetParams()); err != nil {
 		return fmt.Errorf("aes_gcm_hkdf_key_manager: %s", err)
 	}
 	return nil
@@ -170,7 +170,7 @@ func (km *aesGCMHKDFKeyManager) validateKeyFormat(format *ghpb.AesGcmHkdfStreami
 	if err := subtleaead.ValidateAESKeySize(format.KeySize); err != nil {
 		return fmt.Errorf("aes_gcm_hkdf_key_manager: %s", err)
 	}
-	if err := km.validateParams(format.Params); err != nil {
+	if err := km.validateParams(format.GetParams()); err != nil {
 		return fmt.Errorf("aes_gcm_hkdf_key_manager: %s", err)
 	}
 	return nil
@@ -178,17 +178,17 @@ func (km *aesGCMHKDFKeyManager) validateKeyFormat(format *ghpb.AesGcmHkdfStreami
 
 // validateKeyFormat validates the given AESGCMHKDFKeyFormat.
 func (km *aesGCMHKDFKeyManager) validateParams(params *ghpb.AesGcmHkdfStreamingParams) error {
-	if err := subtleaead.ValidateAESKeySize(params.DerivedKeySize); err != nil {
+	if err := subtleaead.ValidateAESKeySize(params.GetDerivedKeySize()); err != nil {
 		return fmt.Errorf("aes_gcm_hkdf_key_manager: %s", err)
 	}
-	if params.HkdfHashType != commonpb.HashType_SHA1 && params.HkdfHashType != commonpb.HashType_SHA256 && params.HkdfHashType != commonpb.HashType_SHA512 {
+	if params.GetHkdfHashType() != commonpb.HashType_SHA1 && params.GetHkdfHashType() != commonpb.HashType_SHA256 && params.GetHkdfHashType() != commonpb.HashType_SHA512 {
 		return errors.New("unknown HKDF hash type")
 	}
-	if params.CiphertextSegmentSize > 0x7fffffff {
+	if params.GetCiphertextSegmentSize() > 0x7fffffff {
 		return errors.New("CiphertextSegmentSize must be at most 2^31 - 1")
 	}
-	minSegmentSize := params.DerivedKeySize + subtle.AESGCMHKDFNoncePrefixSizeInBytes + subtle.AESGCMHKDFTagSizeInBytes + 2
-	if params.CiphertextSegmentSize < minSegmentSize {
+	minSegmentSize := params.GetDerivedKeySize() + subtle.AESGCMHKDFNoncePrefixSizeInBytes + subtle.AESGCMHKDFTagSizeInBytes + 2
+	if params.GetCiphertextSegmentSize() < minSegmentSize {
 		return fmt.Errorf("ciphertext segment_size must be at least (derivedKeySize + noncePrefixInBytes + tagSizeInBytes + 2)")
 	}
 	return nil

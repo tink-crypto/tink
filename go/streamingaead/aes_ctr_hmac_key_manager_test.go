@@ -76,6 +76,16 @@ func TestAESCTRHMACGetPrimitiveWithInvalidInput(t *testing.T) {
 	if _, err := keyManager.Primitive([]byte{}); err == nil {
 		t.Errorf("expect an error when input is empty")
 	}
+
+	keyNilParams := testutil.NewAESCTRHMACKey(testutil.AESCTRHMACKeyVersion, 32, commonpb.HashType_SHA256, 32, commonpb.HashType_SHA256, 16, 4096)
+	keyNilParams.Params = nil
+	serializedKeyNilParams, err := proto.Marshal(keyNilParams)
+	if err != nil {
+		t.Errorf("proto.Marshal(keyNilParams) err = %v, want nil", err)
+	}
+	if _, err := keyManager.Primitive(serializedKeyNilParams); err == nil {
+		t.Errorf("keyManager.Primitive(serializedKeyNilParams) err = nil, want non-nil")
+	}
 }
 
 func TestAESCTRHMACNewKeyMultipleTimes(t *testing.T) {
@@ -152,6 +162,16 @@ func TestAESCTRHMACNewKeyWithInvalidInput(t *testing.T) {
 	// empty array
 	if _, err := keyManager.NewKey([]byte{}); err == nil {
 		t.Errorf("expect an error when input is empty")
+	}
+	// params field is unset
+	formatNilParams := testutil.NewAESCTRHMACKeyFormat(32, commonpb.HashType_SHA256, 32, commonpb.HashType_SHA256, 16, 4096)
+	formatNilParams.Params = nil
+	serializedFormatNilParams, err := proto.Marshal(formatNilParams)
+	if err != nil {
+		t.Errorf("proto.Marshal(formatNilParams) err = %v, want nil", err)
+	}
+	if _, err := keyManager.NewKey(serializedFormatNilParams); err == nil {
+		t.Errorf("keyManager.NewKey(serializedFormatNilParams) err = nil, want non-nil")
 	}
 }
 
