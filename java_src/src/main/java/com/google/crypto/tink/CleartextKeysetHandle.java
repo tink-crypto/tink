@@ -81,7 +81,10 @@ public final class CleartextKeysetHandle {
 
   /**
    * @return the keyset underlying this {@code keysetHandle}.
+   * @deprecated Instead, call "KeysetHandle.getAt()" to get information about individual keys or
+   *     TinkProtoKeysetFormat if you need a serialized keyset.
    */
+  @Deprecated
   public static Keyset getKeyset(KeysetHandle keysetHandle) {
     return keysetHandle.getKeyset();
   }
