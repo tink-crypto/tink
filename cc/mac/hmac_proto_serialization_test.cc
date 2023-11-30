@@ -336,6 +336,56 @@ TEST_F(HmacProtoSerializationTest, ParseKeyWithInvalidVersion) {
   ASSERT_THAT(key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
+TEST_F(HmacProtoSerializationTest, ParseKeyWithUnknownOutputPrefixType) {
+  ASSERT_THAT(RegisterHmacProtoSerialization(), IsOk());
+
+  std::string raw_key_bytes = Random::GetRandomBytes(16);
+  google::crypto::tink::HmacKey key_proto;
+  key_proto.set_version(0);
+  key_proto.set_key_value(raw_key_bytes);
+  key_proto.mutable_params()->set_tag_size(10);
+  key_proto.mutable_params()->set_hash(HashType::SHA256);
+  RestrictedData serialized_key = RestrictedData(
+      key_proto.SerializeAsString(), InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(
+          "type.googleapis.com/google.crypto.tink.HmacKey", serialized_key,
+          KeyData::SYMMETRIC, OutputPrefixType::UNKNOWN_PREFIX,
+          /*id_requirement=*/0x23456789);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST_F(HmacProtoSerializationTest, ParseKeyWithUnknownHashType) {
+  ASSERT_THAT(RegisterHmacProtoSerialization(), IsOk());
+
+  std::string raw_key_bytes = Random::GetRandomBytes(16);
+  google::crypto::tink::HmacKey key_proto;
+  key_proto.set_version(0);
+  key_proto.set_key_value(raw_key_bytes);
+  key_proto.mutable_params()->set_tag_size(10);
+  key_proto.mutable_params()->set_hash(HashType::UNKNOWN_HASH);
+  RestrictedData serialized_key = RestrictedData(
+      key_proto.SerializeAsString(), InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(
+          "type.googleapis.com/google.crypto.tink.HmacKey", serialized_key,
+          KeyData::SYMMETRIC, OutputPrefixType::TINK,
+          /*id_requirement=*/0x23456789);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
 TEST_F(HmacProtoSerializationTest, ParseKeyWithoutSecretKeyAccess) {
   ASSERT_THAT(RegisterHmacProtoSerialization(), IsOk());
 

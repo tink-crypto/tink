@@ -214,7 +214,7 @@ util::StatusOr<HmacKey> ParseKey(
   if (!variant.ok()) return variant.status();
   util::StatusOr<HmacParameters::HashType> hash_type =
       ToHashType(proto_key.params().hash());
-  if (!hash_type.ok()) return variant.status();
+  if (!hash_type.ok()) return hash_type.status();
 
   util::StatusOr<HmacParameters> parameters = HmacParameters::Create(
       proto_key.key_value().length(), proto_key.params().tag_size(), *hash_type,
