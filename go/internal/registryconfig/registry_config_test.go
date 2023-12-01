@@ -29,75 +29,78 @@ import (
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
-func TestPrimitiveFromKeyDataMatchesRegistryOnSuccess(t *testing.T) {
+func TestPrimitiveFromKeyData(t *testing.T) {
 	keyData := testutil.NewHMACKeyData(commonpb.HashType_SHA256, 16)
 	registryConfig := &registryconfig.RegistryConfig{}
 	p, err := registryConfig.PrimitiveFromKeyData(keyData, internalapitoken.InternalAPIToken{})
 	if err != nil {
-		t.Errorf("unexpected error: %v", err)
+		t.Errorf("registryConfig.PrimitiveFromKeyData() err = %v, want nil", err)
 	}
 	if _, ok := p.(*subtle.HMAC); !ok {
-		t.Errorf("unexpected error: %v", err)
+		t.Error("primitive is not of type *subtle.HMAC")
 	}
 }
 
-func TestPrimitiveFromKeyDataMatchesRegistryOnFailure(t *testing.T) {
-	keyDataUnregisteredURL := testutil.NewHMACKeyData(commonpb.HashType_SHA256, 16)
-	keyDataUnregisteredURL.TypeUrl = "some url"
-	keyDataUnmatchedURL := testutil.NewHMACKeyData(commonpb.HashType_SHA256, 16)
-	keyDataUnmatchedURL.TypeUrl = testutil.AESGCMTypeURL
+func TestPrimitiveFromKeyDataErrors(t *testing.T) {
 	registryConfig := &registryconfig.RegistryConfig{}
-	testCases := []struct {
-		kd   *tinkpb.KeyData
-		name string
-	}{{keyDataUnregisteredURL, "unregistered url"}, {keyDataUnmatchedURL, "mismatching url"}, {nil, "nil KeyData"}}
 
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			if _, err := registryConfig.PrimitiveFromKeyData(testCase.kd, internalapitoken.InternalAPIToken{}); err == nil {
-				t.Errorf("expected an error when requesting primitive with %s", testCase.name)
+	testCases := []struct {
+		name    string
+		keyData *tinkpb.KeyData
+	}{
+		{
+			name: "unregistered url",
+			keyData: func() *tinkpb.KeyData {
+				kd := testutil.NewHMACKeyData(commonpb.HashType_SHA256, 16)
+				kd.TypeUrl = "some url"
+				return kd
+			}(),
+		},
+		{
+			name: "mismatching url",
+			keyData: func() *tinkpb.KeyData {
+				kd := testutil.NewHMACKeyData(commonpb.HashType_SHA256, 16)
+				kd.TypeUrl = testutil.AESGCMTypeURL
+				return kd
+			}(),
+		},
+		{
+			name:    "nil KeyData",
+			keyData: nil,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if _, err := registryConfig.PrimitiveFromKeyData(tc.keyData, internalapitoken.InternalAPIToken{}); err == nil {
+				t.Errorf("registryConfig.Primitive() err = nil, want not-nil")
 			}
 		})
 	}
 }
 
-type testKeyManager struct{}
 type testPrimitive struct{}
+type testKeyManager struct{}
 
-func (km *testKeyManager) Primitive(_ []byte) (any, error) {
-	return testPrimitive{}, nil
-}
+func (km *testKeyManager) Primitive(_ []byte) (any, error)              { return &testPrimitive{}, nil }
+func (km *testKeyManager) NewKey(_ []byte) (proto.Message, error)       { return nil, nil }
+func (km *testKeyManager) DoesSupport(typeURL string) bool              { return typeURL == "testKeyManager" }
+func (km *testKeyManager) TypeURL() string                              { return "testKeyManager" }
+func (km *testKeyManager) NewKeyData(_ []byte) (*tinkpb.KeyData, error) { return nil, nil }
 
-func (km *testKeyManager) NewKey(_ []byte) (proto.Message, error) {
-	return nil, nil
-}
-
-func (km *testKeyManager) DoesSupport(typeURL string) bool {
-	return typeURL == "testKeyManager"
-}
-
-func (km *testKeyManager) TypeURL() string {
-	return "testKeyManager"
-}
-
-func (km *testKeyManager) NewKeyData(_ []byte) (*tinkpb.KeyData, error) {
-	return nil, nil
-}
-
-func TestRegisterKeyManagerWorks(t *testing.T) {
+func TestRegisterKeyManager(t *testing.T) {
 	registryConfig := &registryconfig.RegistryConfig{}
-	err := registryConfig.RegisterKeyManager(new(testKeyManager), internalapitoken.InternalAPIToken{})
-	if err != nil {
-		t.Fatal("could not register key manager")
+	if err := registryConfig.RegisterKeyManager(new(testKeyManager), internalapitoken.InternalAPIToken{}); err != nil {
+		t.Fatalf("registryConfig.RegisterKeyManager() err = %v, want nil", err)
 	}
 	if _, err := registry.GetKeyManager("testKeyManager"); err != nil {
-		t.Fatal("expect testKeyManager to exist")
+		t.Fatalf("registry.GetKeyManager(\"testKeyManager\") err = %v, want nil", err)
 	}
 	primitive, err := registry.Primitive(new(testKeyManager).TypeURL(), []byte{0, 1, 2, 3})
 	if err != nil {
-		t.Fatalf("could not create primitive: %v", err)
+		t.Fatalf("registry.Primitive() err = %v, want nil", err)
 	}
-	if _, ok := primitive.(testPrimitive); !ok {
-		t.Errorf("primitive creation returned incorrect type object: %v", err)
+	if _, ok := primitive.(*testPrimitive); !ok {
+		t.Error("primitive is not of type *testPrimitive")
 	}
 }
