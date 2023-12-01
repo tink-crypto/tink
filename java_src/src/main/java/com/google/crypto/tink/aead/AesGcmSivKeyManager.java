@@ -136,8 +136,12 @@ public final class AesGcmSivKeyManager {
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
+    // We want to register key proto serialization even when AES-GCM-SIV is unavailable via the
+    // Java Cryptographic Extension framework (and thus via Tink) to enable operations that don't
+    // depend on the actual cryptographic primitive - for example, exporting keys to key management
+    // systems.
+    AesGcmSivProtoSerialization.register();
     if (canUseAesGcmSive()) {
-      AesGcmSivProtoSerialization.register();
       MutablePrimitiveRegistry.globalInstance()
           .registerPrimitiveConstructor(AES_GCM_SIV_PRIMITIVE_CONSTRUCTOR);
       MutableParametersRegistry.globalInstance().putAll(namedParameters());
