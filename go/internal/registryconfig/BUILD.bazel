@@ -7,7 +7,7 @@ go_library(
     visibility = ["//keyset:__subpackages__"],
     deps = [
         "//core/registry",
-        "//internal/internalapitoken",
+        "//internal/internalapi",
         "//proto/tink_go_proto",
     ],
 )
@@ -24,7 +24,7 @@ go_test(
     deps = [
         ":registryconfig",
         "//core/registry",
-        "//internal/internalapitoken",
+        "//internal/internalapi",
         "//mac/subtle",
         "//proto/common_go_proto",
         "//proto/tink_go_proto",

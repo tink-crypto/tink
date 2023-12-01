@@ -21,7 +21,7 @@ import (
 
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
-	"github.com/google/tink/go/internal/internalapitoken"
+	"github.com/google/tink/go/internal/internalapi"
 	"github.com/google/tink/go/internal/registryconfig"
 	"github.com/google/tink/go/mac/subtle"
 	"github.com/google/tink/go/testutil"
@@ -32,7 +32,7 @@ import (
 func TestPrimitiveFromKeyData(t *testing.T) {
 	keyData := testutil.NewHMACKeyData(commonpb.HashType_SHA256, 16)
 	registryConfig := &registryconfig.RegistryConfig{}
-	p, err := registryConfig.PrimitiveFromKeyData(keyData, internalapitoken.InternalAPIToken{})
+	p, err := registryConfig.PrimitiveFromKeyData(keyData, internalapi.Token{})
 	if err != nil {
 		t.Errorf("registryConfig.PrimitiveFromKeyData() err = %v, want nil", err)
 	}
@@ -72,7 +72,7 @@ func TestPrimitiveFromKeyDataErrors(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if _, err := registryConfig.PrimitiveFromKeyData(tc.keyData, internalapitoken.InternalAPIToken{}); err == nil {
+			if _, err := registryConfig.PrimitiveFromKeyData(tc.keyData, internalapi.Token{}); err == nil {
 				t.Errorf("registryConfig.Primitive() err = nil, want not-nil")
 			}
 		})
@@ -90,7 +90,7 @@ func (km *testKeyManager) NewKeyData(_ []byte) (*tinkpb.KeyData, error) { return
 
 func TestRegisterKeyManager(t *testing.T) {
 	registryConfig := &registryconfig.RegistryConfig{}
-	if err := registryConfig.RegisterKeyManager(new(testKeyManager), internalapitoken.InternalAPIToken{}); err != nil {
+	if err := registryConfig.RegisterKeyManager(new(testKeyManager), internalapi.Token{}); err != nil {
 		t.Fatalf("registryConfig.RegisterKeyManager() err = %v, want nil", err)
 	}
 	if _, err := registry.GetKeyManager("testKeyManager"); err != nil {

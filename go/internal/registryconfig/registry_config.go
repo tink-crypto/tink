@@ -21,7 +21,7 @@ package registryconfig
 
 import (
 	"github.com/google/tink/go/core/registry"
-	"github.com/google/tink/go/internal/internalapitoken"
+	"github.com/google/tink/go/internal/internalapi"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
@@ -31,12 +31,12 @@ type RegistryConfig struct{}
 
 // PrimitiveFromKeyData creates a primitive from KeyData by forwarding the
 // KeyData straight to the Registry.
-func (c *RegistryConfig) PrimitiveFromKeyData(keyData *tinkpb.KeyData, _ internalapitoken.InternalAPIToken) (any, error) {
+func (c *RegistryConfig) PrimitiveFromKeyData(keyData *tinkpb.KeyData, _ internalapi.Token) (any, error) {
 	return registry.PrimitiveFromKeyData(keyData)
 }
 
 // RegisterKeyManager registers a provided KeyManager by forwarding it directly
 // to the Registry.
-func (c *RegistryConfig) RegisterKeyManager(km registry.KeyManager, _ internalapitoken.InternalAPIToken) error {
+func (c *RegistryConfig) RegisterKeyManager(km registry.KeyManager, _ internalapi.Token) error {
 	return registry.RegisterKeyManager(km)
 }

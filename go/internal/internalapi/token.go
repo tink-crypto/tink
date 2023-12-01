@@ -14,10 +14,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package internalapitoken provides a token that restricts access to Tink APIs
-// that must be exported from their public packages but shouldn't be accessed by
-// Tink users.
-package internalapitoken
+// Package internalapi provides a token that restricts access to Tink APIs.
+package internalapi
 
-// InternalAPIToken is the token described above.
-type InternalAPIToken struct{}
+// Token is used to restrict access to APIs that must be exported from their
+// public packages but shouldn't be accessed by Tink users.
+type Token struct{}
