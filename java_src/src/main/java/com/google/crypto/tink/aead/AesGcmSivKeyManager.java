@@ -20,27 +20,21 @@ import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.aead.subtle.AesGcmSiv;
-import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
+import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
-import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.Util;
-import com.google.crypto.tink.proto.AesGcmSivKey;
-import com.google.crypto.tink.proto.AesGcmSivKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.Validators;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.crypto.tink.util.SecretBytes;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
@@ -55,81 +49,26 @@ import javax.crypto.NoSuchPaddingException;
  * This key manager generates new {@code AesGcmSivKey} keys and produces new instances of {@code
  * AesGcmSiv}.
  */
-public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
+public final class AesGcmSivKeyManager {
   private static final PrimitiveConstructor<com.google.crypto.tink.aead.AesGcmSivKey, Aead>
       AES_GCM_SIV_PRIMITIVE_CONSTRUCTOR =
           PrimitiveConstructor.create(
               AesGcmSiv::create, com.google.crypto.tink.aead.AesGcmSivKey.class, Aead.class);
 
-  AesGcmSivKeyManager() {
-    super(
-        AesGcmSivKey.class,
-        new PrimitiveFactory<Aead, AesGcmSivKey>(Aead.class) {
-          @Override
-          public Aead getPrimitive(AesGcmSivKey key) throws GeneralSecurityException {
-            return new AesGcmSiv(key.getKeyValue().toByteArray());
-          }
-        });
-  }
-
-  @Override
-  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
-    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
-  }
-
-  @Override
-  public String getKeyType() {
-    return "type.googleapis.com/google.crypto.tink.AesGcmSivKey";
-  }
-
-  @Override
-  public int getVersion() {
-    return 0;
-  }
-
-  @Override
-  public KeyMaterialType keyMaterialType() {
-    return KeyMaterialType.SYMMETRIC;
-  }
-
-  @Override
-  public void validateKey(AesGcmSivKey key) throws GeneralSecurityException {
-    Validators.validateVersion(key.getVersion(), getVersion());
-    Validators.validateAesKeySize(key.getKeyValue().size());
-  }
-
-  @Override
-  public AesGcmSivKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return AesGcmSivKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-  }
-
-  @Override
-  public KeyFactory<AesGcmSivKeyFormat, AesGcmSivKey> keyFactory() {
-    return new KeyFactory<AesGcmSivKeyFormat, AesGcmSivKey>(AesGcmSivKeyFormat.class) {
-      @Override
-      public void validateKeyFormat(AesGcmSivKeyFormat format) throws GeneralSecurityException {
-        Validators.validateAesKeySize(format.getKeySize());
-      }
-
-      @Override
-      public AesGcmSivKeyFormat parseKeyFormat(ByteString byteString)
-          throws InvalidProtocolBufferException {
-        return AesGcmSivKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-      }
-
-      @Override
-      public AesGcmSivKey createKey(AesGcmSivKeyFormat format) {
-        return AesGcmSivKey.newBuilder()
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
-            .setVersion(getVersion())
-            .build();
-      }
-    };
-  }
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyCreationRegistry.KeyCreator<AesGcmSivParameters> KEY_CREATOR =
+      AesGcmSivKeyManager::createAesGcmSivKey;
 
   @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
   private static final MutableKeyDerivationRegistry.InsecureKeyCreator<AesGcmSivParameters>
       KEY_DERIVER = AesGcmSivKeyManager::createAesGcmSivKeyFromRandomness;
+
+  private static final KeyManager<Aead> legacyKeyManager =
+      LegacyKeyManagerImpl.create(
+          "type.googleapis.com/google.crypto.tink.AesGcmSivKey",
+          Aead.class,
+          KeyMaterialType.SYMMETRIC,
+          com.google.crypto.tink.proto.AesGcmSivKey.parser());
 
   @AccessesPartialKey
   static com.google.crypto.tink.aead.AesGcmSivKey createAesGcmSivKeyFromRandomness(
@@ -142,6 +81,17 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
         .setParameters(parameters)
         .setIdRequirement(idRequirement)
         .setKeyBytes(Util.readIntoSecretBytes(stream, parameters.getKeySizeBytes(), access))
+        .build();
+  }
+
+  @AccessesPartialKey
+  private static com.google.crypto.tink.aead.AesGcmSivKey createAesGcmSivKey(
+      AesGcmSivParameters parameters, @Nullable Integer idRequirement)
+      throws GeneralSecurityException {
+    return com.google.crypto.tink.aead.AesGcmSivKey.builder()
+        .setParameters(parameters)
+        .setIdRequirement(idRequirement)
+        .setKeyBytes(SecretBytes.randomBytes(parameters.getKeySizeBytes()))
         .build();
   }
 
@@ -187,12 +137,13 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     if (canUseAesGcmSive()) {
-      Registry.registerKeyManager(new AesGcmSivKeyManager(), newKeyAllowed);
       AesGcmSivProtoSerialization.register();
       MutablePrimitiveRegistry.globalInstance()
           .registerPrimitiveConstructor(AES_GCM_SIV_PRIMITIVE_CONSTRUCTOR);
       MutableParametersRegistry.globalInstance().putAll(namedParameters());
       MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, AesGcmSivParameters.class);
+      MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, AesGcmSivParameters.class);
+      Registry.registerKeyManager(legacyKeyManager, newKeyAllowed);
     }
   }
 
@@ -275,4 +226,6 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
                     .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
                     .build()));
   }
+
+  private AesGcmSivKeyManager() {}
 }

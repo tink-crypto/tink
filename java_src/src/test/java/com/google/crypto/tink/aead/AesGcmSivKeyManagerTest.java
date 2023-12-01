@@ -30,21 +30,15 @@ import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.aead.AesGcmSivParameters.Variant;
 import com.google.crypto.tink.aead.subtle.AesGcmSiv;
-import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.SlowInputStream;
 import com.google.crypto.tink.internal.Util;
-import com.google.crypto.tink.proto.AesGcmSivKey;
-import com.google.crypto.tink.proto.AesGcmSivKeyFormat;
-import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Hex;
-import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.util.SecretBytes;
 import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import java.security.Security;
 import java.util.Arrays;
-import java.util.Set;
-import java.util.TreeSet;
 import javax.annotation.Nullable;
 import org.conscrypt.Conscrypt;
 import org.junit.Assume;
@@ -59,10 +53,6 @@ import org.junit.runner.RunWith;
 /** Test for AesGcmSivKeyManagerTest. */
 @RunWith(Theories.class)
 public class AesGcmSivKeyManagerTest {
-  private final AesGcmSivKeyManager manager = new AesGcmSivKeyManager();
-  private final KeyTypeManager.KeyFactory<AesGcmSivKeyFormat, AesGcmSivKey> factory =
-      manager.keyFactory();
-
   @Before
   public void setUp() throws Exception {
     try {
@@ -75,85 +65,22 @@ public class AesGcmSivKeyManagerTest {
   }
 
   @Test
-  public void basics() throws Exception {
-    assertThat(manager.getKeyType())
-        .isEqualTo("type.googleapis.com/google.crypto.tink.AesGcmSivKey");
-    assertThat(manager.getVersion()).isEqualTo(0);
-    assertThat(manager.keyMaterialType()).isEqualTo(KeyMaterialType.SYMMETRIC);
+  public void testKeyManagerRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getKeyManager("type.googleapis.com/google.crypto.tink.AesGcmSivKey", Aead.class))
+        .isNotNull();
   }
 
   @Test
-  public void validateKeyFormat_empty() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(AesGcmSivKeyFormat.getDefaultInstance()));
-  }
-
-  @Test
-  public void validateKeyFormat_valid() throws Exception {
-    factory.validateKeyFormat(AesGcmSivKeyFormat.newBuilder().setKeySize(16).build());
-    factory.validateKeyFormat(AesGcmSivKeyFormat.newBuilder().setKeySize(32).build());
-  }
-
-  @Test
-  public void validateKeyFormat_invalid() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(AesGcmSivKeyFormat.newBuilder().setKeySize(1).build()));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(AesGcmSivKeyFormat.newBuilder().setKeySize(15).build()));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(AesGcmSivKeyFormat.newBuilder().setKeySize(17).build()));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(AesGcmSivKeyFormat.newBuilder().setKeySize(31).build()));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(AesGcmSivKeyFormat.newBuilder().setKeySize(33).build()));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(AesGcmSivKeyFormat.newBuilder().setKeySize(64).build()));
-  }
-
-  @Test
-  public void createKey_16Bytes() throws Exception {
-    AesGcmSivKey key = factory.createKey(AesGcmSivKeyFormat.newBuilder().setKeySize(16).build());
-    assertThat(key.getKeyValue()).hasSize(16);
-  }
-
-  @Test
-  public void createKey_32Bytes() throws Exception {
-    AesGcmSivKey key = factory.createKey(AesGcmSivKeyFormat.newBuilder().setKeySize(32).build());
-    assertThat(key.getKeyValue()).hasSize(32);
-  }
-
-  @Test
-  public void createKey_multipleTimes() throws Exception {
-    AesGcmSivKeyFormat format = AesGcmSivKeyFormat.newBuilder().setKeySize(16).build();
-    Set<String> keys = new TreeSet<>();
-    // Calls newKey multiple times and make sure that they generate different keys.
-    int numTests = 50;
-    for (int i = 0; i < numTests; i++) {
-      keys.add(Hex.encode(factory.createKey(format).getKeyValue().toByteArray()));
-    }
-    assertThat(keys).hasSize(numTests);
-  }
-
-  @Test
-  public void getPrimitive() throws Exception {
-    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
-    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
-
-    AesGcmSivKey key = factory.createKey(AesGcmSivKeyFormat.newBuilder().setKeySize(16).build());
-    Aead managerAead = manager.getPrimitive(key, Aead.class);
-    Aead directAead = new AesGcmSiv(key.getKeyValue().toByteArray());
-
-    byte[] plaintext = Random.randBytes(20);
-    byte[] associatedData = Random.randBytes(20);
-    assertThat(directAead.decrypt(managerAead.encrypt(plaintext, associatedData), associatedData))
-        .isEqualTo(plaintext);
+  public void testKeyCreationWorks() throws Exception {
+    Parameters validParameters =
+        AesGcmSivParameters.builder()
+            .setKeySizeBytes(32)
+            .setVariant(AesGcmSivParameters.Variant.TINK)
+            .build();
+    assertThat(KeysetHandle.generateNew(validParameters).getAt(0).getKey().getParameters())
+        .isEqualTo(validParameters);
   }
 
   @Test
@@ -161,10 +88,22 @@ public class AesGcmSivKeyManagerTest {
     @Nullable Integer apiLevel = Util.getAndroidApiLevel();
     Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
 
-    AesGcmSivKey key = factory.createKey(AesGcmSivKeyFormat.newBuilder().setKeySize(32).build());
-    Aead aead = new AesGcmSivKeyManager().getPrimitive(key, Aead.class);
+    AesGcmSivParameters parameters =
+        AesGcmSivParameters.builder().setKeySizeBytes(16).setVariant(Variant.NO_PREFIX).build();
+    AesGcmSivKey key =
+        AesGcmSivKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(SecretBytes.randomBytes(16))
+            .build();
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).withRandomId().makePrimary())
+            .build();
     byte[] plaintext = "plaintext".getBytes(UTF_8);
-    byte[] associatedData = "associatedData".getBytes(UTF_8);
+    byte[] associatedData = "aad".getBytes(UTF_8);
+
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
+
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);
     assertThat(ciphertext.length)
         .isEqualTo(12 /* IV_SIZE */ + plaintext.length + 16 /* TAG_SIZE */);
@@ -300,8 +239,8 @@ public class AesGcmSivKeyManagerTest {
     @Nullable Integer apiLevel = Util.getAndroidApiLevel();
     Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
 
-    com.google.crypto.tink.aead.AesGcmSivKey aesGcmSivKey =
-        com.google.crypto.tink.aead.AesGcmSivKey.builder()
+    AesGcmSivKey aesGcmSivKey =
+        AesGcmSivKey.builder()
             .setParameters(
                 AesGcmSivParameters.builder()
                     .setKeySizeBytes(16)
@@ -363,8 +302,8 @@ public class AesGcmSivKeyManagerTest {
     Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
 
     // A valid AES GCM SIV key.
-    com.google.crypto.tink.aead.AesGcmSivKey aesGcmSivKey =
-        com.google.crypto.tink.aead.AesGcmSivKey.builder()
+    AesGcmSivKey aesGcmSivKey =
+        AesGcmSivKey.builder()
             .setParameters(
                 AesGcmSivParameters.builder()
                     .setKeySizeBytes(16)
@@ -384,8 +323,8 @@ public class AesGcmSivKeyManagerTest {
         Hex.decode("c3561ce7f48b8a6b9b8d5ef957d2e512368f7da837bcf2aeebe176e3");
 
     // Create an Aead instance that can decrypt in both AES GCM and AES GCM SIV.
-    com.google.crypto.tink.aead.AesGcmKey legacyKey =
-        com.google.crypto.tink.aead.AesGcmKey.builder()
+    AesGcmKey legacyKey =
+        AesGcmKey.builder()
             .setParameters(
                 AesGcmParameters.builder()
                     .setIvSizeBytes(12)
@@ -414,8 +353,8 @@ public class AesGcmSivKeyManagerTest {
 
     AesGcmSivParameters parameters =
         AesGcmSivParameters.builder().setKeySizeBytes(16).setVariant(Variant.TINK).build();
-    com.google.crypto.tink.aead.AesGcmSivKey key =
-        com.google.crypto.tink.aead.AesGcmSivKey.builder()
+    AesGcmSivKey key =
+        AesGcmSivKey.builder()
             .setParameters(parameters)
             .setKeyBytes(SecretBytes.randomBytes(16))
             .setIdRequirement(42)
