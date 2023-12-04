@@ -224,14 +224,24 @@ public class KmsEnvelopeAeadKeyManager extends KeyTypeManager<KmsEnvelopeAeadKey
    * key encrypting key (KEK) is pointing to {@code kekUri} and DEK template is {@code dekTemplate}
    * (or a derived version of it).
    *
+   * <p>It requires that a {@code KmsClient} that can handle {@code kekUri} is registered. Avoid
+   * registering it more than once.
+   *
    * <p><b>Note: </b> Unlike other templates, when you call {@link KeysetHandle#generateNew} with
    * this template Tink does not generate new key material, but instead creates a reference to the
    * remote KEK.
    *
-   * <p>The second argument of the passed in template is used ignoring the Variant, and assuming
+   * <p>The second argument of the passed in template is ignoring the Variant, and assuming
    * NO_PREFIX instead.
+   *
+   * @deprecated Instead of registring a {@code KmsClient}, and creating an {@code Aead} using
+   *     {@code KeysetHandle.generateNew(KmsEnvelopeAeadKeyManager.createKeyTemplate(keyUri,
+   *     KeyTemplates.get("AES128_GCM"))).getPrimitive(Aead.class)}, create the {@code Aead}
+   *     directly using {@code KmsEnvelopeAead.create(PredefinedAeadParameters.AES256_GCM,
+   *     kmsClient.getAead(keyUri))}, without registering any {@code KmsClient}.
    */
   @AccessesPartialKey
+  @Deprecated // We do not recommend using this API, but there are no plans to remove it.
   public static KeyTemplate createKeyTemplate(String kekUri, KeyTemplate dekTemplate) {
     try {
       Parameters parameters = dekTemplate.toParameters();

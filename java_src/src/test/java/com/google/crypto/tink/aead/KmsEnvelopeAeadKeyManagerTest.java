@@ -27,6 +27,7 @@ import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KmsEnvelopeAeadKey;
@@ -38,6 +39,8 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
+import javax.annotation.Nullable;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -440,6 +443,33 @@ public class KmsEnvelopeAeadKeyManagerTest {
                     .setVariant(AesCtrHmacAeadParameters.Variant.TINK)
                     .build()));
     assertThat(template2.toParameters()).isEqualTo(parameters);
+  }
+
+  @Test
+  public void createKeyTemplateGenerateNewGetPrimitive_isSameAs_create() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
+    String keyUri = FakeKmsClient.createFakeKeyUri();
+
+    // Create Aead primitive using createKeyTemplate, generateNew, and getPrimitive.
+    // This requires that a KmsClient that supports keyUri is registered.
+    KeyTemplate template =
+        KmsEnvelopeAeadKeyManager.createKeyTemplate(keyUri, KeyTemplates.get("AES128_GCM"));
+    KeysetHandle keysetHandle = KeysetHandle.generateNew(template);
+    Aead aead1 = keysetHandle.getPrimitive(Aead.class);
+
+    // Create Aead using FakeKmsClient.getAead and KmsEnvelopeAead.create.
+    // No KmsClient needs to be registered.
+    Aead keyEncryptionAead = new FakeKmsClient().getAead(keyUri);
+    Aead aead2 = KmsEnvelopeAead.create(PredefinedAeadParameters.AES256_GCM, keyEncryptionAead);
+
+    // Test that aead1 and aead2 are the same.
+    byte[] plaintext = Random.randBytes(20);
+    byte[] associatedData = Random.randBytes(20);
+    byte[] ciphertext = aead1.encrypt(plaintext, associatedData);
+    byte[] decrypted = aead2.decrypt(ciphertext, associatedData);
+    assertThat(decrypted).isEqualTo(plaintext);
   }
 
   @Test

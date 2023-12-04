@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClients;
+import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.FakeKmsClient;
 import com.google.crypto.tink.testing.TestUtil;
 import org.junit.Before;
@@ -43,6 +44,29 @@ public class KmsAeadKeyManagerTest {
     KeysetHandle keysetHandle =
         KeysetHandle.generateNew(KmsAeadKeyManager.createKeyTemplate(keyUri));
     TestUtil.runBasicAeadTests(keysetHandle.getPrimitive(Aead.class));
+  }
+
+  @Test
+  public void createKeyTemplateGenerateNewGetPrimitive_isSameAs_clientGetAead()
+      throws Exception {
+    String keyUri = FakeKmsClient.createFakeKeyUri();
+
+    // Create Aead primitive using createKeyTemplate, generateNew, and getPrimitive.
+    // This requires that a KmsClient that supports keyUri is registered.
+    KeysetHandle keysetHandle =
+        KeysetHandle.generateNew(KmsAeadKeyManager.createKeyTemplate(keyUri));
+    Aead aead1 = keysetHandle.getPrimitive(Aead.class);
+
+    // Create Aead using FakeKmsClient.getAead.
+    // No KmsClient needs to be registered.
+    Aead aead2 = new FakeKmsClient().getAead(keyUri);
+
+    // Test that aead1 and aead2 are the same.
+    byte[] plaintext = Random.randBytes(20);
+    byte[] associatedData = Random.randBytes(20);
+    byte[] ciphertext = aead1.encrypt(plaintext, associatedData);
+    byte[] decrypted = aead2.decrypt(ciphertext, associatedData);
+    assertThat(decrypted).isEqualTo(plaintext);
   }
 
   @Test
