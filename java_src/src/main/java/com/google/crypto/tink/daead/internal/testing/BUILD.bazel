@@ -1,0 +1,36 @@
+load("@build_bazel_rules_android//android:rules.bzl", "android_library")
+
+licenses(["notice"])
+
+package(
+    default_testonly = 1,
+    default_visibility = ["//:__subpackages__"],
+)
+
+java_library(
+    name = "legacy_aes_siv_test_key_manager",
+    srcs = ["LegacyAesSivTestKeyManager.java"],
+    deps = [
+        "//proto:aes_siv_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:deterministic_aead",
+        "//src/main/java/com/google/crypto/tink:key_manager",
+        "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/subtle:aes_siv",
+        "@maven//:com_google_protobuf_protobuf_java",
+    ],
+)
+
+android_library(
+    name = "legacy_aes_siv_test_key_manager-android",
+    srcs = ["LegacyAesSivTestKeyManager.java"],
+    deps = [
+        "//proto:aes_siv_java_proto_lite",
+        "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink:deterministic_aead-android",
+        "//src/main/java/com/google/crypto/tink:key_manager-android",
+        "//src/main/java/com/google/crypto/tink:registry-android",
+        "//src/main/java/com/google/crypto/tink/subtle:aes_siv-android",
+        "@maven//:com_google_protobuf_protobuf_javalite",
+    ],
+)
