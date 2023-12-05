@@ -42,9 +42,9 @@ import java.security.GeneralSecurityException;
  */
 public final class HybridConfig {
   public static final String ECIES_AEAD_HKDF_PUBLIC_KEY_TYPE_URL =
-      new EciesAeadHkdfPublicKeyManager().getKeyType();
+      initializeClassReturnInput("type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey");
   public static final String ECIES_AEAD_HKDF_PRIVATE_KEY_TYPE_URL =
-      new EciesAeadHkdfPrivateKeyManager().getKeyType();
+      initializeClassReturnInput("type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey");
 
   /**
    * @deprecated
@@ -71,6 +71,26 @@ public final class HybridConfig {
     } catch (GeneralSecurityException e) {
       throw new ExceptionInInitializerError(e);
     }
+  }
+
+  /**
+   * Returns the input, but crucially also calls the static initializer just above.
+   *
+   * <p>Before some refactorings, the string constants in this class were defined as: <code>
+   * private final static string AES_CTR_HMAC_AEAD_TYPE_URL = new SomeKeyMananger().get();
+   * </code>. After the refactorings, it would be tempting to define them as <code>
+   * AES_CTR_HMAC_AEAD_TYPE_URL = "...";</code> However, this would change the behavior. By the JLS
+   * §12.4.1, the static initializer of the class is called if "A static field declared by T is used
+   * and the field is not a constant variable". The §4.12.4 explains that a constant variable is a
+   * "final variable of type String which is initialized with a constant expression". Hence, after
+   * the above refactoring the initializer wouldn't be called anymore.
+   *
+   * <p>Because of this, we always call this function here to enforce calling the static
+   * initializer, i.e. to enforce that when a user accesses any of the variables here, the class is
+   * initialized.
+   */
+  private static String initializeClassReturnInput(String s) {
+    return s;
   }
 
   /**
