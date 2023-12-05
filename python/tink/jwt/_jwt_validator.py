@@ -14,7 +14,7 @@
 
 import datetime
 
-from typing import Optional
+from typing import Optional, cast
 from tink.jwt import _jwt_error
 from tink.jwt import _raw_jwt
 
@@ -66,7 +66,7 @@ class JwtValidator:
     if clock_skew:
       if clock_skew > _MAX_CLOCK_SKEW:
         raise ValueError('clock skew too large, max is 10 minutes')
-      self._clock_skew = clock_skew
+      self._clock_skew = cast(datetime.timedelta, clock_skew)
     else:
       self._clock_skew = datetime.timedelta()
     if fixed_now and not fixed_now.tzinfo:
@@ -155,7 +155,7 @@ def validate(validator: JwtValidator, raw_jwt: _raw_jwt.RawJwt) -> None:
     jwt.JwtInvalidError
   """
   if validator.has_fixed_now():
-    now = validator.fixed_now()
+    now = cast(datetime.datetime, validator.fixed_now())
   else:
     now = datetime.datetime.now(tz=datetime.timezone.utc)
   if not raw_jwt.has_expiration() and not validator.allow_missing_expiration():
