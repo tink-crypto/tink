@@ -76,15 +76,17 @@ def _set_custom_kid(keyset_handle: tink.KeysetHandle,
     jwt_ecdsa_key.public_key.custom_kid.value = custom_kid
     keyset.key[0].key_data.value = jwt_ecdsa_key.SerializeToString()
   elif keyset.key[0].key_data.type_url.endswith('JwtRsaSsaPkcs1PrivateKey'):
-    rsa_key = jwt_rsa_ssa_pkcs1_pb2.JwtRsaSsaPkcs1PrivateKey.FromString(
-        keyset.key[0].key_data.value)
-    rsa_key.public_key.custom_kid.value = custom_kid
-    keyset.key[0].key_data.value = rsa_key.SerializeToString()
+    rsa_pkcs1_key = jwt_rsa_ssa_pkcs1_pb2.JwtRsaSsaPkcs1PrivateKey.FromString(
+        keyset.key[0].key_data.value
+    )
+    rsa_pkcs1_key.public_key.custom_kid.value = custom_kid
+    keyset.key[0].key_data.value = rsa_pkcs1_key.SerializeToString()
   elif keyset.key[0].key_data.type_url.endswith('JwtRsaSsaPssPrivateKey'):
-    rsa_key = jwt_rsa_ssa_pss_pb2.JwtRsaSsaPssPrivateKey.FromString(
-        keyset.key[0].key_data.value)
-    rsa_key.public_key.custom_kid.value = custom_kid
-    keyset.key[0].key_data.value = rsa_key.SerializeToString()
+    rsa_pss_key = jwt_rsa_ssa_pss_pb2.JwtRsaSsaPssPrivateKey.FromString(
+        keyset.key[0].key_data.value
+    )
+    rsa_pss_key.public_key.custom_kid.value = custom_kid
+    keyset.key[0].key_data.value = rsa_pss_key.SerializeToString()
   else:
     raise tink.TinkError('unknown key type')
   return tink.proto_keyset_format.parse(
