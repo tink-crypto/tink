@@ -19,10 +19,16 @@
 #include <memory>
 #include <utility>
 
+#include "absl/memory/memory.h"
+#include "absl/strings/string_view.h"
 #include "tink/cleartext_keyset_handle.h"
+#include "tink/input_stream.h"
+#include "tink/internal/registry_impl.h"
+#include "tink/keyderivation/keyset_deriver.h"
 #include "tink/keyset_handle.h"
 #include "tink/registry.h"
 #include "tink/subtle/prf/streaming_prf.h"
+#include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {

@@ -17,6 +17,7 @@
 #ifndef TINK_KEYDERIVATION_INTERNAL_PRF_BASED_DERIVER_KEY_MANAGER_H_
 #define TINK_KEYDERIVATION_INTERNAL_PRF_BASED_DERIVER_KEY_MANAGER_H_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
@@ -24,8 +25,15 @@
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
+#include "tink/core/key_type_manager.h"
+#include "tink/core/template_util.h"
 #include "tink/keyderivation/internal/prf_based_deriver.h"
 #include "tink/keyderivation/keyset_deriver.h"
+#include "tink/registry.h"
+#include "tink/util/constants.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
+#include "tink/util/validation.h"
 #include "proto/prf_based_deriver.pb.h"
 #include "proto/tink.pb.h"
 
