@@ -3,8 +3,8 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 
 TINK_MAVEN_ARTIFACTS = [
-    "com.google.protobuf:protobuf-java:3.19.6",
-    "com.google.protobuf:protobuf-javalite:3.19.6",
+    "com.google.protobuf:protobuf-java:3.24.4",
+    "com.google.protobuf:protobuf-javalite:3.24.4",
     "com.amazonaws:aws-java-sdk-core:1.12.182",
     "com.amazonaws:aws-java-sdk-kms:1.12.182",
     "androidx.annotation:annotation:1.5.0",
