@@ -23,9 +23,12 @@ import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.TinkProtoParametersFormat;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KmsEnvelopeAeadKey;
@@ -43,6 +46,27 @@ import java.security.GeneralSecurityException;
 public class KmsEnvelopeAeadKeyManager extends KeyTypeManager<KmsEnvelopeAeadKey> {
   private static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey";
+
+  @AccessesPartialKey
+  private static Aead create(LegacyKmsEnvelopeAeadKey key) throws GeneralSecurityException {
+    byte[] serializedDekParameters =
+        TinkProtoParametersFormat.serialize(key.getParameters().getDekParametersForNewKeys());
+    com.google.crypto.tink.proto.KeyTemplate dekKeyTemplate;
+    try {
+      dekKeyTemplate =
+          com.google.crypto.tink.proto.KeyTemplate.parseFrom(
+              serializedDekParameters, ExtensionRegistryLite.getEmptyRegistry());
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("Parsing of DEK key template failed: ", e);
+    }
+    String kekUri = key.getParameters().getKekUri();
+    return new KmsEnvelopeAead(dekKeyTemplate, KmsClients.get(kekUri).getAead(kekUri));
+  }
+
+  private static final PrimitiveConstructor<LegacyKmsEnvelopeAeadKey, Aead>
+      LEGACY_KMS_ENVELOPE_AEAD_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              KmsEnvelopeAeadKeyManager::create, LegacyKmsEnvelopeAeadKey.class, Aead.class);
 
   KmsEnvelopeAeadKeyManager() {
     super(
@@ -262,6 +286,8 @@ public class KmsEnvelopeAeadKeyManager extends KeyTypeManager<KmsEnvelopeAeadKey
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new KmsEnvelopeAeadKeyManager(), newKeyAllowed);
     LegacyKmsEnvelopeAeadProtoSerialization.register();
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(LEGACY_KMS_ENVELOPE_AEAD_PRIMITIVE_CONSTRUCTOR);
   }
 
   static KmsEnvelopeAeadKeyFormat createKeyFormat(String kekUri, KeyTemplate dekTemplate)

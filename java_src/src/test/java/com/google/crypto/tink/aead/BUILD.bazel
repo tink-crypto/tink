@@ -123,6 +123,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/aead:cha_cha20_poly1305_parameters",
         "//src/main/java/com/google/crypto/tink/aead:kms_envelope_aead",
         "//src/main/java/com/google/crypto/tink/aead:kms_envelope_aead_key_manager",
+        "//src/main/java/com/google/crypto/tink/aead:legacy_kms_envelope_aead_key",
         "//src/main/java/com/google/crypto/tink/aead:legacy_kms_envelope_aead_parameters",
         "//src/main/java/com/google/crypto/tink/aead:predefined_aead_parameters",
         "//src/main/java/com/google/crypto/tink/aead:x_cha_cha20_poly1305_parameters",
