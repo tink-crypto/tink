@@ -17,6 +17,7 @@
 package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
@@ -24,6 +25,7 @@ import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.FakeKmsClient;
 import com.google.crypto.tink.testing.TestUtil;
+import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,6 +46,31 @@ public class KmsAeadKeyManagerTest {
     KeysetHandle keysetHandle =
         KeysetHandle.generateNew(KmsAeadKeyManager.createKeyTemplate(keyUri));
     TestUtil.runBasicAeadTests(keysetHandle.getPrimitive(Aead.class));
+  }
+
+  @Test
+  public void createAeadFromLegacyKmsAeadKey_works() throws Exception {
+    LegacyKmsAeadParameters parameters =
+        LegacyKmsAeadParameters.create(FakeKmsClient.createFakeKeyUri());
+    LegacyKmsAeadKey key = LegacyKmsAeadKey.create(parameters);
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).withRandomId().makePrimary())
+            .build();
+
+    TestUtil.runBasicAeadTests(keysetHandle.getPrimitive(Aead.class));
+  }
+
+  @Test
+  public void createAeadInvalidUri_throws() throws Exception {
+    LegacyKmsAeadParameters parameters = LegacyKmsAeadParameters.create("wrong uri");
+    LegacyKmsAeadKey key = LegacyKmsAeadKey.create(parameters);
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).withRandomId().makePrimary())
+            .build();
+
+    assertThrows(GeneralSecurityException.class, () -> keysetHandle.getPrimitive(Aead.class));
   }
 
   @Test

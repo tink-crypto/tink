@@ -142,6 +142,7 @@ java_library(
     name = "kms_aead_key_manager",
     srcs = ["KmsAeadKeyManager.java"],
     deps = [
+        ":legacy_kms_aead_key",
         ":legacy_kms_aead_parameters",
         ":legacy_kms_aead_proto_serialization",
         "//proto:kms_aead_java_proto",
@@ -153,6 +154,8 @@ java_library(
         "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_primitive_registry",
+        "//src/main/java/com/google/crypto/tink/internal:primitive_constructor",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
         "@maven//:com_google_protobuf_protobuf_java",
@@ -639,6 +642,7 @@ android_library(
     name = "kms_aead_key_manager-android",
     srcs = ["KmsAeadKeyManager.java"],
     deps = [
+        ":legacy_kms_aead_key-android",
         ":legacy_kms_aead_parameters-android",
         ":legacy_kms_aead_proto_serialization-android",
         "//proto:kms_aead_java_proto_lite",
@@ -650,6 +654,8 @@ android_library(
         "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_primitive_registry-android",
+        "//src/main/java/com/google/crypto/tink/internal:primitive_constructor-android",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory-android",
         "//src/main/java/com/google/crypto/tink/subtle:validators-android",
         "@maven//:com_google_protobuf_protobuf_javalite",

@@ -241,6 +241,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink/aead:aead_config",
         "//src/main/java/com/google/crypto/tink/aead:kms_aead_key_manager",
+        "//src/main/java/com/google/crypto/tink/aead:legacy_kms_aead_key",
         "//src/main/java/com/google/crypto/tink/aead:legacy_kms_aead_parameters",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/testing:fake_kms_client",

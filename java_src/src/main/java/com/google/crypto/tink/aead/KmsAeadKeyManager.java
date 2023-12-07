@@ -23,6 +23,8 @@ import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KmsAeadKey;
@@ -38,6 +40,15 @@ import java.security.GeneralSecurityException;
  * a key residing in a remote KMS.
  */
 public class KmsAeadKeyManager extends KeyTypeManager<KmsAeadKey> {
+  private static Aead create(LegacyKmsAeadKey key) throws GeneralSecurityException {
+    return KmsClients.get(key.getParameters().keyUri()).getAead(key.getParameters().keyUri());
+  }
+
+  private static final PrimitiveConstructor<LegacyKmsAeadKey, Aead>
+      LEGACY_KMS_AEAD_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              KmsAeadKeyManager::create, LegacyKmsAeadKey.class, Aead.class);
+
   KmsAeadKeyManager() {
     super(
         KmsAeadKey.class,
@@ -103,6 +114,8 @@ public class KmsAeadKeyManager extends KeyTypeManager<KmsAeadKey> {
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new KmsAeadKeyManager(), newKeyAllowed);
     LegacyKmsAeadProtoSerialization.register();
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(LEGACY_KMS_AEAD_PRIMITIVE_CONSTRUCTOR);
   }
 
   /**
