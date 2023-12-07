@@ -922,3 +922,29 @@ java_library(
     name = "configuration",
     srcs = ["Configuration.java"],
 )
+
+android_library(
+    name = "tink_legacy_keyset_format-android",
+    srcs = ["TinkLegacyKeysetFormat.java"],
+    deps = [
+        ":aead-android",
+        ":cleartext_keyset_handle-android",
+        ":keyset_reader-android",
+        ":keyset_writer-android",
+        ":registry_cluster-android",
+        ":secret_key_access-android",
+    ],
+)
+
+java_library(
+    name = "tink_legacy_keyset_format",
+    srcs = ["TinkLegacyKeysetFormat.java"],
+    deps = [
+        ":aead",
+        ":cleartext_keyset_handle",
+        ":keyset_reader",
+        ":keyset_writer",
+        ":registry_cluster",
+        ":secret_key_access",
+    ],
+)
