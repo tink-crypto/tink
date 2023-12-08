@@ -97,7 +97,7 @@ class EciesAeadHkdfHybridDecryptTest : public ::testing::Test {
 
   void TestValidKey(const EciesAeadHkdfPrivateKey& ecies_key) {
     auto result(EciesAeadHkdfHybridDecrypt::New(ecies_key));
-    ASSERT_TRUE(result.ok()) << result.status() << ecies_key.DebugString();
+    ASSERT_TRUE(result.ok()) << result.status();
     std::unique_ptr<HybridDecrypt> hybrid_decrypt(std::move(result.value()));
 
     std::unique_ptr<HybridEncrypt> hybrid_encrypt(std::move(

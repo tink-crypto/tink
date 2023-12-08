@@ -160,7 +160,14 @@ MATCHER_P(EqualsKey, key, "is equals to the expected key") {
          arg.key_data().value() == key.key_data().value()) {
     return true;
   }
-  *result_listener << arg.DebugString();
+  *result_listener << "Expected: " << arg.key_id() << ", "
+                   << arg.output_prefix_type() << arg.key_data().type_url()
+                   << ", " << arg.key_data().key_material_type() << ", "
+                   << arg.key_data().value();
+  *result_listener << "\nActual: " << key.key_id() << ", "
+                   << key.output_prefix_type() << key.key_data().type_url()
+                   << ", " << key.key_data().key_material_type() << ", "
+                   << key.key_data().value();
   return false;
 }
 

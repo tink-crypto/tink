@@ -527,8 +527,7 @@ TEST(SignaturePemKeysetReaderTest, ReadECDSACorrectPublicKey) {
   expected_primary_data->set_value(
       GetExpectedEcdsaPublicKeyProto(
           EcdsaSignatureEncoding::IEEE_P1363).SerializeAsString());
-  EXPECT_THAT(keyset->key(0), EqualsKey(expected_primary))
-      << "expected key: " << expected_primary.DebugString();
+  EXPECT_THAT(keyset->key(0), EqualsKey(expected_primary));
 
   // Build the expected secondary key.
   Keyset::Key expected_secondary;
@@ -545,8 +544,7 @@ TEST(SignaturePemKeysetReaderTest, ReadECDSACorrectPublicKey) {
   expected_secondary_data->set_value(
       GetExpectedEcdsaPublicKeyProto(
           EcdsaSignatureEncoding::DER).SerializeAsString());
-  EXPECT_THAT(keyset->key(1), EqualsKey(expected_secondary))
-      << "expected key: " << expected_secondary.DebugString();
+  EXPECT_THAT(keyset->key(1), EqualsKey(expected_secondary));
 }
 
 TEST(SignaturePemKeysetReaderTest, ReadECDSAWrongHashType) {
