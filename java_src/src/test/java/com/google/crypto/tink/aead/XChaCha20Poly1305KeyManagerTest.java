@@ -230,6 +230,15 @@ public class XChaCha20Poly1305KeyManagerTest {
   }
 
   @Test
+  public void callingCreateTwiceGivesDifferentKeys() throws Exception {
+    Parameters p = XChaCha20Poly1305KeyManager.xChaCha20Poly1305Template().toParameters();
+    Key key = KeysetHandle.generateNew(p).getAt(0).getKey();
+    for (int i = 0; i < 1000; ++i) {
+      assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().equalsKey(key)).isFalse();
+    }
+  }
+
+  @Test
   public void getPrimitiveKeysetHandle() throws Exception {
     com.google.crypto.tink.aead.XChaCha20Poly1305Key key =
         com.google.crypto.tink.aead.XChaCha20Poly1305Key.create(

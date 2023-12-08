@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.Key;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
@@ -183,6 +184,15 @@ public class ChaCha20Poly1305KeyManagerTest {
     assertThat(h.size()).isEqualTo(1);
     assertThat(h.getAt(0).getKey().getParameters())
         .isEqualTo(KeyTemplates.get(templateName).toParameters());
+  }
+
+  @Test
+  public void callingCreateTwiceGivesDifferentKeys() throws Exception {
+    Parameters p = ChaCha20Poly1305KeyManager.chaCha20Poly1305Template().toParameters();
+    Key key = KeysetHandle.generateNew(p).getAt(0).getKey();
+    for (int i = 0; i < 1000; ++i) {
+      assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().equalsKey(key)).isFalse();
+    }
   }
 
   @Test

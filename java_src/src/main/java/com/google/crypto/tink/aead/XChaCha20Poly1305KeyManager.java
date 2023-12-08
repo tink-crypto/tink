@@ -26,6 +26,7 @@ import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
@@ -38,6 +39,7 @@ import com.google.crypto.tink.proto.XChaCha20Poly1305KeyFormat;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.crypto.tink.subtle.XChaCha20Poly1305;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -150,6 +152,18 @@ public class XChaCha20Poly1305KeyManager extends KeyTypeManager<XChaCha20Poly130
         idRequirement);
   }
 
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyCreationRegistry.KeyCreator<XChaCha20Poly1305Parameters>
+      KEY_CREATOR = XChaCha20Poly1305KeyManager::createXChaChaKey;
+
+  @AccessesPartialKey
+  static com.google.crypto.tink.aead.XChaCha20Poly1305Key createXChaChaKey(
+      XChaCha20Poly1305Parameters parameters, @Nullable Integer idRequirement)
+      throws GeneralSecurityException {
+    return com.google.crypto.tink.aead.XChaCha20Poly1305Key.create(
+        parameters.getVariant(), SecretBytes.randomBytes(KEY_SIZE_IN_BYTES), idRequirement);
+  }
+
   private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
     Map<String, Parameters> result = new HashMap<>();
         result.put(
@@ -167,6 +181,7 @@ public class XChaCha20Poly1305KeyManager extends KeyTypeManager<XChaCha20Poly130
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(X_CHA_CHA_20_POLY_1305_PRIMITIVE_CONSTRUCTOR);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
+    MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, XChaCha20Poly1305Parameters.class);
     MutableKeyDerivationRegistry.globalInstance()
         .add(KEY_DERIVER, XChaCha20Poly1305Parameters.class);
   }

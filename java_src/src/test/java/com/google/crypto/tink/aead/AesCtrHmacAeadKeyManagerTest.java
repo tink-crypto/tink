@@ -336,6 +336,15 @@ public class AesCtrHmacAeadKeyManagerTest {
         .isEqualTo(KeyTemplates.get(templateName).toParameters());
   }
 
+  @Test
+  public void callingCreateTwiceGivesDifferentKeys() throws Exception {
+    Parameters p = AesCtrHmacAeadKeyManager.aes256CtrHmacSha256Template().toParameters();
+    Key key = KeysetHandle.generateNew(p).getAt(0).getKey();
+    for (int i = 0; i < 1000; ++i) {
+      assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().equalsKey(key)).isFalse();
+    }
+  }
+
   @Theory
   public void testCreateKeyFromRandomness(@FromDataPoints("templateNames") String templateName)
       throws Exception {

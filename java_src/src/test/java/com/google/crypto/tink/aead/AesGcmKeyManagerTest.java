@@ -467,6 +467,15 @@ public class AesGcmKeyManagerTest {
   }
 
   @Test
+  public void callingCreateTwiceGivesDifferentKeys() throws Exception {
+    Parameters p = AesGcmKeyManager.aes128GcmTemplate().toParameters();
+    Key key = KeysetHandle.generateNew(p).getAt(0).getKey();
+    for (int i = 0; i < 1000; ++i) {
+      assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().equalsKey(key)).isFalse();
+    }
+  }
+
+  @Test
   public void testCreateKeyFromRandomness_slowInputStream_works() throws Exception {
     byte[] keyMaterial =
         new byte[] {
