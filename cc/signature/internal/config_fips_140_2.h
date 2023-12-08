@@ -14,8 +14,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef THIRD_PARTY_TINK_CC_SIGNATURE_INTERNAL_CONFIG_FIPS_140_2
-#define THIRD_PARTY_TINK_CC_SIGNATURE_INTERNAL_CONFIG_FIPS_140_2
+#ifndef TINK_SIGNATURE_INTERNAL_CONFIG_FIPS_140_2_H_
+#define TINK_SIGNATURE_INTERNAL_CONFIG_FIPS_140_2_H_
 
 #include "tink/configuration.h"
 #include "tink/util/status.h"
@@ -32,4 +32,4 @@ util::Status AddSignatureFips140_2(Configuration& config);
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // THIRD_PARTY_TINK_CC_SIGNATURE_INTERNAL_CONFIG_FIPS_140_2
+#endif  // TINK_SIGNATURE_INTERNAL_CONFIG_FIPS_140_2_H_
