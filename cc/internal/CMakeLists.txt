@@ -1104,6 +1104,7 @@ tink_cc_test(
     tink::internal::fips_utils
     tink::internal::key_type_info_store
     gmock
+    absl::memory
     absl::status
     absl::optional
     tink::core::aead
@@ -1114,6 +1115,7 @@ tink_cc_test(
     tink::aead::kms_envelope_aead_key_manager
     tink::signature::ecdsa_sign_key_manager
     tink::signature::ecdsa_verify_key_manager
+    tink::util::statusor
     tink::util::test_matchers
     tink::proto::aes_gcm_cc_proto
     tink::proto::common_cc_proto

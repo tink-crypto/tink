@@ -22,6 +22,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/types/optional.h"
 #include "tink/aead.h"
@@ -33,6 +34,7 @@
 #include "tink/key_manager.h"
 #include "tink/signature/ecdsa_sign_key_manager.h"
 #include "tink/signature/ecdsa_verify_key_manager.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/common.pb.h"
@@ -51,6 +53,7 @@ using ::google::crypto::tink::EcdsaParams;
 using ::google::crypto::tink::EcdsaSignatureEncoding;
 using ::google::crypto::tink::EllipticCurveType;
 using ::google::crypto::tink::HashType;
+using ::google::crypto::tink::KeyData;
 
 // TODO(b/265705174): Use fake key managers to avoid relying on key manager
 // implementations.
@@ -343,7 +346,7 @@ TEST(KeyTypeInfoStoreTest, IsEmpty) {
   EXPECT_THAT(store.IsEmpty(), false);
 }
 
-TEST(KeyTypeInfoStoreInfoTest, ConstructWithKeyTypeManager) {
+TEST(KeyTypeInfoStoreInfoTest, KeyTypeManager) {
   KeyTypeInfoStore::Info info(absl::make_unique<AesGcmKeyManager>().release(),
                               /*new_key_allowed=*/false);
 
@@ -373,7 +376,7 @@ TEST(KeyTypeInfoStoreInfoTest, ConstructWithKeyTypeManager) {
   EXPECT_EQ((bool)info.key_deriver(), true);
 }
 
-TEST(KeyTypeInfoStoreInfoTest, ConstructWithAsymmetricKeyTypeManagers) {
+TEST(KeyTypeInfoStoreInfoTest, AsymmetricKeyTypeManagers) {
   KeyTypeInfoStore::Info info(
       absl::make_unique<EcdsaSignKeyManager>().release(),
       absl::make_unique<EcdsaVerifyKeyManager>().get(),
@@ -405,7 +408,7 @@ TEST(KeyTypeInfoStoreInfoTest, ConstructWithAsymmetricKeyTypeManagers) {
   EXPECT_EQ((bool)info.key_deriver(), true);
 }
 
-TEST(KeyTypeInfoStoreInfoTest, ConstructWithKeyManager) {
+TEST(KeyTypeInfoStoreInfoTest, KeyManager) {
   AesGcmKeyManager key_type_manager;
   std::unique_ptr<KeyManager<Aead>> manager =
       MakeKeyManager<Aead>(&key_type_manager);
@@ -435,6 +438,24 @@ TEST(KeyTypeInfoStoreInfoTest, ConstructWithKeyManager) {
               IsOk());
 
   EXPECT_EQ((bool)info.key_deriver(), false);
+}
+
+TEST(KeyTypeInfoStoreInfoTest, GetPrimitive) {
+  KeyTypeInfoStore::Info info(absl::make_unique<AesGcmKeyManager>().release(),
+                              /*new_key_allowed=*/false);
+
+  AesGcmKeyFormat format;
+  format.set_key_size(32);
+  util::StatusOr<std::unique_ptr<KeyData>> key_data =
+      info.key_factory().NewKeyData(format.SerializeAsString());
+  ASSERT_THAT(key_data, IsOk());
+
+  util::StatusOr<std::unique_ptr<Aead>> aead =
+      info.GetPrimitive<Aead>(**key_data);
+  ASSERT_THAT(aead, IsOk());
+  util::StatusOr<std::string> ciphertext = (*aead)->Encrypt("plaintext", "ad");
+  ASSERT_THAT(ciphertext, IsOk());
+  EXPECT_THAT((*aead)->Decrypt(*ciphertext, "ad"), IsOk());
 }
 
 }  // namespace

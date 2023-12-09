@@ -46,8 +46,8 @@ class ConfigurationImpl {
                                         kConfigurationImplErr);
     }
 
-    // Function `primitive_getter` must be defined here, since
-    // PW::InputPrimitive is not accessible later.
+    // `primitive_getter` must be defined here, as PW::InputPrimitive is not
+    // accessible later.
     // TODO(b/284084337): Move primitive getter out of key manager.
     std::function<crypto::tink::util::StatusOr<
         std::unique_ptr<typename PW::InputPrimitive>>(
@@ -62,16 +62,7 @@ class ConfigurationImpl {
       if (!info.ok()) {
         return info.status();
       }
-
-      crypto::tink::util::StatusOr<
-          const crypto::tink::KeyManager<typename PW::InputPrimitive>*>
-          key_manager = (*info)->get_key_manager<typename PW::InputPrimitive>(
-              key_data.type_url());
-      if (!key_manager.ok()) {
-        return key_manager.status();
-      }
-
-      return (*key_manager)->GetPrimitive(key_data);
+      return (*info)->GetPrimitive<typename PW::InputPrimitive>(key_data);
     };
 
     return config.keyset_wrapper_store_
