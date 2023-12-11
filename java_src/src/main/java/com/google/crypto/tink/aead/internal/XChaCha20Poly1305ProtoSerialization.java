@@ -29,6 +29,7 @@ import com.google.crypto.tink.internal.ParametersParser;
 import com.google.crypto.tink.internal.ParametersSerializer;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.ProtoParametersSerialization;
+import com.google.crypto.tink.internal.SerializationRegistry;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
@@ -192,6 +193,14 @@ public final class XChaCha20Poly1305ProtoSerialization {
     registry.registerParametersParser(PARAMETERS_PARSER);
     registry.registerKeySerializer(KEY_SERIALIZER);
     registry.registerKeyParser(KEY_PARSER);
+  }
+
+  public static void register(SerializationRegistry.Builder registryBuilder)
+      throws GeneralSecurityException {
+    registryBuilder.registerParametersSerializer(PARAMETERS_SERIALIZER);
+    registryBuilder.registerParametersParser(PARAMETERS_PARSER);
+    registryBuilder.registerKeySerializer(KEY_SERIALIZER);
+    registryBuilder.registerKeyParser(KEY_PARSER);
   }
 
   private XChaCha20Poly1305ProtoSerialization() {}
