@@ -30,7 +30,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public final class TinkLegacyKeysetFormatTest {
+public final class LegacyKeysetSerializationTest {
 
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
@@ -93,7 +93,7 @@ public final class TinkLegacyKeysetFormatTest {
     byte[] serializedKeyset = TinkProtoKeysetFormat.serializeKeysetWithoutSecret(keysetHandle);
 
     KeysetHandle parsedKeysetHandle =
-        TinkLegacyKeysetFormat.parseKeysetWithoutSecret(
+        LegacyKeysetSerialization.parseKeysetWithoutSecret(
             BinaryKeysetReader.withBytes(serializedKeyset));
 
     assertTrue(keysetHandle.equalsKeyset(parsedKeysetHandle));
@@ -108,7 +108,7 @@ public final class TinkLegacyKeysetFormatTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            TinkLegacyKeysetFormat.parseKeysetWithoutSecret(
+            LegacyKeysetSerialization.parseKeysetWithoutSecret(
                 BinaryKeysetReader.withBytes(serializedKeyset)));
   }
 
@@ -119,7 +119,7 @@ public final class TinkLegacyKeysetFormatTest {
         TinkProtoKeysetFormat.serializeKeyset(keysetHandle, InsecureSecretKeyAccess.get());
 
     KeysetHandle parsedKeysetHandle =
-        TinkLegacyKeysetFormat.parseKeyset(
+        LegacyKeysetSerialization.parseKeyset(
             BinaryKeysetReader.withBytes(serializedKeyset), InsecureSecretKeyAccess.get());
 
     assertTrue(keysetHandle.equalsKeyset(parsedKeysetHandle));
@@ -134,7 +134,7 @@ public final class TinkLegacyKeysetFormatTest {
     assertThrows(
         NullPointerException.class,
         () ->
-            TinkLegacyKeysetFormat.parseKeyset(
+            LegacyKeysetSerialization.parseKeyset(
                 BinaryKeysetReader.withBytes(serializedKeyset), null));
   }
 
@@ -148,7 +148,7 @@ public final class TinkLegacyKeysetFormatTest {
         TinkProtoKeysetFormat.serializeEncryptedKeyset(keysetHandle, aead, associatedData);
 
     KeysetHandle parsedKeysetHandle =
-        TinkLegacyKeysetFormat.parseEncryptedKeyset(
+        LegacyKeysetSerialization.parseEncryptedKeyset(
             BinaryKeysetReader.withBytes(serializedKeyset), aead, associatedData);
 
     assertTrue(keysetHandle.equalsKeyset(parsedKeysetHandle));
@@ -166,7 +166,7 @@ public final class TinkLegacyKeysetFormatTest {
     assertThrows(
         GeneralSecurityException.class,
         () ->
-            TinkLegacyKeysetFormat.parseEncryptedKeyset(
+            LegacyKeysetSerialization.parseEncryptedKeyset(
                 BinaryKeysetReader.withBytes(serializedKeyset), aead, new byte[] {4, 5, 6}));
   }
 
@@ -176,7 +176,7 @@ public final class TinkLegacyKeysetFormatTest {
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     KeysetWriter writer = BinaryKeysetWriter.withOutputStream(outputStream);
-    TinkLegacyKeysetFormat.serializeKeysetWithoutSecret(keysetHandle, writer);
+    LegacyKeysetSerialization.serializeKeysetWithoutSecret(keysetHandle, writer);
     byte[] serializedKeyset = outputStream.toByteArray();
 
     KeysetHandle parsedKeyset = TinkProtoKeysetFormat.parseKeysetWithoutSecret(serializedKeyset);
@@ -192,7 +192,7 @@ public final class TinkLegacyKeysetFormatTest {
     KeysetWriter writer = BinaryKeysetWriter.withOutputStream(outputStream);
     assertThrows(
         GeneralSecurityException.class,
-        () -> TinkLegacyKeysetFormat.serializeKeysetWithoutSecret(keysetHandle, writer));
+        () -> LegacyKeysetSerialization.serializeKeysetWithoutSecret(keysetHandle, writer));
   }
 
   @Test
@@ -201,7 +201,7 @@ public final class TinkLegacyKeysetFormatTest {
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     KeysetWriter writer = BinaryKeysetWriter.withOutputStream(outputStream);
-    TinkLegacyKeysetFormat.serializeKeyset(keysetHandle, writer, InsecureSecretKeyAccess.get());
+    LegacyKeysetSerialization.serializeKeyset(keysetHandle, writer, InsecureSecretKeyAccess.get());
     byte[] serializedKeyset = outputStream.toByteArray();
 
     KeysetHandle parsedKeyset =
@@ -217,7 +217,7 @@ public final class TinkLegacyKeysetFormatTest {
     KeysetWriter writer = BinaryKeysetWriter.withOutputStream(outputStream);
     assertThrows(
         NullPointerException.class,
-        () -> TinkLegacyKeysetFormat.serializeKeyset(keysetHandle, writer, null));
+        () -> LegacyKeysetSerialization.serializeKeyset(keysetHandle, writer, null));
   }
 
   @Test
@@ -228,7 +228,7 @@ public final class TinkLegacyKeysetFormatTest {
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     KeysetWriter writer = BinaryKeysetWriter.withOutputStream(outputStream);
-    TinkLegacyKeysetFormat.serializeEncryptedKeyset(keysetHandle, writer, aead, associatedData);
+    LegacyKeysetSerialization.serializeEncryptedKeyset(keysetHandle, writer, aead, associatedData);
     byte[] serializedKeyset = outputStream.toByteArray();
 
     KeysetHandle parsedKeyset =
@@ -244,7 +244,7 @@ public final class TinkLegacyKeysetFormatTest {
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     KeysetWriter writer = BinaryKeysetWriter.withOutputStream(outputStream);
-    TinkLegacyKeysetFormat.serializeEncryptedKeyset(keysetHandle, writer, aead, associatedData);
+    LegacyKeysetSerialization.serializeEncryptedKeyset(keysetHandle, writer, aead, associatedData);
     byte[] serializedKeyset = outputStream.toByteArray();
 
     assertThrows(

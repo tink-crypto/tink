@@ -924,8 +924,8 @@ java_library(
 )
 
 android_library(
-    name = "tink_legacy_keyset_format-android",
-    srcs = ["TinkLegacyKeysetFormat.java"],
+    name = "legacy_keyset_serialization-android",
+    srcs = ["LegacyKeysetSerialization.java"],
     deps = [
         ":aead-android",
         ":cleartext_keyset_handle-android",
@@ -937,8 +937,8 @@ android_library(
 )
 
 java_library(
-    name = "tink_legacy_keyset_format",
-    srcs = ["TinkLegacyKeysetFormat.java"],
+    name = "legacy_keyset_serialization",
+    srcs = ["LegacyKeysetSerialization.java"],
     deps = [
         ":aead",
         ":cleartext_keyset_handle",

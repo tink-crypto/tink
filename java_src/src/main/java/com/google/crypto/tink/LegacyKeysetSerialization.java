@@ -23,17 +23,18 @@ import java.security.GeneralSecurityException;
  * Parsing and Serialization methods for use with {@link KeysetReader} and {@link KeysetWriter}
  * classes.
  *
- * <p>In combination with a {@link BinaryKeysetReader}, the methods in this file are compatible with
- * the methods in {@link TinkProtoKeysetFormat}.
+ * <p>In combination with a {@link BinaryKeysetReader} or a {@link BinaryKeysetWriter}, the methods
+ * in this file produce serializations compatible with the methods in {@link TinkProtoKeysetFormat}.
  *
- * <p>In combination with a {@link JsonKeysetReader}, the methods in this file are compatible with
- * the methods in {@link TinkJsonProtoKeysetFormat}.
+ * <p>In combination with a {@link JsonKeysetReader} or a {@link JsonKeysetWriter}, the methods in
+ * this file produce serializations compatible with the methods in {@link
+ * TinkJsonProtoKeysetFormat}.
  */
-public final class TinkLegacyKeysetFormat {
+public final class LegacyKeysetSerialization {
   /**
-   * Parse a keyset from the reader.
+   * Parse a KeysetHandle from the reader.
    *
-   * <p>This method only works in case the given key material has no secret keys.
+   * <p>This method is used for keysets containing no secret key material.
    */
   public static KeysetHandle parseKeysetWithoutSecret(KeysetReader reader)
       throws GeneralSecurityException, IOException {
@@ -43,8 +44,8 @@ public final class TinkLegacyKeysetFormat {
   /**
    * Parse a keyset from the reader.
    *
-   * <p>This is used to parse keysets which possibly have secret key material. The second argument
-   * has to be {@code InsecureSecretKeyAccess.get()}.
+   * <p>This is used to parse keysets that may contain secret key material. The second argument has
+   * to be {@code InsecureSecretKeyAccess.get()}.
    */
   public static KeysetHandle parseKeyset(KeysetReader reader, SecretKeyAccess access)
       throws GeneralSecurityException, IOException {
@@ -64,7 +65,7 @@ public final class TinkLegacyKeysetFormat {
   /**
    * Serialize a keyset to the writer.
    *
-   * <p>This method is used in case the keyset has no secret keys material.
+   * <p>This method is used for keysets containing no secret key material.
    */
   public static void serializeKeysetWithoutSecret(KeysetHandle keysetHandle, KeysetWriter writer)
       throws GeneralSecurityException, IOException {
@@ -74,8 +75,8 @@ public final class TinkLegacyKeysetFormat {
   /**
    * Serialize a keyset to the writer.
    *
-   * <p>This method is used in case the keyset may contain secret keys. The last argument must be
-   * {@code InsecureSecretKeyAccess.get()}.
+   * <p>This method is used to serialize keysets that may contain secret key material. The last
+   * argument must be {@code InsecureSecretKeyAccess.get()}.
    */
   public static void serializeKeyset(
       KeysetHandle keysetHandle, KeysetWriter writer, SecretKeyAccess access) throws IOException {
@@ -92,5 +93,5 @@ public final class TinkLegacyKeysetFormat {
     keysetHandle.writeWithAssociatedData(writer, aead, associatedData);
   }
 
-  private TinkLegacyKeysetFormat() {}
+  private LegacyKeysetSerialization() {}
 }
