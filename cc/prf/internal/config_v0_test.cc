@@ -53,8 +53,8 @@ using ::testing::Values;
 TEST(PrfV0Test, PrimitiveWrapper) {
   Configuration config;
   ASSERT_THAT(AddPrfV0(config), IsOk());
-  util::StatusOr<const internal::KeysetWrapperStore*> store =
-      internal::ConfigurationImpl::GetKeysetWrapperStore(config);
+  util::StatusOr<const KeysetWrapperStore*> store =
+      ConfigurationImpl::GetKeysetWrapperStore(config);
   ASSERT_THAT(store, IsOk());
 
   EXPECT_THAT((*store)->Get<PrfSet>(), IsOk());
@@ -63,17 +63,17 @@ TEST(PrfV0Test, PrimitiveWrapper) {
 TEST(PrfV0Test, KeyManagers) {
   Configuration config;
   ASSERT_THAT(AddPrfV0(config), IsOk());
-  util::StatusOr<const internal::KeyTypeInfoStore*> store =
-      internal::ConfigurationImpl::GetKeyTypeInfoStore(config);
+  util::StatusOr<const KeyTypeInfoStore*> store =
+      ConfigurationImpl::GetKeyTypeInfoStore(config);
   ASSERT_THAT(store, IsOk());
 
   KeyGenConfiguration key_gen_config;
   ASSERT_THAT(AddPrfKeyGenV0(key_gen_config), IsOk());
-  util::StatusOr<const internal::KeyTypeInfoStore*> key_gen_store =
-      internal::KeyGenConfigurationImpl::GetKeyTypeInfoStore(key_gen_config);
+  util::StatusOr<const KeyTypeInfoStore*> key_gen_store =
+      KeyGenConfigurationImpl::GetKeyTypeInfoStore(key_gen_config);
   ASSERT_THAT(key_gen_store, IsOk());
 
-  for (const internal::KeyTypeInfoStore* s : {*store, *key_gen_store}) {
+  for (const KeyTypeInfoStore* s : {*store, *key_gen_store}) {
     EXPECT_THAT(s->Get(AesCmacPrfKeyManager().get_key_type()), IsOk());
     EXPECT_THAT(s->Get(HkdfPrfKeyManager().get_key_type()), IsOk());
     EXPECT_THAT(s->Get(HmacPrfKeyManager().get_key_type()), IsOk());

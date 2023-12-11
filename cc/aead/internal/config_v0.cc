@@ -32,33 +32,33 @@ namespace tink {
 namespace internal {
 
 util::Status AddAeadV0(Configuration& config) {
-  util::Status status = internal::ConfigurationImpl::AddPrimitiveWrapper(
+  util::Status status = ConfigurationImpl::AddPrimitiveWrapper(
       absl::make_unique<AeadWrapper>(), config);
   if (!status.ok()) {
     return status;
   }
 
-  status = internal::ConfigurationImpl::AddKeyTypeManager(
+  status = ConfigurationImpl::AddKeyTypeManager(
       absl::make_unique<AesCtrHmacAeadKeyManager>(), config);
   if (!status.ok()) {
     return status;
   }
-  status = internal::ConfigurationImpl::AddKeyTypeManager(
+  status = ConfigurationImpl::AddKeyTypeManager(
       absl::make_unique<AesEaxKeyManager>(), config);
   if (!status.ok()) {
     return status;
   }
-  status = internal::ConfigurationImpl::AddKeyTypeManager(
+  status = ConfigurationImpl::AddKeyTypeManager(
       absl::make_unique<AesGcmKeyManager>(), config);
   if (!status.ok()) {
     return status;
   }
-  status = internal::ConfigurationImpl::AddKeyTypeManager(
+  status = ConfigurationImpl::AddKeyTypeManager(
       absl::make_unique<AesGcmSivKeyManager>(), config);
   if (!status.ok()) {
     return status;
   }
-  return internal::ConfigurationImpl::AddKeyTypeManager(
+  return ConfigurationImpl::AddKeyTypeManager(
       absl::make_unique<XChaCha20Poly1305KeyManager>(), config);
 }
 

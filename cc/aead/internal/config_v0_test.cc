@@ -56,8 +56,8 @@ using ::testing::Values;
 TEST(AeadV0Test, PrimitiveWrappers) {
   Configuration config;
   ASSERT_THAT(AddAeadV0(config), IsOk());
-  util::StatusOr<const internal::KeysetWrapperStore*> store =
-      internal::ConfigurationImpl::GetKeysetWrapperStore(config);
+  util::StatusOr<const KeysetWrapperStore*> store =
+      ConfigurationImpl::GetKeysetWrapperStore(config);
   ASSERT_THAT(store, IsOk());
 
   EXPECT_THAT((*store)->Get<Aead>(), IsOk());
@@ -66,17 +66,17 @@ TEST(AeadV0Test, PrimitiveWrappers) {
 TEST(AeadV0Test, KeyManagers) {
   Configuration config;
   ASSERT_THAT(AddAeadV0(config), IsOk());
-  util::StatusOr<const internal::KeyTypeInfoStore*> store =
-      internal::ConfigurationImpl::GetKeyTypeInfoStore(config);
+  util::StatusOr<const KeyTypeInfoStore*> store =
+      ConfigurationImpl::GetKeyTypeInfoStore(config);
   ASSERT_THAT(store, IsOk());
 
   KeyGenConfiguration key_gen_config;
   ASSERT_THAT(AddAeadKeyGenV0(key_gen_config), IsOk());
-  util::StatusOr<const internal::KeyTypeInfoStore*> key_gen_store =
-      internal::KeyGenConfigurationImpl::GetKeyTypeInfoStore(key_gen_config);
+  util::StatusOr<const KeyTypeInfoStore*> key_gen_store =
+      KeyGenConfigurationImpl::GetKeyTypeInfoStore(key_gen_config);
   ASSERT_THAT(key_gen_store, IsOk());
 
-  for (const internal::KeyTypeInfoStore* s : {*store, *key_gen_store}) {
+  for (const KeyTypeInfoStore* s : {*store, *key_gen_store}) {
     EXPECT_THAT(s->Get(AesCtrHmacAeadKeyManager().get_key_type()), IsOk());
     EXPECT_THAT(s->Get(AesEaxKeyManager().get_key_type()), IsOk());
     EXPECT_THAT(s->Get(AesGcmKeyManager().get_key_type()), IsOk());
@@ -130,7 +130,7 @@ TEST_P(AeadV0BoringSslKeyTypesTest, GetPrimitive) {
   ASSERT_THAT(handle, IsOk());
 
   // Fails if using OpenSSL.
-  if (!internal::IsBoringSsl()) {
+  if (!IsBoringSsl()) {
     EXPECT_THAT((*handle)->GetPrimitive<Aead>(config), Not(IsOk()));
     return;
   }

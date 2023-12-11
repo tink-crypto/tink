@@ -52,7 +52,7 @@ using ::testing::TestWithParam;
 using ::testing::Values;
 
 TEST(SignatureV0Test, Fips) {
-  if (internal::IsFipsEnabledInSsl()) {
+  if (IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only test in non-FIPS mode";
   }
   Configuration config;
@@ -60,7 +60,7 @@ TEST(SignatureV0Test, Fips) {
 }
 
 TEST(SignatureV0Test, PrimitiveWrappers) {
-  if (!internal::IsFipsEnabledInSsl()) {
+  if (!IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
 
@@ -75,7 +75,7 @@ TEST(SignatureV0Test, PrimitiveWrappers) {
 }
 
 TEST(SignatureV0Test, KeyManagers) {
-  if (!internal::IsFipsEnabledInSsl()) {
+  if (!IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
 
@@ -104,7 +104,7 @@ INSTANTIATE_TEST_SUITE_P(
            SignatureKeyTemplates::RsaSsaPss3072Sha256Sha256F4()));
 
 TEST_P(SignatureV0Test, GetPrimitive) {
-  if (!internal::IsFipsEnabledInSsl()) {
+  if (!IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
 
@@ -134,7 +134,7 @@ TEST_P(SignatureV0Test, GetPrimitive) {
 }
 
 TEST(SignatureV0Test, GetPrimitiveNonFips1402KeyTypeFails) {
-  if (!internal::IsFipsEnabledInSsl()) {
+  if (!IsFipsEnabledInSsl()) {
     GTEST_SKIP() << "Only test in FIPS mode";
   }
 
