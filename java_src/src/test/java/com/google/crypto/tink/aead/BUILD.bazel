@@ -472,30 +472,6 @@ java_test(
 )
 
 java_test(
-    name = "AesGcmProtoSerializationTest",
-    size = "small",
-    srcs = ["AesGcmProtoSerializationTest.java"],
-    deps = [
-        "//proto:aes_gcm_java_proto",
-        "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
-        "//src/main/java/com/google/crypto/tink:key",
-        "//src/main/java/com/google/crypto/tink:parameters",
-        "//src/main/java/com/google/crypto/tink/aead:aes_gcm_key",
-        "//src/main/java/com/google/crypto/tink/aead:aes_gcm_parameters",
-        "//src/main/java/com/google/crypto/tink/aead:aes_gcm_proto_serialization",
-        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
-        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
-        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
-        "//src/main/java/com/google/crypto/tink/internal/testing:asserts",
-        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
-        "@maven//:com_google_protobuf_protobuf_java",
-        "@maven//:com_google_truth_truth",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
     name = "AesGcmSivProtoSerializationTest",
     size = "small",
     srcs = ["AesGcmSivProtoSerializationTest.java"],
@@ -586,30 +562,6 @@ java_test(
         "//src/main/java/com/google/crypto/tink/aead:cha_cha20_poly1305_key",
         "//src/main/java/com/google/crypto/tink/aead:cha_cha20_poly1305_parameters",
         "//src/main/java/com/google/crypto/tink/aead:cha_cha20_poly1305_proto_serialization",
-        "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
-        "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
-        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
-        "//src/main/java/com/google/crypto/tink/internal/testing:asserts",
-        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
-        "@maven//:com_google_protobuf_protobuf_java",
-        "@maven//:com_google_truth_truth",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
-    name = "XChaCha20Poly1305ProtoSerializationTest",
-    size = "small",
-    srcs = ["XChaCha20Poly1305ProtoSerializationTest.java"],
-    deps = [
-        "//proto:tink_java_proto",
-        "//proto:xchacha20_poly1305_java_proto",
-        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
-        "//src/main/java/com/google/crypto/tink:key",
-        "//src/main/java/com/google/crypto/tink:parameters",
-        "//src/main/java/com/google/crypto/tink/aead:x_cha_cha20_poly1305_key",
-        "//src/main/java/com/google/crypto/tink/aead:x_cha_cha20_poly1305_parameters",
-        "//src/main/java/com/google/crypto/tink/aead:x_cha_cha20_poly1305_proto_serialization",
         "//src/main/java/com/google/crypto/tink/internal:mutable_serialization_registry",
         "//src/main/java/com/google/crypto/tink/internal:proto_key_serialization",
         "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",

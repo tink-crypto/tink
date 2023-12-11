@@ -14,12 +14,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.aead;
+package com.google.crypto.tink.aead.internal;
 
 import static com.google.crypto.tink.internal.Util.toBytesFromPrintableAscii;
 
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.SecretKeyAccess;
+import com.google.crypto.tink.aead.AesGcmKey;
+import com.google.crypto.tink.aead.AesGcmParameters;
 import com.google.crypto.tink.internal.KeyParser;
 import com.google.crypto.tink.internal.KeySerializer;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
@@ -41,7 +43,7 @@ import javax.annotation.Nullable;
 /** Methods to serialize and parse {@link AesGcmKey} objects and {@link AesGcmParameters} objects */
 @AccessesPartialKey
 @SuppressWarnings("UnnecessarilyFullyQualified") // Fully specifying proto types is more readable
-final class AesGcmProtoSerialization {
+public final class AesGcmProtoSerialization {
   private static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.AesGcmKey";
   private static final Bytes TYPE_URL_BYTES = toBytesFromPrintableAscii(TYPE_URL);
 
