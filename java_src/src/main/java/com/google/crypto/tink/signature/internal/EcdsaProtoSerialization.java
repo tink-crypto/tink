@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.signature;
+package com.google.crypto.tink.signature.internal;
 
 import static com.google.crypto.tink.internal.Util.toBytesFromPrintableAscii;
 
@@ -34,6 +34,9 @@ import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.signature.EcdsaParameters;
+import com.google.crypto.tink.signature.EcdsaPrivateKey;
+import com.google.crypto.tink.signature.EcdsaPublicKey;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBigInteger;
 import com.google.protobuf.ByteString;
@@ -49,7 +52,7 @@ import javax.annotation.Nullable;
  */
 @AccessesPartialKey
 @SuppressWarnings("UnnecessarilyFullyQualified") // Fully specifying proto types is more readable
-final class EcdsaProtoSerialization {
+public final class EcdsaProtoSerialization {
   private static final String PRIVATE_TYPE_URL =
       "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
   private static final Bytes PRIVATE_TYPE_URL_BYTES = toBytesFromPrintableAscii(PRIVATE_TYPE_URL);
