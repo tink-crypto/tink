@@ -97,6 +97,24 @@ func NewAEAD(keyPath string, client *api.Logical, opts ...AEADOption) (tink.AEAD
 	return a, nil
 }
 
+func extractCiphertext(secret *api.Secret) ([]byte, error) {
+	if secret == nil {
+		return nil, errors.New("secret is nil")
+	}
+	c, ok := secret.Data["ciphertext"]
+	if !ok {
+		return nil, errors.New("no ciphertext")
+	}
+	ciphertext, ok := c.(string)
+	if !ok {
+		return nil, errors.New("invalid ciphertext")
+	}
+	if len(ciphertext) == 0 {
+		return nil, errors.New("empty ciphertext")
+	}
+	return []byte(ciphertext), nil
+}
+
 // Encrypt encrypts the plaintext data using a key stored in HashiCorp Vault.
 func (a *vaultAEAD) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
 	// Create an encryption request map according to Vault REST API:
@@ -109,8 +127,28 @@ func (a *vaultAEAD) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	ciphertext := secret.Data["ciphertext"].(string)
-	return []byte(ciphertext), nil
+	return extractCiphertext(secret)
+}
+
+func extractPlaintext(secret *api.Secret) ([]byte, error) {
+	// Note that when a valid ciphertext of the empty string is decrypted,
+	// secret.Data["plaintext"] may not be set. So we allow that.
+	if secret == nil {
+		return []byte{}, nil
+	}
+	p, ok := secret.Data["plaintext"]
+	if !ok {
+		return []byte{}, nil
+	}
+	plaintext64, ok := p.(string)
+	if !ok {
+		return nil, errors.New("invalid plaintext")
+	}
+	plaintext, err := base64.StdEncoding.DecodeString(plaintext64)
+	if err != nil {
+		return nil, err
+	}
+	return plaintext, nil
 }
 
 // Decrypt decrypts the ciphertext using a key stored in HashiCorp Vault.
@@ -125,12 +163,7 @@ func (a *vaultAEAD) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	plaintext64 := secret.Data["plaintext"].(string)
-	plaintext, err := base64.StdEncoding.DecodeString(plaintext64)
-	if err != nil {
-		return nil, err
-	}
-	return plaintext, nil
+	return extractPlaintext(secret)
 }
 
 // getEndpointPaths transforms keyPath into the Vault transit encrypt and decrypt

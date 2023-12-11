@@ -17,7 +17,10 @@
 package hcvault
 
 import (
+	"bytes"
 	"testing"
+
+	"github.com/hashicorp/vault/api"
 )
 
 func TestGetEndpointPaths(t *testing.T) {
@@ -101,6 +104,118 @@ func TestGetEndpointPaths(t *testing.T) {
 			}
 			if decPath != tc.dec {
 				t.Errorf("getEndpointPaths(%q) decryptPath = %q, want %q", tc.path, decPath, tc.dec)
+			}
+		})
+	}
+}
+
+func TestExtractCiphertextFails(t *testing.T) {
+	for _, tc := range []struct {
+		desc   string
+		secret *api.Secret
+	}{
+		{
+			desc:   "nil",
+			secret: nil,
+		},
+		{
+			desc: "empty data",
+			secret: &api.Secret{
+				Data: map[string]any{},
+			},
+		},
+		{
+			desc: "empty ciphertext",
+			secret: &api.Secret{
+				Data: map[string]any{"ciphertext": ""},
+			},
+		},
+		{
+			desc: "wrong type",
+			secret: &api.Secret{
+				Data: map[string]any{"ciphertext": 123},
+			},
+		},
+	} {
+		t.Run(tc.desc, func(t *testing.T) {
+			_, err := extractCiphertext(tc.secret)
+			if err == nil {
+				t.Error("extractCiphertext() err is nil, want error")
+			}
+		})
+	}
+}
+
+func TestExtractCiphertextWorks(t *testing.T) {
+	secret := &api.Secret{
+		Data: map[string]any{"ciphertext": "ciphertext"},
+	}
+	got, err := extractCiphertext(secret)
+	if err != nil {
+		t.Fatalf("extractCiphertext() err = %q, want nil", err)
+	}
+	want := []byte("ciphertext")
+	if !bytes.Equal(got, want) {
+		t.Errorf("extractCiphertext() = %q, want %q", got, want)
+	}
+}
+
+func TestExtractPlaintextFails(t *testing.T) {
+	for _, tc := range []struct {
+		desc   string
+		secret *api.Secret
+	}{
+		{
+			desc: "wrong type",
+			secret: &api.Secret{
+				Data: map[string]any{"plaintext": 123},
+			},
+		},
+	} {
+		t.Run(tc.desc, func(t *testing.T) {
+			_, err := extractPlaintext(tc.secret)
+			if err == nil {
+				t.Error("extractPlaintext() err is nil, want error")
+			}
+		})
+	}
+}
+
+func TestExtractPlaintextWorks(t *testing.T) {
+	for _, tc := range []struct {
+		desc   string
+		secret *api.Secret
+		want   []byte
+	}{
+		{
+			desc: "normal",
+			secret: &api.Secret{
+				Data: map[string]any{"plaintext": "cGxhaW50ZXh0"},
+			},
+			want: []byte("plaintext"),
+		},
+		{
+			desc: "empty plaintext",
+			secret: &api.Secret{
+				Data: map[string]any{"plaintext": ""},
+			},
+			want: []byte{},
+		},
+		{
+			desc: "empty data",
+			secret: &api.Secret{
+				Data: map[string]any{},
+			},
+			want: []byte{},
+		},
+	} {
+		t.Run(tc.desc, func(t *testing.T) {
+			got, err := extractPlaintext(tc.secret)
+			if err != nil {
+				t.Fatalf("extractPlaintext() err = %q, want nil", err)
+			}
+			if !bytes.Equal(got, tc.want) {
+				t.Errorf("extractPlaintext() = %q, want %q", got, tc.want)
 			}
 		})
 	}
