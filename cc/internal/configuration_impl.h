@@ -95,6 +95,18 @@ class ConfigurationImpl {
         /*new_key_allowed=*/true);
   }
 
+  template <class P>
+  static crypto::tink::util::Status AddLegacyKeyManager(
+      std::unique_ptr<KeyManager<P>> key_manager,
+      crypto::tink::Configuration& config) {
+    if (config.global_registry_mode_) {
+      return crypto::tink::util::Status(absl::StatusCode::kFailedPrecondition,
+                                        kConfigurationImplErr);
+    }
+    return config.key_type_info_store_.AddKeyManager(std::move(key_manager),
+                                                     /*new_key_allowed=*/true);
+  }
+
   static crypto::tink::util::StatusOr<
       const crypto::tink::internal::KeyTypeInfoStore*>
   GetKeyTypeInfoStore(const crypto::tink::Configuration& config) {

@@ -26,6 +26,7 @@
 #include "absl/status/status.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/configuration.h"
+#include "tink/core/key_manager_impl.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/core/private_key_type_manager.h"
 #include "tink/core/template_util.h"
@@ -184,16 +185,33 @@ TEST(ConfigurationImplTest, AddKeyTypeManager) {
               IsOk());
 }
 
+TEST(ConfigurationImplTest, AddLegacyKeyManager) {
+  Configuration config;
+  FakeKeyTypeManager manager;
+  EXPECT_THAT(ConfigurationImpl::AddLegacyKeyManager(
+                  MakeKeyManager<FakePrimitive>(&manager), config),
+              IsOk());
+}
+
 TEST(ConfigurationImplTest, GetKeyTypeInfoStore) {
   Configuration config;
   ASSERT_THAT(ConfigurationImpl::AddKeyTypeManager(
                   absl::make_unique<FakeKeyTypeManager>(), config),
               IsOk());
 
-  std::string type_url = FakeKeyTypeManager().get_key_type();
+  EXPECT_THAT(ConfigurationImpl::GetKeyTypeInfoStore(config), IsOk());
+}
+
+TEST(ConfigurationImplTest, GetKeyTypeManager) {
+  Configuration config;
+  ASSERT_THAT(ConfigurationImpl::AddKeyTypeManager(
+                  absl::make_unique<FakeKeyTypeManager>(), config),
+              IsOk());
+
   util::StatusOr<const KeyTypeInfoStore*> store =
       ConfigurationImpl::GetKeyTypeInfoStore(config);
   ASSERT_THAT(store, IsOk());
+  std::string type_url = FakeKeyTypeManager().get_key_type();
   util::StatusOr<const KeyTypeInfoStore::Info*> info = (*store)->Get(type_url);
   ASSERT_THAT(info, IsOk());
 
@@ -203,7 +221,27 @@ TEST(ConfigurationImplTest, GetKeyTypeInfoStore) {
   EXPECT_EQ((*key_manager)->get_key_type(), type_url);
 }
 
-TEST(ConfigurationImplTest, GetKeyTypeInfoStoreMissingInfoFails) {
+TEST(ConfigurationImplTest, GetLegacyKeyManager) {
+  Configuration config;
+  FakeKeyTypeManager manager;
+  ASSERT_THAT(ConfigurationImpl::AddLegacyKeyManager(
+                  MakeKeyManager<FakePrimitive>(&manager), config),
+              IsOk());
+
+  util::StatusOr<const KeyTypeInfoStore*> store =
+      ConfigurationImpl::GetKeyTypeInfoStore(config);
+  ASSERT_THAT(store, IsOk());
+  std::string type_url = FakeKeyTypeManager().get_key_type();
+  util::StatusOr<const KeyTypeInfoStore::Info*> info = (*store)->Get(type_url);
+  ASSERT_THAT(info, IsOk());
+
+  util::StatusOr<const KeyManager<FakePrimitive>*> key_manager =
+      (*info)->get_key_manager<FakePrimitive>(type_url);
+  ASSERT_THAT(key_manager, IsOk());
+  EXPECT_EQ((*key_manager)->get_key_type(), type_url);
+}
+
+TEST(ConfigurationImplTest, GetMissingKeyManagerFails) {
   Configuration config;
   util::StatusOr<const KeyTypeInfoStore*> store =
       ConfigurationImpl::GetKeyTypeInfoStore(config);
@@ -387,7 +425,7 @@ TEST(ConfigurationImplTest, AddAsymmetricKeyManagers) {
               IsOk());
 }
 
-TEST(ConfigurationImplTest, GetKeyTypeInfoStoreAsymmetric) {
+TEST(ConfigurationImplTest, GetAsymmetricKeyManagers) {
   Configuration config;
   ASSERT_THAT(ConfigurationImpl::AddAsymmetricKeyManagers(
                   absl::make_unique<FakeSignKeyManager>(),
@@ -441,6 +479,10 @@ TEST(ConfigurationImplTest, GlobalRegistryMode) {
                   absl::make_unique<FakeSignKeyManager>(),
                   absl::make_unique<FakeVerifyKeyManager>(), config),
               StatusIs(absl::StatusCode::kFailedPrecondition));
+  FakeKeyTypeManager manager;
+  EXPECT_THAT(ConfigurationImpl::AddLegacyKeyManager(
+                  MakeKeyManager<FakePrimitive>(&manager), config),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
   EXPECT_THAT(ConfigurationImpl::GetKeyTypeInfoStore(config).status(),
               StatusIs(absl::StatusCode::kFailedPrecondition));
   EXPECT_THAT(ConfigurationImpl::GetKeysetWrapperStore(config).status(),
@@ -452,8 +494,7 @@ TEST(ConfigurationImplTest, GlobalRegistryMode) {
   keyset.set_primary_key_id(13);
   std::unique_ptr<KeysetHandle> handle =
       CleartextKeysetHandle::GetKeysetHandle(keyset);
-  // TODO(b/265705174): Replace with GetPrimitive(config) once implemented.
-  EXPECT_THAT(handle->GetPrimitive<FakePrimitive>().status(),
+  EXPECT_THAT(handle->GetPrimitive<FakePrimitive>(config).status(),
               StatusIs(absl::StatusCode::kNotFound));
 
   ASSERT_THAT(Registry::RegisterPrimitiveWrapper(
@@ -463,8 +504,7 @@ TEST(ConfigurationImplTest, GlobalRegistryMode) {
       Registry::RegisterKeyTypeManager(absl::make_unique<FakeKeyTypeManager>(),
                                        /*new_key_allowed=*/true),
       IsOk());
-  // TODO(b/265705174): Replace with GetPrimitive(config) once implemented.
-  EXPECT_THAT(handle->GetPrimitive<FakePrimitive>(), IsOk());
+  EXPECT_THAT(handle->GetPrimitive<FakePrimitive>(config), IsOk());
 }
 
 TEST(ConfigurationImplTest, GlobalRegistryModeWithNonEmptyConfigFails) {

@@ -25,6 +25,7 @@
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "tink/aead/aead_key_templates.h"
+#include "tink/core/key_manager_impl.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/core/private_key_type_manager.h"
 #include "tink/core/template_util.h"
@@ -32,6 +33,7 @@
 #include "tink/internal/key_type_info_store.h"
 #include "tink/key_gen_configuration.h"
 #include "tink/key_manager.h"
+#include "tink/keyset_handle.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/registry.h"
@@ -120,7 +122,24 @@ TEST(KeyGenConfigurationImplTest, AddKeyTypeManager) {
               IsOk());
 }
 
+TEST(KeyGenConfigurationImplTest, AddLegacyKeyManager) {
+  KeyGenConfiguration config;
+  FakeKeyTypeManager manager;
+  EXPECT_THAT(KeyGenConfigurationImpl::AddLegacyKeyManager(
+                  MakeKeyManager<FakePrimitive>(&manager), config),
+              IsOk());
+}
+
 TEST(KeyGenConfigurationImplTest, GetKeyTypeInfoStore) {
+  KeyGenConfiguration config;
+  ASSERT_THAT(KeyGenConfigurationImpl::AddKeyTypeManager(
+                  absl::make_unique<FakeKeyTypeManager>(), config),
+              IsOk());
+
+  EXPECT_THAT(KeyGenConfigurationImpl::GetKeyTypeInfoStore(config), IsOk());
+}
+
+TEST(KeyGenConfigurationImplTest, GetKeyTypeManager) {
   KeyGenConfiguration config;
   ASSERT_THAT(KeyGenConfigurationImpl::AddKeyTypeManager(
                   absl::make_unique<FakeKeyTypeManager>(), config),
@@ -139,7 +158,27 @@ TEST(KeyGenConfigurationImplTest, GetKeyTypeInfoStore) {
   EXPECT_EQ((*key_manager)->get_key_type(), type_url);
 }
 
-TEST(KeyGenConfigurationImplTest, GetKeyTypeInfoStoreMissingInfoFails) {
+TEST(KeyGenConfigurationImplTest, GetLegacyKeyManager) {
+  KeyGenConfiguration config;
+  FakeKeyTypeManager manager;
+  ASSERT_THAT(KeyGenConfigurationImpl::AddLegacyKeyManager(
+                  MakeKeyManager<FakePrimitive>(&manager), config),
+              IsOk());
+
+  util::StatusOr<const KeyTypeInfoStore*> store =
+      KeyGenConfigurationImpl::GetKeyTypeInfoStore(config);
+  ASSERT_THAT(store, IsOk());
+  std::string type_url = FakeKeyTypeManager().get_key_type();
+  util::StatusOr<const KeyTypeInfoStore::Info*> info = (*store)->Get(type_url);
+  ASSERT_THAT(info, IsOk());
+
+  util::StatusOr<const KeyManager<FakePrimitive>*> key_manager =
+      (*info)->get_key_manager<FakePrimitive>(type_url);
+  ASSERT_THAT(key_manager, IsOk());
+  EXPECT_EQ((*key_manager)->get_key_type(), type_url);
+}
+
+TEST(KeyGenConfigurationImplTest, GetMissingKeyManagerFails) {
   KeyGenConfiguration config;
   util::StatusOr<const KeyTypeInfoStore*> store =
       KeyGenConfigurationImpl::GetKeyTypeInfoStore(config);
@@ -243,7 +282,7 @@ TEST(KeyGenConfigurationImplTest, AddAsymmetricKeyManagers) {
               IsOk());
 }
 
-TEST(KeyGenConfigurationImplTest, GetKeyTypeInfoStoreAsymmetric) {
+TEST(KeyGenConfigurationImplTest, GetAsymmetricKeyManagers) {
   KeyGenConfiguration config;
   ASSERT_THAT(KeyGenConfigurationImpl::AddAsymmetricKeyManagers(
                   absl::make_unique<FakeSignKeyManager>(),
@@ -294,20 +333,24 @@ TEST(KeyGenConfigurationImplTest, GlobalRegistryMode) {
                   absl::make_unique<FakeSignKeyManager>(),
                   absl::make_unique<FakeVerifyKeyManager>(), config),
               StatusIs(absl::StatusCode::kFailedPrecondition));
+  FakeKeyTypeManager manager;
+  EXPECT_THAT(KeyGenConfigurationImpl::AddLegacyKeyManager(
+                  MakeKeyManager<FakePrimitive>(&manager), config),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
   EXPECT_THAT(KeyGenConfigurationImpl::GetKeyTypeInfoStore(config).status(),
               StatusIs(absl::StatusCode::kFailedPrecondition));
 
-  // TODO(b/265705174): Replace with KeysetHandle::GenerateNew(config).
-  EXPECT_THAT(Registry::NewKeyData(AeadKeyTemplates::Aes256Gcm()).status(),
-              StatusIs(absl::StatusCode::kNotFound));
+  EXPECT_THAT(
+      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes256Gcm(), config).status(),
+      StatusIs(absl::StatusCode::kNotFound));
 
   ASSERT_THAT(
       Registry::RegisterKeyTypeManager(absl::make_unique<FakeKeyTypeManager>(),
                                        /*new_key_allowed=*/true),
       IsOk());
-  // TODO(b/265705174): Replace with KeysetHandle::GenerateNew(config) once
-  // implemented.
-  EXPECT_THAT(Registry::NewKeyData(AeadKeyTemplates::Aes256Gcm()), IsOk());
+  EXPECT_THAT(
+      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes256Gcm(), config).status(),
+      IsOk());
 }
 
 TEST(KeyGenConfigurationImplTest, GlobalRegistryModeWithNonEmptyConfigFails) {

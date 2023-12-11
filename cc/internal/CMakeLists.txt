@@ -1057,6 +1057,7 @@ tink_cc_test(
     absl::status
     tink::core::cleartext_keyset_handle
     tink::core::configuration
+    tink::core::key_manager_impl
     tink::core::key_type_manager
     tink::core::private_key_type_manager
     tink::core::template_util
@@ -1164,6 +1165,7 @@ tink_cc_library(
     absl::status
     absl::string_view
     tink::core::key_gen_configuration
+    tink::core::key_manager
     tink::util::status
     tink::util::statusor
 )
@@ -1178,12 +1180,14 @@ tink_cc_test(
     gmock
     absl::memory
     absl::status
+    tink::core::key_manager_impl
     tink::core::key_type_manager
     tink::core::private_key_type_manager
     tink::core::template_util
     tink::core::input_stream
     tink::core::key_gen_configuration
     tink::core::key_manager
+    tink::core::keyset_handle
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::core::registry
