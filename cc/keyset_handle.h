@@ -220,7 +220,10 @@ class KeysetHandle {
   // Creates a wrapped primitive using this keyset handle and the global
   // registry, which stores necessary primitive wrappers and key type managers.
   template <class P>
-  crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive() const;
+  ABSL_DEPRECATED("Inline this function's body at its call sites")
+  crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive() const {
+    return GetPrimitive<P>(crypto::tink::ConfigGlobalRegistry());
+  }
 
   // Creates a wrapped primitive corresponding to this keyset. Uses the given
   // KeyManager, as well as the KeyManager and PrimitiveWrapper objects in the
@@ -393,13 +396,6 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive(
     return wrapper.status();
   }
   return (*wrapper)->Wrap(keyset_, monitoring_annotations_);
-}
-
-template <class P>
-ABSL_DEPRECATED("Inline this function's body at its call sites")
-crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive()
-    const {
-  return GetPrimitive<P>(crypto::tink::ConfigGlobalRegistry());
 }
 
 template <class P>
