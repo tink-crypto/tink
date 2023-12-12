@@ -18,6 +18,7 @@ package com.google.crypto.tink.hybrid.internal;
 
 import static com.google.crypto.tink.internal.Util.UTF_8;
 
+import com.google.crypto.tink.hybrid.HpkeParameters;
 import com.google.crypto.tink.proto.HpkeAead;
 import com.google.crypto.tink.proto.HpkeKdf;
 import com.google.crypto.tink.proto.HpkeKem;
@@ -142,6 +143,20 @@ public final class HpkeUtil {
       default:
         throw new GeneralSecurityException("Unrecognized NIST HPKE KEM identifier");
     }
+  }
+
+  static EllipticCurves.CurveType nistHpkeKemToCurve(HpkeParameters.KemId kemId)
+      throws GeneralSecurityException {
+    if (kemId == HpkeParameters.KemId.DHKEM_P256_HKDF_SHA256) {
+      return EllipticCurves.CurveType.NIST_P256;
+    }
+    if (kemId == HpkeParameters.KemId.DHKEM_P384_HKDF_SHA384) {
+      return EllipticCurves.CurveType.NIST_P384;
+    }
+    if (kemId == HpkeParameters.KemId.DHKEM_P521_HKDF_SHA512) {
+      return EllipticCurves.CurveType.NIST_P521;
+    }
+    throw new GeneralSecurityException("Unrecognized NIST HPKE KEM identifier");
   }
 
   /** Lengths from 'Npk' column in https://www.rfc-editor.org/rfc/rfc9180.html#table-2. */
