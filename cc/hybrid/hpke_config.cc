@@ -32,6 +32,9 @@ namespace tink {
 
 util::Status RegisterHpke() {
   util::Status status = AeadConfig::Register();
+  if (!status.ok()) {
+    return status;
+  }
 
   // Register primitive wrappers.
   status = Registry::RegisterPrimitiveWrapper(
