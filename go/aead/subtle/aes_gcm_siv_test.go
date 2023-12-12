@@ -44,11 +44,17 @@ func TestAESGCMSIVRandomNonceProducesDifferentCiphertexts(t *testing.T) {
 	key := random.GetRandomBytes(16)
 	pt := []byte{}
 	ad := []byte{}
-	a, _ := subtle.NewAESGCMSIV(key)
+	a, err := subtle.NewAESGCMSIV(key)
+	if err != nil {
+		t.Fatalf("subtle.NewAESGCMSIV() err = %v, want nil", err)
+	}
 	ctSet := make(map[string]bool)
 
 	for i := 0; i < nSample; i++ {
-		ct, _ := a.Encrypt(pt, ad)
+		ct, err := a.Encrypt(pt, ad)
+		if err != nil {
+			t.Fatalf("a.Encrypt() err = %v, want nil", err)
+		}
 		ctHex := hex.EncodeToString(ct)
 
 		if _, existed := ctSet[ctHex]; existed {
@@ -62,8 +68,14 @@ func TestAESGCMSIVModifyCiphertext(t *testing.T) {
 	ad := random.GetRandomBytes(33)
 	key := random.GetRandomBytes(16)
 	pt := random.GetRandomBytes(32)
-	a, _ := subtle.NewAESGCMSIV(key)
-	ct, _ := a.Encrypt(pt, ad)
+	a, err := subtle.NewAESGCMSIV(key)
+	if err != nil {
+		t.Fatalf("subtle.NewAESGCMSIV() err = %v, want nil", err)
+	}
+	ct, err := a.Encrypt(pt, ad)
+	if err != nil {
+		t.Fatalf("a.Encrypt() err = %v, want nil", err)
+	}
 	// flipping bits
 	for i := 0; i < len(ct); i++ {
 		tmp := ct[i]
