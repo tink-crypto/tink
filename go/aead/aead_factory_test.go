@@ -52,12 +52,18 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	if primaryKey.OutputPrefixType == tinkpb.OutputPrefixType_RAW {
 		t.Errorf("expect a non-raw key")
 	}
-	keysetHandle, _ := testkeyset.NewHandle(keyset)
+	keysetHandle, err := testkeyset.NewHandle(keyset)
+	if err != nil {
+		t.Fatalf("testkeyset.NewHandle() err = %s, want err", err)
+	}
 	a, err := aead.New(keysetHandle)
 	if err != nil {
 		t.Errorf("aead.New failed: %s", err)
 	}
-	expectedPrefix, _ := cryptofmt.OutputPrefix(primaryKey)
+	expectedPrefix, err := cryptofmt.OutputPrefix(primaryKey)
+	if err != nil {
+		t.Errorf("cryptofmt.OutputPrefix() err = %s, want nil", err)
+	}
 	if err := validateAEADFactoryCipher(a, a, expectedPrefix); err != nil {
 		t.Errorf("invalid cipher: %s", err)
 	}
@@ -68,7 +74,10 @@ func TestFactoryMultipleKeys(t *testing.T) {
 		t.Errorf("expect a raw key")
 	}
 	keyset2 := testutil.NewKeyset(rawKey.KeyId, []*tinkpb.Keyset_Key{rawKey})
-	keysetHandle2, _ := testkeyset.NewHandle(keyset2)
+	keysetHandle2, err := testkeyset.NewHandle(keyset2)
+	if err != nil {
+		t.Fatalf("testkeyset.NewHandle() err = %s, want err", err)
+	}
 	a2, err := aead.New(keysetHandle2)
 	if err != nil {
 		t.Errorf("aead.New failed: %s", err)
@@ -80,8 +89,14 @@ func TestFactoryMultipleKeys(t *testing.T) {
 	// encrypt with a random key not in the keyset, decrypt with the keyset should fail
 	keyset2 = testutil.NewTestAESGCMKeyset(tinkpb.OutputPrefixType_TINK)
 	primaryKey = keyset2.Key[0]
-	expectedPrefix, _ = cryptofmt.OutputPrefix(primaryKey)
-	keysetHandle2, _ = testkeyset.NewHandle(keyset2)
+	expectedPrefix, err = cryptofmt.OutputPrefix(primaryKey)
+	if err != nil {
+		t.Errorf("cryptofmt.OutputPrefix() err = %s, want err", err)
+	}
+	keysetHandle2, err = testkeyset.NewHandle(keyset2)
+	if err != nil {
+		t.Fatalf("testkeyset.NewHandle() err = %s, want err", err)
+	}
 	a2, err = aead.New(keysetHandle2)
 	if err != nil {
 		t.Errorf("aead.New failed: %s", err)
@@ -97,7 +112,10 @@ func TestFactoryRawKeyAsPrimary(t *testing.T) {
 	if keyset.Key[0].OutputPrefixType != tinkpb.OutputPrefixType_RAW {
 		t.Errorf("primary key is not a raw key")
 	}
-	keysetHandle, _ := testkeyset.NewHandle(keyset)
+	keysetHandle, err := testkeyset.NewHandle(keyset)
+	if err != nil {
+		t.Fatalf("testkeyset.NewHandle() err = %s, want err", err)
+	}
 
 	a, err := aead.New(keysetHandle)
 	if err != nil {
