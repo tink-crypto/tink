@@ -20,30 +20,23 @@ import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Parameters;
-import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.aead.internal.AesGcmProtoSerialization;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
+import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
 import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
-import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.Util;
-import com.google.crypto.tink.proto.AesGcmKey;
-import com.google.crypto.tink.proto.AesGcmKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.AesGcmJce;
-import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.Validators;
 import com.google.crypto.tink.util.SecretBytes;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
@@ -55,72 +48,26 @@ import javax.annotation.Nullable;
  * This key manager generates new {@code AesGcmKey} keys and produces new instances of {@code
  * AesGcmJce}.
  */
-public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
-  private static final PrimitiveConstructor<com.google.crypto.tink.aead.AesGcmKey, Aead>
-      AES_GCM_PRIMITIVE_CONSTRUCTOR =
-          PrimitiveConstructor.create(
-              AesGcmJce::create, com.google.crypto.tink.aead.AesGcmKey.class, Aead.class);
-
-  AesGcmKeyManager() {
-    super(
-        AesGcmKey.class,
-        new PrimitiveFactory<Aead, AesGcmKey>(Aead.class) {
-          @Override
-          public Aead getPrimitive(AesGcmKey key) throws GeneralSecurityException {
-            return new AesGcmJce(key.getKeyValue().toByteArray());
-          }
-        });
+public final class AesGcmKeyManager {
+  private static final void validate(AesGcmParameters parameters) throws GeneralSecurityException {
+    if (parameters.getKeySizeBytes() == 24) {
+      throw new GeneralSecurityException("192 bit AES GCM Parameters are not valid");
+    }
   }
 
-  @Override
-  public String getKeyType() {
+  private static final PrimitiveConstructor<AesGcmKey, Aead> AES_GCM_PRIMITIVE_CONSTRUCTOR =
+      PrimitiveConstructor.create(AesGcmJce::create, AesGcmKey.class, Aead.class);
+
+  static String getKeyType() {
     return "type.googleapis.com/google.crypto.tink.AesGcmKey";
   }
 
-  @Override
-  public int getVersion() {
-    return 0;
-  }
-
-  @Override
-  public KeyMaterialType keyMaterialType() {
-    return KeyMaterialType.SYMMETRIC;
-  }
-
-  @Override
-  public void validateKey(AesGcmKey key) throws GeneralSecurityException {
-    Validators.validateVersion(key.getVersion(), getVersion());
-    Validators.validateAesKeySize(key.getKeyValue().size());
-  }
-
-  @Override
-  public AesGcmKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return AesGcmKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-  }
-
-  @Override
-  public KeyFactory<AesGcmKeyFormat, AesGcmKey> keyFactory() {
-    return new KeyFactory<AesGcmKeyFormat, AesGcmKey>(AesGcmKeyFormat.class) {
-      @Override
-      public void validateKeyFormat(AesGcmKeyFormat format) throws GeneralSecurityException {
-        Validators.validateAesKeySize(format.getKeySize());
-      }
-
-      @Override
-      public AesGcmKeyFormat parseKeyFormat(ByteString byteString)
-          throws InvalidProtocolBufferException {
-        return AesGcmKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-      }
-
-      @Override
-      public AesGcmKey createKey(AesGcmKeyFormat format) throws GeneralSecurityException {
-        return AesGcmKey.newBuilder()
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
-            .setVersion(getVersion())
-            .build();
-      }
-    };
-  }
+  private static final KeyManager<Aead> legacyKeyManager =
+      LegacyKeyManagerImpl.create(
+          getKeyType(),
+          Aead.class,
+          KeyMaterialType.SYMMETRIC,
+          com.google.crypto.tink.proto.AesGcmKey.parser());
 
   private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
         Map<String, Parameters> result = new HashMap<>();
@@ -150,13 +97,14 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
       KEY_DERIVER = AesGcmKeyManager::createAesGcmKeyFromRandomness;
 
   @AccessesPartialKey
-  static com.google.crypto.tink.aead.AesGcmKey createAesGcmKeyFromRandomness(
+  static AesGcmKey createAesGcmKeyFromRandomness(
       AesGcmParameters parameters,
       InputStream stream,
       @Nullable Integer idRequirement,
       SecretKeyAccess access)
       throws GeneralSecurityException {
-    return com.google.crypto.tink.aead.AesGcmKey.builder()
+    validate(parameters);
+    return AesGcmKey.builder()
         .setParameters(parameters)
         .setIdRequirement(idRequirement)
         .setKeyBytes(Util.readIntoSecretBytes(stream, parameters.getKeySizeBytes(), access))
@@ -168,10 +116,11 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
       AesGcmKeyManager::createAesGcmKey;
 
   @AccessesPartialKey
-  private static com.google.crypto.tink.aead.AesGcmKey createAesGcmKey(
+  private static AesGcmKey createAesGcmKey(
       AesGcmParameters parameters, @Nullable Integer idRequirement)
       throws GeneralSecurityException {
-    return com.google.crypto.tink.aead.AesGcmKey.builder()
+    validate(parameters);
+    return AesGcmKey.builder()
         .setParameters(parameters)
         .setIdRequirement(idRequirement)
         .setKeyBytes(SecretBytes.randomBytes(parameters.getKeySizeBytes()))
@@ -179,13 +128,17 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
-    Registry.registerKeyManager(new AesGcmKeyManager(), newKeyAllowed);
     AesGcmProtoSerialization.register();
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(AES_GCM_PRIMITIVE_CONSTRUCTOR);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
     MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, AesGcmParameters.class);
     MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, AesGcmParameters.class);
+    KeyManagerRegistry.globalInstance()
+        .registerKeyManagerWithFipsCompatibility(
+            legacyKeyManager,
+            TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO,
+            newKeyAllowed);
   }
 
   /**
@@ -284,8 +237,5 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
                     .build()));
   }
 
-  @Override
-  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
-    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
-  };
+  private AesGcmKeyManager() {}
 }

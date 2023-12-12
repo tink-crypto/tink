@@ -30,22 +30,14 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
-import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.SlowInputStream;
-import com.google.crypto.tink.proto.AesGcmKey;
-import com.google.crypto.tink.proto.AesGcmKeyFormat;
-import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.AesGcmJce;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Hex;
-import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.util.SecretBytes;
-import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.Set;
-import java.util.TreeSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
@@ -57,91 +49,9 @@ import org.junit.runner.RunWith;
 /** Test for AesGcmJce and its key manager. */
 @RunWith(Theories.class)
 public class AesGcmKeyManagerTest {
-  private final AesGcmKeyManager manager = new AesGcmKeyManager();
-  private final KeyTypeManager.KeyFactory<AesGcmKeyFormat, AesGcmKey> factory =
-      manager.keyFactory();
-
   @Before
   public void register() throws Exception {
     AeadConfig.register();
-  }
-
-  @Test
-  public void basics() throws Exception {
-    assertThat(manager.getKeyType()).isEqualTo("type.googleapis.com/google.crypto.tink.AesGcmKey");
-    assertThat(manager.getVersion()).isEqualTo(0);
-    assertThat(manager.keyMaterialType()).isEqualTo(KeyMaterialType.SYMMETRIC);
-  }
-
-  @Test
-  public void validateKeyFormat_empty() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(AesGcmKeyFormat.getDefaultInstance()));
-  }
-
-  @Test
-  public void validateKeyFormat_valid() throws Exception {
-    factory.validateKeyFormat(AesGcmKeyFormat.newBuilder().setKeySize(16).build());
-    factory.validateKeyFormat(AesGcmKeyFormat.newBuilder().setKeySize(32).build());
-  }
-
-  @Test
-  public void validateKeyFormat_invalid() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(AesGcmKeyFormat.newBuilder().setKeySize(1).build()));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(AesGcmKeyFormat.newBuilder().setKeySize(15).build()));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(AesGcmKeyFormat.newBuilder().setKeySize(17).build()));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(AesGcmKeyFormat.newBuilder().setKeySize(31).build()));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(AesGcmKeyFormat.newBuilder().setKeySize(33).build()));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(AesGcmKeyFormat.newBuilder().setKeySize(64).build()));
-  }
-
-  @Test
-  public void createKey_16Bytes() throws Exception {
-    AesGcmKey key = factory.createKey(AesGcmKeyFormat.newBuilder().setKeySize(16).build());
-    assertThat(key.getKeyValue()).hasSize(16);
-  }
-
-  @Test
-  public void createKey_32Bytes() throws Exception {
-    AesGcmKey key = factory.createKey(AesGcmKeyFormat.newBuilder().setKeySize(32).build());
-    assertThat(key.getKeyValue()).hasSize(32);
-  }
-
-  @Test
-  public void createKey_multipleTimes() throws Exception {
-    AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder().setKeySize(16).build();
-    Set<String> keys = new TreeSet<>();
-    // Calls newKey multiple times and make sure that they generate different keys.
-    int numTests = 50;
-    for (int i = 0; i < numTests; i++) {
-      keys.add(Hex.encode(factory.createKey(format).getKeyValue().toByteArray()));
-    }
-    assertThat(keys).hasSize(numTests);
-  }
-
-  @Test
-  public void getPrimitive() throws Exception {
-    AesGcmKey key = factory.createKey(AesGcmKeyFormat.newBuilder().setKeySize(16).build());
-    Aead managerAead = manager.getPrimitive(key, Aead.class);
-    Aead directAead = new AesGcmJce(key.getKeyValue().toByteArray());
-
-    byte[] plaintext = Random.randBytes(20);
-    byte[] associatedData = Random.randBytes(20);
-    assertThat(directAead.decrypt(managerAead.encrypt(plaintext, associatedData), associatedData))
-        .isEqualTo(plaintext);
   }
 
   private static class NistTestVector {
@@ -337,8 +247,23 @@ public class AesGcmKeyManagerTest {
         // We support only 12-byte IV and 16-byte tag.
         continue;
       }
-      AesGcmKey key = AesGcmKey.newBuilder().setKeyValue(ByteString.copyFrom(t.keyValue)).build();
-      Aead aead = manager.getPrimitive(key, Aead.class);
+      AesGcmParameters parameters =
+          AesGcmParameters.builder()
+              .setIvSizeBytes(12)
+              .setKeySizeBytes(t.keyValue.length)
+              .setTagSizeBytes(16)
+              .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+              .build();
+      AesGcmKey key =
+          AesGcmKey.builder()
+              .setParameters(parameters)
+              .setKeyBytes(SecretBytes.copyFrom(t.keyValue, InsecureSecretKeyAccess.get()))
+              .build();
+      Aead aead =
+          KeysetHandle.newBuilder()
+              .addEntry(KeysetHandle.importKey(key).makePrimary().withRandomId())
+              .build()
+              .getPrimitive(Aead.class);
       try {
         byte[] ciphertext = Bytes.concat(t.iv, t.ciphertext, t.tag);
         byte[] plaintext = aead.decrypt(ciphertext, t.aad);
@@ -347,17 +272,6 @@ public class AesGcmKeyManagerTest {
         fail("Should not fail at " + t.name + ", but thrown exception " + e);
       }
     }
-  }
-
-  @Test
-  public void testCiphertextSize() throws Exception {
-    AesGcmKey key = factory.createKey(AesGcmKeyFormat.newBuilder().setKeySize(32).build());
-    Aead aead = new AesGcmKeyManager().getPrimitive(key, Aead.class);
-    byte[] plaintext = "plaintext".getBytes(UTF_8);
-    byte[] associatedData = "associatedData".getBytes(UTF_8);
-    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
-    assertThat(ciphertext.length)
-        .isEqualTo(12 /* IV_SIZE */ + plaintext.length + 16 /* TAG_SIZE */);
   }
 
   @Test
@@ -450,7 +364,7 @@ public class AesGcmKeyManagerTest {
           25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35
         };
     AesGcmParameters parameters = (AesGcmParameters) KeyTemplates.get(templateName).toParameters();
-    com.google.crypto.tink.aead.AesGcmKey key =
+    AesGcmKey key =
         AesGcmKeyManager.createAesGcmKeyFromRandomness(
             parameters,
             new ByteArrayInputStream(keyMaterial),
@@ -458,7 +372,7 @@ public class AesGcmKeyManagerTest {
             InsecureSecretKeyAccess.get());
     byte[] truncatedKeyMaterial = Arrays.copyOf(keyMaterial, parameters.getKeySizeBytes());
     Key expectedKey =
-        com.google.crypto.tink.aead.AesGcmKey.builder()
+        AesGcmKey.builder()
             .setParameters(parameters)
             .setIdRequirement(parameters.hasIdRequirement() ? 123 : null)
             .setKeyBytes(SecretBytes.copyFrom(truncatedKeyMaterial, InsecureSecretKeyAccess.get()))
@@ -476,6 +390,19 @@ public class AesGcmKeyManagerTest {
   }
 
   @Test
+  public void no24ByteKeys() throws Exception {
+    // We currently disallow creation of AesGcmKeys with 24 bytes (Tink doesn't support using these
+    // for consistency among the languages, so we also disallow creation at the moment).
+    Parameters p =
+        AesGcmParameters.builder()
+            .setIvSizeBytes(12)
+            .setTagSizeBytes(16)
+            .setKeySizeBytes(24)
+            .build();
+    assertThrows(GeneralSecurityException.class, () -> KeysetHandle.generateNew(p));
+  }
+
+  @Test
   public void testCreateKeyFromRandomness_slowInputStream_works() throws Exception {
     byte[] keyMaterial =
         new byte[] {
@@ -489,12 +416,12 @@ public class AesGcmKeyManagerTest {
             .setKeySizeBytes(32)
             .setVariant(AesGcmParameters.Variant.NO_PREFIX)
             .build();
-    com.google.crypto.tink.aead.AesGcmKey key =
+    AesGcmKey key =
         AesGcmKeyManager.createAesGcmKeyFromRandomness(
             parameters, SlowInputStream.copyFrom(keyMaterial), null, InsecureSecretKeyAccess.get());
     byte[] truncatedKeyMaterial = Arrays.copyOf(keyMaterial, parameters.getKeySizeBytes());
     Key expectedKey =
-        com.google.crypto.tink.aead.AesGcmKey.builder()
+        AesGcmKey.builder()
             .setParameters(parameters)
             .setIdRequirement(null)
             .setKeyBytes(SecretBytes.copyFrom(truncatedKeyMaterial, InsecureSecretKeyAccess.get()))
@@ -511,8 +438,8 @@ public class AesGcmKeyManagerTest {
             .setKeySizeBytes(16)
             .setVariant(AesGcmParameters.Variant.TINK)
             .build();
-    com.google.crypto.tink.aead.AesGcmKey key =
-        com.google.crypto.tink.aead.AesGcmKey.builder()
+    AesGcmKey key =
+        AesGcmKey.builder()
             .setParameters(parameters)
             .setKeyBytes(SecretBytes.randomBytes(16))
             .setIdRequirement(31)
