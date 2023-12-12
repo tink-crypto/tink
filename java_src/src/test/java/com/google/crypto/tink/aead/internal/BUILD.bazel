@@ -166,3 +166,24 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "LegacyAesCtrHmacTestKeyManagerTest",
+    size = "small",
+    srcs = ["LegacyAesCtrHmacTestKeyManagerTest.java"],
+    deps = [
+        "//proto:aes_ctr_hmac_aead_java_proto",
+        "//proto:aes_ctr_java_proto",
+        "//proto:common_java_proto",
+        "//proto:hmac_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/aead/internal:legacy_aes_ctr_hmac_test_key_manager",
+        "//src/main/java/com/google/crypto/tink/subtle:encrypt_then_authenticate",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

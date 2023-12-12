@@ -269,3 +269,43 @@ java_library(
         "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
+
+android_library(
+    name = "legacy_aes_ctr_hmac_test_key_manager-android",
+    testonly = 1,
+    srcs = ["LegacyAesCtrHmacTestKeyManager.java"],
+    deps = [
+        "//proto:aes_ctr_hmac_aead_java_proto_lite",
+        "//proto:aes_ctr_java_proto_lite",
+        "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink:aead-android",
+        "//src/main/java/com/google/crypto/tink:key_manager-android",
+        "//src/main/java/com/google/crypto/tink:mac-android",
+        "//src/main/java/com/google/crypto/tink:registry-android",
+        "//src/main/java/com/google/crypto/tink/mac:hmac_key_manager-android",
+        "//src/main/java/com/google/crypto/tink/subtle:aes_ctr_jce_cipher-android",
+        "//src/main/java/com/google/crypto/tink/subtle:encrypt_then_authenticate-android",
+        "//src/main/java/com/google/crypto/tink/subtle:validators-android",
+        "@maven//:com_google_protobuf_protobuf_javalite",
+    ],
+)
+
+java_library(
+    name = "legacy_aes_ctr_hmac_test_key_manager",
+    testonly = 1,
+    srcs = ["LegacyAesCtrHmacTestKeyManager.java"],
+    deps = [
+        "//proto:aes_ctr_hmac_aead_java_proto",
+        "//proto:aes_ctr_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:key_manager",
+        "//src/main/java/com/google/crypto/tink:mac",
+        "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/mac:hmac_key_manager",
+        "//src/main/java/com/google/crypto/tink/subtle:aes_ctr_jce_cipher",
+        "//src/main/java/com/google/crypto/tink/subtle:encrypt_then_authenticate",
+        "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "@maven//:com_google_protobuf_protobuf_java",
+    ],
+)
