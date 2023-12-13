@@ -20,26 +20,18 @@ import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
 import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
-import com.google.crypto.tink.internal.PrimitiveFactory;
-import com.google.crypto.tink.proto.AesEaxKey;
-import com.google.crypto.tink.proto.AesEaxKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.AesEaxJce;
-import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.Validators;
 import com.google.crypto.tink.util.SecretBytes;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,85 +42,26 @@ import javax.annotation.Nullable;
  * This key manager generates new {@code AesEaxKey} keys and produces new instances of {@code
  * AesEaxJce}.
  */
-public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
-  private static final PrimitiveConstructor<com.google.crypto.tink.aead.AesEaxKey, Aead>
-      AES_EAX_PRIMITIVE_CONSTRUCTOR =
-          PrimitiveConstructor.create(
-              AesEaxJce::create, com.google.crypto.tink.aead.AesEaxKey.class, Aead.class);
-
-  AesEaxKeyManager() {
-    super(
-        AesEaxKey.class,
-        new PrimitiveFactory<Aead, AesEaxKey>(Aead.class) {
-          @Override
-          public Aead getPrimitive(AesEaxKey key) throws GeneralSecurityException {
-            return new AesEaxJce(key.getKeyValue().toByteArray(), key.getParams().getIvSize());
-          }
-        });
-  }
-
-  @Override
-  public String getKeyType() {
-    return "type.googleapis.com/google.crypto.tink.AesEaxKey";
-  }
-
-  @Override
-  public int getVersion() {
-    return 0;
-  }
-
-  @Override
-  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
-    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
-  }
-
-  @Override
-  public KeyMaterialType keyMaterialType() {
-    return KeyMaterialType.SYMMETRIC;
-  }
-
-  @Override
-  public void validateKey(AesEaxKey key) throws GeneralSecurityException {
-    Validators.validateVersion(key.getVersion(), getVersion());
-    Validators.validateAesKeySize(key.getKeyValue().size());
-    if (key.getParams().getIvSize() != 12 && key.getParams().getIvSize() != 16) {
-      throw new GeneralSecurityException("invalid IV size; acceptable values have 12 or 16 bytes");
+public final class AesEaxKeyManager {
+  private static final void validate(AesEaxParameters parameters) throws GeneralSecurityException {
+    if (parameters.getKeySizeBytes() == 24) {
+      throw new GeneralSecurityException("192 bit AES GCM Parameters are not valid");
     }
   }
 
-  @Override
-  public AesEaxKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return AesEaxKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
+  private static final PrimitiveConstructor<AesEaxKey, Aead> AES_EAX_PRIMITIVE_CONSTRUCTOR =
+      PrimitiveConstructor.create(AesEaxJce::create, AesEaxKey.class, Aead.class);
+
+  static String getKeyType() {
+    return "type.googleapis.com/google.crypto.tink.AesEaxKey";
   }
 
-  @Override
-  public KeyFactory<AesEaxKeyFormat, AesEaxKey> keyFactory() {
-    return new KeyFactory<AesEaxKeyFormat, AesEaxKey>(AesEaxKeyFormat.class) {
-      @Override
-      public void validateKeyFormat(AesEaxKeyFormat format) throws GeneralSecurityException {
-        Validators.validateAesKeySize(format.getKeySize());
-        if (format.getParams().getIvSize() != 12 && format.getParams().getIvSize() != 16) {
-          throw new GeneralSecurityException(
-              "invalid IV size; acceptable values have 12 or 16 bytes");
-        }
-      }
-
-      @Override
-      public AesEaxKeyFormat parseKeyFormat(ByteString byteString)
-          throws InvalidProtocolBufferException {
-        return AesEaxKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-      }
-
-      @Override
-      public AesEaxKey createKey(AesEaxKeyFormat format) throws GeneralSecurityException {
-        return AesEaxKey.newBuilder()
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
-            .setParams(format.getParams())
-            .setVersion(getVersion())
-            .build();
-      }
-    };
-  }
+  private static final KeyManager<Aead> legacyKeyManager =
+      LegacyKeyManagerImpl.create(
+          getKeyType(),
+          Aead.class,
+          KeyMaterialType.SYMMETRIC,
+          com.google.crypto.tink.proto.AesEaxKey.parser());
 
   private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
         Map<String, Parameters> result = new HashMap<>();
@@ -162,6 +95,7 @@ public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
   private static com.google.crypto.tink.aead.AesEaxKey createAesEaxKey(
       AesEaxParameters parameters, @Nullable Integer idRequirement)
       throws GeneralSecurityException {
+    validate(parameters);
     return com.google.crypto.tink.aead.AesEaxKey.builder()
         .setParameters(parameters)
         .setIdRequirement(idRequirement)
@@ -170,12 +104,12 @@ public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
-    Registry.registerKeyManager(new AesEaxKeyManager(), newKeyAllowed);
     AesEaxProtoSerialization.register();
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(AES_EAX_PRIMITIVE_CONSTRUCTOR);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
     MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, AesEaxParameters.class);
+    Registry.registerKeyManager(legacyKeyManager, newKeyAllowed);
   }
 
   /**
@@ -262,4 +196,5 @@ public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
                     .build()));
   }
 
+  private AesEaxKeyManager() {}
 }

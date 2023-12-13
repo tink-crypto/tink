@@ -19,31 +19,21 @@ package com.google.crypto.tink.aead;
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.aead.AesEaxParameters.Variant;
-import com.google.crypto.tink.internal.KeyTypeManager;
-import com.google.crypto.tink.proto.AesEaxKey;
-import com.google.crypto.tink.proto.AesEaxKeyFormat;
-import com.google.crypto.tink.proto.AesEaxParams;
-import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.AesEaxJce;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Hex;
-import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.util.SecretBytes;
-import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
-import java.util.Set;
-import java.util.TreeSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
@@ -55,106 +45,9 @@ import org.junit.runner.RunWith;
 /** Test for AesEaxJce and its key manager. */
 @RunWith(Theories.class)
 public class AesEaxKeyManagerTest {
-  private final AesEaxKeyManager manager = new AesEaxKeyManager();
-  private final KeyTypeManager.KeyFactory<AesEaxKeyFormat, AesEaxKey> factory =
-      manager.keyFactory();
-
   @Before
   public void register() throws Exception {
     AeadConfig.register();
-  }
-
-  @Test
-  public void basics() throws Exception {
-    assertThat(manager.getKeyType()).isEqualTo("type.googleapis.com/google.crypto.tink.AesEaxKey");
-    assertThat(manager.getVersion()).isEqualTo(0);
-    assertThat(manager.keyMaterialType()).isEqualTo(KeyMaterialType.SYMMETRIC);
-  }
-
-  private static AesEaxKeyFormat createKeyFormat(int keySize, int ivSize) {
-    return AesEaxKeyFormat.newBuilder()
-        .setParams(AesEaxParams.newBuilder().setIvSize(ivSize))
-        .setKeySize(keySize)
-        .build();
-  }
-
-  @Test
-  public void validateKeyFormat_empty() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(AesEaxKeyFormat.getDefaultInstance()));
-  }
-
-  @Test
-  public void validateKeyFormat_valid() throws Exception {
-    factory.validateKeyFormat(createKeyFormat(16, 12));
-    factory.validateKeyFormat(createKeyFormat(16, 16));
-    factory.validateKeyFormat(createKeyFormat(32, 12));
-    factory.validateKeyFormat(createKeyFormat(32, 16));
-  }
-
-  @Test
-  public void validateKeyFormat_keySize() throws Exception {
-    for (int len = 0; len < 200; ++len) {
-      AesEaxKeyFormat format = createKeyFormat(len, 16);
-      if (len == 16 || len == 32) {
-        factory.validateKeyFormat(format);
-      } else {
-        assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
-      }
-    }
-  }
-
-  @Test
-  public void validateKeyFormat_ivSize() throws Exception {
-    for (int ivSize = 0; ivSize < 200; ++ivSize) {
-      AesEaxKeyFormat format = createKeyFormat(32, ivSize);
-      if (ivSize == 12 || ivSize == 16) {
-        factory.validateKeyFormat(format);
-      } else {
-        assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
-      }
-    }
-  }
-
-  @Test
-  public void createKey_checkValues() throws Exception {
-    AesEaxKeyFormat format = createKeyFormat(32, 16);
-    AesEaxKey key = factory.createKey(format);
-    assertThat(key.getKeyValue()).hasSize(format.getKeySize());
-    assertThat(key.getParams()).isEqualTo(format.getParams());
-  }
-
-  @Test
-  public void createKey_checkValues_variant2() throws Exception {
-    AesEaxKeyFormat format = createKeyFormat(16, 12);
-    AesEaxKey key = factory.createKey(format);
-    assertThat(key.getKeyValue()).hasSize(format.getKeySize());
-    assertThat(key.getParams()).isEqualTo(format.getParams());
-  }
-
-  @Test
-  public void createKey_multipleTimes() throws Exception {
-    AesEaxKeyFormat format = createKeyFormat(32, 16);
-    Set<String> keys = new TreeSet<>();
-    // Calls newKey multiple times and make sure that they generate different keys.
-    int numTests = 50;
-    for (int i = 0; i < numTests; i++) {
-      keys.add(Hex.encode(factory.createKey(format).getKeyValue().toByteArray()));
-    }
-    assertThat(keys).hasSize(numTests);
-  }
-
-  @Test
-  public void getPrimitive() throws Exception {
-    AesEaxKey key = factory.createKey(createKeyFormat(32, 16));
-    Aead managerAead = manager.getPrimitive(key, Aead.class);
-    Aead directAead = new AesEaxJce(key.getKeyValue().toByteArray(), key.getParams().getIvSize());
-
-    byte[] plaintext = Random.randBytes(20);
-    byte[] associatedData = Random.randBytes(20);
-    assertThat(directAead.decrypt(managerAead.encrypt(plaintext, associatedData), associatedData))
-        .isEqualTo(plaintext);
   }
 
   private static class PublicTestVector {
@@ -276,12 +169,23 @@ public class AesEaxKeyManagerTest {
   @Test
   public void testPublicTestVectors() throws Exception {
     for (PublicTestVector t : publicTestVectors) {
-      AesEaxKey key =
-          AesEaxKey.newBuilder()
-              .setKeyValue(ByteString.copyFrom(t.keyValue))
-              .setParams(AesEaxParams.newBuilder().setIvSize(t.iv.length))
+      AesEaxParameters parameters =
+          AesEaxParameters.builder()
+              .setIvSizeBytes(t.iv.length)
+              .setKeySizeBytes(t.keyValue.length)
+              .setTagSizeBytes(t.tag.length)
+              .setVariant(AesEaxParameters.Variant.NO_PREFIX)
               .build();
-      Aead aead = manager.getPrimitive(key, Aead.class);
+      AesEaxKey key =
+          AesEaxKey.builder()
+              .setParameters(parameters)
+              .setKeyBytes(SecretBytes.copyFrom(t.keyValue, InsecureSecretKeyAccess.get()))
+              .build();
+      Aead aead =
+          KeysetHandle.newBuilder()
+              .addEntry(KeysetHandle.importKey(key).makePrimary().withRandomId())
+              .build()
+              .getPrimitive(Aead.class);
       try {
         byte[] ciphertext = Bytes.concat(t.iv, t.ciphertext, t.tag);
         byte[] plaintext = aead.decrypt(ciphertext, t.aad);
@@ -290,16 +194,6 @@ public class AesEaxKeyManagerTest {
         fail("Should not fail at " + t.name + ", but thrown exception " + e);
       }
     }
-  }
-
-  @Test
-  public void testCiphertextSize() throws Exception {
-    AesEaxKey key = factory.createKey(createKeyFormat(32, 16));
-    Aead aead = manager.getPrimitive(key, Aead.class);
-    byte[] plaintext = "plaintext".getBytes(UTF_8);
-    byte[] associatedData = "associatedData".getBytes(UTF_8);
-    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
-    assertEquals(16 /* IV_SIZE */ + plaintext.length + 16 /* TAG_SIZE */, ciphertext.length);
   }
 
   @Test

@@ -190,7 +190,7 @@ public final class AeadKeyTemplates {
         .build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(new AesEaxKeyManager().getKeyType())
+        .setTypeUrl(AesEaxKeyManager.getKeyType())
         .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }
