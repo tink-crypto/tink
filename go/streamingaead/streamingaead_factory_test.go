@@ -65,7 +65,10 @@ func TestFactoryMultipleKeys(t *testing.T) {
 			t.Errorf("expect a raw key")
 		}
 		keyset2 := testutil.NewKeyset(rawKey.KeyId, []*tinkpb.Keyset_Key{rawKey})
-		keysetHandle2, _ := testkeyset.NewHandle(keyset2)
+		keysetHandle2, err := testkeyset.NewHandle(keyset2)
+		if err != nil {
+			t.Fatalf("testkeyset.NewHandle(keyset2) err = %q, want nil", err)
+		}
 		a2, err := streamingaead.New(keysetHandle2)
 		if err != nil {
 			t.Errorf("streamingaead.New failed: %s", err)
@@ -77,7 +80,10 @@ func TestFactoryMultipleKeys(t *testing.T) {
 
 	t.Run("Encrypt with a random key not in the keyset, decrypt with the keyset should fail", func(t *testing.T) {
 		keyset2 := testutil.NewTestAESGCMHKDFKeyset()
-		keysetHandle2, _ := testkeyset.NewHandle(keyset2)
+		keysetHandle2, err := testkeyset.NewHandle(keyset2)
+		if err != nil {
+			t.Fatalf("testkeyset.NewHandle(keyset2) err = %q, want nil", err)
+		}
 		a2, err := streamingaead.New(keysetHandle2)
 		if err != nil {
 			t.Errorf("streamingaead.New failed: %s", err)

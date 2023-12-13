@@ -202,7 +202,10 @@ func TestKeysetManagerEnable(t *testing.T) {
 	if err != nil {
 		t.Errorf("Expected no error but got error %s", err)
 	}
-	h2, _ := ksm1.Handle()
+	h2, err := ksm1.Handle()
+	if err != nil {
+		t.Errorf("ksm1.Handle() err = %q, want nil", err)
+	}
 	ks2 := testkeyset.KeysetMaterial(h2)
 	if len(ks2.Key) != 1 {
 		t.Fatalf("Expected only one key, got %d", len(ks2.Key))
@@ -523,11 +526,13 @@ func TestKeysetManagerDelete(t *testing.T) {
 	if err != nil {
 		t.Errorf("Expected no error but got error %s", err)
 	}
-	h2, _ := ksm1.Handle()
+	h2, err := ksm1.Handle()
+	if err != nil {
+		t.Fatalf("ksm1.Handle() err = %q, want nil", err)
+	}
 	ks2 := testkeyset.KeysetMaterial(h2)
 	if len(ks2.Key) != 1 {
-		t.Errorf("Expected only one key but got %d", len(ks2.Key))
-		t.Fail()
+		t.Fatalf("Expected only one key but got %d", len(ks2.Key))
 	}
 	if ks2.Key[0].KeyId != ks2.PrimaryKeyId || ks2.Key[0].KeyId != keyID {
 		t.Errorf("Expected keyID %d to be present but got %d", keyID, ks2.Key[0].KeyId)

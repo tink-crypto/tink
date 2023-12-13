@@ -37,10 +37,16 @@ var aesKeySizes = []uint32{
 func TestAESGCMTagLength(t *testing.T) {
 	for _, keySize := range aesKeySizes {
 		key := random.GetRandomBytes(keySize)
-		a, _ := subtle.NewAESGCM(key)
+		a, err := subtle.NewAESGCM(key)
+		if err != nil {
+			t.Fatalf("subtle.NewAESGCM() err = %q, want nil", err)
+		}
 		ad := random.GetRandomBytes(32)
 		pt := random.GetRandomBytes(32)
-		ct, _ := a.Encrypt(pt, ad)
+		ct, err := a.Encrypt(pt, ad)
+		if err != nil {
+			t.Fatalf("a.Encrypt() err = %q, want nil", err)
+		}
 		actualTagSize := len(ct) - subtle.AESGCMIVSize - len(pt)
 		if actualTagSize != subtle.AESGCMTagSize {
 			t.Errorf("tag size is not 128 bit, it is %d bit", actualTagSize*8)
@@ -91,9 +97,18 @@ func TestAESGCMLongMessages(t *testing.T) {
 		ad := random.GetRandomBytes(uint32(ptSize / 3))
 		for _, keySize := range aesKeySizes {
 			key := random.GetRandomBytes(keySize)
-			a, _ := subtle.NewAESGCM(key)
-			ct, _ := a.Encrypt(pt, ad)
-			decrypted, _ := a.Decrypt(ct, ad)
+			a, err := subtle.NewAESGCM(key)
+			if err != nil {
+				t.Fatalf("subtle.NewAESGCM() err = %q, want nil", err)
+			}
+			ct, err := a.Encrypt(pt, ad)
+			if err != nil {
+				t.Fatalf("a.Encrypt() err = %q, want nil", err)
+			}
+			decrypted, err := a.Decrypt(ct, ad)
+			if err != nil {
+				t.Fatalf("a.Decrypt() err = %q, want nil", err)
+			}
 			if !bytes.Equal(pt, decrypted) {
 				t.Errorf("decrypted text and plaintext don't match: keySize %v, ptSize %v", keySize, ptSize)
 			}
@@ -106,8 +121,14 @@ func TestAESGCMModifyCiphertext(t *testing.T) {
 	ad := random.GetRandomBytes(33)
 	key := random.GetRandomBytes(16)
 	pt := random.GetRandomBytes(32)
-	a, _ := subtle.NewAESGCM(key)
-	ct, _ := a.Encrypt(pt, ad)
+	a, err := subtle.NewAESGCM(key)
+	if err != nil {
+		t.Fatalf("subtle.NewAESGCM() err = %q, want nil", err)
+	}
+	ct, err := a.Encrypt(pt, ad)
+	if err != nil {
+		t.Fatalf("a.Encrypt() err = %q, want nil", err)
+	}
 	// flipping bits
 	for i := 0; i < len(ct); i++ {
 		tmp := ct[i]
@@ -156,10 +177,16 @@ func TestAESGCMRandomNonce(t *testing.T) {
 	key := random.GetRandomBytes(16)
 	pt := []byte{}
 	ad := []byte{}
-	a, _ := subtle.NewAESGCM(key)
+	a, err := subtle.NewAESGCM(key)
+	if err != nil {
+		t.Fatalf("subtle.NewAESGCM() err = %q, want nil", err)
+	}
 	ctSet := make(map[string]bool)
 	for i := 0; i < nSample; i++ {
-		ct, _ := a.Encrypt(pt, ad)
+		ct, err := a.Encrypt(pt, ad)
+		if err != nil {
+			t.Fatalf("a.Encrypt() err = %q, want nil", err)
+		}
 		ctHex := hex.EncodeToString(ct)
 		_, existed := ctSet[ctHex]
 		if existed {
