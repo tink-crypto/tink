@@ -195,7 +195,7 @@ public class AeadKeyTemplatesTest {
   @Test
   public void chacha20Poly1305() throws Exception {
     KeyTemplate template = AeadKeyTemplates.CHACHA20_POLY1305;
-    assertEquals(new ChaCha20Poly1305KeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(ChaCha20Poly1305KeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     assertTrue(template.getValue().isEmpty()); // Empty format.
   }
@@ -203,7 +203,7 @@ public class AeadKeyTemplatesTest {
   @Test
   public void xchacha20Poly1305() throws Exception {
     KeyTemplate template = AeadKeyTemplates.XCHACHA20_POLY1305;
-    assertEquals(new XChaCha20Poly1305KeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(XChaCha20Poly1305KeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     assertTrue(template.getValue().isEmpty()); // Empty format.
   }
