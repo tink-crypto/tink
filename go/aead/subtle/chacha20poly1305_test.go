@@ -31,11 +31,26 @@ import (
 
 func TestChaCha20Poly1305EncryptDecrypt(t *testing.T) {
 	for i, test := range chaCha20Poly1305Tests {
-		key, _ := hex.DecodeString(test.key)
-		pt, _ := hex.DecodeString(test.plaintext)
-		ad, _ := hex.DecodeString(test.associatedData)
-		nonce, _ := hex.DecodeString(test.nonce)
-		out, _ := hex.DecodeString(test.out)
+		key, err := hex.DecodeString(test.key)
+		if err != nil {
+			t.Fatalf("hex.DecodeString(test.key) err = %q, want nil", err)
+		}
+		pt, err := hex.DecodeString(test.plaintext)
+		if err != nil {
+			t.Fatalf("hex.DecodeString(test.plaintext) err = %q, want nil", err)
+		}
+		ad, err := hex.DecodeString(test.associatedData)
+		if err != nil {
+			t.Fatalf("hex.DecodeString(test.associatedData) err = %q, want nil", err)
+		}
+		nonce, err := hex.DecodeString(test.nonce)
+		if err != nil {
+			t.Fatalf("hex.DecodeString(test.nonce) err = %q, want nil", err)
+		}
+		out, err := hex.DecodeString(test.out)
+		if err != nil {
+			t.Fatalf("hex.DecodeString(test.out) err = %q, want nil", err)
+		}
 
 		ca, err := subtle.NewChaCha20Poly1305(key)
 		if err != nil {
@@ -141,9 +156,18 @@ func TestChaCha20Poly1305LongMessages(t *testing.T) {
 
 func TestChaCha20Poly1305ModifyCiphertext(t *testing.T) {
 	for i, test := range chaCha20Poly1305Tests {
-		key, _ := hex.DecodeString(test.key)
-		pt, _ := hex.DecodeString(test.plaintext)
-		ad, _ := hex.DecodeString(test.associatedData)
+		key, err := hex.DecodeString(test.key)
+		if err != nil {
+			t.Fatalf("hex.DecodeString(test.key) err = %q, want nil", err)
+		}
+		pt, err := hex.DecodeString(test.plaintext)
+		if err != nil {
+			t.Fatalf("hex.DecodeString(test.plaintext) err = %q, want nil", err)
+		}
+		ad, err := hex.DecodeString(test.associatedData)
+		if err != nil {
+			t.Fatalf("hex.DecodeString(test.associatedData) err = %q, want nil", err)
+		}
 
 		ca, err := subtle.NewChaCha20Poly1305(key)
 		if err != nil {

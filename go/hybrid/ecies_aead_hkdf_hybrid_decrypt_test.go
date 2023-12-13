@@ -165,7 +165,10 @@ func TestECAESSIVTestVectors(t *testing.T) {
 			ctx := []byte(tv.context)
 			pt := []byte(tv.plaintext)
 
-			curve, _ := subtle.GetCurve("NIST_P256")
+			curve, err := subtle.GetCurve("NIST_P256")
+			if err != nil {
+				t.Fatalf("subtle.GetCurve() err = %q, want nil", err)
+			}
 			pvt := subtle.GetECPrivateKey(curve, key)
 			var salt []byte
 			helper, err := newRegisterECIESAEADHKDFDemHelper(daead.AESSIVKeyTemplate())

@@ -34,7 +34,10 @@ func TestSignVerify(t *testing.T) {
 	curve := "NIST_P256"
 	encodings := []string{"DER", "IEEE_P1363"}
 	for _, encoding := range encodings {
-		priv, _ := ecdsa.GenerateKey(subtle.GetCurve(curve), rand.Reader)
+		priv, err := ecdsa.GenerateKey(subtle.GetCurve(curve), rand.Reader)
+		if err != nil {
+			t.Fatalf("ecdsa.GenerateKey() err = %q, want nil", err)
+		}
 		// Use the private key and public key directly to create new instances
 		signer, err := subtleSignature.NewECDSASignerFromPrivateKey(hash, encoding, priv)
 		if err != nil {
@@ -78,7 +81,10 @@ func TestECDSAInvalidPublicKey(t *testing.T) {
 }
 
 func TestECDSAInvalidCurve(t *testing.T) {
-	priv, _ := ecdsa.GenerateKey(subtle.GetCurve("NIST_P256"), rand.Reader)
+	priv, err := ecdsa.GenerateKey(subtle.GetCurve("NIST_P256"), rand.Reader)
+	if err != nil {
+		t.Fatalf("ecdsa.GenerateKey() err = %q, want nil", err)
+	}
 	if _, err := subtleSignature.NewECDSAVerifier("SHA256", "INVALID", "IEEE_P1363", priv.X.Bytes(), priv.Y.Bytes()); err == nil {
 		t.Errorf("subtleSignature.NewECDSAVerifier() err = nil, want error")
 	}

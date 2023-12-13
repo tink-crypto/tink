@@ -43,8 +43,14 @@ func TestAESSIVPrimitive(t *testing.T) {
 	if err != nil {
 		t.Errorf("km.NewKey(nil) = _, %v; want _, nil", err)
 	}
-	key, _ := m.(*aspb.AesSivKey)
-	serializedKey, _ := proto.Marshal(key)
+	key, ok := m.(*aspb.AesSivKey)
+	if !ok {
+		t.Errorf("m is not *aspb.AesSivKey")
+	}
+	serializedKey, err := proto.Marshal(key)
+	if err != nil {
+		t.Errorf("proto.Marshal() = %q; want nil", err)
+	}
 	p, err := km.Primitive(serializedKey)
 	if err != nil {
 		t.Errorf("km.Primitive(%v) = %v; want nil", serializedKey, err)
@@ -84,7 +90,10 @@ func TestAESSIVPrimitiveWithInvalidKeys(t *testing.T) {
 		},
 	}
 	for _, key := range invalidKeys {
-		serializedKey, _ := proto.Marshal(key)
+		serializedKey, err := proto.Marshal(key)
+		if err != nil {
+			t.Errorf("proto.Marshal() = %q; want nil", err)
+		}
 		if _, err := km.Primitive(serializedKey); err == nil {
 			t.Errorf("km.Primitive(%v) = _, nil; want _, err", serializedKey)
 		}
@@ -100,7 +109,10 @@ func TestAESSIVNewKey(t *testing.T) {
 	if err != nil {
 		t.Errorf("km.NewKey(nil) = _, %v; want _, nil", err)
 	}
-	key, _ := m.(*aspb.AesSivKey)
+	key, ok := m.(*aspb.AesSivKey)
+	if !ok {
+		t.Errorf("m is not *aspb.AesSivKey")
+	}
 	if err := validateAESSIVKey(key); err != nil {
 		t.Errorf("validateAESSIVKey(%v) = %v; want nil", key, err)
 	}

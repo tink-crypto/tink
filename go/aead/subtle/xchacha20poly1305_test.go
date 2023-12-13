@@ -31,12 +31,30 @@ import (
 
 func TestXChaCha20Poly1305EncryptDecrypt(t *testing.T) {
 	for i, test := range xChaCha20Poly1305Tests {
-		key, _ := hex.DecodeString(test.key)
-		pt, _ := hex.DecodeString(test.plaintext)
-		aad, _ := hex.DecodeString(test.aad)
-		nonce, _ := hex.DecodeString(test.nonce)
-		out, _ := hex.DecodeString(test.out)
-		tag, _ := hex.DecodeString(test.tag)
+		key, err := hex.DecodeString(test.key)
+		if err != nil {
+			t.Fatalf("hex.DecodeString(test.key) err = %q, want nil", err)
+		}
+		pt, err := hex.DecodeString(test.plaintext)
+		if err != nil {
+			t.Fatalf("hex.DecodeString(test.plaintext) err = %q, want nil", err)
+		}
+		aad, err := hex.DecodeString(test.aad)
+		if err != nil {
+			t.Fatalf("hex.DecodeString(test.aad) err = %q, want nil", err)
+		}
+		nonce, err := hex.DecodeString(test.nonce)
+		if err != nil {
+			t.Fatalf("hex.DecodeString(test.nonce) err = %q, want nil", err)
+		}
+		out, err := hex.DecodeString(test.out)
+		if err != nil {
+			t.Fatalf("hex.DecodeString(test.out) err = %q, want nil", err)
+		}
+		tag, err := hex.DecodeString(test.tag)
+		if err != nil {
+			t.Fatalf("hex.DecodeString(test.tag) err = %q, want nil", err)
+		}
 
 		x, err := subtle.NewXChaCha20Poly1305(key)
 		if err != nil {
@@ -143,9 +161,18 @@ func TestXChaCha20Poly1305LongMessages(t *testing.T) {
 
 func TestXChaCha20Poly1305ModifyCiphertext(t *testing.T) {
 	for i, test := range xChaCha20Poly1305Tests {
-		key, _ := hex.DecodeString(test.key)
-		pt, _ := hex.DecodeString(test.plaintext)
-		aad, _ := hex.DecodeString(test.aad)
+		key, err := hex.DecodeString(test.key)
+		if err != nil {
+			t.Fatalf("hex.DecodeString(test.key) err = %q, want nil", err)
+		}
+		pt, err := hex.DecodeString(test.plaintext)
+		if err != nil {
+			t.Fatalf("hex.DecodeString(test.plaintext) err = %q, want nil", err)
+		}
+		aad, err := hex.DecodeString(test.aad)
+		if err != nil {
+			t.Fatalf("hex.DecodeString(test.aad) err = %q, want nil", err)
+		}
 
 		x, err := subtle.NewXChaCha20Poly1305(key)
 		if err != nil {
