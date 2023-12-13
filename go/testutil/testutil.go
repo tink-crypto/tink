@@ -394,7 +394,10 @@ func NewECDSAPublicKey(version uint32, params *ecdsapb.EcdsaParams, x, y []byte)
 // NewRandomECDSAPrivateKey creates an ECDSAPrivateKey with randomly generated key material.
 func NewRandomECDSAPrivateKey(hashType commonpb.HashType, curve commonpb.EllipticCurveType) *ecdsapb.EcdsaPrivateKey {
 	curveName := commonpb.EllipticCurveType_name[int32(curve)]
-	priv, _ := ecdsa.GenerateKey(subtle.GetCurve(curveName), rand.Reader)
+	priv, err := ecdsa.GenerateKey(subtle.GetCurve(curveName), rand.Reader)
+	if err != nil {
+		panic(fmt.Sprintf("ecdsa.GenerateKey() failed: %v", err))
+	}
 	params := NewECDSAParams(hashType, curve, ecdsapb.EcdsaSignatureEncoding_DER)
 	publicKey := NewECDSAPublicKey(ECDSAVerifierKeyVersion, params, priv.X.Bytes(), priv.Y.Bytes())
 	return NewECDSAPrivateKey(ECDSASignerKeyVersion, publicKey, priv.D.Bytes())
@@ -416,7 +419,10 @@ func GetECDSAParamNames(params *ecdsapb.EcdsaParams) (string, string, string) {
 
 // NewED25519PrivateKey creates an ED25519PrivateKey with randomly generated key material.
 func NewED25519PrivateKey() *ed25519pb.Ed25519PrivateKey {
-	public, private, _ := ed25519.GenerateKey(rand.Reader)
+	public, private, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		panic(fmt.Sprintf("ed25519.GenerateKey() failed: %v", err))
+	}
 	publicProto := &ed25519pb.Ed25519PublicKey{
 		Version:  ED25519SignerKeyVersion,
 		KeyValue: public,

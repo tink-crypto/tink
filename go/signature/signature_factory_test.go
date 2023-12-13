@@ -40,25 +40,28 @@ import (
 )
 
 func TestSignerVerifyFactory(t *testing.T) {
-	tinkPriv, tinkPub := newECDSAKeysetKeypair(commonpb.HashType_SHA512,
+	tinkPriv, tinkPub := newECDSAKeysetKeypair(t, commonpb.HashType_SHA512,
 		commonpb.EllipticCurveType_NIST_P521,
 		tinkpb.OutputPrefixType_TINK,
 		1)
-	legacyPriv, legacyPub := newECDSAKeysetKeypair(commonpb.HashType_SHA256,
+	legacyPriv, legacyPub := newECDSAKeysetKeypair(t, commonpb.HashType_SHA256,
 		commonpb.EllipticCurveType_NIST_P256,
 		tinkpb.OutputPrefixType_LEGACY,
 		2)
-	rawPriv, rawPub := newECDSAKeysetKeypair(commonpb.HashType_SHA512,
+	rawPriv, rawPub := newECDSAKeysetKeypair(t, commonpb.HashType_SHA512,
 		commonpb.EllipticCurveType_NIST_P384,
 		tinkpb.OutputPrefixType_RAW,
 		3)
-	crunchyPriv, crunchyPub := newECDSAKeysetKeypair(commonpb.HashType_SHA512,
+	crunchyPriv, crunchyPub := newECDSAKeysetKeypair(t, commonpb.HashType_SHA512,
 		commonpb.EllipticCurveType_NIST_P384,
 		tinkpb.OutputPrefixType_CRUNCHY,
 		4)
 	privKeys := []*tinkpb.Keyset_Key{tinkPriv, legacyPriv, rawPriv, crunchyPriv}
 	privKeyset := testutil.NewKeyset(privKeys[0].KeyId, privKeys)
-	privKeysetHandle, _ := testkeyset.NewHandle(privKeyset)
+	privKeysetHandle, err := testkeyset.NewHandle(privKeyset)
+	if err != nil {
+		t.Fatalf("testkeyset.NewHandle() err = %q, want nil", err)
+	}
 	pubKeys := []*tinkpb.Keyset_Key{tinkPub, legacyPub, rawPub, crunchyPub}
 	pubKeyset := testutil.NewKeyset(pubKeys[0].KeyId, pubKeys)
 	pubKeysetHandle, err := testkeyset.NewHandle(pubKeyset)
@@ -84,7 +87,7 @@ func TestSignerVerifyFactory(t *testing.T) {
 		t.Errorf("verifier.Verify(sig, data) = %v, want nil", err)
 	}
 	// verify with other key should fail
-	_, otherPub := newECDSAKeysetKeypair(commonpb.HashType_SHA512,
+	_, otherPub := newECDSAKeysetKeypair(t, commonpb.HashType_SHA512,
 		commonpb.EllipticCurveType_NIST_P521,
 		tinkpb.OutputPrefixType_TINK,
 		1)
@@ -104,7 +107,7 @@ func TestSignerVerifyFactory(t *testing.T) {
 }
 
 func TestPrimitiveFactoryFailsWhenKeysetHasNoPrimary(t *testing.T) {
-	privateKey, _ := newECDSAKeysetKeypair(commonpb.HashType_SHA512,
+	privateKey, _ := newECDSAKeysetKeypair(t, commonpb.HashType_SHA512,
 		commonpb.EllipticCurveType_NIST_P521,
 		tinkpb.OutputPrefixType_TINK,
 		1)
@@ -129,15 +132,22 @@ func TestPrimitiveFactoryFailsWhenKeysetHasNoPrimary(t *testing.T) {
 	}
 }
 
-func newECDSAKeysetKeypair(hashType commonpb.HashType, curve commonpb.EllipticCurveType, outputPrefixType tinkpb.OutputPrefixType, keyID uint32) (*tinkpb.Keyset_Key, *tinkpb.Keyset_Key) {
+func newECDSAKeysetKeypair(t *testing.T, hashType commonpb.HashType, curve commonpb.EllipticCurveType, outputPrefixType tinkpb.OutputPrefixType, keyID uint32) (*tinkpb.Keyset_Key, *tinkpb.Keyset_Key) {
+	t.Helper()
 	key := testutil.NewRandomECDSAPrivateKey(hashType, curve)
-	serializedKey, _ := proto.Marshal(key)
+	serializedKey, err := proto.Marshal(key)
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %q, want nil", err)
+	}
 	keyData := testutil.NewKeyData(testutil.ECDSASignerTypeURL,
 		serializedKey,
 		tinkpb.KeyData_ASYMMETRIC_PRIVATE)
 	privKey := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, keyID, outputPrefixType)
 
-	serializedKey, _ = proto.Marshal(key.PublicKey)
+	serializedKey, err = proto.Marshal(key.PublicKey)
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %q, want nil", err)
+	}
 	keyData = testutil.NewKeyData(testutil.ECDSAVerifierTypeURL,
 		serializedKey,
 		tinkpb.KeyData_ASYMMETRIC_PUBLIC)
@@ -452,7 +462,7 @@ func TestPrimitiveFactoryMonitoringWithAnnotationsVerifyFailureIsLogged(t *testi
 }
 
 func TestVerifyWithLegacyKeyDoesNotHaveSideEffectOnMessage(t *testing.T) {
-	privateKey, publicKey := newECDSAKeysetKeypair(commonpb.HashType_SHA256,
+	privateKey, publicKey := newECDSAKeysetKeypair(t, commonpb.HashType_SHA256,
 		commonpb.EllipticCurveType_NIST_P256,
 		tinkpb.OutputPrefixType_LEGACY,
 		2)
