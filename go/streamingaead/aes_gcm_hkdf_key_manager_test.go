@@ -104,14 +104,20 @@ func TestAESGCMHKDFNewKeyMultipleTimes(t *testing.T) {
 	keys := make(map[string]struct{})
 	n := 26
 	for i := 0; i < n; i++ {
-		key, _ := keyManager.NewKey(serializedFormat)
+		key, err := keyManager.NewKey(serializedFormat)
+		if err != nil {
+			t.Fatalf("keyManager.NewKey() err = %q, want nil", err)
+		}
 		serializedKey, err := proto.Marshal(key)
 		if err != nil {
 			t.Errorf("failed to marshal key: %s", err)
 		}
 		keys[string(serializedKey)] = struct{}{}
 
-		keyData, _ := keyManager.NewKeyData(serializedFormat)
+		keyData, err := keyManager.NewKeyData(serializedFormat)
+		if err != nil {
+			t.Fatalf("keyManager.NewKeyData() err = %q, want nil", err)
+		}
 		serializedKey = keyData.Value
 		keys[string(serializedKey)] = struct{}{}
 	}

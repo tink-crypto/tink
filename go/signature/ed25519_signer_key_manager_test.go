@@ -40,7 +40,10 @@ func TestED25519SignerGetPrimitiveBasic(t *testing.T) {
 		t.Errorf("cannot obtain ED25519Signer key manager: %s", err)
 	}
 	pvtKey := testutil.NewED25519PrivateKey()
-	serializedKey, _ := proto.Marshal(pvtKey)
+	serializedKey, err := proto.Marshal(pvtKey)
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %v, want nil", err)
+	}
 	tmp, err := km.Primitive(serializedKey)
 	if err != nil {
 		t.Errorf("unexpect error in test case: %s ", err)
@@ -52,7 +55,10 @@ func TestED25519SignerGetPrimitiveBasic(t *testing.T) {
 		t.Errorf("cannot obtain ED25519Signer key manager: %s", err)
 	}
 	pubKey := pvtKey.PublicKey
-	serializedKey, _ = proto.Marshal(pubKey)
+	serializedKey, err = proto.Marshal(pubKey)
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %v, want nil", err)
+	}
 	tmp, err = kmPub.Primitive(serializedKey)
 	if err != nil {
 		t.Errorf("unexpect error in test case: %s ", err)
@@ -81,7 +87,10 @@ func TestED25519SignGetPrimitiveWithInvalidInput(t *testing.T) {
 	// invalid version
 	key := testutil.NewED25519PrivateKey()
 	key.Version = testutil.ED25519SignerKeyVersion + 1
-	serializedKey, _ := proto.Marshal(key)
+	serializedKey, err := proto.Marshal(key)
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %v, want nil", err)
+	}
 	if _, err := km.Primitive(serializedKey); err == nil {
 		t.Errorf("expect an error when version is invalid")
 	}
@@ -99,7 +108,10 @@ func TestED25519SignNewKeyBasic(t *testing.T) {
 	if err != nil {
 		t.Errorf("cannot obtain ED25519Signer key manager: %s", err)
 	}
-	serializedFormat, _ := proto.Marshal(testutil.NewED25519PrivateKey())
+	serializedFormat, err := proto.Marshal(testutil.NewED25519PrivateKey())
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %v, want nil", err)
+	}
 	tmp, err := km.NewKey(serializedFormat)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
@@ -121,7 +133,10 @@ func TestED25519PublicKeyDataBasic(t *testing.T) {
 	}
 
 	key := testutil.NewED25519PrivateKey()
-	serializedKey, _ := proto.Marshal(key)
+	serializedKey, err := proto.Marshal(key)
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %v, want nil", err)
+	}
 
 	pubKeyData, err := pkm.PublicKeyData(serializedKey)
 	if err != nil {
@@ -150,7 +165,10 @@ func TestED25519PublicKeyDataWithInvalidInput(t *testing.T) {
 	}
 	// modified key
 	key := testutil.NewED25519PrivateKey()
-	serializedKey, _ := proto.Marshal(key)
+	serializedKey, err := proto.Marshal(key)
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %v, want nil", err)
+	}
 	serializedKey[0] = 0
 	if _, err := pkm.PublicKeyData(serializedKey); err == nil {
 		t.Errorf("expect an error when input is a modified serialized key")

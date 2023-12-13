@@ -35,14 +35,23 @@ import (
 func TestChaCha20Poly1305GetPrimitive(t *testing.T) {
 	km, err := registry.GetKeyManager(testutil.ChaCha20Poly1305TypeURL)
 	if err != nil {
-		t.Errorf("cannot obtain ChaCha20Poly1305 key manager: %s", err)
+		t.Fatalf("cannot obtain ChaCha20Poly1305 key manager: %s", err)
 	}
-	m, _ := km.NewKey(nil)
-	key, _ := m.(*cppb.ChaCha20Poly1305Key)
-	serializedKey, _ := proto.Marshal(key)
+	m, err := km.NewKey(nil)
+	if err != nil {
+		t.Fatalf("km.NewKey(nil) err = %q, want nil", err)
+	}
+	key, ok := m.(*cppb.ChaCha20Poly1305Key)
+	if !ok {
+		t.Fatalf("m is not a *cppb.ChaCha20Poly1305Key")
+	}
+	serializedKey, err := proto.Marshal(key)
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %q, want nil", err)
+	}
 	p, err := km.Primitive(serializedKey)
 	if err != nil {
-		t.Errorf("km.Primitive(%v) = %v; want nil", serializedKey, err)
+		t.Fatalf("km.Primitive(%v) = %v; want nil", serializedKey, err)
 	}
 	if err := validateChaCha20Poly1305Primitive(p, key); err != nil {
 		t.Errorf("validateChaCha20Poly1305Primitive(p, key) = %v; want nil", err)
@@ -56,7 +65,10 @@ func TestChaCha20Poly1305GetPrimitiveWithInvalidKeys(t *testing.T) {
 	}
 	invalidKeys := genInvalidChaCha20Poly1305Keys()
 	for _, key := range invalidKeys {
-		serializedKey, _ := proto.Marshal(key)
+		serializedKey, err := proto.Marshal(key)
+		if err != nil {
+			t.Errorf("proto.Marshal() err = %q, want nil", err)
+		}
 		if _, err := km.Primitive(serializedKey); err == nil {
 			t.Errorf("km.Primitive(%v) = _, nil; want _, err", serializedKey)
 		}
@@ -72,7 +84,10 @@ func TestChaCha20Poly1305NewKey(t *testing.T) {
 	if err != nil {
 		t.Errorf("km.NewKey(nil) = _, %v; want _, nil", err)
 	}
-	key, _ := m.(*cppb.ChaCha20Poly1305Key)
+	key, ok := m.(*cppb.ChaCha20Poly1305Key)
+	if !ok {
+		t.Fatalf("m is not a *cppb.ChaCha20Poly1305Key")
+	}
 	if err := validateChaCha20Poly1305Key(key); err != nil {
 		t.Errorf("validateChaCha20Poly1305Key(%v) = %v; want nil", key, err)
 	}
@@ -148,7 +163,7 @@ func genInvalidChaCha20Poly1305Keys() []*cppb.ChaCha20Poly1305Key {
 	}
 }
 
-func validateChaCha20Poly1305Primitive(p interface{}, key *cppb.ChaCha20Poly1305Key) error {
+func validateChaCha20Poly1305Primitive(p any, key *cppb.ChaCha20Poly1305Key) error {
 	cipher := p.(*subtle.ChaCha20Poly1305)
 	if !bytes.Equal(cipher.Key, key.KeyValue) {
 		return fmt.Errorf("key and primitive don't match")

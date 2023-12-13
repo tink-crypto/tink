@@ -41,7 +41,10 @@ func TestAESGCMGetPrimitiveBasic(t *testing.T) {
 	}
 	for _, keySize := range keySizes {
 		key := testutil.NewAESGCMKey(testutil.AESGCMKeyVersion, keySize)
-		serializedKey, _ := proto.Marshal(key)
+		serializedKey, err := proto.Marshal(key)
+		if err != nil {
+			t.Errorf("proto.Marshal() err = %q, want nil", err)
+		}
 		p, err := keyManager.Primitive(serializedKey)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err)
@@ -60,7 +63,10 @@ func TestAESGCMGetPrimitiveWithInvalidInput(t *testing.T) {
 	// invalid AESGCMKey
 	testKeys := genInvalidAESGCMKeys()
 	for i := 0; i < len(testKeys); i++ {
-		serializedKey, _ := proto.Marshal(testKeys[i])
+		serializedKey, err := proto.Marshal(testKeys[i])
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		if _, err := keyManager.Primitive(serializedKey); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
@@ -81,15 +87,27 @@ func TestAESGCMNewKeyMultipleTimes(t *testing.T) {
 		t.Errorf("cannot obtain AES-GCM key manager: %s", err)
 	}
 	format := testutil.NewAESGCMKeyFormat(32)
-	serializedFormat, _ := proto.Marshal(format)
+	serializedFormat, err := proto.Marshal(format)
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %q, want nil", err)
+	}
 	keys := make(map[string]bool)
 	nTest := 26
 	for i := 0; i < nTest; i++ {
-		key, _ := keyManager.NewKey(serializedFormat)
-		serializedKey, _ := proto.Marshal(key)
+		key, err := keyManager.NewKey(serializedFormat)
+		if err != nil {
+			t.Fatalf("keyManager.NewKey() err = %q, want nil", err)
+		}
+		serializedKey, err := proto.Marshal(key)
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		keys[string(serializedKey)] = true
 
-		keyData, _ := keyManager.NewKeyData(serializedFormat)
+		keyData, err := keyManager.NewKeyData(serializedFormat)
+		if err != nil {
+			t.Fatalf("keyManager.NewKeyData() err = %q, want nil", err)
+		}
 		serializedKey = keyData.Value
 		keys[string(serializedKey)] = true
 	}
@@ -105,7 +123,10 @@ func TestAESGCMNewKeyBasic(t *testing.T) {
 	}
 	for _, keySize := range keySizes {
 		format := testutil.NewAESGCMKeyFormat(keySize)
-		serializedFormat, _ := proto.Marshal(format)
+		serializedFormat, err := proto.Marshal(format)
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		m, err := keyManager.NewKey(serializedFormat)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err)
@@ -125,7 +146,10 @@ func TestAESGCMNewKeyWithInvalidInput(t *testing.T) {
 	// bad format
 	badFormats := genInvalidAESGCMKeyFormats()
 	for i := 0; i < len(badFormats); i++ {
-		serializedFormat, _ := proto.Marshal(badFormats[i])
+		serializedFormat, err := proto.Marshal(badFormats[i])
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		if _, err := keyManager.NewKey(serializedFormat); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
@@ -147,7 +171,10 @@ func TestAESGCMNewKeyDataBasic(t *testing.T) {
 	}
 	for _, keySize := range keySizes {
 		format := testutil.NewAESGCMKeyFormat(keySize)
-		serializedFormat, _ := proto.Marshal(format)
+		serializedFormat, err := proto.Marshal(format)
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		keyData, err := keyManager.NewKeyData(serializedFormat)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err)
@@ -175,7 +202,10 @@ func TestAESGCMNewKeyDataWithInvalidInput(t *testing.T) {
 	}
 	badFormats := genInvalidAESGCMKeyFormats()
 	for i := 0; i < len(badFormats); i++ {
-		serializedFormat, _ := proto.Marshal(badFormats[i])
+		serializedFormat, err := proto.Marshal(badFormats[i])
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		if _, err := keyManager.NewKeyData(serializedFormat); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
@@ -413,7 +443,7 @@ func validateAESGCMKey(key *gcmpb.AesGcmKey, format *gcmpb.AesGcmKeyFormat) erro
 	return validateAESGCMPrimitive(p, key)
 }
 
-func validateAESGCMPrimitive(p interface{}, key *gcmpb.AesGcmKey) error {
+func validateAESGCMPrimitive(p any, key *gcmpb.AesGcmKey) error {
 	cipher := p.(*subtle.AESGCM)
 	if !bytes.Equal(cipher.Key(), key.KeyValue) {
 		return fmt.Errorf("key and primitive don't match")

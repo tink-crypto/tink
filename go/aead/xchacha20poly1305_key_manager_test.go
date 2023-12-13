@@ -40,9 +40,18 @@ func TestXChaCha20Poly1305GetPrimitive(t *testing.T) {
 	if err != nil {
 		t.Errorf("cannot obtain XChaCha20Poly1305 key manager: %s", err)
 	}
-	m, _ := km.NewKey(nil)
-	key, _ := m.(*xpb.XChaCha20Poly1305Key)
-	serializedKey, _ := proto.Marshal(key)
+	m, err := km.NewKey(nil)
+	if err != nil {
+		t.Fatalf("km.NewKey(nil) err = %q, want nil", err)
+	}
+	key, ok := m.(*xpb.XChaCha20Poly1305Key)
+	if !ok {
+		t.Fatal("m is not a *xpb.XChaCha20Poly1305Key")
+	}
+	serializedKey, err := proto.Marshal(key)
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %q, want nil", err)
+	}
 	p, err := km.Primitive(serializedKey)
 	if err != nil {
 		t.Errorf("km.Primitive(%v) = %v; want nil", serializedKey, err)
@@ -78,7 +87,10 @@ func TestXChaCha20Poly1305GetPrimitiveWithInvalidKeys(t *testing.T) {
 		},
 	}
 	for _, key := range invalidKeys {
-		serializedKey, _ := proto.Marshal(key)
+		serializedKey, err := proto.Marshal(key)
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		if _, err := km.Primitive(serializedKey); err == nil {
 			t.Errorf("km.Primitive(%v) = _, nil; want _, err", serializedKey)
 		}
@@ -94,7 +106,10 @@ func TestXChaCha20Poly1305NewKey(t *testing.T) {
 	if err != nil {
 		t.Errorf("km.NewKey(nil) = _, %v; want _, nil", err)
 	}
-	key, _ := m.(*xpb.XChaCha20Poly1305Key)
+	key, ok := m.(*xpb.XChaCha20Poly1305Key)
+	if !ok {
+		t.Errorf("m is not a *xpb.XChaCha20Poly1305Key")
+	}
 	if err := validateXChaCha20Poly1305Key(key); err != nil {
 		t.Errorf("validateXChaCha20Poly1305Key(%v) = %v; want nil", key, err)
 	}
@@ -280,7 +295,7 @@ func TestXChaCha20Poly1305DeriveKeyFailsWithInsufficientRandomness(t *testing.T)
 	}
 }
 
-func validateXChaCha20Poly1305Primitive(p interface{}, key *xpb.XChaCha20Poly1305Key) error {
+func validateXChaCha20Poly1305Primitive(p any, key *xpb.XChaCha20Poly1305Key) error {
 	cipher := p.(*subtle.XChaCha20Poly1305)
 	if !bytes.Equal(cipher.Key, key.KeyValue) {
 		return fmt.Errorf("key and primitive don't match")

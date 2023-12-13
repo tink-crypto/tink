@@ -42,7 +42,10 @@ func TestGetPrimitiveHMACBasic(t *testing.T) {
 	}
 	testKeys := genValidHMACPRFKeys()
 	for i := 0; i < len(testKeys); i++ {
-		serializedKey, _ := proto.Marshal(testKeys[i])
+		serializedKey, err := proto.Marshal(testKeys[i])
+		if err != nil {
+			t.Errorf("proto.Marshal() err = %q, want nil", err)
+		}
 		p, err := km.Primitive(serializedKey)
 		if err != nil {
 			t.Errorf("unexpected error in test case %d: %s", i, err)
@@ -61,7 +64,10 @@ func TestGetPrimitiveHMACWithInvalidInput(t *testing.T) {
 	// invalid key
 	testKeys := genInvalidHMACPRFKeys()
 	for i := 0; i < len(testKeys); i++ {
-		serializedKey, _ := proto.Marshal(testKeys[i])
+		serializedKey, err := proto.Marshal(testKeys[i])
+		if err != nil {
+			t.Errorf("proto.Marshal() err = %q, want nil", err)
+		}
 		if _, err := km.Primitive(serializedKey); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
@@ -80,15 +86,27 @@ func TestNewKeyHMACMultipleTimes(t *testing.T) {
 	if err != nil {
 		t.Errorf("cannot obtain HMAC PRF key manager: %s", err)
 	}
-	serializedFormat, _ := proto.Marshal(testutil.NewHMACPRFKeyFormat(commonpb.HashType_SHA256))
+	serializedFormat, err := proto.Marshal(testutil.NewHMACPRFKeyFormat(commonpb.HashType_SHA256))
+	if err != nil {
+		t.Errorf("proto.Marshal() err = %q, want nil", err)
+	}
 	keys := make(map[string]bool)
 	nTest := 26
 	for i := 0; i < nTest; i++ {
-		key, _ := km.NewKey(serializedFormat)
-		serializedKey, _ := proto.Marshal(key)
+		key, err := km.NewKey(serializedFormat)
+		if err != nil {
+			t.Fatalf("km.NewKey() err = %q, want nil", err)
+		}
+		serializedKey, err := proto.Marshal(key)
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		keys[string(serializedKey)] = true
 
-		keyData, _ := km.NewKeyData(serializedFormat)
+		keyData, err := km.NewKeyData(serializedFormat)
+		if err != nil {
+			t.Fatalf("km.NewKeyData() err = %q, want nil", err)
+		}
 		serializedKey = keyData.Value
 		keys[string(serializedKey)] = true
 	}
@@ -104,7 +122,10 @@ func TestNewKeyHMACBasic(t *testing.T) {
 	}
 	testFormats := genValidHMACPRFKeyFormats()
 	for i := 0; i < len(testFormats); i++ {
-		serializedFormat, _ := proto.Marshal(testFormats[i])
+		serializedFormat, err := proto.Marshal(testFormats[i])
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		key, err := km.NewKey(serializedFormat)
 		if err != nil {
 			t.Errorf("unexpected error in test case %d: %s", i, err)
@@ -147,7 +168,10 @@ func TestNewKeyDataHMACBasic(t *testing.T) {
 	}
 	testFormats := genValidHMACPRFKeyFormats()
 	for i := 0; i < len(testFormats); i++ {
-		serializedFormat, _ := proto.Marshal(testFormats[i])
+		serializedFormat, err := proto.Marshal(testFormats[i])
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		keyData, err := km.NewKeyData(serializedFormat)
 		if err != nil {
 			t.Errorf("unexpected error in test case %d: %s", i, err)
@@ -176,7 +200,10 @@ func TestNewKeyDataHMACWithInvalidInput(t *testing.T) {
 	// invalid key formats
 	testFormats := genInvalidHMACPRFKeyFormats()
 	for i := 0; i < len(testFormats); i++ {
-		serializedFormat, _ := proto.Marshal(testFormats[i])
+		serializedFormat, err := proto.Marshal(testFormats[i])
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		if _, err := km.NewKeyData(serializedFormat); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
@@ -463,7 +490,7 @@ func validateHMACPRFKey(format *hmacpb.HmacPrfKeyFormat, key *hmacpb.HmacPrfKey)
 }
 
 // validateHMACPRFPrimitive checks whether the given primitive can compute a PRF of length 16
-func validateHMACPRFPrimitive(p interface{}, key *hmacpb.HmacPrfKey) error {
+func validateHMACPRFPrimitive(p any, key *hmacpb.HmacPrfKey) error {
 	hmac := p.(prf.PRF)
 	prfPrimitive, err := subtle.NewHMACPRF(commonpb.HashType_name[int32(key.Params.Hash)], key.KeyValue)
 	if err != nil {

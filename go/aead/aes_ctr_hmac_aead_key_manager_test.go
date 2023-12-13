@@ -45,7 +45,10 @@ func TestAESCTRHMACNewKeyMultipleTimes(t *testing.T) {
 	keys := make(map[string]bool)
 	const numTests = 24
 	for i := 0; i < numTests/2; i++ {
-		k, _ := keyManager.NewKey(keyTemplate.Value)
+		k, err := keyManager.NewKey(keyTemplate.Value)
+		if err != nil {
+			t.Fatalf("keyManager.NewKey() err = %q, want nil", err)
+		}
 		sk, err := proto.Marshal(k)
 		if err != nil {
 			t.Fatalf("cannot serialize key, error: %v", err)
