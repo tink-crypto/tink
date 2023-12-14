@@ -109,48 +109,66 @@ func TestECDSAEncodeWithInvalidInput(t *testing.T) {
 	}
 }
 
-func TestECDSADecodeWithInvalidInput(t *testing.T) {
-	var sig *subtle.ECDSASignature
-	var encoded []byte
-	encoding := "DER"
-
-	// modified first byte
-	sig = newECDSARandomSignature()
-	encoded, _ = sig.EncodeECDSASignature(encoding, "P-256")
+func TestECDSADecodeWithModifiedFirstByte(t *testing.T) {
+	sig := newECDSARandomSignature()
+	encoded, err := sig.EncodeECDSASignature("DER", "P-256")
+	if err != nil {
+		t.Fatalf("sig.EncodeECDSASignature() err = %q, want nil", err)
+	}
 	encoded[0] = 0x31
-	if _, err := subtle.DecodeECDSASignature(encoded, encoding); err == nil {
+	if _, err := subtle.DecodeECDSASignature(encoded, "DER"); err == nil {
 		t.Errorf("expect an error when first byte is not 0x30")
 	}
-	// modified tag
-	sig = newECDSARandomSignature()
-	encoded, _ = sig.EncodeECDSASignature(encoding, "P-256")
+}
+
+func TestECDSADecodeWithModifiedTag(t *testing.T) {
+	sig := newECDSARandomSignature()
+	encoded, err := sig.EncodeECDSASignature("DER", "P-256")
+	if err != nil {
+		t.Fatalf("sig.EncodeECDSASignature() err = %q, want nil", err)
+	}
 	encoded[2] = encoded[2] + 1
-	if _, err := subtle.DecodeECDSASignature(encoded, encoding); err == nil {
+	if _, err := subtle.DecodeECDSASignature(encoded, "DER"); err == nil {
 		t.Errorf("expect an error when tag is modified")
 	}
-	// modified length
-	sig = newECDSARandomSignature()
-	encoded, _ = sig.EncodeECDSASignature(encoding, "P-256")
+}
+
+func TestECDSADecodeWithModifiedLength(t *testing.T) {
+	sig := newECDSARandomSignature()
+	encoded, err := sig.EncodeECDSASignature("DER", "P-256")
+	if err != nil {
+		t.Fatalf("sig.EncodeECDSASignature() err = %q, want nil", err)
+	}
 	encoded[1] = encoded[1] + 1
-	if _, err := subtle.DecodeECDSASignature(encoded, encoding); err == nil {
+	if _, err := subtle.DecodeECDSASignature(encoded, "DER"); err == nil {
 		t.Errorf("expect an error when length is modified")
 	}
-	// append unused 0s
-	sig = newECDSARandomSignature()
-	encoded, _ = sig.EncodeECDSASignature(encoding, "P-256")
+}
+
+func TestECDSADecodeWithUnusedZeros(t *testing.T) {
+	sig := newECDSARandomSignature()
+	encoded, err := sig.EncodeECDSASignature("DER", "P-256")
+	if err != nil {
+		t.Fatalf("sig.EncodeECDSASignature() err = %q, want nil", err)
+	}
 	tmp := make([]byte, len(encoded)+4)
 	copy(tmp, encoded)
-	if _, err := subtle.DecodeECDSASignature(tmp, encoding); err == nil {
+	if _, err := subtle.DecodeECDSASignature(tmp, "DER"); err == nil {
 		t.Errorf("expect an error when unused 0s are appended to signature")
 	}
-	// a struct with three numbers
+}
+
+func TestECDSADecodeWithStructWithThreeNumbers(t *testing.T) {
 	randomStruct := struct{ X, Y, Z *big.Int }{
 		X: new(big.Int).SetBytes(random.GetRandomBytes(32)),
 		Y: new(big.Int).SetBytes(random.GetRandomBytes(32)),
 		Z: new(big.Int).SetBytes(random.GetRandomBytes(32)),
 	}
-	encoded, _ = asn1.Marshal(randomStruct)
-	if _, err := subtle.DecodeECDSASignature(encoded, encoding); err == nil {
+	encoded, err := asn1.Marshal(randomStruct)
+	if err != nil {
+		t.Fatalf("asn1.Marshal() err = %q, want nil", err)
+	}
+	if _, err := subtle.DecodeECDSASignature(encoded, "DER"); err == nil {
 		t.Errorf("expect an error when input is not an ECDSASignature")
 	}
 }
