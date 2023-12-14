@@ -20,9 +20,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.common.io.Files;
 import com.google.common.truth.Expect;
-import com.google.crypto.tink.proto.HpkeParams;
-import com.google.crypto.tink.proto.HpkePrivateKey;
-import com.google.crypto.tink.proto.HpkePublicKey;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.hybrid.HpkeParameters;
+import com.google.crypto.tink.hybrid.HpkePrivateKey;
+import com.google.crypto.tink.hybrid.HpkePublicKey;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.HpkeTestEncryption;
 import com.google.crypto.tink.testing.HpkeTestId;
@@ -30,6 +31,8 @@ import com.google.crypto.tink.testing.HpkeTestSetup;
 import com.google.crypto.tink.testing.HpkeTestUtil;
 import com.google.crypto.tink.testing.HpkeTestVector;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.util.Bytes;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import java.io.File;
 import java.io.IOException;
@@ -142,13 +145,13 @@ public final class HpkeContextTest {
     HpkeKdf kdf = HpkePrimitiveFactory.createKdf(kdfId);
     HpkeAead aead = HpkePrimitiveFactory.createAead(aeadId);
 
-    HpkePublicKey recipientPublicKey =
-        HpkePublicKey.newBuilder()
+    com.google.crypto.tink.proto.HpkePublicKey recipientPublicKey =
+        com.google.crypto.tink.proto.HpkePublicKey.newBuilder()
             .setPublicKey(ByteString.copyFrom(testSetup.recipientPublicKey))
-            .setParams(HpkeParams.newBuilder().setKem(hpkeKem).build())
+            .setParams(com.google.crypto.tink.proto.HpkeParams.newBuilder().setKem(hpkeKem).build())
             .build();
-    HpkePrivateKey recipientPrivateKey =
-        HpkePrivateKey.newBuilder()
+    com.google.crypto.tink.proto.HpkePrivateKey recipientPrivateKey =
+        com.google.crypto.tink.proto.HpkePrivateKey.newBuilder()
             .setPrivateKey(ByteString.copyFrom(testSetup.recipientPrivateKey))
             .setPublicKey(recipientPublicKey)
             .build();
@@ -175,11 +178,7 @@ public final class HpkeContextTest {
 
   /** Helper method to verify context API provided to Tink users. */
   private void testSenderAndRecipientAuthContexts(
-      byte[] mode,
-      byte[] kemId,
-      byte[] kdfId,
-      byte[] aeadId,
-      com.google.crypto.tink.proto.HpkeKem hpkeKem)
+      byte[] mode, byte[] kemId, byte[] kdfId, byte[] aeadId, HpkeParameters parameters)
       throws GeneralSecurityException {
     HpkeTestVector testVector = getTestVector(mode, kemId, kdfId, aeadId);
     HpkeTestSetup testSetup = testVector.getTestSetup();
@@ -189,25 +188,19 @@ public final class HpkeContextTest {
     HpkeAead aead = HpkePrimitiveFactory.createAead(aeadId);
 
     HpkePublicKey recipientPublicKey =
-        HpkePublicKey.newBuilder()
-            .setPublicKey(ByteString.copyFrom(testSetup.recipientPublicKey))
-            .setParams(HpkeParams.newBuilder().setKem(hpkeKem).build())
-            .build();
+        HpkePublicKey.create(
+            parameters, Bytes.copyFrom(testSetup.recipientPublicKey), /* idRequirement= */ null);
     HpkePrivateKey recipientPrivateKey =
-        HpkePrivateKey.newBuilder()
-            .setPrivateKey(ByteString.copyFrom(testSetup.recipientPrivateKey))
-            .setPublicKey(recipientPublicKey)
-            .build();
+        HpkePrivateKey.create(
+            recipientPublicKey,
+            SecretBytes.copyFrom(testSetup.recipientPrivateKey, InsecureSecretKeyAccess.get()));
     HpkePublicKey senderPublicKey =
-        HpkePublicKey.newBuilder()
-            .setPublicKey(ByteString.copyFrom(testSetup.senderPublicKey))
-            .setParams(HpkeParams.newBuilder().setKem(hpkeKem).build())
-            .build();
+        HpkePublicKey.create(
+            parameters, Bytes.copyFrom(testSetup.senderPublicKey), /* idRequirement= */ null);
     HpkePrivateKey senderPrivateKey =
-        HpkePrivateKey.newBuilder()
-            .setPrivateKey(ByteString.copyFrom(testSetup.senderPrivateKey))
-            .setPublicKey(senderPublicKey)
-            .build();
+        HpkePrivateKey.create(
+            senderPublicKey,
+            SecretBytes.copyFrom(testSetup.senderPrivateKey, InsecureSecretKeyAccess.get()));
 
     HpkeKemPrivateKey senderKemPrivateKey = HpkeKemKeyFactory.createPrivate(senderPrivateKey);
     HpkeContext senderContext =
@@ -284,12 +277,19 @@ public final class HpkeContextTest {
   @Test
   public void createSenderAndRecipientAuthContexts_succeedsWithX25519HkdfSha256Aes128Gcm()
       throws GeneralSecurityException {
+    HpkeParameters parameters =
+        HpkeParameters.builder()
+            .setVariant(HpkeParameters.Variant.NO_PREFIX)
+            .setKemId(HpkeParameters.KemId.DHKEM_X25519_HKDF_SHA256)
+            .setKdfId(HpkeParameters.KdfId.HKDF_SHA256)
+            .setAeadId(HpkeParameters.AeadId.AES_128_GCM)
+            .build();
     testSenderAndRecipientAuthContexts(
         HpkeUtil.AUTH_MODE,
         HpkeUtil.X25519_HKDF_SHA256_KEM_ID,
         HpkeUtil.HKDF_SHA256_KDF_ID,
         HpkeUtil.AES_128_GCM_AEAD_ID,
-        com.google.crypto.tink.proto.HpkeKem.DHKEM_X25519_HKDF_SHA256);
+        parameters);
   }
 
   @Test
@@ -306,12 +306,19 @@ public final class HpkeContextTest {
   @Test
   public void createSenderAndRecipientAuthContexts_succeedsWithP256HkdfSha256Aes128Gcm()
       throws GeneralSecurityException {
+    HpkeParameters parameters =
+        HpkeParameters.builder()
+            .setVariant(HpkeParameters.Variant.NO_PREFIX)
+            .setKemId(HpkeParameters.KemId.DHKEM_P256_HKDF_SHA256)
+            .setKdfId(HpkeParameters.KdfId.HKDF_SHA256)
+            .setAeadId(HpkeParameters.AeadId.AES_128_GCM)
+            .build();
     testSenderAndRecipientAuthContexts(
         HpkeUtil.AUTH_MODE,
         HpkeUtil.P256_HKDF_SHA256_KEM_ID,
         HpkeUtil.HKDF_SHA256_KDF_ID,
         HpkeUtil.AES_128_GCM_AEAD_ID,
-        com.google.crypto.tink.proto.HpkeKem.DHKEM_P256_HKDF_SHA256);
+        parameters);
   }
 
   @Test
@@ -348,12 +355,19 @@ public final class HpkeContextTest {
   @Test
   public void createSenderAndRecipientAuthContexts_succeedsWithX25519HkdfSha256Aes256Gcm()
       throws GeneralSecurityException {
+    HpkeParameters parameters =
+        HpkeParameters.builder()
+            .setVariant(HpkeParameters.Variant.NO_PREFIX)
+            .setKemId(HpkeParameters.KemId.DHKEM_X25519_HKDF_SHA256)
+            .setKdfId(HpkeParameters.KdfId.HKDF_SHA256)
+            .setAeadId(HpkeParameters.AeadId.AES_256_GCM)
+            .build();
     testSenderAndRecipientAuthContexts(
         HpkeUtil.AUTH_MODE,
         HpkeUtil.X25519_HKDF_SHA256_KEM_ID,
         HpkeUtil.HKDF_SHA256_KDF_ID,
         HpkeUtil.AES_256_GCM_AEAD_ID,
-        com.google.crypto.tink.proto.HpkeKem.DHKEM_X25519_HKDF_SHA256);
+        parameters);
   }
 
   @Test
@@ -370,11 +384,18 @@ public final class HpkeContextTest {
   @Test
   public void createSenderAndRecipientAuthContexts_succeedsWithP256HkdfSha256Aes256Gcm()
       throws GeneralSecurityException {
+    HpkeParameters parameters =
+        HpkeParameters.builder()
+            .setVariant(HpkeParameters.Variant.NO_PREFIX)
+            .setKemId(HpkeParameters.KemId.DHKEM_P256_HKDF_SHA256)
+            .setKdfId(HpkeParameters.KdfId.HKDF_SHA256)
+            .setAeadId(HpkeParameters.AeadId.AES_256_GCM)
+            .build();
     testSenderAndRecipientAuthContexts(
         HpkeUtil.AUTH_MODE,
         HpkeUtil.P256_HKDF_SHA256_KEM_ID,
         HpkeUtil.HKDF_SHA256_KDF_ID,
         HpkeUtil.AES_256_GCM_AEAD_ID,
-        com.google.crypto.tink.proto.HpkeKem.DHKEM_P256_HKDF_SHA256);
+        parameters);
   }
 }
