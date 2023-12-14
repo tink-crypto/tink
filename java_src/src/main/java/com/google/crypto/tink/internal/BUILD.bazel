@@ -832,6 +832,8 @@ android_library(
         "//src/main/java/com/google/crypto/tink:key-android",
         "//src/main/java/com/google/crypto/tink:key_manager-android",
         "//src/main/java/com/google/crypto/tink:parameters-android",
+        "//src/main/java/com/google/crypto/tink:private_key-android",
+        "//src/main/java/com/google/crypto/tink:private_key_manager-android",
         "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
@@ -850,6 +852,8 @@ java_library(
         "//src/main/java/com/google/crypto/tink:key",
         "//src/main/java/com/google/crypto/tink:key_manager",
         "//src/main/java/com/google/crypto/tink:parameters",
+        "//src/main/java/com/google/crypto/tink:private_key",
+        "//src/main/java/com/google/crypto/tink:private_key_manager",
         "@maven//:com_google_protobuf_protobuf_java",
     ],
 )

@@ -20,6 +20,8 @@ import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.PrivateKey;
+import com.google.crypto.tink.PrivateKeyManager;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyTemplate;
@@ -46,13 +48,13 @@ import java.security.GeneralSecurityException;
  *   <li>{@link MutableKeyCreationRegistry}
  * </ul>
  */
-public final class LegacyKeyManagerImpl<P> implements KeyManager<P> {
-  private final String typeUrl;
-  private final Class<P> primitiveClass;
-  private final KeyMaterialType keyMaterialType;
-  private final Parser<? extends MessageLite> protobufKeyParser;
+public class LegacyKeyManagerImpl<P> implements KeyManager<P> {
+  final String typeUrl;
+  final Class<P> primitiveClass;
+  final KeyMaterialType keyMaterialType;
+  final Parser<? extends MessageLite> protobufKeyParser;
 
-  public static <P> LegacyKeyManagerImpl<P> create(
+  public static <P> KeyManager<P> create(
       String typeUrl,
       Class<P> primitiveClass,
       KeyMaterialType keyMaterialType,
@@ -60,7 +62,7 @@ public final class LegacyKeyManagerImpl<P> implements KeyManager<P> {
     return new LegacyKeyManagerImpl<>(typeUrl, primitiveClass, keyMaterialType, protobufKeyParser);
   }
 
-  private LegacyKeyManagerImpl(
+  LegacyKeyManagerImpl(
       String typeUrl,
       Class<P> primitiveClass,
       KeyMaterialType keyMaterialType,
@@ -146,5 +148,40 @@ public final class LegacyKeyManagerImpl<P> implements KeyManager<P> {
   @Override
   public final Class<P> getPrimitiveClass() {
     return primitiveClass;
+  }
+
+  private static class LegacyPrivateKeyManagerImpl<P> extends LegacyKeyManagerImpl<P>
+      implements PrivateKeyManager<P> {
+    protected LegacyPrivateKeyManagerImpl(
+        String typeUrl, Class<P> primitiveClass, Parser<? extends MessageLite> protobufKeyParser) {
+      super(typeUrl, primitiveClass, KeyMaterialType.ASYMMETRIC_PRIVATE, protobufKeyParser);
+    }
+
+    @Override
+    public KeyData getPublicKeyData(ByteString serializedKey) throws GeneralSecurityException {
+      ProtoKeySerialization serialization =
+          ProtoKeySerialization.create(
+              typeUrl, serializedKey, keyMaterialType, OutputPrefixType.RAW, null);
+      Key key =
+          MutableSerializationRegistry.globalInstance()
+              .parseKey(serialization, InsecureSecretKeyAccess.get());
+      if (!(key instanceof PrivateKey)) {
+        throw new GeneralSecurityException("Key not private key");
+      }
+      Key publicKey = ((PrivateKey) key).getPublicKey();
+      ProtoKeySerialization publicKeySerialization =
+          MutableSerializationRegistry.globalInstance()
+              .serializeKey(publicKey, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
+      return KeyData.newBuilder()
+          .setTypeUrl(publicKeySerialization.getTypeUrl())
+          .setValue(publicKeySerialization.getValue())
+          .setKeyMaterialType(publicKeySerialization.getKeyMaterialType())
+          .build();
+    }
+  }
+
+  public static <P> PrivateKeyManager<P> createPrivateKeyManager(
+      String typeUrl, Class<P> primitiveClass, Parser<? extends MessageLite> protobufKeyParser) {
+    return new LegacyPrivateKeyManagerImpl<P>(typeUrl, primitiveClass, protobufKeyParser);
   }
 }
