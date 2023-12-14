@@ -26,6 +26,8 @@ go_library(
         "//core/primitiveset",
         "//core/registry",
         "//internal",
+        "//internal/internalapi",
+        "//internal/registryconfig",
         "//proto/tink_go_proto",
         "//subtle/random",
         "//tink",
@@ -49,7 +51,9 @@ go_test(
     deps = [
         ":keyset",
         "//aead",
+        "//core/registry",
         "//insecurecleartextkeyset",
+        "//internal/internalapi",
         "//mac",
         "//proto/common_go_proto",
         "//proto/tink_go_proto",

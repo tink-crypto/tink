@@ -25,6 +25,8 @@ import (
 
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/internal/internalapi"
+	"github.com/google/tink/go/internal/registryconfig"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
@@ -174,14 +176,48 @@ func (h *Handle) WriteWithNoSecrets(w Writer) error {
 	return w.Write(h.ks)
 }
 
+// Config defines methods in the config.Config concrete type that are used by keyset.Handle.
+// The config.Config concrete type is not used directly due to circular dependencies.
+type Config interface {
+	PrimitiveFromKeyData(keyData *tinkpb.KeyData, _ internalapi.Token) (any, error)
+}
+type primitiveOptions struct {
+	config Config
+}
+
+// PrimitivesOption is used to configure Primitives(...).
+type PrimitivesOption func(*primitiveOptions) error
+
+// WithConfig sets the configuration used to create primitives via Primitives().
+// If this option is omitted, default to using the global registry.
+func WithConfig(c Config) PrimitivesOption {
+	return func(args *primitiveOptions) error {
+		if args.config != nil {
+			return fmt.Errorf("configuration has already been set")
+		}
+		args.config = c
+		return nil
+	}
+}
+
 // Primitives creates a set of primitives corresponding to the keys with
-// status=ENABLED in the keyset of the given keyset handle, assuming all the
-// corresponding key managers are present (keys with status!=ENABLED are skipped).
+// status=ENABLED in the keyset of the given keyset handle. It uses the
+// key managers that are present in the global Registry or in the Config,
+// should it be provided. It assumes that all the needed key managers are
+// present. Keys with status!=ENABLED are skipped.
+//
+// An example usage where a custom config is provided:
+//
+//	ps, err := h.Primitives(WithConfig(config.V0()))
 //
 // The returned set is usually later "wrapped" into a class that implements
 // the corresponding Primitive-interface.
-func (h *Handle) Primitives() (*primitiveset.PrimitiveSet, error) {
-	return h.PrimitivesWithKeyManager(nil)
+func (h *Handle) Primitives(opts ...PrimitivesOption) (*primitiveset.PrimitiveSet, error) {
+	p, err := h.primitives(nil, opts...)
+	if err != nil {
+		return nil, fmt.Errorf("handle.Primitives: %v", err)
+	}
+	return p, nil
 }
 
 // PrimitivesWithKeyManager creates a set of primitives corresponding to
@@ -197,8 +233,27 @@ func (h *Handle) Primitives() (*primitiveset.PrimitiveSet, error) {
 // The returned set is usually later "wrapped" into a class that implements
 // the corresponding Primitive-interface.
 func (h *Handle) PrimitivesWithKeyManager(km registry.KeyManager) (*primitiveset.PrimitiveSet, error) {
+	p, err := h.primitives(km)
+	if err != nil {
+		return nil, fmt.Errorf("handle.PrimitivesWithKeyManager: %v", err)
+	}
+	return p, nil
+}
+
+func (h *Handle) primitives(km registry.KeyManager, opts ...PrimitivesOption) (*primitiveset.PrimitiveSet, error) {
+	args := new(primitiveOptions)
+	for _, opt := range opts {
+		if err := opt(args); err != nil {
+			return nil, fmt.Errorf("failed to process primitiveOptions: %v", err)
+		}
+	}
+	config := args.config
+	if config == nil {
+		config = &registryconfig.RegistryConfig{}
+	}
+
 	if err := Validate(h.ks); err != nil {
-		return nil, fmt.Errorf("registry.PrimitivesWithKeyManager: invalid keyset: %s", err)
+		return nil, fmt.Errorf("invalid keyset: %v", err)
 	}
 	primitiveSet := primitiveset.New()
 	primitiveSet.Annotations = h.annotations
@@ -211,14 +266,14 @@ func (h *Handle) PrimitivesWithKeyManager(km registry.KeyManager) (*primitiveset
 		if km != nil && km.DoesSupport(key.KeyData.TypeUrl) {
 			primitive, err = km.Primitive(key.KeyData.Value)
 		} else {
-			primitive, err = registry.PrimitiveFromKeyData(key.KeyData)
+			primitive, err = config.PrimitiveFromKeyData(key.KeyData, internalapi.Token{})
 		}
 		if err != nil {
-			return nil, fmt.Errorf("registry.PrimitivesWithKeyManager: cannot get primitive from key: %s", err)
+			return nil, fmt.Errorf("cannot get primitive from key: %v", err)
 		}
 		entry, err := primitiveSet.Add(primitive, key)
 		if err != nil {
-			return nil, fmt.Errorf("registry.PrimitivesWithKeyManager: cannot add primitive: %s", err)
+			return nil, fmt.Errorf("cannot add primitive: %v", err)
 		}
 		if key.KeyId == h.ks.PrimaryKeyId {
 			primitiveSet.Primary = entry

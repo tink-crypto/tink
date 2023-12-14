@@ -22,11 +22,14 @@ import (
 
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/aead"
+	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/internal/internalapi"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/testkeyset"
 	"github.com/google/tink/go/testutil"
+	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
@@ -322,5 +325,122 @@ func TestKeysetInfo(t *testing.T) {
 	info := kh.KeysetInfo()
 	if info.PrimaryKeyId != info.KeyInfo[0].KeyId {
 		t.Errorf("Expected primary key id: %d, but got: %d", info.KeyInfo[0].KeyId, info.PrimaryKeyId)
+	}
+}
+
+func TestPrimitivesWithRegistry(t *testing.T) {
+	template := mac.HMACSHA256Tag128KeyTemplate()
+	template.OutputPrefixType = tinkpb.OutputPrefixType_RAW
+	handle, err := keyset.NewHandle(template)
+	if err != nil {
+		t.Fatalf("keyset.NewHandle(%v) err = %v, want nil", template, err)
+	}
+	handleMAC, err := mac.New(handle)
+	if err != nil {
+		t.Fatalf("mac.New(%v) err = %v, want nil", handle, err)
+	}
+
+	ks := testkeyset.KeysetMaterial(handle)
+	if len(ks.Key) != 1 {
+		t.Fatalf("len(ks.Key) = %d, want 1", len(ks.Key))
+	}
+	keyDataPrimitive, err := registry.PrimitiveFromKeyData(ks.Key[0].KeyData)
+	if err != nil {
+		t.Fatalf("registry.PrimitiveFromKeyData(%v) err = %v, want nil", ks.Key[0].KeyData, err)
+	}
+	keyDataMAC, ok := keyDataPrimitive.(tink.MAC)
+	if !ok {
+		t.Fatal("registry.PrimitiveFromKeyData(keyData) is not of type tink.MAC")
+	}
+
+	plaintext := []byte("plaintext")
+	handleMACTag, err := handleMAC.ComputeMAC(plaintext)
+	if err != nil {
+		t.Fatalf("handleMAC.ComputeMAC(%v) err = %v, want nil", plaintext, err)
+	}
+	if err = keyDataMAC.VerifyMAC(handleMACTag, plaintext); err != nil {
+		t.Errorf("keyDataMAC.VerifyMAC(%v, %v) err = %v, want nil", handleMACTag, plaintext, err)
+	}
+	keyDataMACTag, err := keyDataMAC.ComputeMAC(plaintext)
+	if err != nil {
+		t.Fatalf("keyDataMAC.ComputeMAC(%v) err = %v, want nil", plaintext, err)
+	}
+	if err = handleMAC.VerifyMAC(keyDataMACTag, plaintext); err != nil {
+		t.Errorf("handleMAC.VerifyMAC(%v, %v) err = %v, want nil", keyDataMACTag, plaintext, err)
+	}
+}
+
+type testConfig struct{}
+
+func (c *testConfig) PrimitiveFromKeyData(_ *tinkpb.KeyData, _ internalapi.Token) (any, error) {
+	return testPrimitive{}, nil
+}
+
+func TestPrimitivesWithConfig(t *testing.T) {
+	template := mac.HMACSHA256Tag128KeyTemplate()
+	template.OutputPrefixType = tinkpb.OutputPrefixType_RAW
+	handle, err := keyset.NewHandle(template)
+	if err != nil {
+		t.Fatalf("keyset.NewHandle(%v) = %v, want nil", template, err)
+	}
+	primitives, err := handle.Primitives(keyset.WithConfig(&testConfig{}))
+	if err != nil {
+		t.Fatalf("handle.Primitives(keyset.WithConfig(&testConfig{})) err = %v, want nil", err)
+	}
+	if len(primitives.EntriesInKeysetOrder) != 1 {
+		t.Fatalf("len(handle.Primitives()) = %d, want 1", len(primitives.EntriesInKeysetOrder))
+	}
+	if _, ok := (primitives.Primary.Primitive).(testPrimitive); !ok {
+		t.Errorf("handle.Primitives().Primary = %v, want instance of `testPrimitive`", primitives.Primary.Primitive)
+	}
+}
+
+func TestPrimitivesWithMultipleConfigs(t *testing.T) {
+	template := mac.HMACSHA256Tag128KeyTemplate()
+	template.OutputPrefixType = tinkpb.OutputPrefixType_RAW
+	handle, err := keyset.NewHandle(template)
+	if err != nil {
+		t.Fatalf("keyset.NewHandle(%v) = %v, want nil", template, err)
+	}
+	_, err = handle.Primitives(keyset.WithConfig(&testConfig{}), keyset.WithConfig(&testConfig{}))
+	if err == nil { // if NO error
+		t.Error("handle.Primitives(keyset.WithConfig(&testConfig{}), keyset.WithConfig(&testConfig{})) err = nil, want error")
+	}
+}
+
+type testKeyManager struct{}
+
+type testPrimitive struct{}
+
+func (km *testKeyManager) Primitive(_ []byte) (any, error)              { return testPrimitive{}, nil }
+func (km *testKeyManager) NewKey(_ []byte) (proto.Message, error)       { return nil, nil }
+func (km *testKeyManager) TypeURL() string                              { return mac.HMACSHA256Tag128KeyTemplate().TypeUrl }
+func (km *testKeyManager) NewKeyData(_ []byte) (*tinkpb.KeyData, error) { return nil, nil }
+func (km *testKeyManager) DoesSupport(typeURL string) bool {
+	return typeURL == mac.HMACSHA256Tag128KeyTemplate().TypeUrl
+}
+
+func TestPrimitivesWithKeyManager(t *testing.T) {
+	template := mac.HMACSHA256Tag128KeyTemplate()
+	handle, err := keyset.NewHandle(template)
+	if err != nil {
+		t.Fatalf("keyset.NewHandle(%v) = %v, want nil", template, err)
+	}
+
+	// Verify that without providing a custom key manager we get a usual MAC.
+	if _, err = mac.New(handle); err != nil {
+		t.Fatalf("mac.New(%v) err = %v, want nil", handle, err)
+	}
+
+	// Verify that with the custom key manager provided we get the custom primitive.
+	primitives, err := handle.PrimitivesWithKeyManager(&testKeyManager{})
+	if err != nil {
+		t.Fatalf("handle.PrimitivesWithKeyManager(testKeyManager) err = %v, want nil", err)
+	}
+	if len(primitives.EntriesInKeysetOrder) != 1 {
+		t.Fatalf("len(handle.PrimitivesWithKeyManager()) = %d, want 1", len(primitives.EntriesInKeysetOrder))
+	}
+	if _, ok := (primitives.Primary.Primitive).(testPrimitive); !ok {
+		t.Errorf("handle.PrimitivesWithKeyManager().Primary = %v, want instance of `testPrimitive`", primitives.Primary.Primitive)
 	}
 }
