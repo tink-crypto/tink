@@ -390,16 +390,60 @@ public class AesGcmKeyManagerTest {
   }
 
   @Test
-  public void no24ByteKeys() throws Exception {
+  public void test_24byte_keyCreation_throws() throws Exception {
     // We currently disallow creation of AesGcmKeys with 24 bytes (Tink doesn't support using these
     // for consistency among the languages, so we also disallow creation at the moment).
-    Parameters p =
+    AesGcmParameters p =
         AesGcmParameters.builder()
             .setIvSizeBytes(12)
             .setTagSizeBytes(16)
             .setKeySizeBytes(24)
             .build();
     assertThrows(GeneralSecurityException.class, () -> KeysetHandle.generateNew(p));
+  }
+
+  @Test
+  public void test_24byte_primitiveCreation_throws() throws Exception {
+    // We currently disallow creation of AesGcmKeys with 24 bytes (Tink doesn't support using these
+    // for consistency among the languages, so we also disallow creation at the moment).
+    AesGcmParameters p =
+        AesGcmParameters.builder()
+            .setIvSizeBytes(12)
+            .setTagSizeBytes(16)
+            .setKeySizeBytes(24)
+            .build();
+    AesGcmKey key =
+        AesGcmKey.builder().setParameters(p).setKeyBytes(SecretBytes.randomBytes(24)).build();
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).makePrimary().withRandomId())
+            .build();
+    assertThrows(GeneralSecurityException.class, () -> keysetHandle.getPrimitive(Aead.class));
+  }
+
+  @Test
+  public void test_24byte_createKeyFromRandomness_throws() throws Exception {
+    // We currently disallow creation of AesGcmKeys with 24 bytes (Tink doesn't support using these
+    // for consistency among the languages, so we also disallow creation at the moment).
+    AesGcmParameters parameters =
+        AesGcmParameters.builder()
+            .setIvSizeBytes(12)
+            .setTagSizeBytes(16)
+            .setKeySizeBytes(24)
+            .build();
+    byte[] keyMaterial =
+        new byte[] {
+          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+          25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35
+        };
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            AesGcmKeyManager.createAesGcmKeyFromRandomness(
+                parameters,
+                SlowInputStream.copyFrom(keyMaterial),
+                null,
+                InsecureSecretKeyAccess.get()));
   }
 
   @Test

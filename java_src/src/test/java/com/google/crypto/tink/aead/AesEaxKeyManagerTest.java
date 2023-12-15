@@ -19,6 +19,7 @@ package com.google.crypto.tink.aead;
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
@@ -283,6 +284,43 @@ public class AesEaxKeyManagerTest {
     for (int i = 0; i < 1000; ++i) {
       assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().equalsKey(key)).isFalse();
     }
+  }
+
+  @Test
+  public void test_24byte_keyCreation_throws() throws Exception {
+    // We currently disallow creation of AesEaxKeys with 24 bytes (Tink doesn't support using these
+    // for consistency among the languages, so we also disallow creation at the moment).
+    AesEaxParameters parameters =
+        AesEaxParameters.builder()
+            .setKeySizeBytes(24)
+            .setTagSizeBytes(16)
+            .setIvSizeBytes(12)
+            .setVariant(Variant.NO_PREFIX)
+            .build();
+    assertThrows(GeneralSecurityException.class, () -> KeysetHandle.generateNew(parameters));
+  }
+
+  @Test
+  public void test_24byte_primitiveCreation_throws() throws Exception {
+    // We currently disallow creation of AesEaxKeys with 24 bytes (Tink doesn't support using these
+    // for consistency among the languages, so we also disallow creation at the moment).
+    AesEaxParameters parameters =
+        AesEaxParameters.builder()
+            .setKeySizeBytes(24)
+            .setTagSizeBytes(16)
+            .setIvSizeBytes(12)
+            .setVariant(Variant.NO_PREFIX)
+            .build();
+    AesEaxKey key =
+        AesEaxKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(SecretBytes.randomBytes(24))
+            .build();
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).makePrimary().withRandomId())
+            .build();
+    assertThrows(GeneralSecurityException.class, () -> keysetHandle.getPrimitive(Aead.class));
   }
 
   @Test
