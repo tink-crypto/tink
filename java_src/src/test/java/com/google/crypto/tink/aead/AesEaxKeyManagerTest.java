@@ -30,6 +30,7 @@ import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.aead.AesEaxParameters.Variant;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.subtle.AesEaxJce;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Hex;
@@ -166,6 +167,14 @@ public class AesEaxKeyManagerTest {
         "cb8920f87a6c75cff39627b56e3ed197c552d295a7",
         "cfc46afc253b4652b1af3795b124ab6e"),
   };
+
+  @Test
+  public void testKeyManagerRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getKeyManager("type.googleapis.com/google.crypto.tink.AesEaxKey", Aead.class))
+        .isNotNull();
+  }
 
   @Test
   public void testPublicTestVectors() throws Exception {

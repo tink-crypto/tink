@@ -28,6 +28,7 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.SlowInputStream;
 import com.google.crypto.tink.keyderivation.KeyDerivationConfig;
@@ -73,6 +74,15 @@ public class AesCtrHmacAeadKeyManagerTest {
   public void register() throws Exception {
     AeadConfig.register();
     KeyDerivationConfig.register();
+  }
+
+  @Test
+  public void testKeyManagerRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getKeyManager(
+                    "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey", Aead.class))
+        .isNotNull();
   }
 
   @Test

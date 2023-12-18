@@ -26,6 +26,7 @@ import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.aead.ChaCha20Poly1305Parameters.Variant;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.subtle.ChaCha20Poly1305;
 import com.google.crypto.tink.util.SecretBytes;
 import org.junit.Before;
@@ -42,6 +43,15 @@ public class ChaCha20Poly1305KeyManagerTest {
   @Before
   public void register() throws Exception {
     AeadConfig.register();
+  }
+
+  @Test
+  public void testKeyManagerRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getKeyManager(
+                    "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key", Aead.class))
+        .isNotNull();
   }
 
   @Test

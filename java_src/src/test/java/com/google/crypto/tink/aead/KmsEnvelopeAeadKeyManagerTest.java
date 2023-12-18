@@ -27,6 +27,7 @@ import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.aead.LegacyKmsEnvelopeAeadParameters.DekParsingStrategy;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.Util;
@@ -62,6 +63,15 @@ public class KmsEnvelopeAeadKeyManagerTest {
     KmsClients.add(new FakeKmsClient());
     AeadConfig.register();
     AesGcmSivProtoSerialization.register();
+  }
+
+  @Test
+  public void testKeyManagerRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getKeyManager(
+                    "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey", Aead.class))
+        .isNotNull();
   }
 
   @Test
