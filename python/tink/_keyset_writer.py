@@ -16,6 +16,7 @@
 
 import abc
 from typing import BinaryIO, TextIO
+import warnings
 
 from google.protobuf import json_format
 from tink.proto import tink_pb2
@@ -36,6 +37,8 @@ class KeysetWriter(metaclass=abc.ABCMeta):
     raise NotImplementedError()
 
 
+# Deprecated. Instead, use the serialize functions in
+# tink.json_proto_keyset_format.
 class JsonKeysetWriter(KeysetWriter):
   """Writes keysets in proto JSON wire format to some storage system.
 
@@ -43,6 +46,7 @@ class JsonKeysetWriter(KeysetWriter):
   """
 
   def __init__(self, text_io_stream: TextIO):
+    warnings.warn('JsonKeysetWriter is deprecated.', DeprecationWarning, 2)
     self._io_stream = text_io_stream
 
   def write(self, keyset: tink_pb2.Keyset) -> None:
@@ -60,6 +64,7 @@ class JsonKeysetWriter(KeysetWriter):
     self._io_stream.flush()
 
 
+# Deprecated. Instead, use the serialize functions in tink.proto_keyset_format.
 class BinaryKeysetWriter(KeysetWriter):
   """Writes keysets in proto binary wire format to some storage system.
 
@@ -67,6 +72,7 @@ class BinaryKeysetWriter(KeysetWriter):
   """
 
   def __init__(self, binary_io_stream: BinaryIO):
+    warnings.warn('BinaryKeysetWriter is deprecated.', DeprecationWarning, 2)
     self._io_stream = binary_io_stream
 
   def write(self, keyset: tink_pb2.Keyset) -> None:
