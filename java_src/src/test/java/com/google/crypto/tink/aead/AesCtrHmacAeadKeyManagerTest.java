@@ -30,6 +30,13 @@ import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.SlowInputStream;
+import com.google.crypto.tink.keyderivation.KeyDerivationConfig;
+import com.google.crypto.tink.keyderivation.KeysetDeriver;
+import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationKey;
+import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationParameters;
+import com.google.crypto.tink.prf.HkdfPrfKey;
+import com.google.crypto.tink.prf.HkdfPrfParameters;
+import com.google.crypto.tink.prf.PrfKey;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
 import com.google.crypto.tink.proto.AesCtrKeyFormat;
@@ -65,6 +72,7 @@ public class AesCtrHmacAeadKeyManagerTest {
   @Before
   public void register() throws Exception {
     AeadConfig.register();
+    KeyDerivationConfig.register();
   }
 
   @Test
@@ -415,5 +423,128 @@ public class AesCtrHmacAeadKeyManagerTest {
             .setHmacKeyBytes(SecretBytes.copyFrom(expectedHmacKey, InsecureSecretKeyAccess.get()))
             .build();
     assertTrue(key.equalsKey(expectedKey));
+  }
+
+  private static PrfBasedKeyDerivationKey createDerivationKey(Parameters derivedParameters, int id)
+      throws Exception {
+    PrfKey prfKey =
+        HkdfPrfKey.builder()
+            .setParameters(
+                HkdfPrfParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setHashType(HkdfPrfParameters.HashType.SHA256)
+                    .build())
+            .setKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("0102030405060708091011121314151617181920212123242526272829303132"),
+                    InsecureSecretKeyAccess.get()))
+            .build();
+    PrfBasedKeyDerivationParameters derivationParameters =
+        PrfBasedKeyDerivationParameters.builder()
+            .setDerivedKeyParameters(derivedParameters)
+            .setPrfParameters(prfKey.getParameters())
+            .build();
+    return PrfBasedKeyDerivationKey.create(derivationParameters, prfKey, /* idRequirement= */ id);
+  }
+
+  private static final SecretBytes secretBytesFromHex(String hex) {
+    return SecretBytes.copyFrom(Hex.decode(hex), InsecureSecretKeyAccess.get());
+  }
+
+  @Test
+  public void testDeriveKey_predefinedKey_works() throws Exception {
+    // Same test vector as in PrfBasedKeyDeriverTest
+    KeysetDeriver deriver =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.importKey(
+                        createDerivationKey(PredefinedAeadParameters.AES128_CTR_HMAC_SHA256, 24680))
+                    .makePrimary())
+            .build()
+            .getPrimitive(KeysetDeriver.class);
+    KeysetHandle derivedKeyset = deriver.deriveKeyset(Hex.decode("000102"));
+    assertThat(derivedKeyset.size()).isEqualTo(1);
+    assertThat(derivedKeyset.getAt(0).getKey().getParameters())
+        .isEqualTo(PredefinedAeadParameters.AES128_CTR_HMAC_SHA256);
+    Key expectedKey =
+        com.google.crypto.tink.aead.AesCtrHmacAeadKey.builder()
+            .setParameters(PredefinedAeadParameters.AES128_CTR_HMAC_SHA256)
+            .setIdRequirement(24680)
+            .setAesKeyBytes(secretBytesFromHex("94e397d674deda6e965295698491a3fe"))
+            .setHmacKeyBytes(
+                secretBytesFromHex(
+                    "b69838a35f1d48143f3c4cbad90eeb249c8ddea6d09adc5f89a9a190122b095d"))
+            .build();
+
+    KeysetHandle expectedKeyset =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(expectedKey).makePrimary())
+            .build();
+    assertTrue(derivedKeyset.equalsKeyset(expectedKeyset));
+  }
+
+  @Test
+  public void testDeriveKey_24byteAes_throws() throws Exception {
+    KeysetHandle derivationHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(
+                KeysetHandle.importKey(
+                        createDerivationKey(
+                            AesCtrHmacAeadParameters.builder()
+                                .setAesKeySizeBytes(24)
+                                .setHmacKeySizeBytes(32)
+                                .setTagSizeBytes(16)
+                                .setIvSizeBytes(16)
+                                .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
+                                .setVariant(AesCtrHmacAeadParameters.Variant.TINK)
+                                .build(),
+                            24680))
+                    .makePrimary())
+            .build();
+    // TODO(tholenst): This should throw.
+    Object unused =
+        derivationHandle.getPrimitive(KeysetDeriver.class).deriveKeyset(Hex.decode("000102"));
+  }
+
+  @Test
+  public void testNewKey_validationHappens_throws() throws Exception {
+    AesCtrHmacAeadParameters rejectedParameters =
+        AesCtrHmacAeadParameters.builder()
+            .setAesKeySizeBytes(24)
+            .setHmacKeySizeBytes(32)
+            .setIvSizeBytes(16)
+            .setTagSizeBytes(32)
+            .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
+            .setVariant(AesCtrHmacAeadParameters.Variant.TINK)
+            .build();
+    assertThrows(
+        GeneralSecurityException.class, () -> KeysetHandle.generateNew(rejectedParameters));
+  }
+
+  @Test
+  public void testGetPrimitive_validationHappens_throws() throws Exception {
+    AesCtrHmacAeadParameters rejectedParameters =
+        AesCtrHmacAeadParameters.builder()
+            .setAesKeySizeBytes(24)
+            .setHmacKeySizeBytes(32)
+            .setIvSizeBytes(16)
+            .setTagSizeBytes(32)
+            .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
+            .setVariant(AesCtrHmacAeadParameters.Variant.TINK)
+            .build();
+    com.google.crypto.tink.aead.AesCtrHmacAeadKey rejectedKey =
+        com.google.crypto.tink.aead.AesCtrHmacAeadKey.builder()
+            .setParameters(rejectedParameters)
+            .setIdRequirement(123456)
+            .setAesKeyBytes(SecretBytes.randomBytes(rejectedParameters.getAesKeySizeBytes()))
+            .setHmacKeyBytes(SecretBytes.randomBytes(rejectedParameters.getHmacKeySizeBytes()))
+            .build();
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            KeysetHandle.newBuilder()
+                .addEntry(KeysetHandle.importKey(rejectedKey).makePrimary())
+                .build()
+                .getPrimitive(Aead.class));
   }
 }
