@@ -22,6 +22,8 @@ import (
 	"testing"
 
 	"google.golang.org/protobuf/proto"
+	"github.com/google/tink/go/aead"
+	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/testkeyset"
 	"github.com/google/tink/go/testutil"
@@ -73,5 +75,47 @@ func TestBinaryIOEncrypted(t *testing.T) {
 
 	if !proto.Equal(kse1, kse2) {
 		t.Errorf("written encrypted keyset (%s) doesn't match read encrypted keyset (%s)", kse1, kse2)
+	}
+}
+
+func TestBinaryWriteEncryptedOverhead(t *testing.T) {
+	keysetEncryptionHandle, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("keyset.NewHandle(aead.AES128GCMKeyTemplate()) err = %v, want nil", err)
+	}
+	keysetEncryptionAead, err := aead.New(keysetEncryptionHandle)
+	if err != nil {
+		t.Fatalf("aead.New(keysetEncryptionHandle) err = %v, want nil", err)
+	}
+
+	handle, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("keyset.NewHandle(aead.AES128GCMKeyTemplate()) err = %v, want nil", err)
+	}
+
+	buf := &bytes.Buffer{}
+	err = insecurecleartextkeyset.Write(handle, keyset.NewBinaryWriter(buf))
+	if err != nil {
+		t.Fatalf("insecurecleartextkeyset.Write() err = %v, want nil", err)
+	}
+	serialized := buf.Bytes()
+	rawEncryptedKeyset, err := keysetEncryptionAead.Encrypt(serialized, nil)
+	if err != nil {
+		t.Fatalf("keysetEncryptionAead.Encrypt() err = %v, want nil", err)
+	}
+
+	encBuf := &bytes.Buffer{}
+	err = handle.Write(keyset.NewBinaryWriter(encBuf), keysetEncryptionAead)
+	if err != nil {
+		t.Fatalf("handle.Write(keyset.NewBinaryWriter(buff), keysetEncryptionAead) err = %v, want nil", err)
+	}
+	encryptedKeyset := encBuf.Bytes()
+
+	// encryptedKeyset is a serialized protocol buffer that contains rawEncryptedKeyset and
+	// a KeysetInfo. KeysetInfo contains a type url, which is 48 bytes for AES GCM, and a 4 byte
+	// key ID. So it must be at least 52 longer than rawEncryptedKeyset.
+	// TODO(b/316316648) Remove KeysetInfo, to make the overhead smaller.
+	if len(encryptedKeyset) < len(rawEncryptedKeyset)+52 {
+		t.Errorf("len(encryptedKeyset) = %d, want >= %d", len(encryptedKeyset), len(rawEncryptedKeyset)+52)
 	}
 }

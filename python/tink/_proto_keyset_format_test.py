@@ -220,6 +220,32 @@ class TinkProtoKeysetFormatTest(absltest.TestCase):
     primitive2 = parsed_keyset_handle.primitive(aead.Aead)
     self.assertEqual(primitive2.decrypt(ciphertext, associated_data), plaintext)
 
+  def test_encrypted_keyset_overhead(self):
+    keyset_encryption_aead = tink.new_keyset_handle(
+        aead.aead_key_templates.AES128_GCM
+    ).primitive(aead.Aead)
+
+    keyset_handle = tink.new_keyset_handle(aead.aead_key_templates.AES128_GCM)
+
+    serialized_keyset = tink.proto_keyset_format.serialize(
+        keyset_handle, secret_key_access.TOKEN
+    )
+    raw_encrypted_keyset = keyset_encryption_aead.encrypt(
+        serialized_keyset, b''
+    )
+
+    encrypted_keyset = tink.proto_keyset_format.serialize_encrypted(
+        keyset_handle=keyset_handle,
+        keyset_encryption_aead=keyset_encryption_aead,
+        associated_data=b'',
+    )
+    # encrypted_keyset is a serialized protocol buffer that contains
+    # raw_encrypted_keyset and a KeysetInfo. KeysetInfo contains a type url,
+    # which is 48 bytes for AES GCM, and a 4 byte key ID. So it must be at least
+    # 52 longer than raw_encrypted_keyset.
+    # TODO(b/316316648) Remove KeysetInfo, to make the overhead smaller.
+    self.assertGreater(len(encrypted_keyset), len(raw_encrypted_keyset) + 52)
+
 
 if __name__ == '__main__':
   absltest.main()
