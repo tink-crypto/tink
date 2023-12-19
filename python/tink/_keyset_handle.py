@@ -14,16 +14,15 @@
 """This module defines KeysetHandle."""
 
 import random
-
 from typing import Type, TypeVar
 
 from google.protobuf import message
 from tink.proto import tink_pb2
 from tink import _keyset_reader
 from tink import _keyset_writer
+from tink import _secret_key_access
 from tink import aead
 from tink import core
-from tink import secret_key_access
 
 P = TypeVar('P')
 
@@ -40,7 +39,7 @@ PUBLIC_KEY_ACCESS_TOKEN = PublicKeyAccess()
 
 def has_secret_key_access(token: core.KeyAccess) -> bool:
   """Returns True if token is secret_key_access.TOKEN, and False otherwise."""
-  return isinstance(token, secret_key_access.SecretKeyAccess)
+  return isinstance(token, _secret_key_access.SecretKeyAccess)
 
 
 class KeysetHandle:

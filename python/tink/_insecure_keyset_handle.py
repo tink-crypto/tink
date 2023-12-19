@@ -15,14 +15,14 @@
 
 from tink.proto import tink_pb2
 from tink import _keyset_handle
+from tink import _secret_key_access
 from tink import core
-from tink import secret_key_access
 
 
 def from_proto_keyset(
     keyset: tink_pb2.Keyset, token: core.KeyAccess
 ) -> _keyset_handle.KeysetHandle:
-  if not isinstance(token, secret_key_access.SecretKeyAccess):
+  if not isinstance(token, _secret_key_access.SecretKeyAccess):
     raise core.TinkError('no secret access.')
   return _keyset_handle.KeysetHandle._create(keyset)  # pylint: disable=protected-access
 
@@ -30,6 +30,6 @@ def from_proto_keyset(
 def to_proto_keyset(
     keyset_handle: _keyset_handle.KeysetHandle, token: core.KeyAccess
 ) -> tink_pb2.Keyset:
-  if not isinstance(token, secret_key_access.SecretKeyAccess):
+  if not isinstance(token, _secret_key_access.SecretKeyAccess):
     raise core.TinkError('no secret access.')
   return keyset_handle._keyset  # pylint: disable=protected-access

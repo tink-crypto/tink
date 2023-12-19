@@ -19,7 +19,12 @@ Reading or writing secret keys is a bad practice, usage of this API should be
 restricted.
 """
 
-from tink import _secret_key_access
+from tink import core
 
-SecretKeyAccess = _secret_key_access.SecretKeyAccess
-TOKEN = _secret_key_access.TOKEN
+
+class SecretKeyAccess(core.KeyAccess):
+  """An access token that gives access to all keys."""
+  pass
+
+
+TOKEN = SecretKeyAccess()
