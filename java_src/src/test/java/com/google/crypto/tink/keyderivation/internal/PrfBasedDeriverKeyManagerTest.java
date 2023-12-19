@@ -18,12 +18,27 @@ package com.google.crypto.tink.keyderivation.internal;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.Key;
+import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.aead.AesGcmKey;
+import com.google.crypto.tink.aead.PredefinedAeadParameters;
+import com.google.crypto.tink.aead.XChaCha20Poly1305Parameters;
 import com.google.crypto.tink.config.TinkConfig;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.keyderivation.KeyDerivationConfig;
+import com.google.crypto.tink.keyderivation.KeysetDeriver;
+import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationKey;
+import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationParameters;
 import com.google.crypto.tink.prf.HkdfPrfKeyManager;
+import com.google.crypto.tink.prf.HkdfPrfParameters;
+import com.google.crypto.tink.prf.PrfConfig;
+import com.google.crypto.tink.prf.PrfKey;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HkdfPrfKey;
 import com.google.crypto.tink.proto.HkdfPrfKeyFormat;
@@ -33,11 +48,15 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.PrfBasedDeriverKey;
 import com.google.crypto.tink.proto.PrfBasedDeriverKeyFormat;
 import com.google.crypto.tink.proto.PrfBasedDeriverParams;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
+import java.util.Set;
+import java.util.TreeSet;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,6 +73,7 @@ public class PrfBasedDeriverKeyManagerTest {
   public static void setUp() throws GeneralSecurityException {
     TinkConfig.register();
     KeyDerivationConfig.register();
+    PrfConfig.register();
   }
 
   @Test
@@ -209,5 +229,143 @@ public class PrfBasedDeriverKeyManagerTest {
                         KeyTemplate.newBuilder().setTypeUrl("nonexistenttypeurl").build()))
             .build();
     assertThrows(GeneralSecurityException.class, () -> factory.createKey(keyFormat));
+  }
+
+  @Test
+  public void testKeyManagerRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getUntypedKeyManager("type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey"))
+        .isNotNull();
+  }
+
+  @Test
+  public void createKey_works() throws Exception {
+    PrfBasedKeyDerivationParameters params =
+        PrfBasedKeyDerivationParameters.builder()
+            .setPrfParameters(
+                HkdfPrfParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setHashType(HkdfPrfParameters.HashType.SHA256)
+                    .build())
+            .setDerivedKeyParameters(XChaCha20Poly1305Parameters.create())
+            .build();
+
+    KeysetHandle handle = KeysetHandle.generateNew(params);
+    assertThat(handle.size()).isEqualTo(1);
+    PrfBasedKeyDerivationKey key = (PrfBasedKeyDerivationKey) handle.getAt(0).getKey();
+    assertThat(key.getParameters()).isEqualTo(params);
+  }
+
+  @Test
+  public void createKey_otherParams_works() throws Exception {
+    // We repeat the above test just to check that no part of Tink somehow inlines  default
+    // parameters for this somewhere and we ignore some inputs.
+    PrfBasedKeyDerivationParameters params =
+        PrfBasedKeyDerivationParameters.builder()
+            .setPrfParameters(
+                HkdfPrfParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setHashType(HkdfPrfParameters.HashType.SHA512)
+                    .build())
+            .setDerivedKeyParameters(
+                XChaCha20Poly1305Parameters.create(XChaCha20Poly1305Parameters.Variant.TINK))
+            .build();
+
+    KeysetHandle handle = KeysetHandle.generateNew(params);
+    assertThat(handle.size()).isEqualTo(1);
+    PrfBasedKeyDerivationKey key = (PrfBasedKeyDerivationKey) handle.getAt(0).getKey();
+    assertThat(key.getParameters()).isEqualTo(params);
+  }
+
+  @Test
+  public void createKey_differentKeyValues_alwaysDifferent() throws Exception {
+    PrfBasedKeyDerivationParameters params =
+        PrfBasedKeyDerivationParameters.builder()
+            .setPrfParameters(
+                HkdfPrfParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setHashType(HkdfPrfParameters.HashType.SHA256)
+                    .build())
+            .setDerivedKeyParameters(XChaCha20Poly1305Parameters.create())
+            .build();
+
+    int numKeys = 100;
+    Set<String> keys = new TreeSet<>();
+    for (int i = 0; i < numKeys; i++) {
+      KeysetHandle handle = KeysetHandle.generateNew(params);
+      assertThat(handle.size()).isEqualTo(1);
+      PrfBasedKeyDerivationKey key = (PrfBasedKeyDerivationKey) handle.getAt(0).getKey();
+      com.google.crypto.tink.prf.HkdfPrfKey prfKey =
+          (com.google.crypto.tink.prf.HkdfPrfKey) key.getPrfKey();
+      keys.add(Hex.encode(prfKey.getKeyBytes().toByteArray(InsecureSecretKeyAccess.get())));
+    }
+    assertThat(keys.size()).isEqualTo(numKeys);
+  }
+
+  @Test
+  public void createPrimitiveAndUseIt_works() throws Exception {
+    // Test vector from PrfBasedDeriverSecondTest. (FIXED_PRF_KEY)
+    PrfKey prfKey =
+        com.google.crypto.tink.prf.HkdfPrfKey.builder()
+            .setParameters(
+                HkdfPrfParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setHashType(HkdfPrfParameters.HashType.SHA256)
+                    .build())
+            .setKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("0102030405060708091011121314151617181920212123242526272829303132"),
+                    InsecureSecretKeyAccess.get()))
+            .build();
+
+    PrfBasedKeyDerivationParameters derivationParameters =
+        PrfBasedKeyDerivationParameters.builder()
+            .setDerivedKeyParameters(PredefinedAeadParameters.AES128_GCM)
+            .setPrfParameters(prfKey.getParameters())
+            .build();
+    PrfBasedKeyDerivationKey keyDerivationKey =
+        PrfBasedKeyDerivationKey.create(derivationParameters, prfKey, 123);
+
+    KeysetHandle handle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(keyDerivationKey).makePrimary().withFixedId(123))
+            .build();
+    KeysetDeriver deriver = handle.getPrimitive(KeysetDeriver.class);
+
+    Key expectedKey =
+        AesGcmKey.builder()
+            .setParameters(PredefinedAeadParameters.AES128_GCM)
+            .setIdRequirement(123)
+            .setKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("1b73bdf5293cc533d635f263e35913ec"), InsecureSecretKeyAccess.get()))
+            .build();
+    KeysetHandle derivedKeysetHandle = deriver.deriveKeyset(new byte[0]);
+    assertThat(derivedKeysetHandle.getAt(0).getKey().getParameters())
+        .isEqualTo(PredefinedAeadParameters.AES128_GCM);
+    assertThat(derivedKeysetHandle.getAt(0).getKey().equalsKey(expectedKey)).isTrue();
+  }
+
+  @Test
+  public void checkSerializationRegistered() throws Exception {
+    PrfBasedKeyDerivationParameters params =
+        PrfBasedKeyDerivationParameters.builder()
+            .setPrfParameters(
+                HkdfPrfParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setHashType(HkdfPrfParameters.HashType.SHA256)
+                    .build())
+            .setDerivedKeyParameters(XChaCha20Poly1305Parameters.create())
+            .build();
+
+    KeysetHandle handle = KeysetHandle.generateNew(params);
+
+    byte[] serialized =
+        TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get());
+    KeysetHandle parsed =
+        TinkProtoKeysetFormat.parseKeyset(serialized, InsecureSecretKeyAccess.get());
+
+    assertTrue(parsed.equalsKeyset(handle));
   }
 }
