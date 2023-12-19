@@ -19,9 +19,11 @@ package com.google.crypto.tink.streamingaead;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.Util;
@@ -238,12 +240,16 @@ public class AesCtrHmacStreamingKeyManagerTest {
 
   @Test
   public void createKey_multipleTimes_differentValues() throws Exception {
-    AesCtrHmacStreamingKeyFormat keyFormat = createKeyFormat().build();
+    Parameters parameters =
+        AesCtrHmacStreamingKeyManager.aes128CtrHmacSha2564KBTemplate().toParameters();
     Set<String> keys = new TreeSet<>();
     // Calls newKey multiple times and make sure that they generate different keys.
     int numTests = 100;
     for (int i = 0; i < numTests; i++) {
-      keys.add(Hex.encode(factory.createKey(keyFormat).getKeyValue().toByteArray()));
+      KeysetHandle handle = KeysetHandle.generateNew(parameters);
+      com.google.crypto.tink.streamingaead.AesCtrHmacStreamingKey key =
+          (com.google.crypto.tink.streamingaead.AesCtrHmacStreamingKey) handle.getAt(0).getKey();
+      keys.add(Hex.encode(key.getInitialKeyMaterial().toByteArray(InsecureSecretKeyAccess.get())));
     }
     assertThat(keys).hasSize(numTests);
   }

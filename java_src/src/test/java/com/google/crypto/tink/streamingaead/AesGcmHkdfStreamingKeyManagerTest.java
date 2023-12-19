@@ -25,6 +25,7 @@ import com.google.crypto.tink.Key;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.SlowInputStream;
@@ -153,12 +154,15 @@ public class AesGcmHkdfStreamingKeyManagerTest {
 
   @Test
   public void testNewKeyMultipleTimes() throws Exception {
-    AesGcmHkdfStreamingKeyFormat keyFormat = createKeyFormat(32, 32, HashType.SHA256, 1024);
+    Parameters parameters = AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate().toParameters();
     Set<String> keys = new TreeSet<>();
     // Calls newKey multiple times and make sure that they generate different keys.
     int numTests = 100;
     for (int i = 0; i < numTests; i++) {
-      keys.add(Hex.encode(factory.createKey(keyFormat).getKeyValue().toByteArray()));
+      KeysetHandle handle = KeysetHandle.generateNew(parameters);
+      com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey key =
+          (com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey) handle.getAt(0).getKey();
+      keys.add(Hex.encode(key.getInitialKeyMaterial().toByteArray(InsecureSecretKeyAccess.get())));
     }
     assertThat(keys).hasSize(numTests);
   }
