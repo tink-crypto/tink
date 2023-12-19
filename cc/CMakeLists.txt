@@ -784,7 +784,17 @@ tink_cc_test(
     core/binary_keyset_writer_test.cc
   DEPS
     tink::core::binary_keyset_writer
+    tink::core::cc
+    tink::core::insecure_secret_key_access
+    tink::core::proto_keyset_format
     gmock
+    absl::memory
+    absl::status
+    tink::aead::aead_config
+    tink::config::global_registry
+    tink::util::secret_data
+    tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
 )

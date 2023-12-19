@@ -840,8 +840,18 @@ cc_test(
     srcs = ["core/binary_keyset_writer_test.cc"],
     deps = [
         ":binary_keyset_writer",
+        ":insecure_secret_key_access",
+        ":proto_keyset_format",
+        ":tink_cc",
+        "//aead:aead_config",
+        "//config:global_registry",
         "//proto:tink_cc_proto",
+        "//util:secret_data",
+        "//util:statusor",
+        "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
