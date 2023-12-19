@@ -19,12 +19,15 @@ package com.google.crypto.tink.prf;
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.proto.HashType;
@@ -33,14 +36,18 @@ import com.google.crypto.tink.proto.HkdfPrfKeyFormat;
 import com.google.crypto.tink.proto.HkdfPrfParams;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Enums;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.prf.HkdfStreamingPrf;
+import com.google.crypto.tink.subtle.prf.PrfImpl;
 import com.google.crypto.tink.subtle.prf.StreamingPrf;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.util.Set;
+import java.util.TreeSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
@@ -342,5 +349,95 @@ public class HkdfPrfKeyManagerTest {
         MutablePrimitiveRegistry.globalInstance().getPrimitive(hkdfPrfKey, StreamingPrf.class);
 
     assertThat(streamingPrf).isNotNull();
+  }
+
+  @Test
+  public void testKeyManagerRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getKeyManager("type.googleapis.com/google.crypto.tink.HkdfPrfKey", Prf.class))
+        .isNotNull();
+  }
+
+  @Test
+  public void createKey_works() throws Exception {
+    HkdfPrfParameters params =
+        HkdfPrfParameters.builder()
+            .setHashType(HkdfPrfParameters.HashType.SHA256)
+            .setKeySizeBytes(32)
+            .build();
+    KeysetHandle handle = KeysetHandle.generateNew(params);
+    assertThat(handle.size()).isEqualTo(1);
+    com.google.crypto.tink.prf.HkdfPrfKey key =
+        (com.google.crypto.tink.prf.HkdfPrfKey) handle.getAt(0).getKey();
+    assertThat(key.getParameters()).isEqualTo(params);
+  }
+
+  @Test
+  public void createKey_otherParams_works() throws Exception {
+    HkdfPrfParameters params =
+        HkdfPrfParameters.builder()
+            .setHashType(HkdfPrfParameters.HashType.SHA512)
+            .setKeySizeBytes(32)
+            .build();
+    KeysetHandle handle = KeysetHandle.generateNew(params);
+    assertThat(handle.size()).isEqualTo(1);
+    com.google.crypto.tink.prf.HkdfPrfKey key =
+        (com.google.crypto.tink.prf.HkdfPrfKey) handle.getAt(0).getKey();
+    assertThat(key.getParameters()).isEqualTo(params);
+  }
+
+  @Test
+  public void createKey_differentKeyValues_alwaysDifferent() throws Exception {
+    HkdfPrfParameters params =
+        HkdfPrfParameters.builder()
+            .setHashType(HkdfPrfParameters.HashType.SHA512)
+            .setKeySizeBytes(32)
+            .build();
+
+    int numKeys = 100;
+    Set<String> keys = new TreeSet<>();
+    for (int i = 0; i < numKeys; i++) {
+      KeysetHandle handle = KeysetHandle.generateNew(params);
+      assertThat(handle.size()).isEqualTo(1);
+      com.google.crypto.tink.prf.HkdfPrfKey key =
+          (com.google.crypto.tink.prf.HkdfPrfKey) handle.getAt(0).getKey();
+      keys.add(Hex.encode(key.getKeyBytes().toByteArray(InsecureSecretKeyAccess.get())));
+    }
+    assertThat(keys).hasSize(numKeys);
+  }
+
+  @Test
+  public void createPrimitiveAndUseIt_works() throws Exception {
+    HkdfPrfParameters params =
+        HkdfPrfParameters.builder()
+            .setHashType(HkdfPrfParameters.HashType.SHA512)
+            .setKeySizeBytes(32)
+            .build();
+    KeysetHandle handle = KeysetHandle.generateNew(params);
+    assertThat(handle.size()).isEqualTo(1);
+    PrfSet prfSet = handle.getPrimitive(PrfSet.class);
+    Prf directPrf =
+        PrfImpl.wrap(
+            HkdfStreamingPrf.create(
+                (com.google.crypto.tink.prf.HkdfPrfKey) handle.getAt(0).getKey()));
+    assertThat(prfSet.computePrimary(new byte[0], 16))
+        .isEqualTo(directPrf.compute(new byte[0], 16));
+  }
+
+  @Test
+  public void serializeAndDeserializeKeysets() throws Exception {
+    HkdfPrfParameters params =
+        HkdfPrfParameters.builder()
+            .setHashType(HkdfPrfParameters.HashType.SHA512)
+            .setKeySizeBytes(32)
+            .build();
+    KeysetHandle handle = KeysetHandle.generateNew(params);
+
+    byte[] serializedKeyset =
+        TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get());
+    KeysetHandle parsed =
+        TinkProtoKeysetFormat.parseKeyset(serializedKeyset, InsecureSecretKeyAccess.get());
+    assertTrue(parsed.equalsKeyset(handle));
   }
 }

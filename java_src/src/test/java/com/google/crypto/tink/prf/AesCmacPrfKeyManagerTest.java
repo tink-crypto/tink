@@ -18,19 +18,26 @@ package com.google.crypto.tink.prf;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.proto.AesCmacPrfKey;
 import com.google.crypto.tink.proto.AesCmacPrfKeyFormat;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.PrfAesCmac;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
+import java.util.Set;
+import java.util.TreeSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
@@ -181,5 +188,97 @@ public class AesCmacPrfKeyManagerTest {
                 Prf.class);
 
     assertThat(prf).isInstanceOf(PrfAesCmac.class);
+  }
+
+  @Test
+  public void testKeyManagerRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getKeyManager("type.googleapis.com/google.crypto.tink.AesCmacPrfKey", Prf.class))
+        .isNotNull();
+  }
+
+  @Test
+  public void createKey_works() throws Exception {
+    AesCmacPrfParameters params = AesCmacPrfParameters.create(32);
+    KeysetHandle handle = KeysetHandle.generateNew(params);
+    assertThat(handle.size()).isEqualTo(1);
+    com.google.crypto.tink.prf.AesCmacPrfKey key =
+        (com.google.crypto.tink.prf.AesCmacPrfKey) handle.getAt(0).getKey();
+    assertThat(key.getParameters()).isEqualTo(params);
+  }
+
+  @Test
+  public void createKey_differentKeyValues_alwaysDifferent() throws Exception {
+    AesCmacPrfParameters params = AesCmacPrfParameters.create(32);
+
+    int numKeys = 100;
+    Set<String> keys = new TreeSet<>();
+    for (int i = 0; i < numKeys; i++) {
+      KeysetHandle handle = KeysetHandle.generateNew(params);
+      assertThat(handle.size()).isEqualTo(1);
+      com.google.crypto.tink.prf.AesCmacPrfKey key =
+          (com.google.crypto.tink.prf.AesCmacPrfKey) handle.getAt(0).getKey();
+      keys.add(Hex.encode(key.getKeyBytes().toByteArray(InsecureSecretKeyAccess.get())));
+    }
+    assertThat(keys).hasSize(numKeys);
+  }
+
+  @Test
+  public void createPrimitiveAndUseIt_works() throws Exception {
+    AesCmacPrfParameters params = AesCmacPrfParameters.create(32);
+    KeysetHandle handle = KeysetHandle.generateNew(params);
+    assertThat(handle.size()).isEqualTo(1);
+    PrfSet prfSet = handle.getPrimitive(PrfSet.class);
+    Prf directPrf =
+        PrfAesCmac.create((com.google.crypto.tink.prf.AesCmacPrfKey) handle.getAt(0).getKey());
+    assertThat(prfSet.computePrimary(new byte[0], 16))
+        .isEqualTo(directPrf.compute(new byte[0], 16));
+  }
+
+  @Test
+  public void serializeAndDeserializeKeysets() throws Exception {
+    AesCmacPrfParameters params = AesCmacPrfParameters.create(32);
+    KeysetHandle handle = KeysetHandle.generateNew(params);
+
+    byte[] serializedKeyset =
+        TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get());
+    KeysetHandle parsed =
+        TinkProtoKeysetFormat.parseKeyset(serializedKeyset, InsecureSecretKeyAccess.get());
+    assertTrue(parsed.equalsKeyset(handle));
+  }
+
+  @Test
+  public void createKeyWith16Bytes_throws() throws Exception {
+    AesCmacPrfParameters params = AesCmacPrfParameters.create(16);
+    assertThrows(GeneralSecurityException.class, () -> KeysetHandle.generateNew(params));
+  }
+
+  @Test
+  public void createPrimitiveWith16Bytes_throws() throws Exception {
+    AesCmacPrfParameters params = AesCmacPrfParameters.create(16);
+    com.google.crypto.tink.prf.AesCmacPrfKey key =
+        com.google.crypto.tink.prf.AesCmacPrfKey.create(params, SecretBytes.randomBytes(16));
+    KeysetHandle handle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).withFixedId(1).makePrimary())
+            .build();
+    assertThrows(GeneralSecurityException.class, () -> handle.getPrimitive(PrfSet.class));
+  }
+
+  @Test
+  public void serializeDeserializeKeysetsWith16Bytes_works() throws Exception {
+    AesCmacPrfParameters params = AesCmacPrfParameters.create(16);
+    com.google.crypto.tink.prf.AesCmacPrfKey key =
+        com.google.crypto.tink.prf.AesCmacPrfKey.create(params, SecretBytes.randomBytes(16));
+    KeysetHandle handle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).withFixedId(1).makePrimary())
+            .build();
+    byte[] serializedKeyset =
+        TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get());
+    KeysetHandle parsed =
+        TinkProtoKeysetFormat.parseKeyset(serializedKeyset, InsecureSecretKeyAccess.get());
+    assertTrue(parsed.equalsKeyset(handle));
   }
 }

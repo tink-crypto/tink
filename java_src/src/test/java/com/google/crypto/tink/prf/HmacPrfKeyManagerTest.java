@@ -26,9 +26,15 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.SlowInputStream;
+import com.google.crypto.tink.keyderivation.KeyDerivationConfig;
+import com.google.crypto.tink.keyderivation.KeysetDeriver;
+import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationKey;
+import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationParameters;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacPrfKey;
 import com.google.crypto.tink.proto.HmacPrfKeyFormat;
@@ -61,6 +67,7 @@ public class HmacPrfKeyManagerTest {
 
   @Before
   public void register() throws Exception {
+    KeyDerivationConfig.register();
     PrfConfig.register();
   }
 
@@ -283,5 +290,142 @@ public class HmacPrfKeyManagerTest {
             .setKeyBytes(SecretBytes.copyFrom(expectedKeyBytes, InsecureSecretKeyAccess.get()))
             .build();
     assertTrue(key.equalsKey(expectedKey));
+  }
+
+  @Test
+  public void testKeyManagerRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getKeyManager("type.googleapis.com/google.crypto.tink.HmacPrfKey", Prf.class))
+        .isNotNull();
+  }
+
+  @Test
+  public void createKey_works() throws Exception {
+    HmacPrfParameters params =
+        HmacPrfParameters.builder()
+            .setHashType(HmacPrfParameters.HashType.SHA256)
+            .setKeySizeBytes(32)
+            .build();
+    KeysetHandle handle = KeysetHandle.generateNew(params);
+    assertThat(handle.size()).isEqualTo(1);
+    com.google.crypto.tink.prf.HmacPrfKey key =
+        (com.google.crypto.tink.prf.HmacPrfKey) handle.getAt(0).getKey();
+    assertThat(key.getParameters()).isEqualTo(params);
+  }
+
+  @Test
+  public void createKey_otherParams_works() throws Exception {
+    HmacPrfParameters params =
+        HmacPrfParameters.builder()
+            .setHashType(HmacPrfParameters.HashType.SHA512)
+            .setKeySizeBytes(32)
+            .build();
+    KeysetHandle handle = KeysetHandle.generateNew(params);
+    assertThat(handle.size()).isEqualTo(1);
+    com.google.crypto.tink.prf.HmacPrfKey key =
+        (com.google.crypto.tink.prf.HmacPrfKey) handle.getAt(0).getKey();
+    assertThat(key.getParameters()).isEqualTo(params);
+  }
+
+  @Test
+  public void createKey_differentKeyValues_alwaysDifferent() throws Exception {
+    HmacPrfParameters params =
+        HmacPrfParameters.builder()
+            .setHashType(HmacPrfParameters.HashType.SHA512)
+            .setKeySizeBytes(32)
+            .build();
+
+    int numKeys = 100;
+    Set<String> keys = new TreeSet<>();
+    for (int i = 0; i < numKeys; i++) {
+      KeysetHandle handle = KeysetHandle.generateNew(params);
+      assertThat(handle.size()).isEqualTo(1);
+      com.google.crypto.tink.prf.HmacPrfKey key =
+          (com.google.crypto.tink.prf.HmacPrfKey) handle.getAt(0).getKey();
+      keys.add(Hex.encode(key.getKeyBytes().toByteArray(InsecureSecretKeyAccess.get())));
+    }
+    assertThat(keys).hasSize(numKeys);
+  }
+
+  @Test
+  public void createPrimitiveAndUseIt_works() throws Exception {
+    HmacPrfParameters params =
+        HmacPrfParameters.builder()
+            .setHashType(HmacPrfParameters.HashType.SHA512)
+            .setKeySizeBytes(32)
+            .build();
+    KeysetHandle handle = KeysetHandle.generateNew(params);
+    assertThat(handle.size()).isEqualTo(1);
+    PrfSet prfSet = handle.getPrimitive(PrfSet.class);
+    Prf directPrf =
+        PrfHmacJce.create((com.google.crypto.tink.prf.HmacPrfKey) handle.getAt(0).getKey());
+    assertThat(prfSet.computePrimary(new byte[0], 16))
+        .isEqualTo(directPrf.compute(new byte[0], 16));
+  }
+
+  @Test
+  public void serializeAndDeserializeKeysets() throws Exception {
+    HmacPrfParameters params =
+        HmacPrfParameters.builder()
+            .setHashType(HmacPrfParameters.HashType.SHA512)
+            .setKeySizeBytes(32)
+            .build();
+    KeysetHandle handle = KeysetHandle.generateNew(params);
+
+    byte[] serializedKeyset =
+        TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get());
+    KeysetHandle parsed =
+        TinkProtoKeysetFormat.parseKeyset(serializedKeyset, InsecureSecretKeyAccess.get());
+    assertTrue(parsed.equalsKeyset(handle));
+  }
+
+  @Test
+  public void deriveHmacPrfKey_works() throws Exception {
+    PrfKey prfKeyForDeriver =
+        HkdfPrfKey.builder()
+            .setParameters(
+                HkdfPrfParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setHashType(HkdfPrfParameters.HashType.SHA256)
+                    .build())
+            .setKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("0102030405060708091011121314151617181920212123242526272829303132"),
+                    InsecureSecretKeyAccess.get()))
+            .build();
+    PrfBasedKeyDerivationParameters derivationParameters =
+        PrfBasedKeyDerivationParameters.builder()
+            .setDerivedKeyParameters(PredefinedPrfParameters.HMAC_SHA256_PRF)
+            .setPrfParameters(prfKeyForDeriver.getParameters())
+            .build();
+    PrfBasedKeyDerivationKey key =
+        PrfBasedKeyDerivationKey.create(
+            derivationParameters, prfKeyForDeriver, /* idRequirement= */ null);
+
+    KeysetHandle keyset =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).withFixedId(112233).makePrimary())
+            .build();
+    KeysetDeriver deriver = keyset.getPrimitive(KeysetDeriver.class);
+
+    KeysetHandle derivedKeyset = deriver.deriveKeyset(Hex.decode("000102"));
+
+    assertThat(derivedKeyset.size()).isEqualTo(1);
+    assertThat(
+            derivedKeyset
+                .getAt(0)
+                .getKey()
+                .equalsKey(
+                    com.google.crypto.tink.prf.HmacPrfKey.builder()
+                        .setParameters(PredefinedPrfParameters.HMAC_SHA256_PRF)
+                        .setKeyBytes(
+                            SecretBytes.copyFrom(
+                                Hex.decode(
+                                    "94e397d674deda6e965295698491a3feb69838a35f1d48143f3c4cbad9"
+                                        + "0eeb24"),
+                                InsecureSecretKeyAccess.get()))
+                        .build()))
+        .isTrue();
   }
 }
