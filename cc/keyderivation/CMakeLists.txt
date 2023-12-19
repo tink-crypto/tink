@@ -9,6 +9,8 @@ tink_cc_library(
     key_derivation_config.h
   DEPS
     tink::keyderivation::keyset_deriver_wrapper
+    absl::memory
+    tink::core::registry
     tink::config::tink_fips
     tink::keyderivation::internal::prf_based_deriver_key_manager
     tink::prf::hkdf_prf_key_manager
@@ -25,10 +27,14 @@ tink_cc_test(
     tink::keyderivation::key_derivation_key_templates
     tink::keyderivation::keyset_deriver
     gmock
+    absl::memory
+    tink::core::aead
+    tink::core::keyset_handle
     tink::core::registry
     tink::aead::aead_config
     tink::aead::aead_key_templates
     tink::aead::aes_gcm_key_manager
+    tink::config::global_registry
     tink::prf::prf_key_templates
     tink::util::statusor
     tink::util::test_matchers
@@ -40,8 +46,10 @@ tink_cc_library(
     key_derivation_key_templates.cc
     key_derivation_key_templates.h
   DEPS
+    tink::keyderivation::keyset_deriver
+    tink::core::keyset_handle
+    tink::config::global_registry
     tink::keyderivation::internal::prf_based_deriver_key_manager
-    tink::subtle::random
     tink::util::statusor
     tink::proto::tink_cc_proto
   PUBLIC
@@ -55,6 +63,7 @@ tink_cc_test(
     tink::keyderivation::key_derivation_key_templates
     tink::keyderivation::keyset_deriver_wrapper
     gmock
+    absl::memory
     absl::status
     tink::core::registry
     tink::aead::aead_key_templates
@@ -86,10 +95,15 @@ tink_cc_library(
     keyset_deriver_wrapper.h
   DEPS
     tink::keyderivation::keyset_deriver
+    absl::memory
     absl::status
+    absl::string_view
     tink::core::cleartext_keyset_handle
+    tink::core::keyset_handle
     tink::core::primitive_set
     tink::core::primitive_wrapper
+    tink::util::status
+    tink::util::statusor
     tink::proto::tink_cc_proto
 )
 
@@ -101,9 +115,14 @@ tink_cc_test(
     tink::keyderivation::keyset_deriver
     tink::keyderivation::keyset_deriver_wrapper
     gmock
+    absl::memory
     absl::status
+    absl::strings
+    absl::string_view
     tink::core::cleartext_keyset_handle
+    tink::core::keyset_handle
     tink::core::primitive_set
+    tink::util::statusor
     tink::util::test_matchers
     tink::proto::tink_cc_proto
 )

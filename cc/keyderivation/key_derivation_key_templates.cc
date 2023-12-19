@@ -18,8 +18,11 @@
 
 #include <memory>
 
+#include "tink/config/global_registry.h"
 #include "tink/keyderivation/internal/prf_based_deriver_key_manager.h"
-#include "tink/subtle/random.h"
+#include "tink/keyderivation/keyset_deriver.h"
+#include "tink/keyset_handle.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
