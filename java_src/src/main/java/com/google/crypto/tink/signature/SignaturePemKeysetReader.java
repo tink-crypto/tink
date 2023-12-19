@@ -210,14 +210,14 @@ public final class SignaturePemKeysetReader implements KeysetReader {
               .build();
       EcdsaPublicKey ecdsaPubKey =
           EcdsaPublicKey.newBuilder()
-              .setVersion(new EcdsaVerifyKeyManager().getVersion())
+              .setVersion(0)
               .setParams(params)
               .setX(SigUtil.toUnsignedIntByteString(key.getW().getAffineX()))
               .setY(SigUtil.toUnsignedIntByteString(key.getW().getAffineY()))
               .build();
 
       return KeyData.newBuilder()
-          .setTypeUrl(new EcdsaVerifyKeyManager().getKeyType())
+          .setTypeUrl(EcdsaVerifyKeyManager.getKeyType())
           .setValue(ecdsaPubKey.toByteString())
           .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC)
           .build();

@@ -240,7 +240,7 @@ public final class SignatureKeyTemplates {
     EcdsaKeyFormat format = EcdsaKeyFormat.newBuilder().setParams(params).build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(new EcdsaSignKeyManager().getKeyType())
+        .setTypeUrl(EcdsaSignKeyManager.getKeyType())
         .setOutputPrefixType(prefixType)
         .build();
   }

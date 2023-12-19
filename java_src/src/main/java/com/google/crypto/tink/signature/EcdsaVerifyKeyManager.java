@@ -16,75 +16,14 @@
 
 package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.PublicKeyVerify;
-import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.crypto.tink.internal.KeyTypeManager;
-import com.google.crypto.tink.internal.PrimitiveFactory;
-import com.google.crypto.tink.proto.EcdsaPublicKey;
-import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.signature.internal.SigUtil;
-import com.google.crypto.tink.subtle.EcdsaVerifyJce;
-import com.google.crypto.tink.subtle.EllipticCurves;
-import com.google.crypto.tink.subtle.Validators;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
-import java.security.GeneralSecurityException;
-import java.security.interfaces.ECPublicKey;
-
 /**
  * This key manager produces new instances of {@code EcdsaVerifyJce}. It doesn't support key
  * generation.
  */
-class EcdsaVerifyKeyManager extends KeyTypeManager<EcdsaPublicKey> {
-  public EcdsaVerifyKeyManager() {
-    super(
-        EcdsaPublicKey.class,
-        new PrimitiveFactory<PublicKeyVerify, EcdsaPublicKey>(PublicKeyVerify.class) {
-          @Override
-          public PublicKeyVerify getPrimitive(EcdsaPublicKey keyProto)
-              throws GeneralSecurityException {
-            ECPublicKey publicKey =
-                EllipticCurves.getEcPublicKey(
-                    SigUtil.toCurveType(keyProto.getParams().getCurve()),
-                    keyProto.getX().toByteArray(),
-                    keyProto.getY().toByteArray());
-            return new EcdsaVerifyJce(
-                publicKey,
-                SigUtil.toHashType(keyProto.getParams().getHashType()),
-                SigUtil.toEcdsaEncoding(keyProto.getParams().getEncoding()));
-          }
-        });
-  }
-
-  @Override
-  public String getKeyType() {
+class EcdsaVerifyKeyManager {
+  static String getKeyType() {
     return "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
   }
 
-  @Override
-  public int getVersion() {
-    return 0;
-  }
-
-  @Override
-  public KeyMaterialType keyMaterialType() {
-    return KeyMaterialType.ASYMMETRIC_PUBLIC;
-  }
-
-  @Override
-  public EcdsaPublicKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return EcdsaPublicKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-  }
-
-  @Override
-  public void validateKey(EcdsaPublicKey pubKey) throws GeneralSecurityException {
-    Validators.validateVersion(pubKey.getVersion(), getVersion());
-    SigUtil.validateEcdsaParams(pubKey.getParams());
-  }
-
-  @Override
-  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
-    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
-  };
+  private EcdsaVerifyKeyManager() {}
 }

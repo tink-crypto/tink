@@ -107,7 +107,7 @@ public final class SignaturePemKeysetReaderTest {
     assertThat(ks.getPrimaryKeyId()).isEqualTo(key.getKeyId());
     assertThat(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
     assertThat(key.getOutputPrefixType()).isEqualTo(OutputPrefixType.RAW);
-    assertThat(keyData.getTypeUrl()).isEqualTo(new EcdsaVerifyKeyManager().getKeyType());
+    assertThat(keyData.getTypeUrl()).isEqualTo(EcdsaVerifyKeyManager.getKeyType());
     assertThat(keyData.getKeyMaterialType()).isEqualTo(KeyMaterialType.ASYMMETRIC_PUBLIC);
     assertThat(publicKeyProto.getParams().getHashType()).isEqualTo(HashType.SHA256);
     assertThat(publicKeyProto.getParams().getCurve()).isEqualTo(EllipticCurveType.NIST_P256);
@@ -297,7 +297,7 @@ public final class SignaturePemKeysetReaderTest {
             PemKeyType.ECDSA_P256_SHA256.readKey(new BufferedReader(new StringReader(ecPem)));
     assertThat(secondKey.getStatus()).isEqualTo(KeyStatusType.ENABLED);
     assertThat(secondKey.getOutputPrefixType()).isEqualTo(OutputPrefixType.RAW);
-    assertThat(keyData.getTypeUrl()).isEqualTo(new EcdsaVerifyKeyManager().getKeyType());
+    assertThat(keyData.getTypeUrl()).isEqualTo(EcdsaVerifyKeyManager.getKeyType());
     assertThat(keyData.getKeyMaterialType()).isEqualTo(KeyMaterialType.ASYMMETRIC_PUBLIC);
     assertThat(ecPublicKeyProto.getParams().getHashType()).isEqualTo(HashType.SHA256);
     assertThat(ecPublicKeyProto.getParams().getCurve()).isEqualTo(EllipticCurveType.NIST_P256);
