@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
@@ -211,17 +212,26 @@ public class RsaSsaPkcs1SignKeyManagerTest {
       return;
     }
 
-    RsaSsaPkcs1KeyFormat format = createKeyFormat(HashType.SHA256, 3072, RSAKeyGenParameterSpec.F4);
-    Set<String> keys = new TreeSet<>();
+    RsaSsaPkcs1Parameters parameters =
+        RsaSsaPkcs1Parameters.builder()
+            .setModulusSizeBits(2048)
+            .setPublicExponent(RsaSsaPkcs1Parameters.F4)
+            .setHashType(RsaSsaPkcs1Parameters.HashType.SHA256)
+            .setVariant(RsaSsaPkcs1Parameters.Variant.TINK)
+            .build();
+    Set<BigInteger> primes = new TreeSet<>();
     // Calls newKey multiple times and make sure that they generate different keys -- takes about a
     // second per key.
     int numTests = 5;
     for (int i = 0; i < numTests; i++) {
-      RsaSsaPkcs1PrivateKey key = factory.createKey(format);
-      keys.add(Hex.encode(key.getQ().toByteArray()));
-      keys.add(Hex.encode(key.getP().toByteArray()));
+      KeysetHandle handle = KeysetHandle.generateNew(parameters);
+      assertThat(handle.size()).isEqualTo(1);
+      com.google.crypto.tink.signature.RsaSsaPkcs1PrivateKey key =
+          (com.google.crypto.tink.signature.RsaSsaPkcs1PrivateKey) handle.getAt(0).getKey();
+      primes.add(key.getPrimeP().getBigInteger(InsecureSecretKeyAccess.get()));
+      primes.add(key.getPrimeQ().getBigInteger(InsecureSecretKeyAccess.get()));
     }
-    assertThat(keys).hasSize(2 * numTests);
+    assertThat(primes).hasSize(2 * numTests);
   }
 
   @Test

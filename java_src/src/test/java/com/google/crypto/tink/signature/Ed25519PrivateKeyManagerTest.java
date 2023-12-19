@@ -97,11 +97,15 @@ public class Ed25519PrivateKeyManagerTest {
   // Tests that generated keys are different.
   @Test
   public void createKey_differentValues() throws Exception {
-    Ed25519KeyFormat format = Ed25519KeyFormat.getDefaultInstance();
     Set<String> keys = new TreeSet<>();
     int numTests = 100;
     for (int i = 0; i < numTests; i++) {
-      keys.add(Hex.encode(factory.createKey(format).getKeyValue().toByteArray()));
+      KeysetHandle handle = KeysetHandle.generateNew(Ed25519Parameters.create());
+      assertThat(handle.size()).isEqualTo(1);
+      assertThat(handle.getAt(0).getKey().getParameters()).isEqualTo(Ed25519Parameters.create());
+      com.google.crypto.tink.signature.Ed25519PrivateKey key =
+          (com.google.crypto.tink.signature.Ed25519PrivateKey) handle.getAt(0).getKey();
+      keys.add(Hex.encode(key.getPrivateKeyBytes().toByteArray(InsecureSecretKeyAccess.get())));
     }
     assertThat(keys).hasSize(numTests);
   }

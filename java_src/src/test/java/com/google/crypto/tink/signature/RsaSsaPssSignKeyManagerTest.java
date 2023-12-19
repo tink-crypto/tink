@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
@@ -37,7 +38,6 @@ import com.google.crypto.tink.signature.internal.SigUtil;
 import com.google.crypto.tink.signature.internal.testing.RsaSsaPssTestUtil;
 import com.google.crypto.tink.signature.internal.testing.SignatureTestVector;
 import com.google.crypto.tink.subtle.EngineFactory;
-import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.RsaSsaPssVerifyJce;
 import com.google.crypto.tink.testing.TestUtil;
@@ -238,18 +238,28 @@ public class RsaSsaPssSignKeyManagerTest {
       // factory.createKey is too slow in Tsan.
       return;
     }
-    RsaSsaPssKeyFormat format =
-        createKeyFormat(HashType.SHA256, HashType.SHA256, 32, 3072, RSAKeyGenParameterSpec.F4);
-    Set<String> keys = new TreeSet<>();
+    RsaSsaPssParameters parameters =
+        RsaSsaPssParameters.builder()
+            .setModulusSizeBits(2048)
+            .setPublicExponent(RsaSsaPssParameters.F4)
+            .setSigHashType(RsaSsaPssParameters.HashType.SHA256)
+            .setMgf1HashType(RsaSsaPssParameters.HashType.SHA256)
+            .setVariant(RsaSsaPssParameters.Variant.NO_PREFIX)
+            .setSaltLengthBytes(32)
+            .build();
+    Set<BigInteger> primes = new TreeSet<>();
     // Calls newKey multiple times and make sure that they generate different keys -- takes about a
     // second per key.
     int numTests = 5;
     for (int i = 0; i < numTests; i++) {
-      RsaSsaPssPrivateKey key = factory.createKey(format);
-      keys.add(Hex.encode(key.getQ().toByteArray()));
-      keys.add(Hex.encode(key.getP().toByteArray()));
+      KeysetHandle handle = KeysetHandle.generateNew(parameters);
+      assertThat(handle.size()).isEqualTo(1);
+      com.google.crypto.tink.signature.RsaSsaPssPrivateKey key =
+          (com.google.crypto.tink.signature.RsaSsaPssPrivateKey) handle.getAt(0).getKey();
+      primes.add(key.getPrimeP().getBigInteger(InsecureSecretKeyAccess.get()));
+      primes.add(key.getPrimeQ().getBigInteger(InsecureSecretKeyAccess.get()));
     }
-    assertThat(keys).hasSize(2 * numTests);
+    assertThat(primes).hasSize(2 * numTests);
   }
 
   @Test
