@@ -296,5 +296,6 @@ py_test(
         "//tink/aead",
         "//tink/core",
         "//tink/hybrid",
+        "//tink/mac",
     ],
 )
