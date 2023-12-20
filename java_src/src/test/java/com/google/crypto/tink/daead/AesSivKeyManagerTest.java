@@ -27,8 +27,17 @@ import com.google.crypto.tink.Key;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.SlowInputStream;
+import com.google.crypto.tink.keyderivation.KeyDerivationConfig;
+import com.google.crypto.tink.keyderivation.KeysetDeriver;
+import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationKey;
+import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationParameters;
+import com.google.crypto.tink.prf.HkdfPrfKey;
+import com.google.crypto.tink.prf.HkdfPrfParameters;
+import com.google.crypto.tink.prf.PrfKey;
 import com.google.crypto.tink.proto.AesSivKey;
 import com.google.crypto.tink.proto.AesSivKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -40,6 +49,7 @@ import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import java.util.Set;
 import java.util.TreeSet;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,6 +66,7 @@ public class AesSivKeyManagerTest {
   @Before
   public void register() throws Exception {
     DeterministicAeadConfig.register();
+    KeyDerivationConfig.register();
   }
 
   @Test
@@ -283,5 +294,189 @@ public class AesSivKeyManagerTest {
         directDaead.decryptDeterministically(daead.encryptDeterministically(plaintext, aad), aad);
     unused =
         daead.decryptDeterministically(directDaead.encryptDeterministically(plaintext, aad), aad);
+  }
+
+  @Test
+  public void testKeyManagerRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getKeyManager(
+                    "type.googleapis.com/google.crypto.tink.AesSivKey", DeterministicAead.class))
+        .isNotNull();
+  }
+
+  @Test
+  public void createKey_works() throws Exception {
+    AesSivParameters params =
+        AesSivParameters.builder()
+            .setKeySizeBytes(64)
+            .setVariant(AesSivParameters.Variant.TINK)
+            .build();
+    KeysetHandle handle = KeysetHandle.generateNew(params);
+    assertThat(handle.size()).isEqualTo(1);
+    com.google.crypto.tink.daead.AesSivKey key =
+        (com.google.crypto.tink.daead.AesSivKey) handle.getAt(0).getKey();
+    assertThat(key.getParameters()).isEqualTo(params);
+  }
+
+  @Test
+  public void createKey_differentKeyValues_alwaysDifferent() throws Exception {
+    AesSivParameters params =
+        AesSivParameters.builder()
+            .setKeySizeBytes(64)
+            .setVariant(AesSivParameters.Variant.TINK)
+            .build();
+
+    int numKeys = 100;
+    Set<String> keys = new TreeSet<>();
+    for (int i = 0; i < numKeys; i++) {
+      KeysetHandle handle = KeysetHandle.generateNew(params);
+      assertThat(handle.size()).isEqualTo(1);
+      com.google.crypto.tink.daead.AesSivKey key =
+          (com.google.crypto.tink.daead.AesSivKey) handle.getAt(0).getKey();
+      keys.add(Hex.encode(key.getKeyBytes().toByteArray(InsecureSecretKeyAccess.get())));
+    }
+    assertThat(keys).hasSize(numKeys);
+  }
+
+  @Test
+  public void createPrimitiveAndUseIt_works() throws Exception {
+    AesSivParameters params =
+        AesSivParameters.builder()
+            .setKeySizeBytes(64)
+            .setVariant(AesSivParameters.Variant.TINK)
+            .build();
+    KeysetHandle handle = KeysetHandle.generateNew(params);
+    assertThat(handle.size()).isEqualTo(1);
+    DeterministicAead daead = handle.getPrimitive(DeterministicAead.class);
+    DeterministicAead directDaead =
+        AesSiv.create((com.google.crypto.tink.daead.AesSivKey) handle.getAt(0).getKey());
+    byte[] ciphertext = daead.encryptDeterministically(new byte[] {1, 2, 3}, new byte[0]);
+    assertThat(directDaead.decryptDeterministically(ciphertext, new byte[0]))
+        .isEqualTo(new byte[] {1, 2, 3});
+  }
+
+  @Test
+  public void serializeAndDeserializeKeysets() throws Exception {
+    AesSivParameters params =
+        AesSivParameters.builder()
+            .setKeySizeBytes(64)
+            .setVariant(AesSivParameters.Variant.TINK)
+            .build();
+    KeysetHandle handle = KeysetHandle.generateNew(params);
+
+    byte[] serializedKeyset =
+        TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get());
+    KeysetHandle parsed =
+        TinkProtoKeysetFormat.parseKeyset(serializedKeyset, InsecureSecretKeyAccess.get());
+    assertTrue(parsed.equalsKeyset(handle));
+  }
+
+  @Test
+  public void createKeyWith32Bytes_throws() throws Exception {
+    AesSivParameters params =
+        AesSivParameters.builder()
+            .setKeySizeBytes(32)
+            .setVariant(AesSivParameters.Variant.TINK)
+            .build();
+    assertThrows(GeneralSecurityException.class, () -> KeysetHandle.generateNew(params));
+  }
+
+  @Test
+  public void createPrimitiveWith32Bytes_throws() throws Exception {
+    AesSivParameters params =
+        AesSivParameters.builder()
+            .setKeySizeBytes(32)
+            .setVariant(AesSivParameters.Variant.TINK)
+            .build();
+    com.google.crypto.tink.daead.AesSivKey key =
+        com.google.crypto.tink.daead.AesSivKey.builder()
+            .setParameters(params)
+            .setKeyBytes(SecretBytes.randomBytes(32))
+            .setIdRequirement(3133)
+            .build();
+    KeysetHandle handle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).withFixedId(3133).makePrimary())
+            .build();
+    assertThrows(
+        GeneralSecurityException.class, () -> handle.getPrimitive(DeterministicAead.class));
+  }
+
+  @Test
+  public void serializeDeserializeKeysetsWith16Bytes_works() throws Exception {
+    AesSivParameters params =
+        AesSivParameters.builder()
+            .setKeySizeBytes(32)
+            .setVariant(AesSivParameters.Variant.TINK)
+            .build();
+    com.google.crypto.tink.daead.AesSivKey key =
+        com.google.crypto.tink.daead.AesSivKey.builder()
+            .setParameters(params)
+            .setKeyBytes(SecretBytes.randomBytes(32))
+            .setIdRequirement(3133)
+            .build();
+    KeysetHandle handle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).withFixedId(3133).makePrimary())
+            .build();
+    byte[] serializedKeyset =
+        TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get());
+    KeysetHandle parsed =
+        TinkProtoKeysetFormat.parseKeyset(serializedKeyset, InsecureSecretKeyAccess.get());
+    assertTrue(parsed.equalsKeyset(handle));
+  }
+
+  private static final SecretBytes secretBytesFromHex(String hex) {
+    return SecretBytes.copyFrom(Hex.decode(hex), InsecureSecretKeyAccess.get());
+  }
+
+  @Test
+  public void deriveAesSivKey_works() throws Exception {
+    PrfKey prfKeyForDeriver =
+        HkdfPrfKey.builder()
+            .setParameters(
+                HkdfPrfParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setHashType(HkdfPrfParameters.HashType.SHA256)
+                    .build())
+            .setKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("0102030405060708091011121314151617181920212123242526272829303132"),
+                    InsecureSecretKeyAccess.get()))
+            .build();
+    PrfBasedKeyDerivationParameters derivationParameters =
+        PrfBasedKeyDerivationParameters.builder()
+            .setDerivedKeyParameters(PredefinedDeterministicAeadParameters.AES256_SIV)
+            .setPrfParameters(prfKeyForDeriver.getParameters())
+            .build();
+    PrfBasedKeyDerivationKey key =
+        PrfBasedKeyDerivationKey.create(
+            derivationParameters, prfKeyForDeriver, /* idRequirement= */ 112233);
+
+    KeysetHandle keyset =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).withFixedId(112233).makePrimary())
+            .build();
+    KeysetDeriver deriver = keyset.getPrimitive(KeysetDeriver.class);
+
+    KeysetHandle derivedKeyset = deriver.deriveKeyset(Hex.decode("000102"));
+
+    assertThat(derivedKeyset.size()).isEqualTo(1);
+    assertThat(
+            derivedKeyset
+                .getAt(0)
+                .getKey()
+                .equalsKey(
+                    com.google.crypto.tink.daead.AesSivKey.builder()
+                        .setParameters(PredefinedDeterministicAeadParameters.AES256_SIV)
+                        .setIdRequirement(112233)
+                        .setKeyBytes(
+                            secretBytesFromHex(
+                                "94e397d674deda6e965295698491a3feb69838a35f1d48143f3c4cbad90eeb24"
+                                    + "9c8ddea6d09adc5f89a9a190122b095d34e166df93b36f417d63baac78"
+                                    + "115ac3"))
+                        .build()))
+        .isTrue();
   }
 }

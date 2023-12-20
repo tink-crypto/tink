@@ -51,7 +51,11 @@ public final class AesSivParameters extends DeterministicAeadParameters {
 
     private Builder() {}
 
-    /** Accepts key sizes of 32, 48 or 64 bytes. */
+    /**
+     * Accepts key sizes of 32, 48 or 64 bytes.
+     *
+     * <p>Note that some Tink configurations reject key sizes 32 and 48 bytes.
+     */
     @CanIgnoreReturnValue
     public Builder setKeySizeBytes(int keySizeBytes) throws GeneralSecurityException {
       if (keySizeBytes != 32 && keySizeBytes != 48 && keySizeBytes != 64) {
