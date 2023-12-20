@@ -17,6 +17,7 @@
 package com.google.crypto.tink.prf;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
@@ -440,4 +441,73 @@ public class HkdfPrfKeyManagerTest {
         TinkProtoKeysetFormat.parseKeyset(serializedKeyset, InsecureSecretKeyAccess.get());
     assertTrue(parsed.equalsKeyset(handle));
   }
+
+  @Theory
+  public void createKeyWithRejectedParameters_throws(
+      @FromDataPoints("KeyManager rejected") HkdfPrfParameters params) throws Exception {
+    assertThrows(GeneralSecurityException.class, () -> KeysetHandle.generateNew(params));
+  }
+
+  @Theory
+  public void createPrimitiveWithRejectedParameters_throws(
+      @FromDataPoints("KeyManager rejected") HkdfPrfParameters params) throws Exception {
+    com.google.crypto.tink.prf.HkdfPrfKey key =
+        com.google.crypto.tink.prf.HkdfPrfKey.builder()
+            .setParameters(params)
+            .setKeyBytes(SecretBytes.randomBytes(params.getKeySizeBytes()))
+            .build();
+    KeysetHandle handle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).withFixedId(1).makePrimary())
+            .build();
+    assertThrows(GeneralSecurityException.class, () -> handle.getPrimitive(PrfSet.class));
+  }
+
+  /** We allow serialization and deserialization with parameters which are otherwise rejected */
+  @Theory
+  public void serializeDeserializeKeysetsWithRejectedParams_works(
+      @FromDataPoints("KeyManager rejected") HkdfPrfParameters params) throws Exception {
+    com.google.crypto.tink.prf.HkdfPrfKey key =
+        com.google.crypto.tink.prf.HkdfPrfKey.builder()
+            .setParameters(params)
+            .setKeyBytes(SecretBytes.randomBytes(params.getKeySizeBytes()))
+            .build();
+    KeysetHandle handle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).withFixedId(1).makePrimary())
+            .build();
+    byte[] serializedKeyset =
+        TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get());
+    KeysetHandle parsed =
+        TinkProtoKeysetFormat.parseKeyset(serializedKeyset, InsecureSecretKeyAccess.get());
+    assertTrue(parsed.equalsKeyset(handle));
+  }
+
+  private static HkdfPrfParameters[] createRejectedParameters() {
+    return exceptionIsBug(
+        () ->
+            new HkdfPrfParameters[] {
+              // Key Size 16 is rejected
+              HkdfPrfParameters.builder()
+                  .setHashType(HkdfPrfParameters.HashType.SHA512)
+                  .setKeySizeBytes(16)
+                  .build(),
+              // Only SHA256 and SHA512 are accepted
+              HkdfPrfParameters.builder()
+                  .setHashType(HkdfPrfParameters.HashType.SHA1)
+                  .setKeySizeBytes(32)
+                  .build(),
+              HkdfPrfParameters.builder()
+                  .setHashType(HkdfPrfParameters.HashType.SHA224)
+                  .setKeySizeBytes(32)
+                  .build(),
+              HkdfPrfParameters.builder()
+                  .setHashType(HkdfPrfParameters.HashType.SHA384)
+                  .setKeySizeBytes(32)
+                  .build()
+            });
+  }
+
+  @DataPoints("KeyManager rejected")
+  public static final HkdfPrfParameters[] RECJECTED_PARAMETERS = createRejectedParameters();
 }
