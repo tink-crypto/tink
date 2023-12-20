@@ -56,7 +56,7 @@ import javax.crypto.spec.SecretKeySpec;
  * PrfHmacJce}.
  */
 public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
-  public HmacPrfKeyManager() {
+  HmacPrfKeyManager() {
     super(
         HmacPrfKey.class,
         new PrimitiveFactory<Prf, HmacPrfKey>(Prf.class) {
