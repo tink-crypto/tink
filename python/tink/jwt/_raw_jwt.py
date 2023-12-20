@@ -189,7 +189,7 @@ class RawJwt:
     if audience is not None and audiences is not None:
       raise _jwt_error.JwtInvalidError(
           'audience and audiences cannot be set at the same time')
-    payload = {}
+    payload: Dict[str, Any] = {}
     if issuer:
       payload['iss'] = issuer
     if subject:
