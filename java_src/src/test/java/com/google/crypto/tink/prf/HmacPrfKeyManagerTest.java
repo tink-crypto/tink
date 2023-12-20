@@ -17,7 +17,6 @@
 package com.google.crypto.tink.prf;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
@@ -28,28 +27,19 @@ import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.internal.KeyManagerRegistry;
-import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.SlowInputStream;
 import com.google.crypto.tink.keyderivation.KeyDerivationConfig;
 import com.google.crypto.tink.keyderivation.KeysetDeriver;
 import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationKey;
 import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationParameters;
-import com.google.crypto.tink.proto.HashType;
-import com.google.crypto.tink.proto.HmacPrfKey;
-import com.google.crypto.tink.proto.HmacPrfKeyFormat;
-import com.google.crypto.tink.proto.HmacPrfParams;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.PrfHmacJce;
-import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.util.SecretBytes;
-import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;
-import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
-import javax.crypto.spec.SecretKeySpec;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
@@ -61,127 +51,10 @@ import org.junit.runner.RunWith;
 /** Unit tests for {@link HmacPrfKeyManager}. */
 @RunWith(Theories.class)
 public class HmacPrfKeyManagerTest {
-  private final HmacPrfKeyManager manager = new HmacPrfKeyManager();
-  private final KeyTypeManager.KeyFactory<HmacPrfKeyFormat, HmacPrfKey> factory =
-      manager.keyFactory();
-
   @Before
   public void register() throws Exception {
     KeyDerivationConfig.register();
     PrfConfig.register();
-  }
-
-  @Test
-  public void validateKeyFormat_empty() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(HmacPrfKeyFormat.getDefaultInstance()));
-  }
-
-  private static HmacPrfKeyFormat makeHmacPrfKeyFormat(int keySize, HashType hashType) {
-    HmacPrfParams params = HmacPrfParams.newBuilder().setHash(hashType).build();
-    return HmacPrfKeyFormat.newBuilder().setParams(params).setKeySize(keySize).build();
-  }
-
-  @Test
-  public void validateKeyFormat_keySizes() throws Exception {
-    factory.validateKeyFormat(makeHmacPrfKeyFormat(16, HashType.SHA256));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(makeHmacPrfKeyFormat(15, HashType.SHA256)));
-  }
-
-  @Test
-  public void createKey_valid() throws Exception {
-    manager.validateKey(factory.createKey(makeHmacPrfKeyFormat(16, HashType.SHA1)));
-    manager.validateKey(factory.createKey(makeHmacPrfKeyFormat(20, HashType.SHA1)));
-    manager.validateKey(factory.createKey(makeHmacPrfKeyFormat(32, HashType.SHA1)));
-    manager.validateKey(factory.createKey(makeHmacPrfKeyFormat(16, HashType.SHA256)));
-    manager.validateKey(factory.createKey(makeHmacPrfKeyFormat(32, HashType.SHA256)));
-    manager.validateKey(factory.createKey(makeHmacPrfKeyFormat(16, HashType.SHA512)));
-    manager.validateKey(factory.createKey(makeHmacPrfKeyFormat(32, HashType.SHA512)));
-    manager.validateKey(factory.createKey(makeHmacPrfKeyFormat(64, HashType.SHA512)));
-  }
-
-  @Test
-  public void createKey_checkValues() throws Exception {
-    HmacPrfKeyFormat keyFormat = makeHmacPrfKeyFormat(16, HashType.SHA256);
-    HmacPrfKey key = factory.createKey(keyFormat);
-    assertThat(key.getKeyValue()).hasSize(keyFormat.getKeySize());
-    assertThat(key.getParams().getHash()).isEqualTo(keyFormat.getParams().getHash());
-  }
-
-  @Test
-  public void createKey_multipleTimes() throws Exception {
-    HmacPrfKeyFormat keyFormat = makeHmacPrfKeyFormat(16, HashType.SHA256);
-    int numKeys = 100;
-    Set<String> keys = new TreeSet<String>();
-    for (int i = 0; i < numKeys; ++i) {
-      keys.add(Hex.encode(factory.createKey(keyFormat).getKeyValue().toByteArray()));
-    }
-    assertThat(keys).hasSize(numKeys);
-  }
-
-  @Test
-  public void validateKey_wrongVersion_throws() throws Exception {
-    HmacPrfKey validKey = factory.createKey(makeHmacPrfKeyFormat(16, HashType.SHA1));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> manager.validateKey(HmacPrfKey.newBuilder(validKey).setVersion(1).build()));
-  }
-
-  @Test
-  public void validateKey_notValid_throws() throws Exception {
-    HmacPrfKey validKey = factory.createKey(makeHmacPrfKeyFormat(16, HashType.SHA1));
-    assertThrows(
-        GeneralSecurityException.class,
-        () ->
-            manager.validateKey(
-                HmacPrfKey.newBuilder(validKey)
-                    .setKeyValue(ByteString.copyFrom(Random.randBytes(15)))
-                    .build()));
-    assertThrows(
-        GeneralSecurityException.class,
-        () ->
-            manager.validateKey(
-                HmacPrfKey.newBuilder(validKey)
-                    .setParams(
-                        HmacPrfParams.newBuilder(validKey.getParams())
-                            .setHash(HashType.UNKNOWN_HASH)
-                            .build())
-                    .build()));
-  }
-
-  @Test
-  public void getPrimitive_worksForSha1() throws Exception {
-    HmacPrfKey validKey = factory.createKey(makeHmacPrfKeyFormat(16, HashType.SHA1));
-    Prf managerPrf = manager.getPrimitive(validKey, Prf.class);
-    Prf directPrf =
-        new PrfHmacJce("HMACSHA1", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC"));
-    byte[] message = Random.randBytes(50);
-    assertThat(managerPrf.compute(message, 19)).isEqualTo(directPrf.compute(message, 19));
-  }
-
-  @Test
-  public void getPrimitive_worksForSha256() throws Exception {
-    HmacPrfKey validKey = factory.createKey(makeHmacPrfKeyFormat(16, HashType.SHA256));
-    Prf managerPrf = manager.getPrimitive(validKey, Prf.class);
-    Prf directPrf =
-        new PrfHmacJce(
-            "HMACSHA256", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC"));
-    byte[] message = Random.randBytes(50);
-    assertThat(managerPrf.compute(message, 29)).isEqualTo(directPrf.compute(message, 29));
-  }
-
-  @Test
-  public void getPrimitive_worksForSha512() throws Exception {
-    HmacPrfKey validKey = factory.createKey(makeHmacPrfKeyFormat(16, HashType.SHA512));
-    Prf managerPrf = manager.getPrimitive(validKey, Prf.class);
-    Prf directPrf =
-        new PrfHmacJce(
-            "HMACSHA512", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC"));
-    byte[] message = Random.randBytes(50);
-    assertThat(managerPrf.compute(message, 33)).isEqualTo(directPrf.compute(message, 33));
   }
 
   @Test

@@ -25,7 +25,7 @@ import java.security.GeneralSecurityException;
  */
 public final class PrfConfig {
   public static final String PRF_TYPE_URL = new HkdfPrfKeyManager().getKeyType();
-  public static final String HMAC_PRF_TYPE_URL = new HmacPrfKeyManager().getKeyType();
+  public static final String HMAC_PRF_TYPE_URL = HmacPrfKeyManager.getKeyType();
 
   /**
    * Tries to register with the {@link Registry} all instances of {@link

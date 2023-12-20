@@ -68,7 +68,7 @@ public final class PrfKeyTemplates {
     HmacPrfKeyFormat format =
         HmacPrfKeyFormat.newBuilder().setParams(params).setKeySize(keySize).build();
     return KeyTemplate.newBuilder()
-        .setTypeUrl(new HmacPrfKeyManager().getKeyType())
+        .setTypeUrl(HmacPrfKeyManager.getKeyType())
         .setValue(format.toByteString())
         .setOutputPrefixType(OutputPrefixType.RAW)
         .build();
