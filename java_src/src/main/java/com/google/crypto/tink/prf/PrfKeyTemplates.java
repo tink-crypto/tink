@@ -77,7 +77,7 @@ public final class PrfKeyTemplates {
   private static KeyTemplate createAes256CmacTemplate() {
     AesCmacPrfKeyFormat format = AesCmacPrfKeyFormat.newBuilder().setKeySize(32).build();
     return KeyTemplate.newBuilder()
-        .setTypeUrl(new AesCmacPrfKeyManager().getKeyType())
+        .setTypeUrl(AesCmacPrfKeyManager.getKeyType())
         .setValue(format.toByteString())
         .setOutputPrefixType(OutputPrefixType.RAW)
         .build();

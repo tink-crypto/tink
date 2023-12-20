@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,111 +18,72 @@ package com.google.crypto.tink.prf;
 
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
+import com.google.crypto.tink.AccessesPartialKey;
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
+import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
-import com.google.crypto.tink.internal.PrimitiveFactory;
-import com.google.crypto.tink.proto.AesCmacPrfKey;
-import com.google.crypto.tink.proto.AesCmacPrfKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.PrfAesCmac;
-import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.Validators;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.crypto.tink.util.SecretBytes;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * This key manager generates new {@code AesCmacKeyPrf} keys and produces new instances of {@code
  * AesCmacPrf}.
  */
-public final class AesCmacPrfKeyManager extends KeyTypeManager<AesCmacPrfKey> {
-  AesCmacPrfKeyManager() {
-    super(
-        AesCmacPrfKey.class,
-        new PrimitiveFactory<Prf, AesCmacPrfKey>(Prf.class) {
-          @Override
-          public Prf getPrimitive(AesCmacPrfKey key) throws GeneralSecurityException {
-            return new PrfAesCmac(key.getKeyValue().toByteArray());
-          }
-        });
+public final class AesCmacPrfKeyManager {
+  private static Prf createPrimitive(AesCmacPrfKey key) throws GeneralSecurityException {
+    validate(key.getParameters());
+    return PrfAesCmac.create(key);
   }
 
-  private static final int VERSION = 0;
-  private static final int KEY_SIZE_IN_BYTES = 32;
   private static final PrimitiveConstructor<com.google.crypto.tink.prf.AesCmacPrfKey, Prf>
       PRF_PRIMITIVE_CONSTRUCTOR =
           PrimitiveConstructor.create(
-              PrfAesCmac::create, com.google.crypto.tink.prf.AesCmacPrfKey.class, Prf.class);
+              AesCmacPrfKeyManager::createPrimitive,
+              com.google.crypto.tink.prf.AesCmacPrfKey.class,
+              Prf.class);
 
-  @Override
-  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
-    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
-  }
-
-  @Override
-  public String getKeyType() {
-    return "type.googleapis.com/google.crypto.tink.AesCmacPrfKey";
-  }
-
-  @Override
-  public int getVersion() {
-    return VERSION;
-  }
-
-  @Override
-  public KeyMaterialType keyMaterialType() {
-    return KeyMaterialType.SYMMETRIC;
-  }
-
-  @Override
-  public void validateKey(AesCmacPrfKey key) throws GeneralSecurityException {
-    Validators.validateVersion(key.getVersion(), getVersion());
-    validateSize(key.getKeyValue().size());
-  }
-
-  @Override
-  public AesCmacPrfKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return AesCmacPrfKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-  }
-
-  private static void validateSize(int size) throws GeneralSecurityException {
-    if (size != KEY_SIZE_IN_BYTES) {
-      throw new GeneralSecurityException("AesCmacPrfKey size wrong, must be 32 bytes");
+  private static void validate(AesCmacPrfParameters parameters) throws GeneralSecurityException {
+    if (parameters.getKeySizeBytes() != 32) {
+      throw new GeneralSecurityException("Key size must be 32 bytes");
     }
   }
 
-  @Override
-  public KeyFactory<AesCmacPrfKeyFormat, AesCmacPrfKey> keyFactory() {
-    return new KeyFactory<AesCmacPrfKeyFormat, AesCmacPrfKey>(AesCmacPrfKeyFormat.class) {
-      @Override
-      public void validateKeyFormat(AesCmacPrfKeyFormat format) throws GeneralSecurityException {
-        validateSize(format.getKeySize());
-      }
+  private static final KeyManager<Prf> legacyKeyManager =
+      LegacyKeyManagerImpl.create(
+          getKeyType(),
+          Prf.class,
+          KeyMaterialType.SYMMETRIC,
+          com.google.crypto.tink.proto.AesCmacPrfKey.parser());
 
-      @Override
-      public AesCmacPrfKeyFormat parseKeyFormat(ByteString byteString)
-          throws InvalidProtocolBufferException {
-        return AesCmacPrfKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-      }
+  @AccessesPartialKey
+  private static AesCmacPrfKey newKey(
+      AesCmacPrfParameters parameters, @Nullable Integer idRequirement)
+      throws GeneralSecurityException {
+    if (idRequirement != null) {
+      throw new GeneralSecurityException("Id Requirement is not supported for AES CMAC PRF keys");
+    }
+    validate(parameters);
+    return AesCmacPrfKey.create(parameters, SecretBytes.randomBytes(parameters.getKeySizeBytes()));
+  }
 
-      @Override
-      public AesCmacPrfKey createKey(AesCmacPrfKeyFormat format) {
-        return AesCmacPrfKey.newBuilder()
-            .setVersion(VERSION)
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
-            .build();
-      }
-    };
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyCreationRegistry.KeyCreator<AesCmacPrfParameters> KEY_CREATOR =
+      AesCmacPrfKeyManager::newKey;
+
+  static String getKeyType() {
+    return "type.googleapis.com/google.crypto.tink.AesCmacPrfKey";
   }
 
   private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
@@ -134,11 +95,12 @@ public final class AesCmacPrfKeyManager extends KeyTypeManager<AesCmacPrfKey> {
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
-    Registry.registerKeyManager(new AesCmacPrfKeyManager(), newKeyAllowed);
     AesCmacPrfProtoSerialization.register();
+    MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, AesCmacPrfParameters.class);
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(PRF_PRIMITIVE_CONSTRUCTOR);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
+    Registry.registerKeyManager(legacyKeyManager, newKeyAllowed);
   }
 
   /**
@@ -162,4 +124,6 @@ public final class AesCmacPrfKeyManager extends KeyTypeManager<AesCmacPrfKey> {
   public static final KeyTemplate aes256CmacTemplate() {
     return exceptionIsBug(() -> KeyTemplate.createFrom(AesCmacPrfParameters.create(32)));
   }
+
+  private AesCmacPrfKeyManager() {}
 }
