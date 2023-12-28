@@ -42,7 +42,7 @@ public class LegacyFullAead implements Aead {
   private final OutputPrefixType outputPrefixType;
   private final byte[] identifier;
 
-  /** This method covers the cases where users created their own mac/key classes. */
+  /** This method covers the cases where users created their own aead/key classes. */
   public static Aead create(LegacyProtoKey key) throws GeneralSecurityException {
     ProtoKeySerialization protoKeySerialization =
         key.getSerialization(InsecureSecretKeyAccess.get());
