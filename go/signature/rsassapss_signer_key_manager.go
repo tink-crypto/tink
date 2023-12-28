@@ -68,6 +68,10 @@ func (km *rsaSSAPSSSignerKeyManager) Primitive(serializedKey []byte) (interface{
 			bytesToBigInt(key.GetQ()),
 		},
 	}
+	if err := privKey.Validate(); err != nil {
+		return nil, err
+	}
+
 	// Instead of extracting Dp, Dq, and Qinv values from the key proto,
 	// the values must be computed by the Go library.
 	//

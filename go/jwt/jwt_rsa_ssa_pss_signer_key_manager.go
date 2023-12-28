@@ -70,6 +70,10 @@ func (km *jwtPSSignerKeyManager) Primitive(serializedKey []byte) (interface{}, e
 			bytesToBigInt(privKey.GetQ()),
 		},
 	}
+	if err := rsaPrivKey.Validate(); err != nil {
+		return nil, err
+	}
+
 	// Instead of extracting Dp, Dq, and Qinv values from the key proto,
 	// the values must be computed by the Go library.
 	//
