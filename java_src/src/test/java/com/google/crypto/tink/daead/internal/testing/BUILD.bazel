@@ -1,5 +1,7 @@
 licenses(["notice"])
 
+package(default_testonly = 1)
+
 java_test(
     name = "LegacyAesSivTestKeyManagerTest",
     size = "small",
