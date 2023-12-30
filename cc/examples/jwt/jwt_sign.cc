@@ -101,7 +101,7 @@ int main(int argc, char** argv) {
   std::clog << "Using keyset in " << keyset_filename << " to ";
   std::clog << " generate and sign a token using audience '" << audience
             << "'; the resulting signature is written to " << token_filename
-            << std::endl;
+            << '\n';
 
   CHECK_OK(
       tink_cc_examples::JwtSign(keyset_filename, audience, token_filename));

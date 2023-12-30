@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
 
   std::clog << "Convert public keyset in " << public_keyset_filename << " to ";
   std::clog << " to JWK set format; the result is written to "
-            << public_jwk_set_filename << std::endl;
+            << public_jwk_set_filename << '\n';
 
   CHECK_OK(tink_cc_examples::JwtGeneratePublicJwkSet(public_keyset_filename,
                                                      public_jwk_set_filename));
