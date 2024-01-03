@@ -479,4 +479,42 @@ public class AesSivKeyManagerTest {
                         .build()))
         .isTrue();
   }
+
+  @Test
+  public void deriveAesSivKey_with32bytes_works() throws Exception {
+    PrfKey prfKeyForDeriver =
+        HkdfPrfKey.builder()
+            .setParameters(
+                HkdfPrfParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setHashType(HkdfPrfParameters.HashType.SHA256)
+                    .build())
+            .setKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("0102030405060708091011121314151617181920212123242526272829303132"),
+                    InsecureSecretKeyAccess.get()))
+            .build();
+    PrfBasedKeyDerivationParameters derivationParameters =
+        PrfBasedKeyDerivationParameters.builder()
+            .setDerivedKeyParameters(
+                AesSivParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setVariant(AesSivParameters.Variant.TINK)
+                    .build())
+            .setPrfParameters(prfKeyForDeriver.getParameters())
+            .build();
+    PrfBasedKeyDerivationKey key =
+        PrfBasedKeyDerivationKey.create(
+            derivationParameters, prfKeyForDeriver, /* idRequirement= */ 112233);
+
+    KeysetHandle keyset =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).withFixedId(112233).makePrimary())
+            .build();
+    KeysetDeriver deriver = keyset.getPrimitive(KeysetDeriver.class);
+    KeysetHandle derivedHandle = deriver.deriveKeyset(Hex.decode("000102"));
+    assertThat(derivedHandle.size()).isEqualTo(1);
+    assertThat(derivedHandle.getAt(0).getKey().getParameters())
+        .isEqualTo(derivationParameters.getDerivedKeyParameters());
+  }
 }
