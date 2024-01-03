@@ -136,9 +136,9 @@ int main(int argc, char** argv) {
 
   std::clog << "Using keyset from file " << keyset_filename
             << " to derive a new AEAD keyset with the salt in file "
-            << salt_filename << "." << std::endl;
+            << salt_filename << "." << '\n';
   std::clog << "The resulting derived keyset will be written to "
-            << derived_keyset_filename << "." << std::endl;
+            << derived_keyset_filename << "." << '\n';
 
   CHECK_OK(tink_cc_examples::KeyDerivationCli(keyset_filename, salt_filename,
                                               derived_keyset_filename));
