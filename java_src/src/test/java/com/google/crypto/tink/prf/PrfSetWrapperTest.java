@@ -23,12 +23,15 @@ import static org.junit.Assert.assertThrows;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
+import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.testing.FakeMonitoringClient;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.prf.HkdfPrfParameters.HashType;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.errorprone.annotations.Immutable;
@@ -251,15 +254,28 @@ public class PrfSetWrapperTest {
     }
   }
 
-  @Test
-  public void testAlwaysFailingPrfWithAnnotations_hasMonitoring() throws Exception {
-    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+  /** Perform registrations such as HkdfKeyManager.register, but with a failing PRF */
+  private static void doHkdfKeyManagerRegistrationWithFailingPrf() throws Exception {
+    HkdfPrfProtoSerialization.register();
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(
             PrimitiveConstructor.create(AlwaysFailingPrf::new, HkdfPrfKey.class, Prf.class));
+    MutableKeyCreationRegistry.globalInstance()
+        .add(HkdfPrfKeyManager.KEY_CREATOR, HkdfPrfParameters.class);
+    Registry.registerKeyManager(
+        LegacyKeyManagerImpl.create(
+            HkdfPrfKeyManager.getKeyType(),
+            Prf.class,
+            KeyMaterialType.SYMMETRIC,
+            com.google.crypto.tink.proto.HkdfPrfKey.parser()),
+        true);
+  }
+
+  @Test
+  public void testAlwaysFailingPrfWithAnnotations_hasMonitoring() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
     PrfSetWrapper.register();
-    HkdfPrfProtoSerialization.register();
-    Registry.registerKeyManager(new HkdfPrfKeyManager(), true);
+    doHkdfKeyManagerRegistrationWithFailingPrf();
 
     FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
     MutableMonitoringRegistry.globalInstance().clear();

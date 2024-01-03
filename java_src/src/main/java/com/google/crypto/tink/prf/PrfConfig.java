@@ -24,7 +24,7 @@ import java.security.GeneralSecurityException;
  * Tink.
  */
 public final class PrfConfig {
-  public static final String PRF_TYPE_URL = new HkdfPrfKeyManager().getKeyType();
+  public static final String PRF_TYPE_URL = HkdfPrfKeyManager.getKeyType();
   public static final String HMAC_PRF_TYPE_URL = HmacPrfKeyManager.getKeyType();
 
   /**

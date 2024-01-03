@@ -18,7 +18,6 @@ package com.google.crypto.tink.prf;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
@@ -28,15 +27,14 @@ import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.internal.KeyManagerRegistry;
-import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
-import com.google.crypto.tink.proto.HashType;
-import com.google.crypto.tink.proto.HkdfPrfKey;
-import com.google.crypto.tink.proto.HkdfPrfKeyFormat;
-import com.google.crypto.tink.proto.HkdfPrfParams;
-import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.subtle.Enums;
+import com.google.crypto.tink.keyderivation.KeyDerivationConfig;
+import com.google.crypto.tink.keyderivation.KeysetDeriver;
+import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationKey;
+import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationParameters;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.prf.HkdfStreamingPrf;
@@ -44,8 +42,6 @@ import com.google.crypto.tink.subtle.prf.PrfImpl;
 import com.google.crypto.tink.subtle.prf.StreamingPrf;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
-import com.google.protobuf.ByteString;
-import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
@@ -60,225 +56,11 @@ import org.junit.runner.RunWith;
 /** Tests for HkdfPrfKeyManager. */
 @RunWith(Theories.class)
 public class HkdfPrfKeyManagerTest {
-  private final HkdfPrfKeyManager manager = new HkdfPrfKeyManager();
-  private final KeyTypeManager.KeyFactory<HkdfPrfKeyFormat, HkdfPrfKey> factory =
-      manager.keyFactory();
-
   @Before
   public void register() throws Exception {
     PrfConfig.register();
-  }
-
-  @Test
-  public void basics() throws Exception {
-    assertThat(manager.getKeyType()).isEqualTo("type.googleapis.com/google.crypto.tink.HkdfPrfKey");
-    assertThat(manager.getVersion()).isEqualTo(0);
-    assertThat(manager.keyMaterialType()).isEqualTo(KeyMaterialType.SYMMETRIC);
-  }
-
-  @Test
-  public void validateKey_empty_throws() throws Exception {
-    HkdfPrfKey key = HkdfPrfKey.getDefaultInstance();
-    assertThrows(GeneralSecurityException.class, () -> manager.validateKey(key));
-  }
-
-  @Test
-  public void validateKey_valid32ByteKey_works() throws Exception {
-    manager.validateKey(
-        HkdfPrfKey.newBuilder()
-            .setVersion(0)
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(32)))
-            .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
-            .build());
-  }
-
-  @Test
-  public void validateKey_invalid31ByteKey_throws() throws Exception {
-    HkdfPrfKey key =
-        HkdfPrfKey.newBuilder()
-            .setVersion(0)
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(31)))
-            .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
-            .build();
-    assertThrows(GeneralSecurityException.class, () -> manager.validateKey(key));
-  }
-
-  @Test
-  public void validateKey_validSha512Key_works() throws Exception {
-    manager.validateKey(
-        HkdfPrfKey.newBuilder()
-            .setVersion(0)
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(32)))
-            .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA512))
-            .build());
-  }
-
-  @Test
-  public void validateKey_valid33ByteKey_works() throws Exception {
-    manager.validateKey(
-        HkdfPrfKey.newBuilder()
-            .setVersion(0)
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(33)))
-            .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
-            .build());
-  }
-
-  @Test
-  public void validateKey_validKeyWithSalt_works() throws Exception {
-    manager.validateKey(
-        HkdfPrfKey.newBuilder()
-            .setVersion(0)
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(32)))
-            .setParams(
-                HkdfPrfParams.newBuilder()
-                    .setSalt(ByteString.copyFrom(Random.randBytes(5)))
-                    .setHash(HashType.SHA256))
-            .build());
-  }
-
-  @Test
-  public void validateKey_invalidSha1Key_throws() throws Exception {
-    HkdfPrfKey key =
-        HkdfPrfKey.newBuilder()
-            .setVersion(0)
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(32)))
-            .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA1))
-            .build();
-    assertThrows(GeneralSecurityException.class, () -> manager.validateKey(key));
-  }
-
-  @Test
-  public void validateKey_invalidKeyVersion_throws() throws Exception {
-    HkdfPrfKey key =
-        HkdfPrfKey.newBuilder()
-            .setVersion(1)
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(32)))
-            .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
-            .build();
-    assertThrows(GeneralSecurityException.class, () -> manager.validateKey(key));
-  }
-
-  @Test
-  public void validateKeyFormat_empty_throws() throws Exception {
-    HkdfPrfKeyFormat keyFormat = HkdfPrfKeyFormat.getDefaultInstance();
-    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(keyFormat));
-  }
-
-  @Test
-  public void validateKeyFormat_valid32Byte() throws Exception {
-    factory.validateKeyFormat(
-        HkdfPrfKeyFormat.newBuilder()
-            .setKeySize(32)
-            .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
-            .build());
-  }
-
-  @Test
-  public void validateKeyFormat_invalid31Byte_throws() throws Exception {
-    HkdfPrfKeyFormat keyFormat =
-        HkdfPrfKeyFormat.newBuilder()
-            .setKeySize(31)
-            .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
-            .build();
-    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(keyFormat));
-  }
-
-  @Test
-  public void validateKeyFormat_validSha512() throws Exception {
-    factory.validateKeyFormat(
-        HkdfPrfKeyFormat.newBuilder()
-            .setKeySize(32)
-            .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA512))
-            .build());
-  }
-
-  @Test
-  public void validateKeyFormat_valid33Bytes() throws Exception {
-    factory.validateKeyFormat(
-        HkdfPrfKeyFormat.newBuilder()
-            .setKeySize(33)
-            .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
-            .build());
-  }
-
-  @Test
-  public void validateKeyFormat_validWithSalt() throws Exception {
-    factory.validateKeyFormat(
-        HkdfPrfKeyFormat.newBuilder()
-            .setKeySize(32)
-            .setParams(
-                HkdfPrfParams.newBuilder()
-                    .setSalt(ByteString.copyFrom(Random.randBytes(5)))
-                    .setHash(HashType.SHA256))
-            .build());
-  }
-
-  @Test
-  public void validateKeyFormat_invalidSha1_throws() throws Exception {
-    HkdfPrfKeyFormat format =
-        HkdfPrfKeyFormat.newBuilder()
-            .setKeySize(32)
-            .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA1))
-            .build();
-    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
-  }
-
-  @Test
-  public void createKey_valuesAreOk() throws Exception {
-    HkdfPrfKeyFormat format =
-        HkdfPrfKeyFormat.newBuilder()
-            .setKeySize(77)
-            .setParams(
-                HkdfPrfParams.newBuilder()
-                    .setSalt(ByteString.copyFrom(Random.randBytes(5)))
-                    .setHash(HashType.SHA256))
-            .build();
-    HkdfPrfKey key = factory.createKey(format);
-    assertThat(key.getVersion()).isEqualTo(0);
-    assertThat(key.getKeyValue()).hasSize(77);
-    assertThat(key.getParams()).isEqualTo(format.getParams());
-  }
-
-  @Test
-  public void createPrimitive_works() throws Exception {
-    HkdfPrfKey key =
-        HkdfPrfKey.newBuilder()
-            .setKeyValue(ByteString.copyFromUtf8("super secret key value"))
-            .setParams(
-                HkdfPrfParams.newBuilder()
-                    .setSalt(ByteString.copyFromUtf8("some salt"))
-                    .setHash(HashType.SHA256))
-            .build();
-    StreamingPrf managerPrf = manager.getPrimitive(key, StreamingPrf.class);
-    InputStream managerInput = managerPrf.computePrf("my input".getBytes(UTF_8));
-    byte[] managerOutput = new byte[10];
-    assertThat(managerInput.read(managerOutput)).isEqualTo(10);
-
-    HkdfStreamingPrf directPrf =
-        new HkdfStreamingPrf(
-            Enums.HashType.SHA256,
-            "super secret key value".getBytes(UTF_8),
-            "some salt".getBytes(UTF_8));
-    InputStream directInput = directPrf.computePrf("my input".getBytes(UTF_8));
-
-    byte[] directOutput = new byte[10];
-    assertThat(directInput.read(directOutput)).isEqualTo(10);
-
-    assertThat(directOutput).isEqualTo(managerOutput);
-  }
-
-  /** Smoke test getPrimitive for PrfSet via the HkdfPrfKeymanager. */
-  @Test
-  public void createPrfSetPrimitive_works() throws Exception {
-    HkdfPrfKey key =
-        HkdfPrfKey.newBuilder()
-            .setKeyValue(ByteString.copyFromUtf8("super secret key value"))
-            .setParams(
-                HkdfPrfParams.newBuilder()
-                    .setSalt(ByteString.copyFromUtf8("some salt"))
-                    .setHash(HashType.SHA256))
-            .build();
-    Object unused = manager.getPrimitive(key, Prf.class);
+    KeyDerivationConfig.register();
+    AeadConfig.register();
   }
 
   @Test
@@ -481,6 +263,30 @@ public class HkdfPrfKeyManagerTest {
     KeysetHandle parsed =
         TinkProtoKeysetFormat.parseKeyset(serializedKeyset, InsecureSecretKeyAccess.get());
     assertTrue(parsed.equalsKeyset(handle));
+  }
+
+  @Theory
+  public void deriveAesGcmKey_withInvalidPrfParameters_throws(
+      @FromDataPoints("KeyManager rejected") HkdfPrfParameters params) throws Exception {
+    PrfKey prfKeyForDeriver =
+        HkdfPrfKey.builder()
+            .setParameters(params)
+            .setKeyBytes(SecretBytes.randomBytes(params.getKeySizeBytes()))
+            .build();
+    PrfBasedKeyDerivationParameters derivationParameters =
+        PrfBasedKeyDerivationParameters.builder()
+            .setDerivedKeyParameters(PredefinedAeadParameters.AES128_GCM)
+            .setPrfParameters(prfKeyForDeriver.getParameters())
+            .build();
+    PrfBasedKeyDerivationKey key =
+        PrfBasedKeyDerivationKey.create(
+            derivationParameters, prfKeyForDeriver, /* idRequirement= */ 112233);
+
+    KeysetHandle keyset =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).withFixedId(112233).makePrimary())
+            .build();
+    assertThrows(GeneralSecurityException.class, () -> keyset.getPrimitive(KeysetDeriver.class));
   }
 
   private static HkdfPrfParameters[] createRejectedParameters() {

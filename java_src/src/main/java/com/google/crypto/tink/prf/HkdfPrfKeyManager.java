@@ -17,149 +17,84 @@ package com.google.crypto.tink.prf;
 
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
+import com.google.crypto.tink.AccessesPartialKey;
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
+import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
-import com.google.crypto.tink.internal.PrimitiveFactory;
-import com.google.crypto.tink.proto.HashType;
-import com.google.crypto.tink.proto.HkdfPrfKey;
-import com.google.crypto.tink.proto.HkdfPrfKeyFormat;
-import com.google.crypto.tink.proto.HkdfPrfParams;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.Validators;
 import com.google.crypto.tink.subtle.prf.HkdfStreamingPrf;
 import com.google.crypto.tink.subtle.prf.PrfImpl;
 import com.google.crypto.tink.subtle.prf.StreamingPrf;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.crypto.tink.util.SecretBytes;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * This key manager generates new {@code HkdfPrfKey} keys and produces new instances of {@code
  * HkdfStreamingPrf} and {@code HkdfPrf}.
  */
-public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
-
-  private static final PrimitiveConstructor<com.google.crypto.tink.prf.HkdfPrfKey, StreamingPrf>
-      STREAMING_HKDF_PRF_CONSTRUCTOR =
-          PrimitiveConstructor.create(
-              HkdfStreamingPrf::create,
-              com.google.crypto.tink.prf.HkdfPrfKey.class,
-              StreamingPrf.class);
-  private static final PrimitiveConstructor<com.google.crypto.tink.prf.HkdfPrfKey, Prf>
-      HKDF_PRF_CONSTRUCTOR =
-          PrimitiveConstructor.create(
-              (com.google.crypto.tink.prf.HkdfPrfKey key) ->
-                  PrfImpl.wrap(HkdfStreamingPrf.create(key)),
-              com.google.crypto.tink.prf.HkdfPrfKey.class,
-              Prf.class);
-
-  private static com.google.crypto.tink.subtle.Enums.HashType convertHash(HashType hashType)
-      throws GeneralSecurityException {
-    switch (hashType) {
-      case SHA1:
-        return com.google.crypto.tink.subtle.Enums.HashType.SHA1;
-      case SHA256:
-        return com.google.crypto.tink.subtle.Enums.HashType.SHA256;
-      case SHA384:
-        return com.google.crypto.tink.subtle.Enums.HashType.SHA384;
-      case SHA512:
-        return com.google.crypto.tink.subtle.Enums.HashType.SHA512;
-      default:
-        throw new GeneralSecurityException("HashType " + hashType.name() + " not known in");
+public class HkdfPrfKeyManager {
+  private static void validate(HkdfPrfParameters parameters) throws GeneralSecurityException {
+    if (parameters.getKeySizeBytes() < MIN_KEY_SIZE) {
+      throw new GeneralSecurityException("Key size must be at least " + MIN_KEY_SIZE);
+    }
+    if (parameters.getHashType() != HkdfPrfParameters.HashType.SHA256
+        && parameters.getHashType() != HkdfPrfParameters.HashType.SHA512) {
+      throw new GeneralSecurityException("Hash type must be SHA256 or SHA512");
     }
   }
 
-  HkdfPrfKeyManager() {
-    super(
-        HkdfPrfKey.class,
-        new PrimitiveFactory<StreamingPrf, HkdfPrfKey>(StreamingPrf.class) {
-          @Override
-          public StreamingPrf getPrimitive(HkdfPrfKey key) throws GeneralSecurityException {
-            return new HkdfStreamingPrf(
-                convertHash(key.getParams().getHash()),
-                key.getKeyValue().toByteArray(),
-                key.getParams().getSalt().toByteArray());
-          }
-        },
-        new PrimitiveFactory<Prf, HkdfPrfKey>(Prf.class) {
-          @Override
-          public Prf getPrimitive(HkdfPrfKey key) throws GeneralSecurityException {
-            return PrfImpl.wrap(
-                new HkdfStreamingPrf(
-                    convertHash(key.getParams().getHash()),
-                    key.getKeyValue().toByteArray(),
-                    key.getParams().getSalt().toByteArray()));
-          }
-        });
+  private static StreamingPrf createStreamingPrf(HkdfPrfKey key) throws GeneralSecurityException {
+    validate(key.getParameters());
+    return HkdfStreamingPrf.create(key);
   }
 
-  @Override
-  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
-    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
+  private static Prf createPrf(HkdfPrfKey key) throws GeneralSecurityException {
+    return PrfImpl.wrap(createStreamingPrf(key));
   }
 
-  @Override
-  public String getKeyType() {
+  private static final PrimitiveConstructor<HkdfPrfKey, StreamingPrf>
+      STREAMING_HKDF_PRF_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              HkdfPrfKeyManager::createStreamingPrf, HkdfPrfKey.class, StreamingPrf.class);
+  private static final PrimitiveConstructor<HkdfPrfKey, Prf> HKDF_PRF_CONSTRUCTOR =
+      PrimitiveConstructor.create(HkdfPrfKeyManager::createPrf, HkdfPrfKey.class, Prf.class);
+
+  private static final KeyManager<Prf> legacyKeyManager =
+      LegacyKeyManagerImpl.create(
+          getKeyType(),
+          Prf.class,
+          KeyMaterialType.SYMMETRIC,
+          com.google.crypto.tink.proto.HkdfPrfKey.parser());
+
+  @AccessesPartialKey
+  private static HkdfPrfKey newKey(HkdfPrfParameters parameters, @Nullable Integer idRequirement)
+      throws GeneralSecurityException {
+    if (idRequirement != null) {
+      throw new GeneralSecurityException("Id Requirement is not supported for HKDF PRF keys");
+    }
+    validate(parameters);
+    return HkdfPrfKey.builder()
+        .setParameters(parameters)
+        .setKeyBytes(SecretBytes.randomBytes(parameters.getKeySizeBytes()))
+        .build();
+  }
+
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  static final MutableKeyCreationRegistry.KeyCreator<HkdfPrfParameters> KEY_CREATOR =
+      HkdfPrfKeyManager::newKey;
+
+  static String getKeyType() {
     return "type.googleapis.com/google.crypto.tink.HkdfPrfKey";
-  }
-
-  @Override
-  public int getVersion() {
-    return 0;
-  }
-
-  @Override
-  public KeyMaterialType keyMaterialType() {
-    return KeyMaterialType.SYMMETRIC;
-  }
-
-  @Override
-  public void validateKey(HkdfPrfKey key) throws GeneralSecurityException {
-    Validators.validateVersion(key.getVersion(), getVersion());
-    validateKeySize(key.getKeyValue().size());
-    validateParams(key.getParams());
-  }
-
-  @Override
-  public HkdfPrfKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return HkdfPrfKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-  }
-
-  @Override
-  public KeyFactory<HkdfPrfKeyFormat, HkdfPrfKey> keyFactory() {
-    return new KeyFactory<HkdfPrfKeyFormat, HkdfPrfKey>(HkdfPrfKeyFormat.class) {
-      @Override
-      public void validateKeyFormat(HkdfPrfKeyFormat format) throws GeneralSecurityException {
-        validateKeySize(format.getKeySize());
-        validateParams(format.getParams());
-      }
-
-      @Override
-      public HkdfPrfKeyFormat parseKeyFormat(ByteString byteString)
-          throws InvalidProtocolBufferException {
-        return HkdfPrfKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-      }
-
-      @Override
-      public HkdfPrfKey createKey(HkdfPrfKeyFormat format) throws GeneralSecurityException {
-        return HkdfPrfKey.newBuilder()
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
-            .setVersion(getVersion())
-            .setParams(format.getParams())
-            .build();
-      }
-    };
   }
 
   private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
@@ -173,30 +108,18 @@ public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
   // for example in https://eprint.iacr.org/2012/159)
   private static final int MIN_KEY_SIZE = 32;
 
-  private static void validateKeySize(int keySize) throws GeneralSecurityException {
-    if (keySize < MIN_KEY_SIZE) {
-      throw new GeneralSecurityException("Invalid HkdfPrfKey/HkdfPrfKeyFormat: Key size too short");
-    }
-  }
-
-  private static void validateParams(HkdfPrfParams params) throws GeneralSecurityException {
-    // Omitting SHA1 for the moment; there seems to be no reason to allow it.
-    if (params.getHash() != HashType.SHA256 && params.getHash() != HashType.SHA512) {
-      throw new GeneralSecurityException("Invalid HkdfPrfKey/HkdfPrfKeyFormat: Unsupported hash");
-    }
-  }
-
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
-    Registry.registerKeyManager(new HkdfPrfKeyManager(), newKeyAllowed);
     HkdfPrfProtoSerialization.register();
     MutablePrimitiveRegistry.globalInstance().registerPrimitiveConstructor(HKDF_PRF_CONSTRUCTOR);
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(STREAMING_HKDF_PRF_CONSTRUCTOR);
+    MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, HkdfPrfParameters.class);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
+    Registry.registerKeyManager(legacyKeyManager, newKeyAllowed);
   }
 
   public static String staticKeyType() {
-    return new HkdfPrfKeyManager().getKeyType();
+    return HkdfPrfKeyManager.getKeyType();
   }
 
   /**
@@ -217,4 +140,6 @@ public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
                     .setHashType(HkdfPrfParameters.HashType.SHA256)
                     .build()));
   }
+
+  private HkdfPrfKeyManager() {}
 }
