@@ -77,7 +77,7 @@ std::string ReadTestFile(absl::string_view filename) {
   std::string full_filename = absl::StrCat(test::TmpDir(), "/", filename);
   std::ifstream input_stream(full_filename, std::ios::binary);
   if (!input_stream) {
-    std::clog << "Cannot open file " << full_filename << std::endl;
+    std::clog << "Cannot open file " << full_filename << '\n';
     exit(1);
   }
   std::stringstream buffer;
