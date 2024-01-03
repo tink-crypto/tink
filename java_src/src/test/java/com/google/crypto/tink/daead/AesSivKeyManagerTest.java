@@ -29,7 +29,6 @@ import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.internal.KeyManagerRegistry;
-import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.SlowInputStream;
 import com.google.crypto.tink.keyderivation.KeyDerivationConfig;
 import com.google.crypto.tink.keyderivation.KeysetDeriver;
@@ -38,14 +37,9 @@ import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationParameters;
 import com.google.crypto.tink.prf.HkdfPrfKey;
 import com.google.crypto.tink.prf.HkdfPrfParameters;
 import com.google.crypto.tink.prf.PrfKey;
-import com.google.crypto.tink.proto.AesSivKey;
-import com.google.crypto.tink.proto.AesSivKeyFormat;
-import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.AesSiv;
 import com.google.crypto.tink.subtle.Hex;
-import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.util.SecretBytes;
-import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -67,115 +61,6 @@ public class AesSivKeyManagerTest {
   public void register() throws Exception {
     DeterministicAeadConfig.register();
     KeyDerivationConfig.register();
-  }
-
-  @Test
-  public void basics() throws Exception {
-    assertThat(new AesSivKeyManager().getKeyType())
-        .isEqualTo("type.googleapis.com/google.crypto.tink.AesSivKey");
-    assertThat(new AesSivKeyManager().getVersion()).isEqualTo(0);
-    assertThat(new AesSivKeyManager().keyMaterialType()).isEqualTo(KeyMaterialType.SYMMETRIC);
-  }
-
-  @Test
-  public void validateKeyFormat_empty() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () ->
-            new AesSivKeyManager()
-                .keyFactory()
-                .validateKeyFormat(AesSivKeyFormat.getDefaultInstance()));
-  }
-
-  @Test
-  public void validateKeyFormat_checkAllLengths() throws Exception {
-    AesSivKeyManager manager = new AesSivKeyManager();
-    for (int j = 0; j < 100; j++) {
-      final int i = j;
-      if (i == 64) {
-        manager.keyFactory().validateKeyFormat(createAesSivKeyFormat(i));
-      } else {
-        assertThrows(
-            GeneralSecurityException.class,
-            () -> manager.keyFactory().validateKeyFormat(createAesSivKeyFormat(i)));
-      }
-    }
-  }
-
-  @Test
-  public void validateKey_empty() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> new AesSivKeyManager().validateKey(AesSivKey.getDefaultInstance()));
-  }
-
-  @Test
-  public void validateKey_checkAllLengths() throws Exception {
-    AesSivKeyManager manager = new AesSivKeyManager();
-    for (int j = 0; j < 100; j++) {
-      final int i = j;
-      if (i == 64) {
-        manager.validateKey(createAesSivKey(i));
-      } else {
-        assertThrows(GeneralSecurityException.class, () -> manager.validateKey(createAesSivKey(i)));
-      }
-    }
-  }
-
-  @Test
-  public void validateKey_version() throws Exception {
-    AesSivKeyManager manager = new AesSivKeyManager();
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> manager.validateKey(AesSivKey.newBuilder(createAesSivKey(64)).setVersion(1).build()));
-  }
-
-  @Test
-  public void createKey_valid() throws Exception {
-    AesSivKeyFormat format = createAesSivKeyFormat(64);
-    AesSivKey key = new AesSivKeyManager().keyFactory().createKey(format);
-    new AesSivKeyManager().validateKey(key);
-  }
-
-  @Test
-  public void createKey_values() throws Exception {
-    AesSivKeyFormat format = createAesSivKeyFormat(64);
-    AesSivKey key = new AesSivKeyManager().keyFactory().createKey(format);
-    assertThat(key.getVersion()).isEqualTo(0);
-    assertThat(key.getKeyValue()).hasSize(format.getKeySize());
-  }
-
-  @Test
-  public void createKey_multipleCallsCreateDifferentKeys() throws Exception {
-    AesSivKeyFormat format = createAesSivKeyFormat(64);
-    TreeSet<String> keys = new TreeSet<>();
-    KeyTypeManager.KeyFactory<AesSivKeyFormat, AesSivKey> factory =
-        new AesSivKeyManager().keyFactory();
-    final int numKeys = 1000;
-    for (int i = 0; i < numKeys; ++i) {
-      keys.add(Hex.encode(factory.createKey(format).toByteArray()));
-    }
-    assertThat(keys).hasSize(numKeys);
-  }
-
-  @Test
-  public void testCiphertextSize() throws Exception {
-    DeterministicAead daead =
-        new AesSivKeyManager().getPrimitive(createAesSivKey(64), DeterministicAead.class);
-    byte[] plaintext = "plaintext".getBytes("UTF-8");
-    byte[] associatedData = "associatedData".getBytes("UTF-8");
-    assertThat(daead.encryptDeterministically(plaintext, associatedData))
-        .hasLength(plaintext.length + /* IV_SIZE= */ 16);
-  }
-
-  private AesSivKeyFormat createAesSivKeyFormat(int keySize) {
-    return AesSivKeyFormat.newBuilder().setKeySize(keySize).build();
-  }
-
-  private AesSivKey createAesSivKey(int keySize) {
-    return AesSivKey.newBuilder()
-        .setKeyValue(ByteString.copyFrom(Random.randBytes(keySize)))
-        .build();
   }
 
   @Test
@@ -481,7 +366,7 @@ public class AesSivKeyManagerTest {
   }
 
   @Test
-  public void deriveAesSivKey_with32bytes_works() throws Exception {
+  public void deriveAesSivKey_with32bytes_throws() throws Exception {
     PrfKey prfKeyForDeriver =
         HkdfPrfKey.builder()
             .setParameters(
@@ -511,10 +396,6 @@ public class AesSivKeyManagerTest {
         KeysetHandle.newBuilder()
             .addEntry(KeysetHandle.importKey(key).withFixedId(112233).makePrimary())
             .build();
-    KeysetDeriver deriver = keyset.getPrimitive(KeysetDeriver.class);
-    KeysetHandle derivedHandle = deriver.deriveKeyset(Hex.decode("000102"));
-    assertThat(derivedHandle.size()).isEqualTo(1);
-    assertThat(derivedHandle.getAt(0).getKey().getParameters())
-        .isEqualTo(derivationParameters.getDerivedKeyParameters());
+    assertThrows(GeneralSecurityException.class, () -> keyset.getPrimitive(KeysetDeriver.class));
   }
 }
