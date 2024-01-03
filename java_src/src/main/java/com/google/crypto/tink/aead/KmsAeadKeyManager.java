@@ -16,30 +16,26 @@
 
 package com.google.crypto.tink.aead;
 
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
+import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
-import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KmsAeadKey;
-import com.google.crypto.tink.proto.KmsAeadKeyFormat;
-import com.google.crypto.tink.subtle.Validators;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
+import javax.annotation.Nullable;
 
 /**
  * This key manager produces new instances of {@code Aead} that forwards encrypt/decrypt requests to
  * a key residing in a remote KMS.
  */
-public class KmsAeadKeyManager extends KeyTypeManager<KmsAeadKey> {
+public final class KmsAeadKeyManager {
   private static Aead create(LegacyKmsAeadKey key) throws GeneralSecurityException {
     return KmsClients.get(key.getParameters().keyUri()).getAead(key.getParameters().keyUri());
   }
@@ -49,73 +45,47 @@ public class KmsAeadKeyManager extends KeyTypeManager<KmsAeadKey> {
           PrimitiveConstructor.create(
               KmsAeadKeyManager::create, LegacyKmsAeadKey.class, Aead.class);
 
-  KmsAeadKeyManager() {
-    super(
-        KmsAeadKey.class,
-        new PrimitiveFactory<Aead, KmsAeadKey>(Aead.class) {
-          @Override
-          public Aead getPrimitive(KmsAeadKey keyProto) throws GeneralSecurityException {
-            String keyUri = keyProto.getParams().getKeyUri();
-            KmsClient kmsClient = KmsClients.get(keyUri);
-            return kmsClient.getAead(keyUri);
-          }
-        });
+  private static final KeyManager<Aead> legacyKeyManager =
+      LegacyKeyManagerImpl.create(
+          getKeyType(), Aead.class, KeyMaterialType.REMOTE, KmsAeadKey.parser());
+
+  /**
+   * Creates a "new" key from a parameters object.
+   *
+   * <p>While this creates a new Key object, it doesn't actually create a new key. It simply creates
+   * the key object corresponding to this parameters object. Creating a new key would require to
+   * call an API in the KMS, which this method does not do.
+   *
+   * <p>The reason this method exists is that in the past, Tink did not provide an API for the user
+   * to create a key object by themselves. Instead, users had to always create a Key from a key
+   * template (which is now a Parameters object) via {@code KeysetHandle.generateNew(template);}. To
+   * support old usages, we need to register this creator.
+   */
+  @AccessesPartialKey
+  private static LegacyKmsAeadKey newKey(
+      LegacyKmsAeadParameters parameters, @Nullable Integer idRequirement)
+      throws GeneralSecurityException {
+    if (idRequirement != null) {
+      throw new GeneralSecurityException(
+          "Id Requirement is not supported for LegacyKmsEnvelopeAeadKey");
+    }
+    return LegacyKmsAeadKey.create(parameters);
   }
 
-  @Override
-  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
-    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
-  }
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyCreationRegistry.KeyCreator<LegacyKmsAeadParameters> KEY_CREATOR =
+      KmsAeadKeyManager::newKey;
 
-  @Override
-  public String getKeyType() {
+  static String getKeyType() {
     return "type.googleapis.com/google.crypto.tink.KmsAeadKey";
   }
 
-  @Override
-  public int getVersion() {
-    return 0;
-  }
-
-  @Override
-  public KeyMaterialType keyMaterialType() {
-    return KeyMaterialType.REMOTE;
-  }
-
-  @Override
-  public void validateKey(KmsAeadKey key) throws GeneralSecurityException {
-    Validators.validateVersion(key.getVersion(), getVersion());
-  }
-
-  @Override
-  public KmsAeadKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return KmsAeadKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-  }
-
-  @Override
-  public KeyFactory<KmsAeadKeyFormat, KmsAeadKey> keyFactory() {
-    return new KeyFactory<KmsAeadKeyFormat, KmsAeadKey>(KmsAeadKeyFormat.class) {
-      @Override
-      public void validateKeyFormat(KmsAeadKeyFormat format) throws GeneralSecurityException {}
-
-      @Override
-      public KmsAeadKeyFormat parseKeyFormat(ByteString byteString)
-          throws InvalidProtocolBufferException {
-        return KmsAeadKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-      }
-
-      @Override
-      public KmsAeadKey createKey(KmsAeadKeyFormat format) throws GeneralSecurityException {
-        return KmsAeadKey.newBuilder().setParams(format).setVersion(getVersion()).build();
-      }
-    };
-  }
-
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
-    Registry.registerKeyManager(new KmsAeadKeyManager(), newKeyAllowed);
     LegacyKmsAeadProtoSerialization.register();
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(LEGACY_KMS_AEAD_PRIMITIVE_CONSTRUCTOR);
+    MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, LegacyKmsAeadParameters.class);
+    Registry.registerKeyManager(legacyKeyManager, newKeyAllowed);
   }
 
   /**
@@ -147,7 +117,5 @@ public class KmsAeadKeyManager extends KeyTypeManager<KmsAeadKey> {
     }
   }
 
-  static KmsAeadKeyFormat createKeyFormat(String keyUri) {
-    return KmsAeadKeyFormat.newBuilder().setKeyUri(keyUri).build();
-  }
+  private KmsAeadKeyManager() {}
 }
