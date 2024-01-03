@@ -132,12 +132,18 @@ http_archive(
 add_library(rapidjson INTERFACE)
 target_include_directories(rapidjson INTERFACE "${rapidjson_SOURCE_DIR}")
 
-set(protobuf_BUILD_TESTS OFF CACHE BOOL "Tink dependency override" FORCE)
-set(protobuf_BUILD_EXAMPLES OFF CACHE BOOL "Tink dependency override" FORCE)
-set(protobuf_INSTALL OFF CACHE BOOL "Tink dependency override" FORCE)
+if (NOT TINK_USE_INSTALLED_PROTOBUF)
+  set(protobuf_BUILD_TESTS OFF CACHE BOOL "Tink dependency override" FORCE)
+  set(protobuf_BUILD_EXAMPLES OFF CACHE BOOL "Tink dependency override" FORCE)
+  set(protobuf_INSTALL OFF CACHE BOOL "Tink dependency override" FORCE)
 
-http_archive(
-  NAME com_google_protobuf
-  URL https://github.com/protocolbuffers/protobuf/releases/download/v25.1/protobuf-25.1.zip
-  SHA256 5c86c077b0794c3e9bb30cac872cf883043febfb0f992137f0a8b1c3d534617c
-)
+  http_archive(
+    NAME com_google_protobuf
+    URL https://github.com/protocolbuffers/protobuf/releases/download/v25.1/protobuf-25.1.zip
+    SHA256 5c86c077b0794c3e9bb30cac872cf883043febfb0f992137f0a8b1c3d534617c
+  )
+else()
+  find_package(Protobuf REQUIRED CONFIG)
+  include_directories(${Protobuf_INCLUDE_DIRS})
+  include_directories(${CMAKE_CURRENT_BINARY_DIR})
+endif()
