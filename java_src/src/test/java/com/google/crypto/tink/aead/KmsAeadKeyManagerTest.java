@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThrows;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClients;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.FakeKmsClient;
@@ -110,5 +111,24 @@ public class KmsAeadKeyManagerTest {
     String keyUri = "some example KEK URI";
     assertThat(KmsAeadKeyManager.createKeyTemplate(keyUri).toParameters())
         .isEqualTo(LegacyKmsAeadParameters.create(keyUri));
+  }
+
+  @Test
+  public void generateNewFromParams_works() throws Exception {
+    LegacyKmsAeadParameters parameters = LegacyKmsAeadParameters.create("some example KEK URI");
+    KeysetHandle keysetHandle1 = KeysetHandle.generateNew(parameters);
+    KeysetHandle keysetHandle2 = KeysetHandle.generateNew(parameters);
+    // For LegacyKmsAeadParameters we expect both keysets to be the same -- however, the ID of the
+    // keys may differ.
+    assertThat(keysetHandle1.getAt(0).getKey().equalsKey(keysetHandle2.getAt(0).getKey())).isTrue();
+  }
+
+  @Test
+  public void serializeAndParse_works() throws Exception {
+    LegacyKmsAeadParameters parameters = LegacyKmsAeadParameters.create("some example KEK URI");
+    KeysetHandle keysetHandle1 = KeysetHandle.generateNew(parameters);
+    byte[] serialized = TinkProtoKeysetFormat.serializeKeysetWithoutSecret(keysetHandle1);
+    KeysetHandle keysetHandle2 = TinkProtoKeysetFormat.parseKeysetWithoutSecret(serialized);
+    assertThat(keysetHandle1.equalsKeyset(keysetHandle2)).isTrue();
   }
 }
