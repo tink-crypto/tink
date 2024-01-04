@@ -27,6 +27,8 @@ import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.StreamingAead;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.SlowInputStream;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingKey;
@@ -34,6 +36,7 @@ import com.google.crypto.tink.proto.AesGcmHkdfStreamingKeyFormat;
 import com.google.crypto.tink.proto.AesGcmHkdfStreamingParams;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.subtle.AesGcmHkdfStreaming;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.testing.StreamingTestUtil;
 import com.google.crypto.tink.util.SecretBytes;
@@ -60,6 +63,29 @@ public class AesGcmHkdfStreamingKeyManagerTest {
   @Before
   public void register() throws Exception {
     StreamingAeadConfig.register();
+  }
+
+  @Test
+  public void testKeyManagerRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getKeyManager(
+                    "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey",
+                    StreamingAead.class))
+        .isNotNull();
+  }
+
+  @Test
+  public void getPrimitive_works() throws Exception {
+    Parameters parameters = AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate().toParameters();
+    KeysetHandle handle = KeysetHandle.generateNew(parameters);
+    StreamingAead streamingAead = handle.getPrimitive(StreamingAead.class);
+    StreamingAead directAead =
+        AesGcmHkdfStreaming.create(
+            (com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey) handle.getAt(0).getKey());
+
+    StreamingTestUtil.testEncryptDecryptDifferentInstances(
+        streamingAead, directAead, 0, 2049, 1000);
   }
 
   private static AesGcmHkdfStreamingKeyFormat createKeyFormat(
@@ -278,5 +304,16 @@ public class AesGcmHkdfStreamingKeyManagerTest {
         com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey.create(
             parameters, SecretBytes.copyFrom(expectedKeyBytes, InsecureSecretKeyAccess.get()));
     assertTrue(key.equalsKey(expectedKey));
+  }
+
+  @Test
+  public void serializeAndParse_works() throws Exception {
+    Parameters parameters = AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate().toParameters();
+    KeysetHandle handle = KeysetHandle.generateNew(parameters);
+    byte[] serializedHandle =
+        TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get());
+    KeysetHandle parsedHandle =
+        TinkProtoKeysetFormat.parseKeyset(serializedHandle, InsecureSecretKeyAccess.get());
+    assertThat(parsedHandle.equalsKeyset(handle)).isTrue();
   }
 }

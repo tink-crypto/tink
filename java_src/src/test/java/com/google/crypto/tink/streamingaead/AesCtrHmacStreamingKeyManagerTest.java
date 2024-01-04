@@ -25,6 +25,8 @@ import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.StreamingAead;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKey;
@@ -33,6 +35,7 @@ import com.google.crypto.tink.proto.AesCtrHmacStreamingParams;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.subtle.AesCtrHmacStreaming;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.testing.StreamingTestUtil;
 import com.google.protobuf.ByteString;
@@ -57,6 +60,16 @@ public class AesCtrHmacStreamingKeyManagerTest {
   @Before
   public void register() throws Exception {
     StreamingAeadConfig.register();
+  }
+
+  @Test
+  public void testKeyManagerRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getKeyManager(
+                    "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey",
+                    StreamingAead.class))
+        .isNotNull();
   }
 
   // Returns an HmacParams.Builder with valid parameters
@@ -255,6 +268,20 @@ public class AesCtrHmacStreamingKeyManagerTest {
   }
 
   @Test
+  public void getPrimitive_works() throws Exception {
+    Parameters parameters =
+        AesCtrHmacStreamingKeyManager.aes128CtrHmacSha2564KBTemplate().toParameters();
+    KeysetHandle handle = KeysetHandle.generateNew(parameters);
+    StreamingAead streamingAead = handle.getPrimitive(StreamingAead.class);
+    StreamingAead directAead =
+        AesCtrHmacStreaming.create(
+            (com.google.crypto.tink.streamingaead.AesCtrHmacStreamingKey) handle.getAt(0).getKey());
+
+    StreamingTestUtil.testEncryptDecryptDifferentInstances(
+        streamingAead, directAead, 0, 2049, 1000);
+  }
+
+  @Test
   public void testAes128CtrHmacSha2564KBTemplate() throws Exception {
     KeyTemplate template = AesCtrHmacStreamingKeyManager.aes128CtrHmacSha2564KBTemplate();
     assertThat(template.toParameters())
@@ -329,5 +356,17 @@ public class AesCtrHmacStreamingKeyManagerTest {
     assertThat(h.size()).isEqualTo(1);
     assertThat(h.getAt(0).getKey().getParameters())
         .isEqualTo(KeyTemplates.get(templateName).toParameters());
+  }
+
+  @Test
+  public void serializeAndParse_works() throws Exception {
+    Parameters parameters =
+        AesCtrHmacStreamingKeyManager.aes128CtrHmacSha2561MBTemplate().toParameters();
+    KeysetHandle handle = KeysetHandle.generateNew(parameters);
+    byte[] serializedHandle =
+        TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get());
+    KeysetHandle parsedHandle =
+        TinkProtoKeysetFormat.parseKeyset(serializedHandle, InsecureSecretKeyAccess.get());
+    assertThat(parsedHandle.equalsKeyset(handle)).isTrue();
   }
 }
