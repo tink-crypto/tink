@@ -232,7 +232,7 @@ public final class StreamingAeadKeyTemplates {
             .build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(new AesGcmHkdfStreamingKeyManager().getKeyType())
+        .setTypeUrl(AesGcmHkdfStreamingKeyManager.getKeyType())
         .setOutputPrefixType(OutputPrefixType.RAW)
         .build();
   }
