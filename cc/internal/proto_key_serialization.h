@@ -58,7 +58,7 @@ class ProtoKeySerialization : public Serialization {
   }
 
   // Returned value is only valid for the lifetime of this object.
-  RestrictedData SerializedKeyProto() const { return serialized_key_; }
+  const RestrictedData& SerializedKeyProto() const { return serialized_key_; }
 
   google::crypto::tink::KeyData::KeyMaterialType KeyMaterialType() const {
     return key_material_type_;

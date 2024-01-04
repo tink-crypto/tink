@@ -534,6 +534,7 @@ tink_cc_test(
     tink::internal::proto_key_serialization
     gmock
     absl::status
+    absl::strings
     absl::optional
     tink::core::insecure_secret_key_access
     tink::core::restricted_data
