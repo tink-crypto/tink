@@ -20,35 +20,22 @@ import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Parameters;
-import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
+import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
 import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
-import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.Util;
-import com.google.crypto.tink.mac.HmacKeyManager;
-import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
-import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
-import com.google.crypto.tink.proto.AesCtrKey;
-import com.google.crypto.tink.proto.AesCtrParams;
-import com.google.crypto.tink.proto.HmacKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.subtle.AesCtrJceCipher;
 import com.google.crypto.tink.subtle.EncryptThenAuthenticate;
-import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.Validators;
 import com.google.crypto.tink.util.SecretBytes;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
@@ -60,7 +47,14 @@ import javax.annotation.Nullable;
  * This key manager generates new {@link AesCtrHmacAeadKey} keys and produces new instances of
  * {@link EncryptThenAuthenticate}.
  */
-public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAeadKey> {
+public final class AesCtrHmacAeadKeyManager {
+  private static void validate(AesCtrHmacAeadParameters parameters)
+      throws GeneralSecurityException {
+    if (parameters.getAesKeySizeBytes() != 16 && parameters.getAesKeySizeBytes() != 32) {
+      throw new GeneralSecurityException("AES key size must be 16 or 32 bytes");
+    }
+  }
+
   private static final PrimitiveConstructor<com.google.crypto.tink.aead.AesCtrHmacAeadKey, Aead>
       AES_CTR_HMAC_AEAD_PRIMITIVE_CONSTRUCTOR =
           PrimitiveConstructor.create(
@@ -68,119 +62,15 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
               com.google.crypto.tink.aead.AesCtrHmacAeadKey.class,
               Aead.class);
 
-  // In counter mode each message is encrypted with an initialization vector (IV) that must be
-  // unique. If one single IV is ever used to encrypt two or more messages, the confidentiality of
-  // these messages might be lost. This cipher uses a randomly generated IV for each message. The
-  // birthday paradox says that if one encrypts 2^k messages, the probability that the random IV
-  // will repeat is roughly 2^{2k - t}, where t is the size in bits of the IV. Thus with 96-bit
-  // (12-byte) IV, if one encrypts 2^32 messages the probability of IV collision is less than
-  // 2^-33 (i.e., less than one in eight billion).
-  private static final int MIN_AES_CTR_IV_SIZE_IN_BYTES = 12;
+  private static final KeyManager<Aead> legacyKeyManager =
+      LegacyKeyManagerImpl.create(
+          getKeyType(),
+          Aead.class,
+          KeyMaterialType.SYMMETRIC,
+          com.google.crypto.tink.proto.AesCtrHmacAeadKey.parser());
 
-  AesCtrHmacAeadKeyManager() {
-    super(
-        AesCtrHmacAeadKey.class,
-        new PrimitiveFactory<Aead, AesCtrHmacAeadKey>(Aead.class) {
-          @Override
-          public Aead getPrimitive(AesCtrHmacAeadKey key) throws GeneralSecurityException {
-            return new EncryptThenAuthenticate(
-                new AesCtrJceCipher(
-                    key.getAesCtrKey().getKeyValue().toByteArray(),
-                    key.getAesCtrKey().getParams().getIvSize()),
-                new HmacKeyManager().getPrimitive(key.getHmacKey(), Mac.class),
-                key.getHmacKey().getParams().getTagSize());
-          }
-        });
-  }
-
-  // Static so we don't have to construct the object and handle the exception when we need the
-  // key type.
-  @Override
-  public String getKeyType() {
+  static String getKeyType() {
     return "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
-  }
-
-  @Override
-  public int getVersion() {
-    return 0;
-  }
-
-  private int getAesCtrVersion() {
-    return 0;
-  }
-
-  @Override
-  public KeyMaterialType keyMaterialType() {
-    return KeyMaterialType.SYMMETRIC;
-  }
-
-  @Override
-  public void validateKey(AesCtrHmacAeadKey key) throws GeneralSecurityException {
-    // Validate overall.
-    Validators.validateVersion(key.getVersion(), getVersion());
-
-    // Validate AesCtrKey.
-    AesCtrKey aesCtrKey = key.getAesCtrKey();
-    Validators.validateVersion(aesCtrKey.getVersion(), getAesCtrVersion());
-    Validators.validateAesKeySize(aesCtrKey.getKeyValue().size());
-    AesCtrParams aesCtrParams = aesCtrKey.getParams();
-    if (aesCtrParams.getIvSize() < MIN_AES_CTR_IV_SIZE_IN_BYTES || aesCtrParams.getIvSize() > 16) {
-      throw new GeneralSecurityException("invalid AES STR IV size");
-    }
-
-    // Validate HmacKey.
-    new HmacKeyManager().validateKey(key.getHmacKey());
-  }
-
-  @Override
-  public AesCtrHmacAeadKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return AesCtrHmacAeadKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-  }
-
-  @Override
-  public KeyFactory<AesCtrHmacAeadKeyFormat, AesCtrHmacAeadKey> keyFactory() {
-    return new KeyFactory<AesCtrHmacAeadKeyFormat, AesCtrHmacAeadKey>(
-        AesCtrHmacAeadKeyFormat.class) {
-      @Override
-      public void validateKeyFormat(AesCtrHmacAeadKeyFormat format)
-          throws GeneralSecurityException {
-        // Validate AesCtrKeyFormat.
-        Validators.validateAesKeySize(format.getAesCtrKeyFormat().getKeySize());
-        AesCtrParams aesCtrParams = format.getAesCtrKeyFormat().getParams();
-        if (aesCtrParams.getIvSize() < MIN_AES_CTR_IV_SIZE_IN_BYTES
-            || aesCtrParams.getIvSize() > 16) {
-          throw new GeneralSecurityException("invalid AES STR IV size");
-        }
-
-        new HmacKeyManager().keyFactory().validateKeyFormat(format.getHmacKeyFormat());
-        Validators.validateAesKeySize(format.getAesCtrKeyFormat().getKeySize());
-      }
-
-      @Override
-      public AesCtrHmacAeadKeyFormat parseKeyFormat(ByteString byteString)
-          throws InvalidProtocolBufferException {
-        return AesCtrHmacAeadKeyFormat.parseFrom(
-            byteString, ExtensionRegistryLite.getEmptyRegistry());
-      }
-
-      @Override
-      public AesCtrHmacAeadKey createKey(AesCtrHmacAeadKeyFormat format)
-          throws GeneralSecurityException {
-        AesCtrKey aesCtrKey =
-            AesCtrKey.newBuilder()
-                .setParams(format.getAesCtrKeyFormat().getParams())
-                .setKeyValue(
-                    ByteString.copyFrom(Random.randBytes(format.getAesCtrKeyFormat().getKeySize())))
-                .setVersion(getVersion())
-                .build();
-        HmacKey hmacKey = new HmacKeyManager().keyFactory().createKey(format.getHmacKeyFormat());
-        return AesCtrHmacAeadKey.newBuilder()
-            .setAesCtrKey(aesCtrKey)
-            .setHmacKey(hmacKey)
-            .setVersion(getVersion())
-            .build();
-      }
-    };
   }
 
   @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
@@ -219,6 +109,7 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
   static com.google.crypto.tink.aead.AesCtrHmacAeadKey createAesCtrHmacAeadKey(
       AesCtrHmacAeadParameters parameters, @Nullable Integer idRequirement)
       throws GeneralSecurityException {
+    validate(parameters);
     return com.google.crypto.tink.aead.AesCtrHmacAeadKey.builder()
         .setParameters(parameters)
         .setIdRequirement(idRequirement)
@@ -258,13 +149,17 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
-    Registry.registerKeyManager(new AesCtrHmacAeadKeyManager(), newKeyAllowed);
     AesCtrHmacAeadProtoSerialization.register();
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(AES_CTR_HMAC_AEAD_PRIMITIVE_CONSTRUCTOR);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
     MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, AesCtrHmacAeadParameters.class);
     MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, AesCtrHmacAeadParameters.class);
+    KeyManagerRegistry.globalInstance()
+        .registerKeyManagerWithFipsCompatibility(
+            legacyKeyManager,
+            TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO,
+            newKeyAllowed);
   }
 
   /**
@@ -317,8 +212,5 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
                     .build()));
   }
 
-  @Override
-  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
-    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
-  };
+  private AesCtrHmacAeadKeyManager() {}
 }
