@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -229,10 +229,12 @@ class KeysetHandle {
   // KeyManager, as well as the KeyManager and PrimitiveWrapper objects in the
   // global registry to create the primitive. The given KeyManager is used for
   // keys supported by it. For those, the registry is ignored.
+  // TINK-PENDING-REMOVAL-IN-3.0.0-START
   template <class P>
   ABSL_DEPRECATED("Register the keymanager and use GetPrimitive")
   crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
       const KeyManager<P>* custom_manager) const;
+  // TINK-PENDING-REMOVAL-IN-3.0.0-END
 
  private:
   // The classes below need access to get_keyset();
@@ -398,6 +400,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive(
   return (*wrapper)->Wrap(keyset_, monitoring_annotations_);
 }
 
+// TINK-PENDING-REMOVAL-IN-3.0.0-START
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive(
     const KeyManager<P>* custom_manager) const {
@@ -411,6 +414,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive(
   }
   return Registry::Wrap<P>(std::move(primitives_result.value()));
 }
+// TINK-PENDING-REMOVAL-IN-3.0.0-END
 
 }  // namespace tink
 }  // namespace crypto

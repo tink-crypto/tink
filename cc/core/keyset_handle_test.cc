@@ -989,6 +989,7 @@ TEST_F(KeysetHandleTest, GetPrimitiveWithConfigFips1402FailsWithNonFipsHandle) {
 }
 
 // Tests that GetPrimitive(nullptr) fails with a non-ok status.
+// TINK-PENDING-REMOVAL-IN-3.0.0-START
 TEST_F(KeysetHandleTest, GetPrimitiveNullptrKeyManager) {
   Keyset keyset;
   AddKeyData(*Registry::NewKeyData(AeadKeyTemplates::Aes128Gcm()).value(),
@@ -1000,9 +1001,12 @@ TEST_F(KeysetHandleTest, GetPrimitiveNullptrKeyManager) {
   ASSERT_THAT(keyset_handle->GetPrimitive<Aead>(nullptr).status(),
               test::StatusIs(absl::StatusCode::kInvalidArgument));
 }
+// TINK-PENDING-REMOVAL-IN-3.0.0-END
 
 // Test creating with custom key manager. For this, we reset the registry before
 // asking for the primitive.
+// NOLINTBEGIN(whitespace/line_length) (Formatted when commented in)
+// TINK-PENDING-REMOVAL-IN-3.0.0-START
 TEST_F(KeysetHandleTest, GetPrimitiveCustomKeyManager) {
   auto handle_result = KeysetHandle::GenerateNew(AeadKeyTemplates::Aes128Gcm(),
                                                  KeyGenConfigGlobalRegistry());
@@ -1021,6 +1025,8 @@ TEST_F(KeysetHandleTest, GetPrimitiveCustomKeyManager) {
   // With custom key manager it works ok.
   ASSERT_TRUE(handle->GetPrimitive<Aead>(key_manager.get()).ok());
 }
+// TINK-PENDING-REMOVAL-IN-3.0.0-END
+// NOLINTEND(whitespace/line_length)
 
 // Compile time check: ensures that the KeysetHandle can be copied.
 TEST_F(KeysetHandleTest, Copiable) {
