@@ -21,6 +21,7 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.Ed25519KeyFormat;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
@@ -29,6 +30,7 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Random;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -41,6 +43,11 @@ public class Ed25519PublicKeyManagerTest {
       signManager.keyFactory();
 
   private final Ed25519PublicKeyManager verifyManager = new Ed25519PublicKeyManager();
+
+  @Before
+  public void register() throws Exception {
+    SignatureConfig.register();
+  }
 
   @Test
   public void basics() throws Exception {
@@ -116,5 +123,15 @@ public class Ed25519PublicKeyManagerTest {
     byte[] message = Random.randBytes(135);
     byte[] signature = signer.sign(message);
     assertThrows(GeneralSecurityException.class, () -> verifier.verify(signature, message));
+  }
+
+  @Test
+  public void testKeyManagerRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getKeyManager(
+                    "type.googleapis.com/google.crypto.tink.Ed25519PublicKey",
+                    PublicKeyVerify.class))
+        .isNotNull();
   }
 }
