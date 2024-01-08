@@ -6,9 +6,11 @@ workspace(name = "tink_cc")
 #   path = "third_party/boringssl_fips/",
 # )
 
-load("@tink_cc//:tink_cc_deps.bzl", "tink_cc_deps")
+load("@tink_cc//:tink_cc_deps.bzl", "tink_cc_deps", "tink_cc_testonly_deps")
 
 tink_cc_deps()
+
+tink_cc_testonly_deps()
 
 load("@tink_cc//:tink_cc_deps_init.bzl", "tink_cc_deps_init")
 

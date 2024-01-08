@@ -61,8 +61,8 @@ if (TINK_BUILD_TESTS)
   else()
     http_archive(
       NAME googletest
-      URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz
-      SHA256 b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5
+      URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
+      SHA256 1f357c27ca988c3f7c6b4bf68a9395005ac6761f034046e9dde0896e3aba00e4
     )
   endif()
 
@@ -79,11 +79,11 @@ if (TINK_BUILD_TESTS)
 endif()
 
 if (NOT TINK_USE_INSTALLED_ABSEIL)
-  # Release from 2023-08-02.
+  # Release from 2023-09-18.
   http_archive(
     NAME abseil
-    URL https://github.com/abseil/abseil-cpp/archive/refs/tags/20230802.0.zip
-    SHA256 2942db09db29359e0c1982986167167d226e23caac50eea1f07b2eb2181169cf
+    URL https://github.com/abseil/abseil-cpp/archive/refs/tags/20230802.1.zip
+    SHA256 497ebdc3a4885d9209b9bd416e8c3f71e7a1fb8af249f6c2a80b7cbeefcd7e21
   )
 else()
   # This is everything that needs to be done here. Abseil already defines its
@@ -95,14 +95,12 @@ endif()
 # defined.
 if (NOT TARGET crypto)
   if (NOT TINK_USE_SYSTEM_OPENSSL)
-    # Commit from Feb 15, 2023.
-    # NOTE: This is one commit ahead of Bazel; the commit fixes a CMake issue,
-    # which made build fail on CMake 3.10.
-    # See https://github.com/google/boringssl/compare/5c22014...e27ff0e.
+    # Commit from 2023-09-08.
+    # TODO(b/319145660): Use a later version once we can force /std:c11 on MSVC.
     http_archive(
       NAME boringssl
-      URL https://github.com/google/boringssl/archive/e27ff0e4312c91357778b36bbd8a7ec7bfc67be3.zip
-      SHA256 11d3c87906bed215a915b0db11cefd0fc7b939ddbec4952a29e343a83ce3bc50
+      URL https://github.com/google/boringssl/archive/667d54c96acda029523c5bf425e8eb9079dbe94a.zip
+      SHA256 21b2086e9242b87415767fd6d2d13bd0481e2eb3c336c7ffa24b1f3d7afb09ae
       CMAKE_SUBDIR src
     )
     # BoringSSL targets do not carry include directory info, this fixes it.
