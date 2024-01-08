@@ -111,11 +111,10 @@ func TestBinaryWriteEncryptedOverhead(t *testing.T) {
 	}
 	encryptedKeyset := encBuf.Bytes()
 
-	// encryptedKeyset is a serialized protocol buffer that contains rawEncryptedKeyset and
-	// a KeysetInfo. KeysetInfo contains a type url, which is 48 bytes for AES GCM, and a 4 byte
-	// key ID. So it must be at least 52 longer than rawEncryptedKeyset.
-	// TODO(b/316316648) Remove KeysetInfo, to make the overhead smaller.
-	if len(encryptedKeyset) < len(rawEncryptedKeyset)+52 {
-		t.Errorf("len(encryptedKeyset) = %d, want >= %d", len(encryptedKeyset), len(rawEncryptedKeyset)+52)
+	// encryptedKeyset is a serialized protocol buffer that contains only
+	// rawEncryptedKeyset in a field. So
+	// it should only be slightly larger than rawEncryptedKeyset.
+	if len(encryptedKeyset) >= len(rawEncryptedKeyset)+6 {
+		t.Errorf("len(encryptedKeyset) = %d, want < %d", len(encryptedKeyset), len(rawEncryptedKeyset)+6)
 	}
 }

@@ -80,7 +80,10 @@ func (bkw *BinaryWriter) Write(keyset *tinkpb.Keyset) error {
 
 // WriteEncrypted writes the encrypted keyset to the underlying io.Writer.
 func (bkw *BinaryWriter) WriteEncrypted(keyset *tinkpb.EncryptedKeyset) error {
-	return write(bkw.w, keyset)
+	encryptedKeysetWithoutInfo := &tinkpb.EncryptedKeyset{
+		EncryptedKeyset: keyset.GetEncryptedKeyset(),
+	}
+	return write(bkw.w, encryptedKeysetWithoutInfo)
 }
 
 func write(w io.Writer, msg proto.Message) error {
