@@ -19,8 +19,11 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -28,6 +31,8 @@ import com.google.crypto.tink.proto.RsaSsaPkcs1KeyFormat;
 import com.google.crypto.tink.proto.RsaSsaPkcs1Params;
 import com.google.crypto.tink.proto.RsaSsaPkcs1PrivateKey;
 import com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey;
+import com.google.crypto.tink.signature.internal.testing.RsaSsaPkcs1TestUtil;
+import com.google.crypto.tink.signature.internal.testing.SignatureTestVector;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
@@ -42,6 +47,11 @@ import org.junit.runners.JUnit4;
 /** Unit tests for RsaSsaPkcs1VerifyKeyManager. */
 @RunWith(JUnit4.class)
 public final class RsaSsaPkcs1VerifyKeyManagerTest {
+  @BeforeClass
+  public static void beforeClass() throws Exception {
+    RsaSsaPkcs1SignKeyManager.registerPair(/* newKeyAllowed= */ true);
+  }
+
   private final RsaSsaPkcs1SignKeyManager signManager = new RsaSsaPkcs1SignKeyManager();
   private final KeyTypeManager.KeyFactory<RsaSsaPkcs1KeyFormat, RsaSsaPkcs1PrivateKey> factory =
       signManager.keyFactory();
@@ -205,5 +215,29 @@ public final class RsaSsaPkcs1VerifyKeyManagerTest {
         fail("Valid signature, should not throw exception" + e);
       }
     }
+  }
+
+  @Test
+  public void test_serializeAndParse_works() throws Exception {
+    SignatureTestVector testVector = RsaSsaPkcs1TestUtil.createRsaSsaPkcs1TestVectors()[0];
+    com.google.crypto.tink.signature.RsaSsaPkcs1PublicKey key =
+        (com.google.crypto.tink.signature.RsaSsaPkcs1PublicKey)
+            testVector.getPrivateKey().getPublicKey();
+    KeysetHandle.Builder.Entry entry = KeysetHandle.importKey(key).withFixedId(1951).makePrimary();
+    KeysetHandle handle = KeysetHandle.newBuilder().addEntry(entry).build();
+
+    byte[] serializedHandle = TinkProtoKeysetFormat.serializeKeysetWithoutSecret(handle);
+    KeysetHandle parsedHandle = TinkProtoKeysetFormat.parseKeysetWithoutSecret(serializedHandle);
+    assertThat(parsedHandle.equalsKeyset(handle)).isTrue();
+  }
+
+  @Test
+  public void testKeyManagerRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getKeyManager(
+                    "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PublicKey",
+                    PublicKeyVerify.class))
+        .isNotNull();
   }
 }
