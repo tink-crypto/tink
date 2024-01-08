@@ -101,6 +101,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink:mac",
         "//src/main/java/com/google/crypto/tink:parameters",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/internal:key_manager_registry",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "//src/main/java/com/google/crypto/tink/internal:slow_input_stream",
         "//src/main/java/com/google/crypto/tink/mac:hmac_key",

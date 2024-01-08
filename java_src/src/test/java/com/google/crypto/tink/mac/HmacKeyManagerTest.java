@@ -27,6 +27,7 @@ import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.SlowInputStream;
 import com.google.crypto.tink.proto.HashType;
@@ -62,6 +63,14 @@ public class HmacKeyManagerTest {
   @Before
   public void register() throws Exception {
     MacConfig.register();
+  }
+
+  @Test
+  public void testKeyManagerRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getKeyManager("type.googleapis.com/google.crypto.tink.HmacKey", Mac.class))
+        .isNotNull();
   }
 
   @Test
@@ -154,17 +163,27 @@ public class HmacKeyManagerTest {
     assertThat(key.getParams().getTagSize()).isEqualTo(keyFormat.getParams().getTagSize());
   }
 
+
   @Test
   public void createKey_multipleTimes() throws Exception {
-    HmacKeyFormat keyFormat = makeHmacKeyFormat(16, 10, HashType.SHA256);
+    HmacParameters parameters =
+        HmacParameters.builder()
+            .setKeySizeBytes(32)
+            .setTagSizeBytes(16)
+            .setHashType(HmacParameters.HashType.SHA256)
+            .setVariant(HmacParameters.Variant.TINK)
+            .build();
     int numKeys = 100;
     Set<String> keys = new TreeSet<>();
     for (int i = 0; i < numKeys; ++i) {
-      keys.add(Hex.encode(factory.createKey(keyFormat).getKeyValue().toByteArray()));
+      KeysetHandle handle = KeysetHandle.generateNew(parameters);
+      com.google.crypto.tink.mac.HmacKey macKey =
+          (com.google.crypto.tink.mac.HmacKey) handle.getAt(0).getKey();
+      keys.add(Hex.encode(macKey.getKeyBytes().toByteArray(InsecureSecretKeyAccess.get())));
     }
     assertThat(keys).hasSize(numKeys);
   }
-
+  
   @Test
   public void validateKey_wrongVersion_throws() throws Exception {
     HmacKey validKey = factory.createKey(makeHmacKeyFormat(16, 10, HashType.SHA1));

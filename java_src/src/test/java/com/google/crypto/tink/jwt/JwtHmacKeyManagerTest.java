@@ -27,6 +27,7 @@ import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.JwtHmacAlgorithm;
 import com.google.crypto.tink.proto.JwtHmacKey;
@@ -71,6 +72,14 @@ public class JwtHmacKeyManagerTest {
   @BeforeClass
   public static void setUp() throws Exception {
     JwtMacConfig.register();
+  }
+
+  @Test
+  public void testKeyManagerRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getUntypedKeyManager("type.googleapis.com/google.crypto.tink.JwtHmacKey"))
+        .isNotNull();
   }
 
   @DataPoint public static final String JWT_HS256 = "JWT_HS256";
@@ -163,11 +172,19 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   public void createKey_multipleTimes() throws Exception {
-    JwtHmacKeyFormat keyFormat = makeJwtHmacKeyFormat(32, JwtHmacAlgorithm.HS256);
+    JwtHmacParameters parameters =
+        JwtHmacParameters.builder()
+            .setKeySizeBytes(32)
+            .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+            .setAlgorithm(JwtHmacParameters.Algorithm.HS256)
+            .build();
     int numKeys = 100;
     Set<String> keys = new TreeSet<>();
     for (int i = 0; i < numKeys; ++i) {
-      keys.add(Hex.encode(factory.createKey(keyFormat).getKeyValue().toByteArray()));
+      KeysetHandle handle = KeysetHandle.generateNew(parameters);
+      com.google.crypto.tink.jwt.JwtHmacKey jwtHmacKey =
+          (com.google.crypto.tink.jwt.JwtHmacKey) handle.getAt(0).getKey();
+      keys.add(Hex.encode(jwtHmacKey.getKeyBytes().toByteArray(InsecureSecretKeyAccess.get())));
     }
     assertThat(keys).hasSize(numKeys);
   }
