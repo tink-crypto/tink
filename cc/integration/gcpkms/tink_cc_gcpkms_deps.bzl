@@ -79,7 +79,7 @@ def _grpc_deps():
     if "com_google_googleapis" not in native.existing_rules():
         http_archive(
             name = "com_google_googleapis",
-            # sha256 = "5bb6b0253ccf64b53d6c7249625a7e3f6c3bc6402abd52d3778bfa48258703a0",
+            sha256 = "5bb6b0253ccf64b53d6c7249625a7e3f6c3bc6402abd52d3778bfa48258703a0",
             strip_prefix = "googleapis-2f9af297c84c55c8b871ba4495e01ade42476c92",
             build_file = Label("@com_github_grpc_grpc//bazel:googleapis.BUILD"),
             urls = [
@@ -133,11 +133,31 @@ def tink_cc_gcpkms_deps():
 
     _grpc_deps()
 
+    if not native.existing_rule("com_google_absl"):
+        # Release from 2023-09-18.
+        http_archive(
+            name = "com_google_absl",
+            sha256 = "497ebdc3a4885d9209b9bd416e8c3f71e7a1fb8af249f6c2a80b7cbeefcd7e21",
+            strip_prefix = "abseil-cpp-20230802.1",
+            urls = ["https://github.com/abseil/abseil-cpp/archive/refs/tags/20230802.1.zip"],
+        )
+
     if not native.existing_rule("tink_cc"):
-        # Release from 2023-11-23.
         http_archive(
             name = "tink_cc",
-            sha256 = "3804afecbe7096d3786b660e9cd5f365f064743eec52d76984abb9da38dd0fb3",
-            strip_prefix = "tink-cc-2.1.0",
-            url = "https://github.com/tink-crypto/tink-cc/releases/download/v2.1.0/tink-cc-2.1.0.zip",
+            sha256 = "3080600b6c38421ebaca5bfc460aa965afc88c877695c080019a8905f0f1c1b8",
+            strip_prefix = "tink-cc-2.1.1",
+            urls = ["https://github.com/tink-crypto/tink-cc/releases/download/v2.1.1/tink-cc-2.1.1.zip"],
+        )
+
+def tink_cc_gcpkms_testonly_deps():
+    """Test only dependencies."""
+
+    if not native.existing_rule("com_google_googletest"):
+        # Release from 2023-08-02.
+        http_archive(
+            name = "com_google_googletest",
+            sha256 = "1f357c27ca988c3f7c6b4bf68a9395005ac6761f034046e9dde0896e3aba00e4",
+            strip_prefix = "googletest-1.14.0",
+            url = "https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip",
         )
