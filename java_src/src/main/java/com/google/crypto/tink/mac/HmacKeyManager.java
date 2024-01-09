@@ -59,7 +59,7 @@ import javax.crypto.spec.SecretKeySpec;
  * PrfHmacJce}.
  */
 public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
-  public HmacKeyManager() {
+  HmacKeyManager() {
     super(
         HmacKey.class,
         new PrimitiveFactory<Mac, HmacKey>(Mac.class) {
