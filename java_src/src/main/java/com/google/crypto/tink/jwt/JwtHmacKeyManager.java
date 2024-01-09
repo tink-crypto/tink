@@ -19,94 +19,50 @@ package com.google.crypto.tink.jwt;
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
+import com.google.crypto.tink.AccessesPartialKey;
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Parameters;
-import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
+import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
+import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
-import com.google.crypto.tink.internal.PrimitiveFactory;
-import com.google.crypto.tink.proto.JwtHmacAlgorithm;
-import com.google.crypto.tink.proto.JwtHmacKey;
-import com.google.crypto.tink.proto.JwtHmacKeyFormat;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
+import com.google.crypto.tink.mac.HmacKey;
+import com.google.crypto.tink.mac.HmacParameters;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.subtle.PrfHmacJce;
 import com.google.crypto.tink.subtle.PrfMac;
-import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.Validators;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.errorprone.annotations.Immutable;
 import com.google.gson.JsonObject;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import javax.crypto.spec.SecretKeySpec;
+import javax.annotation.Nullable;
 
 /**
  * This key manager generates new {@code JwtHmacKey} keys and produces new instances of {@link
  * JwtHmac}.
  */
-public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
-  private static final String getAlgorithmName(JwtHmacAlgorithm algorithm)
-      throws GeneralSecurityException {
-    switch (algorithm) {
-      case HS256:
-        return "HS256";
-      case HS384:
-        return "HS384";
-      case HS512:
-        return "HS512";
-      default:
-        throw new GeneralSecurityException("unknown algorithm");
-    }
-  }
-
-  private static final String getHmacAlgorithm(JwtHmacAlgorithm algorithm)
-      throws GeneralSecurityException {
-    switch (algorithm) {
-      case HS256:
-        return "HMACSHA256";
-      case HS384:
-        return "HMACSHA384";
-      case HS512:
-        return "HMACSHA512";
-      default:
-        throw new GeneralSecurityException("unknown algorithm");
-    }
-  }
-
-  /** Returns the minimum key size in bytes.
-   *
-   * <p>These minimum key sizes are required by https://tools.ietf.org/html/rfc7518#section-3.2
-   */
-  private static final int getMinimumKeySizeInBytes(JwtHmacAlgorithm algorithm)
-      throws GeneralSecurityException {
-    switch (algorithm) {
-      case HS256:
-        return 32;
-      case HS384:
-        return 48;
-      case HS512:
-        return 64;
-      default:
-        throw new GeneralSecurityException("unknown algorithm");
-    }
-  }
-
+public final class JwtHmacKeyManager {
   @Immutable
   private static final class JwtHmac implements JwtMacInternal {
-    private final PrfMac prfMac;
+    @SuppressWarnings("Immutable") // Mac objects obtained from PrfMac.create are immutable.
+    private final Mac mac;
+
     private final String algorithm;
     private final Optional<String> customKidFromHmacKey;
 
-    public JwtHmac(String algorithm, Optional<String> customKidFromHmacKey, PrfMac prfMac) {
+    private JwtHmac(String algorithm, Optional<String> customKidFromHmacKey, HmacKey hmacKey)
+        throws GeneralSecurityException {
       this.algorithm = algorithm;
       this.customKidFromHmacKey = customKidFromHmacKey;
-      this.prfMac = prfMac;
+      this.mac = PrfMac.create(hmacKey);
     }
 
     @Override
@@ -120,7 +76,7 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
       }
       String unsignedCompact = JwtFormat.createUnsignedCompact(algorithm, kid, rawJwt);
       return JwtFormat.createSignedCompact(
-          unsignedCompact, prfMac.computeMac(unsignedCompact.getBytes(US_ASCII)));
+          unsignedCompact, mac.computeMac(unsignedCompact.getBytes(US_ASCII)));
     }
 
     @Override
@@ -128,7 +84,7 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
         String compact, JwtValidator validator, Optional<String> kid)
         throws GeneralSecurityException {
       JwtFormat.Parts parts = JwtFormat.splitSignedCompact(compact);
-      prfMac.verifyMac(parts.signatureOrMac, parts.unsignedCompact.getBytes(US_ASCII));
+      mac.verifyMac(parts.signatureOrMac, parts.unsignedCompact.getBytes(US_ASCII));
       JsonObject parsedHeader = JsonUtil.parseJson(parts.header);
       JwtFormat.validateHeader(algorithm, kid, customKidFromHmacKey, parsedHeader);
       RawJwt token = RawJwt.fromJsonPayload(JwtFormat.getTypeHeader(parsedHeader), parts.payload);
@@ -136,77 +92,97 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
     }
   };
 
-  public JwtHmacKeyManager() {
-    super(
-        JwtHmacKey.class,
-        new PrimitiveFactory<JwtMacInternal, JwtHmacKey>(JwtMacInternal.class) {
-          @Override
-          public JwtMacInternal getPrimitive(JwtHmacKey key) throws GeneralSecurityException {
-            JwtHmacAlgorithm algorithm = key.getAlgorithm();
-            byte[] keyValue = key.getKeyValue().toByteArray();
-            SecretKeySpec keySpec = new SecretKeySpec(keyValue, "HMAC");
-            PrfHmacJce prf = new PrfHmacJce(getHmacAlgorithm(algorithm), keySpec);
-            final PrfMac prfMac = new PrfMac(prf, prf.getMaxOutputLength());
-            final Optional<String> customKid =
-                key.hasCustomKid() ? Optional.of(key.getCustomKid().getValue()) : Optional.empty();
-            return new JwtHmac(getAlgorithmName(algorithm), customKid, prfMac);
-          }
-        });
-  }
-  @Override
-  public String getKeyType() {
-    return "type.googleapis.com/google.crypto.tink.JwtHmacKey";
-  }
-
-  @Override
-  public int getVersion() {
-    return 0;
-  }
-
-  @Override
-  public KeyMaterialType keyMaterialType() {
-    return KeyMaterialType.SYMMETRIC;
-  }
-
-  @Override
-  public void validateKey(JwtHmacKey key) throws GeneralSecurityException {
-    Validators.validateVersion(key.getVersion(), getVersion());
-    if (key.getKeyValue().size() < getMinimumKeySizeInBytes(key.getAlgorithm())) {
-      throw new GeneralSecurityException("key too short");
+  private static void validate(JwtHmacParameters parameters) throws GeneralSecurityException {
+    int minKeySize = Integer.MAX_VALUE;
+    if (parameters.getAlgorithm().equals(JwtHmacParameters.Algorithm.HS256)) {
+      minKeySize = 32;
+    }
+    if (parameters.getAlgorithm().equals(JwtHmacParameters.Algorithm.HS384)) {
+      minKeySize = 48;
+    }
+    if (parameters.getAlgorithm().equals(JwtHmacParameters.Algorithm.HS512)) {
+      minKeySize = 64;
+    }
+    if (parameters.getKeySizeBytes() < minKeySize) {
+      throw new GeneralSecurityException("Key size must be at least " + minKeySize);
     }
   }
 
-  @Override
-  public JwtHmacKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return JwtHmacKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
+  private static int getTagLength(JwtHmacParameters.Algorithm algorithm)
+      throws GeneralSecurityException {
+    if (algorithm.equals(JwtHmacParameters.Algorithm.HS256)) {
+      return 32;
+    }
+    if (algorithm.equals(JwtHmacParameters.Algorithm.HS384)) {
+      return 48;
+    }
+    if (algorithm.equals(JwtHmacParameters.Algorithm.HS512)) {
+      return 64;
+    }
+    throw new GeneralSecurityException("Unsupported algorithm: " + algorithm);
   }
 
-  @Override
-  public KeyFactory<JwtHmacKeyFormat, JwtHmacKey> keyFactory() {
-    return new KeyFactory<JwtHmacKeyFormat, JwtHmacKey>(JwtHmacKeyFormat.class) {
-      @Override
-      public void validateKeyFormat(JwtHmacKeyFormat format) throws GeneralSecurityException {
-        if (format.getKeySize() < getMinimumKeySizeInBytes(format.getAlgorithm())) {
-          throw new GeneralSecurityException("key too short");
-        }
-      }
+  private static HmacParameters.HashType getHmacHashType(JwtHmacParameters.Algorithm algorithm)
+      throws GeneralSecurityException {
+    if (algorithm.equals(JwtHmacParameters.Algorithm.HS256)) {
+      return HmacParameters.HashType.SHA256;
+    }
+    if (algorithm.equals(JwtHmacParameters.Algorithm.HS384)) {
+      return HmacParameters.HashType.SHA384;
+    }
+    if (algorithm.equals(JwtHmacParameters.Algorithm.HS512)) {
+      return HmacParameters.HashType.SHA512;
+    }
+    throw new GeneralSecurityException("Unsupported algorithm: " + algorithm);
+  }
 
-      @Override
-      public JwtHmacKeyFormat parseKeyFormat(ByteString byteString)
-          throws InvalidProtocolBufferException {
-        return JwtHmacKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-      }
+  private static final KeyManager<JwtMacInternal> legacyKeyManager =
+      LegacyKeyManagerImpl.create(
+          "type.googleapis.com/google.crypto.tink.JwtHmacKey",
+          JwtMacInternal.class,
+          KeyMaterialType.SYMMETRIC,
+          com.google.crypto.tink.proto.JwtHmacKey.parser());
 
-      @Override
-      public JwtHmacKey createKey(JwtHmacKeyFormat format) {
-        return JwtHmacKey.newBuilder()
-            .setVersion(getVersion())
-            .setAlgorithm(format.getAlgorithm())
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
+  @AccessesPartialKey
+  private static JwtHmac createJwtHmac(JwtHmacKey key) throws GeneralSecurityException {
+    validate(key.getParameters());
+    HmacKey hmacKey =
+        HmacKey.builder()
+            .setParameters(
+                HmacParameters.builder()
+                    .setKeySizeBytes(key.getParameters().getKeySizeBytes())
+                    .setHashType(getHmacHashType(key.getParameters().getAlgorithm()))
+                    .setTagSizeBytes(getTagLength(key.getParameters().getAlgorithm()))
+                    .build())
+            .setKeyBytes(key.getKeyBytes())
             .build();
-      }
-    };
+    return new JwtHmac(key.getParameters().getAlgorithm().toString(), key.getKid(), hmacKey);
   }
+
+  private static final PrimitiveConstructor<JwtHmacKey, JwtMacInternal> PRIMITIVE_CONSTRUCTOR =
+      PrimitiveConstructor.create(
+          JwtHmacKeyManager::createJwtHmac, JwtHmacKey.class, JwtMacInternal.class);
+
+  static String getKeyType() {
+    return "type.googleapis.com/google.crypto.tink.JwtHmacKey";
+  }
+
+  @AccessesPartialKey
+  private static JwtHmacKey createKey(JwtHmacParameters parameters, @Nullable Integer idRequirement)
+      throws GeneralSecurityException {
+    validate(parameters);
+    JwtHmacKey.Builder builder =
+        JwtHmacKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(SecretBytes.randomBytes(parameters.getKeySizeBytes()));
+    if (parameters.hasIdRequirement()) {
+      builder.setIdRequirement(idRequirement);
+    }
+    return builder.build();
+  }
+
+  private static final MutableKeyCreationRegistry.KeyCreator<JwtHmacParameters> KEY_CREATOR =
+      JwtHmacKeyManager::createKey;
 
   /**
    * List of default templates to generate tokens with algorithms "HS256", "HS384" or "HS512". Use
@@ -259,15 +235,20 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
         return Collections.unmodifiableMap(result);
   }
 
-  @Override
   public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
     return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
-    Registry.registerKeyManager(new JwtHmacKeyManager(), newKeyAllowed);
     JwtHmacProtoSerialization.register();
+    MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, JwtHmacParameters.class);
+    MutablePrimitiveRegistry.globalInstance().registerPrimitiveConstructor(PRIMITIVE_CONSTRUCTOR);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
+    KeyManagerRegistry.globalInstance()
+        .registerKeyManagerWithFipsCompatibility(
+            legacyKeyManager,
+            TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO,
+            newKeyAllowed);
   }
 
   /** Returns a {@link KeyTemplate} that generates new instances of HS256 256-bit keys. */
@@ -306,4 +287,5 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
                     .build()));
   }
 
+  private JwtHmacKeyManager() {}
 }
