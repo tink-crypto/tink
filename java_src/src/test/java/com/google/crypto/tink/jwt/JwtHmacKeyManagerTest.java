@@ -17,6 +17,7 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
@@ -989,4 +990,66 @@ public class JwtHmacKeyManagerTest {
             TinkProtoKeysetFormat.parseKeyset(serializeKeysetWithKid, InsecureSecretKeyAccess.get())
                 .getPrimitive(JwtMac.class));
   }
+
+  @Test
+  public void serializeAndDeserialize_works() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_HS256_RAW");
+    KeysetHandle handle = KeysetHandle.generateNew(template);
+    byte[] serialized =
+        TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get());
+    KeysetHandle parsed =
+        TinkProtoKeysetFormat.parseKeyset(serialized, InsecureSecretKeyAccess.get());
+    assertThat(parsed.equalsKeyset(handle)).isTrue();
+  }
+
+  @Theory
+  public void createKeyWithRejectedParameters_throws(
+      @FromDataPoints("KeyManager rejected") JwtHmacParameters params) throws Exception {
+    assertThrows(GeneralSecurityException.class, () -> KeysetHandle.generateNew(params));
+  }
+
+  @Theory
+  public void createPrimitiveWithRejectedParameters_throws(
+      @FromDataPoints("KeyManager rejected") JwtHmacParameters params) throws Exception {
+    com.google.crypto.tink.jwt.JwtHmacKey key =
+        com.google.crypto.tink.jwt.JwtHmacKey.builder()
+            .setParameters(params)
+            .setKeyBytes(SecretBytes.randomBytes(params.getKeySizeBytes()))
+            .setIdRequirement(123)
+            .build();
+    KeysetHandle handle =
+        KeysetHandle.newBuilder().addEntry(KeysetHandle.importKey(key).makePrimary()).build();
+    assertThrows(GeneralSecurityException.class, () -> handle.getPrimitive(JwtMac.class));
+  }
+
+  private static JwtHmacParameters[] createRejectedParameters() {
+    return exceptionIsBug(
+        () ->
+            new JwtHmacParameters[] {
+              // Key Sizes below the minimum are rejected.
+              JwtHmacParameters.builder()
+                  .setKeySizeBytes(31)
+                  .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                  .setAlgorithm(JwtHmacParameters.Algorithm.HS256)
+                  .build(),
+              JwtHmacParameters.builder()
+                  .setKeySizeBytes(47)
+                  .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                  .setAlgorithm(JwtHmacParameters.Algorithm.HS384)
+                  .build(),
+              JwtHmacParameters.builder()
+                  .setKeySizeBytes(63)
+                  .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                  .setAlgorithm(JwtHmacParameters.Algorithm.HS512)
+                  .build(),
+              JwtHmacParameters.builder()
+                  .setKeySizeBytes(32)
+                  .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                  .setAlgorithm(JwtHmacParameters.Algorithm.HS512)
+                  .build(),
+            });
+  }
+
+  @DataPoints("KeyManager rejected")
+  public static final JwtHmacParameters[] RECJECTED_PARAMETERS = createRejectedParameters();
 }
