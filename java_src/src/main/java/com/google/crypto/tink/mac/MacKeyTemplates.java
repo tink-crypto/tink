@@ -47,7 +47,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * {@link com.google.crypto.tink.proto.HmacKey}, one can do:
  *
  * <pre>{@code
- * Config.register(Mac.TINK_1_0_0);
+ * MacConfig.register();
  * KeysetHandle handle = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
  * Mac mac = handle.getPrimitive(Mac.class);
  * }</pre>

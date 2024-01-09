@@ -51,7 +51,7 @@ import com.google.protobuf.ByteString;
  * com.google.crypto.tink.proto.EciesAeadHkdfPrivateKey}, one can do:
  *
  * <pre>{@code
- * Config.register(HybridConfig.TINK_1_0_0);
+ * HybridConfig.register();
  * KeysetHandle handle = KeysetHandle.generateNew(
  *     HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM);
  * HybridDecrypt decrypter = handle.getPrimitive(HybridDecrypt.class);

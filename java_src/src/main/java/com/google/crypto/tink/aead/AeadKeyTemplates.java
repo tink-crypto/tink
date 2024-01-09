@@ -52,7 +52,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * single {@link com.google.crypto.tink.proto.AesGcmKey}, one can do:
  *
  * <pre>{@code
- * Config.register(AeadConfig.TINK_1_1_0);
+ * AeadConfig.register();
  * KeysetHandle handle = KeysetHandle.generateNew(AeadKeyTemplates.AES128_GCM);
  * Aead aead = handle.getPrimitive(Aead.class);
  * }</pre>

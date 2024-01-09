@@ -55,7 +55,7 @@ import java.security.spec.RSAKeyGenParameterSpec;
  * {@code EcdsaPrivateKey}, one can do:
  *
  * <pre>{@code
- * Config.register(SignatureConfig.TINK_1_1_0);
+ * SignatureConfig.register();
  * KeysetHandle handle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
  * PublicKeySign signer = handle.getPrimitive(PublicKeySign.class);
  * PublicKeyVerify verifier = handle.getPublicKeyset().getPrimitive(PublicKeyVerify.class);
