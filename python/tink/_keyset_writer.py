@@ -84,5 +84,10 @@ class BinaryKeysetWriter(KeysetWriter):
   def write_encrypted(self, encrypted_keyset: tink_pb2.EncryptedKeyset) -> None:
     if not isinstance(encrypted_keyset, tink_pb2.EncryptedKeyset):
       raise core.TinkError('invalid encrypted keyset.')
-    self._io_stream.write(encrypted_keyset.SerializeToString())
+    encrypted_keyset_without_keyset_info = tink_pb2.EncryptedKeyset(
+        encrypted_keyset=encrypted_keyset.encrypted_keyset
+    )
+    self._io_stream.write(
+        encrypted_keyset_without_keyset_info.SerializeToString()
+    )
     self._io_stream.flush()

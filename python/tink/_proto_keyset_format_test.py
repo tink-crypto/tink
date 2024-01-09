@@ -294,12 +294,12 @@ class TinkProtoKeysetFormatTest(absltest.TestCase):
         keyset_encryption_aead=keyset_encryption_aead,
         associated_data=b'',
     )
-    # encrypted_keyset is a serialized protocol buffer that contains
-    # raw_encrypted_keyset and a KeysetInfo. KeysetInfo contains a type url,
-    # which is 48 bytes for AES GCM, and a 4 byte key ID. So it must be at least
-    # 52 longer than raw_encrypted_keyset.
-    # TODO(b/316316648) Remove KeysetInfo, to make the overhead smaller.
-    self.assertGreater(len(encrypted_keyset), len(raw_encrypted_keyset) + 52)
+    # encrypted_keyset is a serialized protocol buffer that contains only
+    # raw_encrypted_keyset in a field. So
+    # it should only be slightly larger than raw_encrypted_keyset.
+    # The overhead is currently just 2 bytes, but we choose 6 here to avoid
+    # making the test brittle or flaky.
+    self.assertLessEqual(len(encrypted_keyset), len(raw_encrypted_keyset) + 6)
 
 
 if __name__ == '__main__':

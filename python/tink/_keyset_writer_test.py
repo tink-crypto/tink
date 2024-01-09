@@ -65,7 +65,10 @@ class JsonKeysetWriterTest(absltest.TestCase):
     writer = tink.JsonKeysetWriter(stream)
     writer.write_encrypted(encrypted_keyset)
     reader = tink.JsonKeysetReader(stream.getvalue())
-    self.assertEqual(encrypted_keyset, reader.read_encrypted())
+    self.assertEqual(
+        encrypted_keyset.encrypted_keyset,
+        reader.read_encrypted().encrypted_keyset,
+    )
 
   def test_write_read_with_unicode_chars(self):
     keyset = tink_pb2.Keyset()
@@ -109,7 +112,10 @@ class BinaryKeysetReaderTest(absltest.TestCase):
     writer = tink.BinaryKeysetWriter(stream)
     writer.write_encrypted(encrypted_keyset)
     reader = tink.BinaryKeysetReader(stream.getvalue())
-    self.assertEqual(encrypted_keyset, reader.read_encrypted())
+    self.assertEqual(
+        encrypted_keyset.encrypted_keyset,
+        reader.read_encrypted().encrypted_keyset,
+    )
 
   def test_write_invalid_fails(self):
     stream = io.BytesIO()
