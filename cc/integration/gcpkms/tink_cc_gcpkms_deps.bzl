@@ -76,18 +76,6 @@ def _grpc_deps():
             ],
         )
 
-    if "com_google_googleapis" not in native.existing_rules():
-        http_archive(
-            name = "com_google_googleapis",
-            sha256 = "5bb6b0253ccf64b53d6c7249625a7e3f6c3bc6402abd52d3778bfa48258703a0",
-            strip_prefix = "googleapis-2f9af297c84c55c8b871ba4495e01ade42476c92",
-            build_file = Label("@com_github_grpc_grpc//bazel:googleapis.BUILD"),
-            urls = [
-                "https://storage.googleapis.com/grpc-bazel-mirror/github.com/googleapis/googleapis/archive/2f9af297c84c55c8b871ba4495e01ade42476c92.tar.gz",
-                "https://github.com/googleapis/googleapis/archive/2f9af297c84c55c8b871ba4495e01ade42476c92.tar.gz",
-            ],
-        )
-
     if "bazel_gazelle" not in native.existing_rules():
         http_archive(
             name = "bazel_gazelle",
@@ -132,6 +120,18 @@ def tink_cc_gcpkms_deps():
         )
 
     _grpc_deps()
+
+    if "com_google_googleapis" not in native.existing_rules():
+        http_archive(
+            name = "com_google_googleapis",
+            sha256 = "b541d28b3fd5c0ce802f02b665cf14dfe7a88bd34d8549215127e7ab1008bbbc",
+            strip_prefix = "googleapis-e56f4b1c926f42d6ab127c049158df2dda189914",
+            build_file = Label("@com_github_grpc_grpc//bazel:googleapis.BUILD"),
+            urls = [
+                "https://storage.googleapis.com/cloud-cpp-community-archive/com_google_googleapis/e56f4b1c926f42d6ab127c049158df2dda189914.tar.gz",
+                "https://github.com/googleapis/googleapis/archive/e56f4b1c926f42d6ab127c049158df2dda189914.tar.gz",
+            ],
+        )
 
     if not native.existing_rule("com_google_absl"):
         # Release from 2023-09-18.
