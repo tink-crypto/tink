@@ -182,7 +182,7 @@ TEST(HpkeParametersTest, BuildWithoutAeadIdFails) {
               StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
-TEST(Ed25519ParametersTest, CopyConstructor) {
+TEST(HpkeParametersTest, CopyConstructor) {
   util::StatusOr<HpkeParameters> parameters =
       HpkeParameters::Builder()
           .SetVariant(HpkeParameters::Variant::kTink)
@@ -198,7 +198,7 @@ TEST(Ed25519ParametersTest, CopyConstructor) {
   EXPECT_THAT(copy.HasIdRequirement(), IsTrue());
 }
 
-TEST(Ed25519ParametersTest, CopyAssignment) {
+TEST(HpkeParametersTest, CopyAssignment) {
   util::StatusOr<HpkeParameters> parameters =
       HpkeParameters::Builder()
           .SetVariant(HpkeParameters::Variant::kTink)
