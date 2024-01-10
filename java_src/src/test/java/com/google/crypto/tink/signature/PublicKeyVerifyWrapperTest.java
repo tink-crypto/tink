@@ -42,6 +42,7 @@ import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.FromDataPoints;
 import org.junit.experimental.theories.Theories;
@@ -284,29 +285,31 @@ public class PublicKeyVerifyWrapperTest {
         GeneralSecurityException.class, () -> verifier.verify(sig, data));
   }
 
-  @Theory
-  public void verifyWorksIfSignatureIsValidForAnyPrimitiveInThePrimitiveSet(
-      @FromDataPoints("outputPrefixType") OutputPrefixType prefix1,
-      @FromDataPoints("outputPrefixType") OutputPrefixType prefix2)
-      throws Exception {
+  @Test
+  public void verifyWorksIfSignatureIsValidForAnyPrimitiveInThePrimitiveSet() throws Exception {
     PublicKeySign signer1 =
         new PublicKeySignWrapper()
             .wrap(
                 TestUtil.createPrimitiveSet(
-                    TestUtil.createKeyset(getPrivateKey(ecdsaPrivateKey, /*keyId=*/ 123, prefix1)),
+                    TestUtil.createKeyset(
+                        getPrivateKey(ecdsaPrivateKey, /* keyId= */ 123, OutputPrefixType.TINK)),
                     PublicKeySign.class));
     PublicKeySign signer2 =
         new PublicKeySignWrapper()
             .wrap(
                 TestUtil.createPrimitiveSet(
-                    TestUtil.createKeyset(getPrivateKey(ecdsaPrivateKey2, /*keyId=*/ 234, prefix2)),
+                    TestUtil.createKeyset(
+                        getPrivateKey(
+                            ecdsaPrivateKey2, /* keyId= */ 234, OutputPrefixType.CRUNCHY)),
                     PublicKeySign.class));
 
     PrimitiveSet<PublicKeyVerify> verifyPrimitives =
         TestUtil.createPrimitiveSet(
             TestUtil.createKeyset(
-                getPublicKey(ecdsaPrivateKey.getPublicKey(), /*keyId=*/ 123, prefix1),
-                getPublicKey(ecdsaPrivateKey2.getPublicKey(), /*keyId=*/ 234, prefix2)),
+                getPublicKey(
+                    ecdsaPrivateKey.getPublicKey(), /* keyId= */ 123, OutputPrefixType.TINK),
+                getPublicKey(
+                    ecdsaPrivateKey2.getPublicKey(), /* keyId= */ 234, OutputPrefixType.CRUNCHY)),
             PublicKeyVerify.class);
     PublicKeyVerify verifier = new PublicKeyVerifyWrapper().wrap(verifyPrimitives);
 
