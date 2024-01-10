@@ -200,7 +200,7 @@ public final class SignatureKeyTemplates {
    */
   public static final KeyTemplate ED25519 =
       KeyTemplate.newBuilder()
-          .setTypeUrl(new Ed25519PrivateKeyManager().getKeyType())
+          .setTypeUrl(Ed25519PrivateKeyManager.getKeyType())
           .setOutputPrefixType(OutputPrefixType.TINK)
           .build();
 
@@ -208,15 +208,15 @@ public final class SignatureKeyTemplates {
    * A {@link KeyTemplate} that generates new instances of {@link
    * com.google.crypto.tink.proto.ED25519PrivateKey}.
    *
-   * The difference between {@link ED25519WithRawOutput} and {@link ED25519} is the format of
-   * signatures generated. {@link ED25519WithRawOutput} generates signatures of
-   * {@link OutputPrefixType.RAW} format, which is 64 bytes long.
+   * <p>The difference between {@link ED25519WithRawOutput} and {@link ED25519} is the format of
+   * signatures generated. {@link ED25519WithRawOutput} generates signatures of {@link
+   * OutputPrefixType.RAW} format, which is 64 bytes long.
    *
    * @since 1.3.0
    */
   public static final KeyTemplate ED25519WithRawOutput =
       KeyTemplate.newBuilder()
-          .setTypeUrl(new Ed25519PrivateKeyManager().getKeyType())
+          .setTypeUrl(Ed25519PrivateKeyManager.getKeyType())
           .setOutputPrefixType(OutputPrefixType.RAW)
           .build();
 

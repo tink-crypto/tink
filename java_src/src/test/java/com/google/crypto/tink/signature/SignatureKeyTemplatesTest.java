@@ -154,7 +154,7 @@ public class SignatureKeyTemplatesTest {
   @Test
   public void ed25519() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.ED25519;
-    assertEquals(new Ed25519PrivateKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(Ed25519PrivateKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     assertTrue(template.getValue().isEmpty()); // Empty format.
   }
@@ -162,7 +162,7 @@ public class SignatureKeyTemplatesTest {
   @Test
   public void ed25519WithRawOutput() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.ED25519WithRawOutput;
-    assertEquals(new Ed25519PrivateKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(Ed25519PrivateKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
     assertTrue(template.getValue().isEmpty()); // Empty format.
   }
