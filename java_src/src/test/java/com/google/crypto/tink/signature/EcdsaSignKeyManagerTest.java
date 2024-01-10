@@ -19,7 +19,7 @@ package com.google.crypto.tink.signature;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.Key;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
@@ -27,10 +27,15 @@ import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.internal.KeyManagerRegistry;
+import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.signature.internal.testing.EcdsaTestUtil;
 import com.google.crypto.tink.signature.internal.testing.SignatureTestVector;
+import com.google.crypto.tink.testing.TestUtil;
+import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import java.util.Set;
+import java.util.TreeSet;
 import javax.annotation.Nullable;
 import org.junit.Before;
 import org.junit.Test;
@@ -90,11 +95,17 @@ public class EcdsaSignKeyManagerTest {
 
   @Test
   public void callingCreateTwiceGivesDifferentKeys() throws Exception {
-    Parameters p = EcdsaSignKeyManager.ecdsaP256Template().toParameters();
-    Key key = KeysetHandle.generateNew(p).getAt(0).getKey();
-    for (int i = 0; i < 100; ++i) {
-      assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().equalsKey(key)).isFalse();
+    int numKeys = 2;
+    if (TestUtil.isAndroid() || TestUtil.isTsan()) {
+      numKeys = 2;
     }
+    Parameters p = EcdsaSignKeyManager.ecdsaP256Template().toParameters();
+    Set<BigInteger> keys = new TreeSet<>();
+    for (int i = 0; i < numKeys; ++i) {
+      EcdsaPrivateKey key = (EcdsaPrivateKey) KeysetHandle.generateNew(p).getAt(0).getKey();
+      keys.add(key.getPrivateValue().getBigInteger(InsecureSecretKeyAccess.get()));
+    }
+    assertThat(keys).hasSize(numKeys);
   }
 
   @Test
@@ -122,6 +133,11 @@ public class EcdsaSignKeyManagerTest {
 
   @Theory
   public void testTemplates(@FromDataPoints("templateNames") String templateName) throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    if (apiLevel != null && apiLevel == 19) {
+      // Android API 19 is slower than the others in this.
+      return;
+    }
     KeysetHandle h = KeysetHandle.generateNew(KeyTemplates.get(templateName));
     assertThat(h.size()).isEqualTo(1);
     assertThat(h.getAt(0).getKey().getParameters())
@@ -135,6 +151,11 @@ public class EcdsaSignKeyManagerTest {
   @Theory
   public void test_validateSignatureInTestVector(
       @FromDataPoints("allTests") SignatureTestVector testVector) throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    if (apiLevel != null && apiLevel == 19) {
+      // Android API 19 is slower than the others in this.
+      return;
+    }
     SignaturePrivateKey key = testVector.getPrivateKey();
     KeysetHandle.Builder.Entry entry = KeysetHandle.importKey(key).makePrimary();
     @Nullable Integer id = key.getIdRequirementOrNull();
@@ -154,6 +175,11 @@ public class EcdsaSignKeyManagerTest {
   @Theory
   public void test_computeAndValidateFreshSignatureWithTestVector(
       @FromDataPoints("allTests") SignatureTestVector testVector) throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    if (apiLevel != null && apiLevel == 19) {
+      // Android API 19 is slower than the others in this.
+      return;
+    }
     SignaturePrivateKey key = testVector.getPrivateKey();
     KeysetHandle.Builder.Entry entry = KeysetHandle.importKey(key).makePrimary();
     @Nullable Integer id = key.getIdRequirementOrNull();
@@ -181,6 +207,11 @@ public class EcdsaSignKeyManagerTest {
   @Theory
   public void test_computeFreshSignatureWithTestVector_throwsWithWrongMessage(
       @FromDataPoints("allTests") SignatureTestVector testVector) throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    if (apiLevel != null && apiLevel == 19) {
+      // Android API 19 is slower than the others in this.
+      return;
+    }
     SignaturePrivateKey key = testVector.getPrivateKey();
     KeysetHandle.Builder.Entry entry = KeysetHandle.importKey(key).makePrimary();
     @Nullable Integer id = key.getIdRequirementOrNull();
