@@ -393,10 +393,9 @@ public final class TinkProtoKeysetFormatTest {
 
     byte[] encryptedKeyset =
         TinkProtoKeysetFormat.serializeEncryptedKeyset(keysetHandle, keyEncryptionAead, null);
-    // encryptedKeyset is a serialized protocol buffer that contains the rawEncryptedKeyset and
-    // a KeysetInfo. KeysetInfo contains a type url, which is 48 bytes for AES GCM, and a 4 byte
-    // key ID. So it must be at least 52 longer rawEncryptedKeyset.
-    // TODO(b/316316648) Remove KeysetInfo, to make the overhead smaller.
-    assertThat(encryptedKeyset.length).isGreaterThan(rawEncryptedKeyset.length + 52);
+    // {@code encryptedKeyset} is a serialized protocol buffer that wraps the encrypted keyset bytes
+    // as a protobuf bytes field. So, it should only be slightly larger than {@code
+    // rawEncryptedKeyset}.
+    assertThat(encryptedKeyset.length).isLessThan(rawEncryptedKeyset.length + 6);
   }
 }
