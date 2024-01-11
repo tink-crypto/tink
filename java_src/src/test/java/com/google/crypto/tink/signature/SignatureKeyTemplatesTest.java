@@ -170,7 +170,7 @@ public class SignatureKeyTemplatesTest {
   @Test
   public void rsaSsaPkcs1_3072() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.RSA_SSA_PKCS1_3072_SHA256_F4;
-    assertEquals(new RsaSsaPkcs1SignKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(RsaSsaPkcs1SignKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     RsaSsaPkcs1KeyFormat format =
         RsaSsaPkcs1KeyFormat.parseFrom(
@@ -186,7 +186,7 @@ public class SignatureKeyTemplatesTest {
   @Test
   public void rsaSsaPkcs1_4096() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.RSA_SSA_PKCS1_4096_SHA512_F4;
-    assertEquals(new RsaSsaPkcs1SignKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(RsaSsaPkcs1SignKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     RsaSsaPkcs1KeyFormat format =
         RsaSsaPkcs1KeyFormat.parseFrom(
