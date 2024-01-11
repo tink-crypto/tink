@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -202,7 +202,7 @@ public class SignatureKeyTemplatesTest {
   @Test
   public void rsaSsaPss3072() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.RSA_SSA_PSS_3072_SHA256_SHA256_32_F4;
-    assertEquals(new RsaSsaPssSignKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(RsaSsaPssSignKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     RsaSsaPssKeyFormat format =
         RsaSsaPssKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
@@ -219,7 +219,7 @@ public class SignatureKeyTemplatesTest {
   @Test
   public void rsaSsaPss4096() throws Exception {
     KeyTemplate template = SignatureKeyTemplates.RSA_SSA_PSS_4096_SHA512_SHA512_64_F4;
-    assertEquals(new RsaSsaPssSignKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(RsaSsaPssSignKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     RsaSsaPssKeyFormat format =
         RsaSsaPssKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());

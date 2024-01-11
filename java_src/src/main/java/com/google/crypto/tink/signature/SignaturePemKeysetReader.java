@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -185,13 +185,13 @@ public final class SignaturePemKeysetReader implements KeysetReader {
               .build();
       RsaSsaPssPublicKey pssPubKey =
           RsaSsaPssPublicKey.newBuilder()
-              .setVersion(new RsaSsaPssVerifyKeyManager().getVersion())
+              .setVersion(0)
               .setParams(params)
               .setE(SigUtil.toUnsignedIntByteString(key.getPublicExponent()))
               .setN(SigUtil.toUnsignedIntByteString(key.getModulus()))
               .build();
       return KeyData.newBuilder()
-          .setTypeUrl(new RsaSsaPssVerifyKeyManager().getKeyType())
+          .setTypeUrl(RsaSsaPssVerifyKeyManager.getKeyType())
           .setValue(pssPubKey.toByteString())
           .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC)
           .build();
