@@ -17,40 +17,39 @@
 package com.google.crypto.tink.keyderivation.internal;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Key;
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
-import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.aead.AesGcmKey;
 import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.aead.XChaCha20Poly1305Parameters;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.internal.KeyManagerRegistry;
-import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.keyderivation.KeyDerivationConfig;
 import com.google.crypto.tink.keyderivation.KeysetDeriver;
 import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationKey;
 import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationParameters;
-import com.google.crypto.tink.prf.HkdfPrfKeyManager;
 import com.google.crypto.tink.prf.HkdfPrfParameters;
 import com.google.crypto.tink.prf.PrfConfig;
 import com.google.crypto.tink.prf.PrfKey;
+import com.google.crypto.tink.proto.AesGcmKeyFormat;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HkdfPrfKey;
 import com.google.crypto.tink.proto.HkdfPrfKeyFormat;
 import com.google.crypto.tink.proto.HkdfPrfParams;
+import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.proto.PrfBasedDeriverKey;
 import com.google.crypto.tink.proto.PrfBasedDeriverKeyFormat;
 import com.google.crypto.tink.proto.PrfBasedDeriverParams;
 import com.google.crypto.tink.subtle.Hex;
-import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
@@ -65,170 +64,177 @@ import org.junit.runners.JUnit4;
 /** Test for PrfBasedDeriverKeyManager. */
 @RunWith(JUnit4.class)
 public class PrfBasedDeriverKeyManagerTest {
-  private final PrfBasedDeriverKeyManager manager = new PrfBasedDeriverKeyManager();
-  private final KeyTypeManager.KeyFactory<PrfBasedDeriverKeyFormat, PrfBasedDeriverKey> factory =
-      manager.keyFactory();
+  private static KeyManager<?> manager;
 
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
     TinkConfig.register();
     KeyDerivationConfig.register();
     PrfConfig.register();
+
+    manager =
+        KeyManagerRegistry.globalInstance()
+            .getUntypedKeyManager("type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey");
+  }
+
+  /** We test newKey directly because PrfBasedDeriverKeyManager has its own implementation. */
+  @Test
+  @SuppressWarnings("deprecation") // This is a test for the deprecated function
+  public void newKey_works() throws Exception {
+    HkdfPrfKeyFormat prfKeyFormat =
+        HkdfPrfKeyFormat.newBuilder()
+            .setKeySize(32)
+            .setParams(
+                HkdfPrfParams.newBuilder()
+                    .setHash(HashType.SHA256)
+                    .setSalt(ByteString.copyFrom(new byte[] {1, 2, 3})))
+            .build();
+    AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder().setKeySize(16).build();
+    KeyTemplate derivedKeyTemplate =
+        KeyTemplate.newBuilder()
+            .setValue(format.toByteString())
+            .setTypeUrl("type.googleapis.com/google.crypto.tink.AesGcmKey")
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .build();
+
+    PrfBasedDeriverKeyFormat keyFormat =
+        PrfBasedDeriverKeyFormat.newBuilder()
+            .setPrfKeyTemplate(
+                KeyTemplate.newBuilder()
+                    .setOutputPrefixType(OutputPrefixType.RAW)
+                    .setTypeUrl("type.googleapis.com/google.crypto.tink.HkdfPrfKey")
+                    .setValue(prfKeyFormat.toByteString()))
+            .setParams(PrfBasedDeriverParams.newBuilder().setDerivedKeyTemplate(derivedKeyTemplate))
+            .build();
+
+    PrfBasedDeriverKey prfBasedDeriverKey =
+        (PrfBasedDeriverKey) manager.newKey(keyFormat.toByteString());
+
+    assertThat(prfBasedDeriverKey.getParams().getDerivedKeyTemplate())
+        .isEqualTo(derivedKeyTemplate);
+    assertThat(prfBasedDeriverKey.getPrfKey().getTypeUrl())
+        .isEqualTo("type.googleapis.com/google.crypto.tink.HkdfPrfKey");
+    assertThat(prfBasedDeriverKey.getPrfKey().getKeyMaterialType())
+        .isEqualTo(KeyMaterialType.SYMMETRIC);
+    HkdfPrfKey hkdfPrfKey =
+        HkdfPrfKey.parseFrom(
+            prfBasedDeriverKey.getPrfKey().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(hkdfPrfKey.getParams()).isEqualTo(prfKeyFormat.getParams());
+    assertThat(hkdfPrfKey.getKeyValue()).hasSize(prfKeyFormat.getKeySize());
+  }
+
+  /** We test newKey directly because PrfBasedDeriverKeyManager has its own implementation. */
+  @Test
+  @SuppressWarnings("deprecation") // This is a test for the deprecated function
+  public void newKey_messageLite_works() throws Exception {
+    HkdfPrfKeyFormat prfKeyFormat =
+        HkdfPrfKeyFormat.newBuilder()
+            .setKeySize(64)
+            .setParams(
+                HkdfPrfParams.newBuilder()
+                    .setHash(HashType.SHA512)
+                    .setSalt(ByteString.copyFrom(new byte[] {1, 2, 3})))
+            .build();
+    AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder().setKeySize(32).build();
+    KeyTemplate derivedKeyTemplate =
+        KeyTemplate.newBuilder()
+            .setValue(format.toByteString())
+            .setTypeUrl("type.googleapis.com/google.crypto.tink.AesGcmKey")
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .build();
+
+    PrfBasedDeriverKeyFormat keyFormat =
+        PrfBasedDeriverKeyFormat.newBuilder()
+            .setPrfKeyTemplate(
+                KeyTemplate.newBuilder()
+                    .setOutputPrefixType(OutputPrefixType.RAW)
+                    .setTypeUrl("type.googleapis.com/google.crypto.tink.HkdfPrfKey")
+                    .setValue(prfKeyFormat.toByteString()))
+            .setParams(PrfBasedDeriverParams.newBuilder().setDerivedKeyTemplate(derivedKeyTemplate))
+            .build();
+
+    // Calls the MessageLite overload of newKey
+    PrfBasedDeriverKey prfBasedDeriverKey = (PrfBasedDeriverKey) manager.newKey(keyFormat);
+
+    assertThat(prfBasedDeriverKey.getParams().getDerivedKeyTemplate())
+        .isEqualTo(derivedKeyTemplate);
+    assertThat(prfBasedDeriverKey.getPrfKey().getTypeUrl())
+        .isEqualTo("type.googleapis.com/google.crypto.tink.HkdfPrfKey");
+    assertThat(prfBasedDeriverKey.getPrfKey().getKeyMaterialType())
+        .isEqualTo(KeyMaterialType.SYMMETRIC);
+    HkdfPrfKey hkdfPrfKey =
+        HkdfPrfKey.parseFrom(
+            prfBasedDeriverKey.getPrfKey().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(hkdfPrfKey.getParams()).isEqualTo(prfKeyFormat.getParams());
+    assertThat(hkdfPrfKey.getKeyValue()).hasSize(prfKeyFormat.getKeySize());
+  }
+
+  /** We test newKeyData directly because PrfBasedDeriverKeyManager has its own implementation. */
+  @Test
+  public void newKeyData_works() throws Exception {
+    HkdfPrfKeyFormat prfKeyFormat =
+        HkdfPrfKeyFormat.newBuilder()
+            .setKeySize(64)
+            .setParams(
+                HkdfPrfParams.newBuilder()
+                    .setHash(HashType.SHA512)
+                    .setSalt(ByteString.copyFrom(new byte[] {1, 2, 3})))
+            .build();
+    AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder().setKeySize(32).build();
+    KeyTemplate derivedKeyTemplate =
+        KeyTemplate.newBuilder()
+            .setValue(format.toByteString())
+            .setTypeUrl("type.googleapis.com/google.crypto.tink.AesGcmKey")
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .build();
+
+    PrfBasedDeriverKeyFormat keyFormat =
+        PrfBasedDeriverKeyFormat.newBuilder()
+            .setPrfKeyTemplate(
+                KeyTemplate.newBuilder()
+                    .setOutputPrefixType(OutputPrefixType.RAW)
+                    .setTypeUrl("type.googleapis.com/google.crypto.tink.HkdfPrfKey")
+                    .setValue(prfKeyFormat.toByteString()))
+            .setParams(PrfBasedDeriverParams.newBuilder().setDerivedKeyTemplate(derivedKeyTemplate))
+            .build();
+
+    // Calls the MessageLite overload of newKey
+    KeyData keyData = manager.newKeyData(keyFormat.toByteString());
+    assertThat(keyData.getTypeUrl())
+        .isEqualTo("type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey");
+    assertThat(keyData.getKeyMaterialType()).isEqualTo(KeyMaterialType.SYMMETRIC);
+    PrfBasedDeriverKey parsedMessageLite =
+        PrfBasedDeriverKey.parseFrom(keyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(parsedMessageLite.getParams().getDerivedKeyTemplate()).isEqualTo(derivedKeyTemplate);
+    assertThat(parsedMessageLite.getPrfKey().getTypeUrl())
+        .isEqualTo("type.googleapis.com/google.crypto.tink.HkdfPrfKey");
+    assertThat(parsedMessageLite.getPrfKey().getKeyMaterialType())
+        .isEqualTo(KeyMaterialType.SYMMETRIC);
+    HkdfPrfKey hkdfPrfKey =
+        HkdfPrfKey.parseFrom(
+            parsedMessageLite.getPrfKey().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(hkdfPrfKey.getParams()).isEqualTo(prfKeyFormat.getParams());
+    assertThat(hkdfPrfKey.getKeyValue()).hasSize(prfKeyFormat.getKeySize());
   }
 
   @Test
-  public void basics() throws Exception {
+  @SuppressWarnings("deprecation") // This is a test for the deprecated function
+  public void testDoesSupport_works() throws Exception {
+    assertTrue(manager.doesSupport("type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey"));
+    assertFalse(manager.doesSupport("type.googleapis.com/google.crypto.tink.AesGcmKey"));
+  }
+
+  @Test
+  public void testGetKeyType_works() throws Exception {
     assertThat(manager.getKeyType())
         .isEqualTo("type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey");
+  }
+
+  @Test
+  @SuppressWarnings("deprecation") // This is a test for the deprecated function
+  public void testGetVersion() throws Exception {
     assertThat(manager.getVersion()).isEqualTo(0);
-    assertThat(manager.keyMaterialType()).isEqualTo(KeyMaterialType.SYMMETRIC);
-  }
-
-  @Test
-  public void validateKey_empty() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> manager.validateKey(PrfBasedDeriverKey.getDefaultInstance()));
-  }
-
-  @Test
-  public void validateKey_valid() throws Exception {
-    HkdfPrfKey prfKey =
-        HkdfPrfKey.newBuilder()
-            .setVersion(0)
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(10)))
-            .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
-            .build();
-    PrfBasedDeriverKey key =
-        PrfBasedDeriverKey.newBuilder()
-            .setPrfKey(
-                TestUtil.createKeyData(
-                    prfKey, HkdfPrfKeyManager.staticKeyType(), KeyMaterialType.SYMMETRIC))
-            .setParams(
-                PrfBasedDeriverParams.newBuilder()
-                    .setDerivedKeyTemplate(AeadKeyTemplates.AES256_GCM))
-            .build();
-    manager.validateKey(key);
-  }
-
-  @Test
-  public void validateKey_wrongVersion_throws() throws Exception {
-    HkdfPrfKey prfKey =
-        HkdfPrfKey.newBuilder()
-            .setVersion(0)
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(10)))
-            .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
-            .build();
-    PrfBasedDeriverKey key =
-        PrfBasedDeriverKey.newBuilder()
-            .setPrfKey(
-                TestUtil.createKeyData(
-                    prfKey, HkdfPrfKeyManager.staticKeyType(), KeyMaterialType.SYMMETRIC))
-            .setParams(
-                PrfBasedDeriverParams.newBuilder()
-                    .setDerivedKeyTemplate(AeadKeyTemplates.AES256_GCM))
-            .setVersion(1)
-            .build();
-    assertThrows(GeneralSecurityException.class, () -> manager.validateKey(key));
-  }
-
-  @Test
-  public void validateKeyFormat_empty() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(PrfBasedDeriverKeyFormat.getDefaultInstance()));
-  }
-
-  @Test
-  public void validateKeyFormat_valid() throws Exception {
-    HkdfPrfKeyFormat prfKeyFormat =
-        HkdfPrfKeyFormat.newBuilder()
-            .setKeySize(32)
-            .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
-            .build();
-    PrfBasedDeriverKeyFormat keyFormat =
-        PrfBasedDeriverKeyFormat.newBuilder()
-            .setPrfKeyTemplate(
-                KeyTemplate.newBuilder()
-                    .setTypeUrl(HkdfPrfKeyManager.staticKeyType())
-                    .setValue(prfKeyFormat.toByteString()))
-            .setParams(
-                PrfBasedDeriverParams.newBuilder()
-                    .setDerivedKeyTemplate(AeadKeyTemplates.AES256_GCM))
-            .build();
-    factory.validateKeyFormat(keyFormat);
-  }
-
-  @Test
-  public void createKey_checkValues() throws Exception {
-    HkdfPrfKeyManager.register(true);
-    HkdfPrfKeyFormat prfKeyFormat =
-        HkdfPrfKeyFormat.newBuilder()
-            .setKeySize(32)
-            .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
-            .build();
-    PrfBasedDeriverKeyFormat keyFormat =
-        PrfBasedDeriverKeyFormat.newBuilder()
-            .setPrfKeyTemplate(
-                KeyTemplate.newBuilder()
-                    .setTypeUrl(HkdfPrfKeyManager.staticKeyType())
-                    .setValue(prfKeyFormat.toByteString()))
-            .setParams(
-                PrfBasedDeriverParams.newBuilder()
-                    .setDerivedKeyTemplate(AeadKeyTemplates.AES256_GCM))
-            .build();
-    PrfBasedDeriverKey key = factory.createKey(keyFormat);
-
-    assertThat(key.getVersion()).isEqualTo(0);
-    assertThat(key.getPrfKey().getTypeUrl()).isEqualTo(HkdfPrfKeyManager.staticKeyType());
-    assertThat(key.getPrfKey().getKeyMaterialType()).isEqualTo(KeyMaterialType.SYMMETRIC);
-    HkdfPrfKey hkdfPrfKey =
-        HkdfPrfKey.parseFrom(key.getPrfKey().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    assertThat(hkdfPrfKey.getKeyValue()).hasSize(32);
-    assertThat(key.getParams()).isEqualTo(keyFormat.getParams());
-  }
-
-  @Test
-  public void createKey_invalidPrfKey_throws() throws Exception {
-    HkdfPrfKeyManager.register(true);
-    HkdfPrfKeyFormat prfKeyFormat =
-        HkdfPrfKeyFormat.newBuilder()
-            .setKeySize(32)
-            .setParams(HkdfPrfParams.newBuilder().setHash(HashType.UNKNOWN_HASH))
-            .build();
-    PrfBasedDeriverKeyFormat keyFormat =
-        PrfBasedDeriverKeyFormat.newBuilder()
-            .setPrfKeyTemplate(
-                KeyTemplate.newBuilder()
-                    .setTypeUrl(HkdfPrfKeyManager.staticKeyType())
-                    .setValue(prfKeyFormat.toByteString()))
-            .setParams(
-                PrfBasedDeriverParams.newBuilder()
-                    .setDerivedKeyTemplate(AeadKeyTemplates.AES256_GCM))
-            .build();
-    assertThrows(GeneralSecurityException.class, () -> factory.createKey(keyFormat));
-  }
-
-  @Test
-  public void createKey_invalidDerivedKeyTemplate_throws() throws Exception {
-    HkdfPrfKeyManager.register(true);
-    HkdfPrfKeyFormat prfKeyFormat =
-        HkdfPrfKeyFormat.newBuilder()
-            .setKeySize(32)
-            .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
-            .build();
-    PrfBasedDeriverKeyFormat keyFormat =
-        PrfBasedDeriverKeyFormat.newBuilder()
-            .setPrfKeyTemplate(
-                KeyTemplate.newBuilder()
-                    .setTypeUrl(HkdfPrfKeyManager.staticKeyType())
-                    .setValue(prfKeyFormat.toByteString()))
-            .setParams(
-                PrfBasedDeriverParams.newBuilder()
-                    .setDerivedKeyTemplate(
-                        KeyTemplate.newBuilder().setTypeUrl("nonexistenttypeurl").build()))
-            .build();
-    assertThrows(GeneralSecurityException.class, () -> factory.createKey(keyFormat));
   }
 
   @Test
