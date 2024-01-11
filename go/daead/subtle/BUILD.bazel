@@ -15,6 +15,7 @@ go_test(
     deps = [
         ":subtle",
         "//subtle/random",
+        "//testutil",
     ],
 )
 

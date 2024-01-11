@@ -19,16 +19,14 @@ package subtle_test
 import (
 	"bytes"
 	"encoding/hex"
-	"encoding/json"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/google/tink/go/daead/subtle"
 	"github.com/google/tink/go/subtle/random"
+	"github.com/google/tink/go/testutil"
 )
 
-type testData struct {
+type AESSIVSuite struct {
 	Algorithm        string
 	GeneratorVersion string
 	NumberOfTests    uint32
@@ -272,21 +270,13 @@ func TestAESSIV_CiphertextModifications(t *testing.T) {
 }
 
 func TestAESSIV_WycheproofVectors(t *testing.T) {
-	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
-	if !ok {
-		t.Skip("TEST_SRCDIR not set")
-	}
-	f, err := os.Open(filepath.Join(srcDir, "wycheproof/testvectors/aes_siv_cmac_test.json"))
-	if err != nil {
-		t.Fatalf("Cannot open file: %s", err)
-	}
-	parser := json.NewDecoder(f)
-	data := new(testData)
-	if err := parser.Decode(data); err != nil {
-		t.Fatalf("Cannot decode test data: %s", err)
+	testutil.SkipTestIfTestSrcDirIsNotSet(t)
+	suite := new(AESSIVSuite)
+	if err := testutil.PopulateSuite(suite, "aes_siv_cmac_test.json"); err != nil {
+		t.Fatalf("testutil.PopulateSuite: %v", err)
 	}
 
-	for _, g := range data.TestGroups {
+	for _, g := range suite.TestGroups {
 		if g.KeySize/8 != subtle.AESSIVKeySize {
 			continue
 		}
