@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package com.google.crypto.tink.mac;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
@@ -27,25 +26,19 @@ import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.internal.KeyManagerRegistry;
-import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.SlowInputStream;
-import com.google.crypto.tink.proto.HashType;
-import com.google.crypto.tink.proto.HmacKey;
-import com.google.crypto.tink.proto.HmacKeyFormat;
-import com.google.crypto.tink.proto.HmacParams;
+import com.google.crypto.tink.mac.internal.HmacTestUtil;
+import com.google.crypto.tink.mac.internal.HmacTestUtil.HmacTestVector;
 import com.google.crypto.tink.subtle.Hex;
-import com.google.crypto.tink.subtle.PrfHmacJce;
-import com.google.crypto.tink.subtle.PrfMac;
-import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.util.SecretBytes;
-import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;
-import java.security.GeneralSecurityException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
-import javax.crypto.spec.SecretKeySpec;
+import javax.annotation.Nullable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
@@ -57,9 +50,6 @@ import org.junit.runner.RunWith;
 /** Unit tests for {@link HmacKeyManager}. */
 @RunWith(Theories.class)
 public class HmacKeyManagerTest {
-  private final HmacKeyManager manager = new HmacKeyManager();
-  private final KeyTypeManager.KeyFactory<HmacKeyFormat, HmacKey> factory = manager.keyFactory();
-
   @Before
   public void register() throws Exception {
     MacConfig.register();
@@ -72,97 +62,6 @@ public class HmacKeyManagerTest {
                 .getKeyManager("type.googleapis.com/google.crypto.tink.HmacKey", Mac.class))
         .isNotNull();
   }
-
-  @Test
-  public void validateKeyFormat_empty() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(HmacKeyFormat.getDefaultInstance()));
-  }
-
-  private static HmacKeyFormat makeHmacKeyFormat(int keySize, int tagSize, HashType hashType) {
-    HmacParams params = HmacParams.newBuilder()
-        .setHash(hashType)
-        .setTagSize(tagSize)
-        .build();
-    return HmacKeyFormat.newBuilder()
-        .setParams(params)
-        .setKeySize(keySize)
-        .build();
-  }
-
-  @Test
-  public void validateKeyFormat_tagSizesSha1() throws Exception {
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 10, HashType.SHA1));
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 11, HashType.SHA1));
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 12, HashType.SHA1));
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 13, HashType.SHA1));
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 14, HashType.SHA1));
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 15, HashType.SHA1));
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 16, HashType.SHA1));
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 17, HashType.SHA1));
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 18, HashType.SHA1));
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 19, HashType.SHA1));
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 20, HashType.SHA1));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(makeHmacKeyFormat(16, 21, HashType.SHA1)));
-  }
-
-  @Test
-  public void validateKeyFormat_tagSizesSha256() throws Exception {
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 10, HashType.SHA256));
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 11, HashType.SHA256));
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 12, HashType.SHA256));
-
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 30, HashType.SHA256));
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 31, HashType.SHA256));
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 32, HashType.SHA256));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(makeHmacKeyFormat(16, 33, HashType.SHA256)));
-  }
-
-  @Test
-  public void validateKeyFormat_tagSizesSha512() throws Exception {
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 10, HashType.SHA512));
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 11, HashType.SHA512));
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 12, HashType.SHA512));
-
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 62, HashType.SHA512));
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 63, HashType.SHA512));
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 64, HashType.SHA512));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(makeHmacKeyFormat(16, 65, HashType.SHA512)));
-  }
-
-  @Test
-  public void validateKeyFormat_keySizes() throws Exception {
-    factory.validateKeyFormat(makeHmacKeyFormat(16, 10, HashType.SHA256));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(makeHmacKeyFormat(15, 10, HashType.SHA256)));
-  }
-
-  @Test
-  public void createKey_valid() throws Exception {
-    manager.validateKey(factory.createKey(makeHmacKeyFormat(16, 10, HashType.SHA1)));
-    manager.validateKey(factory.createKey(makeHmacKeyFormat(16, 20, HashType.SHA1)));
-    manager.validateKey(factory.createKey(makeHmacKeyFormat(16, 10, HashType.SHA256)));
-    manager.validateKey(factory.createKey(makeHmacKeyFormat(16, 32, HashType.SHA256)));
-    manager.validateKey(factory.createKey(makeHmacKeyFormat(16, 10, HashType.SHA512)));
-    manager.validateKey(factory.createKey(makeHmacKeyFormat(16, 64, HashType.SHA512)));
-  }
-
-  @Test
-  public void createKey_checkValues() throws Exception {
-    HmacKeyFormat keyFormat = makeHmacKeyFormat(16, 10, HashType.SHA256);
-    HmacKey key = factory.createKey(keyFormat);
-    assertThat(key.getKeyValue()).hasSize(keyFormat.getKeySize());
-    assertThat(key.getParams().getTagSize()).isEqualTo(keyFormat.getParams().getTagSize());
-  }
-
 
   @Test
   public void createKey_multipleTimes() throws Exception {
@@ -184,93 +83,6 @@ public class HmacKeyManagerTest {
     assertThat(keys).hasSize(numKeys);
   }
   
-  @Test
-  public void validateKey_wrongVersion_throws() throws Exception {
-    HmacKey validKey = factory.createKey(makeHmacKeyFormat(16, 10, HashType.SHA1));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> manager.validateKey(HmacKey.newBuilder(validKey).setVersion(1).build()));
-  }
-
-  @Test
-  public void validateKey_notValid_throws() throws Exception {
-    HmacKey validKey = factory.createKey(makeHmacKeyFormat(16, 10, HashType.SHA1));
-    assertThrows(
-        GeneralSecurityException.class,
-        () ->
-            manager.validateKey(
-                HmacKey.newBuilder(validKey)
-                    .setKeyValue(ByteString.copyFrom(Random.randBytes(15)))
-                    .build()));
-    assertThrows(
-        GeneralSecurityException.class,
-        () ->
-            manager.validateKey(
-                HmacKey.newBuilder(validKey)
-                    .setParams(HmacParams.newBuilder(validKey.getParams()).setTagSize(0).build())
-                    .build()));
-    assertThrows(
-        GeneralSecurityException.class,
-        () ->
-            manager.validateKey(
-                HmacKey.newBuilder(validKey)
-                    .setParams(HmacParams.newBuilder(validKey.getParams()).setTagSize(9).build())
-                    .build()));
-    assertThrows(
-        GeneralSecurityException.class,
-        () ->
-            manager.validateKey(
-                HmacKey.newBuilder(validKey)
-                    .setParams(HmacParams.newBuilder(validKey.getParams()).setTagSize(21).build())
-                    .build()));
-    assertThrows(
-        GeneralSecurityException.class,
-        () ->
-            manager.validateKey(
-                HmacKey.newBuilder(validKey)
-                    .setParams(HmacParams.newBuilder(validKey.getParams()).setTagSize(32).build())
-                    .build()));
-  }
-
-  @Test
-  public void getPrimitive_worksForSha1() throws Exception {
-    HmacKey validKey = factory.createKey(makeHmacKeyFormat(16, 19, HashType.SHA1));
-    Mac managerMac = manager.getPrimitive(validKey, Mac.class);
-    Mac directMac =
-        new PrfMac(
-            new PrfHmacJce(
-                "HMACSHA1", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC")),
-            19);
-    byte[] message = Random.randBytes(50);
-    managerMac.verifyMac(directMac.computeMac(message), message);
-  }
-
-  @Test
-  public void getPrimitive_worksForSha256() throws Exception {
-    HmacKey validKey = factory.createKey(makeHmacKeyFormat(16, 29, HashType.SHA256));
-    Mac managerMac = manager.getPrimitive(validKey, Mac.class);
-    Mac directMac =
-        new PrfMac(
-            new PrfHmacJce(
-                "HMACSHA256", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC")),
-            29);
-    byte[] message = Random.randBytes(50);
-    managerMac.verifyMac(directMac.computeMac(message), message);
-  }
-
-  @Test
-  public void getPrimitive_worksForSha512() throws Exception {
-    HmacKey validKey = factory.createKey(makeHmacKeyFormat(16, 33, HashType.SHA512));
-    Mac managerMac = manager.getPrimitive(validKey, Mac.class);
-    Mac directMac =
-        new PrfMac(
-            new PrfHmacJce(
-                "HMACSHA512", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC")),
-            33);
-    byte[] message = Random.randBytes(50);
-    managerMac.verifyMac(directMac.computeMac(message), message);
-  }
-
   @Test
   public void testHmacSha256HalfDigestTemplate() throws Exception {
     KeyTemplate template = HmacKeyManager.hmacSha256HalfDigestTemplate();
@@ -413,5 +225,65 @@ public class HmacKeyManagerTest {
             .setKeyBytes(SecretBytes.copyFrom(expectedKeyBytes, InsecureSecretKeyAccess.get()))
             .build();
     assertTrue(key.equalsKey(expectedKey));
+  }
+
+  @DataPoints("hmacTestVectors")
+  public static final HmacTestVector[] HMAC_TEST_VECTORS = HmacTestUtil.HMAC_TEST_VECTORS;
+
+  @Theory
+  public void testGetPrimitive_chunkedMac_works(@FromDataPoints("hmacTestVectors") HmacTestVector t)
+      throws Exception {
+    KeysetHandle.Builder.Entry entry = KeysetHandle.importKey(t.key).makePrimary();
+    @Nullable Integer id = t.key.getIdRequirementOrNull();
+    if (id == null) {
+      entry.withRandomId();
+    } else {
+      entry.withFixedId(id);
+    }
+    KeysetHandle handle = KeysetHandle.newBuilder().addEntry(entry).build();
+    ChunkedMac chunkedMac = handle.getPrimitive(ChunkedMac.class);
+
+    ChunkedMacComputation chunkedMacComputation = chunkedMac.createComputation();
+    chunkedMacComputation.update(ByteBuffer.wrap(t.message).asReadOnlyBuffer());
+    assertThat(t.tag).isEqualTo(chunkedMacComputation.computeMac());
+
+    ChunkedMacVerification chunkedHmacVerification = chunkedMac.createVerification(t.tag);
+    chunkedHmacVerification.update(ByteBuffer.wrap(t.message));
+    chunkedHmacVerification.verifyMac();
+  }
+
+  @Theory
+  public void testGetPrimitive_mac_works(@FromDataPoints("hmacTestVectors") HmacTestVector t)
+      throws Exception {
+    KeysetHandle.Builder.Entry entry = KeysetHandle.importKey(t.key).makePrimary();
+    @Nullable Integer id = t.key.getIdRequirementOrNull();
+    if (id == null) {
+      entry.withRandomId();
+    } else {
+      entry.withFixedId(id);
+    }
+    KeysetHandle handle = KeysetHandle.newBuilder().addEntry(entry).build();
+    Mac mac = handle.getPrimitive(Mac.class);
+
+    assertThat(t.tag).isEqualTo(mac.computeMac(t.message));
+    mac.verifyMac(t.tag, t.message);
+  }
+
+  @Test
+  public void testSerializeAndParse_works() throws Exception {
+    HmacParameters parameters =
+        HmacParameters.builder()
+            .setKeySizeBytes(64)
+            .setTagSizeBytes(64)
+            .setHashType(HmacParameters.HashType.SHA512)
+            .setVariant(HmacParameters.Variant.TINK)
+            .build();
+    KeysetHandle handle = KeysetHandle.generateNew(parameters);
+    byte[] serialized =
+        TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get());
+    KeysetHandle parsed =
+        TinkProtoKeysetFormat.parseKeyset(serialized, InsecureSecretKeyAccess.get());
+
+    assertTrue(handle.equalsKeyset(parsed));
   }
 }

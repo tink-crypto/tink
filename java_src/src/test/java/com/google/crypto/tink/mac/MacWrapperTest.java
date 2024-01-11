@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
@@ -31,6 +32,7 @@ import com.google.crypto.tink.internal.testing.FakeMonitoringClient;
 import com.google.crypto.tink.mac.HmacParameters.HashType;
 import com.google.crypto.tink.mac.internal.HmacProtoSerialization;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.util.SecretBytes;
 import java.security.GeneralSecurityException;
@@ -532,7 +534,13 @@ public class MacWrapperTest {
             PrimitiveConstructor.create(AlwaysFailingMac::new, HmacKey.class, Mac.class));
     MacWrapper.register();
     HmacProtoSerialization.register();
-    Registry.registerKeyManager(new HmacKeyManager(), true);
+    Registry.registerKeyManager(
+        LegacyKeyManagerImpl.create(
+            "type.googleapis.com/google.crypto.tink.HmacKey",
+            Mac.class,
+            KeyMaterialType.SYMMETRIC,
+            com.google.crypto.tink.proto.HmacKey.parser()),
+        true);
 
     FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
     MutableMonitoringRegistry.globalInstance().clear();
