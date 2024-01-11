@@ -1257,6 +1257,16 @@ cc_test(
 cc_library(
     name = "call_with_core_dump_protection",
     hdrs = ["call_with_core_dump_protection.h"],
+    include_prefix = "tink/internal",
+)
+
+cc_test(
+    name = "call_with_core_dump_protection_test",
+    srcs = ["call_with_core_dump_protection_test.cc"],
+    deps = [
+        ":call_with_core_dump_protection",
+        "@com_google_googletest//:gtest_main",
+    ],
 )
 
 cc_library(

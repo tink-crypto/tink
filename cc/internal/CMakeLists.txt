@@ -1207,6 +1207,15 @@ tink_cc_library(
     call_with_core_dump_protection.h
 )
 
+tink_cc_test(
+  NAME call_with_core_dump_protection_test
+  SRCS
+    call_with_core_dump_protection_test.cc
+  DEPS
+    tink::internal::call_with_core_dump_protection
+    gmock
+)
+
 tink_cc_library(
   NAME bn_encoding_util
   SRCS
