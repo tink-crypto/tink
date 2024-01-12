@@ -88,11 +88,13 @@ genrule(
 genrule(
     name = "rsa_pss",
     testonly = 1,
-    srcs = ["@wycheproof//testvectors:rsa_pss"],
+    srcs = ["@wycheproof//testvectors:all"],
     outs = [
         "rsa_pss_2048_sha1_mgf1_20_test.json",
         "rsa_pss_2048_sha256_mgf1_0_test.json",
         "rsa_pss_2048_sha256_mgf1_32_test.json",
+        "rsa_pss_2048_sha512_256_mgf1_28_test.json",
+        "rsa_pss_2048_sha512_256_mgf1_32_test.json",
         "rsa_pss_3072_sha256_mgf1_32_test.json",
         "rsa_pss_4096_sha256_mgf1_32_test.json",
         "rsa_pss_4096_sha512_mgf1_32_test.json",
@@ -140,7 +142,7 @@ genrule(
 genrule(
     name = "ecdsa",
     testonly = 1,
-    srcs = ["@wycheproof//testvectors:ecdsa"],
+    srcs = ["@wycheproof//testvectors:all"],
     outs = [
         "ecdsa_brainpoolP224r1_sha224_test.json",
         "ecdsa_brainpoolP256r1_sha256_test.json",
@@ -167,6 +169,9 @@ genrule(
         "ecdsa_secp384r1_sha512_test.json",
         "ecdsa_secp521r1_sha3_512_test.json",
         "ecdsa_secp521r1_sha512_test.json",
+        "ecdsa_secp256r1_sha256_p1363_test.json",
+        "ecdsa_secp384r1_sha512_p1363_test.json",
+        "ecdsa_secp521r1_sha512_p1363_test.json",
         "ecdsa_test.json",  # deprecated: use the files above
     ],
     cmd = "cp $(SRCS) $(@D)/",
@@ -199,6 +204,60 @@ genrule(
         "ecdh_secp384r1_test.json",
         "ecdh_secp521r1_test.json",
         "ecdh_test.json",  # deprecated use the files above
+    ],
+    cmd = "cp $(SRCS) $(@D)/",
+)
+
+genrule(
+    name = "ecdh_ecpoint",
+    testonly = 1,
+    srcs = ["@wycheproof//testvectors:ecdh_ecpoint"],
+    outs = [
+        "ecdh_secp224r1_ecpoint_test.json",
+        "ecdh_secp256r1_ecpoint_test.json",
+        "ecdh_secp384r1_ecpoint_test.json",
+        "ecdh_secp521r1_ecpoint_test.json",
+    ],
+    cmd = "cp $(SRCS) $(@D)/",
+)
+
+genrule(
+    name = "keywrap",
+    testonly = 1,
+    srcs = ["@wycheproof//testvectors:keywrap"],
+    outs = [
+        "kw_test.json",
+        "kwp_test.json",
+    ],
+    cmd = "cp $(SRCS) $(@D)/",
+)
+
+genrule(
+    name = "kdf",
+    testonly = 1,
+    srcs = ["@wycheproof//testvectors:kdf"],
+    outs = [
+        "hkdf_sha1_test.json",
+        "hkdf_sha256_test.json",
+        "hkdf_sha384_test.json",
+        "hkdf_sha512_test.json",
+    ],
+    cmd = "cp $(SRCS) $(@D)/",
+)
+
+genrule(
+    name = "xdh",
+    testonly = 1,
+    srcs = ["@wycheproof//testvectors:xdh"],
+    outs = [
+        "x25519_asn_test.json",
+        "x25519_jwk_test.json",
+        "x25519_pem_test.json",
+        "x25519_test.json",
+        "x448_asn_test.json",
+        "x448_jwk_test.json",
+        "x448_pem_test.json",
+        "x448_test.json",
     ],
     cmd = "cp $(SRCS) $(@D)/",
 )
