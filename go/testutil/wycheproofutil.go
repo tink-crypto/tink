@@ -26,7 +26,7 @@ import (
 )
 
 const (
-	wycheproofDir = "wycheproof/testvectors"
+	testvectorsDir = "testdata/testvectors"
 )
 
 // SkipTestIfTestSrcDirIsNotSet skips the test if TEST_SRCDIR is not set.
@@ -89,12 +89,16 @@ func (a *HexBytes) UnmarshalText(text []byte) error {
 //
 // When using this in a test function, the function should start with
 // SkipTestIfTestSrcDirIsNotSet(), to expediently skip the test.
-func PopulateSuite(suite interface{}, filename string) error {
+func PopulateSuite(suite any, filename string) error {
 	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
 	if !ok {
 		return errors.New("TEST_SRCDIR not found")
 	}
-	f, err := os.Open(filepath.Join(srcDir, wycheproofDir, filename))
+	workspaceDir, ok := os.LookupEnv("TEST_WORKSPACE")
+	if !ok {
+		return errors.New("TEST_WORKSPACE not found")
+	}
+	f, err := os.Open(filepath.Join(srcDir, workspaceDir, testvectorsDir, filename))
 	if err != nil {
 		return err
 	}

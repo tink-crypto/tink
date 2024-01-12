@@ -34,7 +34,7 @@ go_test(
         "streaming_prf_factory_test.go",
         "streaming_prf_test.go",
     ],
-    data = ["@wycheproof//testvectors:all"],
+    data = ["//testdata/testvectors:kdf"],
     embed = [":streamingprf"],
     deps = [
         "//aead",

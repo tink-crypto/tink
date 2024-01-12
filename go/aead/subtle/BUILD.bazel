@@ -39,7 +39,11 @@ go_test(
         "xchacha20poly1305_test.go",
         "xchacha20poly1305_vectors_test.go",
     ],
-    data = ["@wycheproof//testvectors:all"],
+    data = [
+        "//testdata/testvectors:aes_gcm",
+        "//testdata/testvectors:aes_gcm_siv",
+        "//testdata/testvectors:chacha20_poly1305",
+    ],
     deps = [
         ":subtle",
         "//mac/subtle",

@@ -21,7 +21,7 @@ go_test(
         "cmac_test.go",
         "hmac_test.go",
     ],
-    data = ["@wycheproof//testvectors:all"],
+    data = ["//testdata/testvectors:aes_cmac"],
     deps = [
         ":subtle",
         "//subtle/random",

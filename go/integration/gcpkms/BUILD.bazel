@@ -32,7 +32,7 @@ go_test(
         "//testdata/gcp:credentials",
         "//testdata/keysets:ecies",
         "@google_root_pem//file",  #keep
-        "@wycheproof//testvectors:all",  #keep
+        "//testdata/testvectors:all",  #keep
     ],
     tags = ["manual"],
     deps = [

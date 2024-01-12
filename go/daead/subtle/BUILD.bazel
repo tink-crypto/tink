@@ -11,7 +11,7 @@ go_library(
 go_test(
     name = "subtle_test",
     srcs = ["aes_siv_test.go"],
-    data = ["@wycheproof//testvectors:all"],
+    data = ["//testdata/testvectors:aes_siv_cmac"],
     deps = [
         ":subtle",
         "//subtle/random",

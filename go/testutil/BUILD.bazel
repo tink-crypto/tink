@@ -46,7 +46,7 @@ go_test(
         "wycheproofutil_test.go",
     ],
     data = [
-        "@wycheproof//testvectors:all",
+        "//testdata/testvectors:aes_gcm",
     ],
     deps = [
         ":testutil",

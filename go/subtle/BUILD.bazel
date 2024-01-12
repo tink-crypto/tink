@@ -23,7 +23,7 @@ go_test(
         "subtle_test.go",
         "x25519_test.go",
     ],
-    data = ["@wycheproof//testvectors:xdh"],
+    data = ["//testdata/testvectors:xdh"],
     deps = [
         ":subtle",
         "//testutil",

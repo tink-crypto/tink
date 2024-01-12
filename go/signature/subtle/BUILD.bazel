@@ -26,7 +26,8 @@ go_test(
         "subtle_test.go",
     ],
     data = [
-        "@wycheproof//testvectors:all",
+        "//testdata/testvectors:ecdsa",
+        "//testdata/testvectors:eddsa",
     ],
     deps = [
         ":subtle",

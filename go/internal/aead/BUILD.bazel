@@ -21,7 +21,10 @@ go_test(
         "chacha20poly1305_insecure_nonce_test.go",
         "chacha20poly1305_insecure_nonce_vectors_test.go",
     ],
-    data = ["@wycheproof//testvectors:all"],
+    data = [
+        "//testdata/testvectors:aes_gcm",
+        "//testdata/testvectors:chacha20_poly1305",
+    ],
     deps = [
         ":aead",
         "//subtle/random",
