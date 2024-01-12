@@ -21,6 +21,12 @@ if [[ -n "${KOKORO_ARTIFACTS_DIR:-}" ]]; then
 fi
 
 ./kokoro/testutils/copy_credentials.sh "python/testdata" "all"
+
+# Use the latest Python 3.8.
+eval "$(pyenv init -)"
+pyenv install "3.8"
+pyenv global "3.8"
+
 source ./kokoro/testutils/install_protoc.sh
 ./kokoro/testutils/install_tink_via_pip.sh -a "${PWD}/python"
 
