@@ -19,10 +19,7 @@ package com.google.crypto.tink.hybrid.internal;
 import static com.google.crypto.tink.internal.Util.UTF_8;
 
 import com.google.crypto.tink.hybrid.HpkeParameters;
-import com.google.crypto.tink.proto.HpkeAead;
-import com.google.crypto.tink.proto.HpkeKdf;
 import com.google.crypto.tink.proto.HpkeKem;
-import com.google.crypto.tink.proto.HpkeParams;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import java.security.GeneralSecurityException;
@@ -117,19 +114,6 @@ public final class HpkeUtil {
   static byte[] labelInfo(String label, byte[] info, byte[] suiteId, int length)
       throws GeneralSecurityException {
     return Bytes.concat(intToByteArray(2, length), HPKE_V1, suiteId, label.getBytes(UTF_8), info);
-  }
-
-  static void validateParams(HpkeParams params) throws GeneralSecurityException {
-    if ((params.getKem() == HpkeKem.KEM_UNKNOWN) || (params.getKem() == HpkeKem.UNRECOGNIZED)) {
-      throw new GeneralSecurityException("Invalid KEM param: " + params.getKem().name());
-    }
-    if ((params.getKdf() == HpkeKdf.KDF_UNKNOWN) || (params.getKdf() == HpkeKdf.UNRECOGNIZED)) {
-      throw new GeneralSecurityException("Invalid KDF param: " + params.getKdf().name());
-    }
-    if ((params.getAead() == HpkeAead.AEAD_UNKNOWN)
-        || (params.getAead() == HpkeAead.UNRECOGNIZED)) {
-      throw new GeneralSecurityException("Invalid AEAD param: " + params.getAead().name());
-    }
   }
 
   static EllipticCurves.CurveType nistHpkeKemToCurve(HpkeKem kem) throws GeneralSecurityException {
@@ -233,6 +217,24 @@ public final class HpkeUtil {
       default:
         throw new GeneralSecurityException("Unrecognized HPKE KEM identifier");
     }
+  }
+
+  /** Lengths from 'Nsk' column in https://www.rfc-editor.org/rfc/rfc9180.html#table-2. */
+  public static int getEncodedPrivateKeyLength(HpkeParameters.KemId kemId)
+      throws GeneralSecurityException {
+    if (kemId == HpkeParameters.KemId.DHKEM_X25519_HKDF_SHA256) {
+      return 32;
+    }
+    if (kemId == HpkeParameters.KemId.DHKEM_P256_HKDF_SHA256) {
+      return 32;
+    }
+    if (kemId == HpkeParameters.KemId.DHKEM_P384_HKDF_SHA384) {
+      return 48;
+    }
+    if (kemId == HpkeParameters.KemId.DHKEM_P521_HKDF_SHA512) {
+      return 66;
+    }
+    throw new GeneralSecurityException("Unrecognized HPKE KEM identifier");
   }
 
   private HpkeUtil() {}

@@ -16,28 +16,29 @@
 
 package com.google.crypto.tink.hybrid.internal;
 
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.HybridDecrypt;
+import com.google.crypto.tink.HybridEncrypt;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.Parameters;
-import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.PrivateKeyManager;
 import com.google.crypto.tink.hybrid.HpkeParameters;
+import com.google.crypto.tink.hybrid.HpkePrivateKey;
 import com.google.crypto.tink.hybrid.HpkeProtoSerialization;
+import com.google.crypto.tink.hybrid.HpkePublicKey;
 import com.google.crypto.tink.internal.BigIntegerEncoding;
-import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
+import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
+import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
-import com.google.crypto.tink.internal.PrimitiveFactory;
-import com.google.crypto.tink.internal.PrivateKeyTypeManager;
-import com.google.crypto.tink.proto.HpkeKem;
-import com.google.crypto.tink.proto.HpkeKeyFormat;
-import com.google.crypto.tink.proto.HpkePrivateKey;
-import com.google.crypto.tink.proto.HpkePublicKey;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.EllipticCurves;
-import com.google.crypto.tink.subtle.Validators;
 import com.google.crypto.tink.subtle.X25519;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.crypto.tink.util.Bytes;
+import com.google.crypto.tink.util.SecretBytes;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;
@@ -45,138 +46,91 @@ import java.security.interfaces.ECPublicKey;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * Key manager that generates new {@link HpkePrivateKey} keys and produces new instances of {@link
  * HpkeDecrypt} primitives.
  */
-public final class HpkePrivateKeyManager
-    extends PrivateKeyTypeManager<HpkePrivateKey, HpkePublicKey> {
-  public HpkePrivateKeyManager() {
-    super(
-        HpkePrivateKey.class,
-        HpkePublicKey.class,
-        new PrimitiveFactory<HybridDecrypt, HpkePrivateKey>(HybridDecrypt.class) {
-          @Override
-          public HybridDecrypt getPrimitive(HpkePrivateKey recipientPrivateKey)
-              throws GeneralSecurityException {
-            return HpkeDecrypt.createHpkeDecrypt(recipientPrivateKey);
-          }
-        });
+public final class HpkePrivateKeyManager {
+  private static final PrimitiveConstructor<HpkePrivateKey, HybridDecrypt>
+      HYBRID_DECRYPT_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              HpkeDecrypt::create, HpkePrivateKey.class, HybridDecrypt.class);
+
+  private static final PrimitiveConstructor<HpkePublicKey, HybridEncrypt>
+      HYBRID_ENCRYPT_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              HpkeEncrypt::create, HpkePublicKey.class, HybridEncrypt.class);
+
+  private static final PrivateKeyManager<HybridDecrypt> legacyPrivateKeyManager =
+      LegacyKeyManagerImpl.createPrivateKeyManager(
+          getKeyType(), HybridDecrypt.class, com.google.crypto.tink.proto.HpkePrivateKey.parser());
+
+  private static final KeyManager<HybridEncrypt> legacyPublicKeyManager =
+      LegacyKeyManagerImpl.create(
+          HpkePublicKeyManager.getKeyType(),
+          HybridEncrypt.class,
+          KeyMaterialType.ASYMMETRIC_PUBLIC,
+          com.google.crypto.tink.proto.HpkePublicKey.parser());
+
+  @AccessesPartialKey
+  private static HpkePrivateKey createKey(
+      HpkeParameters parameters, @Nullable Integer idRequirement) throws GeneralSecurityException {
+    SecretBytes privateKeyBytes;
+    Bytes publicKeyBytes;
+
+    if (parameters.getKemId().equals(HpkeParameters.KemId.DHKEM_X25519_HKDF_SHA256)) {
+      byte[] privateKeyByteArray = X25519.generatePrivateKey();
+      privateKeyBytes = SecretBytes.copyFrom(privateKeyByteArray, InsecureSecretKeyAccess.get());
+      publicKeyBytes = Bytes.copyFrom(X25519.publicFromPrivate(privateKeyByteArray));
+    } else if (parameters.getKemId().equals(HpkeParameters.KemId.DHKEM_P256_HKDF_SHA256)
+        || parameters.getKemId().equals(HpkeParameters.KemId.DHKEM_P384_HKDF_SHA384)
+        || parameters.getKemId().equals(HpkeParameters.KemId.DHKEM_P521_HKDF_SHA512)) {
+      EllipticCurves.CurveType curveType = HpkeUtil.nistHpkeKemToCurve(parameters.getKemId());
+      KeyPair keyPair = EllipticCurves.generateKeyPair(curveType);
+      publicKeyBytes =
+          Bytes.copyFrom(
+              EllipticCurves.pointEncode(
+                  curveType,
+                  EllipticCurves.PointFormatType.UNCOMPRESSED,
+                  ((ECPublicKey) keyPair.getPublic()).getW()));
+      privateKeyBytes =
+          SecretBytes.copyFrom(
+              BigIntegerEncoding.toBigEndianBytesOfFixedLength(
+                  ((ECPrivateKey) keyPair.getPrivate()).getS(),
+                  HpkeUtil.getEncodedPrivateKeyLength(parameters.getKemId())),
+              InsecureSecretKeyAccess.get());
+    } else {
+      throw new GeneralSecurityException("Unknown KEM ID");
+    }
+    HpkePublicKey publicKey = HpkePublicKey.create(parameters, publicKeyBytes, idRequirement);
+    return HpkePrivateKey.create(publicKey, privateKeyBytes);
   }
+
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyCreationRegistry.KeyCreator<HpkeParameters> KEY_CREATOR =
+      HpkePrivateKeyManager::createKey;
 
   /**
    * Registers an {@link HpkePrivateKeyManager} and an {@link HpkePublicKeyManager} with the
    * registry, so that HpkePrivateKey and HpkePublicKey key types can be used with Tink.
    */
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
-    Registry.registerAsymmetricKeyManagers(
-        new HpkePrivateKeyManager(), new HpkePublicKeyManager(), newKeyAllowed);
     HpkeProtoSerialization.register();
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(HYBRID_DECRYPT_PRIMITIVE_CONSTRUCTOR);
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(HYBRID_ENCRYPT_PRIMITIVE_CONSTRUCTOR);
+    MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, HpkeParameters.class);
+    KeyManagerRegistry.globalInstance().registerKeyManager(legacyPrivateKeyManager, newKeyAllowed);
+    KeyManagerRegistry.globalInstance()
+        .registerKeyManager(legacyPublicKeyManager, /* newKeyAllowed= */ false);
   }
 
-  @Override
-  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
-    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
-  }
-
-  @Override
-  public String getKeyType() {
+  static String getKeyType() {
     return "type.googleapis.com/google.crypto.tink.HpkePrivateKey";
-  }
-
-  @Override
-  public int getVersion() {
-    return 0;
-  }
-
-  @Override
-  public HpkePublicKey getPublicKey(HpkePrivateKey key) {
-    return key.getPublicKey();
-  }
-
-  @Override
-  public KeyMaterialType keyMaterialType() {
-    return KeyMaterialType.ASYMMETRIC_PRIVATE;
-  }
-
-  @Override
-  public HpkePrivateKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return HpkePrivateKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-  }
-
-  @Override
-  public void validateKey(HpkePrivateKey key) throws GeneralSecurityException {
-    if (key.getPrivateKey().isEmpty()) {
-      throw new GeneralSecurityException("Private key is empty.");
-    }
-    if (!key.hasPublicKey()) {
-      throw new GeneralSecurityException("Missing public key.");
-    }
-    Validators.validateVersion(key.getVersion(), getVersion());
-    HpkeUtil.validateParams(key.getPublicKey().getParams());
-  }
-
-  @Override
-  public KeyTypeManager.KeyFactory<HpkeKeyFormat, HpkePrivateKey> keyFactory() {
-    return new KeyTypeManager.KeyFactory<HpkeKeyFormat, HpkePrivateKey>(HpkeKeyFormat.class) {
-      @Override
-      public void validateKeyFormat(HpkeKeyFormat keyFormat) throws GeneralSecurityException {
-        HpkeUtil.validateParams(keyFormat.getParams());
-      }
-
-      @Override
-      public HpkeKeyFormat parseKeyFormat(ByteString byteString)
-          throws InvalidProtocolBufferException {
-        return HpkeKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-      }
-
-      @Override
-      public HpkePrivateKey createKey(HpkeKeyFormat keyFormat) throws GeneralSecurityException {
-        byte[] privateKeyBytes;
-        byte[] publicKeyBytes;
-
-        HpkeKem kem = keyFormat.getParams().getKem();
-        switch (kem) {
-          case DHKEM_X25519_HKDF_SHA256:
-            privateKeyBytes = X25519.generatePrivateKey();
-            publicKeyBytes = X25519.publicFromPrivate(privateKeyBytes);
-            break;
-          case DHKEM_P256_HKDF_SHA256:
-          case DHKEM_P384_HKDF_SHA384:
-          case DHKEM_P521_HKDF_SHA512:
-            EllipticCurves.CurveType curveType =
-                HpkeUtil.nistHpkeKemToCurve(keyFormat.getParams().getKem());
-            KeyPair keyPair = EllipticCurves.generateKeyPair(curveType);
-            publicKeyBytes =
-                EllipticCurves.pointEncode(
-                    curveType,
-                    EllipticCurves.PointFormatType.UNCOMPRESSED,
-                    ((ECPublicKey) keyPair.getPublic()).getW());
-            privateKeyBytes =
-                BigIntegerEncoding.toBigEndianBytesOfFixedLength(
-                    ((ECPrivateKey) keyPair.getPrivate()).getS(),
-                    HpkeUtil.getEncodedPrivateKeyLength(kem));
-            break;
-          default:
-            throw new GeneralSecurityException("Invalid KEM");
-        }
-
-        HpkePublicKey publicKey =
-            HpkePublicKey.newBuilder()
-                .setVersion(getVersion())
-                .setParams(keyFormat.getParams())
-                .setPublicKey(ByteString.copyFrom(publicKeyBytes))
-                .build();
-
-        return HpkePrivateKey.newBuilder()
-            .setVersion(getVersion())
-            .setPublicKey(publicKey)
-            .setPrivateKey(ByteString.copyFrom(privateKeyBytes))
-            .build();
-      }
-    };
   }
 
   private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
@@ -327,4 +281,6 @@ public final class HpkePrivateKeyManager
                 .build());
         return Collections.unmodifiableMap(result);
   }
+
+  private HpkePrivateKeyManager() {}
 }
