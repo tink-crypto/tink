@@ -50,6 +50,8 @@ py_test(
         ":gcpkms",
         "//tink/testing:helper",
         requirement("absl-py"),
+        requirement("google-api-core"),
+        requirement("google-cloud-kms"),
     ],
 )
 
