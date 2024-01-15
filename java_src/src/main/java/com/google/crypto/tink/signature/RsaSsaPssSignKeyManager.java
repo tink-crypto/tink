@@ -100,6 +100,7 @@ public final class RsaSsaPssSignKeyManager {
         RsaSsaPssPublicKey.builder()
             .setParameters(parameters)
             .setModulus(pubKey.getModulus())
+            .setIdRequirement(idRequirement)
             .build();
 
     // Creates RsaSsaPssPrivateKey.
