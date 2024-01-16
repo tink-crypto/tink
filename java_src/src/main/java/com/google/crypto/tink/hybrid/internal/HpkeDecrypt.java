@@ -22,8 +22,6 @@ import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.hybrid.HpkeParameters;
-import com.google.crypto.tink.proto.HpkeParams;
-import com.google.crypto.tink.proto.HpkePrivateKey;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
@@ -61,28 +59,6 @@ final class HpkeDecrypt implements HybridDecrypt {
     this.aead = aead;
     this.encapsulatedKeyLength = encapsulatedKeyLength;
     this.outputPrefix = outputPrefix.toByteArray();
-  }
-
-  /**
-   * Returns the encapsulated key length (in bytes) for the specified {@code kemProtoEnum}. This
-   * value corresponds to the 'Nenc' column in the following table.
-   *
-   * <p>https://www.rfc-editor.org/rfc/rfc9180.html#name-key-encapsulation-mechanism.
-   */
-  private static int encodingSizeInBytes(com.google.crypto.tink.proto.HpkeKem kemProtoEnum) {
-    switch (kemProtoEnum) {
-      case DHKEM_X25519_HKDF_SHA256:
-        return 32;
-      case DHKEM_P256_HKDF_SHA256:
-        return 65;
-      case DHKEM_P384_HKDF_SHA384:
-        return 97;
-      case DHKEM_P521_HKDF_SHA512:
-        return 133;
-      default:
-        throw new IllegalArgumentException(
-            "Unable to determine KEM-encoding length for " + kemProtoEnum.name());
-    }
   }
 
   private static int encodingSizeInBytes(HpkeParameters.KemId kemId)
@@ -150,33 +126,6 @@ final class HpkeDecrypt implements HybridDecrypt {
         aead,
         encapsulatedKeyLength,
         privateKey.getOutputPrefix());
-  }
-
-  /** Returns an HPKE decryption primitive created from {@code recipientPrivateKey} */
-  static HpkeDecrypt createHpkeDecrypt(HpkePrivateKey recipientPrivateKey)
-      throws GeneralSecurityException {
-    if (!recipientPrivateKey.hasPublicKey()) {
-      throw new IllegalArgumentException("HpkePrivateKey is missing public_key field.");
-    }
-    if (!recipientPrivateKey.getPublicKey().hasParams()) {
-      throw new IllegalArgumentException("HpkePrivateKey.public_key is missing params field.");
-    }
-    if (recipientPrivateKey.getPrivateKey().isEmpty()) {
-      throw new IllegalArgumentException("HpkePrivateKey.private_key is empty.");
-    }
-    HpkeParams params = recipientPrivateKey.getPublicKey().getParams();
-    HpkeKem kem = HpkePrimitiveFactory.createKem(params);
-    HpkeKdf kdf = HpkePrimitiveFactory.createKdf(params);
-    HpkeAead aead = HpkePrimitiveFactory.createAead(params);
-    int encapsulatedKeyLength = encodingSizeInBytes(params.getKem());
-    HpkeKemPrivateKey recipientKemPrivateKey = HpkeKemKeyFactory.createPrivate(recipientPrivateKey);
-    return new HpkeDecrypt(
-        recipientKemPrivateKey,
-        kem,
-        kdf,
-        aead,
-        encapsulatedKeyLength,
-        /* outputPrefix= */ Bytes.copyFrom(new byte[0]));
   }
 
   private byte[] decryptNoPrefix(final byte[] ciphertext, final byte[] contextInfo)

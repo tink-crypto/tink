@@ -19,8 +19,6 @@ package com.google.crypto.tink.hybrid.internal;
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.hybrid.HpkeParameters;
-import com.google.crypto.tink.proto.HpkeParams;
-import com.google.crypto.tink.proto.HpkePublicKey;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
@@ -106,24 +104,6 @@ final class HpkeEncrypt implements HybridEncrypt {
       return new ChaCha20Poly1305HpkeAead();
     }
     throw new GeneralSecurityException("Unrecognized HPKE AEAD identifier");
-  }
-
-  /** Returns an HPKE encryption primitive created from {@code recipientPublicKey} */
-  static HpkeEncrypt createHpkeEncrypt(HpkePublicKey recipientPublicKey)
-      throws GeneralSecurityException {
-    if (recipientPublicKey.getPublicKey().isEmpty()) {
-      throw new IllegalArgumentException("HpkePublicKey.public_key is empty.");
-    }
-    HpkeParams params = recipientPublicKey.getParams();
-    HpkeKem kem = HpkePrimitiveFactory.createKem(params);
-    HpkeKdf kdf = HpkePrimitiveFactory.createKdf(params);
-    HpkeAead aead = HpkePrimitiveFactory.createAead(params);
-    return new HpkeEncrypt(
-        Bytes.copyFrom(recipientPublicKey.getPublicKey().toByteArray()),
-        kem,
-        kdf,
-        aead,
-        /* outputPrefix= */ Bytes.copyFrom(new byte[0]));
   }
 
   private byte[] noPrefixEncrypt(final byte[] plaintext, final byte[] contextInfo)

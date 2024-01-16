@@ -23,16 +23,17 @@ import static org.junit.Assert.assertThrows;
 import com.google.common.truth.Expect;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.hybrid.HpkeParameters;
+import com.google.crypto.tink.hybrid.HpkePrivateKey;
+import com.google.crypto.tink.hybrid.HpkePublicKey;
 import com.google.crypto.tink.hybrid.internal.testing.HpkeTestUtil;
 import com.google.crypto.tink.hybrid.internal.testing.HybridTestVector;
-import com.google.crypto.tink.proto.HpkeParams;
-import com.google.crypto.tink.proto.HpkePrivateKey;
-import com.google.crypto.tink.proto.HpkePublicKey;
-import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.X25519;
-import com.google.protobuf.ByteString;
+import com.google.crypto.tink.util.Bytes;
+import com.google.crypto.tink.util.SecretBytes;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import org.junit.BeforeClass;
@@ -58,142 +59,38 @@ public final class HpkeEncryptDecryptTest {
     publicKeyBytes = X25519.publicFromPrivate(privateKeyBytes);
   }
 
-  private HpkeParams getParams(
-      com.google.crypto.tink.proto.HpkeKem kem,
-      com.google.crypto.tink.proto.HpkeKdf kdf,
-      com.google.crypto.tink.proto.HpkeAead aead) {
-    return HpkeParams.newBuilder().setKem(kem).setKdf(kdf).setAead(aead).build();
-  }
-
-  private HpkeParams getDefaultValidParams() {
-    return getParams(
-        com.google.crypto.tink.proto.HpkeKem.DHKEM_X25519_HKDF_SHA256,
-        com.google.crypto.tink.proto.HpkeKdf.HKDF_SHA256,
-        com.google.crypto.tink.proto.HpkeAead.AES_256_GCM);
-  }
-
-  private HpkePublicKey getPublicKey(HpkeParams params) {
-    return HpkePublicKey.newBuilder()
-        .setPublicKey(ByteString.copyFrom(publicKeyBytes))
-        .setParams(params)
+  private HpkeParameters getDefaultValidParams() throws GeneralSecurityException {
+    return HpkeParameters.builder()
+        .setVariant(HpkeParameters.Variant.NO_PREFIX)
+        .setKemId(HpkeParameters.KemId.DHKEM_X25519_HKDF_SHA256)
+        .setKdfId(HpkeParameters.KdfId.HKDF_SHA256)
+        .setAeadId(HpkeParameters.AeadId.AES_256_GCM)
         .build();
   }
 
-  private HpkePrivateKey getPrivateKey(HpkePublicKey publicKey) {
-    return HpkePrivateKey.newBuilder()
-        .setPrivateKey(ByteString.copyFrom(privateKeyBytes))
-        .setPublicKey(publicKey)
-        .build();
+  private HpkePublicKey getPublicKey(HpkeParameters parameters) throws GeneralSecurityException {
+    return HpkePublicKey.create(
+        parameters, Bytes.copyFrom(publicKeyBytes), /* idRequirement= */ null);
   }
 
-  @Test
-  public void create_failsWithUnknownKem() {
-    HpkeParams params =
-        HpkeParams.newBuilder(getDefaultValidParams())
-            .setKem(com.google.crypto.tink.proto.HpkeKem.KEM_UNKNOWN)
-            .build();
-    HpkePublicKey recipientPublicKey = getPublicKey(params);
-    HpkePrivateKey recipientPrivateKey = getPrivateKey(recipientPublicKey);
-
-    assertThrows(
-        IllegalArgumentException.class, () -> HpkeEncrypt.createHpkeEncrypt(recipientPublicKey));
-    assertThrows(
-        IllegalArgumentException.class, () -> HpkeDecrypt.createHpkeDecrypt(recipientPrivateKey));
-  }
-
-  @Test
-  public void create_failsWithUnknownKdf() {
-    HpkeParams params =
-        HpkeParams.newBuilder(getDefaultValidParams())
-            .setKdf(com.google.crypto.tink.proto.HpkeKdf.KDF_UNKNOWN)
-            .build();
-    HpkePublicKey recipientPublicKey = getPublicKey(params);
-    HpkePrivateKey recipientPrivateKey = getPrivateKey(recipientPublicKey);
-
-    assertThrows(
-        IllegalArgumentException.class, () -> HpkeEncrypt.createHpkeEncrypt(recipientPublicKey));
-    assertThrows(
-        IllegalArgumentException.class, () -> HpkeDecrypt.createHpkeDecrypt(recipientPrivateKey));
-  }
-
-  @Test
-  public void create_failsWithUnknownAead() {
-    HpkeParams params =
-        HpkeParams.newBuilder(getDefaultValidParams())
-            .setAead(com.google.crypto.tink.proto.HpkeAead.AEAD_UNKNOWN)
-            .build();
-    HpkePublicKey recipientPublicKey = getPublicKey(params);
-    HpkePrivateKey recipientPrivateKey = getPrivateKey(recipientPublicKey);
-
-    assertThrows(
-        IllegalArgumentException.class, () -> HpkeEncrypt.createHpkeEncrypt(recipientPublicKey));
-    assertThrows(
-        IllegalArgumentException.class, () -> HpkeDecrypt.createHpkeDecrypt(recipientPrivateKey));
-  }
-
-  @Test
-  public void create_failsWithMissingPublicKey() {
-    HpkePrivateKey recipientPrivateKey =
-        HpkePrivateKey.newBuilder().setPrivateKey(ByteString.copyFrom(privateKeyBytes)).build();
-
-    assertThrows(
-        IllegalArgumentException.class, () -> HpkeDecrypt.createHpkeDecrypt(recipientPrivateKey));
-  }
-
-  @Test
-  public void create_failsWithMissingHpkeParams() {
-    HpkePublicKey missingParamsPublicKey =
-        HpkePublicKey.newBuilder().setPublicKey(ByteString.copyFrom(publicKeyBytes)).build();
-    HpkePrivateKey recipientPrivateKey =
-        HpkePrivateKey.newBuilder()
-            .setPrivateKey(ByteString.copyFrom(privateKeyBytes))
-            .setPublicKey(missingParamsPublicKey)
-            .build();
-
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> HpkeEncrypt.createHpkeEncrypt(missingParamsPublicKey));
-    assertThrows(
-        IllegalArgumentException.class, () -> HpkeDecrypt.createHpkeDecrypt(recipientPrivateKey));
-  }
-
-  @Test
-  public void create_failsWithZeroLengthPublicKey() {
-    HpkePublicKey recipientPublicKey =
-        HpkePublicKey.newBuilder()
-            .setParams(getDefaultValidParams())
-            .setPublicKey(ByteString.EMPTY)
-            .build();
-
-    assertThrows(
-        IllegalArgumentException.class, () -> HpkeEncrypt.createHpkeEncrypt(recipientPublicKey));
-  }
-
-  @Test
-  public void create_failsWithZeroLengthPrivateKey() {
-    HpkePublicKey recipientPublicKey = getPublicKey(getDefaultValidParams());
-    HpkePrivateKey recipientPrivateKey =
-        HpkePrivateKey.newBuilder()
-            .setPublicKey(recipientPublicKey)
-            .setPrivateKey(ByteString.EMPTY)
-            .build();
-
-    assertThrows(
-        IllegalArgumentException.class, () -> HpkeDecrypt.createHpkeDecrypt(recipientPrivateKey));
+  private HpkePrivateKey getPrivateKey(HpkePublicKey publicKey) throws GeneralSecurityException {
+    return HpkePrivateKey.create(
+        publicKey, SecretBytes.copyFrom(privateKeyBytes, InsecureSecretKeyAccess.get()));
   }
 
   @Test
   public void encryptDecrypt_succeedsWithX25519HkdfSha256Aes128Gcm()
       throws GeneralSecurityException {
-    HpkeParams params =
-        getParams(
-            com.google.crypto.tink.proto.HpkeKem.DHKEM_X25519_HKDF_SHA256,
-            com.google.crypto.tink.proto.HpkeKdf.HKDF_SHA256,
-            com.google.crypto.tink.proto.HpkeAead.AES_128_GCM);
-    HpkePublicKey recipientPublicKey = getPublicKey(params);
+    HpkeParameters parameters =
+        HpkeParameters.builder()
+            .setKemId(HpkeParameters.KemId.DHKEM_X25519_HKDF_SHA256)
+            .setKdfId(HpkeParameters.KdfId.HKDF_SHA256)
+            .setAeadId(HpkeParameters.AeadId.AES_128_GCM)
+            .build();
+    HpkePublicKey recipientPublicKey = getPublicKey(parameters);
     HpkePrivateKey recipientPrivateKey = getPrivateKey(recipientPublicKey);
-    HybridEncrypt hpkeEncrypt = HpkeEncrypt.createHpkeEncrypt(recipientPublicKey);
-    HybridDecrypt hpkeDecrypt = HpkeDecrypt.createHpkeDecrypt(recipientPrivateKey);
+    HybridEncrypt hpkeEncrypt = HpkeEncrypt.create(recipientPublicKey);
+    HybridDecrypt hpkeDecrypt = HpkeDecrypt.create(recipientPrivateKey);
 
     byte[] input = Random.randBytes(200);
     byte[] contextInfo = Random.randBytes(100);
@@ -206,15 +103,16 @@ public final class HpkeEncryptDecryptTest {
   @Test
   public void encryptDecrypt_succeedsWithX25519HkdfSha256Aes256Gcm()
       throws GeneralSecurityException {
-    HpkeParams params =
-        getParams(
-            com.google.crypto.tink.proto.HpkeKem.DHKEM_X25519_HKDF_SHA256,
-            com.google.crypto.tink.proto.HpkeKdf.HKDF_SHA256,
-            com.google.crypto.tink.proto.HpkeAead.AES_256_GCM);
-    HpkePublicKey recipientPublicKey = getPublicKey(params);
+    HpkeParameters parameters =
+        HpkeParameters.builder()
+            .setKemId(HpkeParameters.KemId.DHKEM_X25519_HKDF_SHA256)
+            .setKdfId(HpkeParameters.KdfId.HKDF_SHA256)
+            .setAeadId(HpkeParameters.AeadId.AES_256_GCM)
+            .build();
+    HpkePublicKey recipientPublicKey = getPublicKey(parameters);
     HpkePrivateKey recipientPrivateKey = getPrivateKey(recipientPublicKey);
-    HybridEncrypt hpkeEncrypt = HpkeEncrypt.createHpkeEncrypt(recipientPublicKey);
-    HybridDecrypt hpkeDecrypt = HpkeDecrypt.createHpkeDecrypt(recipientPrivateKey);
+    HybridEncrypt hpkeEncrypt = HpkeEncrypt.create(recipientPublicKey);
+    HybridDecrypt hpkeDecrypt = HpkeDecrypt.create(recipientPrivateKey);
 
     byte[] input = Random.randBytes(200);
     byte[] contextInfo = Random.randBytes(100);
@@ -227,7 +125,7 @@ public final class HpkeEncryptDecryptTest {
   @Test
   public void encrypt_failsWithNullPlaintext() throws GeneralSecurityException {
     HpkePublicKey recipientPublicKey = getPublicKey(getDefaultValidParams());
-    HybridEncrypt hpkeEncrypt = HpkeEncrypt.createHpkeEncrypt(recipientPublicKey);
+    HybridEncrypt hpkeEncrypt = HpkeEncrypt.create(recipientPublicKey);
 
     byte[] contextInfo = Random.randBytes(100);
     byte[] nullPlaintext = null;
@@ -240,13 +138,15 @@ public final class HpkeEncryptDecryptTest {
   public void decrypt_failsWithModifiedCiphertext() throws GeneralSecurityException {
     HpkePublicKey recipientPublicKey = getPublicKey(getDefaultValidParams());
     HpkePrivateKey recipientPrivateKey = getPrivateKey(recipientPublicKey);
-    HybridEncrypt hpkeEncrypt = HpkeEncrypt.createHpkeEncrypt(recipientPublicKey);
-    HybridDecrypt hpkeDecrypt = HpkeDecrypt.createHpkeDecrypt(recipientPrivateKey);
+    HybridEncrypt hpkeEncrypt = HpkeEncrypt.create(recipientPublicKey);
+    HybridDecrypt hpkeDecrypt = HpkeDecrypt.create(recipientPrivateKey);
 
     byte[] input = Random.randBytes(200);
     byte[] contextInfo = Random.randBytes(100);
     byte[] ciphertext = hpkeEncrypt.encrypt(input, contextInfo);
-    byte[] extendedCiphertext = Bytes.concat(ciphertext, "modified ciphertext".getBytes(UTF_8));
+    byte[] extendedCiphertext =
+        com.google.crypto.tink.subtle.Bytes.concat(
+            ciphertext, "modified ciphertext".getBytes(UTF_8));
     byte[] shortCiphertext = Arrays.copyOf(ciphertext, 10);
     byte[] emptyCiphertext = new byte[0];
 
@@ -263,7 +163,7 @@ public final class HpkeEncryptDecryptTest {
   public void decrypt_failsWithNullCiphertext() throws GeneralSecurityException {
     HpkePublicKey recipientPublicKey = getPublicKey(getDefaultValidParams());
     HpkePrivateKey recipientPrivateKey = getPrivateKey(recipientPublicKey);
-    HybridDecrypt hpkeDecrypt = HpkeDecrypt.createHpkeDecrypt(recipientPrivateKey);
+    HybridDecrypt hpkeDecrypt = HpkeDecrypt.create(recipientPrivateKey);
 
     byte[] contextInfo = Random.randBytes(100);
     byte[] nullCiphertext = null;
@@ -276,13 +176,14 @@ public final class HpkeEncryptDecryptTest {
   public void decrypt_failsWithModifiedContextInfo() throws GeneralSecurityException {
     HpkePublicKey recipientPublicKey = getPublicKey(getDefaultValidParams());
     HpkePrivateKey recipientPrivateKey = getPrivateKey(recipientPublicKey);
-    HybridEncrypt hpkeEncrypt = HpkeEncrypt.createHpkeEncrypt(recipientPublicKey);
-    HybridDecrypt hpkeDecrypt = HpkeDecrypt.createHpkeDecrypt(recipientPrivateKey);
+    HybridEncrypt hpkeEncrypt = HpkeEncrypt.create(recipientPublicKey);
+    HybridDecrypt hpkeDecrypt = HpkeDecrypt.create(recipientPrivateKey);
 
     byte[] input = Random.randBytes(200);
     byte[] contextInfo = Random.randBytes(100);
     byte[] ciphertext = hpkeEncrypt.encrypt(input, contextInfo);
-    byte[] extendedContextInfo = Bytes.concat(contextInfo, "modified context".getBytes(UTF_8));
+    byte[] extendedContextInfo =
+        com.google.crypto.tink.subtle.Bytes.concat(contextInfo, "modified context".getBytes(UTF_8));
     byte[] shortContextInfo = Arrays.copyOf(contextInfo, 10);
     byte[] emptyContextInfo = new byte[0];
     byte[] nullContextInfo = null;
@@ -302,8 +203,8 @@ public final class HpkeEncryptDecryptTest {
   public void encryptDecrypt_succeedsWithNullContextInfo() throws GeneralSecurityException {
     HpkePublicKey recipientPublicKey = getPublicKey(getDefaultValidParams());
     HpkePrivateKey recipientPrivateKey = getPrivateKey(recipientPublicKey);
-    HybridEncrypt hpkeEncrypt = HpkeEncrypt.createHpkeEncrypt(recipientPublicKey);
-    HybridDecrypt hpkeDecrypt = HpkeDecrypt.createHpkeDecrypt(recipientPrivateKey);
+    HybridEncrypt hpkeEncrypt = HpkeEncrypt.create(recipientPublicKey);
+    HybridDecrypt hpkeDecrypt = HpkeDecrypt.create(recipientPrivateKey);
 
     byte[] input = Random.randBytes(200);
     byte[] emptyContextInfo = new byte[0];
@@ -319,15 +220,16 @@ public final class HpkeEncryptDecryptTest {
 
   @Test
   public void flipMsbOfEncapsulatedKeyInCiphertext_fails() throws GeneralSecurityException {
-    HpkeParams params =
-        getParams(
-            com.google.crypto.tink.proto.HpkeKem.DHKEM_X25519_HKDF_SHA256,
-            com.google.crypto.tink.proto.HpkeKdf.HKDF_SHA256,
-            com.google.crypto.tink.proto.HpkeAead.AES_256_GCM);
-    HpkePublicKey recipientPublicKey = getPublicKey(params);
+    HpkeParameters parameters =
+        HpkeParameters.builder()
+            .setKemId(HpkeParameters.KemId.DHKEM_X25519_HKDF_SHA256)
+            .setKdfId(HpkeParameters.KdfId.HKDF_SHA256)
+            .setAeadId(HpkeParameters.AeadId.AES_256_GCM)
+            .build();
+    HpkePublicKey recipientPublicKey = getPublicKey(parameters);
     HpkePrivateKey recipientPrivateKey = getPrivateKey(recipientPublicKey);
-    HybridEncrypt hpkeEncrypt = HpkeEncrypt.createHpkeEncrypt(recipientPublicKey);
-    HybridDecrypt hpkeDecrypt = HpkeDecrypt.createHpkeDecrypt(recipientPrivateKey);
+    HybridEncrypt hpkeEncrypt = HpkeEncrypt.create(recipientPublicKey);
+    HybridDecrypt hpkeDecrypt = HpkeDecrypt.create(recipientPrivateKey);
 
     byte[] input = Random.randBytes(100);
     byte[] contextInfo = Random.randBytes(100);
