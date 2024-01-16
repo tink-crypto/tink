@@ -36,6 +36,7 @@ cc_library(
     include_prefix = "tink/aead/internal",
     deps = [
         ":aead_util",
+        "//internal:call_with_core_dump_protection",
         "//internal:err_util",
         "//internal:ssl_unique_ptr",
         "//internal:util",

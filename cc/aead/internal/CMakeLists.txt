@@ -38,6 +38,7 @@ tink_cc_library(
     absl::strings
     absl::span
     crypto
+    tink::internal::call_with_core_dump_protection
     tink::internal::err_util
     tink::internal::ssl_unique_ptr
     tink::internal::util
