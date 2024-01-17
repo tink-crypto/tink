@@ -14,6 +14,7 @@
 """PrfSet wrapper."""
 
 from typing import Type, Mapping
+from tink.proto import tink_pb2
 from tink import core
 from tink.prf import _prf_set
 
@@ -37,6 +38,13 @@ class _WrappedPrfSet(_prf_set.PrfSet):
     return self._primitive_set.primary().primitive
 
 
+def _validate_primitive_set(pset: core.PrimitiveSet):
+  for entries in pset.all():
+    for entry in entries:
+      if entry.output_prefix_type != tink_pb2.RAW:
+        raise core.TinkError('unsupported OutputPrefixType')
+
+
 class PrfSetWrapper(core.PrimitiveWrapper[_prf_set.Prf, _prf_set.PrfSet]):
   """A PrimitiveWrapper for the PrfSet primitive.
 
@@ -46,6 +54,7 @@ class PrfSetWrapper(core.PrimitiveWrapper[_prf_set.Prf, _prf_set.PrfSet]):
   """
 
   def wrap(self, primitives_set: core.PrimitiveSet) -> _WrappedPrfSet:
+    _validate_primitive_set(primitives_set)
     return _WrappedPrfSet(primitives_set)
 
   def primitive_class(self) -> Type[_prf_set.PrfSet]:
