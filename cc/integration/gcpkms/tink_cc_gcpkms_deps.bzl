@@ -133,6 +133,14 @@ def tink_cc_gcpkms_deps():
             ],
         )
 
+    if "google_cloud_cpp" not in native.existing_rules():
+        http_archive(
+            name = "google_cloud_cpp",
+            sha256 = "0f42208ca782249555aac06455b1669c17dfb31d6d8fa4baad29a90f295666bb",
+            strip_prefix = "google-cloud-cpp-2.20.0",
+            url = "https://github.com/googleapis/google-cloud-cpp/archive/v2.20.0.tar.gz",
+        )
+
     if not native.existing_rule("com_google_absl"):
         # Release from 2023-09-18.
         http_archive(

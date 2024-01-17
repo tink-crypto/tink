@@ -10,6 +10,7 @@ load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
 load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 load("@envoy_api//bazel:repositories.bzl", "api_dependencies")
+load("@google_cloud_cpp//bazel:google_cloud_cpp_deps.bzl", "google_cloud_cpp_deps")
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 load("@tink_cc//:tink_cc_deps.bzl", "tink_cc_deps")
 load("@tink_cc//:tink_cc_deps_init.bzl", "tink_cc_deps_init")
@@ -49,6 +50,8 @@ def tink_cc_gcpkms_deps_init(
     upb_deps()
 
     api_dependencies()
+
+    google_cloud_cpp_deps()
 
     if register_go:
         go_rules_dependencies()
