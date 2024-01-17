@@ -22,6 +22,7 @@ TINK_MAVEN_ARTIFACTS = [
     "com.google.http-client:google-http-client-gson:1.43.1",
     "com.google.oauth-client:google-oauth-client:1.34.1",
     "com.google.truth:truth:0.44",
+    "io.github.jopenlibs:vault-java-driver:5.4.0",
     "junit:junit:4.13.2",
     "org.conscrypt:conscrypt-openjdk-uber:2.5.2",
     "org.ow2.asm:asm:7.0",

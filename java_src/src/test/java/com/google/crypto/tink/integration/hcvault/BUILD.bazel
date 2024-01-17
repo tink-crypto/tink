@@ -1,0 +1,82 @@
+licenses(["notice"])
+
+java_test(
+    name = "HcVaultAeadTest",
+    size = "small",
+    srcs = ["HcVaultAeadTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/integration/hcvault:fake_hcvault_kms",
+        "//src/main/java/com/google/crypto/tink/integration/hcvault:hcvault_kms_aead",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "@maven//:com_google_truth_truth",
+        "@maven//:io_github_jopenlibs_vault_java_driver",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "HcVaultClientTest",
+    size = "small",
+    srcs = ["HcVaultClientTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_templates",
+        "//src/main/java/com/google/crypto/tink:kms_client",
+        "//src/main/java/com/google/crypto/tink:kms_clients",
+        "//src/main/java/com/google/crypto/tink:kms_clients_test_util",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/aead:kms_aead_key_manager",
+        "//src/main/java/com/google/crypto/tink/aead:kms_envelope_aead_key_manager",
+        "//src/main/java/com/google/crypto/tink/integration/hcvault:fake_hcvault_kms",
+        "//src/main/java/com/google/crypto/tink/integration/hcvault:hcvault_kms_client",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "HcVaultIntegrationTest",
+    size = "small",
+    srcs = ["HcVaultIntegrationTest.java"],
+    tags = [
+        "manual",
+        "no_rbe",
+        "requires-network",
+    ],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_templates",
+        "//src/main/java/com/google/crypto/tink:kms_client",
+        "//src/main/java/com/google/crypto/tink:kms_clients",
+        "//src/main/java/com/google/crypto/tink:kms_clients_test_util",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/aead:kms_aead_key_manager",
+        "//src/main/java/com/google/crypto/tink/aead:kms_envelope_aead_key_manager",
+        "//src/main/java/com/google/crypto/tink/integration/hcvault:hcvault_kms_client",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "FakeHcVaultTest",
+    size = "small",
+    srcs = ["FakeHcVaultTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/integration/hcvault:fake_hcvault_kms",
+        "//src/main/java/com/google/crypto/tink/integration/hcvault:hcvault_kms_aead",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "@maven//:com_google_truth_truth",
+        "@maven//:io_github_jopenlibs_vault_java_driver",
+        "@maven//:junit_junit",
+    ],
+)
