@@ -299,6 +299,7 @@ cc_library(
     hdrs = ["test_keyset_handle.h"],
     include_prefix = "tink/util",
     deps = [
+        ":secret_proto",
         "//:keyset_handle",
         "//proto:tink_cc_proto",
         "@com_google_absl//absl/memory",

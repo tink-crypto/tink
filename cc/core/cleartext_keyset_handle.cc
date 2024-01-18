@@ -27,12 +27,12 @@
 #include "tink/keyset_handle.h"
 #include "tink/keyset_reader.h"
 #include "tink/util/errors.h"
+#include "tink/util/secret_proto.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::Keyset;
-
 
 namespace crypto {
 namespace tink {
@@ -57,8 +57,9 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> CleartextKeysetHandle::Read(
     return util::Status(absl::StatusCode::kInternal,
                         "Error converting keyset proto into key entries.");
   }
-  std::unique_ptr<KeysetHandle> handle(new KeysetHandle(
-      std::move(keyset_result.value()), *entries, monitoring_annotations));
+  std::unique_ptr<KeysetHandle> handle(
+      new KeysetHandle(util::SecretProto<Keyset>(**keyset_result), *entries,
+                       monitoring_annotations));
   return std::move(handle);
 }
 
@@ -75,9 +76,8 @@ crypto::tink::util::Status CleartextKeysetHandle::Write(
 // static
 std::unique_ptr<KeysetHandle> CleartextKeysetHandle::GetKeysetHandle(
     const Keyset& keyset) {
-  auto unique_keyset = absl::make_unique<Keyset>(keyset);
   std::unique_ptr<KeysetHandle> handle =
-      absl::WrapUnique(new KeysetHandle(std::move(unique_keyset)));
+      absl::WrapUnique(new KeysetHandle(util::SecretProto<Keyset>(keyset)));
   return handle;
 }
 

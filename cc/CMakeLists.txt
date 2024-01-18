@@ -134,6 +134,7 @@ tink_cc_library(
     tink::util::buffer
     tink::util::errors
     tink::util::protobuf_helper
+    tink::util::secret_proto
     tink::util::status
     tink::util::statusor
     tink::util::validation
@@ -467,6 +468,7 @@ tink_cc_library(
     tink::internal::util
     tink::util::errors
     tink::util::keyset_util
+    tink::util::secret_proto
     tink::util::status
     tink::util::statusor
     tink::util::validation
@@ -489,6 +491,7 @@ tink_cc_library(
     absl::optional
     tink::internal::keyset_handle_builder_entry
     tink::subtle::random
+    tink::util::secret_proto
     tink::proto::tink_cc_proto
 )
 
@@ -503,6 +506,7 @@ tink_cc_library(
     absl::flat_hash_map
     absl::status
     tink::util::errors
+    tink::util::secret_proto
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
@@ -538,6 +542,7 @@ tink_cc_library(
     tink::internal::key_gen_configuration_impl
     tink::util::enums
     tink::util::errors
+    tink::util::secret_proto
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto

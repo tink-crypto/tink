@@ -20,6 +20,7 @@
 
 #include "absl/base/thread_annotations.h"
 #include "absl/synchronization/mutex.h"
+#include "tink/util/secret_proto.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -107,7 +108,8 @@ class KeysetManager {
       ABSL_LOCKS_EXCLUDED(keyset_mutex_);
 
   mutable absl::Mutex keyset_mutex_;
-  google::crypto::tink::Keyset keyset_ ABSL_GUARDED_BY(keyset_mutex_);
+  util::SecretProto<google::crypto::tink::Keyset> keyset_
+      ABSL_GUARDED_BY(keyset_mutex_);
 };
 
 }  // namespace tink
