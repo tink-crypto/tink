@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 package jwt
 
@@ -21,6 +21,7 @@ import (
 
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/keyset"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 // NewVerifier generates a new instance of the JWT Verifier primitive.
@@ -48,6 +49,9 @@ func newWrappedVerifier(ps *primitiveset.PrimitiveSet) (*wrappedVerifier, error)
 	}
 	for _, primitives := range ps.Entries {
 		for _, p := range primitives {
+			if p.PrefixType != tinkpb.OutputPrefixType_RAW && p.PrefixType != tinkpb.OutputPrefixType_TINK {
+				return nil, fmt.Errorf("jwt_verifier_factory: invalid OutputPrefixType: %s", p.PrefixType)
+			}
 			if _, ok := (p.Primitive).(*verifierWithKID); !ok {
 				return nil, fmt.Errorf("jwt_verifier_factory: not a JWT Verifier primitive")
 			}

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 package jwt_test
 
@@ -54,7 +54,8 @@ func newKeyData(key *jwtmacpb.JwtHmacKey) (*tinkpb.KeyData, error) {
 }
 
 func createJWTMAC(keyData *tinkpb.KeyData, prefixType tinkpb.OutputPrefixType) (jwt.MAC, error) {
-	handle, err := testkeyset.NewHandle(testutil.NewTestKeyset(keyData, prefixType))
+	primaryKey := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 42, prefixType)
+	handle, err := testkeyset.NewHandle(testutil.NewKeyset(primaryKey.KeyId, []*tinkpb.Keyset_Key{primaryKey}))
 	if err != nil {
 		return nil, fmt.Errorf("creating keyset handle: %v", err)
 	}
@@ -203,7 +204,9 @@ func TestFactoryWithRAWKeyAndKID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("creating NewKeyData: %v", err)
 	}
-	ks := testutil.NewTestKeyset(keyData, tinkpb.OutputPrefixType_RAW)
+	primaryKey := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, 42, tinkpb.OutputPrefixType_RAW)
+	ks := testutil.NewKeyset(primaryKey.KeyId, []*tinkpb.Keyset_Key{primaryKey})
+
 	handle, err := testkeyset.NewHandle(ks)
 	if err != nil {
 		t.Fatalf("creating keyset handle: %v", err)
