@@ -33,8 +33,6 @@ import org.junit.runners.JUnit4;
 public final class FakeHcVaultTest {
 
   private static final String KEY_URI = "hcvault://hcvault.corp.com:8200/transit/keys/key-1";
-  private static final String KEY_URI_2 = "hcvault://hcvault.corp.com:8200/transit/keys/key-2";
-  private static final String INVALID_KEY = "hcvaul://hcvault.corp.com:8200/transit/keys/invalid";
 
   @BeforeClass
   public static void setUpClass() throws Exception {
@@ -48,17 +46,18 @@ public final class FakeHcVaultTest {
     byte[] plaintext = "plaintext1".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);
 
-    String encPath = HcVaultAead.getOperationEndpoint(KEY_URI, "encrypt");
-    String decPath = HcVaultAead.getOperationEndpoint(KEY_URI, "decrypt");
+    String encPath = "transit/encrypt/key-1";
     Map<String, Object> content = new HashMap<>();
     content.put("plaintext", Base64.getEncoder().encodeToString(plaintext));
     content.put("context", Base64.getEncoder().encodeToString(associatedData));
     LogicalResponse encResp = kms.write(encPath, content);
 
-    Map<String, String> encData = encResp.getData();
+    String ciphertext = (String) encResp.getData().get("ciphertext");
+
+    String decPath = "transit/decrypt/key-1";
     Map<String, Object> decReq = new HashMap<>();
     decReq.put("context", Base64.getEncoder().encodeToString(associatedData));
-    decReq.put("ciphertext", encResp.getData().get("ciphertext"));
+    decReq.put("ciphertext", ciphertext);
     LogicalResponse decResp = kms.write(decPath, decReq);
 
     assertThat(Base64.getDecoder().decode(decResp.getData().get("plaintext"))).isEqualTo(plaintext);
