@@ -25,21 +25,30 @@ from tink.integration.awskms import _aws_kms_client
 from tink.testing import helper
 
 
-CREDENTIAL_PATH = os.path.join(helper.tink_py_testdata_path(),
-                               'aws/credentials.ini')
+CREDENTIAL_PATH = os.path.join(
+    helper.tink_py_testdata_path(), 'aws/credentials.ini'
+)
 
-KEY_URI = ('aws-kms://arn:aws:kms:us-east-2:235739564943:key/'
-           '3ee50705-5a82-4f5b-9753-05c4f473922f')
+KEY_URI = (
+    'aws-kms://arn:aws:kms:us-east-2:235739564943:key/'
+    '3ee50705-5a82-4f5b-9753-05c4f473922f'
+)
 
 # An alias for KEY_URI.
-KEY_ALIAS_URI = ('aws-kms://arn:aws:kms:us-east-2:235739564943:alias/'
-                 'unit-and-integration-testing')
+KEY_ALIAS_URI = (
+    'aws-kms://arn:aws:kms:us-east-2:235739564943:alias/'
+    'unit-and-integration-testing'
+)
 
-KEY_URI_2 = ('aws-kms://arn:aws:kms:us-east-2:235739564943:key/'
-             'b3ca2efd-a8fb-47f2-b541-7e20f8c5cd11')
+KEY_URI_2 = (
+    'aws-kms://arn:aws:kms:us-east-2:235739564943:key/'
+    'b3ca2efd-a8fb-47f2-b541-7e20f8c5cd11'
+)
 
-GCP_KEY_URI = ('gcp-kms://projects/tink-test-infrastructure/locations/global/'
-               'keyRings/unit-and-integration-testing/cryptoKeys/aead-key')
+GCP_KEY_URI = (
+    'gcp-kms://projects/tink-test-infrastructure/locations/global/'
+    'keyRings/unit-and-integration-testing/cryptoKeys/aead-key'
+)
 
 
 class AwsKmsClientTest(absltest.TestCase):
@@ -142,9 +151,7 @@ class AwsKmsClientTest(absltest.TestCase):
         region_name='us-east-2',
         service_name='kms',
     )
-    aws_client = awskms.new_client(
-        boto3_client=boto3_client, key_uri=KEY_URI
-    )
+    aws_client = awskms.new_client(boto3_client=boto3_client, key_uri=KEY_URI)
 
     self.assertEqual(
         aws_client.does_support(KEY_URI), want_aws_client.does_support(KEY_URI)
@@ -199,8 +206,6 @@ aws_secret_access_key = key_123""")
     self.assertEqual(aws_access_key_id, 'key_id_123')
     self.assertEqual(aws_secret_access_key, 'key_123')
 
-    os.unlink(config_file.name)
-
   def test_parse_credentials_without_key_id_fails(self):
     config_file = tempfile.NamedTemporaryFile(delete=False)
     with open(config_file.name, 'w') as f:
@@ -210,8 +215,6 @@ aws_secret_access_key = key_123""")
     with self.assertRaises(ValueError):
       _aws_kms_client._parse_config(config_file.name)
 
-    os.unlink(config_file.name)
-
   def test_parse_credentials_without_key_fails(self):
     config_file = tempfile.NamedTemporaryFile(delete=False)
     with open(config_file.name, 'w') as f:
@@ -220,8 +223,6 @@ aws_secret_access_key = key_123""")
 aws_secret_access_key = key_123""")
     with self.assertRaises(ValueError):
       _aws_kms_client._parse_config(config_file.name)
-
-    os.unlink(config_file.name)
 
   def test_parse_credentials_without_default_section_fails(self):
     config_file = tempfile.NamedTemporaryFile(delete=False)
@@ -233,7 +234,6 @@ aws_secret_access_key = other_key""")
     with self.assertRaises(ValueError):
       _aws_kms_client._parse_config(config_file.name)
 
-    os.unlink(config_file.name)
 
 if __name__ == '__main__':
   absltest.main()

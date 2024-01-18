@@ -6,6 +6,14 @@ build:linux --cxxopt=-std=c++14
 build:linux --host_cxxopt=-std=c++14
 build:macos --cxxopt=-std=c++14
 build:macos --host_cxxopt=-std=c++14
+build:windows --cxxopt='/std:c++14'
+build:windows --host_cxxopt='/std:c++14'
+
+# Solve various length limits. See e.g., https://github.com/bazelbuild/bazel/issues/17068.
+build:windows --features=archive_param_file
+build:windows --features=linker_param_file
+build:windows --features=compiler_param_file
+build:windows --enable_runfiles
 
 # Configs for macOS on x86_64.
 build:macos_x86_64 --cpu=darwin
