@@ -3,7 +3,7 @@ licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 java_library(
-    name = "hcvault_kms_aead",
+    name = "hcvault_aead",
     srcs = ["HcVaultAead.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:aead",
@@ -13,11 +13,11 @@ java_library(
 )
 
 java_library(
-    name = "hcvault_kms_client",
+    name = "hcvault_client",
     srcs = ["HcVaultClient.java"],
     plugins = [":auto_service_plugin"],
     deps = [
-        ":hcvault_kms_aead",
+        ":hcvault_aead",
         "//src/main/java/com/google/crypto/tink:aead",
         "//src/main/java/com/google/crypto/tink:kms_client",
         "//src/main/java/com/google/crypto/tink:kms_clients",
@@ -30,7 +30,7 @@ java_library(
 )
 
 java_library(
-    name = "fake_hcvault_kms",
+    name = "fake_hcvault",
     testonly = 1,
     srcs = ["FakeHcVault.java"],
     deps = [

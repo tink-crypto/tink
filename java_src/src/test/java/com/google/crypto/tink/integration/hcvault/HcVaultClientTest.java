@@ -24,14 +24,12 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.KmsClientsTestUtil;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.KmsAeadKeyManager;
 import com.google.crypto.tink.aead.KmsEnvelopeAeadKeyManager;
 import java.security.GeneralSecurityException;
-import java.util.Optional;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -56,28 +54,14 @@ public final class HcVaultClientTest {
     KmsClientsTestUtil.reset();
   }
 
-  @Test
-  public void registerWithKeyUriAndCredentials_success() throws Exception {
-    // Register a client bound to a single key.
-    HcVaultClient.register(KEY_URI, TOKEN);
-
-    KmsClient client = KmsClients.get(KEY_URI);
-    assertThat(client.doesSupport(KEY_URI)).isTrue();
-
-    String modifiedKeyUri = KEY_URI.replace("hcvault", "invalid");
-    assertThat(client.doesSupport(modifiedKeyUri)).isFalse();
-  }
-
-  @Test
-  public void registerWithCredentialsAndBadKeyUri_fail() throws Exception {
-    assertThrows(IllegalArgumentException.class, () -> HcVaultClient.register("blah", TOKEN));
+  private static void registerWithFakeHcVault(String keyUri) throws Exception {
+    KmsClients.add(HcVaultClient.create(FakeHcVault.fromURI(keyUri), keyUri));
   }
 
   @Test
   public void registerWithKeyUriAndFakeHcVault_kmsAeadWorks() throws Exception {
     // Register a client bound to a single key.
-    HcVaultClient.registerWithHcVault(
-        KEY_URI, TOKEN, FakeHcVault.fromURI(KEY_URI), false, false, Optional.empty());
+    registerWithFakeHcVault(KEY_URI);
 
     // Create a KmsAead primitive
     KeyTemplate kmsTemplate = KmsAeadKeyManager.createKeyTemplate(KEY_URI);
@@ -94,8 +78,7 @@ public final class HcVaultClientTest {
   @Test
   public void registerWithKeyUriAndFakeHcVault_kmsEnvelopeAeadWorks() throws Exception {
     // Register a client bound to a single key.
-    HcVaultClient.registerWithHcVault(
-        KEY_URI, TOKEN, FakeHcVault.fromURI(KEY_URI), false, false, Optional.empty());
+    registerWithFakeHcVault(KEY_URI);
 
     // Create an envelope encryption AEAD primitive
     KeyTemplate dekTemplate = KeyTemplates.get("AES128_CTR_HMAC_SHA256_RAW");
@@ -114,8 +97,7 @@ public final class HcVaultClientTest {
   @Test
   public void registerWithKeyUriAndFakeHcVault_kmsAeadCanOnlyBeCreatedForRegisteredKeyUri()
       throws Exception {
-    HcVaultClient.registerWithHcVault(
-        KEY_URI, TOKEN, FakeHcVault.fromURI(KEY_URI), false, false, Optional.empty());
+    registerWithFakeHcVault(KEY_URI);
 
     // getPrimitive works for keyUri
     KeyTemplate kmsTemplate = KmsAeadKeyManager.createKeyTemplate(KEY_URI);
@@ -131,8 +113,7 @@ public final class HcVaultClientTest {
   @Test
   public void registerBoundWithFakeHcVault_kmsEnvelopeAeadCanOnlyBeCreatedForBoundedUri()
       throws Exception {
-    HcVaultClient.registerWithHcVault(
-        KEY_URI, TOKEN, FakeHcVault.fromURI(KEY_URI), false, false, Optional.empty());
+    registerWithFakeHcVault(KEY_URI);
 
     KeyTemplate dekTemplate = KeyTemplates.get("AES128_CTR_HMAC_SHA256_RAW");
     // getPrimitive works for KEY_URI
@@ -150,9 +131,8 @@ public final class HcVaultClientTest {
 
   @Test
   public void registerTwoBoundWithFakeHcVault_kmsAeadWorks() throws Exception {
-    FakeHcVault fakeKms = FakeHcVault.fromURI(KEY_URI);
-    HcVaultClient.registerWithHcVault(KEY_URI, TOKEN, fakeKms, false, false, Optional.empty());
-    HcVaultClient.registerWithHcVault(KEY_URI_2, TOKEN, fakeKms, false, false, Optional.empty());
+    registerWithFakeHcVault(KEY_URI);
+    registerWithFakeHcVault(KEY_URI_2);
 
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);
@@ -174,8 +154,7 @@ public final class HcVaultClientTest {
 
   @Test
   public void registerUnboundWithFakeHcVault_kmsAeadWorks() throws Exception {
-    HcVaultClient.registerWithHcVault(
-        KEY_URI, TOKEN, FakeHcVault.fromURI(KEY_URI), false, false, Optional.empty());
+    KmsClients.add(HcVaultClient.create(FakeHcVault.fromURI(KEY_URI)));
 
     KeyTemplate kmsTemplate = KmsAeadKeyManager.createKeyTemplate(KEY_URI);
     KeysetHandle handle = KeysetHandle.generateNew(kmsTemplate);
@@ -190,10 +169,9 @@ public final class HcVaultClientTest {
 
   @Test
   public void kmsAeadCannotDecryptCiphertextOfDifferentUri() throws Exception {
-    HcVaultClient.registerWithHcVault(
-        KEY_URI, TOKEN, FakeHcVault.fromURI(KEY_URI), false, false, Optional.empty());
-    HcVaultClient.registerWithHcVault(
-        KEY_URI_2, TOKEN, FakeHcVault.fromURI(KEY_URI_2), false, false, Optional.empty());
+    registerWithFakeHcVault(KEY_URI);
+    registerWithFakeHcVault(KEY_URI_2);
+
     KeyTemplate kmsTemplate = KmsAeadKeyManager.createKeyTemplate(KEY_URI);
     KeysetHandle handle = KeysetHandle.generateNew(kmsTemplate);
     Aead kmsAead = handle.getPrimitive(Aead.class);
@@ -211,15 +189,8 @@ public final class HcVaultClientTest {
   @Test
   public void invalidUri_fails() throws Exception {
     String invalidUri = "hcvaul://@#$%&";
+    FakeHcVault fakeHcVault = FakeHcVault.fromURI(invalidUri);
     assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            HcVaultClient.registerWithHcVault(
-                invalidUri,
-                TOKEN,
-                FakeHcVault.fromURI(invalidUri),
-                false,
-                false,
-                Optional.empty()));
+        IllegalArgumentException.class, () -> HcVaultClient.create(fakeHcVault, invalidUri));
   }
 }

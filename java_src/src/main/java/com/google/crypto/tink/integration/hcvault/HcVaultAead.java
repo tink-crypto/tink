@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  *
  * @since 1.0.0
  */
-public final class HcVaultAead implements Aead {
+final class HcVaultAead implements Aead {
 
   /** This client knows how to talk to Hashicorp Vault. */
   private final Logical kmsClient;
@@ -53,7 +53,6 @@ public final class HcVaultAead implements Aead {
       throws GeneralSecurityException {
     try {
       String encPath = getOperationEndpoint(this.keyUri, "encrypt");
-      System.out.println("Running encryption against: " + encPath);
       Map<String, Object> content = new HashMap<>();
       content.put("plaintext", Base64.getEncoder().encodeToString(plaintext));
       content.put("context", Base64.getEncoder().encodeToString(associatedData));
@@ -70,7 +69,6 @@ public final class HcVaultAead implements Aead {
       throws GeneralSecurityException {
     try {
       String encPath = getOperationEndpoint(this.keyUri, "decrypt");
-      System.out.println("Running decryption against: " + encPath);
       Map<String, Object> content = new HashMap<>();
       content.put("ciphertext", new String(ciphertext));
       content.put("context", Base64.getEncoder().encodeToString(associatedData));

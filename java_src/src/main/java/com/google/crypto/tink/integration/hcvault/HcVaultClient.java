@@ -19,62 +19,33 @@ package com.google.crypto.tink.integration.hcvault;
 import com.google.auto.service.AutoService;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KmsClient;
-import com.google.crypto.tink.KmsClients;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.github.jopenlibs.vault.EnvironmentLoader;
-import io.github.jopenlibs.vault.SslConfig;
-import io.github.jopenlibs.vault.Vault;
-import io.github.jopenlibs.vault.VaultConfig;
-import io.github.jopenlibs.vault.VaultException;
 import io.github.jopenlibs.vault.api.Logical;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.Locale;
-import java.util.Optional;
 import javax.annotation.Nullable;
 
 /**
  * An implementation of {@link KmsClient} for <a href="https://www.vaultproject.io/">Hashicorp
  * Vault</a>.
- *
- * @since 1.0.0
  */
 @AutoService(KmsClient.class)
 public final class HcVaultClient implements KmsClient {
   /** The prefix of all keys stored in Hashicorp Vault. */
   public static final String PREFIX = "hcvault://";
 
-  public static final String HTTP_PREFIX = "http://";
-  public static final String HTTPS_PREFIX = "https://";
+  private static final String HTTP_PREFIX = "http://";
+  private static final String HTTPS_PREFIX = "https://";
 
-  @Nullable private Logical hcVault;
-  private String keyUri;
-  @Nullable private VaultConfig vaultConf;
-  private String authToken;
-  private String namespace;
-  private boolean https;
-  private boolean verify;
-  private String clientKeyPath;
-  private String clientPemPath;
+  private final Logical hcVault;
+  @Nullable private final String keyUri;
 
-  /**
-   * Constructs a generic HcVaultClient that is not bound to any specific key.
-   *
-   * <p>This constructor should not be used. We recommend to register the client instead.
-   */
-  public HcVaultClient() {}
-
-  /**
-   * Constructs a specific HcVaultClient that is bound to a single key identified by {@code uri}.
-   *
-   * <p>This constructor should not be used. We recommend to register the client instead.
-   */
-  public HcVaultClient(String uri) {
-    if (!uri.toLowerCase(Locale.US).startsWith(PREFIX)) {
-      throw new IllegalArgumentException("key URI must starts with " + PREFIX);
+  private HcVaultClient(Logical hcVault, String keyUri) {
+    if (keyUri != null && !keyUri.toLowerCase(Locale.US).startsWith(PREFIX)) {
+      throw new IllegalArgumentException("key URI must start with " + PREFIX);
     }
-    this.keyUri = uri;
+    this.hcVault = hcVault;
+    this.keyUri = keyUri;
   }
 
   /**
@@ -90,93 +61,28 @@ public final class HcVaultClient implements KmsClient {
     return this.keyUri == null && uri.toLowerCase(Locale.US).startsWith(PREFIX);
   }
 
-  /**
-   * Loads Hashicorp Vault credentials from a properties file.
-   *
-   * <p>Not implemented. Auth tokens should not be stored in cleartext anywhere.
-   *
-   * @throws GeneralSecurityException if the client initialization fails
-   */
   @Override
   @CanIgnoreReturnValue
   public KmsClient withCredentials(String credentialPath) throws GeneralSecurityException {
-    try {
-      throw new VaultException("cannot load credentials from path - not supported");
-    } catch (VaultException e) {
-      throw new GeneralSecurityException("cannot load credentials", e);
-    }
+    throw new UnsupportedOperationException(
+        "HcVaultClient does not support loading credentials from a file");
   }
 
-  /**
-   * Loads default Hashicorp Vault credentials.
-   *
-   * <p>Hashicorp Vault credentials provider chain that looks for credentials in this order:
-   *
-   * <ul>
-   *   <li>Environment Variables - VAULT_TOKEN and VAULT_URI
-   *   <li>Java System Properties - hcvault.token and hcvault.uri - not yet implemented
-   *   <li>Filesystem - $user.home/.vault.token - not yet implemented
-   * </ul>
-   *
-   * @throws GeneralSecurityException if the client initialization fails
-   */
   @Override
   @CanIgnoreReturnValue
   public KmsClient withDefaultCredentials() throws GeneralSecurityException {
-    try {
-      EnvironmentLoader envLoader = new EnvironmentLoader();
-      String authToken = envLoader.loadVariable("VAULT_TOKEN");
-      String keyUri = envLoader.loadVariable("VAULT_URI");
-      String namespace = envLoader.loadVariable("VAULT_NAMESPACE");
-      boolean https = Boolean.valueOf(envLoader.loadVariable("VAULT_HTTPS"));
-      boolean verifyCert = Boolean.valueOf(envLoader.loadVariable("VAULT_VERIFY_CERT"));
-      String clientPemPath = envLoader.loadVariable("VAULT_CLIENT_PEM");
-      String clientKeyPath = envLoader.loadVariable("VAULT_CLIENT_KEY");
-      VaultConfig config =
-          new VaultConfig()
-              .address(keyUri)
-              .token(authToken)
-              .readTimeout(30)
-              .openTimeout(30)
-              .engineVersion(1); // Transit not available in V2
-
-      if (https) {
-        SslConfig sslConf = new SslConfig().verify(verifyCert);
-        if (clientPemPath != null) {
-          sslConf = sslConf.clientPemUTF8(clientPemPath);
-        }
-
-        if (clientKeyPath != null) {
-          sslConf = sslConf.clientKeyPemUTF8(clientKeyPath);
-        }
-
-        config = config.sslConfig(sslConf);
-      }
-
-      if (namespace != null) {
-        config = config.nameSpace(namespace);
-      }
-
-      this.vaultConf = config.build();
-      this.hcVault = new Vault(vaultConf).logical();
-      return this;
-    } catch (VaultException e) {
-      throw new GeneralSecurityException("error loading default credentials", e);
-    }
+    throw new UnsupportedOperationException(
+        "HcVaultClient does not support loading from default credentials");
   }
 
-  /** Loads Hashicorp Vault credentials from a provider. */
-  @CanIgnoreReturnValue
-  public KmsClient withCredentialsProvider(VaultConfig vaultConf) throws GeneralSecurityException {
-    this.vaultConf = vaultConf;
-    return this;
+  /** Constructs a HcVaultClient that is not bound to a key URI. */
+  public static KmsClient create(Logical hcVault) throws GeneralSecurityException {
+    return new HcVaultClient(hcVault, null);
   }
 
-  /** Specifies the {@link Logical} object to be used. Only used for testing. */
-  @CanIgnoreReturnValue
-  KmsClient withHcVault(@Nullable Logical hcVault) {
-    this.hcVault = hcVault;
-    return this;
+  /** Constructs a HcVaultClient that is bound to a single key identified by {@code keyUri}. */
+  public static KmsClient create(Logical hcVault, String keyUri) throws GeneralSecurityException {
+    return new HcVaultClient(hcVault, keyUri);
   }
 
   @Override
@@ -188,93 +94,9 @@ public final class HcVaultClient implements KmsClient {
     }
 
     try {
-      Logical client = hcVault;
-      if (client == null) {
-        Vault v = new Vault(this.vaultConf);
-        client = v.logical();
-      }
-      return new HcVaultAead(client, this.keyUri);
+      return new HcVaultAead(this.hcVault, uri);
     } catch (Exception e) {
       throw new GeneralSecurityException("cannot load credentials from provider", e);
-    }
-  }
-
-  /**
-   * Creates and registers a {@link #HcVaultClient} with the Tink runtime.
-   *
-   * <p>If {@code keyUri} is present, it is the only key that the new client will support. Otherwise
-   * the new client supports all Hashicorp Vault keys.
-   *
-   * <p>If {@code authToken} is present, use that for authentication. Otherwise, use the "default"
-   * credentials.
-   */
-  public static void register(String keyUri, String authToken) throws GeneralSecurityException {
-    registerWithHcVault(keyUri, authToken, null, true, true, Optional.empty());
-  }
-
-  /**
-   * Creates and registers a {@link #HcVaultClient} with the Tink runtime.
-   *
-   * <p>If {@code keyUri} is present, it is the only key that the new client will support. Otherwise
-   * the new client supports all Hashicorp Vault keys.
-   *
-   * <p>If {@code authToken} is present, use that for authentication. Otherwise, use the "default"
-   * credentials.
-   */
-  public static void register(
-      String keyUri,
-      String authToken,
-      boolean https,
-      boolean verifyCert,
-      Optional<String> namespace)
-      throws GeneralSecurityException {
-    registerWithHcVault(keyUri, authToken, null, https, verifyCert, namespace);
-  }
-
-  /**
-   * Does the same as {@link #register}, but with an additional {@code hcVault} argument. Only used
-   * for testing.
-   */
-  static void registerWithHcVault(
-      String keyUri,
-      String authToken,
-      @Nullable Logical hcVault,
-      boolean https,
-      boolean verifyCert,
-      Optional<String> namespace)
-      throws GeneralSecurityException {
-    try {
-      HcVaultClient client = new HcVaultClient(keyUri);
-      keyUri = https ? keyUri.replace(PREFIX, HTTPS_PREFIX) : keyUri.replace(PREFIX, HTTP_PREFIX);
-      URI u = new URI(keyUri);
-      String address = u.getScheme() + "://" + u.getHost() + ":" + u.getPort();
-      VaultConfig config =
-          new VaultConfig()
-              .address(address)
-              .token(authToken)
-              .readTimeout(30)
-              .openTimeout(30)
-              .engineVersion(1); // Transit not available in V2
-
-      if (https) {
-        config = config.sslConfig(new SslConfig().verify(verifyCert));
-      }
-
-      if (namespace.isPresent()) {
-        config = config.nameSpace(namespace.get());
-      }
-
-      config = config.build();
-
-      if (hcVault == null) {
-        hcVault = new Vault(config).logical();
-      }
-
-      client.withCredentialsProvider(config);
-      client.withHcVault(hcVault);
-      KmsClients.add(client);
-    } catch (URISyntaxException | VaultException e) {
-      throw new GeneralSecurityException("failed to create client", e);
     }
   }
 }
