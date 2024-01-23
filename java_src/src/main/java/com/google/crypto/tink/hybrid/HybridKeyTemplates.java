@@ -152,7 +152,7 @@ public final class HybridKeyTemplates {
             createEciesAeadHkdfParams(curve, hashType, ecPointFormat, demKeyTemplate, salt))
         .build();
     return KeyTemplate.newBuilder()
-        .setTypeUrl(new EciesAeadHkdfPrivateKeyManager().getKeyType())
+        .setTypeUrl(EciesAeadHkdfPrivateKeyManager.getKeyType())
         .setOutputPrefixType(outputPrefixType)
         .setValue(format.toByteString())
         .build();

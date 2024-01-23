@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,37 +21,28 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
 import com.google.crypto.tink.aead.AesCtrHmacAeadParameters;
 import com.google.crypto.tink.aead.AesGcmParameters;
+import com.google.crypto.tink.aead.XChaCha20Poly1305Parameters;
 import com.google.crypto.tink.hybrid.internal.testing.EciesAeadHkdfTestUtil;
 import com.google.crypto.tink.hybrid.internal.testing.HybridTestVector;
-import com.google.crypto.tink.internal.KeyTypeManager;
-import com.google.crypto.tink.proto.EcPointFormat;
-import com.google.crypto.tink.proto.EciesAeadDemParams;
-import com.google.crypto.tink.proto.EciesAeadHkdfKeyFormat;
-import com.google.crypto.tink.proto.EciesAeadHkdfParams;
-import com.google.crypto.tink.proto.EciesAeadHkdfPrivateKey;
-import com.google.crypto.tink.proto.EciesAeadHkdfPublicKey;
-import com.google.crypto.tink.proto.EciesHkdfKemParams;
-import com.google.crypto.tink.proto.EllipticCurveType;
-import com.google.crypto.tink.proto.HashType;
-import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.EciesAeadHkdfDemHelper;
-import com.google.crypto.tink.subtle.EciesAeadHkdfHybridEncrypt;
-import com.google.crypto.tink.subtle.EllipticCurves;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.subtle.Hex;
-import com.google.crypto.tink.subtle.Random;
-import com.google.protobuf.ByteString;
+import com.google.crypto.tink.subtle.X25519;
+import com.google.crypto.tink.util.Bytes;
+import com.google.crypto.tink.util.SecretBytes;
+import java.math.BigInteger;
 import java.security.GeneralSecurityException;
-import java.security.interfaces.ECPublicKey;
 import java.util.Arrays;
+import java.util.Set;
+import java.util.TreeSet;
 import javax.annotation.Nullable;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -68,182 +59,6 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
   public static void setUp() throws Exception {
     AeadConfig.register();
     HybridConfig.register();
-  }
-
-  private final EciesAeadHkdfPrivateKeyManager manager = new EciesAeadHkdfPrivateKeyManager();
-  private final KeyTypeManager.KeyFactory<EciesAeadHkdfKeyFormat, EciesAeadHkdfPrivateKey> factory =
-      manager.keyFactory();
-
-  @Test
-  public void basics() throws Exception {
-    assertThat(manager.getKeyType())
-        .isEqualTo("type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey");
-    assertThat(manager.getVersion()).isEqualTo(0);
-    assertThat(manager.keyMaterialType()).isEqualTo(KeyMaterialType.ASYMMETRIC_PRIVATE);
-  }
-
-  @Test
-  public void validateKeyFormat_empty() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(EciesAeadHkdfKeyFormat.getDefaultInstance()));
-  }
-
-  private static EciesAeadHkdfKeyFormat createKeyFormat(
-      EllipticCurveType curve,
-      HashType hashType,
-      EcPointFormat ecPointFormat,
-      KeyTemplate demKeyTemplate,
-      byte[] salt) {
-
-    return EciesAeadHkdfKeyFormat.newBuilder()
-        .setParams(
-            EciesAeadHkdfPrivateKeyManager.createParams(
-                curve, hashType, ecPointFormat, demKeyTemplate, salt))
-        .build();
-  }
-
-  @Test
-  public void validateKeyFormat_valid() throws Exception {
-    EciesAeadHkdfKeyFormat format =
-        createKeyFormat(
-            EllipticCurveType.NIST_P256,
-            HashType.SHA256,
-            EcPointFormat.UNCOMPRESSED,
-            AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template(),
-            Hex.decode("aabbccddeeff"));
-    factory.validateKeyFormat(format);
-  }
-
-  @Test
-  public void validateKeyFormat_noPointFormat_throws() throws Exception {
-    EciesAeadHkdfKeyFormat format =
-        createKeyFormat(
-            EllipticCurveType.NIST_P256,
-            HashType.SHA256,
-            EcPointFormat.UNKNOWN_FORMAT,
-            AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template(),
-            Hex.decode("aabbccddeeff"));
-    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
-  }
-
-  @Test
-  public void validateKeyFormat_noDem_throws() throws Exception {
-    EciesAeadHkdfKeyFormat format =
-        EciesAeadHkdfKeyFormat.newBuilder()
-            .setParams(
-                EciesAeadHkdfParams.newBuilder()
-                    .setKemParams(
-                        EciesHkdfKemParams.newBuilder()
-                            .setCurveType(EllipticCurveType.NIST_P256)
-                            .setHkdfHashType(HashType.SHA256)
-                            .setHkdfSalt(ByteString.copyFrom(Hex.decode("aabbccddeeff"))))
-                    .setDemParams(
-                        EciesAeadDemParams.newBuilder()
-                            .setAeadDem(
-                                com.google.crypto.tink.proto.KeyTemplate.newBuilder()
-                                    .setOutputPrefixType(OutputPrefixType.TINK)))
-                    .setEcPointFormat(EcPointFormat.UNCOMPRESSED))
-            .build();
-    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
-  }
-
-  @Test
-  public void validateKeyFormat_noKemCurve_throws() throws Exception {
-    EciesAeadHkdfKeyFormat format =
-        createKeyFormat(
-            EllipticCurveType.UNKNOWN_CURVE,
-            HashType.SHA256,
-            EcPointFormat.UNCOMPRESSED,
-            AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template(),
-            Hex.decode("aabbccddeeff"));
-    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
-  }
-
-  @Test
-  public void validateKeyFormat_noKemHash_throws() throws Exception {
-    EciesAeadHkdfKeyFormat format =
-        createKeyFormat(
-            EllipticCurveType.NIST_P256,
-            HashType.UNKNOWN_HASH,
-            EcPointFormat.UNCOMPRESSED,
-            AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template(),
-            Hex.decode("aabbccddeeff"));
-    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
-  }
-
-  @Test
-  public void createKey_checkValues() throws Exception {
-    EciesAeadHkdfKeyFormat format =
-        createKeyFormat(
-            EllipticCurveType.NIST_P256,
-            HashType.SHA256,
-            EcPointFormat.UNCOMPRESSED,
-            AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template(),
-            Hex.decode("aabbccddeeff"));
-    EciesAeadHkdfPrivateKey key = factory.createKey(format);
-    assertThat(key.getPublicKey().getParams()).isEqualTo(format.getParams());
-    assertThat(key.getPublicKey().getX()).isNotEmpty();
-    assertThat(key.getPublicKey().getY()).isNotEmpty();
-    assertThat(key.getKeyValue()).isNotEmpty();
-  }
-
-  private EciesAeadHkdfPrivateKey createValidKey() throws Exception {
-    EciesAeadHkdfKeyFormat format =
-        createKeyFormat(
-            EllipticCurveType.NIST_P256,
-            HashType.SHA256,
-            EcPointFormat.UNCOMPRESSED,
-            AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template(),
-            Hex.decode("aabbccddeeff"));
-    return factory.createKey(format);
-  }
-
-  @Test
-  public void validateKey_valid() throws Exception {
-    manager.validateKey(createValidKey());
-  }
-
-  @Test
-  public void validateKey_invalidVersion_throws() throws Exception {
-    EciesAeadHkdfPrivateKey key =
-        EciesAeadHkdfPrivateKey.newBuilder(createValidKey()).setVersion(1).build();
-    assertThrows(GeneralSecurityException.class, () -> manager.validateKey(key));
-  }
-
-  @Test
-  public void getPublicKey_values() throws Exception {
-    EciesAeadHkdfPrivateKey key = createValidKey();
-    EciesAeadHkdfPublicKey publicKey = manager.getPublicKey(key);
-
-    assertThat(publicKey).isEqualTo(key.getPublicKey());
-  }
-
-  @Test
-  public void createPrimitive() throws Exception {
-    EciesAeadHkdfPrivateKey key = createValidKey();
-    HybridDecrypt hybridDecrypt = manager.getPrimitive(key, HybridDecrypt.class);
-
-    EciesAeadHkdfParams eciesParams = key.getPublicKey().getParams();
-    EciesHkdfKemParams kemParams = eciesParams.getKemParams();
-    ECPublicKey recipientPublicKey =
-        EllipticCurves.getEcPublicKey(
-            HybridUtil.toCurveType(kemParams.getCurveType()),
-            key.getPublicKey().getX().toByteArray(),
-            key.getPublicKey().getY().toByteArray());
-    EciesAeadHkdfDemHelper demHelper =
-        new RegistryEciesAeadHkdfDemHelper(eciesParams.getDemParams().getAeadDem());
-    HybridEncrypt hybridEncrypt = new EciesAeadHkdfHybridEncrypt(
-        recipientPublicKey,
-        kemParams.getHkdfSalt().toByteArray(),
-        HybridUtil.toHmacAlgo(kemParams.getHkdfHashType()),
-        HybridUtil.toPointFormatType(eciesParams.getEcPointFormat()),
-        demHelper);
-
-    byte[] message = Random.randBytes(20);
-    byte[] contextInfo = Random.randBytes(20);
-    assertThat(hybridDecrypt.decrypt(hybridEncrypt.encrypt(message, contextInfo), contextInfo))
-        .isEqualTo(message);
   }
 
   @Test
@@ -382,6 +197,65 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
         .isEqualTo(KeyTemplates.get(templateName).toParameters());
   }
 
+  @Test
+  public void createKey_nistCurve_alwaysDifferent() throws Exception {
+    Parameters params = KeyTemplates.get("ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM").toParameters();
+
+    int numKeys = 10;
+    Set<BigInteger> keys = new TreeSet<>();
+    for (int i = 0; i < numKeys; i++) {
+      KeysetHandle handle = KeysetHandle.generateNew(params);
+      assertThat(handle.size()).isEqualTo(1);
+      EciesPrivateKey key = (EciesPrivateKey) handle.getPrimary().getKey();
+      keys.add(key.getNistPrivateKeyValue().getBigInteger(InsecureSecretKeyAccess.get()));
+    }
+    assertThat(keys).hasSize(numKeys);
+  }
+
+  @Test
+  public void createKey_x25519Curve_throws() throws Exception {
+    Parameters params =
+        EciesParameters.builder()
+            .setCurveType(EciesParameters.CurveType.X25519)
+            .setHashType(EciesParameters.HashType.SHA256)
+            .setVariant(EciesParameters.Variant.NO_PREFIX)
+            .setDemParameters(
+                AesGcmParameters.builder()
+                    .setIvSizeBytes(12)
+                    .setKeySizeBytes(16)
+                    .setTagSizeBytes(16)
+                    .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+                    .build())
+            .build();
+    assertThrows(GeneralSecurityException.class, () -> KeysetHandle.generateNew(params));
+  }
+
+  @Test
+  public void createPrimitive_x25519Curve_throws() throws Exception {
+    EciesParameters params =
+        EciesParameters.builder()
+            .setHashType(EciesParameters.HashType.SHA256)
+            .setCurveType(EciesParameters.CurveType.X25519)
+            .setVariant(EciesParameters.Variant.NO_PREFIX)
+            .setDemParameters(XChaCha20Poly1305Parameters.create())
+            .build();
+
+    byte[] privateKeyBytes = X25519.generatePrivateKey();
+    byte[] publicKeyBytes = X25519.publicFromPrivate(privateKeyBytes);
+
+    EciesPublicKey publicKey =
+        EciesPublicKey.createForCurveX25519(
+            params, Bytes.copyFrom(publicKeyBytes), /* idRequirement= */ null);
+    EciesPrivateKey privateKey =
+        EciesPrivateKey.createForCurveX25519(
+            publicKey, SecretBytes.copyFrom(privateKeyBytes, InsecureSecretKeyAccess.get()));
+
+    KeysetHandle.Builder.Entry entry =
+        KeysetHandle.importKey(privateKey).makePrimary().withRandomId();
+    KeysetHandle handle = KeysetHandle.newBuilder().addEntry(entry).build();
+    assertThrows(GeneralSecurityException.class, () -> handle.getPrimitive(HybridDecrypt.class));
+  }
+
   @DataPoints("testVectors")
   public static final HybridTestVector[] HYBRID_TEST_VECTORS =
       EciesAeadHkdfTestUtil.createEciesTestVectors();
@@ -443,5 +317,47 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
     byte[] ciphertext = hybridEncrypt.encrypt(v.getPlaintext(), v.getContextInfo());
     byte[] plaintext = hybridDecrypt.decrypt(ciphertext, v.getContextInfo());
     assertThat(Hex.encode(plaintext)).isEqualTo(Hex.encode(v.getPlaintext()));
+  }
+
+  @Test
+  public void test_serializeAndParse_works() throws Exception {
+    HybridTestVector testVector = HYBRID_TEST_VECTORS[0];
+    EciesPrivateKey key = (EciesPrivateKey) testVector.getPrivateKey();
+    KeysetHandle.Builder.Entry entry = KeysetHandle.importKey(key).withFixedId(1216).makePrimary();
+    KeysetHandle handle = KeysetHandle.newBuilder().addEntry(entry).build();
+
+    byte[] serializedHandle =
+        TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get());
+    KeysetHandle parsedHandle =
+        TinkProtoKeysetFormat.parseKeyset(serializedHandle, InsecureSecretKeyAccess.get());
+    assertThat(parsedHandle.equalsKeyset(handle)).isTrue();
+  }
+
+  @Test
+  public void test_serializeAndParse_publicKey_works() throws Exception {
+    HybridTestVector testVector = HYBRID_TEST_VECTORS[0];
+    EciesPrivateKey key = (EciesPrivateKey) testVector.getPrivateKey();
+    KeysetHandle.Builder.Entry entry = KeysetHandle.importKey(key).withFixedId(1216).makePrimary();
+    KeysetHandle handle = KeysetHandle.newBuilder().addEntry(entry).build().getPublicKeysetHandle();
+
+    byte[] serializedHandle = TinkProtoKeysetFormat.serializeKeysetWithoutSecret(handle);
+    KeysetHandle parsedHandle = TinkProtoKeysetFormat.parseKeysetWithoutSecret(serializedHandle);
+    assertThat(parsedHandle.equalsKeyset(handle)).isTrue();
+  }
+
+  @Test
+  public void testKeyManagerRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getKeyManager(
+                    "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+                    HybridDecrypt.class))
+        .isNotNull();
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getKeyManager(
+                    "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey",
+                    HybridEncrypt.class))
+        .isNotNull();
   }
 }
