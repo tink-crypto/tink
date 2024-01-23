@@ -327,11 +327,11 @@ class KeysetHandle {
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>>
 KeysetHandle::GetPrimitives(const KeyManager<P>* custom_manager) const {
-  crypto::tink::util::Status status = ValidateKeyset(get_keyset());
+  crypto::tink::util::Status status = ValidateKeyset(*keyset_);
   if (!status.ok()) return status;
   typename PrimitiveSet<P>::Builder primitives_builder;
   primitives_builder.AddAnnotations(monitoring_annotations_);
-  for (const google::crypto::tink::Keyset::Key& key : get_keyset().key()) {
+  for (const google::crypto::tink::Keyset::Key& key : keyset_->key()) {
     if (key.status() == google::crypto::tink::KeyStatusType::ENABLED) {
       std::unique_ptr<P> primitive;
       if (custom_manager != nullptr &&
@@ -344,7 +344,7 @@ KeysetHandle::GetPrimitives(const KeyManager<P>* custom_manager) const {
         if (!primitive_result.ok()) return primitive_result.status();
         primitive = std::move(primitive_result.value());
       }
-      if (key.key_id() == get_keyset().primary_key_id()) {
+      if (key.key_id() == keyset_->primary_key_id()) {
         primitives_builder.AddPrimaryPrimitive(std::move(primitive),
                                                KeyInfoFromKey(key));
       } else {
