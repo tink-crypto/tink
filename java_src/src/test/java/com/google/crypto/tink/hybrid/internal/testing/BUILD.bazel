@@ -1,0 +1,48 @@
+package(default_testonly = 1)
+
+licenses(["notice"])
+
+java_test(
+    name = "LegacyHybridDecryptKeyManagerTest",
+    size = "small",
+    srcs = ["LegacyHybridDecryptKeyManagerTest.java"],
+    deps = [
+        "//proto:hpke_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:hybrid_decrypt",
+        "//src/main/java/com/google/crypto/tink:hybrid_encrypt",
+        "//src/main/java/com/google/crypto/tink/hybrid:hpke_parameters",
+        "//src/main/java/com/google/crypto/tink/hybrid:hpke_public_key",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_encrypt",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal/testing:legacy_hybrid_decrypt_key_manager",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal/testing:legacy_hybrid_encrypt_key_manager",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "LegacyHybridEncryptKeyManagerTest",
+    size = "small",
+    srcs = ["LegacyHybridEncryptKeyManagerTest.java"],
+    deps = [
+        "//proto:hpke_java_proto",
+        "//src/main/java/com/google/crypto/tink:hybrid_decrypt",
+        "//src/main/java/com/google/crypto/tink:hybrid_encrypt",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink/hybrid:hpke_parameters",
+        "//src/main/java/com/google/crypto/tink/hybrid:hpke_private_key",
+        "//src/main/java/com/google/crypto/tink/hybrid:hpke_public_key",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_decrypt",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal/testing:legacy_hybrid_encrypt_key_manager",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

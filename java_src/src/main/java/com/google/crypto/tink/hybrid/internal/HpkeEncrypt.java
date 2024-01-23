@@ -19,6 +19,7 @@ package com.google.crypto.tink.hybrid.internal;
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.hybrid.HpkeParameters;
+import com.google.crypto.tink.hybrid.HpkePublicKey;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
@@ -30,7 +31,7 @@ import java.security.GeneralSecurityException;
  * <p>HPKE RFC: https://www.rfc-editor.org/rfc/rfc9180.html
  */
 @Immutable
-final class HpkeEncrypt implements HybridEncrypt {
+public final class HpkeEncrypt implements HybridEncrypt {
   private static final byte[] EMPTY_ASSOCIATED_DATA = new byte[0];
 
   @SuppressWarnings("Immutable") // We copy this on creation and never output it.
@@ -53,8 +54,7 @@ final class HpkeEncrypt implements HybridEncrypt {
   }
 
   @AccessesPartialKey
-  static HybridEncrypt create(com.google.crypto.tink.hybrid.HpkePublicKey key)
-      throws GeneralSecurityException {
+  public static HybridEncrypt create(HpkePublicKey key) throws GeneralSecurityException {
     HpkeParameters parameters = key.getParameters();
     return new HpkeEncrypt(
         key.getPublicKeyBytes(),

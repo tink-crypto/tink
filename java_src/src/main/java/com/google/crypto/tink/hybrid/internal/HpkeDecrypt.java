@@ -22,6 +22,7 @@ import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.hybrid.HpkeParameters;
+import com.google.crypto.tink.hybrid.HpkePrivateKey;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
@@ -34,7 +35,7 @@ import java.util.Arrays;
  * <p>HPKE RFC: https://www.rfc-editor.org/rfc/rfc9180.html
  */
 @Immutable
-final class HpkeDecrypt implements HybridDecrypt {
+public final class HpkeDecrypt implements HybridDecrypt {
   private static final byte[] EMPTY_ASSOCIATED_DATA = new byte[0];
 
   private final HpkeKemPrivateKey recipientPrivateKey;
@@ -93,8 +94,8 @@ final class HpkeDecrypt implements HybridDecrypt {
   }
 
   @AccessesPartialKey
-  private static HpkeKemPrivateKey createHpkeKemPrivateKey(
-      com.google.crypto.tink.hybrid.HpkePrivateKey privateKey) throws GeneralSecurityException {
+  private static HpkeKemPrivateKey createHpkeKemPrivateKey(HpkePrivateKey privateKey)
+      throws GeneralSecurityException {
     HpkeParameters.KemId kemId = privateKey.getParameters().getKemId();
     if (kemId.equals(HpkeParameters.KemId.DHKEM_X25519_HKDF_SHA256)) {
       return X25519HpkeKemPrivateKey.fromBytes(
@@ -111,8 +112,7 @@ final class HpkeDecrypt implements HybridDecrypt {
     throw new GeneralSecurityException("Unrecognized HPKE KEM identifier");
   }
 
-  static HybridDecrypt create(com.google.crypto.tink.hybrid.HpkePrivateKey privateKey)
-      throws GeneralSecurityException {
+  public static HybridDecrypt create(HpkePrivateKey privateKey) throws GeneralSecurityException {
     HpkeParameters parameters = privateKey.getParameters();
     HpkeKem kem = HpkeEncrypt.createKem(parameters.getKemId());
     HpkeKdf kdf = HpkeEncrypt.createKdf(parameters.getKdfId());
