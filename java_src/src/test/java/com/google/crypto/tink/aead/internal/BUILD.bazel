@@ -212,3 +212,28 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "ChaCha20Poly1305JceTest",
+    size = "small",
+    srcs = ["ChaCha20Poly1305JceTest.java"],
+    data = ["@wycheproof//testvectors:all"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink/aead:cha_cha20_poly1305_key",
+        "//src/main/java/com/google/crypto/tink/aead:cha_cha20_poly1305_parameters",
+        "//src/main/java/com/google/crypto/tink/aead/internal:cha_cha20_poly1305_jce",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/internal:util",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
+        "//src/main/java/com/google/crypto/tink/util:secret_bytes",
+        "@maven//:com_google_code_gson_gson",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
