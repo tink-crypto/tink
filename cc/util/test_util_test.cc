@@ -15,7 +15,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/util/test_util.h"
 
-#include <algorithm>
 #include <cstdint>
 #include <memory>
 #include <sstream>
@@ -24,14 +23,18 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
+#include "absl/strings/cord.h"
 #include "absl/strings/string_view.h"
 #include "tink/internal/test_random_access_stream.h"
+#include "tink/keyset_handle.h"
 #include "tink/output_stream.h"
 #include "tink/random_access_stream.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/test_util.h"
 #include "tink/util/buffer.h"
 #include "tink/util/ostream_output_stream.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/aes_gcm.pb.h"
@@ -286,6 +289,23 @@ TEST(DummyStreamingAead, DummyDecryptingStreamPreadWithCorruptedAadFails) {
               StatusIs(absl::StatusCode::kInvalidArgument, "Corrupted header"));
   EXPECT_THAT((*decrypting_random_access_stream)->size().status(),
               StatusIs(absl::StatusCode::kInvalidArgument, "Corrupted header"));
+}
+
+TEST(FakeKeysetDeriver, DeriveKeyset) {
+  FakeKeysetDeriver deriver("hello");
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      deriver.DeriveKeyset("salty");
+  EXPECT_THAT(handle, IsOk());
+  EXPECT_THAT((*handle)->GetKeysetInfo().primary_key_id(), Eq(119));
+  EXPECT_THAT((*handle)->GetKeysetInfo().key_info_size(), Eq(1));
+  google::crypto::tink::KeysetInfo::KeyInfo info =
+      (*handle)->GetKeysetInfo().key_info(0);
+  EXPECT_THAT(info.type_url(), Eq("5:hellosalty"));
+  EXPECT_THAT(info.status(),
+              Eq(google::crypto::tink::KeyStatusType::UNKNOWN_STATUS));
+  EXPECT_THAT(info.key_id(), Eq(119));
+  EXPECT_THAT(info.output_prefix_type(),
+              Eq(google::crypto::tink::OutputPrefixType::UNKNOWN_PREFIX));
 }
 
 }  // namespace

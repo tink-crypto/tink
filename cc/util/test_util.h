@@ -17,7 +17,6 @@
 #ifndef TINK_UTIL_TEST_UTIL_H_
 #define TINK_UTIL_TEST_UTIL_H_
 
-#include <limits>
 #include <memory>
 #include <ostream>
 #include <string>
@@ -33,10 +32,12 @@
 #include "absl/synchronization/mutex.h"
 #include "tink/aead.h"
 #include "tink/aead/cord_aead.h"
+#include "tink/cleartext_keyset_handle.h"
 #include "tink/deterministic_aead.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/input_stream.h"
+#include "tink/keyderivation/keyset_deriver.h"
 #include "tink/keyset_handle.h"
 #include "tink/keyset_writer.h"
 #include "tink/kms_client.h"
@@ -50,7 +51,6 @@
 #include "tink/subtle/mac/stateful_mac.h"
 #include "tink/util/buffer.h"
 #include "tink/util/constants.h"
-#include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/common.pb.h"
@@ -521,8 +521,7 @@ class DummyStreamingAead : public StreamingAead {
     }
 
    private:
-    util::Status CheckHeader()
-        ABSL_LOCKS_EXCLUDED(header_check_status_mutex_) {
+    util::Status CheckHeader() ABSL_LOCKS_EXCLUDED(header_check_status_mutex_) {
       absl::MutexLock lock(&header_check_status_mutex_);
       if (header_check_status_.code() != absl::StatusCode::kUnavailable) {
         return header_check_status_;
@@ -539,11 +538,11 @@ class DummyStreamingAead : public StreamingAead {
       // Invalid header.
       if (buf->size() < exp_header_.size()) {
         header_check_status_ = util::Status(absl::StatusCode::kInvalidArgument,
-                               "Could not read header");
+                                            "Could not read header");
       } else if (memcmp(buf->get_mem_block(), exp_header_.data(),
                         static_cast<int>(exp_header_.size()))) {
         header_check_status_ = util::Status(absl::StatusCode::kInvalidArgument,
-                               "Corrupted header");
+                                            "Corrupted header");
       }
       return header_check_status_;
     }
@@ -735,6 +734,29 @@ class DummyKmsClient : public KmsClient {
  private:
   std::string uri_prefix_;
   std::string key_uri_;
+};
+
+class FakeKeysetDeriver : public KeysetDeriver {
+ public:
+  explicit FakeKeysetDeriver(absl::string_view name) : name_(name) {}
+  util::StatusOr<std::unique_ptr<KeysetHandle>> DeriveKeyset(
+      absl::string_view salt) const override {
+    google::crypto::tink::Keyset::Key key;
+    key.mutable_key_data()->set_type_url(
+        absl::StrCat(name_.size(), ":", name_, salt));
+    key.set_status(google::crypto::tink::KeyStatusType::UNKNOWN_STATUS);
+    key.set_key_id(119);
+    key.set_output_prefix_type(
+        google::crypto::tink::OutputPrefixType::UNKNOWN_PREFIX);
+
+    google::crypto::tink::Keyset keyset;
+    *keyset.add_key() = key;
+    keyset.set_primary_key_id(119);
+    return CleartextKeysetHandle::GetKeysetHandle(keyset);
+  }
+
+ private:
+  std::string name_;
 };
 
 }  // namespace test

@@ -963,11 +963,14 @@ tink_cc_test(
   SRCS
     core/primitive_set_test.cc
   DEPS
-    tink::core::cleartext_keyset_handle
     tink::core::crypto_format
     tink::core::mac
     tink::core::primitive_set
     gmock
+    absl::memory
+    absl::status
+    absl::strings
+    absl::string_view
     tink::keyderivation::keyset_deriver
     tink::util::test_matchers
     tink::util::test_util

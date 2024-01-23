@@ -193,6 +193,7 @@ tink_cc_library(
     tink::aead::xchacha20_poly1305_key_manager
     tink::daead::aes_siv_key_manager
     tink::internal::ec_util
+    tink::keyderivation::keyset_deriver
     tink::subtle::common_enums
     tink::subtle::random
     tink::subtle::mac::stateful_mac
@@ -396,11 +397,15 @@ tink_cc_test(
   DEPS
     tink::util::buffer
     tink::util::ostream_output_stream
+    tink::util::status
     tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
     gmock
+    absl::status
     absl::strings
+    absl::cord
+    tink::core::keyset_handle
     tink::core::output_stream
     tink::core::random_access_stream
     tink::internal::test_random_access_stream

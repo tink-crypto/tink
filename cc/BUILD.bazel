@@ -1027,7 +1027,6 @@ cc_test(
     size = "small",
     srcs = ["core/primitive_set_test.cc"],
     deps = [
-        ":cleartext_keyset_handle",
         ":crypto_format",
         ":mac",
         ":primitive_set",
@@ -1035,6 +1034,10 @@ cc_test(
         "//proto:tink_cc_proto",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:string_view",
         "@com_google_googletest//:gtest_main",
     ],
 )
