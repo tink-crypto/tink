@@ -17,8 +17,9 @@
 #ifndef TINK_UTIL_PROTOBUF_HELPER_H_
 #define TINK_UTIL_PROTOBUF_HELPER_H_
 
-#include "google/protobuf/message_lite.h"
+#include "google/protobuf/message_lite.h"  // IWYU pragma: export
 
+// NOLINTNEXTLINE(misc-unused-alias-decls)
 namespace portable_proto = ::google::protobuf;
 
 #endif  // TINK_UTIL_PROTOBUF_HELPER_H_
