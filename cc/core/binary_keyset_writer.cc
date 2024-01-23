@@ -16,16 +16,12 @@
 
 #include "tink/binary_keyset_writer.h"
 
-#include <istream>
 #include <memory>
 #include <ostream>
-#include <sstream>
-#include <string>
 #include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
-#include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -42,8 +38,10 @@ namespace {
 
 util::Status WriteProto(const portable_proto::MessageLite& proto,
                         std::ostream* destination) {
-  std::string serialized_proto;
-  (*destination) << proto.SerializeAsString();
+  if (!proto.SerializeToOstream(destination)) {
+    return util::Status(absl::StatusCode::kUnknown,
+                        "Error serializing to the destination stream.");
+  }
   if (destination->fail()) {
     return util::Status(absl::StatusCode::kUnknown,
                         "Error writing to the destination stream.");
