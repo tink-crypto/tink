@@ -28,11 +28,53 @@ import java.io.IOException;
 /**
  * A {@link KeysetWriter} that can write keysets to private shared preferences on Android.
  *
- * @since 1.0.0
- * @deprecated We do not expect anyone to use this class. Please file an issue on
- *     github.com/tink-crypto/tink-java/ if you need to replace this.
+ * <p>We do not recommend new uses of this class. Instead, if you want to store a Tink keyset in
+ * shared preferences, serialize the keyset using TinkProtoKeysetFormat, and write it hex-encoded
+ * into your SharedPreferences manually.
+ *
+ * <p>For example, to write an encrypted keyset to the shared preferences, you can replace this:
+ *
+ * <pre>{@code
+ * keysetHandle.write(
+ *     new SharedPrefKeysetWriter(
+ *         ApplicationProvider.getApplicationContext(), keysetName, null),
+ *     keysetEncryptionAead);
+ * }</pre>
+ *
+ * <p>with this:
+ *
+ * <pre>{@code
+ * byte[] encryptedKeyset =
+ *     TinkProtoKeysetFormat.serializeEncryptedKeyset(
+ *         handle, keysetEncryptionAead, new byte[0]);
+ * SharedPreferences.Editor editor =
+ *     PreferenceManager.getDefaultSharedPreferences(
+ *             ApplicationProvider.getApplicationContext().getApplicationContext())
+ *         .edit();
+ * boolean success = editor.putString(keysetName, Hex.encode(encryptedKeyset)).commit();
+ * }</pre>
+ *
+ * <p>and to write an unencrypted keyset to the shared preferences, you can replace this:
+ *
+ * <pre>{@code
+ * CleartextKeysetHandle.write(
+ *     handle,
+ *     new SharedPrefKeysetWriter(
+ *         ApplicationProvider.getApplicationContext(), keysetName, null));
+ * }</pre>
+ *
+ * <p>with this:
+ *
+ * <pre>{@code
+ * byte[] serializedKeyset =
+ *     TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get());
+ * SharedPreferences.Editor editor =
+ *     PreferenceManager.getDefaultSharedPreferences(
+ *         ApplicationProvider.getApplicationContext().getApplicationContext())
+ *     .edit();
+ * boolean success = editor.putString(keysetName, Hex.encode(serializedKeyset)).commit();
+ * }</pre>
  */
-@Deprecated
 public final class SharedPrefKeysetWriter implements KeysetWriter {
   private final SharedPreferences.Editor editor;
   private final String keysetName;
