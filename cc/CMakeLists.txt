@@ -760,6 +760,14 @@ tink_cc_library(
     tink::util::secret_data
 )
 
+tink_cc_library(
+  NAME ec_point
+  SRCS
+    ec_point.h
+  DEPS
+    tink::core::big_integer
+)
+
 # tests
 
 tink_cc_test(
@@ -1152,4 +1160,15 @@ tink_cc_test(
     gmock
     absl::strings
     absl::string_view
+)
+
+tink_cc_test(
+  NAME ec_point_test
+  SRCS
+    core/ec_point_test.cc
+  DEPS
+    tink::core::big_integer
+    tink::core::ec_point
+    gmock
+    tink::subtle::random
 )

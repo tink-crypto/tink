@@ -814,6 +814,13 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "ec_point",
+    hdrs = ["ec_point.h"],
+    include_prefix = "tink",
+    deps = [":big_integer"],
+)
+
 # tests
 
 cc_test(
@@ -1218,6 +1225,17 @@ cc_test(
         ":restricted_big_integer",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:string_view",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "core/ec_point_test",
+    srcs = ["core/ec_point_test.cc"],
+    deps = [
+        ":big_integer",
+        ":ec_point",
+        "//subtle:random",
         "@com_google_googletest//:gtest_main",
     ],
 )
