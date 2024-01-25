@@ -33,6 +33,7 @@ import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
+import com.google.crypto.tink.jwt.JwtMac;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.PredefinedMacParameters;
 import com.google.crypto.tink.proto.AesEaxKey;
@@ -60,12 +61,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import org.junit.Assume;
 import org.junit.Before;
@@ -175,7 +171,7 @@ public class RegistryTest {
   }
 
   private void testGetKeyManagerShouldWork(String typeUrl, String className) throws Exception {
-    assertThat(Registry.getKeyManager(typeUrl).getClass().toString()).contains(className);
+    assertThat(Registry.getUntypedKeyManager(typeUrl).getClass().toString()).contains(className);
   }
 
   @Test
@@ -205,30 +201,6 @@ public class RegistryTest {
   }
 
   @Test
-  public void testGetKeyManager_legacy_wrongType_shouldThrowException() throws Exception {
-    // Skip test if in FIPS mode, as no provider available to instantiate.
-    Assume.assumeFalse(TinkFips.useOnlyFips());
-
-    KeyManager<Aead> wrongType = Registry.getKeyManager(MacConfig.HMAC_TYPE_URL);
-    HmacKey hmacKey =
-        (HmacKey)
-            Registry.newKey(
-                com.google.crypto.tink.proto.KeyTemplate.parseFrom(
-                    TinkProtoParametersFormat.serialize(
-                        PredefinedMacParameters.HMAC_SHA256_128BITTAG),
-                    ExtensionRegistryLite.getEmptyRegistry()));
-
-    ClassCastException e =
-        assertThrows(
-            ClassCastException.class,
-            () -> {
-              Aead unused = wrongType.getPrimitive(hmacKey);
-            });
-    assertExceptionContains(e, "com.google.crypto.tink.Aead");
-    assertExceptionContains(e, "com.google.crypto.tink.subtle.PrfMac");
-  }
-
-  @Test
   public void testGetKeyManager_wrongType_shouldThrowException() throws Exception {
     GeneralSecurityException e =
         assertThrows(
@@ -243,7 +215,8 @@ public class RegistryTest {
     String badTypeUrl = "bad type URL";
 
     GeneralSecurityException e =
-        assertThrows(GeneralSecurityException.class, () -> Registry.getKeyManager(badTypeUrl));
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(badTypeUrl));
     assertExceptionContains(e, "No key manager found");
     assertExceptionContains(e, badTypeUrl);
   }
@@ -270,6 +243,42 @@ public class RegistryTest {
     IllegalArgumentException e =
         assertThrows(IllegalArgumentException.class, () -> Registry.registerKeyManager(null));
     assertThat(e.toString()).contains("must be non-null");
+  }
+
+  @Test
+  public void testRegisterKeyManager_primitiveIsUnknown_shouldThrowException() throws Exception {
+    KeyManager<JwtMac> unknownPrimitiveKeyManager =
+        new KeyManager<JwtMac>() {
+          @Override
+          public JwtMac getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
+            throw new UnsupportedOperationException();
+          }
+
+          /**
+           * Returns the type URL that identifies the key type of keys managed by this KeyManager.
+           */
+          @Override
+          public String getKeyType() {
+            return "someKeyType";
+          }
+
+          @Override
+          public Class<JwtMac> getPrimitiveClass() {
+            return JwtMac.class;
+          }
+
+          @Override
+          public KeyData newKeyData(ByteString serializedKeyFormat)
+              throws GeneralSecurityException {
+            throw new UnsupportedOperationException();
+          }
+        };
+
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> Registry.registerKeyManager(unknownPrimitiveKeyManager));
+    assertThat(e.toString()).contains("Registration of key managers for class");
   }
 
   @Test
@@ -321,7 +330,7 @@ public class RegistryTest {
                     new CustomAeadKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL)));
     assertThat(e.toString()).contains("already registered");
 
-    KeyManager<Aead> manager = Registry.getKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL);
+    KeyManager<?> manager = Registry.getUntypedKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL);
     assertThat(manager.getClass().toString()).contains("KeyManagerImpl");
   }
 
@@ -396,7 +405,7 @@ public class RegistryTest {
                     new CustomAeadKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL)));
     assertThat(e.toString()).contains("already registered");
 
-    KeyManager<Aead> manager = Registry.getKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL);
+    KeyManager<?> manager = Registry.getUntypedKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL);
     assertThat(manager.getClass().toString()).contains("KeyManagerImpl");
   }
 
@@ -408,8 +417,8 @@ public class RegistryTest {
     KeyData privateKeyData = Registry.newKeyData(SignatureKeyTemplates.ECDSA_P256);
     KeyData publicKeyData = Registry.getPublicKeyData(privateKeyData.getTypeUrl(),
         privateKeyData.getValue());
-    PublicKeyVerify verifier = Registry.<PublicKeyVerify>getPrimitive(publicKeyData);
-    PublicKeySign signer = Registry.<PublicKeySign>getPrimitive(privateKeyData);
+    PublicKeyVerify verifier = Registry.getPrimitive(publicKeyData, PublicKeyVerify.class);
+    PublicKeySign signer = Registry.getPrimitive(privateKeyData, PublicKeySign.class);
     byte[] message = "Nice test message".getBytes(UTF_8);
     verifier.verify(signer.sign(message), message);
   }
@@ -435,22 +444,6 @@ public class RegistryTest {
   }
 
   @Test
-  public void testGetPrimitive_legacy_aesGcm_shouldWork() throws Exception {
-    // Skip test if in FIPS mode, as EAX is not allowed in FipsMode.
-    Assume.assumeFalse(TinkFips.useOnlyFips());
-
-    AesEaxKey aesEaxKey =
-        (AesEaxKey) Registry.newKey(AesEaxKeyManager.aes128EaxTemplate().getProto());
-    KeyData aesEaxKeyData = Registry.newKeyData(AesEaxKeyManager.aes128EaxTemplate().getProto());
-    Aead aead = Registry.getPrimitive(aesEaxKeyData);
-
-    assertThat(aesEaxKey.getKeyValue().size()).isEqualTo(16);
-    assertThat(aesEaxKeyData.getTypeUrl()).isEqualTo(AeadConfig.AES_EAX_TYPE_URL);
-    // This might break when we add native implementations.
-    assertThat(aead.getClass()).isEqualTo(AesEaxJce.class);
-  }
-
-  @Test
   public void testGetPrimitive_aesGcm_shouldWork() throws Exception {
     // Skip test if in FIPS mode, as EAX is not supported in FIPS mode.
     Assume.assumeFalse(TinkFips.useOnlyFips());
@@ -464,27 +457,6 @@ public class RegistryTest {
     assertThat(aesEaxKeyData.getTypeUrl()).isEqualTo(AeadConfig.AES_EAX_TYPE_URL);
     // This might break when we add native implementations.
     assertThat(aead.getClass()).isEqualTo(AesEaxJce.class);
-  }
-
-  @Test
-  public void testGetPrimitive_legacy_hmac_shouldWork() throws Exception {
-    // Skip test if in FIPS mode, as no provider available to instantiate.
-    Assume.assumeFalse(TinkFips.useOnlyFips());
-
-    com.google.crypto.tink.proto.KeyTemplate template =
-        com.google.crypto.tink.proto.KeyTemplate.parseFrom(
-            TinkProtoParametersFormat.serialize(PredefinedMacParameters.HMAC_SHA256_128BITTAG),
-            ExtensionRegistryLite.getEmptyRegistry());
-    HmacKey hmacKey = (HmacKey) Registry.newKey(template);
-    KeyData hmacKeyData = Registry.newKeyData(template);
-    Mac mac = Registry.getPrimitive(hmacKeyData);
-
-    assertThat(hmacKey.getKeyValue().size()).isEqualTo(32);
-    assertThat(hmacKey.getParams().getTagSize()).isEqualTo(16);
-    assertThat(hmacKey.getParams().getHash()).isEqualTo(HashType.SHA256);
-    assertThat(hmacKeyData.getTypeUrl()).isEqualTo(MacConfig.HMAC_TYPE_URL);
-    // This might break when we add native implementations.
-    assertThat(mac.getClass()).isEqualTo(PrfMac.class);
   }
 
   @Test
@@ -614,25 +586,8 @@ public class RegistryTest {
     assertThrows(GeneralSecurityException.class, () -> Registry.newKeyData(template));
   }
 
-  private static Map<String, KeyTypeManager.KeyFactory.KeyFormat<AesGcmKeyFormat>>
-      createTestAesGcmKeyFormats() {
-    Map<String, KeyTypeManager.KeyFactory.KeyFormat<AesGcmKeyFormat>> formats = new HashMap<>();
-    formats.put(
-        "TINK",
-        new KeyTypeManager.KeyFactory.KeyFormat<>(
-            AesGcmKeyFormat.newBuilder().setKeySize(16).build(),
-            KeyTemplate.OutputPrefixType.TINK));
-    formats.put(
-        "RAW",
-        new KeyTypeManager.KeyFactory.KeyFormat<>(
-            AesGcmKeyFormat.newBuilder().setKeySize(32).build(), KeyTemplate.OutputPrefixType.RAW));
-    return Collections.unmodifiableMap(formats);
-  }
-
   /** Implementation of a KeyTypeManager for testing. */
   private static class TestKeyTypeManager extends KeyTypeManager<AesGcmKey> {
-    private Map<String, KeyFactory.KeyFormat<AesGcmKeyFormat>> keyFormats =
-        createTestAesGcmKeyFormats();
 
     public TestKeyTypeManager() {
       super(
@@ -651,7 +606,7 @@ public class RegistryTest {
           });
     }
 
-    public TestKeyTypeManager(Map<String, KeyFactory.KeyFormat<AesGcmKeyFormat>> keyFormats) {
+    public TestKeyTypeManager(Map<String, Parameters> namedParameters) {
       super(
           AesGcmKey.class,
           new PrimitiveFactory<Aead, AesGcmKey>(Aead.class) {
@@ -666,7 +621,6 @@ public class RegistryTest {
               return new FakeAead();
             }
           });
-      this.keyFormats = keyFormats;
     }
 
     @Override
@@ -721,26 +675,6 @@ public class RegistryTest {
               .setVersion(getVersion())
               .build();
         }
-
-        @Override
-        public AesGcmKey deriveKey(AesGcmKeyFormat format, InputStream stream)
-            throws GeneralSecurityException {
-          byte[] pseudorandomness = new byte[format.getKeySize()];
-          try {
-            readFully(stream, pseudorandomness);
-          } catch (IOException e) {
-            throw new AssertionError("Unexpected IOException", e);
-          }
-          return AesGcmKey.newBuilder()
-              .setKeyValue(ByteString.copyFrom(pseudorandomness))
-              .setVersion(getVersion())
-              .build();
-        }
-
-        @Override
-        public Map<String, KeyFactory.KeyFormat<AesGcmKeyFormat>> keyFormats() {
-          return keyFormats;
-        }
       };
     }
 
@@ -765,64 +699,11 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterKeyTypeManager_keyTemplates_works() throws Exception {
-    Registry.reset();
-    assertThat(Registry.keyTemplates()).isEmpty();
-
-    Registry.registerKeyManager(new TestKeyTypeManager(), true);
-
-    assertThat(Registry.keyTemplates()).hasSize(2);
-    assertThat(Registry.keyTemplates()).contains("TINK");
-    assertThat(Registry.keyTemplates()).contains("RAW");
-  }
-
-  @Test
-  public void testRegisterKeyTypeManager_disallowedNewKey_keyTemplates_works() throws Exception {
-    Registry.reset();
-    Registry.registerKeyManager(new TestKeyTypeManager(), false);
-    assertThat(Registry.keyTemplates()).isEmpty();
-  }
-
-  @Test
   public void testRegisterKeyTypeManager_existingKeyManager_noNewKeyTemplate_works()
       throws Exception {
     Registry.reset();
     Registry.registerKeyManager(new TestKeyTypeManager(), true);
     Registry.registerKeyManager(new TestKeyTypeManager(), true);
-  }
-
-  @Test
-  public void testRegisterKeyTypeManager_existingKeyManager_newKeyTemplate_fails()
-      throws Exception {
-    Registry.reset();
-    Registry.registerKeyManager(new TestKeyTypeManager(), true);
-
-    Map<String, KeyTypeManager.KeyFactory.KeyFormat<AesGcmKeyFormat>> formats = new HashMap<>();
-    formats.put(
-        "NEW_KEY_TEMPLATE_NAME",
-        new KeyTypeManager.KeyFactory.KeyFormat<>(
-            AesGcmKeyFormat.newBuilder().setKeySize(16).build(),
-            KeyTemplate.OutputPrefixType.TINK));
-
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> Registry.registerKeyManager(new TestKeyTypeManager(formats), true));
-  }
-
-  @Test
-  public void testRegisterKeyTypeManager_newKeyManager_existingKeyTemplate_fails()
-      throws Exception {
-    Registry.reset();
-    Registry.registerKeyManager(new TestKeyTypeManager(), true);
-
-    TestKeyTypeManager manager =
-        new TestKeyTypeManager() {
-          @Override
-          public String getKeyType() {
-            return "blah";
-          }
-        };
-    assertThrows(GeneralSecurityException.class, () -> Registry.registerKeyManager(manager, true));
   }
 
   @Test
@@ -932,64 +813,6 @@ public class RegistryTest {
                 new CustomAeadKeyManager(new TestKeyTypeManager().getKeyType())));
   }
 
-  @Test
-  public void testDeriveKey_succeeds() throws Exception {
-    Registry.reset();
-    Registry.registerKeyManager(new TestKeyTypeManager(), true);
-    AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder().setKeySize(16).build();
-    com.google.crypto.tink.proto.KeyTemplate template =
-        com.google.crypto.tink.proto.KeyTemplate.newBuilder()
-            .setValue(format.toByteString())
-            .setTypeUrl(new TestKeyTypeManager().getKeyType())
-            .setOutputPrefixType(OutputPrefixType.TINK)
-            .build();
-
-    byte[] keyMaterial = Random.randBytes(100);
-    KeyData keyData =  Registry.deriveKey(template, new ByteArrayInputStream(keyMaterial));
-    assertThat(keyData.getKeyMaterialType()).isEqualTo(new TestKeyTypeManager().keyMaterialType());
-    assertThat(keyData.getTypeUrl()).isEqualTo(new TestKeyTypeManager().getKeyType());
-    AesGcmKey key =
-        AesGcmKey.parseFrom(keyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    for (int i = 0; i < 16; ++i) {
-      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
-    }
-  }
-
-  // Tests that validate is called.
-  @Test
-  public void testDeriveKey_wrongKeySize_validateThrows() throws Exception {
-    Registry.reset();
-    Registry.registerKeyManager(new TestKeyTypeManager(), true);
-    AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder().setKeySize(32).build();
-    com.google.crypto.tink.proto.KeyTemplate template =
-        com.google.crypto.tink.proto.KeyTemplate.newBuilder()
-            .setValue(format.toByteString())
-            .setTypeUrl(new TestKeyTypeManager().getKeyType())
-            .setOutputPrefixType(OutputPrefixType.TINK)
-            .build();
-    ByteArrayInputStream emptyInput = new ByteArrayInputStream(new byte[0]);
-    GeneralSecurityException e =
-        assertThrows(
-            GeneralSecurityException.class, () -> Registry.deriveKey(template, emptyInput));
-    assertExceptionContains(e, "validateKeyFormat");
-  }
-
-  @Test
-  public void testDeriveKey_inexistantKeyMananger_throws() throws Exception {
-    Registry.reset();
-    com.google.crypto.tink.proto.KeyTemplate template =
-        com.google.crypto.tink.proto.KeyTemplate.newBuilder()
-            .setValue(AesGcmKeyFormat.getDefaultInstance().toByteString())
-            .setTypeUrl(new TestKeyTypeManager().getKeyType())
-            .setOutputPrefixType(OutputPrefixType.TINK)
-            .build();
-    ByteArrayInputStream emptyInput = new ByteArrayInputStream(new byte[0]);
-    GeneralSecurityException e =
-        assertThrows(
-            GeneralSecurityException.class, () -> Registry.deriveKey(template, emptyInput));
-    assertExceptionContains(e, "No keymanager registered");
-  }
-
   private static class PublicPrimitiveA {}
 
   private static class PublicPrimitiveB {}
@@ -1057,20 +880,6 @@ public class RegistryTest {
   private static class PrivatePrimitiveA {}
 
   private static class PrivatePrimitiveB {}
-
-  private static Map<String, KeyTypeManager.KeyFactory.KeyFormat<Ed25519KeyFormat>>
-      createTestEd25519KeyFormats() {
-    Map<String, KeyTypeManager.KeyFactory.KeyFormat<Ed25519KeyFormat>> formats = new HashMap<>();
-    formats.put(
-        "TINK",
-        new KeyTypeManager.KeyFactory.KeyFormat<>(
-            Ed25519KeyFormat.getDefaultInstance(), KeyTemplate.OutputPrefixType.TINK));
-    formats.put(
-        "RAW",
-        new KeyTypeManager.KeyFactory.KeyFormat<>(
-            Ed25519KeyFormat.getDefaultInstance(), KeyTemplate.OutputPrefixType.RAW));
-    return Collections.unmodifiableMap(formats);
-  }
 
   private static class TestPrivateKeyTypeManager
       extends PrivateKeyTypeManager<Ed25519PrivateKey, Ed25519PublicKey> {
@@ -1140,17 +949,9 @@ public class RegistryTest {
   }
 
   private static class TestPrivateKeyTypeManagerWithKeyFactory extends TestPrivateKeyTypeManager {
-    private Map<String, KeyTypeManager.KeyFactory.KeyFormat<Ed25519KeyFormat>> keyFormats =
-        createTestEd25519KeyFormats();
 
     public TestPrivateKeyTypeManagerWithKeyFactory() {
       super();
-    }
-
-    public TestPrivateKeyTypeManagerWithKeyFactory(
-        Map<String, KeyTypeManager.KeyFactory.KeyFormat<Ed25519KeyFormat>> keyFormats) {
-      super();
-      this.keyFormats = keyFormats;
     }
 
     @Override
@@ -1173,19 +974,6 @@ public class RegistryTest {
               .setKeyValue(ByteString.copyFrom("created", UTF_8))
               .build();
         }
-
-        @Override
-        public Ed25519PrivateKey deriveKey(Ed25519KeyFormat format, InputStream inputStream)
-            throws GeneralSecurityException {
-          return Ed25519PrivateKey.newBuilder()
-              .setKeyValue(ByteString.copyFrom("derived", UTF_8))
-              .build();
-        }
-
-        @Override
-        public Map<String, KeyTypeManager.KeyFactory.KeyFormat<Ed25519KeyFormat>> keyFormats() {
-          return keyFormats;
-        }
       };
     }
   }
@@ -1198,66 +986,11 @@ public class RegistryTest {
   }
 
   @Test
-  public void testRegisterAssymmetricKeyManagers_keyTemplates_works() throws Exception {
-    Registry.reset();
-    assertThat(Registry.keyTemplates()).isEmpty();
-
-    Registry.registerKeyManager(new TestPrivateKeyTypeManagerWithKeyFactory(), true);
-
-    assertThat(Registry.keyTemplates()).hasSize(2);
-    assertThat(Registry.keyTemplates()).contains("TINK");
-    assertThat(Registry.keyTemplates()).contains("RAW");
-  }
-
-  @Test
-  public void testRegisterAssymmetricKeyManagers_disallowedNewKey_keyTemplates_works()
-      throws Exception {
-    Registry.reset();
-    Registry.registerKeyManager(new TestPrivateKeyTypeManagerWithKeyFactory(), false);
-    assertThat(Registry.keyTemplates()).isEmpty();
-  }
-
-  @Test
   public void testRegisterAssymmetricKeyManagers_existingKeyManager_noNewKeyTemplate_works()
       throws Exception {
     Registry.reset();
     Registry.registerKeyManager(new TestPrivateKeyTypeManagerWithKeyFactory(), true);
     Registry.registerKeyManager(new TestPrivateKeyTypeManagerWithKeyFactory(), true);
-  }
-
-  @Test
-  public void testRegisterAssymmetricKeyManagers_existingKeyManager_newKeyTemplate_fails()
-      throws Exception {
-    Registry.reset();
-    Registry.registerKeyManager(new TestPrivateKeyTypeManagerWithKeyFactory(), true);
-
-    Map<String, KeyTypeManager.KeyFactory.KeyFormat<Ed25519KeyFormat>> formats = new HashMap<>();
-    formats.put(
-        "NEW_KEY_TEMPLATE_NAME",
-        new KeyTypeManager.KeyFactory.KeyFormat<>(
-            Ed25519KeyFormat.getDefaultInstance(), KeyTemplate.OutputPrefixType.TINK));
-
-    assertThrows(
-        GeneralSecurityException.class,
-        () ->
-            Registry.registerKeyManager(
-                new TestPrivateKeyTypeManagerWithKeyFactory(formats), true));
-  }
-
-  @Test
-  public void testRegisterAssymmetricKeyManagers_newKeyManager_existingKeyTemplate_fails()
-      throws Exception {
-    Registry.reset();
-    Registry.registerKeyManager(new TestPrivateKeyTypeManagerWithKeyFactory(), true);
-
-    TestPrivateKeyTypeManagerWithKeyFactory manager =
-        new TestPrivateKeyTypeManagerWithKeyFactory() {
-          @Override
-          public String getKeyType() {
-            return "blah";
-          }
-        };
-    assertThrows(GeneralSecurityException.class, () -> Registry.registerKeyManager(manager, true));
   }
 
   @Test
@@ -1358,17 +1091,6 @@ public class RegistryTest {
         new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), false);
     KeyManager<?> km = Registry.getUntypedKeyManager(new TestPublicKeyTypeManager().getKeyType());
     assertThat(km.getPrimitiveClass()).isEqualTo(PublicPrimitiveA.class);
-  }
-
-  @Test
-  public void testRegisterAssymmetricKeyManagers_newKeyAllowed_withoutKeyFactory_fails()
-      throws Exception {
-    Registry.reset();
-    assertThrows(
-        UnsupportedOperationException.class,
-        () ->
-            Registry.registerAsymmetricKeyManagers(
-                new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true));
   }
 
   @Test
@@ -1544,63 +1266,6 @@ public class RegistryTest {
         GeneralSecurityException.class,
         // Note: due to the {} this is a subclass of TestPublicKeyTypeManager.
         () -> Registry.registerKeyManager(new TestPublicKeyTypeManager() {}, false));
-  }
-
-  @Test
-  public void testRegisterAssymmetricKeyManagers_throwsWithDifferentPublicKeyManager()
-      throws Exception {
-    Registry.reset();
-    Registry.registerAsymmetricKeyManagers(
-        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), false);
-    GeneralSecurityException e =
-        assertThrows(
-            GeneralSecurityException.class,
-            () ->
-                Registry.registerAsymmetricKeyManagers(
-                    new TestPrivateKeyTypeManager(),
-                    new TestPublicKeyTypeManager() {
-                      @Override
-                      public String getKeyType() {
-                        return "bla";
-                      }
-                    },
-                    false));
-    assertExceptionContains(e, "public key manager corresponding to");
-  }
-
-  @Test
-  public void testAsymmetricKeyManagers_deriveKey_withoutKeyFactory() throws Exception {
-    Registry.reset();
-    Registry.registerAsymmetricKeyManagers(
-        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), false);
-    com.google.crypto.tink.proto.KeyTemplate template =
-        com.google.crypto.tink.proto.KeyTemplate.newBuilder()
-            .setValue(Ed25519KeyFormat.getDefaultInstance().toByteString())
-            .setTypeUrl(new TestPrivateKeyTypeManager().getKeyType())
-            .setOutputPrefixType(OutputPrefixType.TINK)
-            .build();
-
-    assertThrows(
-        UnsupportedOperationException.class,
-        () -> Registry.deriveKey(template, new ByteArrayInputStream(new byte[0])));
-  }
-
-  @Test
-  public void testAsymmetricKeyManagers_deriveKey() throws Exception {
-    Registry.reset();
-    Registry.registerAsymmetricKeyManagers(
-        new TestPrivateKeyTypeManagerWithKeyFactory(), new TestPublicKeyTypeManager(), true);
-    com.google.crypto.tink.proto.KeyTemplate template =
-        com.google.crypto.tink.proto.KeyTemplate.newBuilder()
-            .setValue(Ed25519KeyFormat.getDefaultInstance().toByteString())
-            .setTypeUrl(new TestPrivateKeyTypeManagerWithKeyFactory().getKeyType())
-            .setOutputPrefixType(OutputPrefixType.TINK)
-            .build();
-
-    KeyData keyData =  Registry.deriveKey(template, new ByteArrayInputStream(new byte[0]));
-    Ed25519PrivateKey key =
-        Ed25519PrivateKey.parseFrom(keyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    assertThat(key.getKeyValue()).isEqualTo(ByteString.copyFrom("derived", UTF_8));
   }
 
   private static class Catalogue1 implements Catalogue<Aead> {

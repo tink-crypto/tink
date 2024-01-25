@@ -24,6 +24,7 @@
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "openssl/crypto.h"
+#include "tink/config/global_registry.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/hybrid/hybrid_key_templates.h"
@@ -174,8 +175,10 @@ TEST_F(HybridConfigTest, RegisterNonFipsTemplates) {
       HybridKeyTemplates::EciesX25519HkdfHmacSha256XChaCha20Poly1305());
 
   for (auto key_template : non_fips_key_templates) {
-    EXPECT_THAT(KeysetHandle::GenerateNew(key_template).status(),
-                StatusIs(absl::StatusCode::kNotFound));
+    EXPECT_THAT(
+        KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry())
+            .status(),
+        StatusIs(absl::StatusCode::kNotFound));
   }
 }
 

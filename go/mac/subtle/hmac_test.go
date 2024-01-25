@@ -28,6 +28,7 @@ import (
 var key, _ = hex.DecodeString("000102030405060708090a0b0c0d0e0f")
 var data = []byte("Hello")
 var hmacTests = []struct {
+	desc        string
 	hashAlg     string
 	tagSize     uint32
 	key         []byte
@@ -35,6 +36,7 @@ var hmacTests = []struct {
 	expectedMac string
 }{
 	{
+		desc:        "with SHA256 and 32 byte tag",
 		hashAlg:     "SHA256",
 		tagSize:     32,
 		data:        data,
@@ -42,6 +44,7 @@ var hmacTests = []struct {
 		expectedMac: "e0ff02553d9a619661026c7aa1ddf59b7b44eac06a9908ff9e19961d481935d4",
 	},
 	{
+		desc:    "with SHA512 and 64 byte tag",
 		hashAlg: "SHA512",
 		tagSize: 64,
 		data:    data,
@@ -51,6 +54,7 @@ var hmacTests = []struct {
 	},
 	// empty data
 	{
+		desc:        "empty data",
 		hashAlg:     "SHA256",
 		tagSize:     32,
 		data:        []byte{},
@@ -60,22 +64,24 @@ var hmacTests = []struct {
 }
 
 func TestHMACBasic(t *testing.T) {
-	for i, test := range hmacTests {
-		cipher, err := subtle.NewHMAC(test.hashAlg, test.key, test.tagSize)
-		if err != nil {
-			t.Errorf("cannot create new mac in test case %d: %s", i, err)
-		}
-		mac, err := cipher.ComputeMAC(test.data)
-		if err != nil {
-			t.Errorf("mac computation failed in test case %d: %s", i, err)
-		}
-		if hex.EncodeToString(mac) != test.expectedMac[:(test.tagSize*2)] {
-			t.Errorf("incorrect mac in test case %d: expect %s, got %s",
-				i, test.expectedMac[:(test.tagSize*2)], hex.EncodeToString(mac))
-		}
-		if err := cipher.VerifyMAC(mac, test.data); err != nil {
-			t.Errorf("mac verification failed in test case %d: %s", i, err)
-		}
+	for _, test := range hmacTests {
+		t.Run(test.desc, func(t *testing.T) {
+			cipher, err := subtle.NewHMAC(test.hashAlg, test.key, test.tagSize)
+			if err != nil {
+				t.Fatalf("subtle.NewHMAC() err = %q, want nil", err)
+			}
+			mac, err := cipher.ComputeMAC(test.data)
+			if err != nil {
+				t.Fatalf("cipher.ComputeMAC() err = %q, want nil", err)
+			}
+			if hex.EncodeToString(mac) != test.expectedMac {
+				t.Errorf("hex.EncodeToString(mac) = %q, want %q",
+					hex.EncodeToString(mac), test.expectedMac)
+			}
+			if err := cipher.VerifyMAC(mac, test.data); err != nil {
+				t.Errorf("cipher.VerifyMAC() err = %q, want nil", err)
+			}
+		})
 	}
 }
 
@@ -141,39 +147,50 @@ func TestVerifyMACWithInvalidInput(t *testing.T) {
 }
 
 func TestHMACModification(t *testing.T) {
-	for i, test := range hmacTests {
-		cipher, err := subtle.NewHMAC(test.hashAlg, test.key, test.tagSize)
-		if err != nil {
-			t.Errorf("cannot create new mac in test case %d: %s", i, err)
-		}
-		mac, _ := cipher.ComputeMAC(test.data)
-		for i := 0; i < len(mac); i++ {
-			tmp := mac[i]
-			for j := 0; j < 8; j++ {
-				mac[i] ^= 1 << uint8(j)
-				err := cipher.VerifyMAC(mac, test.data)
-				if err == nil {
-					t.Errorf("test case %d: modified MAC should be invalid", i)
-				}
-				mac[i] = tmp
+	for _, test := range hmacTests {
+		t.Run(test.desc, func(t *testing.T) {
+			cipher, err := subtle.NewHMAC(test.hashAlg, test.key, test.tagSize)
+			if err != nil {
+				t.Fatalf("subtle.NewHMAC() err = %q, want nil", err)
 			}
-		}
+			mac, err := cipher.ComputeMAC(test.data)
+			if err != nil {
+				t.Fatalf("cipher.ComputeMAC() err = %q, want nil", err)
+			}
+			for i := 0; i < len(mac); i++ {
+				tmp := mac[i]
+				for j := 0; j < 8; j++ {
+					mac[i] ^= 1 << uint8(j)
+					err := cipher.VerifyMAC(mac, test.data)
+					if err == nil {
+						t.Errorf("cipher.VerifyMAC() of valid mac modified at position (%d, %d) is nil, want error", i, j)
+					}
+					mac[i] = tmp
+				}
+			}
+		})
 	}
 }
 
 func TestHMACTruncation(t *testing.T) {
 	for i, test := range hmacTests {
-		cipher, err := subtle.NewHMAC(test.hashAlg, test.key, test.tagSize)
-		if err != nil {
-			t.Errorf("cannot create new mac in test case %d: %s", i, err)
-		}
-		mac, _ := cipher.ComputeMAC(test.data)
-		for i := 1; i < len(mac); i++ {
-			tmp := mac[:i]
-			err := cipher.VerifyMAC(tmp, test.data)
-			if err == nil {
-				t.Errorf("test case %d: truncated MAC should be invalid", i)
+		t.Run(test.desc, func(t *testing.T) {
+			cipher, err := subtle.NewHMAC(test.hashAlg, test.key, test.tagSize)
+			if err != nil {
+				t.Fatalf("subtle.NewHMAC() err = %q, want nil", err)
 			}
-		}
+			mac, err := cipher.ComputeMAC(test.data)
+			if err != nil {
+				t.Fatalf("cipher.ComputeMAC() err = %q, want nil", err)
+			}
+			for truncatedLen := 1; i < len(mac); i++ {
+				truncatedMAC := mac[:truncatedLen]
+				err := cipher.VerifyMAC(truncatedMAC, test.data)
+				if err == nil {
+					t.Errorf("cipher.VerifyMAC() of a valid mac truncated to %d bytes is nil, want error",
+						truncatedLen)
+				}
+			}
+		})
 	}
 }

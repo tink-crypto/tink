@@ -16,7 +16,7 @@ py_binary(
     python_version = "PY3",
     deps = [
         requirement("absl-py"),
-        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:secret_key_access",
         "@tink_py//tink:tink_python",
         "@tink_py//tink/hybrid",
     ],
@@ -45,12 +45,12 @@ sh_test(
     size = "small",
     srcs = ["hybrid_cli_test.sh"],
     args = [
-        "'python3 $(rootpath :hybrid_cli)'",
+        "'python3 $(rootpath :hybrid_cli.py)'",
         "$(rootpath :hybrid_test_public_keyset.json)",
         "$(rootpath :hybrid_test_private_keyset.json)",
     ],
     data = [
-        ":hybrid_cli",
+        ":hybrid_cli.py",
         ":hybrid_test_private_keyset.json",
         ":hybrid_test_public_keyset.json",
     ],
@@ -60,7 +60,7 @@ py_library(
     name = "hybrid_basic",
     srcs = ["hybrid_basic.py"],
     deps = [
-        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:secret_key_access",
         "@tink_py//tink:tink_python",
         "@tink_py//tink/hybrid",
     ],

@@ -18,27 +18,30 @@ package com.google.crypto.tink.aead;
 
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.aead.subtle.AesGcmSiv;
-import com.google.crypto.tink.internal.KeyTypeManager;
-import com.google.crypto.tink.internal.PrimitiveFactory;
-import com.google.crypto.tink.proto.AesGcmSivKey;
-import com.google.crypto.tink.proto.AesGcmSivKeyFormat;
+import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
+import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
+import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
+import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.Validators;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
-import java.io.IOException;
+import com.google.crypto.tink.util.SecretBytes;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 
@@ -46,97 +49,81 @@ import javax.crypto.NoSuchPaddingException;
  * This key manager generates new {@code AesGcmSivKey} keys and produces new instances of {@code
  * AesGcmSiv}.
  */
-public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
-  AesGcmSivKeyManager() {
-    super(
-        AesGcmSivKey.class,
-        new PrimitiveFactory<Aead, AesGcmSivKey>(Aead.class) {
-          @Override
-          public Aead getPrimitive(AesGcmSivKey key) throws GeneralSecurityException {
-            return new AesGcmSiv(key.getKeyValue().toByteArray());
-          }
-        });
+public final class AesGcmSivKeyManager {
+  private static final PrimitiveConstructor<com.google.crypto.tink.aead.AesGcmSivKey, Aead>
+      AES_GCM_SIV_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              AesGcmSiv::create, com.google.crypto.tink.aead.AesGcmSivKey.class, Aead.class);
+
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyCreationRegistry.KeyCreator<AesGcmSivParameters> KEY_CREATOR =
+      AesGcmSivKeyManager::createAesGcmSivKey;
+
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyDerivationRegistry.InsecureKeyCreator<AesGcmSivParameters>
+      KEY_DERIVER = AesGcmSivKeyManager::createAesGcmSivKeyFromRandomness;
+
+  private static final KeyManager<Aead> legacyKeyManager =
+      LegacyKeyManagerImpl.create(
+          "type.googleapis.com/google.crypto.tink.AesGcmSivKey",
+          Aead.class,
+          KeyMaterialType.SYMMETRIC,
+          com.google.crypto.tink.proto.AesGcmSivKey.parser());
+
+  @AccessesPartialKey
+  static com.google.crypto.tink.aead.AesGcmSivKey createAesGcmSivKeyFromRandomness(
+      AesGcmSivParameters parameters,
+      InputStream stream,
+      @Nullable Integer idRequirement,
+      SecretKeyAccess access)
+      throws GeneralSecurityException {
+    return com.google.crypto.tink.aead.AesGcmSivKey.builder()
+        .setParameters(parameters)
+        .setIdRequirement(idRequirement)
+        .setKeyBytes(Util.readIntoSecretBytes(stream, parameters.getKeySizeBytes(), access))
+        .build();
   }
 
-  @Override
-  public String getKeyType() {
-    return "type.googleapis.com/google.crypto.tink.AesGcmSivKey";
+  @AccessesPartialKey
+  private static com.google.crypto.tink.aead.AesGcmSivKey createAesGcmSivKey(
+      AesGcmSivParameters parameters, @Nullable Integer idRequirement)
+      throws GeneralSecurityException {
+    return com.google.crypto.tink.aead.AesGcmSivKey.builder()
+        .setParameters(parameters)
+        .setIdRequirement(idRequirement)
+        .setKeyBytes(SecretBytes.randomBytes(parameters.getKeySizeBytes()))
+        .build();
   }
 
-  @Override
-  public int getVersion() {
-    return 0;
-  }
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+    Map<String, Parameters> result = new HashMap<>();
 
-  @Override
-  public KeyMaterialType keyMaterialType() {
-    return KeyMaterialType.SYMMETRIC;
-  }
+    result.put(
+        "AES128_GCM_SIV",
+        AesGcmSivParameters.builder()
+            .setKeySizeBytes(16)
+            .setVariant(AesGcmSivParameters.Variant.TINK)
+            .build());
+    result.put(
+        "AES128_GCM_SIV_RAW",
+        AesGcmSivParameters.builder()
+            .setKeySizeBytes(16)
+            .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+            .build());
+    result.put(
+        "AES256_GCM_SIV",
+        AesGcmSivParameters.builder()
+            .setKeySizeBytes(32)
+            .setVariant(AesGcmSivParameters.Variant.TINK)
+            .build());
+    result.put(
+        "AES256_GCM_SIV_RAW",
+        AesGcmSivParameters.builder()
+            .setKeySizeBytes(32)
+            .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+            .build());
 
-  @Override
-  public void validateKey(AesGcmSivKey key) throws GeneralSecurityException {
-    Validators.validateVersion(key.getVersion(), getVersion());
-    Validators.validateAesKeySize(key.getKeyValue().size());
-  }
-
-  @Override
-  public AesGcmSivKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return AesGcmSivKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-  }
-
-  @Override
-  public KeyFactory<AesGcmSivKeyFormat, AesGcmSivKey> keyFactory() {
-    return new KeyFactory<AesGcmSivKeyFormat, AesGcmSivKey>(AesGcmSivKeyFormat.class) {
-      @Override
-      public void validateKeyFormat(AesGcmSivKeyFormat format) throws GeneralSecurityException {
-        Validators.validateAesKeySize(format.getKeySize());
-      }
-
-      @Override
-      public AesGcmSivKeyFormat parseKeyFormat(ByteString byteString)
-          throws InvalidProtocolBufferException {
-        return AesGcmSivKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-      }
-
-      @Override
-      public AesGcmSivKey createKey(AesGcmSivKeyFormat format) {
-        return AesGcmSivKey.newBuilder()
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
-            .setVersion(getVersion())
-            .build();
-      }
-
-      @Override
-      public AesGcmSivKey deriveKey(AesGcmSivKeyFormat format, InputStream inputStream)
-          throws GeneralSecurityException {
-        Validators.validateVersion(format.getVersion(), getVersion());
-
-        byte[] pseudorandomness = new byte[format.getKeySize()];
-        try {
-          readFully(inputStream, pseudorandomness);
-          return AesGcmSivKey.newBuilder()
-              .setKeyValue(ByteString.copyFrom(pseudorandomness))
-              .setVersion(getVersion())
-              .build();
-        } catch (IOException e) {
-          throw new GeneralSecurityException("Reading pseudorandomness failed", e);
-        }
-      }
-
-      @Override
-      public Map<String, KeyFactory.KeyFormat<AesGcmSivKeyFormat>> keyFormats()
-          throws GeneralSecurityException {
-        Map<String, KeyFactory.KeyFormat<AesGcmSivKeyFormat>> result = new HashMap<>();
-
-        result.put("AES128_GCM_SIV", createKeyFormat(16, KeyTemplate.OutputPrefixType.TINK));
-        result.put("AES128_GCM_SIV_RAW", createKeyFormat(16, KeyTemplate.OutputPrefixType.RAW));
-
-        result.put("AES256_GCM_SIV", createKeyFormat(32, KeyTemplate.OutputPrefixType.TINK));
-        result.put("AES256_GCM_SIV_RAW", createKeyFormat(32, KeyTemplate.OutputPrefixType.RAW));
-
-        return Collections.unmodifiableMap(result);
-      }
-    };
+    return Collections.unmodifiableMap(result);
   }
 
   private static boolean canUseAesGcmSive() {
@@ -149,9 +136,18 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
+    // We want to register key proto serialization even when AES-GCM-SIV is unavailable via the
+    // Java Cryptographic Extension framework (and thus via Tink) to enable operations that don't
+    // depend on the actual cryptographic primitive - for example, exporting keys to key management
+    // systems.
+    AesGcmSivProtoSerialization.register();
     if (canUseAesGcmSive()) {
-      Registry.registerKeyManager(new AesGcmSivKeyManager(), newKeyAllowed);
-      AesGcmSivProtoSerialization.register();
+      MutablePrimitiveRegistry.globalInstance()
+          .registerPrimitiveConstructor(AES_GCM_SIV_PRIMITIVE_CONSTRUCTOR);
+      MutableParametersRegistry.globalInstance().putAll(namedParameters());
+      MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, AesGcmSivParameters.class);
+      MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, AesGcmSivParameters.class);
+      Registry.registerKeyManager(legacyKeyManager, newKeyAllowed);
     }
   }
 
@@ -235,10 +231,5 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
                     .build()));
   }
 
-
-  private static KeyFactory.KeyFormat<AesGcmSivKeyFormat> createKeyFormat(
-      int keySize, KeyTemplate.OutputPrefixType prefixType) {
-    AesGcmSivKeyFormat format = AesGcmSivKeyFormat.newBuilder().setKeySize(keySize).build();
-    return new KeyFactory.KeyFormat<>(format, prefixType);
-  }
+  private AesGcmSivKeyManager() {}
 }

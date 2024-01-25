@@ -13,7 +13,7 @@ py_binary(
     python_version = "PY3",
     deps = [
         requirement("absl-py"),
-        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:secret_key_access",
         "@tink_py//tink:tink_python",
         "@tink_py//tink/aead",
     ],
@@ -23,7 +23,7 @@ py_library(
     name = "aead_basic",
     srcs = ["aead_basic.py"],
     deps = [
-        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:secret_key_access",
         "@tink_py//tink:tink_python",
         "@tink_py//tink/aead",
     ],
@@ -35,7 +35,7 @@ py_test(
     python_version = "PY3",
     deps = [
         requirement("absl-py"),
-        ":aead_basic"
+        ":aead_basic",
     ],
 )
 

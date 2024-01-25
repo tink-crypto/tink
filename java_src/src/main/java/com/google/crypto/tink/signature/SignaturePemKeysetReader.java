@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -166,13 +166,13 @@ public final class SignaturePemKeysetReader implements KeysetReader {
           RsaSsaPkcs1Params.newBuilder().setHashType(getHashType(pemKeyType)).build();
       RsaSsaPkcs1PublicKey pkcs1PubKey =
           RsaSsaPkcs1PublicKey.newBuilder()
-              .setVersion(new RsaSsaPkcs1VerifyKeyManager().getVersion())
+              .setVersion(0)
               .setParams(params)
               .setE(SigUtil.toUnsignedIntByteString(key.getPublicExponent()))
               .setN(SigUtil.toUnsignedIntByteString(key.getModulus()))
               .build();
       return KeyData.newBuilder()
-          .setTypeUrl(new RsaSsaPkcs1VerifyKeyManager().getKeyType())
+          .setTypeUrl(RsaSsaPkcs1VerifyKeyManager.getKeyType())
           .setValue(pkcs1PubKey.toByteString())
           .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC)
           .build();
@@ -185,13 +185,13 @@ public final class SignaturePemKeysetReader implements KeysetReader {
               .build();
       RsaSsaPssPublicKey pssPubKey =
           RsaSsaPssPublicKey.newBuilder()
-              .setVersion(new RsaSsaPssVerifyKeyManager().getVersion())
+              .setVersion(0)
               .setParams(params)
               .setE(SigUtil.toUnsignedIntByteString(key.getPublicExponent()))
               .setN(SigUtil.toUnsignedIntByteString(key.getModulus()))
               .build();
       return KeyData.newBuilder()
-          .setTypeUrl(new RsaSsaPssVerifyKeyManager().getKeyType())
+          .setTypeUrl(RsaSsaPssVerifyKeyManager.getKeyType())
           .setValue(pssPubKey.toByteString())
           .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC)
           .build();
@@ -210,14 +210,14 @@ public final class SignaturePemKeysetReader implements KeysetReader {
               .build();
       EcdsaPublicKey ecdsaPubKey =
           EcdsaPublicKey.newBuilder()
-              .setVersion(new EcdsaVerifyKeyManager().getVersion())
+              .setVersion(0)
               .setParams(params)
               .setX(SigUtil.toUnsignedIntByteString(key.getW().getAffineX()))
               .setY(SigUtil.toUnsignedIntByteString(key.getW().getAffineY()))
               .build();
 
       return KeyData.newBuilder()
-          .setTypeUrl(new EcdsaVerifyKeyManager().getKeyType())
+          .setTypeUrl(EcdsaVerifyKeyManager.getKeyType())
           .setValue(ecdsaPubKey.toByteString())
           .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PUBLIC)
           .build();

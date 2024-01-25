@@ -23,11 +23,17 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.aead.XChaCha20Poly1305Key;
+import com.google.crypto.tink.aead.XChaCha20Poly1305Parameters;
+import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.util.SecretBytes;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.HashSet;
 import javax.crypto.AEADBadTagException;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -234,5 +240,78 @@ public class XChaCha20Poly1305Test {
       ciphertexts.add(ctHex);
     }
     assertEquals(samples, ciphertexts.size());
+  }
+
+  /**
+   * Test case taken from Wycheproof (testcase 5)
+   * https://github.com/google/wycheproof/blob/b063b4aedae951c69df014cd25fa6d69ae9e8cb9/testvectors/xchacha20_poly1305_test.json#L69
+   */
+  @Test
+  public void testWithXChaCha20Poly1305Key_noPrefix_works() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+    byte[] plaintext = Hex.decode("e1");
+    byte[] associatedData = Hex.decode("6384f4714ff18c18");
+    byte[] keyBytes =
+        Hex.decode("697c197c9e0023c8eee42ddf08c12c46718a436561b0c66d998c81879f7cb74c");
+    XChaCha20Poly1305Key key =
+        XChaCha20Poly1305Key.create(SecretBytes.copyFrom(keyBytes, InsecureSecretKeyAccess.get()));
+    Aead aead = XChaCha20Poly1305.create(key);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    assertThat(ciphertext).hasLength(41); // msg (1) + iv(24) + tag(16)
+
+    assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+
+    byte[] fixedCiphertext =
+        Hex.decode(
+            "cd78f4533c94648feacd5aef0291b00b454ee3dcdb76dcc8b0e5e35f5332f91bdd2d28e59d68a0b141");
+    assertThat(aead.decrypt(fixedCiphertext, associatedData)).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void testWithXChaCha20Poly1305Key_tinkPrefix_works() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+    byte[] plaintext = Hex.decode("e1");
+    byte[] associatedData = Hex.decode("6384f4714ff18c18");
+    byte[] keyBytes =
+        Hex.decode("697c197c9e0023c8eee42ddf08c12c46718a436561b0c66d998c81879f7cb74c");
+    XChaCha20Poly1305Key key =
+        XChaCha20Poly1305Key.create(
+            XChaCha20Poly1305Parameters.Variant.TINK,
+            SecretBytes.copyFrom(keyBytes, InsecureSecretKeyAccess.get()),
+            0x99887766);
+    Aead aead = XChaCha20Poly1305.create(key);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    assertThat(ciphertext).hasLength(46); // prefix(5) + msg(1) + iv(24) + tag(16)
+
+    assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+
+    byte[] fixedCiphertext =
+        Hex.decode(
+            "0199887766cd78f4533c94648feacd5aef0291b00b454ee3dcdb76dcc8b0e5e35f5332f91bdd2d28e59d68a0b141");
+    assertThat(aead.decrypt(fixedCiphertext, associatedData)).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void testWithXChaCha20Poly1305Key_crunchyPrefix_works() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+    byte[] plaintext = Hex.decode("e1");
+    byte[] associatedData = Hex.decode("6384f4714ff18c18");
+    byte[] keyBytes =
+        Hex.decode("697c197c9e0023c8eee42ddf08c12c46718a436561b0c66d998c81879f7cb74c");
+    XChaCha20Poly1305Key key =
+        XChaCha20Poly1305Key.create(
+            XChaCha20Poly1305Parameters.Variant.CRUNCHY,
+            SecretBytes.copyFrom(keyBytes, InsecureSecretKeyAccess.get()),
+            0x99887766);
+    Aead aead = XChaCha20Poly1305.create(key);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    assertThat(ciphertext).hasLength(46); // prefix(5) + msg(1) + iv(24) + tag(16)
+
+    assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+
+    byte[] fixedCiphertext =
+        Hex.decode(
+            "0099887766cd78f4533c94648feacd5aef0291b00b454ee3dcdb76dcc8b0e5e35f5332f91bdd2d28e59d68a0b141");
+    assertThat(aead.decrypt(fixedCiphertext, associatedData)).isEqualTo(plaintext);
   }
 }

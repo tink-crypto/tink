@@ -18,8 +18,11 @@
 
 #include <memory>
 
+#include "tink/config/global_registry.h"
 #include "tink/keyderivation/internal/prf_based_deriver_key_manager.h"
-#include "tink/subtle/random.h"
+#include "tink/keyderivation/keyset_deriver.h"
+#include "tink/keyset_handle.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -45,7 +48,7 @@ KeyDerivationKeyTemplates::CreatePrfBasedKeyTemplate(
 
   // Verify `key_template` is derivable.
   util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
-      KeysetHandle::GenerateNew(key_template);
+      KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry());
   if (!handle.ok()) {
     return handle.status();
   }

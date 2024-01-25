@@ -225,7 +225,7 @@ public final class PrfBasedKeyDerivationKeyProtoSerializationTest {
             PrfBasedDeriverKeyFormat.newBuilder()
                 .setPrfKeyTemplate(
                     KeyTemplate.newBuilder()
-                        .setTypeUrl("Non Existent Type Url")
+                        .setTypeUrl("NonExistentTypeUrl")
                         .setValue(PRF_KEY_FORMAT_PROTO.toByteString())
                         .setOutputPrefixType(OutputPrefixType.RAW))
                 .setParams(

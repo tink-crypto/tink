@@ -42,7 +42,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * generate a new keyset that contains a single {@code AesSivKey}, one can do:
  *
  * <pre>
- *   Config.register(DeterministicAeadConfig.TINK_1_1_0);
+ *   DeterministicAeadConfig.register();
  *   KeysetHandle handle = KeysetHandle.generateNew(DeterministicAeadKeyTemplates.AES256_SIV);
  *   DeterministicAead daead = handle.getPrimitive(DeterministicAead.class);
  * </pre>
@@ -63,7 +63,7 @@ public final class DeterministicAeadKeyTemplates {
     AesSivKeyFormat format = AesSivKeyFormat.newBuilder().setKeySize(keySize).build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(new AesSivKeyManager().getKeyType())
+        .setTypeUrl(AesSivKeyManager.getKeyType())
         .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }

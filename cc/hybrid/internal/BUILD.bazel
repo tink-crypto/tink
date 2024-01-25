@@ -259,6 +259,44 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "config_v0",
+    srcs = ["config_v0.cc"],
+    hdrs = ["config_v0.h"],
+    include_prefix = "tink/hybrid/internal",
+    tags = ["requires_boringcrypto_update"],
+    deps = [
+        ":hpke_private_key_manager",
+        ":hpke_public_key_manager",
+        "//:configuration",
+        "//hybrid:ecies_aead_hkdf_private_key_manager",
+        "//hybrid:ecies_aead_hkdf_public_key_manager",
+        "//hybrid:hybrid_decrypt_wrapper",
+        "//hybrid:hybrid_encrypt_wrapper",
+        "//internal:configuration_impl",
+        "//util:status",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
+cc_library(
+    name = "key_gen_config_v0",
+    srcs = ["key_gen_config_v0.cc"],
+    hdrs = ["key_gen_config_v0.h"],
+    include_prefix = "tink/hybrid/internal",
+    tags = ["requires_boringcrypto_update"],
+    deps = [
+        ":hpke_private_key_manager",
+        ":hpke_public_key_manager",
+        "//:key_gen_configuration",
+        "//hybrid:ecies_aead_hkdf_private_key_manager",
+        "//hybrid:ecies_aead_hkdf_public_key_manager",
+        "//internal:key_gen_configuration_impl",
+        "//util:status",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -462,6 +500,32 @@ cc_test(
         ":hpke_test_util",
         ":hpke_util",
         "//proto:hpke_cc_proto",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "config_v0_test",
+    srcs = ["config_v0_test.cc"],
+    tags = ["requires_boringcrypto_update"],
+    deps = [
+        ":config_v0",
+        ":hpke_private_key_manager",
+        ":key_gen_config_v0",
+        "//:configuration",
+        "//:hybrid_decrypt",
+        "//:hybrid_encrypt",
+        "//:key_gen_configuration",
+        "//:keyset_handle",
+        "//hybrid:ecies_aead_hkdf_private_key_manager",
+        "//hybrid:hybrid_key_templates",
+        "//internal:configuration_impl",
+        "//internal:key_gen_configuration_impl",
+        "//internal:key_type_info_store",
+        "//internal:keyset_wrapper_store",
+        "//proto:tink_cc_proto",
+        "//util:statusor",
         "//util:test_matchers",
         "@com_google_googletest//:gtest_main",
     ],

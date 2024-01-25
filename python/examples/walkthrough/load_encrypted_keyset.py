@@ -52,9 +52,9 @@ def LoadEncryptedKeyset(json_serialized_encrypted_keyset: str, kms_key_uri: str,
   template = aead.aead_key_templates.create_kms_aead_key_template(kms_key_uri)
   keyset_handle = tink.new_keyset_handle(template)
   kms_aead = keyset_handle.primitive(aead.Aead)
-  return tink.read_keyset_handle_with_associated_data(
-      tink.JsonKeysetReader(json_serialized_encrypted_keyset), kms_aead,
-      associated_data)
+  return tink.json_proto_keyset_format.parse_encrypted(
+      json_serialized_encrypted_keyset, kms_aead, associated_data
+  )
 
 
 # [END tink_walkthrough_load_encrypted_keyset]

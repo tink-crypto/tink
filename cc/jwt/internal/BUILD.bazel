@@ -70,8 +70,8 @@ cc_test(
     srcs = ["json_util_test.cc"],
     deps = [
         ":json_util",
+        "//util:statusor",
         "//util:test_matchers",
-        "//util:test_util",
         "@com_google_googletest//:gtest_main",
     ],
 )

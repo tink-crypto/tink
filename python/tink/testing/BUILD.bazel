@@ -84,10 +84,9 @@ py_library(
     srcs = ["fake_kms.py"],
     srcs_version = "PY3",
     deps = [
-        "//tink:cleartext_keyset_handle",
+        "//tink:secret_key_access",
         "//tink:tink_python",
         "//tink/aead",
-        "//tink/aead:_kms_aead_key_manager",
         "//tink/core",
     ],
 )

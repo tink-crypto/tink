@@ -26,7 +26,8 @@ go_test(
         "rsassapss_signer_verifier_test.go",
     ],
     data = [
-        "@wycheproof//testvectors:all",
+        "//testdata/testvectors:rsa_pss",
+        "//testdata/testvectors:rsa_signature",
     ],
     deps = [
         ":signature",

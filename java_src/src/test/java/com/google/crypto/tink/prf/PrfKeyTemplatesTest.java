@@ -33,6 +33,7 @@ import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
 /** Tests forPrfKeyTemplates */
+@SuppressWarnings("deprecation") // Testing a deprecated class.
 @RunWith(Theories.class)
 public final class PrfKeyTemplatesTest {
   @BeforeClass
@@ -42,17 +43,8 @@ public final class PrfKeyTemplatesTest {
 
   @Test
   public void hkdfSha256() throws Exception {
-    assertThat(PrfKeyTemplates.HKDF_SHA256.getTypeUrl())
-        .isEqualTo(new HkdfPrfKeyManager().getKeyType());
+    assertThat(PrfKeyTemplates.HKDF_SHA256.getTypeUrl()).isEqualTo(HkdfPrfKeyManager.getKeyType());
     assertThat(PrfKeyTemplates.HKDF_SHA256.getOutputPrefixType()).isEqualTo(OutputPrefixType.RAW);
-  }
-
-  @Test
-  public void hkdfSha256_worksWithKeyManager() throws Exception {
-    HkdfPrfKeyFormat format =
-        HkdfPrfKeyFormat.parseFrom(
-            PrfKeyTemplates.HKDF_SHA256.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    new HkdfPrfKeyManager().keyFactory().validateKeyFormat(format);
   }
 
   @Test

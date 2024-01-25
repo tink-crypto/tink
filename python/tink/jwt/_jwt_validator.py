@@ -14,7 +14,7 @@
 
 import datetime
 
-from typing import Optional
+from typing import Optional, cast
 from tink.jwt import _jwt_error
 from tink.jwt import _raw_jwt
 
@@ -66,7 +66,7 @@ class JwtValidator:
     if clock_skew:
       if clock_skew > _MAX_CLOCK_SKEW:
         raise ValueError('clock skew too large, max is 10 minutes')
-      self._clock_skew = clock_skew
+      self._clock_skew = cast(datetime.timedelta, clock_skew)
     else:
       self._clock_skew = datetime.timedelta()
     if fixed_now and not fixed_now.tzinfo:
@@ -76,19 +76,19 @@ class JwtValidator:
   def has_expected_type_header(self) -> bool:
     return self._expected_type_header is not None
 
-  def expected_type_header(self) -> str:
+  def expected_type_header(self) -> Optional[str]:
     return self._expected_type_header
 
   def has_expected_issuer(self) -> bool:
     return self._expected_issuer is not None
 
-  def expected_issuer(self) -> str:
+  def expected_issuer(self) -> Optional[str]:
     return self._expected_issuer
 
   def has_expected_audience(self) -> bool:
     return self._expected_audience is not None
 
-  def expected_audience(self) -> str:
+  def expected_audience(self) -> Optional[str]:
     return self._expected_audience
 
   def ignore_type_header(self) -> bool:
@@ -112,7 +112,7 @@ class JwtValidator:
   def has_fixed_now(self) -> bool:
     return self._fixed_now is not None
 
-  def fixed_now(self) -> datetime.datetime:
+  def fixed_now(self) -> Optional[datetime.datetime]:
     return self._fixed_now
 
 
@@ -155,7 +155,7 @@ def validate(validator: JwtValidator, raw_jwt: _raw_jwt.RawJwt) -> None:
     jwt.JwtInvalidError
   """
   if validator.has_fixed_now():
-    now = validator.fixed_now()
+    now = cast(datetime.datetime, validator.fixed_now())
   else:
     now = datetime.datetime.now(tz=datetime.timezone.utc)
   if not raw_jwt.has_expiration() and not validator.allow_missing_expiration():

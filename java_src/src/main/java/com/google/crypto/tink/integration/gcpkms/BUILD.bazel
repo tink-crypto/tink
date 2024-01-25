@@ -57,3 +57,9 @@ java_library(
         "@maven//:com_google_http_client_google_http_client_gson",
     ],
 )
+
+java_library(
+    name = "fake_key_management_service_client",
+    srcs = ["FakeKeyManagementServiceClient.java"],
+    deps = ["@maven//:com_google_cloud_google_cloud_kms"],
+)

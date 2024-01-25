@@ -16,19 +16,32 @@
 
 package com.google.crypto.tink.subtle;
 
+import static com.google.common.truth.Truth.assertThat;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.CryptoFormat;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.aead.AesCtrHmacAeadKey;
+import com.google.crypto.tink.aead.AesCtrHmacAeadParameters;
+import com.google.crypto.tink.aead.AesCtrHmacAeadParameters.HashType;
+import com.google.crypto.tink.aead.AesCtrHmacAeadParameters.Variant;
+import com.google.crypto.tink.util.SecretBytes;
 import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
 import java.util.Arrays;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Unit tests for {@link EncryptThenAuthenticate}. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public class EncryptThenAuthenticateTest {
   private static class RFCTestVector {
     public byte[] encKey;
@@ -62,9 +75,10 @@ public class EncryptThenAuthenticateTest {
   }
 
   // Test data from https://tools.ietf.org/html/draft-mcgrew-aead-aes-cbc-hmac-sha2-05. As we use
-  // CTR while RFC uses CBC mode, it's not possible to compare plaintexts. However, the test is
-  // still valueable to make sure that we correcly compute HMAC over ciphertext and aad.
-  final RFCTestVector[] rfcTestVectors = {
+  // CTR while the RFC uses CBC mode, it's not possible to compare plaintexts. However, the test is
+  // still valuable to make sure that we correctly compute HMAC over ciphertext and aad.
+  @DataPoints("rfcTestVectors")
+  public static final RFCTestVector[] RFC_TEST_VECTORS = {
     new RFCTestVector(
         "000102030405060708090a0b0c0d0e0f",
         "101112131415161718191a1b1c1d1e1f",
@@ -106,8 +120,8 @@ public class EncryptThenAuthenticateTest {
 
   @Test
   public void testRFCVectors() throws Exception {
-    for (int i = 0; i < rfcTestVectors.length; i++) {
-      RFCTestVector t = rfcTestVectors[i];
+    for (int i = 0; i < RFC_TEST_VECTORS.length; i++) {
+      RFCTestVector t = RFC_TEST_VECTORS[i];
       Aead aead = getAead(t.macKey, t.encKey, t.ivSize, t.tagLength, t.macAlg);
       Object unused = aead.decrypt(t.ciphertext, t.aad);
     }
@@ -225,6 +239,207 @@ public class EncryptThenAuthenticateTest {
     for (int i = 1; i < ciphertext.length; i++) {
       byte[] c1 = Arrays.copyOf(ciphertext, ciphertext.length - i);
       assertThrows(GeneralSecurityException.class, () -> aead.decrypt(c1, aad));
+    }
+  }
+
+  @Theory
+  public void create_RFCVectors_works(@FromDataPoints("rfcTestVectors") RFCTestVector t)
+      throws Exception {
+    AesCtrHmacAeadParameters.HashType hashType;
+    switch (t.macAlg) {
+      case "HMACSHA256":
+        hashType = HashType.SHA256;
+        break;
+      case "HMACSHA512":
+        hashType = HashType.SHA512;
+        break;
+      default:
+        throw new InvalidAlgorithmParameterException("unexpected hash type in RFC test vector");
+    }
+    AesCtrHmacAeadParameters parameters =
+        AesCtrHmacAeadParameters.builder()
+            .setAesKeySizeBytes(t.encKey.length)
+            .setHmacKeySizeBytes(t.macKey.length)
+            .setHashType(hashType)
+            .setTagSizeBytes(t.tagLength)
+            .setIvSizeBytes(t.ivSize)
+            .setVariant(Variant.NO_PREFIX)
+            .build();
+    AesCtrHmacAeadKey key =
+        AesCtrHmacAeadKey.builder()
+            .setAesKeyBytes(SecretBytes.copyFrom(t.encKey, InsecureSecretKeyAccess.get()))
+            .setHmacKeyBytes(SecretBytes.copyFrom(t.macKey, InsecureSecretKeyAccess.get()))
+            .setParameters(parameters)
+            .build();
+
+    Aead aead = EncryptThenAuthenticate.create(key);
+
+    Object unused = aead.decrypt(t.ciphertext, t.aad);
+  }
+
+  @Test
+  public void create_encryptDecryptRaw_works() throws Exception {
+    AesCtrHmacAeadParameters parameters =
+        AesCtrHmacAeadParameters.builder()
+            .setAesKeySizeBytes(32)
+            .setHmacKeySizeBytes(16)
+            .setTagSizeBytes(17)
+            .setHashType(HashType.SHA512)
+            .setIvSizeBytes(16)
+            .setVariant(Variant.NO_PREFIX)
+            .build();
+    AesCtrHmacAeadKey key =
+        AesCtrHmacAeadKey.builder()
+            .setAesKeyBytes(SecretBytes.randomBytes(32))
+            .setHmacKeyBytes(SecretBytes.randomBytes(16))
+            .setParameters(parameters)
+            .build();
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] aad = "aad".getBytes(UTF_8);
+
+    Aead aead = EncryptThenAuthenticate.create(key);
+
+    assertThat(aead.decrypt(aead.encrypt(plaintext, aad), aad)).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void create_encryptTink_hasPrefix() throws Exception {
+    AesCtrHmacAeadParameters parameters =
+        AesCtrHmacAeadParameters.builder()
+            .setAesKeySizeBytes(32)
+            .setHmacKeySizeBytes(32)
+            .setHashType(HashType.SHA512)
+            .setTagSizeBytes(17)
+            .setIvSizeBytes(15)
+            .setVariant(Variant.TINK)
+            .build();
+    AesCtrHmacAeadKey key =
+        AesCtrHmacAeadKey.builder()
+            .setAesKeyBytes(SecretBytes.randomBytes(32))
+            .setHmacKeyBytes(SecretBytes.randomBytes(32))
+            .setParameters(parameters)
+            .setIdRequirement(42)
+            .build();
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] aad = "aad".getBytes(UTF_8);
+
+    Aead aead = EncryptThenAuthenticate.create(key);
+    byte[] ciphertext = aead.encrypt(plaintext, aad);
+
+    assertThat(Arrays.copyOf(ciphertext, CryptoFormat.NON_RAW_PREFIX_SIZE))
+        .isEqualTo(key.getOutputPrefix().toByteArray());
+  }
+
+  @Test
+  public void create_encryptDecryptTink_works() throws Exception {
+    AesCtrHmacAeadParameters parameters =
+        AesCtrHmacAeadParameters.builder()
+            .setAesKeySizeBytes(32)
+            .setHmacKeySizeBytes(32)
+            .setHashType(HashType.SHA256)
+            .setTagSizeBytes(17)
+            .setIvSizeBytes(14)
+            .setVariant(Variant.TINK)
+            .build();
+    AesCtrHmacAeadKey key =
+        AesCtrHmacAeadKey.builder()
+            .setAesKeyBytes(SecretBytes.randomBytes(32))
+            .setHmacKeyBytes(SecretBytes.randomBytes(32))
+            .setParameters(parameters)
+            .setIdRequirement(42)
+            .build();
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] aad = "aad".getBytes(UTF_8);
+
+    Aead aead = EncryptThenAuthenticate.create(key);
+
+    assertThat(aead.decrypt(aead.encrypt(plaintext, aad), aad)).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void create_encryptCrunchy_hasPrefix() throws Exception {
+    AesCtrHmacAeadParameters parameters =
+        AesCtrHmacAeadParameters.builder()
+            .setAesKeySizeBytes(16)
+            .setHmacKeySizeBytes(32)
+            .setHashType(HashType.SHA256)
+            .setTagSizeBytes(18)
+            .setIvSizeBytes(13)
+            .setVariant(Variant.CRUNCHY)
+            .build();
+    AesCtrHmacAeadKey key =
+        AesCtrHmacAeadKey.builder()
+            .setAesKeyBytes(SecretBytes.randomBytes(16))
+            .setHmacKeyBytes(SecretBytes.randomBytes(32))
+            .setParameters(parameters)
+            .setIdRequirement(42)
+            .build();
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] aad = "aad".getBytes(UTF_8);
+
+    Aead aead = EncryptThenAuthenticate.create(key);
+    byte[] ciphertext = aead.encrypt(plaintext, aad);
+
+    assertThat(Arrays.copyOf(ciphertext, CryptoFormat.NON_RAW_PREFIX_SIZE))
+        .isEqualTo(key.getOutputPrefix().toByteArray());
+  }
+
+  @Test
+  public void create_encryptDecryptCrunchy_works() throws Exception {
+    AesCtrHmacAeadParameters parameters =
+        AesCtrHmacAeadParameters.builder()
+            .setAesKeySizeBytes(32)
+            .setHmacKeySizeBytes(16)
+            .setHashType(HashType.SHA512)
+            .setTagSizeBytes(16)
+            .setIvSizeBytes(12)
+            .setVariant(Variant.CRUNCHY)
+            .build();
+    AesCtrHmacAeadKey key =
+        AesCtrHmacAeadKey.builder()
+            .setAesKeyBytes(SecretBytes.randomBytes(32))
+            .setHmacKeyBytes(SecretBytes.randomBytes(16))
+            .setParameters(parameters)
+            .setIdRequirement(42)
+            .build();
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] aad = "aad".getBytes(UTF_8);
+
+    Aead aead = EncryptThenAuthenticate.create(key);
+
+    assertThat(aead.decrypt(aead.encrypt(plaintext, aad), aad)).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void create_bitFlipCiphertext_throws() throws Exception {
+    AesCtrHmacAeadParameters parameters =
+        AesCtrHmacAeadParameters.builder()
+            .setAesKeySizeBytes(32)
+            .setHmacKeySizeBytes(16)
+            .setHashType(HashType.SHA512)
+            .setTagSizeBytes(16)
+            .setIvSizeBytes(12)
+            .setVariant(Variant.CRUNCHY)
+            .build();
+    AesCtrHmacAeadKey key =
+        AesCtrHmacAeadKey.builder()
+            .setAesKeyBytes(SecretBytes.randomBytes(32))
+            .setHmacKeyBytes(SecretBytes.randomBytes(16))
+            .setParameters(parameters)
+            .setIdRequirement(42)
+            .build();
+    byte[] plaintext = Random.randBytes(1001);
+    byte[] aad = Random.randBytes(13);
+
+    Aead aead = EncryptThenAuthenticate.create(key);
+    byte[] ciphertext = aead.encrypt(plaintext, aad);
+
+    for (int i = 0; i < ciphertext.length; i++) {
+      for (int j = 0; j < 8; j++) {
+        byte[] c1 = Arrays.copyOf(ciphertext, ciphertext.length);
+        c1[i] = (byte) (c1[i] ^ (1 << j));
+        assertThrows(GeneralSecurityException.class, () -> aead.decrypt(c1, aad));
+      }
     }
   }
 

@@ -2,7 +2,10 @@
 # distribution. Note that this file is used when creating distributions with
 # "python setup.py sdist" or "python setup.py bdist_wheel".
 include requirements.in
-include requirements.txt
+include requirements_awskms.in
+include requirements_gcpkms.in
+# Required by tink_py_deps_init.bzl.
+include requirements_all.txt
 include .bazelrc
 include .bazelversion
 include VERSION

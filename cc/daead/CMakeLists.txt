@@ -1,6 +1,7 @@
-add_subdirectory(subtle)
-
 tink_module(daead)
+
+add_subdirectory(subtle)
+add_subdirectory(internal)
 
 tink_cc_library(
   NAME aes_siv_key_manager
@@ -171,6 +172,28 @@ tink_cc_library(
     tink::proto::tink_cc_proto
 )
 
+tink_cc_library(
+  NAME config_v0
+  SRCS
+    config_v0.cc
+    config_v0.h
+  DEPS
+    absl::check
+    tink::core::configuration
+    tink::daead::internal::config_v0
+)
+
+tink_cc_library(
+  NAME key_gen_config_v0
+  SRCS
+    key_gen_config_v0.cc
+    key_gen_config_v0.h
+  DEPS
+    absl::check
+    tink::core::key_gen_configuration
+    tink::daead::internal::key_gen_config_v0
+)
+
 # tests
 
 tink_cc_test(
@@ -324,5 +347,21 @@ tink_cc_test(
     tink::subtle::random
     tink::util::test_matchers
     tink::proto::aes_siv_cc_proto
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_test(
+  NAME config_v0_test
+  SRCS
+    config_v0_test.cc
+  DEPS
+    tink::daead::config_v0
+    tink::daead::deterministic_aead_key_templates
+    tink::daead::key_gen_config_v0
+    gmock
+    tink::core::deterministic_aead
+    tink::core::keyset_handle
+    tink::util::statusor
+    tink::util::test_matchers
     tink::proto::tink_cc_proto
 )

@@ -82,8 +82,6 @@ util::StatusOr<std::string> HybridDecryptSetWrapper::Decrypt(
                 hybrid_decrypt_entry->get_key_id(), ciphertext.size());
           }
           return std::move(decrypt_result.value());
-        } else {
-          // LOG that a matching key didn't decrypt the ciphertext.
         }
       }
     }

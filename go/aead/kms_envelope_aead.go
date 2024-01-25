@@ -91,6 +91,9 @@ func (a *KMSEnvelopeAEAD) Encrypt(pt, aad []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	if len(encryptedDEK) == 0 {
+		return nil, errors.New("encrypted dek is empty")
+	}
 	p, err := registry.Primitive(a.dekTemplate.TypeUrl, dek)
 	if err != nil {
 		return nil, err

@@ -16,10 +16,16 @@
 
 package com.google.crypto.tink;
 
-/** Test-only utilities for KmsClients.*/
+/**
+ * Test-only utilities for KmsClients.
+ *
+ * @deprecated KmsClients is deprecated.
+ */
+@Deprecated // We do not recommend using this API, but there are no plans to remove it.
 public final class KmsClientsTestUtil {
 
   /** Resets KmsClients, should only be used for testing. */
+  @Deprecated // We do not recommend using this API, but there are no plans to remove it.
   public static void reset() {
     KmsClients.reset();
   }

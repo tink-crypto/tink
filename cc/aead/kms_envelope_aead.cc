@@ -23,6 +23,7 @@
 #include <utility>
 
 #include "absl/base/internal/endian.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
@@ -72,9 +73,8 @@ util::StatusOr<std::unique_ptr<Aead>> KmsEnvelopeAead::New(
   }
   auto km_result = Registry::get_key_manager<Aead>(dek_template.type_url());
   if (!km_result.ok()) return km_result.status();
-  std::unique_ptr<Aead> envelope_aead(
+  return absl::WrapUnique(
       new KmsEnvelopeAead(dek_template, std::move(remote_aead)));
-  return std::move(envelope_aead);
 }
 
 util::StatusOr<std::string> KmsEnvelopeAead::Encrypt(

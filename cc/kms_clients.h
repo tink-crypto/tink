@@ -40,6 +40,9 @@ class KmsClients {
  public:
   // Adds 'kms_client', which must be non-null, to the list
   // of the list of known clients.
+  ABSL_DEPRECATED(
+      "KmsClients::Add is deprecated. Use the getAead method on the KmsClient"
+      "directly, without registering the client.")
   static crypto::tink::util::Status Add(std::unique_ptr<KmsClient> kms_client) {
     return GlobalInstance().LocalAdd(std::move(kms_client));
   }
@@ -47,6 +50,9 @@ class KmsClients {
   // Returns the first KmsClient that was added previously via Add(),
   // and that does support 'key_uri', which must be non-empty.
   // Retains the ownership of the returned KmsClient.
+  ABSL_DEPRECATED(
+      "KmsClients::Get is deprecated. Use the getAead method on the KmsClient"
+      "directly, without registering the client.")
   static crypto::tink::util::StatusOr<const KmsClient*>
       Get(absl::string_view key_uri) {
     return GlobalInstance().LocalGet(key_uri);

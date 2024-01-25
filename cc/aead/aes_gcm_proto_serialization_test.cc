@@ -40,7 +40,6 @@ namespace {
 
 using ::crypto::tink::subtle::Random;
 using ::crypto::tink::test::IsOk;
-using ::crypto::tink::test::IsOkAndHolds;
 using ::crypto::tink::test::StatusIs;
 using ::google::crypto::tink::AesGcmKeyFormat;
 using ::google::crypto::tink::KeyData;
@@ -67,6 +66,11 @@ class AesGcmProtoSerializationTest : public TestWithParam<TestCase> {
     internal::MutableSerializationRegistry::GlobalInstance().Reset();
   }
 };
+
+TEST_F(AesGcmProtoSerializationTest, RegisterTwiceSucceeds) {
+  ASSERT_THAT(RegisterAesGcmProtoSerialization(), IsOk());
+  ASSERT_THAT(RegisterAesGcmProtoSerialization(), IsOk());
+}
 
 INSTANTIATE_TEST_SUITE_P(
     AesGcmProtoSerializationTestSuite, AesGcmProtoSerializationTest,

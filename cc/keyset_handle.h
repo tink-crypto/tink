@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@
 #include "tink/keyset_writer.h"
 #include "tink/primitive_set.h"
 #include "tink/registry.h"
+#include "tink/util/secret_proto.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
@@ -63,8 +64,7 @@ class KeysetHandle {
   class Entry {
    public:
     // May return an internal class in case there is no implementation of the
-    // corresponding key class yet.  Returned value only valid for lifetime
-    // of entry object.
+    // corresponding key class yet.
     std::shared_ptr<const Key> GetKey() const { return key_; }
 
     // Status indicates whether or not a key should still be used.
@@ -96,7 +96,7 @@ class KeysetHandle {
   };
 
   // Returns the number of entries in this keyset.
-  int size() const { return keyset_.key_size(); }
+  int size() const { return keyset_->key_size(); }
   // Validates single `KeysetHandle::Entry` at `index` by making sure that the
   // key entry's type URL is printable and that it has a valid key status.
   crypto::tink::util::Status ValidateAt(int index) const;
@@ -153,10 +153,10 @@ class KeysetHandle {
   GenerateNew(const google::crypto::tink::KeyTemplate& key_template,
               const crypto::tink::KeyGenConfiguration& config);
 
-  // TODO(b/265865177): Deprecate and inline.
   // Returns a KeysetHandle containing one new key generated according to
   // `key_template` using the global registry. When specified, the keyset is
   //  annotated for monitoring with `monitoring_annotations`.
+  ABSL_DEPRECATED("Inline this function's body at its call sites")
   static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
   GenerateNew(const google::crypto::tink::KeyTemplate& key_template,
               const absl::flat_hash_map<std::string, std::string>&
@@ -164,6 +164,7 @@ class KeysetHandle {
     return GenerateNew(key_template, crypto::tink::KeyGenConfigGlobalRegistry(),
                        monitoring_annotations);
   }
+  ABSL_DEPRECATED("Inline this function's body at its call sites")
   static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
   GenerateNew(const google::crypto::tink::KeyTemplate& key_template) {
     return GenerateNew(key_template,
@@ -205,8 +206,11 @@ class KeysetHandle {
   // private keys in this handle. Relies on key type managers stored in the
   // global registry to do so. Returns an error if this handle contains keys
   // that are not private keys.
+  ABSL_DEPRECATED("Inline this function's body at its call sites")
   crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
-  GetPublicKeysetHandle() const;
+  GetPublicKeysetHandle() const {
+    return GetPublicKeysetHandle(crypto::tink::KeyGenConfigGlobalRegistry());
+  }
 
   // Creates a wrapped primitive using this keyset handle and config, which
   // stores necessary primitive wrappers and key type managers.
@@ -217,16 +221,21 @@ class KeysetHandle {
   // Creates a wrapped primitive using this keyset handle and the global
   // registry, which stores necessary primitive wrappers and key type managers.
   template <class P>
-  crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive() const;
+  ABSL_DEPRECATED("Inline this function's body at its call sites")
+  crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive() const {
+    return GetPrimitive<P>(crypto::tink::ConfigGlobalRegistry());
+  }
 
   // Creates a wrapped primitive corresponding to this keyset. Uses the given
   // KeyManager, as well as the KeyManager and PrimitiveWrapper objects in the
   // global registry to create the primitive. The given KeyManager is used for
   // keys supported by it. For those, the registry is ignored.
+  // TINK-PENDING-REMOVAL-IN-3.0.0-START
   template <class P>
   ABSL_DEPRECATED("Register the keymanager and use GetPrimitive")
   crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
       const KeyManager<P>* custom_manager) const;
+  // TINK-PENDING-REMOVAL-IN-3.0.0-END
 
  private:
   // The classes below need access to get_keyset();
@@ -240,45 +249,27 @@ class KeysetHandle {
   friend class KeysetHandleBuilder;
 
   // Creates a handle that contains the given keyset.
-  explicit KeysetHandle(google::crypto::tink::Keyset keyset)
+  explicit KeysetHandle(util::SecretProto<google::crypto::tink::Keyset> keyset)
       : keyset_(std::move(keyset)) {}
-  explicit KeysetHandle(std::unique_ptr<google::crypto::tink::Keyset> keyset)
-      : keyset_(std::move(*keyset)) {}
   // Creates a handle that contains the given `keyset` and `entries`.
-  explicit KeysetHandle(
-      google::crypto::tink::Keyset keyset,
+  KeysetHandle(
+      util::SecretProto<google::crypto::tink::Keyset> keyset,
       const std::vector<std::shared_ptr<const Entry>>& entries)
       : keyset_(std::move(keyset)), entries_(entries) {}
-  explicit KeysetHandle(
-      std::unique_ptr<google::crypto::tink::Keyset> keyset,
-      const std::vector<std::shared_ptr<const Entry>>& entries)
-      : keyset_(std::move(*keyset)), entries_(entries) {}
   // Creates a handle that contains the given `keyset` and
   // `monitoring_annotations`.
-  KeysetHandle(google::crypto::tink::Keyset keyset,
-               const absl::flat_hash_map<std::string, std::string>&
-                   monitoring_annotations)
-      : keyset_(std::move(keyset)),
-        monitoring_annotations_(monitoring_annotations) {}
-  KeysetHandle(std::unique_ptr<google::crypto::tink::Keyset> keyset,
+  KeysetHandle(util::SecretProto<google::crypto::tink::Keyset> keyset,
                const absl::flat_hash_map<std::string, std::string>&
                    monitoring_annotations)
       : keyset_(std::move(*keyset)),
         monitoring_annotations_(monitoring_annotations) {}
   // Creates a handle that contains the given `keyset`, `entries`, and
   // `monitoring_annotations`.
-  KeysetHandle(google::crypto::tink::Keyset keyset,
+  KeysetHandle(util::SecretProto<google::crypto::tink::Keyset> keyset,
                const std::vector<std::shared_ptr<const Entry>>& entries,
                const absl::flat_hash_map<std::string, std::string>&
                    monitoring_annotations)
       : keyset_(std::move(keyset)),
-        entries_(entries),
-        monitoring_annotations_(monitoring_annotations) {}
-  KeysetHandle(std::unique_ptr<google::crypto::tink::Keyset> keyset,
-               const std::vector<std::shared_ptr<const Entry>>& entries,
-               const absl::flat_hash_map<std::string, std::string>&
-                   monitoring_annotations)
-      : keyset_(std::move(*keyset)),
         entries_(entries),
         monitoring_annotations_(monitoring_annotations) {}
 
@@ -303,7 +294,7 @@ class KeysetHandle {
       const crypto::tink::KeyGenConfiguration& config);
 
   // Returns keyset held by this handle.
-  const google::crypto::tink::Keyset& get_keyset() const { return keyset_; }
+  const google::crypto::tink::Keyset& get_keyset() const { return *keyset_; }
 
   // Creates a set of primitives corresponding to the keys with
   // (status == ENABLED) in the keyset given in 'keyset_handle',
@@ -319,7 +310,7 @@ class KeysetHandle {
   // Creates KeysetHandle::Entry from `keyset_` at `index`.
   Entry CreateEntryAt(int index) const;
 
-  google::crypto::tink::Keyset keyset_;
+  util::SecretProto<google::crypto::tink::Keyset> keyset_;
   // If this keyset handle has been created with a constructor that does not
   // accept an entries argument, then `entries` will be empty and operator[]
   // will fall back to creating the key entry on demand from `keyset_`.
@@ -336,11 +327,11 @@ class KeysetHandle {
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<PrimitiveSet<P>>>
 KeysetHandle::GetPrimitives(const KeyManager<P>* custom_manager) const {
-  crypto::tink::util::Status status = ValidateKeyset(get_keyset());
+  crypto::tink::util::Status status = ValidateKeyset(*keyset_);
   if (!status.ok()) return status;
   typename PrimitiveSet<P>::Builder primitives_builder;
   primitives_builder.AddAnnotations(monitoring_annotations_);
-  for (const google::crypto::tink::Keyset::Key& key : get_keyset().key()) {
+  for (const google::crypto::tink::Keyset::Key& key : keyset_->key()) {
     if (key.status() == google::crypto::tink::KeyStatusType::ENABLED) {
       std::unique_ptr<P> primitive;
       if (custom_manager != nullptr &&
@@ -353,7 +344,7 @@ KeysetHandle::GetPrimitives(const KeyManager<P>* custom_manager) const {
         if (!primitive_result.ok()) return primitive_result.status();
         primitive = std::move(primitive_result.value());
       }
-      if (key.key_id() == get_keyset().primary_key_id()) {
+      if (key.key_id() == keyset_->primary_key_id()) {
         primitives_builder.AddPrimaryPrimitive(std::move(primitive),
                                                KeyInfoFromKey(key));
       } else {
@@ -373,7 +364,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive(
   if (crypto::tink::internal::ConfigurationImpl::IsInGlobalRegistryMode(
           config)) {
     return crypto::tink::internal::RegistryImpl::GlobalInstance().WrapKeyset<P>(
-        keyset_, monitoring_annotations_);
+        *keyset_, monitoring_annotations_);
   }
 
   crypto::tink::util::StatusOr<
@@ -389,16 +380,10 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive(
   if (!wrapper.ok()) {
     return wrapper.status();
   }
-  return (*wrapper)->Wrap(keyset_, monitoring_annotations_);
+  return (*wrapper)->Wrap(*keyset_, monitoring_annotations_);
 }
 
-template <class P>
-ABSL_DEPRECATED("Inline this function's body at its call sites")
-crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive()
-    const {
-  return GetPrimitive<P>(crypto::tink::ConfigGlobalRegistry());
-}
-
+// TINK-PENDING-REMOVAL-IN-3.0.0-START
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive(
     const KeyManager<P>* custom_manager) const {
@@ -412,6 +397,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive(
   }
   return Registry::Wrap<P>(std::move(primitives_result.value()));
 }
+// TINK-PENDING-REMOVAL-IN-3.0.0-END
 
 }  // namespace tink
 }  // namespace crypto

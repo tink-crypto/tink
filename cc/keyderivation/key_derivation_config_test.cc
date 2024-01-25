@@ -21,11 +21,15 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
+#include "tink/aead.h"
 #include "tink/aead/aead_config.h"
 #include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_gcm_key_manager.h"
+#include "tink/config/global_registry.h"
 #include "tink/keyderivation/key_derivation_key_templates.h"
 #include "tink/keyderivation/keyset_deriver.h"
+#include "tink/keyset_handle.h"
 #include "tink/prf/prf_key_templates.h"
 #include "tink/registry.h"
 #include "tink/util/statusor.h"
@@ -57,7 +61,7 @@ TEST(KeyDerivationConfigTest, Register) {
           PrfKeyTemplates::HkdfSha256(), AeadKeyTemplates::Aes256Gcm());
   ASSERT_THAT(templ, IsOk());
   util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
-      KeysetHandle::GenerateNew(*templ);
+      KeysetHandle::GenerateNew(*templ, KeyGenConfigGlobalRegistry());
   ASSERT_THAT(handle, IsOk());
   util::StatusOr<std::unique_ptr<KeysetDeriver>> deriver =
       (*handle)->GetPrimitive<crypto::tink::KeysetDeriver>(

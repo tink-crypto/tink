@@ -18,190 +18,106 @@ package com.google.crypto.tink.prf;
 
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
+import com.google.crypto.tink.AccessesPartialKey;
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
+import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
+import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
+import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
-import com.google.crypto.tink.internal.PrimitiveFactory;
-import com.google.crypto.tink.proto.HashType;
-import com.google.crypto.tink.proto.HmacPrfKey;
-import com.google.crypto.tink.proto.HmacPrfKeyFormat;
-import com.google.crypto.tink.proto.HmacPrfParams;
+import com.google.crypto.tink.internal.Util;
+import com.google.crypto.tink.prf.internal.HmacPrfProtoSerialization;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.PrfHmacJce;
-import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.Validators;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
-import java.io.IOException;
+import com.google.crypto.tink.util.SecretBytes;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import javax.crypto.spec.SecretKeySpec;
+import javax.annotation.Nullable;
 
 /**
  * This key manager generates new {@code HmacPrfKey} keys and produces new instances of {@code
  * PrfHmacJce}.
  */
-public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
-  public HmacPrfKeyManager() {
-    super(
-        HmacPrfKey.class,
-        new PrimitiveFactory<Prf, HmacPrfKey>(Prf.class) {
-          @Override
-          public Prf getPrimitive(HmacPrfKey key) throws GeneralSecurityException {
-            HashType hash = key.getParams().getHash();
-            byte[] keyValue = key.getKeyValue().toByteArray();
-            SecretKeySpec keySpec = new SecretKeySpec(keyValue, "HMAC");
-            switch (hash) {
-              case SHA1:
-                return new PrfHmacJce("HMACSHA1", keySpec);
-              case SHA224:
-                return new PrfHmacJce("HMACSHA224", keySpec);
-              case SHA256:
-                return new PrfHmacJce("HMACSHA256", keySpec);
-              case SHA384:
-                return new PrfHmacJce("HMACSHA384", keySpec);
-              case SHA512:
-                return new PrfHmacJce("HMACSHA512", keySpec);
-              default:
-                throw new GeneralSecurityException("unknown hash");
-            }
-          }
-        });
-  }
-
-  /** Minimum key size in bytes. */
-  private static final int MIN_KEY_SIZE_IN_BYTES = 16;
+public final class HmacPrfKeyManager {
 
   private static final PrimitiveConstructor<com.google.crypto.tink.prf.HmacPrfKey, Prf>
       PRF_PRIMITIVE_CONSTRUCTOR =
           PrimitiveConstructor.create(
               PrfHmacJce::create, com.google.crypto.tink.prf.HmacPrfKey.class, Prf.class);
 
-  @Override
-  public String getKeyType() {
+  private static final KeyManager<Prf> legacyKeyManager =
+      LegacyKeyManagerImpl.create(
+          getKeyType(),
+          Prf.class,
+          KeyMaterialType.SYMMETRIC,
+          com.google.crypto.tink.proto.HmacPrfKey.parser());
+
+  @AccessesPartialKey
+  private static HmacPrfKey newKey(HmacPrfParameters parameters, @Nullable Integer idRequirement)
+      throws GeneralSecurityException {
+    if (idRequirement != null) {
+      throw new GeneralSecurityException("Id Requirement is not supported for HMAC PRF keys");
+    }
+    return HmacPrfKey.builder()
+        .setParameters(parameters)
+        .setKeyBytes(SecretBytes.randomBytes(parameters.getKeySizeBytes()))
+        .build();
+  }
+
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyCreationRegistry.KeyCreator<HmacPrfParameters> KEY_CREATOR =
+      HmacPrfKeyManager::newKey;
+
+  static String getKeyType() {
     return "type.googleapis.com/google.crypto.tink.HmacPrfKey";
   }
 
-  @Override
-  public int getVersion() {
-    return 0;
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyDerivationRegistry.InsecureKeyCreator<HmacPrfParameters>
+      KEY_DERIVER = HmacPrfKeyManager::createHmacKeyFromRandomness;
+
+  @AccessesPartialKey
+  static com.google.crypto.tink.prf.HmacPrfKey createHmacKeyFromRandomness(
+      HmacPrfParameters parameters,
+      InputStream stream,
+      @Nullable Integer idRequirement,
+      SecretKeyAccess access)
+      throws GeneralSecurityException {
+    return com.google.crypto.tink.prf.HmacPrfKey.builder()
+        .setParameters(parameters)
+        .setKeyBytes(Util.readIntoSecretBytes(stream, parameters.getKeySizeBytes(), access))
+        .build();
   }
 
-  @Override
-  public KeyMaterialType keyMaterialType() {
-    return KeyMaterialType.SYMMETRIC;
-  }
-
-  @Override
-  public void validateKey(HmacPrfKey key) throws GeneralSecurityException {
-    Validators.validateVersion(key.getVersion(), getVersion());
-    if (key.getKeyValue().size() < MIN_KEY_SIZE_IN_BYTES) {
-      throw new GeneralSecurityException("key too short");
-    }
-    validateParams(key.getParams());
-  }
-
-  @Override
-  public HmacPrfKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return HmacPrfKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-  }
-
-  private static void validateParams(HmacPrfParams params) throws GeneralSecurityException {
-    if (params.getHash() != HashType.SHA1
-        && params.getHash() != HashType.SHA224
-        && params.getHash() != HashType.SHA256
-        && params.getHash() != HashType.SHA384
-        && params.getHash() != HashType.SHA512) {
-      throw new GeneralSecurityException("unknown hash type");
-    }
-  }
-
-  @Override
-  public KeyFactory<HmacPrfKeyFormat, HmacPrfKey> keyFactory() {
-    return new KeyFactory<HmacPrfKeyFormat, HmacPrfKey>(HmacPrfKeyFormat.class) {
-      @Override
-      public void validateKeyFormat(HmacPrfKeyFormat format) throws GeneralSecurityException {
-        if (format.getKeySize() < MIN_KEY_SIZE_IN_BYTES) {
-          throw new GeneralSecurityException("key too short");
-        }
-        validateParams(format.getParams());
-      }
-
-      @Override
-      public HmacPrfKeyFormat parseKeyFormat(ByteString byteString)
-          throws InvalidProtocolBufferException {
-        return HmacPrfKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-      }
-
-      @Override
-      public HmacPrfKey createKey(HmacPrfKeyFormat format) {
-        return HmacPrfKey.newBuilder()
-            .setVersion(getVersion())
-            .setParams(format.getParams())
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
-            .build();
-      }
-
-      @Override
-      public HmacPrfKey deriveKey(HmacPrfKeyFormat format, InputStream inputStream)
-          throws GeneralSecurityException {
-        Validators.validateVersion(format.getVersion(), getVersion());
-        byte[] pseudorandomness = new byte[format.getKeySize()];
-        try {
-          readFully(inputStream, pseudorandomness);
-          return HmacPrfKey.newBuilder()
-              .setVersion(getVersion())
-              .setParams(format.getParams())
-              .setKeyValue(ByteString.copyFrom(pseudorandomness))
-              .build();
-        } catch (IOException e) {
-          throw new GeneralSecurityException("Reading pseudorandomness failed", e);
-        }
-      }
-
-      @Override
-      public Map<String, KeyFactory.KeyFormat<HmacPrfKeyFormat>> keyFormats()
-          throws GeneralSecurityException {
-        Map<String, KeyFactory.KeyFormat<HmacPrfKeyFormat>> result = new HashMap<>();
-        result.put(
-            "HMAC_SHA256_PRF",
-            new KeyFactory.KeyFormat<>(
-                HmacPrfKeyFormat.newBuilder()
-                    .setParams(HmacPrfParams.newBuilder().setHash(HashType.SHA256).build())
-                    .setKeySize(32)
-                    .build(),
-                KeyTemplate.OutputPrefixType.RAW));
-        result.put(
-            "HMAC_SHA512_PRF",
-            new KeyFactory.KeyFormat<>(
-                HmacPrfKeyFormat.newBuilder()
-                    .setParams(HmacPrfParams.newBuilder().setHash(HashType.SHA512).build())
-                    .setKeySize(64)
-                    .build(),
-                KeyTemplate.OutputPrefixType.RAW));
-        return Collections.unmodifiableMap(result);
-      }
-    };
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
+        result.put("HMAC_SHA256_PRF", PredefinedPrfParameters.HMAC_SHA256_PRF);
+        result.put("HMAC_SHA512_PRF", PredefinedPrfParameters.HMAC_SHA512_PRF);
+    return Collections.unmodifiableMap(result);
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
-    Registry.registerKeyManager(new HmacPrfKeyManager(), newKeyAllowed);
     HmacPrfProtoSerialization.register();
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(PRF_PRIMITIVE_CONSTRUCTOR);
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
+    MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, HmacPrfParameters.class);
+    MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, HmacPrfParameters.class);
+    KeyManagerRegistry.globalInstance()
+        .registerKeyManagerWithFipsCompatibility(
+            legacyKeyManager,
+            TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO,
+            newKeyAllowed);
   }
-
-  @Override
-  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
-    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
-  };
 
   /**
    * Returns a {@link KeyTemplate} that generates new instances of HMAC keys with the following
@@ -242,4 +158,6 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
                     .setHashType(HmacPrfParameters.HashType.SHA512)
                     .build()));
   }
+
+  private HmacPrfKeyManager() {}
 }

@@ -136,6 +136,10 @@ class AeadKeyTemplates {
   //   templates, when you generate new keys with this template, Tink does not
   //   generate new key material, but only creates a reference to the remote
   //   KEK.
+  ABSL_DEPRECATED(
+      "AeadKeyTemplates::KmsEnvelopeAead is deprecated. Instead, get the remote"
+      "AEAD with KmsClient::GetAead, and then create the envelope AEAD using "
+      "KmsEnvelopeAead::New without registering the KmsClient object.")
   static google::crypto::tink::KeyTemplate KmsEnvelopeAead(
       absl::string_view kek_uri,
       const google::crypto::tink::KeyTemplate& dek_template);

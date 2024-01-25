@@ -58,8 +58,7 @@ class RawJwt:
   def __new__(cls):
     raise core.TinkError('RawJwt cannot be instantiated directly.')
 
-  def __init__(self, type_header: Optional[str], payload: Dict[str,
-                                                               Any]) -> None:
+  def __init__(self, type_header: Optional[str], payload: Any) -> None:
     # No need to copy payload, because only create and from_json_payload
     # call this method.
     if not isinstance(payload, Dict):
@@ -99,12 +98,11 @@ class RawJwt:
       if not all(isinstance(value, str) for value in audiences):
         raise _jwt_error.JwtInvalidError('audiences must only contain strings')
 
-  # TODO(juerg): Consider adding a raw_ prefix to all access methods
   def has_type_header(self) -> bool:
     return self._type_header is not None
 
   def type_header(self) -> str:
-    if not self.has_type_header():
+    if self._type_header is None:
       raise KeyError('type header is not set')
     return self._type_header
 
@@ -191,7 +189,7 @@ class RawJwt:
     if audience is not None and audiences is not None:
       raise _jwt_error.JwtInvalidError(
           'audience and audiences cannot be set at the same time')
-    payload = {}
+    payload: Dict[str, Any] = {}
     if issuer:
       payload['iss'] = issuer
     if subject:

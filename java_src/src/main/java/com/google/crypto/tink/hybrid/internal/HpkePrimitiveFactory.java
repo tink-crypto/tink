@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.hybrid.internal;
 
+import com.google.crypto.tink.hybrid.HpkeParameters;
 import com.google.crypto.tink.proto.HpkeParams;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import java.security.GeneralSecurityException;
@@ -57,6 +58,20 @@ public final class HpkePrimitiveFactory {
     throw new IllegalArgumentException("Unrecognized HPKE KEM identifier");
   }
 
+  /** Returns an {@link HpkeKem} primitive corresponding to {@code kemId}. */
+  public static HpkeKem createKem(HpkeParameters.KemId kemId) throws GeneralSecurityException {
+    if (kemId == HpkeParameters.KemId.DHKEM_X25519_HKDF_SHA256) {
+      return new X25519HpkeKem(new HkdfHpkeKdf("HmacSha256"));
+    } else if (kemId == HpkeParameters.KemId.DHKEM_P256_HKDF_SHA256) {
+      return NistCurvesHpkeKem.fromCurve(EllipticCurves.CurveType.NIST_P256);
+    } else if (kemId == HpkeParameters.KemId.DHKEM_P384_HKDF_SHA384) {
+      return NistCurvesHpkeKem.fromCurve(EllipticCurves.CurveType.NIST_P384);
+    } else if (kemId == HpkeParameters.KemId.DHKEM_P521_HKDF_SHA512) {
+      return NistCurvesHpkeKem.fromCurve(EllipticCurves.CurveType.NIST_P521);
+    }
+    throw new IllegalArgumentException("Unrecognized HPKE KEM identifier");
+  }
+
   /** Returns an {@link HpkeKdf} primitive corresponding to {@code kdfId}. */
   public static HpkeKdf createKdf(byte[] kdfId) {
     if (Arrays.equals(kdfId, HpkeUtil.HKDF_SHA256_KDF_ID)) {
@@ -84,6 +99,18 @@ public final class HpkePrimitiveFactory {
     throw new IllegalArgumentException("Unrecognized HPKE KDF identifier");
   }
 
+  /** Returns an {@link HpkeKdf} primitive corresponding to {@code kdfId}. */
+  public static HpkeKdf createKdf(HpkeParameters.KdfId kdfId) {
+    if (kdfId == HpkeParameters.KdfId.HKDF_SHA256) {
+      return new HkdfHpkeKdf("HmacSha256");
+    } else if (kdfId == HpkeParameters.KdfId.HKDF_SHA384) {
+      return new HkdfHpkeKdf("HmacSha384");
+    } else if (kdfId == HpkeParameters.KdfId.HKDF_SHA512) {
+      return new HkdfHpkeKdf("HmacSha512");
+    }
+    throw new IllegalArgumentException("Unrecognized HPKE KDF identifier");
+  }
+
   /** Returns an {@link HpkeAead} primitive corresponding to {@code aeadId}. */
   public static HpkeAead createAead(byte[] aeadId) throws GeneralSecurityException {
     if (Arrays.equals(aeadId, HpkeUtil.AES_128_GCM_AEAD_ID)) {
@@ -106,6 +133,18 @@ public final class HpkePrimitiveFactory {
     } else if (params.getAead() == com.google.crypto.tink.proto.HpkeAead.AES_256_GCM) {
       return new AesGcmHpkeAead(32);
     } else if (params.getAead() == com.google.crypto.tink.proto.HpkeAead.CHACHA20_POLY1305) {
+      return new ChaCha20Poly1305HpkeAead();
+    }
+    throw new IllegalArgumentException("Unrecognized HPKE AEAD identifier");
+  }
+
+  /** Returns an {@link HpkeAead} primitive corresponding to {@code aeadId}. */
+  public static HpkeAead createAead(HpkeParameters.AeadId aeadId) throws GeneralSecurityException {
+    if (aeadId == HpkeParameters.AeadId.AES_128_GCM) {
+      return new AesGcmHpkeAead(16);
+    } else if (aeadId == HpkeParameters.AeadId.AES_256_GCM) {
+      return new AesGcmHpkeAead(32);
+    } else if (aeadId == HpkeParameters.AeadId.CHACHA20_POLY1305) {
       return new ChaCha20Poly1305HpkeAead();
     }
     throw new IllegalArgumentException("Unrecognized HPKE AEAD identifier");

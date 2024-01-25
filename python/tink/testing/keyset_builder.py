@@ -13,11 +13,10 @@
 # limitations under the License.
 """Python implementation of a KeysetBuilder."""
 
-import io
 import random
 from tink.proto import tink_pb2
 import tink
-from tink import cleartext_keyset_handle
+from tink import secret_key_access
 
 _MAX_INT32 = 4294967295  # 2^32-1
 
@@ -58,19 +57,16 @@ class KeysetBuilder:
     self._keyset = keyset_proto
 
   def keyset_handle(self) -> tink.KeysetHandle:
-    keyset_copy = tink_pb2.Keyset()
-    keyset_copy.CopyFrom(self._keyset)
-    return cleartext_keyset_handle.from_keyset(keyset_copy)
+    return tink.proto_keyset_format.parse(
+        self._keyset.SerializeToString(), secret_key_access.TOKEN
+    )
 
   def keyset(self) -> bytes:
     return self._keyset.SerializeToString()
 
   def public_keyset(self) -> bytes:
     public_handle = self.keyset_handle().public_keyset_handle()
-    public_keyset = io.BytesIO()
-    writer = tink.BinaryKeysetWriter(public_keyset)
-    cleartext_keyset_handle.write(writer, public_handle)
-    return public_keyset.getvalue()
+    return tink.proto_keyset_format.serialize_without_secret(public_handle)
 
   def add_new_key(self, key_template: tink_pb2.KeyTemplate) -> int:
     """Generates a new key, adds it to the keyset, and returns its ID."""
@@ -123,10 +119,10 @@ def from_keyset(keyset: bytes) -> KeysetBuilder:
 
 def from_keyset_handle(keyset_handle: tink.KeysetHandle) -> KeysetBuilder:
   """Return a KeysetBuilder for a Keyset copied from a KeysetHandle."""
-  keyset_buffer = io.BytesIO()
-  cleartext_keyset_handle.write(
-      tink.BinaryKeysetWriter(keyset_buffer), keyset_handle)
-  return from_keyset(keyset_buffer.getvalue())
+  serialized_keyset = tink.proto_keyset_format.serialize(
+      keyset_handle, secret_key_access.TOKEN
+  )
+  return from_keyset(serialized_keyset)
 
 
 def new_keyset_builder() -> KeysetBuilder:

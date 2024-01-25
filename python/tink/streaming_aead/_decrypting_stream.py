@@ -17,7 +17,7 @@ It reads the ciphertext from a given other file-like object, and decrypts it.
 """
 
 import io
-from typing import BinaryIO
+from typing import BinaryIO, Optional
 
 from tink import core
 from tink.cc.pybind import tink_bindings
@@ -66,7 +66,7 @@ class RawDecryptingStream(io.RawIOBase):
     """Implemented as a separate method to ensure correct error transform."""
     return self._input_stream_adapter.read(size)
 
-  def read(self, size=-1) -> bytes:
+  def read(self, size: Optional[int] = -1) -> bytes:
     """Read and return up to size bytes, where size is an int.
 
     It blocks until at least one byte can be returned.

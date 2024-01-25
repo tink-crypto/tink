@@ -48,6 +48,7 @@
 #include "tink/restricted_data.h"
 #include "tink/util/errors.h"
 #include "tink/util/keyset_util.h"
+#include "tink/util/secret_proto.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -76,13 +77,13 @@ util::StatusOr<std::unique_ptr<EncryptedKeyset>> Encrypt(
   return std::move(enc_keyset);
 }
 
-util::StatusOr<std::unique_ptr<Keyset>> Decrypt(
+util::StatusOr<util::SecretProto<Keyset>> Decrypt(
     const EncryptedKeyset& enc_keyset, const Aead& master_key_aead,
     absl::string_view associated_data) {
   auto decrypt_result =
       master_key_aead.Decrypt(enc_keyset.encrypted_keyset(), associated_data);
   if (!decrypt_result.ok()) return decrypt_result.status();
-  auto keyset = absl::make_unique<Keyset>();
+  util::SecretProto<Keyset> keyset;
   if (!keyset->ParseFromString(decrypt_result.value())) {
     return util::Status(
         absl::StatusCode::kInvalidArgument,
@@ -122,7 +123,7 @@ util::StatusOr<internal::ProtoKeySerialization> ToProtoKeySerialization(
 }  // anonymous namespace
 
 util::Status KeysetHandle::ValidateAt(int index) const {
-  const Keyset::Key& proto_key = get_keyset().key(index);
+  const Keyset::Key& proto_key = keyset_->key(index);
   OutputPrefixType output_prefix_type = proto_key.output_prefix_type();
   absl::optional<int> id_requirement = absl::nullopt;
   if (output_prefix_type != OutputPrefixType::RAW) {
@@ -143,14 +144,13 @@ util::Status KeysetHandle::ValidateAt(int index) const {
 
 util::Status KeysetHandle::Validate() const {
   int num_primary = 0;
-  const Keyset& keyset = get_keyset();
 
   for (int i = 0; i < size(); ++i) {
     util::Status status = ValidateAt(i);
     if (!status.ok()) return status;
 
-    Keyset::Key proto_key = keyset.key(i);
-    if (proto_key.key_id() == keyset.primary_key_id()) {
+    Keyset::Key proto_key = keyset_->key(i);
+    if (proto_key.key_id() == keyset_->primary_key_id()) {
       ++num_primary;
       if (proto_key.status() != KeyStatusType::ENABLED) {
         return util::Status(absl::StatusCode::kFailedPrecondition,
@@ -175,9 +175,8 @@ KeysetHandle::Entry KeysetHandle::GetPrimary() const {
   util::Status validation = Validate();
   CHECK_OK(validation);
 
-  const Keyset& keyset = get_keyset();
-  for (int i = 0; i < keyset.key_size(); ++i) {
-    if (keyset.key(i).key_id() == keyset.primary_key_id()) {
+  for (int i = 0; i < keyset_->key_size(); ++i) {
+    if (keyset_->key(i).key_id() == keyset_->primary_key_id()) {
       return (*this)[i];
     }
   }
@@ -210,9 +209,8 @@ KeysetHandle::Entry KeysetHandle::CreateEntryAt(int index) const {
   util::Status validation = ValidateAt(index);
   CHECK_OK(validation);
 
-  Keyset keyset = get_keyset();
   util::StatusOr<Entry> entry =
-      CreateEntry(keyset.key(index), keyset.primary_key_id());
+      CreateEntry(keyset_->key(index), keyset_->primary_key_id());
   // Status should be OK since this keyset handle has been validated.
   CHECK_OK(entry.status());
   return *entry;
@@ -290,21 +288,21 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::ReadNoSecret(
     const std::string& serialized_keyset,
     const absl::flat_hash_map<std::string, std::string>&
         monitoring_annotations) {
-  Keyset keyset;
-  if (!keyset.ParseFromString(serialized_keyset)) {
+  util::SecretProto<Keyset> keyset;
+  if (!keyset->ParseFromString(serialized_keyset)) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Could not parse the input string as a Keyset-proto.");
   }
-  util::Status validation = ValidateNoSecret(keyset);
+  util::Status validation = ValidateNoSecret(*keyset);
   if (!validation.ok()) {
     return validation;
   }
   util::StatusOr<std::vector<std::shared_ptr<const Entry>>> entries =
-      GetEntriesFromKeyset(keyset);
+      GetEntriesFromKeyset(*keyset);
   if (!entries.ok()) {
     return entries.status();
   }
-  if (entries->size() != keyset.key_size()) {
+  if (entries->size() != keyset->key_size()) {
     return util::Status(absl::StatusCode::kInternal,
                         "Error converting keyset proto into key entries.");
   }
@@ -324,7 +322,7 @@ util::Status KeysetHandle::WriteWithAssociatedData(
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Writer must be non-null");
   }
-  auto encrypt_result = Encrypt(get_keyset(), master_key_aead, associated_data);
+  auto encrypt_result = Encrypt(*keyset_, master_key_aead, associated_data);
   if (!encrypt_result.ok()) {
     return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Encryption of the keyset failed: %s",
@@ -339,18 +337,18 @@ util::Status KeysetHandle::WriteNoSecret(KeysetWriter* writer) const {
                         "Writer must be non-null");
   }
 
-  util::Status validation = ValidateNoSecret(get_keyset());
+  util::Status validation = ValidateNoSecret(*keyset_);
   if (!validation.ok()) return validation;
 
-  return writer->Write(get_keyset());
+  return writer->Write(*keyset_);
 }
 
 util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::GenerateNew(
     const KeyTemplate& key_template, const KeyGenConfiguration& config,
     const absl::flat_hash_map<std::string, std::string>&
         monitoring_annotations) {
-  auto handle =
-      absl::WrapUnique(new KeysetHandle(Keyset(), monitoring_annotations));
+  auto handle = absl::WrapUnique(
+      new KeysetHandle(util::SecretProto<Keyset>(), monitoring_annotations));
   util::StatusOr<uint32_t> const result =
       handle->AddKey(key_template, /*as_primary=*/true, config);
   if (!result.ok()) {
@@ -408,13 +406,13 @@ util::StatusOr<std::unique_ptr<Keyset::Key>> ExtractPublicKey(
 
 util::StatusOr<std::unique_ptr<KeysetHandle>>
 KeysetHandle::GetPublicKeysetHandle(const KeyGenConfiguration& config) const {
-  std::unique_ptr<Keyset> public_keyset(new Keyset());
-  for (const Keyset::Key& key : get_keyset().key()) {
+  util::SecretProto<Keyset> public_keyset;
+  for (const Keyset::Key& key : keyset_->key()) {
     auto public_key_result = ExtractPublicKey(key, config);
     if (!public_key_result.ok()) return public_key_result.status();
     public_keyset->add_key()->Swap(public_key_result.value().get());
   }
-  public_keyset->set_primary_key_id(get_keyset().primary_key_id());
+  public_keyset->set_primary_key_id(keyset_->primary_key_id());
   util::StatusOr<std::vector<std::shared_ptr<const Entry>>> entries =
       GetEntriesFromKeyset(*public_keyset);
   if (!entries.ok()) {
@@ -424,14 +422,8 @@ KeysetHandle::GetPublicKeysetHandle(const KeyGenConfiguration& config) const {
     return util::Status(absl::StatusCode::kInternal,
                         "Error converting keyset proto into key entries.");
   }
-  std::unique_ptr<KeysetHandle> handle(
+  return absl::WrapUnique<KeysetHandle>(
       new KeysetHandle(std::move(public_keyset), *entries));
-  return std::move(handle);
-}
-
-util::StatusOr<std::unique_ptr<KeysetHandle>>
-KeysetHandle::GetPublicKeysetHandle() const {
-  return GetPublicKeysetHandle(KeyGenConfigGlobalRegistry());
 }
 
 crypto::tink::util::StatusOr<uint32_t> KeysetHandle::AddToKeyset(
@@ -482,12 +474,12 @@ crypto::tink::util::StatusOr<uint32_t> KeysetHandle::AddKey(
     const google::crypto::tink::KeyTemplate& key_template, bool as_primary,
     const KeyGenConfiguration& config) {
   util::StatusOr<uint32_t> id =
-      AddToKeyset(key_template, as_primary, config, &keyset_);
+      AddToKeyset(key_template, as_primary, config, keyset_.get());
   if (!id.ok()) {
     return id.status();
   }
   util::StatusOr<const Entry> entry = CreateEntry(
-      keyset_.key(keyset_.key_size() - 1), keyset_.primary_key_id());
+      keyset_->key(keyset_->key_size() - 1), keyset_->primary_key_id());
   if (!entry.ok()) {
     return entry.status();
   }
@@ -496,7 +488,7 @@ crypto::tink::util::StatusOr<uint32_t> KeysetHandle::AddKey(
 }
 
 KeysetInfo KeysetHandle::GetKeysetInfo() const {
-  return KeysetInfoFromKeyset(get_keyset());
+  return KeysetInfoFromKeyset(*keyset_);
 }
 
 util::StatusOr<std::vector<std::shared_ptr<const KeysetHandle::Entry>>>

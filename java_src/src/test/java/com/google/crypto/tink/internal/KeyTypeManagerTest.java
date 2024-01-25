@@ -18,6 +18,7 @@ package com.google.crypto.tink.internal;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.protobuf.ByteString;
@@ -41,6 +42,11 @@ public final class KeyTypeManagerTest {
   public static class TestKeyTypeManager extends KeyTypeManager<AesGcmKey> {
     public TestKeyTypeManager(PrimitiveFactory<?, AesGcmKey>... factories) {
       super(AesGcmKey.class, factories);
+    }
+
+    @Override
+    public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+      return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
     }
 
     @Override

@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,237 +18,172 @@ package com.google.crypto.tink.mac;
 
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
+import com.google.crypto.tink.AccessesPartialKey;
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Mac;
-import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
+import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
+import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
+import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
-import com.google.crypto.tink.internal.PrimitiveFactory;
+import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.mac.internal.ChunkedHmacImpl;
 import com.google.crypto.tink.mac.internal.HmacProtoSerialization;
-import com.google.crypto.tink.proto.HashType;
-import com.google.crypto.tink.proto.HmacKey;
-import com.google.crypto.tink.proto.HmacKeyFormat;
-import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.subtle.PrfHmacJce;
 import com.google.crypto.tink.subtle.PrfMac;
-import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.Validators;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
-import java.io.IOException;
+import com.google.crypto.tink.util.SecretBytes;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import javax.crypto.spec.SecretKeySpec;
+import javax.annotation.Nullable;
 
 /**
  * This key manager generates new {@code HmacKey} keys and produces new instances of {@code
  * PrfHmacJce}.
  */
-public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
-  public HmacKeyManager() {
-    super(
-        HmacKey.class,
-        new PrimitiveFactory<Mac, HmacKey>(Mac.class) {
-          @Override
-          public Mac getPrimitive(HmacKey key) throws GeneralSecurityException {
-            HashType hash = key.getParams().getHash();
-            byte[] keyValue = key.getKeyValue().toByteArray();
-            SecretKeySpec keySpec = new SecretKeySpec(keyValue, "HMAC");
-            int tagSize = key.getParams().getTagSize();
-            switch (hash) {
-              case SHA1:
-                return new PrfMac(new PrfHmacJce("HMACSHA1", keySpec), tagSize);
-              case SHA224:
-                return new PrfMac(new PrfHmacJce("HMACSHA224", keySpec), tagSize);
-              case SHA256:
-                return new PrfMac(new PrfHmacJce("HMACSHA256", keySpec), tagSize);
-              case SHA384:
-                return new PrfMac(new PrfHmacJce("HMACSHA384", keySpec), tagSize);
-              case SHA512:
-                return new PrfMac(new PrfHmacJce("HMACSHA512", keySpec), tagSize);
-              default:
-                throw new GeneralSecurityException("unknown hash");
-            }
-          }
-        });
-  }
+public final class HmacKeyManager {
+  private static final PrimitiveConstructor<HmacKey, ChunkedMac> CHUNKED_MAC_PRIMITIVE_CONSTRUCTOR =
+      PrimitiveConstructor.create(ChunkedHmacImpl::new, HmacKey.class, ChunkedMac.class);
+  private static final PrimitiveConstructor<HmacKey, Mac> MAC_PRIMITIVE_CONSTRUCTOR =
+      PrimitiveConstructor.create(PrfMac::create, HmacKey.class, Mac.class);
 
-  /** Minimum key size in bytes. */
-  private static final int MIN_KEY_SIZE_IN_BYTES = 16;
+  private static final KeyManager<Mac> legacyKeyManager =
+      LegacyKeyManagerImpl.create(
+          "type.googleapis.com/google.crypto.tink.HmacKey",
+          Mac.class,
+          KeyMaterialType.SYMMETRIC,
+          com.google.crypto.tink.proto.HmacKey.parser());
 
-  /** Minimum tag size in bytes. This provides minimum 80-bit security strength. */
-  private static final int MIN_TAG_SIZE_IN_BYTES = 10;
-
-  private static final PrimitiveConstructor<com.google.crypto.tink.mac.HmacKey, ChunkedMac>
-      CHUNKED_MAC_PRIMITIVE_CONSTRUCTOR =
-          PrimitiveConstructor.create(
-              ChunkedHmacImpl::new, com.google.crypto.tink.mac.HmacKey.class, ChunkedMac.class);
-  private static final PrimitiveConstructor<com.google.crypto.tink.mac.HmacKey, Mac>
-      MAC_PRIMITIVE_CONSTRUCTOR =
-          PrimitiveConstructor.create(
-              PrfMac::create, com.google.crypto.tink.mac.HmacKey.class, Mac.class);
-
-  @Override
-  public String getKeyType() {
+  static String getKeyType() {
     return "type.googleapis.com/google.crypto.tink.HmacKey";
   }
 
-  @Override
-  public int getVersion() {
-    return 0;
+
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyDerivationRegistry.InsecureKeyCreator<HmacParameters> KEY_DERIVER =
+      HmacKeyManager::createHmacKeyFromRandomness;
+
+  @AccessesPartialKey
+  static HmacKey createHmacKeyFromRandomness(
+      HmacParameters parameters,
+      InputStream stream,
+      @Nullable Integer idRequirement,
+      SecretKeyAccess access)
+      throws GeneralSecurityException {
+    return HmacKey.builder()
+        .setParameters(parameters)
+        .setKeyBytes(Util.readIntoSecretBytes(stream, parameters.getKeySizeBytes(), access))
+        .setIdRequirement(idRequirement)
+        .build();
   }
 
-  @Override
-  public KeyMaterialType keyMaterialType() {
-    return KeyMaterialType.SYMMETRIC;
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyCreationRegistry.KeyCreator<HmacParameters> KEY_CREATOR =
+      HmacKeyManager::createNewHmacKey;
+
+  @AccessesPartialKey
+  static HmacKey createNewHmacKey(HmacParameters parameters, @Nullable Integer idRequirement)
+      throws GeneralSecurityException {
+    return HmacKey.builder()
+        .setParameters(parameters)
+        .setKeyBytes(SecretBytes.randomBytes(parameters.getKeySizeBytes()))
+        .setIdRequirement(idRequirement)
+        .build();
   }
 
-  @Override
-  public void validateKey(HmacKey key) throws GeneralSecurityException {
-    Validators.validateVersion(key.getVersion(), getVersion());
-    if (key.getKeyValue().size() < MIN_KEY_SIZE_IN_BYTES) {
-      throw new GeneralSecurityException("key too short");
-    }
-    validateParams(key.getParams());
-  }
-
-  @Override
-  public HmacKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return HmacKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-  }
-
-  private static void validateParams(HmacParams params) throws GeneralSecurityException {
-    if (params.getTagSize() < MIN_TAG_SIZE_IN_BYTES) {
-      throw new GeneralSecurityException("tag size too small");
-    }
-    switch (params.getHash()) {
-      case SHA1:
-        if (params.getTagSize() > 20) {
-          throw new GeneralSecurityException("tag size too big");
-        }
-        break;
-      case SHA224:
-        if (params.getTagSize() > 28) {
-          throw new GeneralSecurityException("tag size too big");
-        }
-        break;
-      case SHA256:
-        if (params.getTagSize() > 32) {
-          throw new GeneralSecurityException("tag size too big");
-        }
-        break;
-      case SHA384:
-        if (params.getTagSize() > 48) {
-          throw new GeneralSecurityException("tag size too big");
-        }
-        break;
-      case SHA512:
-        if (params.getTagSize() > 64) {
-          throw new GeneralSecurityException("tag size too big");
-        }
-        break;
-      default:
-        throw new GeneralSecurityException("unknown hash type");
-    }
-  }
-
-  @Override
-  public KeyFactory<HmacKeyFormat, HmacKey> keyFactory() {
-    return new KeyFactory<HmacKeyFormat, HmacKey>(HmacKeyFormat.class) {
-      @Override
-      public void validateKeyFormat(HmacKeyFormat format) throws GeneralSecurityException {
-        if (format.getKeySize() < MIN_KEY_SIZE_IN_BYTES) {
-          throw new GeneralSecurityException("key too short");
-        }
-        validateParams(format.getParams());
-      }
-
-      @Override
-      public HmacKeyFormat parseKeyFormat(ByteString byteString)
-          throws InvalidProtocolBufferException {
-        return HmacKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-      }
-
-      @Override
-      public HmacKey createKey(HmacKeyFormat format) throws GeneralSecurityException {
-        return HmacKey.newBuilder()
-            .setVersion(getVersion())
-            .setParams(format.getParams())
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
-            .build();
-      }
-
-      @Override
-      public HmacKey deriveKey(HmacKeyFormat format, InputStream inputStream)
-          throws GeneralSecurityException {
-        Validators.validateVersion(format.getVersion(), getVersion());
-        byte[] pseudorandomness = new byte[format.getKeySize()];
-        try {
-          readFully(inputStream, pseudorandomness);
-          return HmacKey.newBuilder()
-              .setVersion(getVersion())
-              .setParams(format.getParams())
-              .setKeyValue(ByteString.copyFrom(pseudorandomness))
-              .build();
-        } catch (IOException e) {
-          throw new GeneralSecurityException("Reading pseudorandomness failed", e);
-        }
-      }
-
-      @Override
-      public Map<String, KeyFactory.KeyFormat<HmacKeyFormat>> keyFormats()
-          throws GeneralSecurityException {
-        Map<String, KeyFactory.KeyFormat<HmacKeyFormat>> result = new HashMap<>();
-        result.put(
-            "HMAC_SHA256_128BITTAG",
-            createKeyFormat(32, 16, HashType.SHA256, KeyTemplate.OutputPrefixType.TINK));
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
+        result.put("HMAC_SHA256_128BITTAG", PredefinedMacParameters.HMAC_SHA256_128BITTAG);
         result.put(
             "HMAC_SHA256_128BITTAG_RAW",
-            createKeyFormat(32, 16, HashType.SHA256, KeyTemplate.OutputPrefixType.RAW));
+            HmacParameters.builder()
+                .setKeySizeBytes(32)
+                .setTagSizeBytes(16)
+                .setVariant(HmacParameters.Variant.NO_PREFIX)
+                .setHashType(HmacParameters.HashType.SHA256)
+                .build());
         result.put(
             "HMAC_SHA256_256BITTAG",
-            createKeyFormat(32, 32, HashType.SHA256, KeyTemplate.OutputPrefixType.TINK));
+            HmacParameters.builder()
+                .setKeySizeBytes(32)
+                .setTagSizeBytes(32)
+                .setVariant(HmacParameters.Variant.TINK)
+                .setHashType(HmacParameters.HashType.SHA256)
+                .build());
         result.put(
             "HMAC_SHA256_256BITTAG_RAW",
-            createKeyFormat(32, 32, HashType.SHA256, KeyTemplate.OutputPrefixType.RAW));
+            HmacParameters.builder()
+                .setKeySizeBytes(32)
+                .setTagSizeBytes(32)
+                .setVariant(HmacParameters.Variant.NO_PREFIX)
+                .setHashType(HmacParameters.HashType.SHA256)
+                .build());
         result.put(
             "HMAC_SHA512_128BITTAG",
-            createKeyFormat(64, 16, HashType.SHA512, KeyTemplate.OutputPrefixType.TINK));
+            HmacParameters.builder()
+                .setKeySizeBytes(64)
+                .setTagSizeBytes(16)
+                .setVariant(HmacParameters.Variant.TINK)
+                .setHashType(HmacParameters.HashType.SHA512)
+                .build());
         result.put(
             "HMAC_SHA512_128BITTAG_RAW",
-            createKeyFormat(64, 16, HashType.SHA512, KeyTemplate.OutputPrefixType.RAW));
+            HmacParameters.builder()
+                .setKeySizeBytes(64)
+                .setTagSizeBytes(16)
+                .setVariant(HmacParameters.Variant.NO_PREFIX)
+                .setHashType(HmacParameters.HashType.SHA512)
+                .build());
         result.put(
             "HMAC_SHA512_256BITTAG",
-            createKeyFormat(64, 32, HashType.SHA512, KeyTemplate.OutputPrefixType.TINK));
+            HmacParameters.builder()
+                .setKeySizeBytes(64)
+                .setTagSizeBytes(32)
+                .setVariant(HmacParameters.Variant.TINK)
+                .setHashType(HmacParameters.HashType.SHA512)
+                .build());
         result.put(
             "HMAC_SHA512_256BITTAG_RAW",
-            createKeyFormat(64, 32, HashType.SHA512, KeyTemplate.OutputPrefixType.RAW));
-        result.put(
-            "HMAC_SHA512_512BITTAG",
-            createKeyFormat(64, 64, HashType.SHA512, KeyTemplate.OutputPrefixType.TINK));
+            HmacParameters.builder()
+                .setKeySizeBytes(64)
+                .setTagSizeBytes(32)
+                .setVariant(HmacParameters.Variant.NO_PREFIX)
+                .setHashType(HmacParameters.HashType.SHA512)
+                .build());
+        result.put("HMAC_SHA512_512BITTAG", PredefinedMacParameters.HMAC_SHA512_512BITTAG);
         result.put(
             "HMAC_SHA512_512BITTAG_RAW",
-            createKeyFormat(64, 64, HashType.SHA512, KeyTemplate.OutputPrefixType.RAW));
+            HmacParameters.builder()
+                .setKeySizeBytes(64)
+                .setTagSizeBytes(64)
+                .setVariant(HmacParameters.Variant.NO_PREFIX)
+                .setHashType(HmacParameters.HashType.SHA512)
+                .build());
         return Collections.unmodifiableMap(result);
-      }
-    };
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
-    Registry.registerKeyManager(new HmacKeyManager(), newKeyAllowed);
     HmacProtoSerialization.register();
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(CHUNKED_MAC_PRIMITIVE_CONSTRUCTOR);
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(MAC_PRIMITIVE_CONSTRUCTOR);
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
+    MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, HmacParameters.class);
+    MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, HmacParameters.class);
+    KeyManagerRegistry.globalInstance()
+        .registerKeyManagerWithFipsCompatibility(
+            legacyKeyManager,
+            TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO,
+            newKeyAllowed);
   }
 
   /**
@@ -339,18 +274,5 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
                     .build()));
   }
 
-  @Override
-  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
-    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
-  };
-
-  private static KeyFactory.KeyFormat<HmacKeyFormat> createKeyFormat(
-      int keySize, int tagSize, HashType hashType, KeyTemplate.OutputPrefixType prefixType) {
-    return new KeyFactory.KeyFormat<>(
-        HmacKeyFormat.newBuilder()
-            .setParams(HmacParams.newBuilder().setHash(hashType).setTagSize(tagSize).build())
-            .setKeySize(keySize)
-            .build(),
-        prefixType);
-  }
+  private HmacKeyManager() {}
 }

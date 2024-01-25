@@ -48,7 +48,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * one can do:
  *
  * <pre>{@code
- * Config.register(StreamingAeadConfig.TINK_1_0_0);
+ * StreamingAeadConfig.register();
  * KeysetHandle handle = KeysetHandle.generateNew(StreamingAeadKeyTemplates.AES128_GCM_HKDF_4KB);
  * StreamingAead ags = handle.getPrimitive(StreamingAead.class);
  * }</pre>
@@ -208,7 +208,7 @@ public final class StreamingAeadKeyTemplates {
         .build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(new AesCtrHmacStreamingKeyManager().getKeyType())
+        .setTypeUrl(AesCtrHmacStreamingKeyManager.getKeyType())
         .setOutputPrefixType(OutputPrefixType.RAW)
         .build();
   }
@@ -232,7 +232,7 @@ public final class StreamingAeadKeyTemplates {
             .build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(new AesGcmHkdfStreamingKeyManager().getKeyType())
+        .setTypeUrl(AesGcmHkdfStreamingKeyManager.getKeyType())
         .setOutputPrefixType(OutputPrefixType.RAW)
         .build();
   }

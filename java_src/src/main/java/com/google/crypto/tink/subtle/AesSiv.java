@@ -16,9 +16,15 @@
 
 package com.google.crypto.tink.subtle;
 
+import static com.google.crypto.tink.internal.Util.isPrefix;
+
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.DeterministicAead;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.daead.AesSivKey;
 import com.google.crypto.tink.mac.internal.AesUtil;
+import com.google.crypto.tink.util.Bytes;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.util.Arrays;
@@ -55,7 +61,15 @@ public final class AesSiv implements DeterministicAead {
   /** The key used for the CTR encryption */
   private final byte[] aesCtrKey;
 
-  public AesSiv(final byte[] key) throws GeneralSecurityException {
+  private final byte[] outputPrefix;
+
+  @AccessesPartialKey
+  public static DeterministicAead create(AesSivKey key) throws GeneralSecurityException {
+    return new AesSiv(
+        key.getKeyBytes().toByteArray(InsecureSecretKeyAccess.get()), key.getOutputPrefix());
+  }
+
+  private AesSiv(final byte[] key, Bytes outputPrefix) throws GeneralSecurityException {
     if (!FIPS.isCompatible()) {
       throw new GeneralSecurityException(
           "Can not use AES-SIV in FIPS-mode.");
@@ -69,6 +83,11 @@ public final class AesSiv implements DeterministicAead {
     byte[] k1 = Arrays.copyOfRange(key, 0, key.length / 2);
     this.aesCtrKey = Arrays.copyOfRange(key, key.length / 2, key.length);
     this.cmacForS2V = new PrfAesCmac(k1);
+    this.outputPrefix = outputPrefix.toByteArray();
+  }
+
+  public AesSiv(final byte[] key) throws GeneralSecurityException {
+    this(key, Bytes.copyFrom(new byte[] {}));
   }
 
   /**
@@ -92,13 +111,16 @@ public final class AesSiv implements DeterministicAead {
       } else {
         currBlock = s[i];
       }
-      result = Bytes.xor(AesUtil.dbl(result), cmacForS2V.compute(currBlock, AesUtil.BLOCK_SIZE));
+      result =
+          com.google.crypto.tink.subtle.Bytes.xor(
+              AesUtil.dbl(result), cmacForS2V.compute(currBlock, AesUtil.BLOCK_SIZE));
     }
     byte[] lastBlock = s[s.length - 1];
     if (lastBlock.length >= 16) {
-      result = Bytes.xorEnd(lastBlock, result);
+      result = com.google.crypto.tink.subtle.Bytes.xorEnd(lastBlock, result);
     } else {
-      result = Bytes.xor(AesUtil.cmacPad(lastBlock), AesUtil.dbl(result));
+      result =
+          com.google.crypto.tink.subtle.Bytes.xor(AesUtil.cmacPad(lastBlock), AesUtil.dbl(result));
     }
     return cmacForS2V.compute(result, AesUtil.BLOCK_SIZE);
   }
@@ -122,19 +144,25 @@ public final class AesSiv implements DeterministicAead {
         new IvParameterSpec(ivForJavaCrypto));
 
     byte[] ctrCiphertext = aesCtr.doFinal(plaintext);
-    return Bytes.concat(computedIv, ctrCiphertext);
+
+    return com.google.crypto.tink.subtle.Bytes.concat(outputPrefix, computedIv, ctrCiphertext);
   }
 
   @Override
   public byte[] decryptDeterministically(final byte[] ciphertext, final byte[] associatedData)
       throws GeneralSecurityException {
-    if (ciphertext.length < AesUtil.BLOCK_SIZE) {
+    if (ciphertext.length < AesUtil.BLOCK_SIZE + outputPrefix.length) {
       throw new GeneralSecurityException("Ciphertext too short.");
+    }
+    if (!isPrefix(outputPrefix, ciphertext)) {
+      throw new GeneralSecurityException("Decryption failed (OutputPrefix mismatch).");
     }
 
     Cipher aesCtr = EngineFactory.CIPHER.getInstance("AES/CTR/NoPadding");
 
-    byte[] expectedIv = Arrays.copyOfRange(ciphertext, 0, AesUtil.BLOCK_SIZE);
+    byte[] expectedIv =
+        Arrays.copyOfRange(
+            ciphertext, outputPrefix.length, AesUtil.BLOCK_SIZE + outputPrefix.length);
 
     byte[] ivForJavaCrypto = expectedIv.clone();
     ivForJavaCrypto[8] &= (byte) 0x7F; // 63th bit from the right
@@ -145,7 +173,8 @@ public final class AesSiv implements DeterministicAead {
         new SecretKeySpec(this.aesCtrKey, "AES"),
         new IvParameterSpec(ivForJavaCrypto));
 
-    byte[] ctrCiphertext = Arrays.copyOfRange(ciphertext, AesUtil.BLOCK_SIZE, ciphertext.length);
+    byte[] ctrCiphertext =
+        Arrays.copyOfRange(ciphertext, AesUtil.BLOCK_SIZE + outputPrefix.length, ciphertext.length);
     byte[] decryptedPt = aesCtr.doFinal(ctrCiphertext);
     if (ctrCiphertext.length == 0 && decryptedPt == null && SubtleUtil.isAndroid()) {
       // On Android KitKat (19) and Lollipop (21), Cipher.doFinal returns a null pointer when the
@@ -155,7 +184,7 @@ public final class AesSiv implements DeterministicAead {
     }
     byte[] computedIv = s2v(associatedData, decryptedPt);
 
-    if (Bytes.equal(expectedIv, computedIv)) {
+    if (com.google.crypto.tink.subtle.Bytes.equal(expectedIv, computedIv)) {
       return decryptedPt;
     } else {
       throw new AEADBadTagException("Integrity check failed.");

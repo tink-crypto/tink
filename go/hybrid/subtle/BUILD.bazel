@@ -33,7 +33,10 @@ go_test(
         "public_key_test.go",
         "subtle_test.go",
     ],
-    data = ["@wycheproof//testvectors:all"],
+    data = [
+        "//testdata/testvectors:ecdh",
+        "//testdata/testvectors:ecdh_ecpoint",
+    ],
     deps = [
         ":subtle",
         "//hybrid",

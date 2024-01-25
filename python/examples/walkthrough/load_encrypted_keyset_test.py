@@ -13,11 +13,9 @@
 # limitations under the License.
 """Test for load_encrypted_keyset."""
 from absl.testing import absltest
-
 import tink
-
 from tink import aead
-from tink import cleartext_keyset_handle
+from tink import secret_key_access
 
 import load_encrypted_keyset
 from tink.testing import fake_kms
@@ -62,7 +60,7 @@ _ENCRYPTED_KEYSET = r"""{
 
 # Fake KMS keys are base64-encoded keysets. This was generated from
 # _FAKE_KMS_AEAD_KEYSET by first serializing it to bytes using a
-# tink.BinaryKeysetWriter, and then encoding it as base64.
+# tink.proto_keyset_format.serialize, and then encoding it as base64.
 _FAKE_KMS_KEY_URI = (
     'fake-kms://COiSsYwBEmQKWAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRvLnR'
     'pbmsuQWVzR2NtS2V5EiIaIFbJR8aBiTdFNGGP8shTNK50haXKMJ-0I7KlOvSMI1IuGAEQARjok'
@@ -102,8 +100,9 @@ class LoadEncryptedKeysetTest(absltest.TestCase):
 
     # Make sure we can use the loaded keyset to decrypt a ciphertext encrypted
     # with _KEYSET_TO_ENCRYPT.
-    expected_keyset_handle = cleartext_keyset_handle.read(
-        tink.JsonKeysetReader(_KEYSET_TO_ENCRYPT))
+    expected_keyset_handle = tink.json_proto_keyset_format.parse(
+        _KEYSET_TO_ENCRYPT, secret_key_access.TOKEN
+    )
     expected_aead = expected_keyset_handle.primitive(aead.Aead)
     self.assertEqual(
         aead_primitive.decrypt(

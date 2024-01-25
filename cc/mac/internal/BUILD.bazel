@@ -42,6 +42,38 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "config_v0",
+    srcs = ["config_v0.cc"],
+    hdrs = ["config_v0.h"],
+    include_prefix = "tink/mac/internal",
+    deps = [
+        ":chunked_mac_wrapper",
+        "//:configuration",
+        "//internal:configuration_impl",
+        "//mac:aes_cmac_key_manager",
+        "//mac:hmac_key_manager",
+        "//mac:mac_wrapper",
+        "//util:status",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
+cc_library(
+    name = "key_gen_config_v0",
+    srcs = ["key_gen_config_v0.cc"],
+    hdrs = ["key_gen_config_v0.h"],
+    include_prefix = "tink/mac/internal",
+    deps = [
+        "//:key_gen_configuration",
+        "//internal:key_gen_configuration_impl",
+        "//mac:aes_cmac_key_manager",
+        "//mac:hmac_key_manager",
+        "//util:status",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -92,6 +124,30 @@ cc_test(
         "//mac:mac_key_templates",
         "//proto:tink_cc_proto",
         "//util:status",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "config_v0_test",
+    srcs = ["config_v0_test.cc"],
+    deps = [
+        ":config_v0",
+        ":key_gen_config_v0",
+        "//:chunked_mac",
+        "//:configuration",
+        "//:key_gen_configuration",
+        "//:keyset_handle",
+        "//:mac",
+        "//internal:configuration_impl",
+        "//internal:key_gen_configuration_impl",
+        "//internal:key_type_info_store",
+        "//internal:keyset_wrapper_store",
+        "//mac:aes_cmac_key_manager",
+        "//mac:hmac_key_manager",
+        "//mac:mac_key_templates",
         "//util:statusor",
         "//util:test_matchers",
         "@com_google_googletest//:gtest_main",

@@ -146,7 +146,8 @@ TEST_F(FakeKmsClientTest, RegisterAndEncryptDecryptWithKmsAead) {
   EXPECT_THAT(status, IsOk());
 
   KeyTemplate key_template = NewKmsAeadKeyTemplate(key_uri);
-  auto handle_result = KeysetHandle::GenerateNew(key_template);
+  auto handle_result =
+      KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry());
   EXPECT_TRUE(handle_result.ok()) << handle_result.status();
   auto aead_result = handle_result.value()->GetPrimitive<crypto::tink::Aead>(
       ConfigGlobalRegistry());
@@ -172,7 +173,8 @@ TEST_F(FakeKmsClientTest, RegisterAndEncryptDecryptWithKmsEnvelopeAead) {
 
   KeyTemplate key_template =
       NewKmsEnvelopeKeyTemplate(key_uri, AeadKeyTemplates::Aes128Gcm());
-  auto handle_result = KeysetHandle::GenerateNew(key_template);
+  auto handle_result =
+      KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry());
   EXPECT_TRUE(handle_result.ok()) << handle_result.status();
   auto aead_result = handle_result.value()->GetPrimitive<crypto::tink::Aead>(
       ConfigGlobalRegistry());

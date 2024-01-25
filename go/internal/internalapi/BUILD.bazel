@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+package(default_visibility = ["//:__subpackages__"])  # keep
+
+go_library(
+    name = "internalapi",
+    srcs = ["token.go"],
+    importpath = "github.com/google/tink/go/internal/internalapi",
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":internalapi",
+    visibility = ["//:__subpackages__"],
+)

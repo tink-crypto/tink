@@ -23,6 +23,7 @@
 #include <string>
 #include <utility>
 
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
@@ -60,9 +61,8 @@ util::StatusOr<std::unique_ptr<BinaryKeysetWriter>> BinaryKeysetWriter::New(
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "destination_stream must be non-null.");
   }
-  std::unique_ptr<BinaryKeysetWriter> writer(
+  return absl::WrapUnique(
       new BinaryKeysetWriter(std::move(destination_stream)));
-  return std::move(writer);
 }
 
 util::Status BinaryKeysetWriter::Write(const Keyset& keyset) {

@@ -22,6 +22,7 @@
 #include "tink/keyderivation/keyset_deriver.h"
 #include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

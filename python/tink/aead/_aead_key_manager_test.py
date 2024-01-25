@@ -25,7 +25,6 @@ from tink.proto import tink_pb2
 from tink.proto import xchacha20_poly1305_pb2
 import tink
 from tink import aead
-from tink import cleartext_keyset_handle
 from tink import core
 from tink import mac
 from tink.testing import fake_kms
@@ -234,8 +233,9 @@ class AeadKeyManagerTest(parameterized.TestCase):
         }
       ]
     }'''
-    keyset_handle = cleartext_keyset_handle.read(
-        tink.JsonKeysetReader(json_keyset))
+    keyset_handle = tink.json_proto_keyset_format.parse_without_secret(
+        json_keyset
+    )
 
     ciphertext = bytes.fromhex(
         '00000033013e77cdcd39016d632a3bb83b694565d3d2d85329ccc3aff540'

@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ import java.security.spec.RSAKeyGenParameterSpec;
  * {@code EcdsaPrivateKey}, one can do:
  *
  * <pre>{@code
- * Config.register(SignatureConfig.TINK_1_1_0);
+ * SignatureConfig.register();
  * KeysetHandle handle = KeysetHandle.generateNew(SignatureKeyTemplates.ECDSA_P256);
  * PublicKeySign signer = handle.getPrimitive(PublicKeySign.class);
  * PublicKeyVerify verifier = handle.getPublicKeyset().getPrimitive(PublicKeyVerify.class);
@@ -200,7 +200,7 @@ public final class SignatureKeyTemplates {
    */
   public static final KeyTemplate ED25519 =
       KeyTemplate.newBuilder()
-          .setTypeUrl(new Ed25519PrivateKeyManager().getKeyType())
+          .setTypeUrl(Ed25519PrivateKeyManager.getKeyType())
           .setOutputPrefixType(OutputPrefixType.TINK)
           .build();
 
@@ -208,15 +208,15 @@ public final class SignatureKeyTemplates {
    * A {@link KeyTemplate} that generates new instances of {@link
    * com.google.crypto.tink.proto.ED25519PrivateKey}.
    *
-   * The difference between {@link ED25519WithRawOutput} and {@link ED25519} is the format of
-   * signatures generated. {@link ED25519WithRawOutput} generates signatures of
-   * {@link OutputPrefixType.RAW} format, which is 64 bytes long.
+   * <p>The difference between {@link ED25519WithRawOutput} and {@link ED25519} is the format of
+   * signatures generated. {@link ED25519WithRawOutput} generates signatures of {@link
+   * OutputPrefixType.RAW} format, which is 64 bytes long.
    *
    * @since 1.3.0
    */
   public static final KeyTemplate ED25519WithRawOutput =
       KeyTemplate.newBuilder()
-          .setTypeUrl(new Ed25519PrivateKeyManager().getKeyType())
+          .setTypeUrl(Ed25519PrivateKeyManager.getKeyType())
           .setOutputPrefixType(OutputPrefixType.RAW)
           .build();
 
@@ -240,7 +240,7 @@ public final class SignatureKeyTemplates {
     EcdsaKeyFormat format = EcdsaKeyFormat.newBuilder().setParams(params).build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(new EcdsaSignKeyManager().getKeyType())
+        .setTypeUrl(EcdsaSignKeyManager.getKeyType())
         .setOutputPrefixType(prefixType)
         .build();
   }
@@ -307,7 +307,7 @@ public final class SignatureKeyTemplates {
             .build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(new RsaSsaPkcs1SignKeyManager().getKeyType())
+        .setTypeUrl(RsaSsaPkcs1SignKeyManager.getKeyType())
         .setOutputPrefixType(prefixType)
         .build();
   }
@@ -370,7 +370,7 @@ public final class SignatureKeyTemplates {
             .build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(new RsaSsaPssSignKeyManager().getKeyType())
+        .setTypeUrl(RsaSsaPssSignKeyManager.getKeyType())
         .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }

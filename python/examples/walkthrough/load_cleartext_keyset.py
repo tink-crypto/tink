@@ -14,8 +14,7 @@
 """Example to showcase how to load a cleartext keyset."""
 # [START tink_walkthrough_load_cleartext_keyset]
 import tink
-
-from tink import cleartext_keyset_handle
+from tink import secret_key_access
 
 
 def LoadKeyset(serialized_keyset: str) -> tink.KeysetHandle:
@@ -36,7 +35,9 @@ def LoadKeyset(serialized_keyset: str) -> tink.KeysetHandle:
   Raises:
     tink.TinkError in case of errors.
   """
-  return cleartext_keyset_handle.read(tink.JsonKeysetReader(serialized_keyset))
+  return tink.json_proto_keyset_format.parse(
+      serialized_keyset, secret_key_access.TOKEN
+  )
 
 
 # [END tink_walkthrough_load_cleartext_keyset]

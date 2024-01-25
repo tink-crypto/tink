@@ -33,7 +33,6 @@ import com.google.crypto.tink.util.Bytes;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * MacWrapper is the implementation of PrimitiveWrapper for the Mac primitive.
@@ -45,7 +44,6 @@ import java.util.logging.Logger;
  * primitive tries all keys with {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
 class MacWrapper implements PrimitiveWrapper<Mac, Mac> {
-  private static final Logger logger = Logger.getLogger(MacWrapper.class.getName());
 
   private static final MacWrapper WRAPPER = new MacWrapper();
   private static final PrimitiveConstructor<LegacyProtoKey, Mac>
@@ -99,7 +97,6 @@ class MacWrapper implements PrimitiveWrapper<Mac, Mac> {
           // If there is no exception, the MAC is valid and we can return.
           return;
         } catch (GeneralSecurityException e) {
-          logger.info("tag prefix matches a key, but cannot verify: " + e);
           // Ignored as we want to continue verification with the remaining keys.
         }
       }

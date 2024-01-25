@@ -102,8 +102,7 @@ int main(int argc, char** argv) {
   std::string token_filename = absl::GetFlag(FLAGS_token_filename);
 
   std::clog << "Using keyset in " << jwk_set_filename << " to ";
-  std::clog << " verify a token with expected audience '" << audience
-            << std::endl;
+  std::clog << " verify a token with expected audience '" << audience << '\n';
 
   CHECK_OK(
       tink_cc_examples::JwtVerify(jwk_set_filename, audience, token_filename));

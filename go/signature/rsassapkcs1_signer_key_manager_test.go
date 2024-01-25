@@ -201,6 +201,24 @@ func TestRSASSAPKCS1SignerKeyManagerPrimitiveWithInvalidInputFails(t *testing.T)
 			},
 		},
 		{
+			name: "public key params field unset",
+			key: &rsassapkcs1pb.RsaSsaPkcs1PrivateKey{
+				Version: validPrivKey.GetVersion(),
+				PublicKey: &rsassapkcs1pb.RsaSsaPkcs1PublicKey{
+					Version: validPrivKey.GetPublicKey().GetVersion(),
+					E:       validPrivKey.GetPublicKey().GetE(),
+					N:       validPrivKey.GetPublicKey().GetN(),
+					Params:  nil,
+				},
+				D:   validPrivKey.GetD(),
+				P:   validPrivKey.GetP(),
+				Q:   validPrivKey.GetQ(),
+				Dp:  validPrivKey.GetDp(),
+				Dq:  validPrivKey.GetDq(),
+				Crt: validPrivKey.GetCrt(),
+			},
+		},
+		{
 			name: "invalid modulus",
 			key: &rsassapkcs1pb.RsaSsaPkcs1PrivateKey{
 				Version: validPrivKey.GetVersion(),

@@ -16,6 +16,11 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.AccessesPartialKey;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.StreamingAead;
+import com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey;
+import com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingParameters.HashType;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.GeneralSecurityException;
@@ -31,11 +36,11 @@ import javax.crypto.spec.SecretKeySpec;
  * <p>Each ciphertext uses a new AES-GCM key that is derived from the key derivation key, a randomly
  * chosen salt of the same size as the key and a nonce prefix.
  *
- * <p>The format of a ciphertext is header || segment_0 || segment_1 || ... || segment_k. The
- * header has size this.getHeaderLength(). Its format is headerLength || salt || prefix. where
- * headerLength is 1 byte determining the size of the header, salt is a salt used in the key
- * derivation and prefix is the prefix of the nonce. In principle headerLength is redundant
- * information, since the length of the header can be determined from the key size.
+ * <p>The format of a ciphertext is header || segment_0 || segment_1 || ... || segment_k. The header
+ * has size this.getHeaderLength(). Its format is headerLength || salt || prefix. where headerLength
+ * is 1 byte determining the size of the header, salt is a salt used in the key derivation and
+ * prefix is the prefix of the nonce. In principle headerLength is redundant information, since the
+ * length of the header can be determined from the key size.
  *
  * <p>segment_i is the i-th segment of the ciphertext. The size of segment_1 .. segment_{k-1} is
  * ciphertextSegmentSize. segment_0 is shorter, so that segment_0, the header and other information
@@ -45,6 +50,7 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * @since 1.1.0
  */
+@AccessesPartialKey
 public final class AesGcmHkdfStreaming extends NonceBasedStreamingAead {
   // TODO(bleichen): Some things that are not yet decided:
   //   - What can we assume about the state of objects after getting an exception?
@@ -108,6 +114,33 @@ public final class AesGcmHkdfStreaming extends NonceBasedStreamingAead {
     this.ciphertextSegmentSize = ciphertextSegmentSize;
     this.firstSegmentOffset = firstSegmentOffset;
     this.plaintextSegmentSize = ciphertextSegmentSize - TAG_SIZE_IN_BYTES;
+  }
+
+  private AesGcmHkdfStreaming(AesGcmHkdfStreamingKey key)
+      throws GeneralSecurityException {
+    this.ikm = key.getInitialKeyMaterial().toByteArray(InsecureSecretKeyAccess.get());
+    String hkdfAlgString = "";
+    if (key.getParameters().getHkdfHashType().equals(HashType.SHA1)) {
+      hkdfAlgString = "HmacSha1";
+    } else if (key.getParameters().getHkdfHashType().equals(HashType.SHA256)) {
+      hkdfAlgString = "HmacSha256";
+    } else if (key.getParameters().getHkdfHashType().equals(HashType.SHA512)) {
+      hkdfAlgString = "HmacSha512";
+    } else {
+      throw new GeneralSecurityException(
+          "Unknown HKDF algorithm " + key.getParameters().getHkdfHashType());
+    }
+    this.hkdfAlg = hkdfAlgString;
+    this.keySizeInBytes = key.getParameters().getDerivedAesGcmKeySizeBytes();
+    this.ciphertextSegmentSize = key.getParameters().getCiphertextSegmentSizeBytes();
+    // Current KeyTypeManager always sets this to 0.
+    this.firstSegmentOffset = 0;
+    this.plaintextSegmentSize = this.ciphertextSegmentSize - TAG_SIZE_IN_BYTES;
+  }
+
+  public static StreamingAead create(AesGcmHkdfStreamingKey key)
+      throws GeneralSecurityException {
+    return new AesGcmHkdfStreaming(key);
   }
 
   @Override

@@ -17,24 +17,30 @@
 package com.google.crypto.tink.streamingaead;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.Key;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.StreamingAead;
-import com.google.crypto.tink.internal.KeyTypeManager;
-import com.google.crypto.tink.proto.AesGcmHkdfStreamingKey;
-import com.google.crypto.tink.proto.AesGcmHkdfStreamingKeyFormat;
-import com.google.crypto.tink.proto.AesGcmHkdfStreamingParams;
-import com.google.crypto.tink.proto.HashType;
-import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
+import com.google.crypto.tink.internal.SlowInputStream;
+import com.google.crypto.tink.keyderivation.KeyDerivationConfig;
+import com.google.crypto.tink.keyderivation.KeysetDeriver;
+import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationKey;
+import com.google.crypto.tink.keyderivation.PrfBasedKeyDerivationParameters;
+import com.google.crypto.tink.prf.HkdfPrfKey;
+import com.google.crypto.tink.prf.HkdfPrfParameters;
+import com.google.crypto.tink.subtle.AesGcmHkdfStreaming;
 import com.google.crypto.tink.subtle.Hex;
-import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.StreamingTestUtil;
+import com.google.crypto.tink.util.SecretBytes;
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 import org.junit.Before;
@@ -48,187 +54,42 @@ import org.junit.runner.RunWith;
 /** Test for AesGcmHkdfStreamingKeyManager. */
 @RunWith(Theories.class)
 public class AesGcmHkdfStreamingKeyManagerTest {
-  private final AesGcmHkdfStreamingKeyManager manager = new AesGcmHkdfStreamingKeyManager();
-  private final KeyTypeManager.KeyFactory<AesGcmHkdfStreamingKeyFormat, AesGcmHkdfStreamingKey>
-      factory = manager.keyFactory();
 
   @Before
   public void register() throws Exception {
     StreamingAeadConfig.register();
-  }
-
-  private static AesGcmHkdfStreamingKeyFormat createKeyFormat(
-      int keySize, int derivedKeySize, HashType hashType, int segmentSize) {
-    return AesGcmHkdfStreamingKeyFormat.newBuilder()
-        .setKeySize(keySize)
-        .setParams(
-            AesGcmHkdfStreamingParams.newBuilder()
-                .setDerivedKeySize(derivedKeySize)
-                .setHkdfHashType(hashType)
-                .setCiphertextSegmentSize(segmentSize))
-        .build();
+    KeyDerivationConfig.register();
   }
 
   @Test
-  public void basics() throws Exception {
-    assertThat(manager.getKeyType())
-        .isEqualTo("type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey");
-    assertThat(manager.getVersion()).isEqualTo(0);
-    assertThat(manager.keyMaterialType()).isEqualTo(KeyMaterialType.SYMMETRIC);
+  public void testKeyManagerRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getKeyManager(
+                    "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey",
+                    StreamingAead.class))
+        .isNotNull();
   }
 
   @Test
-  public void validateKeyFormat_empty_throws() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(AesGcmHkdfStreamingKeyFormat.getDefaultInstance()));
-  }
+  public void getPrimitive_works() throws Exception {
+    Parameters parameters = AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate().toParameters();
+    KeysetHandle handle = KeysetHandle.generateNew(parameters);
+    StreamingAead streamingAead = handle.getPrimitive(StreamingAead.class);
+    StreamingAead directAead =
+        AesGcmHkdfStreaming.create(
+            (com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey) handle.getAt(0).getKey());
 
-  @Test
-  public void validateKeyFormat_valid() throws Exception {
-    factory.validateKeyFormat(createKeyFormat(32, 32, HashType.SHA256, 1024));
-  }
-
-  @Test
-  public void validateKeyFormat_unkownHash_throws() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(createKeyFormat(32, 32, HashType.UNKNOWN_HASH, 1024)));
-  }
-
-  @Test
-  public void validateKeyFormat_sha384_throws() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(createKeyFormat(32, 32, HashType.SHA384, 1024)));
-  }
-
-  @Test
-  public void validateKeyFormat_sha224_throws() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(createKeyFormat(32, 32, HashType.SHA224, 1024)));
-  }
-
-  @Test
-  public void validateKeyFormat_smallKey_throws() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(createKeyFormat(15, 32, HashType.SHA256, 1024)));
-  }
-
-  @Test
-  public void validateKeyFormat_smallSegment_throws() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(createKeyFormat(16, 32, HashType.SHA256, 45)));
-  }
-
-  @Test
-  public void createKey_checkValues() throws Exception {
-    AesGcmHkdfStreamingKeyFormat format = createKeyFormat(32, 32, HashType.SHA256, 1024);
-
-    AesGcmHkdfStreamingKey key = factory.createKey(format);
-
-    assertThat(key.getParams()).isEqualTo(format.getParams());
-    assertThat(key.getVersion()).isEqualTo(0);
-    assertThat(key.getKeyValue()).hasSize(format.getKeySize());
-  }
-
-  @Test
-  public void testDeriveKey_size32() throws Exception {
-    final int keySize = 32;
-    final int derivedKeySize = 16;
-    AesGcmHkdfStreamingKeyFormat format =
-        createKeyFormat(keySize, derivedKeySize, HashType.SHA256, 1024);
-
-    byte[] keyMaterial = Random.randBytes(100);
-    AesGcmHkdfStreamingKey key = factory.deriveKey(format, new ByteArrayInputStream(keyMaterial));
-    assertThat(key.getKeyValue()).hasSize(32);
-    for (int i = 0; i < keySize; ++i) {
-      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
-    }
-    assertThat(key.getParams()).isEqualTo(format.getParams());
-  }
-
-  @Test
-  public void testDeriveKey_handlesDataFragmentationCorrectly() throws Exception {
-    int keySize = 32;
-    int derivedKeySize = 16;
-    byte randomness = 4;
-    InputStream fragmentedInputStream =
-        new InputStream() {
-          @Override
-          public int read() {
-            return 0;
-          }
-
-          @Override
-          public int read(byte[] b, int off, int len) {
-            b[off] = randomness;
-            return 1;
-          }
-        };
-    AesGcmHkdfStreamingKeyFormat format =
-        createKeyFormat(keySize, derivedKeySize, HashType.SHA256, 1024);
-
-    AesGcmHkdfStreamingKey key = factory.deriveKey(format, fragmentedInputStream);
-
-    assertThat(key.getKeyValue()).hasSize(keySize);
-    for (int i = 0; i < keySize; ++i) {
-      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(randomness);
-    }
-  }
-
-  @Test
-  public void testDeriveKey_notEnoughKeyMaterial_throws() throws Exception {
-    final int keySize = 32;
-    final int derivedKeySize = 16;
-    AesGcmHkdfStreamingKeyFormat format =
-        createKeyFormat(keySize, derivedKeySize, HashType.SHA256, 1024);
-
-    byte[] keyMaterial = Random.randBytes(31);
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.deriveKey(format, new ByteArrayInputStream(keyMaterial)));
-  }
-
-  @Test
-  public void testDeriveKey_justEnoughKeyMaterial_works() throws Exception {
-    final int keySize = 32;
-    final int derivedKeySize = 16;
-    AesGcmHkdfStreamingKeyFormat format =
-        createKeyFormat(keySize, derivedKeySize, HashType.SHA256, 1024);
-
-    byte[] keyMaterial = Random.randBytes(32);
-    AesGcmHkdfStreamingKey key = factory.deriveKey(format, new ByteArrayInputStream(keyMaterial));
-    assertThat(key.getKeyValue()).hasSize(32);
-    for (int i = 0; i < keySize; ++i) {
-      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
-    }
-    assertThat(key.getParams()).isEqualTo(format.getParams());
-  }
-
-  @Test
-  public void testDeriveKey_badVersion_throws() throws Exception {
-    final int keySize = 32;
-    final int derivedKeySize = 16;
-    AesGcmHkdfStreamingKeyFormat format =
-        AesGcmHkdfStreamingKeyFormat.newBuilder(
-                createKeyFormat(keySize, derivedKeySize, HashType.SHA256, 1024))
-            .setVersion(1)
-            .build();
-
-    byte[] keyMaterial = Random.randBytes(32);
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.deriveKey(format, new ByteArrayInputStream(keyMaterial)));
+    StreamingTestUtil.testEncryptDecryptDifferentInstances(
+        streamingAead, directAead, 0, 2049, 1000);
   }
 
   @Test
   public void testSkip() throws Exception {
-    AesGcmHkdfStreamingKey key = factory.createKey(createKeyFormat(32, 32, HashType.SHA256, 1024));
-    StreamingAead streamingAead = manager.getPrimitive(key, StreamingAead.class);
+    KeysetHandle handle =
+        KeysetHandle.generateNew(
+            AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate().toParameters());
+    StreamingAead streamingAead = handle.getPrimitive(StreamingAead.class);
     int offset = 0;
     int plaintextSize = 1 << 16;
     // Runs the test with different sizes for the chunks to skip.
@@ -239,12 +100,15 @@ public class AesGcmHkdfStreamingKeyManagerTest {
 
   @Test
   public void testNewKeyMultipleTimes() throws Exception {
-    AesGcmHkdfStreamingKeyFormat keyFormat = createKeyFormat(32, 32, HashType.SHA256, 1024);
+    Parameters parameters = AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate().toParameters();
     Set<String> keys = new TreeSet<>();
     // Calls newKey multiple times and make sure that they generate different keys.
     int numTests = 100;
     for (int i = 0; i < numTests; i++) {
-      keys.add(Hex.encode(factory.createKey(keyFormat).getKeyValue().toByteArray()));
+      KeysetHandle handle = KeysetHandle.generateNew(parameters);
+      com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey key =
+          (com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey) handle.getAt(0).getKey();
+      keys.add(Hex.encode(key.getInitialKeyMaterial().toByteArray(InsecureSecretKeyAccess.get())));
     }
     assertThat(keys).hasSize(numTests);
   }
@@ -315,4 +179,110 @@ public class AesGcmHkdfStreamingKeyManagerTest {
         .isEqualTo(KeyTemplates.get(templateName).toParameters());
   }
 
+  @Theory
+  public void testCreateKeyFromRandomness(@FromDataPoints("templateNames") String templateName)
+      throws Exception {
+    byte[] keyMaterial =
+        new byte[] {
+          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+          25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46,
+          47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68,
+        };
+    AesGcmHkdfStreamingParameters parameters =
+        (AesGcmHkdfStreamingParameters) KeyTemplates.get(templateName).toParameters();
+    com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey key =
+        AesGcmHkdfStreamingKeyManager.createAesGcmHkdfStreamingKeyFromRandomness(
+            parameters, new ByteArrayInputStream(keyMaterial), null, InsecureSecretKeyAccess.get());
+    byte[] expectedKeyBytes = Arrays.copyOf(keyMaterial, parameters.getKeySizeBytes());
+    Key expectedKey =
+        com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey.create(
+            parameters, SecretBytes.copyFrom(expectedKeyBytes, InsecureSecretKeyAccess.get()));
+    assertTrue(key.equalsKey(expectedKey));
+  }
+
+  @Test
+  public void testCreateKeyFromRandomness_slowInputStream_works() throws Exception {
+    AesGcmHkdfStreamingParameters parameters =
+        AesGcmHkdfStreamingParameters.builder()
+            .setKeySizeBytes(16)
+            .setDerivedAesGcmKeySizeBytes(16)
+            .setCiphertextSegmentSizeBytes(1024 * 1024)
+            .setHkdfHashType(AesGcmHkdfStreamingParameters.HashType.SHA256)
+            .build();
+
+    byte[] keyMaterial =
+        new byte[] {
+          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+          25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46,
+          47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68,
+        };
+    com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey key =
+        AesGcmHkdfStreamingKeyManager.createAesGcmHkdfStreamingKeyFromRandomness(
+            parameters, SlowInputStream.copyFrom(keyMaterial), null, InsecureSecretKeyAccess.get());
+    byte[] expectedKeyBytes = Arrays.copyOf(keyMaterial, parameters.getKeySizeBytes());
+    Key expectedKey =
+        com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey.create(
+            parameters, SecretBytes.copyFrom(expectedKeyBytes, InsecureSecretKeyAccess.get()));
+    assertTrue(key.equalsKey(expectedKey));
+  }
+
+  @Test
+  public void deriveKeyset_isAsExpected() throws Exception {
+    HkdfPrfKey prfKey =
+        HkdfPrfKey.builder()
+            .setParameters(
+                HkdfPrfParameters.builder()
+                    .setKeySizeBytes(32)
+                    .setHashType(HkdfPrfParameters.HashType.SHA256)
+                    .build())
+            .setKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("0102030405060708091011121314151617181920212123242526272829303132"),
+                    InsecureSecretKeyAccess.get()))
+            .build();
+
+    PrfBasedKeyDerivationParameters derivationParameters =
+        PrfBasedKeyDerivationParameters.builder()
+            .setDerivedKeyParameters(PredefinedStreamingAeadParameters.AES256_GCM_HKDF_1MB)
+            .setPrfParameters(prfKey.getParameters())
+            .build();
+
+    PrfBasedKeyDerivationKey keyDerivationKey =
+        PrfBasedKeyDerivationKey.create(derivationParameters, prfKey, /* idRequirement= */ null);
+    KeysetHandle keyset =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(keyDerivationKey).withFixedId(789789).makePrimary())
+            .build();
+    KeysetDeriver deriver = keyset.getPrimitive(KeysetDeriver.class);
+
+    KeysetHandle derivedKeyset = deriver.deriveKeyset(Hex.decode("000102"));
+
+    assertThat(derivedKeyset.size()).isEqualTo(1);
+    // The only thing which we need to test is equalsKey(), but we first test other things to make
+    // test failures have nicer messages.
+    assertThat(derivedKeyset.getAt(0).getKey().getParameters())
+        .isEqualTo(derivationParameters.getDerivedKeyParameters());
+    assertTrue(
+        derivedKeyset
+            .getAt(0)
+            .getKey()
+            .equalsKey(
+                com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey.create(
+                    PredefinedStreamingAeadParameters.AES256_GCM_HKDF_1MB,
+                    SecretBytes.copyFrom(
+                        Hex.decode(
+                            "94e397d674deda6e965295698491a3feb69838a35f1d48143f3c4cbad90eeb24"),
+                        InsecureSecretKeyAccess.get()))));
+  }
+
+  @Test
+  public void serializeAndParse_works() throws Exception {
+    Parameters parameters = AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate().toParameters();
+    KeysetHandle handle = KeysetHandle.generateNew(parameters);
+    byte[] serializedHandle =
+        TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get());
+    KeysetHandle parsedHandle =
+        TinkProtoKeysetFormat.parseKeyset(serializedHandle, InsecureSecretKeyAccess.get());
+    assertThat(parsedHandle.equalsKeyset(handle)).isTrue();
+  }
 }

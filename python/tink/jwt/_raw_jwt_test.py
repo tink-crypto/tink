@@ -14,6 +14,7 @@
 
 import datetime
 import json
+import sys
 
 from typing import cast, Dict, List
 
@@ -127,6 +128,11 @@ class RawJwtTest(absltest.TestCase):
         token.expiration(),
         datetime.datetime.fromtimestamp(123, datetime.timezone.utc))
 
+  @absltest.skipIf(
+      sys.platform.startswith('win32'),
+      'Windows does not allow `localtime` values after 23:59:59, December 31,'
+      ' 3000, UTC',
+  )
   def test_large_timestamps_success(self):
     # year 9999
     large = datetime.datetime.fromtimestamp(253402300799,
@@ -140,6 +146,11 @@ class RawJwtTest(absltest.TestCase):
     self.assertEqual(token.issued_at(), large)
     self.assertEqual(token.not_before(), large)
 
+  @absltest.skipIf(
+      sys.platform.startswith('win32'),
+      'Windows does not allow `localtime` values after 23:59:59, December 31,'
+      ' 3000, UTC',
+  )
   def test_too_large_timestamps_fail(self):
     with self.assertRaises(ValueError):
       datetime.datetime.fromtimestamp(253402300800, datetime.timezone.utc)

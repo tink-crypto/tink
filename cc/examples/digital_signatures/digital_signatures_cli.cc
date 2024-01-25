@@ -51,7 +51,7 @@ void ValidateParams() {
   CHECK(absl::GetFlag(FLAGS_mode) == kSign ||
         absl::GetFlag(FLAGS_mode) == kVerify)
       << "Invalid mode; must be `" << kSign << "` or `" << kVerify << "`"
-      << std::endl;
+      << '\n';
   CHECK(!absl::GetFlag(FLAGS_keyset_filename).empty())
       << "Keyset file must be specified";
   CHECK(!absl::GetFlag(FLAGS_input_filename).empty())
@@ -126,10 +126,10 @@ int main(int argc, char** argv) {
   if (mode == kSign) {
     std::clog << " file " << input_filename
               << "; the resulting signature is written to "
-              << signature_filename << std::endl;
+              << signature_filename << '\n';
   } else {  // mode == kVerify
     std::clog << " the signature in " << signature_filename
-              << " over the content of " << input_filename << std::endl;
+              << " over the content of " << input_filename << '\n';
   }
 
   CHECK_OK(tink_cc_examples::DigitalSignatureCli(

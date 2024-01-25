@@ -17,8 +17,6 @@
 #ifndef TINK_INTERNAL_CALL_WITH_CORE_DUMP_PROTECTION_H_
 #define TINK_INTERNAL_CALL_WITH_CORE_DUMP_PROTECTION_H_
 
-#include <type_traits>
-
 namespace crypto {
 namespace tink {
 namespace internal {
@@ -30,7 +28,7 @@ namespace internal {
 // If you are interested in implementing it for your platform, open a GitHub
 // issue.
 template <typename Func>
-typename std::invoke_result_t<Func> CallWithCoreDumpProtection(Func&& func) {
+auto CallWithCoreDumpProtection(Func&& func) -> decltype(func()) {
   return func();
 }
 

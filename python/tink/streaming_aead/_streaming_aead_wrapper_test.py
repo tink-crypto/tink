@@ -22,7 +22,7 @@ from tink.proto import aes_gcm_hkdf_streaming_pb2
 from tink.proto import common_pb2
 from tink.proto import tink_pb2
 import tink
-from tink import cleartext_keyset_handle
+from tink import secret_key_access
 from tink import streaming_aead
 from tink.testing import bytes_io
 from tink.testing import keyset_builder
@@ -268,7 +268,9 @@ class StreamingAeadWrapperTest(parameterized.TestCase):
         ],
     )
 
-    keyset_handle = cleartext_keyset_handle.from_keyset(keyset)
+    keyset_handle = tink.proto_keyset_format.parse(
+        keyset.SerializeToString(), secret_key_access.TOKEN
+    )
     primitive = keyset_handle.primitive(streaming_aead.StreamingAead)
 
     plaintext = b'plaintext'

@@ -17,9 +17,9 @@
 from absl.testing import absltest
 from absl.testing import parameterized
 import tink
-from tink import cleartext_keyset_handle
 from tink import core
 from tink import hybrid
+from tink import secret_key_access
 from tink.testing import keyset_builder
 
 
@@ -201,10 +201,14 @@ class HybridWrapperTest(parameterized.TestCase):
     self.assertEqual(dec4.decrypt(ciphertext4, b'context'), b'plaintext')
 
   def test_encrypt_decrypt_with_primary_key_succeeds(self):
-    private_handle_with_primary = cleartext_keyset_handle.read(
-        tink.JsonKeysetReader(PRIVATE_KEYSET_WITH_PRIMARY))
-    public_handle_with_primary = cleartext_keyset_handle.read(
-        tink.JsonKeysetReader(PUBLIC_KEYSET_WITH_PRIMARY))
+    private_handle_with_primary = tink.json_proto_keyset_format.parse(
+        PRIVATE_KEYSET_WITH_PRIMARY, secret_key_access.TOKEN
+    )
+    public_handle_with_primary = (
+        tink.json_proto_keyset_format.parse_without_secret(
+            PUBLIC_KEYSET_WITH_PRIMARY
+        )
+    )
     dec = private_handle_with_primary.primitive(hybrid.HybridDecrypt)
     enc = public_handle_with_primary.primitive(hybrid.HybridEncrypt)
     ciphertext = enc.encrypt(b'plaintext', b'context')
@@ -212,12 +216,16 @@ class HybridWrapperTest(parameterized.TestCase):
 
   def test_encrypt_decrypt_without_primary_key_fails(self):
     with self.assertRaises(tink.TinkError):
-      cleartext_keyset_handle.read(
-          tink.JsonKeysetReader(PRIVATE_KEYSET_WITHOUT_PRIMARY))
+      tink.json_proto_keyset_format.parse(
+          PRIVATE_KEYSET_WITHOUT_PRIMARY, secret_key_access.TOKEN
+      )
     # Currently, the public keyset only fails when 'encrypt' is called.
     # TODO(b/228140127): It would be preferable that it fails earlier.
-    public_handle_without_primary = cleartext_keyset_handle.read(
-        tink.JsonKeysetReader(PUBLIC_KEYSET_WITHOUT_PRIMARY))
+    public_handle_without_primary = (
+        tink.json_proto_keyset_format.parse_without_secret(
+            PUBLIC_KEYSET_WITHOUT_PRIMARY
+        )
+    )
     enc_without_primary = public_handle_without_primary.primitive(
         hybrid.HybridEncrypt)
     with self.assertRaises(tink.TinkError):

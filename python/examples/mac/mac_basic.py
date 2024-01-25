@@ -14,8 +14,8 @@
 """A minimal example for using the AEAD API."""
 # [START mac-basic-example]
 import tink
-from tink import cleartext_keyset_handle
 from tink import mac
+from tink import secret_key_access
 
 
 def example():
@@ -46,9 +46,11 @@ def example():
   # Create a keyset handle from the cleartext keyset in the previous
   # step. The keyset handle provides abstract access to the underlying keyset to
   # limit access of the raw key material. WARNING: In practice, it is unlikely
-  # you will want to use a cleartext_keyset_handle, as it implies that your key
-  # material is passed in cleartext, which is a security risk.
-  keyset_handle = cleartext_keyset_handle.read(tink.JsonKeysetReader(keyset))
+  # you will want to use tink.json_proto_keyset_format.parse, as it implies that
+  # your key material is passed in cleartext, which is a security risk.
+  keyset_handle = tink.json_proto_keyset_format.parse(
+      keyset, secret_key_access.TOKEN
+  )
 
   # Retrieve the Mac primitive we want to use from the keyset handle.
   primitive = keyset_handle.primitive(mac.Mac)

@@ -125,10 +125,12 @@ func Primitive(typeURL string, serializedKey []byte) (interface{}, error) {
 // This function adds an object to a global list. It should only be called on
 // startup.
 //
-// Deprecated: It is preferable to not register clients. Instead, call
+// Deprecated: We do not recommend using this API, but there are no plans to remove it.
+// It is preferable to not register clients. Instead, call
 // kmsClient.GetAEAD to get a remote AEAD, and then use it to encrypt
 // a keyset with keyset.Write, or to create an envelope AEAD using
 // aead.NewKMSEnvelopeAEAD2.
+// See https://github.com/tink-crypto/tink-go/issues/10 for more details.
 func RegisterKMSClient(kmsClient KMSClient) {
 	kmsClientsMu.Lock()
 	defer kmsClientsMu.Unlock()
@@ -137,7 +139,9 @@ func RegisterKMSClient(kmsClient KMSClient) {
 
 // GetKMSClient fetches a KMSClient by a given URI.
 //
-// Deprecated: It is preferable to not register clients.
+// Deprecated: We do not recommend using this API, but there are no plans to remove it.
+// It is preferable to not register clients.
+// See https://github.com/tink-crypto/tink-go/issues/10 for more details.
 func GetKMSClient(keyURI string) (KMSClient, error) {
 	kmsClientsMu.RLock()
 	defer kmsClientsMu.RUnlock()
@@ -153,7 +157,9 @@ func GetKMSClient(keyURI string) (KMSClient, error) {
 //
 // Should only be used in tests.
 //
-// Deprecated: It is preferable to not register clients.
+// Deprecated: We do not recommend using this API, but there are no plans to remove it.
+// It is preferable to not register clients.
+// See https://github.com/tink-crypto/tink-go/issues/10 for more details.
 func ClearKMSClients() {
 	kmsClientsMu.Lock()
 	defer kmsClientsMu.Unlock()

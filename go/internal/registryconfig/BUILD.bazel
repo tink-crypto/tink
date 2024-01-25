@@ -1,0 +1,34 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "registryconfig",
+    srcs = ["registry_config.go"],
+    importpath = "github.com/google/tink/go/internal/registryconfig",
+    visibility = ["//keyset:__subpackages__"],
+    deps = [
+        "//core/registry",
+        "//internal/internalapi",
+        "//proto/tink_go_proto",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":registryconfig",
+    visibility = ["//keyset:__subpackages__"],
+)
+
+go_test(
+    name = "registryconfig_test",
+    srcs = ["registry_config_test.go"],
+    deps = [
+        ":registryconfig",
+        "//core/registry",
+        "//internal/internalapi",
+        "//mac/subtle",
+        "//proto/common_go_proto",
+        "//proto/tink_go_proto",
+        "//testutil",
+        "@org_golang_google_protobuf//proto",
+    ],
+)

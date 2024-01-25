@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.internal;
 
-import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -106,9 +105,7 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
   public abstract KeyMaterialType keyMaterialType();
 
   /** Returns the FIPS compatibility of this KeyTypeManager. */
-  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
-    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
-  };
+  public abstract TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus();
 
   /**
    * Parses a serialized key proto.
@@ -174,20 +171,6 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
     }
 
     /**
-     * A container that contains key format and other information that form key templates supported
-     * by this factory.
-     */
-    public static final class KeyFormat<KeyFormatProtoT> {
-      public KeyFormatProtoT keyFormat;
-      public KeyTemplate.OutputPrefixType outputPrefixType;
-
-      public KeyFormat(KeyFormatProtoT keyFormat, KeyTemplate.OutputPrefixType outputPrefixType) {
-        this.keyFormat = keyFormat;
-        this.outputPrefixType = outputPrefixType;
-      }
-    }
-
-    /**
      * Returns the class corresponding to the key format protobuffer.
      */
     public final Class<KeyFormatProtoT> getKeyFormatClass() {
@@ -215,45 +198,18 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
     public abstract KeyProtoT createKey(KeyFormatProtoT keyFormat) throws GeneralSecurityException;
 
     /**
-     * Derives a new key from a given format, using the given {@code pseudoRandomness}.
-     *
-     * <p>Implementations need to note that the given paramter {@code pseudoRandomness} may only
-     * produce a finite amount of randomness. Hence, proper implementations will first obtain all
-     * the pseudorandom bytes needed; and only after produce the key.
-     *
-     * <p>While {@link validateKeyFormat} is called before this method will be called,
-     * implementations must check the version of the given {@code keyFormat}, as {@link
-     * validateKeyFormat} is also called from {@link createKey}.
-     *
-     * <p>Not every KeyTypeManager needs to implement this; if not implemented a {@link
-     * GeneralSecurityException} will be thrown.
-     */
-    public KeyProtoT deriveKey(KeyFormatProtoT keyFormat, InputStream pseudoRandomness)
-        throws GeneralSecurityException {
-      throw new GeneralSecurityException("deriveKey not implemented for key of type " + clazz);
-    }
-
-    /**
-     * Returns supported key formats and their names.
-     *
-     * @throws GeneralSecurityException Key type managers can throw GeneralSecurityException when
-     *     their key formats depend on other key formats that were not registered.
-     */
-    public Map<String, KeyFormat<KeyFormatProtoT>> keyFormats() throws GeneralSecurityException {
-      return Collections.emptyMap();
-    }
-
-    /**
      * Reads {@code output.length} number of bytes of (pseudo)randomness from the {@code input}
      * stream into the provided {@code output} buffer.
      *
-     * Note that this method will not close the {@code input} stream.
+     * <p>Note that this method will not close the {@code input} stream.
      *
      * @throws GeneralSecurityException when not enough randomness was provided in the {@code input}
      *     stream.
      */
+    @SuppressWarnings("UnusedException") // We don't want to leak secrets in the exception
     protected static void readFully(InputStream input, byte[] output)
-        throws IOException, GeneralSecurityException {
+        throws GeneralSecurityException {
+      try {
       int len = output.length;
       int read;
       int readTotal = 0;
@@ -263,6 +219,9 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
           throw new GeneralSecurityException("Not enough pseudorandomness provided");
         }
         readTotal += read;
+      }
+      } catch (IOException e) {
+        throw new GeneralSecurityException("Reading pseudorandomness failed");
       }
     }
   }

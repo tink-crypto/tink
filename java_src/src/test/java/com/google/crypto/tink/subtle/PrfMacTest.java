@@ -153,8 +153,8 @@ public class PrfMacTest {
       @FromDataPoints("failingHmacTestVectors") HmacTestVector t) throws Exception {
     assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
-    Mac hmmac = PrfMac.create(t.key);
+    Mac hmac = PrfMac.create(t.key);
 
-    assertThrows(GeneralSecurityException.class, () -> hmmac.verifyMac(t.tag, t.message));
+    assertThrows(GeneralSecurityException.class, () -> hmac.verifyMac(t.tag, t.message));
   }
 }

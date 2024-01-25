@@ -38,6 +38,8 @@
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/internal/configuration_impl.h"
+#include "tink/internal/key_gen_configuration_impl.h"
+#include "tink/internal/key_type_info_store.h"
 #include "tink/internal/keyset_wrapper_store.h"
 #include "tink/keyset_handle.h"
 #include "tink/mac.h"
@@ -56,6 +58,7 @@
 #include "tink/streaming_aead.h"
 #include "tink/streamingaead/aes_ctr_hmac_streaming_key_manager.h"
 #include "tink/streamingaead/aes_gcm_hkdf_streaming_key_manager.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 
 namespace crypto {
@@ -64,6 +67,8 @@ namespace {
 
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
+using ::testing::TestWithParam;
+using ::testing::Values;
 
 TEST(V0Test, PrimitiveWrappers) {
   util::StatusOr<const internal::KeysetWrapperStore*> store =
@@ -82,37 +87,48 @@ TEST(V0Test, PrimitiveWrappers) {
   EXPECT_THAT((*store)->Get<PublicKeyVerify>(), IsOk());
 }
 
-TEST(V0Test, KeyManagers) {
-  util::StatusOr<const internal::KeyTypeInfoStore*> store =
-      internal::ConfigurationImpl::GetKeyTypeInfoStore(ConfigV0());
-  ASSERT_THAT(store, IsOk());
+using V0KeyTypesTest =
+    TestWithParam<util::StatusOr<const internal::KeyTypeInfoStore*>>;
 
-  EXPECT_THAT((*store)->Get(HmacKeyManager().get_key_type()), IsOk());
-  EXPECT_THAT((*store)->Get(AesCmacKeyManager().get_key_type()), IsOk());
-  EXPECT_THAT((*store)->Get(AesCtrHmacAeadKeyManager().get_key_type()), IsOk());
-  EXPECT_THAT((*store)->Get(AesGcmKeyManager().get_key_type()), IsOk());
-  EXPECT_THAT((*store)->Get(AesGcmSivKeyManager().get_key_type()), IsOk());
-  EXPECT_THAT((*store)->Get(AesEaxKeyManager().get_key_type()), IsOk());
-  EXPECT_THAT((*store)->Get(XChaCha20Poly1305KeyManager().get_key_type()),
+INSTANTIATE_TEST_SUITE_P(
+    V0KeyTypesTestSuite, V0KeyTypesTest,
+    Values(internal::ConfigurationImpl::GetKeyTypeInfoStore(ConfigV0()),
+           internal::KeyGenConfigurationImpl::GetKeyTypeInfoStore(
+               KeyGenConfigV0())));
+
+TEST_P(V0KeyTypesTest, KeyManagers) {
+  ASSERT_THAT(GetParam(), IsOk());
+  const crypto::tink::internal::KeyTypeInfoStore* store = GetParam().value();
+
+  EXPECT_THAT(store->Get(HmacKeyManager().get_key_type()), IsOk());
+  EXPECT_THAT(store->Get(AesCmacKeyManager().get_key_type()), IsOk());
+  EXPECT_THAT(store->Get(AesCtrHmacAeadKeyManager().get_key_type()), IsOk());
+
+  EXPECT_THAT(store->Get(AesGcmKeyManager().get_key_type()), IsOk());
+  EXPECT_THAT(store->Get(AesGcmSivKeyManager().get_key_type()), IsOk());
+  EXPECT_THAT(store->Get(AesEaxKeyManager().get_key_type()), IsOk());
+  EXPECT_THAT(store->Get(XChaCha20Poly1305KeyManager().get_key_type()), IsOk());
+
+  EXPECT_THAT(store->Get(AesSivKeyManager().get_key_type()), IsOk());
+
+  EXPECT_THAT(store->Get(AesGcmHkdfStreamingKeyManager().get_key_type()),
               IsOk());
-  EXPECT_THAT((*store)->Get(AesSivKeyManager().get_key_type()), IsOk());
-  EXPECT_THAT((*store)->Get(AesGcmHkdfStreamingKeyManager().get_key_type()),
+  EXPECT_THAT(store->Get(AesCtrHmacStreamingKeyManager().get_key_type()),
               IsOk());
-  EXPECT_THAT((*store)->Get(AesCtrHmacStreamingKeyManager().get_key_type()),
+
+  EXPECT_THAT(store->Get(EciesAeadHkdfPublicKeyManager().get_key_type()),
               IsOk());
-  EXPECT_THAT((*store)->Get(EciesAeadHkdfPublicKeyManager().get_key_type()),
+  EXPECT_THAT(store->Get(internal::HpkePublicKeyManager().get_key_type()),
               IsOk());
-  EXPECT_THAT((*store)->Get(internal::HpkePublicKeyManager().get_key_type()),
-              IsOk());
-  EXPECT_THAT((*store)->Get(HmacPrfKeyManager().get_key_type()), IsOk());
-  EXPECT_THAT((*store)->Get(HkdfPrfKeyManager().get_key_type()), IsOk());
-  EXPECT_THAT((*store)->Get(AesCmacPrfKeyManager().get_key_type()), IsOk());
-  EXPECT_THAT((*store)->Get(EcdsaVerifyKeyManager().get_key_type()), IsOk());
-  EXPECT_THAT((*store)->Get(RsaSsaPssVerifyKeyManager().get_key_type()),
-              IsOk());
-  EXPECT_THAT((*store)->Get(RsaSsaPkcs1VerifyKeyManager().get_key_type()),
-              IsOk());
-  EXPECT_THAT((*store)->Get(Ed25519VerifyKeyManager().get_key_type()), IsOk());
+
+  EXPECT_THAT(store->Get(HmacPrfKeyManager().get_key_type()), IsOk());
+  EXPECT_THAT(store->Get(HkdfPrfKeyManager().get_key_type()), IsOk());
+  EXPECT_THAT(store->Get(AesCmacPrfKeyManager().get_key_type()), IsOk());
+
+  EXPECT_THAT(store->Get(EcdsaVerifyKeyManager().get_key_type()), IsOk());
+  EXPECT_THAT(store->Get(RsaSsaPssVerifyKeyManager().get_key_type()), IsOk());
+  EXPECT_THAT(store->Get(RsaSsaPkcs1VerifyKeyManager().get_key_type()), IsOk());
+  EXPECT_THAT(store->Get(Ed25519VerifyKeyManager().get_key_type()), IsOk());
 }
 
 TEST(V0Test, GetPrimitive) {

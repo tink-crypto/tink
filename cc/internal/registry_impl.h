@@ -240,6 +240,7 @@ crypto::tink::util::Status RegistryImpl::RegisterPrimitiveWrapper(
                                    std::move(primitive_getter));
 }
 
+// TODO: b/284059638 - Remove this and upstream functions from the public API.
 template <class P>
 crypto::tink::util::StatusOr<const KeyManager<P>*>
 RegistryImpl::get_key_manager(absl::string_view type_url) const {
@@ -255,11 +256,13 @@ RegistryImpl::get_key_manager(absl::string_view type_url) const {
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::GetPrimitive(
     const google::crypto::tink::KeyData& key_data) const {
-  auto key_manager_result = get_key_manager<P>(key_data.type_url());
-  if (key_manager_result.ok()) {
-    return key_manager_result.value()->GetPrimitive(key_data);
+  crypto::tink::util::StatusOr<
+      const crypto::tink::internal::KeyTypeInfoStore::Info*>
+      info = get_key_type_info(key_data.type_url());
+  if (!info.ok()) {
+    return info.status();
   }
-  return key_manager_result.status();
+  return (*info)->GetPrimitive<P>(key_data);
 }
 
 template <class P>

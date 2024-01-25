@@ -21,7 +21,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.PublicKeySign;
+import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.signature.Ed25519PrivateKey;
+import com.google.crypto.tink.signature.internal.testing.Ed25519TestUtil;
+import com.google.crypto.tink.signature.internal.testing.SignatureTestVector;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -187,5 +192,22 @@ public final class Ed25519SignTest {
 
     byte[] key = Random.randBytes(32);
     assertThrows(GeneralSecurityException.class, () -> new Ed25519Sign(key));
+  }
+
+  @Test
+  public void test_computeAndValidateFreshSignatureWithTestVector() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+    // We are not using parameterized tests because the next line cannot be run if useOnlyFips.
+    SignatureTestVector[] testVectors = Ed25519TestUtil.createEd25519TestVectors();
+    for (SignatureTestVector testVector : testVectors) {
+      System.out.println(
+          "Testing test_computeAndValidateFreshSignatureWithTestVector with parameters: "
+              + testVector.getPrivateKey().getParameters());
+      Ed25519PrivateKey key = (Ed25519PrivateKey) testVector.getPrivateKey();
+      PublicKeySign signer = Ed25519Sign.create(key);
+      byte[] signature = signer.sign(testVector.getMessage());
+      PublicKeyVerify verifier = Ed25519Verify.create(key.getPublicKey());
+      verifier.verify(signature, testVector.getMessage());
+    }
   }
 }

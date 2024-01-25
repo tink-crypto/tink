@@ -17,14 +17,21 @@
 #include "tink/keyderivation/internal/prf_based_deriver.h"
 
 #include <memory>
+#include <string>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/cleartext_keyset_handle.h"
+#include "tink/keyderivation/keyset_deriver.h"
+#include "tink/keyset_handle.h"
 #include "tink/prf/hkdf_prf_key_manager.h"
+#include "tink/registry.h"
+#include "tink/subtle/random.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/aes_gcm.pb.h"

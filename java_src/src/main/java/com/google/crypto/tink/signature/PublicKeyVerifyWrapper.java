@@ -30,7 +30,6 @@ import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * The implementation of {@code PrimitiveWrapper<DeterministicAead>}.
@@ -43,8 +42,6 @@ import java.util.logging.Logger;
  * @since 1.0.0
  */
 class PublicKeyVerifyWrapper implements PrimitiveWrapper<PublicKeyVerify, PublicKeyVerify> {
-
-  private static final Logger logger = Logger.getLogger(PublicKeyVerifyWrapper.class.getName());
 
   private static final byte[] FORMAT_VERSION = new byte[] {0};
   private static final PublicKeyVerifyWrapper WRAPPER = new PublicKeyVerifyWrapper();
@@ -88,7 +85,6 @@ class PublicKeyVerifyWrapper implements PrimitiveWrapper<PublicKeyVerify, Public
           // If there is no exception, the signature is valid and we can return.
           return;
         } catch (GeneralSecurityException e) {
-          logger.info("signature prefix matches a key, but cannot verify: " + e);
           // Ignored as we want to continue verification with the remaining keys.
         }
       }

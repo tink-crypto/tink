@@ -19,7 +19,7 @@ import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import java.security.GeneralSecurityException;
 
 // [START_EXCLUDE]
-/** Example to showcase creating a keyset and getting a {@link KeysetHandle}. */
+/** Example that creates a keyset and returns a {@link KeysetHandle}. */
 final class CreateKeysetExample {
   private CreateKeysetExample() {}
   // [END_EXCLUDE]

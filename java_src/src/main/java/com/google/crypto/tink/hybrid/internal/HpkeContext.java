@@ -16,8 +16,9 @@
 
 package com.google.crypto.tink.hybrid.internal;
 
+import com.google.crypto.tink.AccessesPartialKey;
+import com.google.crypto.tink.hybrid.HpkePublicKey;
 import com.google.crypto.tink.internal.BigIntegerEncoding;
-import com.google.crypto.tink.proto.HpkePublicKey;
 import com.google.crypto.tink.subtle.Bytes;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
@@ -91,10 +92,9 @@ public final class HpkeContext {
    * @param info application-specific information parameter to influence key generation
    */
   static HpkeContext createSenderContext(
-      HpkePublicKey recipientPublicKey, HpkeKem kem, HpkeKdf kdf, HpkeAead aead, byte[] info)
+      byte[] recipientPublicKey, HpkeKem kem, HpkeKdf kdf, HpkeAead aead, byte[] info)
       throws GeneralSecurityException {
-    HpkeKemEncapOutput encapOutput =
-        kem.encapsulate(recipientPublicKey.getPublicKey().toByteArray());
+    HpkeKemEncapOutput encapOutput = kem.encapsulate(recipientPublicKey);
     byte[] encapsulatedKey = encapOutput.getEncapsulatedKey();
     byte[] sharedSecret = encapOutput.getSharedSecret();
     return createContext(HpkeUtil.BASE_MODE, encapsulatedKey, sharedSecret, kem, kdf, aead, info);
@@ -111,7 +111,8 @@ public final class HpkeContext {
    * @param info application-specific information parameter to influence key generation
    * @param senderPrivateKey sender's private key (skS)
    */
-  static HpkeContext createAuthSenderContext(
+  @AccessesPartialKey
+  public static HpkeContext createAuthSenderContext(
       HpkePublicKey recipientPublicKey,
       HpkeKem kem,
       HpkeKdf kdf,
@@ -120,7 +121,7 @@ public final class HpkeContext {
       HpkeKemPrivateKey senderPrivateKey)
       throws GeneralSecurityException {
     HpkeKemEncapOutput encapOutput =
-        kem.authEncapsulate(recipientPublicKey.getPublicKey().toByteArray(), senderPrivateKey);
+        kem.authEncapsulate(recipientPublicKey.getPublicKeyBytes().toByteArray(), senderPrivateKey);
     byte[] encapsulatedKey = encapOutput.getEncapsulatedKey();
     byte[] sharedSecret = encapOutput.getSharedSecret();
     return createContext(HpkeUtil.AUTH_MODE, encapsulatedKey, sharedSecret, kem, kdf, aead, info);
@@ -161,6 +162,7 @@ public final class HpkeContext {
    * @param info application-specific information parameter to influence key generation
    * @param senderPublicKey sender's public key (pkS)
    */
+  @AccessesPartialKey
   public static HpkeContext createAuthRecipientContext(
       byte[] encapsulatedKey,
       HpkeKemPrivateKey recipientPrivateKey,
@@ -172,7 +174,9 @@ public final class HpkeContext {
       throws GeneralSecurityException {
     byte[] sharedSecret =
         kem.authDecapsulate(
-            encapsulatedKey, recipientPrivateKey, senderPublicKey.getPublicKey().toByteArray());
+            encapsulatedKey,
+            recipientPrivateKey,
+            senderPublicKey.getPublicKeyBytes().toByteArray());
     return createContext(HpkeUtil.AUTH_MODE, encapsulatedKey, sharedSecret, kem, kdf, aead, info);
   }
 
@@ -212,7 +216,7 @@ public final class HpkeContext {
     return baseNonce;
   }
 
-  byte[] getEncapsulatedKey() {
+  public byte[] getEncapsulatedKey() {
     return encapsulatedKey;
   }
 
@@ -222,7 +226,7 @@ public final class HpkeContext {
    *
    * @return ciphertext
    */
-  byte[] seal(byte[] plaintext, byte[] associatedData) throws GeneralSecurityException {
+  public byte[] seal(byte[] plaintext, byte[] associatedData) throws GeneralSecurityException {
     byte[] nonce = computeNonceAndIncrementSequenceNumber();
     return aead.seal(key, nonce, plaintext, associatedData);
   }

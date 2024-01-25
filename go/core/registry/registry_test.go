@@ -146,12 +146,17 @@ func TestPrimitiveFromKeyData(t *testing.T) {
 func TestPrimitive(t *testing.T) {
 	// hmac key
 	key := testutil.NewHMACKey(commonpb.HashType_SHA256, 16)
-	serializedKey, _ := proto.Marshal(key)
+	serializedKey, err := proto.Marshal(key)
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %s, want nil", err)
+	}
 	p, err := registry.Primitive(testutil.HMACTypeURL, serializedKey)
 	if err != nil {
-		t.Errorf("unexpected error: %s", err)
+		t.Fatalf("registry.Primitive() err = %s, want nil", err)
 	}
-	var _ *subtle.HMAC = p.(*subtle.HMAC)
+	if _, ok := p.(*subtle.HMAC); !ok {
+		t.Error("object returned by registry.Primitive() does not implement *subtle.HMAC")
+	}
 	// unregistered url
 	if _, err := registry.Primitive("some url", serializedKey); err == nil {
 		t.Errorf("expect an error when typeURL has not been registered")

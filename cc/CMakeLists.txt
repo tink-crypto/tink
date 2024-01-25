@@ -134,6 +134,7 @@ tink_cc_library(
     tink::util::buffer
     tink::util::errors
     tink::util::protobuf_helper
+    tink::util::secret_proto
     tink::util::status
     tink::util::statusor
     tink::util::validation
@@ -320,6 +321,7 @@ tink_cc_library(
     binary_keyset_writer.h
   DEPS
     tink::core::keyset_writer
+    absl::memory
     absl::status
     absl::strings
     tink::util::errors
@@ -466,6 +468,7 @@ tink_cc_library(
     tink::internal::util
     tink::util::errors
     tink::util::keyset_util
+    tink::util::secret_proto
     tink::util::status
     tink::util::statusor
     tink::util::validation
@@ -488,6 +491,7 @@ tink_cc_library(
     absl::optional
     tink::internal::keyset_handle_builder_entry
     tink::subtle::random
+    tink::util::secret_proto
     tink::proto::tink_cc_proto
 )
 
@@ -502,6 +506,7 @@ tink_cc_library(
     absl::flat_hash_map
     absl::status
     tink::util::errors
+    tink::util::secret_proto
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
@@ -537,6 +542,7 @@ tink_cc_library(
     tink::internal::key_gen_configuration_impl
     tink::util::enums
     tink::util::errors
+    tink::util::secret_proto
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
@@ -732,6 +738,28 @@ tink_cc_library(
     tink::internal::key_type_info_store
 )
 
+tink_cc_library(
+  NAME big_integer
+  SRCS
+    core/big_integer.cc
+    big_integer.h
+  DEPS
+    absl::string_view
+    crypto
+)
+
+tink_cc_library(
+  NAME restricted_big_integer
+  SRCS
+    core/restricted_big_integer.cc
+    restricted_big_integer.h
+  DEPS
+    tink::core::secret_key_access_token
+    absl::string_view
+    crypto
+    tink::util::secret_data
+)
+
 # tests
 
 tink_cc_test(
@@ -761,7 +789,17 @@ tink_cc_test(
     core/binary_keyset_writer_test.cc
   DEPS
     tink::core::binary_keyset_writer
+    tink::core::cc
+    tink::core::insecure_secret_key_access
+    tink::core::proto_keyset_format
     gmock
+    absl::memory
+    absl::status
+    tink::aead::aead_config
+    tink::config::global_registry
+    tink::util::secret_data
+    tink::util::statusor
+    tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
 )
@@ -1088,4 +1126,27 @@ tink_cc_test(
     tink::signature::signature_key_templates
     tink::util::secret_data
     tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME big_integer_test
+  SRCS
+    core/big_integer_test.cc
+  DEPS
+    tink::core::big_integer
+    gmock
+    absl::strings
+    absl::string_view
+)
+
+tink_cc_test(
+  NAME restricted_big_integer_test
+  SRCS
+    core/restricted_big_integer_test.cc
+  DEPS
+    tink::core::insecure_secret_key_access
+    tink::core::restricted_big_integer
+    gmock
+    absl::strings
+    absl::string_view
 )

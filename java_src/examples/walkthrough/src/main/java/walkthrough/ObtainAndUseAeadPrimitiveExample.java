@@ -19,7 +19,7 @@ import com.google.crypto.tink.KeysetHandle;
 import java.security.GeneralSecurityException;
 
 // [START_EXCLUDE]
-/** AEAD encryption/decryption example. */
+/** Example for AEAD encryption/decryption. */
 final class ObtainAndUseAeadPrimitiveExample {
   private ObtainAndUseAeadPrimitiveExample() {}
   // [END_EXCLUDE]

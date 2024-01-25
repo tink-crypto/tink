@@ -15,7 +15,6 @@
 """HybridDecrypt wrapper."""
 
 from typing import Type
-from absl import logging
 
 from tink import core
 from tink.hybrid import _hybrid_decrypt
@@ -36,14 +35,13 @@ class _WrappedHybridDecrypt(_hybrid_decrypt.HybridDecrypt):
         try:
           return entry.primitive.decrypt(ciphertext_no_prefix,
                                          context_info)
-        except core.TinkError as e:
-          logging.info(
-              'ciphertext prefix matches a key, but cannot decrypt: %s', e)
+        except core.TinkError:
+          pass
     # Let's try all RAW keys.
     for entry in self._primitive_set.raw_primitives():
       try:
         return entry.primitive.decrypt(ciphertext, context_info)
-      except core.TinkError as e:
+      except core.TinkError:
         pass
     # nothing works.
     raise core.TinkError('Decryption failed.')

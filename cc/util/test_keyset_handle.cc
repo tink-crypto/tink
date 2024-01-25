@@ -21,6 +21,7 @@
 
 #include "absl/memory/memory.h"
 #include "tink/keyset_handle.h"
+#include "tink/util/secret_proto.h"
 #include "proto/tink.pb.h"
 
 using google::crypto::tink::Keyset;
@@ -31,9 +32,8 @@ namespace tink {
 // static
 std::unique_ptr<KeysetHandle> TestKeysetHandle::GetKeysetHandle(
     const Keyset& keyset) {
-  auto unique_keyset = absl::make_unique<Keyset>(keyset);
   std::unique_ptr<KeysetHandle> handle =
-      absl::WrapUnique(new KeysetHandle(std::move(unique_keyset)));
+      absl::WrapUnique(new KeysetHandle(util::SecretProto<Keyset>(keyset)));
   return handle;
 }
 

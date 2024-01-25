@@ -71,7 +71,7 @@ public final class BinaryKeysetWriter implements KeysetWriter {
   @Override
   public void write(EncryptedKeyset keyset) throws IOException {
     try {
-      keyset.writeTo(outputStream);
+      keyset.toBuilder().clearKeysetInfo().build().writeTo(outputStream);
     } finally {
       outputStream.close();
     }

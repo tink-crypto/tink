@@ -1,7 +1,8 @@
-# Fix for grpc build error on macOS.
-# See: https://github.com/bazelbuild/bazel/issues/4341
-build --copt=-DGRPC_BAZEL_BUILD
+# Enables automatic per-platform configs.
+common --enable_platform_specific_config
 # Minumum C++ version. Override it building this project with
 # `bazel build --cxxopt='-std=c++<XY>' --host_cxxopt='c++<XY>' ...`
 # (Both -std and --host_cxxopt must be set to force the desired version.)
-build --cxxopt='-std=c++14' --host_cxxopt='-std=c++14'
+build:linux --cxxopt='-std=c++14' --host_cxxopt='-std=c++14'
+build:macos --cxxopt='-std=c++14' --host_cxxopt='-std=c++14'
+build:windows --cxxopt='/std:c++14' --host_cxxopt='/std:c++14'

@@ -13,18 +13,16 @@
 # limitations under the License.
 """Convert Tink Keyset with JWT keys from and to JWK sets."""
 
-import io
 import json
 import random
 
-from typing import Dict, List, Optional, Union
+from typing import cast, Dict, List, Optional, Union
 
 from tink.proto import jwt_ecdsa_pb2
 from tink.proto import jwt_rsa_ssa_pkcs1_pb2
 from tink.proto import jwt_rsa_ssa_pss_pb2
 from tink.proto import tink_pb2
 import tink
-from tink import cleartext_keyset_handle
 from tink.jwt import _jwt_format
 
 _JWT_ECDSA_PUBLIC_KEY_TYPE = (
@@ -98,11 +96,10 @@ def from_public_keyset_handle(keyset_handle: tink.KeysetHandle) -> str:
     TinkError if the keys are not of the expected type, or if they have a
     ouput prefix type that is not supported.
   """
-  output_stream = io.BytesIO()
-  writer = tink.BinaryKeysetWriter(output_stream)
-  keyset_handle.write_no_secret(writer)
-  keyset = tink_pb2.Keyset.FromString(output_stream.getvalue())
-
+  serialization = tink.proto_keyset_format.serialize_without_secret(
+      keyset_handle
+  )
+  keyset = tink_pb2.Keyset.FromString(serialization)
   keys = []
   for key in keyset.key:
     if key.status != tink_pb2.ENABLED:
@@ -254,7 +251,9 @@ def to_public_keyset_handle(jwk_set: str) -> tink.KeysetHandle:
     # To verify signature, it also does not matter which key is primary. We
     # simply set it to the last key.
     proto_keyset.primary_key_id = new_id
-  return cleartext_keyset_handle.from_keyset(proto_keyset)
+  return tink.proto_keyset_format.parse_without_secret(
+      proto_keyset.SerializeToString()
+  )
 
 
 # Deprecated. Use to_public_keyset_handle instead.
@@ -279,7 +278,7 @@ def _convert_to_ecdsa_key(
     key: Dict[str, Union[str, List[str]]]) -> tink_pb2.Keyset.Key:
   """Converts a EC Json Web Key (JWK) into a tink_pb2.Keyset.Key."""
   ecdsa_public_key = jwt_ecdsa_pb2.JwtEcdsaPublicKey()
-  algorithm = _ECDSA_NAME_TO_ALGORITHM.get(key['alg'], None)
+  algorithm = _ECDSA_NAME_TO_ALGORITHM.get(cast(str, key['alg']), None)
   if not algorithm:
     raise tink.TinkError('unknown ECDSA algorithm')
   if key.get('kty', None) != 'EC':
@@ -291,8 +290,8 @@ def _convert_to_ecdsa_key(
   if 'd' in key:
     raise tink.TinkError('cannot convert private ECDSA key')
   ecdsa_public_key.algorithm = algorithm
-  ecdsa_public_key.x = _base64_decode(key['x'])
-  ecdsa_public_key.y = _base64_decode(key['y'])
+  ecdsa_public_key.x = _base64_decode(cast(str, key['x']))
+  ecdsa_public_key.y = _base64_decode(cast(str, key['y']))
   if 'kid' in key:
     ecdsa_public_key.custom_kid.value = key['kid']
   proto_key = tink_pb2.Keyset.Key()
@@ -308,7 +307,7 @@ def _convert_to_rsa_ssa_pkcs1_key(
     key: Dict[str, Union[str, List[str]]]) -> tink_pb2.Keyset.Key:
   """Converts a JWK into a JwtEcdsaPublicKey."""
   public_key = jwt_rsa_ssa_pkcs1_pb2.JwtRsaSsaPkcs1PublicKey()
-  algorithm = _RSA_SSA_PKCS1_NAME_TO_ALGORITHM.get(key['alg'], None)
+  algorithm = _RSA_SSA_PKCS1_NAME_TO_ALGORITHM.get(cast(str, key['alg']), None)
   if not algorithm:
     raise tink.TinkError('unknown RSA SSA PKCS1 algorithm')
   if key.get('kty', None) != 'RSA':
@@ -318,8 +317,8 @@ def _convert_to_rsa_ssa_pkcs1_key(
       'qi' in key):
     raise tink.TinkError('importing RSA private keys is not implemented')
   public_key.algorithm = algorithm
-  public_key.n = _base64_decode(key['n'])
-  public_key.e = _base64_decode(key['e'])
+  public_key.n = _base64_decode(cast(str, key['n']))
+  public_key.e = _base64_decode(cast(str, key['e']))
   if 'kid' in key:
     public_key.custom_kid.value = key['kid']
   proto_key = tink_pb2.Keyset.Key()
@@ -335,7 +334,7 @@ def _convert_to_rsa_ssa_pss_key(
     key: Dict[str, Union[str, List[str]]]) -> tink_pb2.Keyset.Key:
   """Converts a JWK into a JwtEcdsaPublicKey."""
   public_key = jwt_rsa_ssa_pss_pb2.JwtRsaSsaPssPublicKey()
-  algorithm = _RSA_SSA_PSS_NAME_TO_ALGORITHM.get(key['alg'], None)
+  algorithm = _RSA_SSA_PSS_NAME_TO_ALGORITHM.get(cast(str, key['alg']), None)
   if not algorithm:
     raise tink.TinkError('unknown RSA SSA PSS algorithm')
   if key.get('kty', None) != 'RSA':
@@ -345,10 +344,10 @@ def _convert_to_rsa_ssa_pss_key(
       'qi' in key):
     raise tink.TinkError('importing RSA private keys is not implemented')
   public_key.algorithm = algorithm
-  public_key.n = _base64_decode(key['n'])
-  public_key.e = _base64_decode(key['e'])
+  public_key.n = _base64_decode(cast(str, key['n']))
+  public_key.e = _base64_decode(cast(str, key['e']))
   if 'kid' in key:
-    public_key.custom_kid.value = key['kid']
+    public_key.custom_kid.value = cast(str, key['kid'])
   proto_key = tink_pb2.Keyset.Key()
   proto_key.key_data.type_url = _JWT_RSA_SSA_PSS_PUBLIC_KEY_TYPE
   proto_key.key_data.value = public_key.SerializeToString()

@@ -25,8 +25,10 @@
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "tink/config/global_registry.h"
 #include "tink/input_stream.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/test_random_access_stream.h"
@@ -54,14 +56,16 @@ namespace crypto {
 namespace tink {
 namespace {
 
+using ::crypto::tink::internal::ReadAllFromRandomAccessStream;
+using ::crypto::tink::subtle::test::ReadFromStream;
+using ::crypto::tink::subtle::test::WriteToStream;
 using ::crypto::tink::test::DummyStreamingAead;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
+using ::crypto::tink::util::IstreamInputStream;
 using ::google::crypto::tink::KeysetInfo;
 using ::google::crypto::tink::KeyStatusType;
 using ::google::crypto::tink::OutputPrefixType;
-using ::crypto::tink::subtle::test::ReadFromStream;
-using ::crypto::tink::subtle::test::WriteToStream;
 using ::testing::HasSubstr;
 
 // A container for specification of instances of DummyStreamingAead
@@ -341,6 +345,196 @@ TEST(StreamingAeadSetWrapperTest, EncryptWithTink) {
                                  subtle::Random::GetRandomBytes(10000),
                                  "some associated data", 0),
               IsOk());
+}
+
+// Tests that we can decrypt with an old key using NewDecryptingStream
+TEST(StreamingAeadSetWrapperTest, DecryptOldKeyWorks) {
+  ASSERT_THAT(StreamingAeadConfig::Register(), IsOk());
+
+  // We use the manually created test vector from
+  // aes_gcm_hkdf_streaming_key_test.py
+  // on https://github.com/tink-crypto/tink-cross-lang-tests
+  google::crypto::tink::AesGcmHkdfStreamingKey key;
+  key.set_key_value(absl::HexStringToBytes("6eb56cdc726dfbe5d57f2fcdc6e9345b"));
+  google::crypto::tink::AesGcmHkdfStreamingParams& params =
+      *key.mutable_params();
+  params.set_hkdf_hash_type(google::crypto::tink::HashType::SHA1);
+  params.set_derived_key_size(16);
+  params.set_ciphertext_segment_size(64);
+  std::string key_used_for_ciphertext = key.SerializeAsString();
+  // New lines are as in the above test: they split the header and ciphertext
+  // blocks
+  std::string ciphertext = absl::HexStringToBytes(
+      "1893b3af5e14ab378d065addfc8484da642c0862877baea8"
+      "db92d9c77406a406168478821c4298eab3e6d531277f4c1a051714f"
+      "aebcaefcbca7b7be05e9445ea"
+      "a0bb2904153398a25084dd80ae0edcd1c3079fcea2cd3770"
+      "630ee36f7539207b8ec9d754956d486b71cdf989f0ed6fba"
+      "6779b63558be0a66e668df14e1603cd2"
+      "af8944844078345286d0b292e772e7190775"
+      "c51a0f83e40c0b75821027e7e538e111");
+  std::string associated_data = "aad";
+
+  google::crypto::tink::Keyset keyset;
+  {
+    // Key 1: a different key with the same parameters, primary
+    google::crypto::tink::Keyset::Key& keyset_key = *keyset.add_key();
+    google::crypto::tink::KeyData& key_data = *keyset_key.mutable_key_data();
+    key_data.set_type_url(AesGcmHkdfStreamingKeyManager().get_key_type());
+    key.set_key_value("0123456789012345");
+    key_data.set_value(key.SerializeAsString());
+    key_data.set_key_material_type(google::crypto::tink::KeyData::SYMMETRIC);
+    keyset_key.set_key_id(1);
+    keyset_key.set_output_prefix_type(
+        google::crypto::tink::OutputPrefixType::TINK);
+    keyset_key.set_status(google::crypto::tink::KeyStatusType::ENABLED);
+
+    keyset.set_primary_key_id(1);
+  }
+  {
+    // Key 2: the correct key for our ciphertext
+    google::crypto::tink::Keyset::Key& keyset_key = *keyset.add_key();
+    google::crypto::tink::KeyData& key_data = *keyset_key.mutable_key_data();
+    key_data.set_type_url(AesGcmHkdfStreamingKeyManager().get_key_type());
+    key_data.set_value(key_used_for_ciphertext);
+    key_data.set_key_material_type(google::crypto::tink::KeyData::SYMMETRIC);
+    keyset_key.set_key_id(2);
+    keyset_key.set_output_prefix_type(
+        google::crypto::tink::OutputPrefixType::TINK);
+    keyset_key.set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  }
+  {
+    // Key 3: a different key with the same parameters
+    google::crypto::tink::Keyset::Key& keyset_key = *keyset.add_key();
+    google::crypto::tink::KeyData& key_data = *keyset_key.mutable_key_data();
+    key_data.set_type_url(AesGcmHkdfStreamingKeyManager().get_key_type());
+    key.set_key_value("abcdefghijklmnop");
+    key_data.set_value(key.SerializeAsString());
+    key_data.set_key_material_type(google::crypto::tink::KeyData::SYMMETRIC);
+    keyset_key.set_key_id(3);
+    keyset_key.set_output_prefix_type(
+        google::crypto::tink::OutputPrefixType::TINK);
+    keyset_key.set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  }
+
+  util::StatusOr<KeysetHandle> handle = ParseKeysetFromProtoKeysetFormat(
+      keyset.SerializeAsString(), InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(handle.status(), IsOk());
+
+  crypto::tink::util::StatusOr<std::unique_ptr<StreamingAead>> streaming_aead =
+      handle->GetPrimitive<crypto::tink::StreamingAead>(ConfigGlobalRegistry());
+  ASSERT_THAT(streaming_aead.status(), IsOk());
+
+  auto ciphertext_input_stream = std::make_unique<IstreamInputStream>(
+      absl::make_unique<std::istringstream>(ciphertext));
+  crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::InputStream>>
+      plaintext_stream =
+          (*streaming_aead)
+              ->NewDecryptingStream(std::move(ciphertext_input_stream),
+                                    associated_data);
+  ASSERT_THAT(plaintext_stream.status(), IsOk());
+  std::string decrypted;
+  ASSERT_THAT(ReadFromStream(plaintext_stream->get(), &decrypted), IsOk());
+  EXPECT_EQ(decrypted,
+            "This is a fairly long plaintext. It is of the exact length to "
+            "create three output blocks. ");
+}
+
+// Tests that we can decrypt with an old key and NewDecryptingRandomAccessStream
+TEST(StreamingAeadSetWrapperTest, DecryptOldKeyWorksWithRandomAccess) {
+  ASSERT_THAT(StreamingAeadConfig::Register(), IsOk());
+
+  // We use the manually created test vector from
+  // aes_gcm_hkdf_streaming_key_test.py
+  // on https://github.com/tink-crypto/tink-cross-lang-tests
+  google::crypto::tink::AesGcmHkdfStreamingKey key;
+  key.set_key_value(absl::HexStringToBytes("6eb56cdc726dfbe5d57f2fcdc6e9345b"));
+  google::crypto::tink::AesGcmHkdfStreamingParams& params =
+      *key.mutable_params();
+  params.set_hkdf_hash_type(google::crypto::tink::HashType::SHA1);
+  params.set_derived_key_size(16);
+  params.set_ciphertext_segment_size(64);
+  std::string key_used_for_ciphertext = key.SerializeAsString();
+  // New lines are as in the above test: they split the header and ciphertext
+  // blocks
+  std::string ciphertext = absl::HexStringToBytes(
+      "1893b3af5e14ab378d065addfc8484da642c0862877baea8"
+      "db92d9c77406a406168478821c4298eab3e6d531277f4c1a051714f"
+      "aebcaefcbca7b7be05e9445ea"
+      "a0bb2904153398a25084dd80ae0edcd1c3079fcea2cd3770"
+      "630ee36f7539207b8ec9d754956d486b71cdf989f0ed6fba"
+      "6779b63558be0a66e668df14e1603cd2"
+      "af8944844078345286d0b292e772e7190775"
+      "c51a0f83e40c0b75821027e7e538e111");
+  std::string associated_data = "aad";
+
+  google::crypto::tink::Keyset keyset;
+  {
+    // Key 1: a different key with the same parameters, primary
+    google::crypto::tink::Keyset::Key& keyset_key = *keyset.add_key();
+    google::crypto::tink::KeyData& key_data = *keyset_key.mutable_key_data();
+    key_data.set_type_url(AesGcmHkdfStreamingKeyManager().get_key_type());
+    key.set_key_value("0123456789012345");
+    key_data.set_value(key.SerializeAsString());
+    key_data.set_key_material_type(google::crypto::tink::KeyData::SYMMETRIC);
+    keyset_key.set_key_id(1);
+    keyset_key.set_output_prefix_type(
+        google::crypto::tink::OutputPrefixType::TINK);
+    keyset_key.set_status(google::crypto::tink::KeyStatusType::ENABLED);
+
+    keyset.set_primary_key_id(1);
+  }
+  {
+    // Key 2: the correct key for our ciphertext
+    google::crypto::tink::Keyset::Key& keyset_key = *keyset.add_key();
+    google::crypto::tink::KeyData& key_data = *keyset_key.mutable_key_data();
+    key_data.set_type_url(AesGcmHkdfStreamingKeyManager().get_key_type());
+    key_data.set_value(key_used_for_ciphertext);
+    key_data.set_key_material_type(google::crypto::tink::KeyData::SYMMETRIC);
+    keyset_key.set_key_id(2);
+    keyset_key.set_output_prefix_type(
+        google::crypto::tink::OutputPrefixType::TINK);
+    keyset_key.set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  }
+  {
+    // Key 3: a different key with the same parameters
+    google::crypto::tink::Keyset::Key& keyset_key = *keyset.add_key();
+    google::crypto::tink::KeyData& key_data = *keyset_key.mutable_key_data();
+    key_data.set_type_url(AesGcmHkdfStreamingKeyManager().get_key_type());
+    key.set_key_value("abcdefghijklmnop");
+    key_data.set_value(key.SerializeAsString());
+    key_data.set_key_material_type(google::crypto::tink::KeyData::SYMMETRIC);
+    keyset_key.set_key_id(3);
+    keyset_key.set_output_prefix_type(
+        google::crypto::tink::OutputPrefixType::TINK);
+    keyset_key.set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  }
+
+  crypto::tink::util::StatusOr<KeysetHandle> handle =
+      ParseKeysetFromProtoKeysetFormat(keyset.SerializeAsString(),
+                                       InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(handle.status(), IsOk());
+
+  crypto::tink::util::StatusOr<std::unique_ptr<StreamingAead>> streaming_aead =
+      handle->GetPrimitive<crypto::tink::StreamingAead>(ConfigGlobalRegistry());
+  ASSERT_THAT(streaming_aead.status(), IsOk());
+
+  auto ciphertext_random_access_stream =
+      std::make_unique<internal::TestRandomAccessStream>(ciphertext);
+  crypto::tink::util::StatusOr<
+      std::unique_ptr<crypto::tink::RandomAccessStream>>
+      plaintext_stream =
+          (*streaming_aead)
+              ->NewDecryptingRandomAccessStream(
+                  std::move(ciphertext_random_access_stream), associated_data);
+  ASSERT_THAT(plaintext_stream.status(), IsOk());
+  std::string decrypted;
+  ASSERT_THAT(
+      ReadAllFromRandomAccessStream(plaintext_stream->get(), decrypted, 100),
+      StatusIs(absl::StatusCode::kOutOfRange));
+  EXPECT_EQ(decrypted,
+            "This is a fairly long plaintext. It is of the exact length to "
+            "create three output blocks. ");
 }
 
 }  // namespace

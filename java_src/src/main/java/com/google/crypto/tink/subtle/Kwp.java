@@ -45,7 +45,6 @@ import javax.crypto.spec.SecretKeySpec;
  *     providers that did not implement KWP. It implements the same functionality as {@code
  *     Cipher.getInstance("AESWRAPPAD");}. Some provider use a different algorithm name: {@code
  *     Cipher.getInstance("AES/KWP/NoPadding");}.
- * @since 1.?.?
  */
 @Deprecated
 public class Kwp implements KeyWrap {

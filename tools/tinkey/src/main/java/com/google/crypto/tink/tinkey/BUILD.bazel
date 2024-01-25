@@ -124,10 +124,19 @@ java_library(
 )
 
 java_library(
+    name = "key_id_handler",
+    srcs = ["KeyIdHandler.java"],
+    deps = [
+        "@maven//:args4j_args4j",
+    ],
+)
+
+java_library(
     name = "key_id_options",
     srcs = ["KeyIdOptions.java"],
     deps = [
         ":out_options",
+        ":key_id_handler",
         "@maven//:args4j_args4j",
     ],
 )

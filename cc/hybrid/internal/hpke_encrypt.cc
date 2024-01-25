@@ -27,6 +27,9 @@
 namespace crypto {
 namespace tink {
 
+using ::google::crypto::tink::HpkeAead;
+using ::google::crypto::tink::HpkeKdf;
+using ::google::crypto::tink::HpkeKem;
 using ::google::crypto::tink::HpkePublicKey;
 
 util::StatusOr<std::unique_ptr<HybridEncrypt>> HpkeEncrypt::New(
@@ -38,6 +41,19 @@ util::StatusOr<std::unique_ptr<HybridEncrypt>> HpkeEncrypt::New(
   if (!recipient_public_key.has_params()) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Recipient public key is missing HPKE parameters.");
+  }
+  if (recipient_public_key.params().kem() !=
+      HpkeKem::DHKEM_X25519_HKDF_SHA256) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Recipient public key has an unsupported KEM");
+  }
+  if (recipient_public_key.params().kdf() != HpkeKdf::HKDF_SHA256) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Recipient public key has an unsupported KDF");
+  }
+  if (recipient_public_key.params().aead() == HpkeAead::AEAD_UNKNOWN) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Recipient public key is missing AEAD");
   }
   return {absl::WrapUnique(new HpkeEncrypt(recipient_public_key))};
 }

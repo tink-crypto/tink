@@ -24,25 +24,32 @@ set -eo pipefail
 
 usage() {
   cat <<EOF
-Usage:  $0 <path to tink python root>
+Usage:  $0 [-a] <path to tink python root>
+  -a: Install all the extras requirement.
   -h: Help. Print this usage information.
 EOF
   exit 1
 }
 
+readonly TINK_REQUIREMENTS_FILE="requirements.txt"
+readonly TINK_REQUIREMENTS_ALL_FILE="requirements_all.txt"
+
 TINK_PY_ROOT_DIR=
+ALL_REQUIREMENTS="false"
 
 #######################################
 # Process command line arguments.
 #######################################
 process_args() {
   # Parse options.
-  while getopts "h" opt; do
+  while getopts "ha" opt; do
     case "${opt}" in
+      a) ALL_REQUIREMENTS="true" ;;
       *) usage ;;
     esac
   done
   shift $((OPTIND - 1))
+  readonly ALL_REQUIREMENTS
   TINK_PY_ROOT_DIR="$1"
   if [[ -z "${TINK_PY_ROOT_DIR}" ]]; then
     echo "ERROR: The root folder of Tink Python must be specified" >&2
@@ -61,17 +68,30 @@ main() {
   (
     cd "${TINK_PY_ROOT_DIR}"
     local -r platform="$(uname | tr '[:upper:]' '[:lower:]')"
+
     local -a pip_flags
+    local requirements_file
+
     if [[ "${platform}" == 'darwin' ]]; then
       # On MacOS we need to use the --user flag as otherwise pip will complain
       # about permissions.
-      pip_flags=( --user )
+      pip_flags+=( --user )
     fi
+
+    if [[ "${ALL_REQUIREMENTS}" == "true" ]]; then
+      requirements_file="${TINK_REQUIREMENTS_ALL_FILE}"
+      pip_flags+=( --no-deps )
+    else
+      requirements_file="${TINK_REQUIREMENTS_FILE}"
+    fi
+
+    readonly requirements_file
     readonly pip_flags
 
     python3 -m pip install "${pip_flags[@]}" --upgrade pip setuptools
     # Install Tink Python requirements.
-    python3 -m pip install "${pip_flags[@]}" --require-hashes -r requirements.txt
+    python3 -m pip install "${pip_flags[@]}" --require-hashes \
+        -r "${requirements_file}"
     # Install Tink Python
     python3 -m pip install "${pip_flags[@]}" .
   )

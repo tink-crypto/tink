@@ -15,7 +15,7 @@
 """A container class for a set of primitives."""
 
 import collections
-from typing import Generic, List, Type, TypeVar
+from typing import Generic, List, Type, TypeVar, Optional, Dict
 
 from tink.proto import tink_pb2
 from tink.core import _crypto_format
@@ -44,8 +44,8 @@ class PrimitiveSet(Generic[P]):
   """
 
   def __init__(self, primitive_class: Type[P]):
-    self._primitives = {}  # Dict[bytes, List[Entry]]
-    self._primary = None
+    self._primitives: Dict[bytes, List[Entry]] = {}
+    self._primary: Optional[Entry] = None
     self._primitive_class = primitive_class
 
   def primitive_class(self) -> Type[P]:
@@ -88,4 +88,6 @@ class PrimitiveSet(Generic[P]):
     self._primary = entry
 
   def primary(self) -> Entry:
+    if not self._primary:
+      raise _tink_error.TinkError('The primary entry is not set.')
     return self._primary

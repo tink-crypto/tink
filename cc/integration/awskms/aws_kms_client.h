@@ -53,6 +53,10 @@ class AwsKmsClient : public crypto::tink::KmsClient {
       absl::string_view key_uri, absl::string_view credentials_path);
 
   // Creates a new client and registers it in KMSClients.
+  ABSL_DEPRECATED(
+      "RegisterNewClient is deprecated. Instead, use AwsKmsAead::New to "
+      "directly create an Aead object without creating or registering a "
+      "client.")
   static crypto::tink::util::Status RegisterNewClient(
       absl::string_view key_uri, absl::string_view credentials_path);
 

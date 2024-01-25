@@ -17,9 +17,11 @@ package com.google.crypto.tink.jwt;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
-import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1Algorithm;
@@ -221,74 +223,85 @@ public final class JwtRsaSsaPkcs1SignKeyManager
             .setCrt(ByteString.copyFrom(privKey.getCrtCoefficient().toByteArray()))
             .build();
       }
+    };
+  }
 
-      /**
-       * List of default templates to generate tokens with algorithms "RS256", "RS384" or "RS512".
-       * Use the template with the "_RAW" suffix if you want to generate tokens without a "kid"
-       * header.
-       */
-      @Override
-      public Map<String, KeyFactory.KeyFormat<JwtRsaSsaPkcs1KeyFormat>> keyFormats() {
-        Map<String, KeyFactory.KeyFormat<JwtRsaSsaPkcs1KeyFormat>> result = new HashMap<>();
+  /**
+   * List of default templates to generate tokens with algorithms "RS256", "RS384" or "RS512". Use
+   * the template with the "_RAW" suffix if you want to generate tokens without a "kid" header.
+   */
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
         result.put(
             "JWT_RS256_2048_F4_RAW",
-            createKeyFormat(
-                JwtRsaSsaPkcs1Algorithm.RS256,
-                2048,
-                RSAKeyGenParameterSpec.F4,
-                KeyTemplate.OutputPrefixType.RAW));
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(2048)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
+                .build());
         result.put(
             "JWT_RS256_2048_F4",
-            createKeyFormat(
-                JwtRsaSsaPkcs1Algorithm.RS256,
-                2048,
-                RSAKeyGenParameterSpec.F4,
-                KeyTemplate.OutputPrefixType.TINK));
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(2048)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
         result.put(
             "JWT_RS256_3072_F4_RAW",
-            createKeyFormat(
-                JwtRsaSsaPkcs1Algorithm.RS256,
-                3072,
-                RSAKeyGenParameterSpec.F4,
-                KeyTemplate.OutputPrefixType.RAW));
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(3072)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
+                .build());
         result.put(
             "JWT_RS256_3072_F4",
-            createKeyFormat(
-                JwtRsaSsaPkcs1Algorithm.RS256,
-                3072,
-                RSAKeyGenParameterSpec.F4,
-                KeyTemplate.OutputPrefixType.TINK));
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(3072)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
         result.put(
             "JWT_RS384_3072_F4_RAW",
-            createKeyFormat(
-                JwtRsaSsaPkcs1Algorithm.RS384,
-                3072,
-                RSAKeyGenParameterSpec.F4,
-                KeyTemplate.OutputPrefixType.RAW));
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(3072)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS384)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
+                .build());
         result.put(
             "JWT_RS384_3072_F4",
-            createKeyFormat(
-                JwtRsaSsaPkcs1Algorithm.RS384,
-                3072,
-                RSAKeyGenParameterSpec.F4,
-                KeyTemplate.OutputPrefixType.TINK));
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(3072)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS384)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
         result.put(
             "JWT_RS512_4096_F4_RAW",
-            createKeyFormat(
-                JwtRsaSsaPkcs1Algorithm.RS512,
-                4096,
-                RSAKeyGenParameterSpec.F4,
-                KeyTemplate.OutputPrefixType.RAW));
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(4096)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS512)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.IGNORED)
+                .build());
         result.put(
             "JWT_RS512_4096_F4",
-            createKeyFormat(
-                JwtRsaSsaPkcs1Algorithm.RS512,
-                4096,
-                RSAKeyGenParameterSpec.F4,
-                KeyTemplate.OutputPrefixType.TINK));
+            JwtRsaSsaPkcs1Parameters.builder()
+                .setModulusSizeBits(4096)
+                .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+                .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS512)
+                .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
         return Collections.unmodifiableMap(result);
-      }
-    };
+  }
+
+  @Override
+  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
   }
 
   /**
@@ -299,20 +312,6 @@ public final class JwtRsaSsaPkcs1SignKeyManager
     Registry.registerAsymmetricKeyManagers(
         new JwtRsaSsaPkcs1SignKeyManager(), new JwtRsaSsaPkcs1VerifyKeyManager(), newKeyAllowed);
     JwtRsaSsaPkcs1ProtoSerialization.register();
-  }
-
-
-  private static KeyFactory.KeyFormat<JwtRsaSsaPkcs1KeyFormat> createKeyFormat(
-      JwtRsaSsaPkcs1Algorithm algorithm,
-      int modulusSize,
-      BigInteger publicExponent,
-      KeyTemplate.OutputPrefixType prefixType) {
-    JwtRsaSsaPkcs1KeyFormat format =
-        JwtRsaSsaPkcs1KeyFormat.newBuilder()
-            .setAlgorithm(algorithm)
-            .setModulusSizeInBits(modulusSize)
-            .setPublicExponent(ByteString.copyFrom(publicExponent.toByteArray()))
-            .build();
-    return new KeyFactory.KeyFormat<>(format, prefixType);
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 }

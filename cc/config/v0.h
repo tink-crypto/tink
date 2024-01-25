@@ -22,8 +22,8 @@
 namespace crypto {
 namespace tink {
 
-// Configuration used to generate primitives using ISE Crypto-approved key types
-// as of July 2023.
+// Configuration used to generate recommended primitives with recommended key
+// managers.
 const Configuration& ConfigV0();
 
 }  // namespace tink

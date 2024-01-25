@@ -13,7 +13,7 @@ py_binary(
     python_version = "PY3",
     deps = [
         requirement("absl-py"),
-        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:secret_key_access",
         "@tink_py//tink:tink_python",
         "@tink_py//tink/mac",
     ],
@@ -53,7 +53,7 @@ py_library(
     name = "mac_basic",
     srcs = ["mac_basic.py"],
     deps = [
-        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:secret_key_access",
         "@tink_py//tink:tink_python",
         "@tink_py//tink/mac",
     ],

@@ -55,5 +55,6 @@ load("@rules_python//python:pip.bzl", "pip_install")
 pip_install(
     name = "pip_deps",
     quiet = False,
+    extra_pip_args = ["--no-deps"],
     requirements = "@examples_python//:requirements.txt",
 )

@@ -103,13 +103,13 @@ Status MacCli(absl::string_view mode, const std::string keyset_filename,
     // Read the authentication tag from tag file.
     StatusOr<std::string> tag_result = ReadFile(tag_filename);
     if (!tag_result.ok()) {
-      std::cerr << tag_result.status().message() << std::endl;
+      std::cerr << tag_result.status().message() << '\n';
       exit(1);
     }
     // Verify authentication tag.
     Status verify_result =
         (*mac_primitive)->VerifyMac(*tag_result, *data_file_content);
-    if (verify_result.ok()) std::clog << "Verification succeeded!" << std::endl;
+    if (verify_result.ok()) std::clog << "Verification succeeded!" << '\n';
     return verify_result;
   }
 }
@@ -128,10 +128,10 @@ int main(int argc, char** argv) {
 
   std::clog << "Using keyset from file '" << keyset_filename << "' to " << mode
             << " authentication tag from file '" << tag_filename
-            << "' for data file '" << data_filename << "'." << std::endl;
+            << "' for data file '" << data_filename << "'." << '\n';
   std::clog << "The tag will be "
             << ((mode == kCompute) ? "written to" : "read from") << " file '"
-            << tag_filename << "'." << std::endl;
+            << tag_filename << "'." << '\n';
 
   CHECK_OK(tink_cc_examples::MacCli(mode, keyset_filename, data_filename,
                                     tag_filename));

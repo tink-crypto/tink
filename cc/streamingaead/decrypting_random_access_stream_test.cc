@@ -35,8 +35,10 @@
 #include "tink/streaming_aead.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/test_util.h"
+#include "tink/util/buffer.h"
 #include "tink/util/ostream_output_stream.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
@@ -48,6 +50,7 @@ namespace {
 
 using crypto::tink::test::DummyStreamingAead;
 using crypto::tink::test::IsOk;
+using crypto::tink::test::IsOkAndHolds;
 using crypto::tink::test::StatusIs;
 using google::crypto::tink::KeysetInfo;
 using google::crypto::tink::KeyStatusType;
@@ -354,6 +357,27 @@ TEST(DecryptingRandomAccessStreamTest, NullCiphertextSource) {
   EXPECT_THAT(dec_stream_result.status(),
               StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("ciphertext_source must be non-null")));
+}
+
+TEST(DecryptingRandomAccessStreamTest, CallSizeBeforePReadWorks) {
+  uint32_t key_id = 1234543;
+  std::string saead_name = "streaming_aead";
+  auto saead_set = GetTestStreamingAeadSet({{key_id, saead_name}});
+
+  std::string associated_data = "associated_data";
+
+  for (int pt_size : {0, 1, 100}) {
+    std::string plaintext = subtle::Random::GetRandomBytes(pt_size);
+    std::unique_ptr<RandomAccessStream> ciphertext =
+        GetCiphertextSource(&(saead_set->get_primary()->get_primitive()),
+                            plaintext, associated_data);
+
+    util::StatusOr<std::unique_ptr<RandomAccessStream>> dec_stream =
+        DecryptingRandomAccessStream::New(saead_set, std::move(ciphertext),
+                                          associated_data);
+    ASSERT_THAT(dec_stream, IsOk());
+    EXPECT_THAT((*dec_stream)->size(), IsOkAndHolds(pt_size));
+  }
 }
 
 }  // namespace

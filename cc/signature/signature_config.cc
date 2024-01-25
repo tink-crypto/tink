@@ -25,8 +25,10 @@
 #include "tink/signature/ed25519_verify_key_manager.h"
 #include "tink/signature/public_key_sign_wrapper.h"
 #include "tink/signature/public_key_verify_wrapper.h"
+#include "tink/signature/rsa_ssa_pkcs1_proto_serialization.h"
 #include "tink/signature/rsa_ssa_pkcs1_sign_key_manager.h"
 #include "tink/signature/rsa_ssa_pkcs1_verify_key_manager.h"
+#include "tink/signature/rsa_ssa_pss_proto_serialization.h"
 #include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
 #include "tink/util/status.h"
@@ -60,10 +62,16 @@ util::Status SignatureConfig::Register() {
       absl::make_unique<RsaSsaPssVerifyKeyManager>(), true);
   if (!status.ok()) return status;
 
+  status = RegisterRsaSsaPssProtoSerialization();
+  if (!status.ok()) return status;
+
   // RSA SSA PKCS1
   status = Registry::RegisterAsymmetricKeyManagers(
       absl::make_unique<RsaSsaPkcs1SignKeyManager>(),
       absl::make_unique<RsaSsaPkcs1VerifyKeyManager>(), true);
+  if (!status.ok()) return status;
+
+  status = RegisterRsaSsaPkcs1ProtoSerialization();
   if (!status.ok()) return status;
 
   if (IsFipsModeEnabled()) {

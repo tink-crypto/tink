@@ -18,10 +18,14 @@ package com.google.crypto.tink.prf;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.internal.LegacyProtoKey;
 import com.google.crypto.tink.internal.MonitoringUtil;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.monitoring.MonitoringClient;
 import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
+import com.google.crypto.tink.prf.internal.LegacyFullPrf;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
@@ -40,6 +44,9 @@ import java.util.Map;
 public class PrfSetWrapper implements PrimitiveWrapper<Prf, PrfSet> {
 
   private static final PrfSetWrapper WRAPPER = new PrfSetWrapper();
+  private static final PrimitiveConstructor<LegacyProtoKey, Prf>
+      LEGACY_FULL_PRF_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(LegacyFullPrf::create, LegacyProtoKey.class, Prf.class);
 
   private static class WrappedPrfSet extends PrfSet {
     // This map is constructed using Collections.unmodifiableMap
@@ -102,7 +109,7 @@ public class PrfSetWrapper implements PrimitiveWrapper<Prf, PrfSet> {
         // Likewise, the key IDs of the PrfSet passed
         mutablePrfMap.put(
             entry.getKeyId(),
-            new PrfWithMonitoring(entry.getPrimitive(), entry.getKeyId(), logger));
+            new PrfWithMonitoring(entry.getFullPrimitive(), entry.getKeyId(), logger));
       }
       keyIdToPrfMap = Collections.unmodifiableMap(mutablePrfMap);
     }
@@ -135,5 +142,7 @@ public class PrfSetWrapper implements PrimitiveWrapper<Prf, PrfSet> {
 
   public static void register() throws GeneralSecurityException {
     Registry.registerPrimitiveWrapper(WRAPPER);
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(LEGACY_FULL_PRF_PRIMITIVE_CONSTRUCTOR);
   }
 }

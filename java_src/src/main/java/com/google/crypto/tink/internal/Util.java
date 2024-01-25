@@ -16,7 +16,11 @@
 
 package com.google.crypto.tink.internal;
 
+import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.util.Bytes;
+import com.google.crypto.tink.util.SecretBytes;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
@@ -126,6 +130,36 @@ public final class Util {
       }
     }
     return true;
+  }
+
+  /**
+   * Reads {@code length} number of bytes from the {@code input} stream and returns it in a {@code
+   * SecretBytes} object.
+   *
+   * <p>Note that this method will not close the {@code input} stream.
+   *
+   * @throws GeneralSecurityException when not enough randomness was provided in the {@code input}
+   *     stream.
+   */
+  @SuppressWarnings("UnusedException")
+  public static SecretBytes readIntoSecretBytes(
+      InputStream input, int length, SecretKeyAccess access) throws GeneralSecurityException {
+    byte[] output = new byte[length];
+    try {
+      int len = output.length;
+      int read;
+      int readTotal = 0;
+      while (readTotal < len) {
+        read = input.read(output, readTotal, len - readTotal);
+        if (read == -1) {
+          throw new GeneralSecurityException("Not enough pseudorandomness provided");
+        }
+        readTotal += read;
+      }
+    } catch (IOException e) {
+      throw new GeneralSecurityException("Reading pseudorandomness failed");
+    }
+    return SecretBytes.copyFrom(output, access);
   }
 
   private Util() {}

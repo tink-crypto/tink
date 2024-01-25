@@ -1,36 +1,37 @@
 workspace(name = "tink_cc_examples")
 
-# The local_repository() rule is used below because the workspaces referenced
-# are all located within the Tink git repository.
-#
-# To replicate this setup in a workspace located in a separate repository, you
-# can:
-#
-# 1. Load the http_archive() rule by using:
-#
-# load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-#
-# 2. Use the equivalent, commented-out http_archive() rules below as a starting
-#    point.
-#
-# See the Tink C++ HOW-TO for more details:
-#   https://github.com/google/tink/blob/master/docs/CPP-HOWTO.md
-
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 
 local_repository(
     name = "tink_cc",
     path = "../",
 )
-# http_archive(
-#     name = "tink_cc",
-#     urls = ["https://github.com/google/tink/archive/master.zip"],
-#     strip_prefix = "tink-master/cc",
-# )
+
+# Release from 2023-09-18.
+maybe(
+    http_archive,
+    name = "com_google_absl",
+    sha256 = "497ebdc3a4885d9209b9bd416e8c3f71e7a1fb8af249f6c2a80b7cbeefcd7e21",
+    strip_prefix = "abseil-cpp-20230802.1",
+    urls = ["https://github.com/abseil/abseil-cpp/archive/refs/tags/20230802.1.zip"],
+)
+
+# Release from 2023-08-02.
+maybe(
+    http_archive,
+    name = "com_google_googletest",
+    sha256 = "1f357c27ca988c3f7c6b4bf68a9395005ac6761f034046e9dde0896e3aba00e4",
+    strip_prefix = "googletest-1.14.0",
+    url = "https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip",
+)
 
 # Load Tink dependencies.
 
 load("@tink_cc//:tink_cc_deps.bzl", "tink_cc_deps")
+
 tink_cc_deps()
 
 load("@tink_cc//:tink_cc_deps_init.bzl", "tink_cc_deps_init")
+
 tink_cc_deps_init()

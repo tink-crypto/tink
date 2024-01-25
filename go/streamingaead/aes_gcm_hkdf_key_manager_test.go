@@ -80,6 +80,15 @@ func TestAESGCMHKDFGetPrimitiveWithInvalidInput(t *testing.T) {
 	if _, err := keyManager.Primitive([]byte{}); err == nil {
 		t.Errorf("expect an error when input is empty")
 	}
+	keyNilParams := testutil.NewAESGCMHKDFKey(testutil.AESGCMHKDFKeyVersion, 32, 32, commonpb.HashType_SHA256, 4096)
+	keyNilParams.Params = nil
+	serializedKeyNilParams, err := proto.Marshal(keyNilParams)
+	if err != nil {
+		t.Errorf("proto.Marshal(keyNilParams) err = %v, want nil", err)
+	}
+	if _, err := keyManager.Primitive(serializedKeyNilParams); err == nil {
+		t.Errorf("keyManager.Primitive(serializedKeyNilParams) err = nil, want non-nil")
+	}
 }
 
 func TestAESGCMHKDFNewKeyMultipleTimes(t *testing.T) {
@@ -95,14 +104,20 @@ func TestAESGCMHKDFNewKeyMultipleTimes(t *testing.T) {
 	keys := make(map[string]struct{})
 	n := 26
 	for i := 0; i < n; i++ {
-		key, _ := keyManager.NewKey(serializedFormat)
+		key, err := keyManager.NewKey(serializedFormat)
+		if err != nil {
+			t.Fatalf("keyManager.NewKey() err = %q, want nil", err)
+		}
 		serializedKey, err := proto.Marshal(key)
 		if err != nil {
 			t.Errorf("failed to marshal key: %s", err)
 		}
 		keys[string(serializedKey)] = struct{}{}
 
-		keyData, _ := keyManager.NewKeyData(serializedFormat)
+		keyData, err := keyManager.NewKeyData(serializedFormat)
+		if err != nil {
+			t.Fatalf("keyManager.NewKeyData() err = %q, want nil", err)
+		}
 		serializedKey = keyData.Value
 		keys[string(serializedKey)] = struct{}{}
 	}
@@ -161,6 +176,16 @@ func TestAESGCMHKDFNewKeyWithInvalidInput(t *testing.T) {
 	// empty array
 	if _, err := keyManager.NewKey([]byte{}); err == nil {
 		t.Errorf("expect an error when input is empty")
+	}
+	// params field is unset
+	formatNilParams := testutil.NewAESGCMHKDFKeyFormat(32, 32, commonpb.HashType_SHA256, 4096)
+	formatNilParams.Params = nil
+	serializedFormatNilParams, err := proto.Marshal(formatNilParams)
+	if err != nil {
+		t.Errorf("proto.Marshal(formatNilParams) err = %v, want nil", err)
+	}
+	if _, err := keyManager.NewKey(serializedFormatNilParams); err == nil {
+		t.Errorf("keyManager.NewKey(serializedFormatNilParams) err = nil, want non-nil")
 	}
 }
 

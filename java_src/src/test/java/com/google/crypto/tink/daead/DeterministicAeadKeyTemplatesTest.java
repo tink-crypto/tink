@@ -40,7 +40,7 @@ public class DeterministicAeadKeyTemplatesTest {
   @Test
   public void aes256Siv() throws Exception {
     KeyTemplate template = DeterministicAeadKeyTemplates.AES256_SIV;
-    assertEquals(new AesSivKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(AesSivKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     AesSivKeyFormat format =
         AesSivKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
@@ -54,7 +54,7 @@ public class DeterministicAeadKeyTemplatesTest {
     // to test that the function correctly puts them in the resulting template.
     int keySize = 42;
     KeyTemplate template = DeterministicAeadKeyTemplates.createAesSivKeyTemplate(keySize);
-    assertEquals(new AesSivKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(AesSivKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     AesSivKeyFormat format =
         AesSivKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());

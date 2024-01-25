@@ -68,7 +68,7 @@ public final class PrfKeyTemplates {
     HmacPrfKeyFormat format =
         HmacPrfKeyFormat.newBuilder().setParams(params).setKeySize(keySize).build();
     return KeyTemplate.newBuilder()
-        .setTypeUrl(new HmacPrfKeyManager().getKeyType())
+        .setTypeUrl(HmacPrfKeyManager.getKeyType())
         .setValue(format.toByteString())
         .setOutputPrefixType(OutputPrefixType.RAW)
         .build();
@@ -77,7 +77,7 @@ public final class PrfKeyTemplates {
   private static KeyTemplate createAes256CmacTemplate() {
     AesCmacPrfKeyFormat format = AesCmacPrfKeyFormat.newBuilder().setKeySize(32).build();
     return KeyTemplate.newBuilder()
-        .setTypeUrl(new AesCmacPrfKeyManager().getKeyType())
+        .setTypeUrl(AesCmacPrfKeyManager.getKeyType())
         .setValue(format.toByteString())
         .setOutputPrefixType(OutputPrefixType.RAW)
         .build();

@@ -17,47 +17,122 @@
 import os
 
 from absl.testing import absltest
+from absl.testing import parameterized
+from google.api_core import exceptions as core_exceptions
+from google.cloud import kms_v1
 
+from tink import core
 from tink.integration import gcpkms
 from tink.testing import helper
 
 
-CREDENTIAL_PATH = os.path.join(helper.tink_py_testdata_path(),
-                               'gcp/credential.json')
+KEY_URI1 = 'gcp-kms://projects/p1/locations/global/keyRings/kr1/cryptoKeys/ck1'
+KEY_URI2 = 'gcp-kms://projects/p1/locations/global/keyRings/kr1/cryptoKeys/ck2'
+AWS_KEY_URI = 'aws-kms://arn:aws:kms:us-west-2:acc:other/key3'
+PLAINTEXT = b'plaintext'
+CIPHERTEXT = b'ciphertext'
+ASSOCIATED_DATA = b'associated_data'
+CREDENTIAL_PATH = os.path.join(
+    helper.tink_py_testdata_path(), 'gcp/credential.json'
+)
 
 
-class GcpKmsClientTest(absltest.TestCase):
+class CustomException(core_exceptions.GoogleAPIError):
+  pass
 
-  def test_client_bound_to_key_uri(self):
-    gcp_key1 = 'gcp-kms://projects/someProject/.../cryptoKeys/key1'
-    gcp_key2 = 'gcp-kms://projects/otherProject/.../cryptoKeys/key2'
-    non_gcp_key = 'aws-kms://arn:aws:kms:us-west-2:acc:other/key3'
 
-    gcp_client = gcpkms.GcpKmsClient(gcp_key1, CREDENTIAL_PATH)
+class GcpKmsClientTest(parameterized.TestCase):
 
-    self.assertEqual(gcp_client.does_support(gcp_key1), True)
-    self.assertEqual(gcp_client.does_support(gcp_key2), False)
-    self.assertEqual(gcp_client.does_support(non_gcp_key), False)
+  def setUp(self):
+    super().setUp()
+    absltest.mock.patch.object(kms_v1, 'KeyManagementServiceClient').start()
 
-  def test_client_not_bound_to_key_uri(self):
-    gcp_key1 = 'gcp-kms://projects/someProject/.../cryptoKeys/key1'
-    gcp_key2 = 'gcp-kms://projects/otherProject/.../cryptoKeys/key2'
-    non_gcp_key = 'aws-kms://arn:aws:kms:us-west-2:acc:other/key3'
+  def tearDown(self):
+    absltest.mock.patch.stopall()
+    super().tearDown()
 
+  @parameterized.parameters(
+      (KEY_URI1, True),
+      (KEY_URI2, False),
+      (KEY_URI1 + 'suffix', False),
+      (AWS_KEY_URI, False),
+  )
+  def test_client_bound_to_key_uri(self, key_uri, expected_support):
+    gcp_client = gcpkms.GcpKmsClient(KEY_URI1, CREDENTIAL_PATH)
+    self.assertEqual(gcp_client.does_support(key_uri), expected_support)
+
+  @parameterized.parameters(
+      (KEY_URI1, True),
+      (KEY_URI2, True),
+      (KEY_URI1 + 'suffix', True),
+      (AWS_KEY_URI, False),
+  )
+  def test_client_not_bound_to_key_uri(self, key_uri, expected_support):
     gcp_client = gcpkms.GcpKmsClient(None, CREDENTIAL_PATH)
+    self.assertEqual(gcp_client.does_support(key_uri), expected_support)
 
-    self.assertEqual(gcp_client.does_support(gcp_key1), True)
-    self.assertEqual(gcp_client.does_support(gcp_key2), True)
-    self.assertEqual(gcp_client.does_support(non_gcp_key), False)
-
-  def test_client_empty_key_uri(self):
-    gcp_key = 'gcp-kms://projects/someProject/.../cryptoKeys/key1'
+  @parameterized.parameters(
+      (KEY_URI1, True),
+      (KEY_URI2, True),
+      (AWS_KEY_URI, False),
+  )
+  def test_client_empty_key_uri(self, key_uri, expected_support):
     gcp_client = gcpkms.GcpKmsClient('', CREDENTIAL_PATH)
-    self.assertEqual(gcp_client.does_support(gcp_key), True)
+    self.assertEqual(gcp_client.does_support(key_uri), expected_support)
 
   def test_client_invalid_path(self):
     with self.assertRaises(FileNotFoundError):
       gcpkms.GcpKmsClient(None, CREDENTIAL_PATH + 'corrupted')
+
+  @parameterized.parameters(
+      '',
+      AWS_KEY_URI,
+      KEY_URI1 + '/',
+      KEY_URI1 + '/cryptoKeyVersions/1',
+      'projects/p1/locations/global/keyRings/kr1/cryptoKeys/ck1',
+      'gcp-kms:/projects/p1/locations/global/keyRings/kr1/cryptoKeys/ck1',
+  )
+  def test_aead_wrong_key_uri_fails(self, key_uri):
+    gcp_client = gcpkms.GcpKmsClient(None, CREDENTIAL_PATH)
+    with self.assertRaises(core.TinkError):
+      gcp_client.get_aead(key_uri)
+
+  def test_aead_different_key_uri_fails(self):
+    gcp_client = gcpkms.GcpKmsClient(KEY_URI1, CREDENTIAL_PATH)
+    with self.assertRaises(core.TinkError):
+      gcp_client.get_aead(KEY_URI1 + 'suffix')
+
+  def test_aead_encryption_fails(self):
+    kms_v1.KeyManagementServiceClient().encrypt.side_effect = CustomException()
+    gcp_client = gcpkms.GcpKmsClient(KEY_URI1, CREDENTIAL_PATH)
+    gcp_aead = gcp_client.get_aead(KEY_URI1)
+    with self.assertRaises(core.TinkError):
+      gcp_aead.encrypt(CIPHERTEXT, ASSOCIATED_DATA)
+
+  def test_aead_decryption_fails(self):
+    kms_v1.KeyManagementServiceClient().decrypt.side_effect = CustomException()
+    gcp_client = gcpkms.GcpKmsClient(KEY_URI1, CREDENTIAL_PATH)
+    gcp_aead = gcp_client.get_aead(KEY_URI1)
+    with self.assertRaises(core.TinkError):
+      gcp_aead.decrypt(PLAINTEXT, ASSOCIATED_DATA)
+
+  def test_aead_encryption_works(self):
+    kms_v1.KeyManagementServiceClient().encrypt.return_value = (
+        kms_v1.types.EncryptResponse(ciphertext=CIPHERTEXT)
+    )
+    gcp_client = gcpkms.GcpKmsClient(KEY_URI1, CREDENTIAL_PATH)
+    gcp_aead = gcp_client.get_aead(KEY_URI1)
+    ciphertext = gcp_aead.encrypt(PLAINTEXT, ASSOCIATED_DATA)
+    self.assertEqual(ciphertext, CIPHERTEXT)
+
+  def test_aead_decryption_works(self):
+    kms_v1.KeyManagementServiceClient().decrypt.return_value = (
+        kms_v1.types.DecryptResponse(plaintext=PLAINTEXT)
+    )
+    gcp_client = gcpkms.GcpKmsClient(KEY_URI1, CREDENTIAL_PATH)
+    gcp_aead = gcp_client.get_aead(KEY_URI1)
+    plaintext = gcp_aead.decrypt(CIPHERTEXT, ASSOCIATED_DATA)
+    self.assertEqual(plaintext, PLAINTEXT)
 
 
 if __name__ == '__main__':

@@ -17,9 +17,17 @@
 #ifndef TINK_INTERNAL_CONFIGURATION_IMPL_H_
 #define TINK_INTERNAL_CONFIGURATION_IMPL_H_
 
+#include <functional>
+#include <memory>
+
+#include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "tink/configuration.h"
 #include "tink/internal/key_type_info_store.h"
 #include "tink/internal/keyset_wrapper_store.h"
+#include "tink/key_manager.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -38,8 +46,8 @@ class ConfigurationImpl {
                                         kConfigurationImplErr);
     }
 
-    // Function `primitive_getter` must be defined here, since
-    // PW::InputPrimitive is not accessible later.
+    // `primitive_getter` must be defined here, as PW::InputPrimitive is not
+    // accessible later.
     // TODO(b/284084337): Move primitive getter out of key manager.
     std::function<crypto::tink::util::StatusOr<
         std::unique_ptr<typename PW::InputPrimitive>>(
@@ -54,16 +62,7 @@ class ConfigurationImpl {
       if (!info.ok()) {
         return info.status();
       }
-
-      crypto::tink::util::StatusOr<
-          const crypto::tink::KeyManager<typename PW::InputPrimitive>*>
-          key_manager = (*info)->get_key_manager<typename PW::InputPrimitive>(
-              key_data.type_url());
-      if (!key_manager.ok()) {
-        return key_manager.status();
-      }
-
-      return (*key_manager)->GetPrimitive(key_data);
+      return (*info)->GetPrimitive<typename PW::InputPrimitive>(key_data);
     };
 
     return config.keyset_wrapper_store_
@@ -94,6 +93,18 @@ class ConfigurationImpl {
     return config.key_type_info_store_.AddAsymmetricKeyTypeManagers(
         std::move(private_key_manager), std::move(public_key_manager),
         /*new_key_allowed=*/true);
+  }
+
+  template <class P>
+  static crypto::tink::util::Status AddLegacyKeyManager(
+      std::unique_ptr<KeyManager<P>> key_manager,
+      crypto::tink::Configuration& config) {
+    if (config.global_registry_mode_) {
+      return crypto::tink::util::Status(absl::StatusCode::kFailedPrecondition,
+                                        kConfigurationImplErr);
+    }
+    return config.key_type_info_store_.AddKeyManager(std::move(key_manager),
+                                                     /*new_key_allowed=*/true);
   }
 
   static crypto::tink::util::StatusOr<

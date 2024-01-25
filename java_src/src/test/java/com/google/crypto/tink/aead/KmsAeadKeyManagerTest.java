@@ -17,18 +17,17 @@
 package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClients;
-import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
-import com.google.crypto.tink.proto.KeyTemplate;
-import com.google.crypto.tink.proto.KmsAeadKeyFormat;
-import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.FakeKmsClient;
 import com.google.crypto.tink.testing.TestUtil;
-import com.google.protobuf.ExtensionRegistryLite;
+import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,6 +43,14 @@ public class KmsAeadKeyManagerTest {
   }
 
   @Test
+  public void testKeyManagerRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getKeyManager("type.googleapis.com/google.crypto.tink.KmsAeadKey", Aead.class))
+        .isNotNull();
+  }
+
+  @Test
   public void testKmsAead_success() throws Exception {
     String keyUri = FakeKmsClient.createFakeKeyUri();
     KeysetHandle keysetHandle =
@@ -52,43 +59,76 @@ public class KmsAeadKeyManagerTest {
   }
 
   @Test
-  public void createKeyTemplate() throws Exception {
-    // Intentionally using "weird" or invalid values for parameters,
-    // to test that the function correctly puts them in the resulting template.
-    String keyUri = "some example KEK URI";
-    com.google.crypto.tink.KeyTemplate nonProtoTemplate =
-        KmsAeadKeyManager.createKeyTemplate(keyUri);
+  public void createAeadFromLegacyKmsAeadKey_works() throws Exception {
+    LegacyKmsAeadParameters parameters =
+        LegacyKmsAeadParameters.create(FakeKmsClient.createFakeKeyUri());
+    LegacyKmsAeadKey key = LegacyKmsAeadKey.create(parameters);
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).withRandomId().makePrimary())
+            .build();
 
-    KeyTemplate template = KeyTemplateProtoConverter.toProto(nonProtoTemplate);
-    assertThat(new KmsAeadKeyManager().getKeyType()).isEqualTo(template.getTypeUrl());
-    assertThat(OutputPrefixType.RAW).isEqualTo(template.getOutputPrefixType());
-
-    KmsAeadKeyFormat format =
-        KmsAeadKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    assertThat(keyUri).isEqualTo(format.getKeyUri());
+    TestUtil.runBasicAeadTests(keysetHandle.getPrimitive(Aead.class));
   }
 
   @Test
-  public void createKeyTemplate_multipleKeysWithSameKek() throws Exception {
+  public void createAeadInvalidUri_throws() throws Exception {
+    LegacyKmsAeadParameters parameters = LegacyKmsAeadParameters.create("wrong uri");
+    LegacyKmsAeadKey key = LegacyKmsAeadKey.create(parameters);
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).withRandomId().makePrimary())
+            .build();
+
+    assertThrows(GeneralSecurityException.class, () -> keysetHandle.getPrimitive(Aead.class));
+  }
+
+  @Test
+  public void createKeyTemplateGenerateNewGetPrimitive_isSameAs_clientGetAead()
+      throws Exception {
     String keyUri = FakeKmsClient.createFakeKeyUri();
 
-    com.google.crypto.tink.KeyTemplate nonProtoTemplate1 =
-        KmsAeadKeyManager.createKeyTemplate(keyUri);
+    // Create Aead primitive using createKeyTemplate, generateNew, and getPrimitive.
+    // This requires that a KmsClient that supports keyUri is registered.
+    KeysetHandle keysetHandle =
+        KeysetHandle.generateNew(KmsAeadKeyManager.createKeyTemplate(keyUri));
+    Aead aead1 = keysetHandle.getPrimitive(Aead.class);
 
-    KeyTemplate template1 = KeyTemplateProtoConverter.toProto(nonProtoTemplate1);
-    KeysetHandle handle1 = KeysetHandle.generateNew(template1);
-    Aead aead1 = handle1.getPrimitive(Aead.class);
+    // Create Aead using FakeKmsClient.getAead.
+    // No KmsClient needs to be registered.
+    Aead aead2 = new FakeKmsClient().getAead(keyUri);
 
-    com.google.crypto.tink.KeyTemplate nonProtoTemplate2 =
-        KmsAeadKeyManager.createKeyTemplate(keyUri);
-    KeyTemplate template2 = KeyTemplateProtoConverter.toProto(nonProtoTemplate2);
-    KeysetHandle handle2 = KeysetHandle.generateNew(template2);
-    Aead aead2 = handle2.getPrimitive(Aead.class);
-
+    // Test that aead1 and aead2 are the same.
     byte[] plaintext = Random.randBytes(20);
     byte[] associatedData = Random.randBytes(20);
+    byte[] ciphertext = aead1.encrypt(plaintext, associatedData);
+    byte[] decrypted = aead2.decrypt(ciphertext, associatedData);
+    assertThat(decrypted).isEqualTo(plaintext);
+  }
 
-    assertThat(aead1.decrypt(aead2.encrypt(plaintext, associatedData), associatedData))
-        .isEqualTo(plaintext);
+  @Test
+  public void createKeyTemplate() throws Exception {
+    String keyUri = "some example KEK URI";
+    assertThat(KmsAeadKeyManager.createKeyTemplate(keyUri).toParameters())
+        .isEqualTo(LegacyKmsAeadParameters.create(keyUri));
+  }
+
+  @Test
+  public void generateNewFromParams_works() throws Exception {
+    LegacyKmsAeadParameters parameters = LegacyKmsAeadParameters.create("some example KEK URI");
+    KeysetHandle keysetHandle1 = KeysetHandle.generateNew(parameters);
+    KeysetHandle keysetHandle2 = KeysetHandle.generateNew(parameters);
+    // For LegacyKmsAeadParameters we expect both keysets to be the same -- however, the ID of the
+    // keys may differ.
+    assertThat(keysetHandle1.getAt(0).getKey().equalsKey(keysetHandle2.getAt(0).getKey())).isTrue();
+  }
+
+  @Test
+  public void serializeAndParse_works() throws Exception {
+    LegacyKmsAeadParameters parameters = LegacyKmsAeadParameters.create("some example KEK URI");
+    KeysetHandle keysetHandle1 = KeysetHandle.generateNew(parameters);
+    byte[] serialized = TinkProtoKeysetFormat.serializeKeysetWithoutSecret(keysetHandle1);
+    KeysetHandle keysetHandle2 = TinkProtoKeysetFormat.parseKeysetWithoutSecret(serialized);
+    assertThat(keysetHandle1.equalsKeyset(keysetHandle2)).isTrue();
   }
 }

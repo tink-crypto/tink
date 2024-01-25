@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 package jwt
 
@@ -21,6 +21,7 @@ import (
 
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/keyset"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 // NewMAC generates a new instance of the JWT MAC primitive.
@@ -48,6 +49,9 @@ func newWrappedJWTMAC(ps *primitiveset.PrimitiveSet) (*wrappedJWTMAC, error) {
 	}
 	for _, primitives := range ps.Entries {
 		for _, p := range primitives {
+			if p.PrefixType != tinkpb.OutputPrefixType_RAW && p.PrefixType != tinkpb.OutputPrefixType_TINK {
+				return nil, fmt.Errorf("jwt_mac_factory: invalid OutputPrefixType: %s", p.PrefixType)
+			}
 			if _, ok := (p.Primitive).(*macWithKID); !ok {
 				return nil, fmt.Errorf("jwt_mac_factory: not a JWT MAC primitive")
 			}

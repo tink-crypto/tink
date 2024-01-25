@@ -18,148 +18,127 @@ package com.google.crypto.tink.daead;
 
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.DeterministicAead;
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.internal.KeyTypeManager;
-import com.google.crypto.tink.internal.PrimitiveFactory;
-import com.google.crypto.tink.proto.AesSivKey;
-import com.google.crypto.tink.proto.AesSivKeyFormat;
+import com.google.crypto.tink.SecretKeyAccess;
+import com.google.crypto.tink.daead.internal.AesSivProtoSerialization;
+import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
+import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
+import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
+import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.AesSiv;
-import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.Validators;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
-import java.io.IOException;
+import com.google.crypto.tink.util.SecretBytes;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * This key manager generates new {@code AesSivKey} keys and produces new instances of {@code
  * AesSiv}.
  */
-public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
-  AesSivKeyManager() {
-    super(
-        AesSivKey.class,
-        new PrimitiveFactory<DeterministicAead, AesSivKey>(DeterministicAead.class) {
-          @Override
-          public DeterministicAead getPrimitive(AesSivKey key) throws GeneralSecurityException {
-            return new AesSiv(key.getKeyValue().toByteArray());
-          }
-        });
+public final class AesSivKeyManager {
+  private static DeterministicAead createDeterministicAead(AesSivKey key)
+      throws GeneralSecurityException {
+    validateParameters(key.getParameters());
+    return AesSiv.create(key);
   }
+
+  private static final PrimitiveConstructor<AesSivKey, DeterministicAead>
+      AES_SIV_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              AesSivKeyManager::createDeterministicAead, AesSivKey.class, DeterministicAead.class);
 
   private static final int KEY_SIZE_IN_BYTES = 64;
 
-  @Override
-  public String getKeyType() {
+  static String getKeyType() {
     return "type.googleapis.com/google.crypto.tink.AesSivKey";
   }
 
-  @Override
-  public int getVersion() {
-    return 0;
-  }
+  private static final KeyManager<DeterministicAead> legacyKeyManager =
+      LegacyKeyManagerImpl.create(
+          getKeyType(),
+          DeterministicAead.class,
+          KeyMaterialType.SYMMETRIC,
+          com.google.crypto.tink.proto.AesSivKey.parser());
 
-  @Override
-  public KeyMaterialType keyMaterialType() {
-    return KeyMaterialType.SYMMETRIC;
-  }
-
-  @Override
-  public void validateKey(AesSivKey key) throws GeneralSecurityException {
-    Validators.validateVersion(key.getVersion(), getVersion());
-    if (key.getKeyValue().size() != KEY_SIZE_IN_BYTES) {
-      throw new InvalidKeyException(
+  private static void validateParameters(AesSivParameters parameters)
+      throws GeneralSecurityException {
+    if (parameters.getKeySizeBytes() != KEY_SIZE_IN_BYTES) {
+      throw new InvalidAlgorithmParameterException(
           "invalid key size: "
-              + key.getKeyValue().size()
+              + parameters.getKeySizeBytes()
               + ". Valid keys must have "
               + KEY_SIZE_IN_BYTES
               + " bytes.");
     }
   }
 
-  @Override
-  public AesSivKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return AesSivKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyDerivationRegistry.InsecureKeyCreator<AesSivParameters>
+      KEY_DERIVER = AesSivKeyManager::createAesSivKeyFromRandomness;
+
+  @AccessesPartialKey
+  static AesSivKey createAesSivKeyFromRandomness(
+      AesSivParameters parameters,
+      InputStream stream,
+      @Nullable Integer idRequirement,
+      SecretKeyAccess access)
+      throws GeneralSecurityException {
+    validateParameters(parameters);
+    return AesSivKey.builder()
+        .setParameters(parameters)
+        .setIdRequirement(idRequirement)
+        .setKeyBytes(Util.readIntoSecretBytes(stream, parameters.getKeySizeBytes(), access))
+        .build();
   }
 
-  @Override
-  public KeyFactory<AesSivKeyFormat, AesSivKey> keyFactory() {
-    return new KeyFactory<AesSivKeyFormat, AesSivKey>(AesSivKeyFormat.class) {
-      @Override
-      public void validateKeyFormat(AesSivKeyFormat format) throws GeneralSecurityException {
-        if (format.getKeySize() != KEY_SIZE_IN_BYTES) {
-          throw new InvalidAlgorithmParameterException(
-              "invalid key size: "
-                  + format.getKeySize()
-                  + ". Valid keys must have "
-                  + KEY_SIZE_IN_BYTES
-                  + " bytes.");
-        }
-      }
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyCreationRegistry.KeyCreator<AesSivParameters> KEY_CREATOR =
+      AesSivKeyManager::newKey;
 
-      @Override
-      public AesSivKeyFormat parseKeyFormat(ByteString byteString)
-          throws InvalidProtocolBufferException {
-        return AesSivKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-      }
+  @AccessesPartialKey
+  static AesSivKey newKey(AesSivParameters parameters, @Nullable Integer idRequirement)
+      throws GeneralSecurityException {
+    validateParameters(parameters);
+    return AesSivKey.builder()
+        .setParameters(parameters)
+        .setIdRequirement(idRequirement)
+        .setKeyBytes(SecretBytes.randomBytes(parameters.getKeySizeBytes()))
+        .build();
+  }
 
-      @Override
-      public AesSivKey createKey(AesSivKeyFormat format) throws GeneralSecurityException {
-        return AesSivKey.newBuilder()
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
-            .setVersion(getVersion())
-            .build();
-      }
-
-      @Override
-      public AesSivKey deriveKey(AesSivKeyFormat format, InputStream inputStream)
-          throws GeneralSecurityException {
-        Validators.validateVersion(format.getVersion(), getVersion());
-
-        byte[] pseudorandomness = new byte[KEY_SIZE_IN_BYTES];
-        try {
-          readFully(inputStream, pseudorandomness);
-          return AesSivKey.newBuilder()
-              .setKeyValue(ByteString.copyFrom(pseudorandomness))
-              .setVersion(getVersion())
-              .build();
-        } catch (IOException e) {
-          throw new GeneralSecurityException("Reading pseudorandomness failed", e);
-        }
-      }
-
-      @Override
-      public Map<String, KeyFactory.KeyFormat<AesSivKeyFormat>> keyFormats()
-          throws GeneralSecurityException {
-        Map<String, KeyFactory.KeyFormat<AesSivKeyFormat>> result = new HashMap<>();
-        result.put(
-            "AES256_SIV",
-            new KeyFactory.KeyFormat<>(
-                AesSivKeyFormat.newBuilder().setKeySize(KEY_SIZE_IN_BYTES).build(),
-                KeyTemplate.OutputPrefixType.TINK));
-        result.put(
-            "AES256_SIV_RAW",
-            new KeyFactory.KeyFormat<>(
-                AesSivKeyFormat.newBuilder().setKeySize(KEY_SIZE_IN_BYTES).build(),
-                KeyTemplate.OutputPrefixType.RAW));
-        return Collections.unmodifiableMap(result);
-      }
-    };
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+    Map<String, Parameters> result = new HashMap<>();
+    result.put("AES256_SIV", PredefinedDeterministicAeadParameters.AES256_SIV);
+    result.put(
+        "AES256_SIV_RAW",
+        AesSivParameters.builder()
+            .setKeySizeBytes(64)
+            .setVariant(AesSivParameters.Variant.NO_PREFIX)
+            .build());
+    return Collections.unmodifiableMap(result);
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
-    Registry.registerKeyManager(new AesSivKeyManager(), newKeyAllowed);
     AesSivProtoSerialization.register();
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(AES_SIV_PRIMITIVE_CONSTRUCTOR);
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
+    MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, AesSivParameters.class);
+    MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, AesSivParameters.class);
+    Registry.registerKeyManager(legacyKeyManager, newKeyAllowed);
   }
 
   /**
@@ -188,4 +167,6 @@ public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
                     .setVariant(AesSivParameters.Variant.NO_PREFIX)
                     .build()));
   }
+
+  private AesSivKeyManager() {}
 }

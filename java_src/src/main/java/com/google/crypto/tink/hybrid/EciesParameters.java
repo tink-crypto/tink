@@ -233,7 +233,6 @@ public final class EciesParameters extends HybridParameters {
                 + " AES256_CTR_HMAC_SHA256_RAW XCHACHA20_POLY1305_RAW and AES256_SIV_RAW are"
                 + " currently supported.");
       }
-      
       this.demParameters = demParameters;
       return this;
     }
@@ -315,6 +314,7 @@ public final class EciesParameters extends HybridParameters {
     return hashType;
   }
 
+  @Nullable
   public PointFormat getNistCurvePointFormat() {
     return nistCurvePointFormat;
   }

@@ -66,7 +66,6 @@ py_library(
     deps = [
         ":_public_key_sign",
         ":_public_key_verify",
-        requirement("absl-py"),
         "//tink/core",
         "//tink/proto:tink_py_pb2",
     ],

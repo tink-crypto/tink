@@ -21,6 +21,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.aead.AesGcmParameters;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.signature.SignatureConfig;
 import com.google.crypto.tink.subtle.Hex;
@@ -43,10 +44,7 @@ public final class TinkProtoKeysetFormatTest {
 
   private void assertKeysetHandleAreEqual(KeysetHandle keysetHandle1, KeysetHandle keysetHandle2)
       throws Exception {
-    // This assertion is too strong, but it works here because we don't parse or serialize
-    // keydata.value fields.
-    assertThat(CleartextKeysetHandle.getKeyset(keysetHandle2))
-        .isEqualTo(CleartextKeysetHandle.getKeyset(keysetHandle1));
+    assertThat(keysetHandle2.equalsKeyset(keysetHandle1)).isTrue();
   }
 
   private KeysetHandle generateKeyset() throws GeneralSecurityException {
@@ -372,5 +370,32 @@ public final class TinkProtoKeysetFormatTest {
     final byte[] message = Hex.decode("");
     final byte[] tag = Hex.decode("011d270875989dd6fbd5f54dbc9520bb41efd058d5");
     mac.verifyMac(tag, message);
+  }
+
+  @Test
+  public void serializationOverhead() throws Exception {
+    int ivSize = 12;
+    int keySize = 16;
+    int tagSize = 16;
+    AesGcmParameters aesGcm128Parameters =
+        AesGcmParameters.builder()
+            .setIvSizeBytes(ivSize)
+            .setKeySizeBytes(keySize)
+            .setTagSizeBytes(tagSize)
+            .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+            .build();
+    KeysetHandle keysetHandle = KeysetHandle.generateNew(aesGcm128Parameters);
+    Aead keyEncryptionAead = KeysetHandle.generateNew(aesGcm128Parameters).getPrimitive(Aead.class);
+    byte[] serializedKeyset =
+        TinkProtoKeysetFormat.serializeKeyset(keysetHandle, InsecureSecretKeyAccess.get());
+
+    byte[] rawEncryptedKeyset = keyEncryptionAead.encrypt(serializedKeyset, null);
+
+    byte[] encryptedKeyset =
+        TinkProtoKeysetFormat.serializeEncryptedKeyset(keysetHandle, keyEncryptionAead, null);
+    // {@code encryptedKeyset} is a serialized protocol buffer that wraps the encrypted keyset bytes
+    // as a protobuf bytes field. So, it should only be slightly larger than {@code
+    // rawEncryptedKeyset}.
+    assertThat(encryptedKeyset.length).isLessThan(rawEncryptedKeyset.length + 6);
   }
 }

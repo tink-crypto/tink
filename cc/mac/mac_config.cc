@@ -29,8 +29,6 @@
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
 
-using google::crypto::tink::RegistryConfig;
-
 namespace crypto {
 namespace tink {
 

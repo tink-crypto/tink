@@ -24,9 +24,9 @@ import (
 // getECDSAParamNames returns the string representations of each parameter in
 // the given ECDSAParams.
 func getECDSAParamNames(params *ecdsapb.EcdsaParams) (string, string, string) {
-	hashName := commonpb.HashType_name[int32(params.HashType)]
-	curveName := commonpb.EllipticCurveType_name[int32(params.Curve)]
-	encodingName := ecdsapb.EcdsaSignatureEncoding_name[int32(params.Encoding)]
+	hashName := commonpb.HashType_name[int32(params.GetHashType())]
+	curveName := commonpb.EllipticCurveType_name[int32(params.GetCurve())]
+	encodingName := ecdsapb.EcdsaSignatureEncoding_name[int32(params.GetEncoding())]
 	return hashName, curveName, encodingName
 }
 

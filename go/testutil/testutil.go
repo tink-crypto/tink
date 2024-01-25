@@ -65,7 +65,7 @@ var _ registry.KeyManager = (*DummyAEADKeyManager)(nil)
 
 // Primitive constructs a primitive instance for the key given in
 // serializedKey, which must be a serialized key protocol buffer handled by this manager.
-func (km *DummyAEADKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *DummyAEADKeyManager) Primitive(serializedKey []byte) (any, error) {
 	return new(DummyAEAD), nil
 }
 
@@ -178,14 +178,14 @@ func (a *AlwaysFailingDeterministicAead) DecryptDeterministically(ciphertext []b
 // TestKeyManager is key manager which can be setup to return an arbitrary primitive for a type URL
 // useful for testing.
 type TestKeyManager struct {
-	primitive interface{}
+	primitive any
 	typeURL   string
 }
 
 var _ registry.KeyManager = (*TestKeyManager)(nil)
 
 // NewTestKeyManager creates a new key manager that returns a specific primitive for a typeURL.
-func NewTestKeyManager(primitive interface{}, typeURL string) registry.KeyManager {
+func NewTestKeyManager(primitive any, typeURL string) registry.KeyManager {
 	return &TestKeyManager{
 		primitive: primitive,
 		typeURL:   typeURL,
@@ -193,7 +193,7 @@ func NewTestKeyManager(primitive interface{}, typeURL string) registry.KeyManage
 }
 
 // Primitive constructs a primitive instance for the key given input key.
-func (km *TestKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *TestKeyManager) Primitive(serializedKey []byte) (any, error) {
 	return km.primitive, nil
 }
 
@@ -255,18 +255,27 @@ type DummyMAC struct {
 	Name string
 }
 
-// ComputeMAC computes a message authentication code (MAC) for data.
+// ComputeMAC computes an insecure message authentication code (MAC) for data.
 func (h *DummyMAC) ComputeMAC(data []byte) ([]byte, error) {
-	var m []byte
-	m = append(m, data...)
-	m = append(m, h.Name...)
-	return m, nil
+	return makeDummyMAC(data, h.Name), nil
 }
 
-// VerifyMAC verifies whether mac is a correct message authentication code
-// (MAC) for data.
+func makeDummyMAC(data []byte, name string) []byte {
+	m := make([]byte, 0, len(data)+len(name))
+	m = append(m, data...)
+	return append(m, name...)
+}
+
+// VerifyMAC verifies whether mac is a correct, although insecure, message
+// authentication code (MAC) for data.
 func (h *DummyMAC) VerifyMAC(mac []byte, data []byte) error {
-	return nil
+	want := makeDummyMAC(data, h.Name)
+	if bytes.Equal(mac, want) {
+		return nil
+	}
+	// This is intended for test use. If it fails, describe what MAC would be
+	// required to succeed.
+	return fmt.Errorf("VerifyMAC: mac = %x, requires %x", mac, want)
 }
 
 // DummyKMSClient is a dummy implementation of a KMS Client.
@@ -385,7 +394,10 @@ func NewECDSAPublicKey(version uint32, params *ecdsapb.EcdsaParams, x, y []byte)
 // NewRandomECDSAPrivateKey creates an ECDSAPrivateKey with randomly generated key material.
 func NewRandomECDSAPrivateKey(hashType commonpb.HashType, curve commonpb.EllipticCurveType) *ecdsapb.EcdsaPrivateKey {
 	curveName := commonpb.EllipticCurveType_name[int32(curve)]
-	priv, _ := ecdsa.GenerateKey(subtle.GetCurve(curveName), rand.Reader)
+	priv, err := ecdsa.GenerateKey(subtle.GetCurve(curveName), rand.Reader)
+	if err != nil {
+		panic(fmt.Sprintf("ecdsa.GenerateKey() failed: %v", err))
+	}
 	params := NewECDSAParams(hashType, curve, ecdsapb.EcdsaSignatureEncoding_DER)
 	publicKey := NewECDSAPublicKey(ECDSAVerifierKeyVersion, params, priv.X.Bytes(), priv.Y.Bytes())
 	return NewECDSAPrivateKey(ECDSASignerKeyVersion, publicKey, priv.D.Bytes())
@@ -407,7 +419,10 @@ func GetECDSAParamNames(params *ecdsapb.EcdsaParams) (string, string, string) {
 
 // NewED25519PrivateKey creates an ED25519PrivateKey with randomly generated key material.
 func NewED25519PrivateKey() *ed25519pb.Ed25519PrivateKey {
-	public, private, _ := ed25519.GenerateKey(rand.Reader)
+	public, private, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		panic(fmt.Sprintf("ed25519.GenerateKey() failed: %v", err))
+	}
 	publicProto := &ed25519pb.Ed25519PublicKey{
 		Version:  ED25519SignerKeyVersion,
 		KeyValue: public,
@@ -742,14 +757,14 @@ func GenerateMutations(src []byte) (all [][]byte) {
 		}
 	}
 
-	//truncate bytes
+	// Truncate bytes
 	for i := 1; i < len(src); i++ {
 		n := make([]byte, len(src[i:]))
 		copy(n, src[i:])
 		all = append(all, n)
 	}
 
-	//append extra byte
+	// Append extra byte
 	m := make([]byte, len(src)+1)
 	copy(m, src)
 	all = append(all, m)
@@ -894,6 +909,5 @@ func GenerateECIESAEADHKDFPrivateKey(c commonpb.EllipticCurveType, ht commonpb.H
 		return nil, err
 	}
 	pubKey := eciesAEADHKDFPublicKey(c, ht, ptfmt, dekT, pvt.PublicKey.Point.X.Bytes(), pvt.PublicKey.Point.Y.Bytes(), salt)
-	//fmt.Println(proto.MarshalTextString(pubKey))
 	return eciesAEADHKDFPrivateKey(pubKey, pvt.D.Bytes()), nil
 }

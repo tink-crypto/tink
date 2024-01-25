@@ -16,7 +16,7 @@
 
 // Package hcvault provides integration with the [HashiCorp Vault].
 //
-//	[HashiCorp Vault]: https://www.vaultproject.io/.
+// [HashiCorp Vault]: https://www.vaultproject.io/.
 package hcvault
 
 import (
@@ -27,9 +27,9 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/hashicorp/vault/api"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/tink"
-	"github.com/hashicorp/vault/api"
 )
 
 const (
@@ -93,11 +93,34 @@ func (c *vaultClient) Supported(keyURI string) bool {
 	return strings.HasPrefix(keyURI, c.keyURIPrefix)
 }
 
-// GetAEAD gets an AEAD backend by keyURI.
+// GetAEAD gets an AEAD backed by keyURI.
+//
+// ## Warning regarding associated data
+//
+// This AEAD implementation uses the associated_data value to populate the
+// "context" parameter in encrypt and decrypt requests, instead of using the
+// "associated_data" request parameter. This is an artifact of the "associated_data"
+// parameter not being present when this package was implemented.
+//
+// Vault only uses the "context" parameter for keys which have derivation enabled
+// (with "derived=true") and ignores it otherwise. For such keys, the "context"
+// parameter is required to be non-empty.
+//
+// Therefore:
+// - for keys with "derived=false", you should only use empty associated data.
+// - for keys with "derived=true", you should only use non-empty associated data.
+//
+// With Tink's "KMS envelope AEAD", always use a key with "derived=false".
+//
+// For reference, see https://developer.hashicorp.com/vault/api-docs/secret/transit.
 func (c *vaultClient) GetAEAD(keyURI string) (tink.AEAD, error) {
 	if !c.Supported(keyURI) {
 		return nil, errors.New("unsupported keyURI")
 	}
-
-	return newHCVaultAEAD(keyURI, c.client)
+	u, err := url.Parse(keyURI)
+	if err != nil || u.Scheme != "hcvault" {
+		return nil, errors.New("malformed keyURI")
+	}
+	keyPath := u.EscapedPath()
+	return NewAEAD(keyPath, c.client, WithLegacyContextParamater())
 }

@@ -144,7 +144,7 @@ final class AesCmacProtoSerialization {
       throws GeneralSecurityException {
     if (!serialization.getKeyTemplate().getTypeUrl().equals(TYPE_URL)) {
       throw new IllegalArgumentException(
-          "Wrong type URL in call to AesCmacParameters.parseParameters: "
+          "Wrong type URL in call to AesCmacProtoSerialization.parseParameters: "
               + serialization.getKeyTemplate().getTypeUrl());
     }
     com.google.crypto.tink.proto.AesCmacKeyFormat format;
@@ -167,7 +167,7 @@ final class AesCmacProtoSerialization {
       throws GeneralSecurityException {
     if (!serialization.getTypeUrl().equals(TYPE_URL)) {
       throw new IllegalArgumentException(
-          "Wrong type URL in call to AesCmacParameters.parseParameters");
+          "Wrong type URL in call to AesCmacProtoSerialization.parseKey");
     }
     try {
       com.google.crypto.tink.proto.AesCmacKey protoKey =

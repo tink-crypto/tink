@@ -16,11 +16,12 @@
 import os
 
 from absl.testing import absltest
+import boto3
 import botocore
 
 import tink
+from tink import _kms_clients
 from tink import aead
-from tink.aead import _kms_aead_key_manager
 from tink.integration import awskms
 from tink.integration.awskms import _aws_kms_client
 from tink.testing import helper
@@ -54,7 +55,7 @@ class AwsKmsAeadTest(absltest.TestCase):
 
   def tearDown(self):
     super().tearDown()
-    _kms_aead_key_manager.reset_kms_clients()
+    _kms_clients.reset_kms_clients()
 
   def test_encrypt_decrypt(self):
     aws_client = awskms.AwsKmsClient(KEY_URI, CREDENTIAL_PATH)
@@ -113,6 +114,35 @@ class AwsKmsAeadTest(absltest.TestCase):
     with self.assertRaises(tink.TinkError):
       aws_aead.encrypt(plaintext, associated_data)
 
+  def test_new_client_get_aead(self):
+    aws_access_key_id, aws_secret_access_key = _aws_kms_client._parse_config(
+        CREDENTIAL_PATH
+    )
+    boto3_client = boto3.client(
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key,
+        region_name='us-east-2',
+        service_name='kms',
+    )
+
+    aws_client = awskms.new_client(boto3_client=boto3_client)
+
+    aws_aead = aws_client.get_aead(KEY_URI)
+    ciphertext = aws_aead.encrypt(b'plaintext', b'associated_data')
+    self.assertEqual(
+        b'plaintext', aws_aead.decrypt(ciphertext, b'associated_data')
+    )
+
+    aws_aead_with_alias = aws_client.get_aead(KEY_ALIAS_URI)
+    ciphertext = aws_aead_with_alias.encrypt(b'plaintext', b'associated_data')
+    self.assertEqual(
+        b'plaintext',
+        aws_aead_with_alias.decrypt(ciphertext, b'associated_data'),
+    )
+
+    with self.assertRaises(tink.TinkError):
+      aws_client.get_aead(GCP_KEY_URI)
+
   def test_client_registration(self):
     # Register AWS KMS Client bound to KEY_URI.
     awskms.AwsKmsClient.register_client(KEY_URI, CREDENTIAL_PATH)
@@ -165,6 +195,23 @@ class AwsKmsAeadTest(absltest.TestCase):
         b'plaintext', aws_aead.decrypt(ciphertext, b'associated_data')
     )
 
+    # creates a boto3 client using default credentials
+    boto3_client = boto3.client(region_name='us-east-2', service_name='kms')
+    aws_client2 = awskms.new_client(boto3_client=boto3_client, key_uri=KEY_URI)
+    aws_aead2 = aws_client2.get_aead(KEY_URI)
+    ciphertext2 = aws_aead2.encrypt(b'plaintext', b'associated_data')
+    self.assertEqual(
+        b'plaintext', aws_aead2.decrypt(ciphertext2, b'associated_data')
+    )
+
+    # check that aws_aead and aws_aead2 are compatible
+    self.assertEqual(
+        b'plaintext', aws_aead2.decrypt(ciphertext, b'associated_data')
+    )
+    self.assertEqual(
+        b'plaintext', aws_aead.decrypt(ciphertext2, b'associated_data')
+    )
+
   def test_server_side_key_commitment(self):
     # TODO(b/242678738): Remove direct usage of KMS client and protected
     # functions in this test once client side key ID verifiaction is removed.
@@ -214,7 +261,7 @@ class AwsKmsAeadTest(absltest.TestCase):
 
       # Attempt to decrypt with KEY_URI_2.
       with self.assertRaises(botocore.exceptions.ClientError):
-        response = aws_aead.client.decrypt(
+        aws_aead.client.decrypt(
             KeyId=_aws_kms_client._key_uri_to_key_arn(KEY_URI_2),
             CiphertextBlob=ciphertext,
             EncryptionContext=encryption_context,

@@ -57,19 +57,20 @@ func (km *eciesAEADHKDFPrivateKeyKeyManager) Primitive(serializedKey []byte) (in
 	if err := km.validateKey(key); err != nil {
 		return nil, errInvalidECIESAEADHKDFPrivateKeyKey
 	}
-	curve, err := subtle.GetCurve(key.PublicKey.Params.KemParams.CurveType.String())
+	params := key.GetPublicKey().GetParams()
+	curve, err := subtle.GetCurve(params.GetKemParams().GetCurveType().String())
 	if err != nil {
 		return nil, err
 	}
-	pvt := subtle.GetECPrivateKey(curve, key.KeyValue)
-	rDem, err := newRegisterECIESAEADHKDFDemHelper(key.PublicKey.Params.DemParams.AeadDem)
+	pvt := subtle.GetECPrivateKey(curve, key.GetKeyValue())
+	rDem, err := newRegisterECIESAEADHKDFDemHelper(params.GetDemParams().GetAeadDem())
 	if err != nil {
 		return nil, err
 	}
-	salt := key.PublicKey.Params.KemParams.HkdfSalt
-	hash := key.PublicKey.Params.KemParams.HkdfHashType.String()
-	ptFormat := key.PublicKey.Params.EcPointFormat.String()
-	return subtle.NewECIESAEADHKDFHybridDecrypt(pvt, salt, hash, ptFormat, rDem)
+	salt := params.GetKemParams().GetHkdfSalt()
+	hash := params.GetKemParams().GetHkdfHashType().String()
+	pointFormat := params.GetEcPointFormat().String()
+	return subtle.NewECIESAEADHKDFHybridDecrypt(pvt, salt, hash, pointFormat, rDem)
 }
 
 // NewKey creates a new key according to specification the given serialized ECIESAEADHKDFPrivateKeyKeyFormat.
@@ -84,7 +85,8 @@ func (km *eciesAEADHKDFPrivateKeyKeyManager) NewKey(serializedKeyFormat []byte) 
 	if err := km.validateKeyFormat(keyFormat); err != nil {
 		return nil, errInvalidECIESAEADHKDFPrivateKeyKeyFormat
 	}
-	curve, err := subtle.GetCurve(keyFormat.Params.KemParams.CurveType.String())
+	params := keyFormat.GetParams()
+	curve, err := subtle.GetCurve(params.GetKemParams().GetCurveType().String())
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +131,7 @@ func (km *eciesAEADHKDFPrivateKeyKeyManager) PublicKeyData(serializedPrivKey []b
 	if err := proto.Unmarshal(serializedPrivKey, privKey); err != nil {
 		return nil, errInvalidECIESAEADHKDFPrivateKeyKey
 	}
-	serializedPubKey, err := proto.Marshal(privKey.PublicKey)
+	serializedPubKey, err := proto.Marshal(privKey.GetPublicKey())
 	if err != nil {
 		return nil, errInvalidECIESAEADHKDFPrivateKeyKey
 	}
@@ -152,10 +154,10 @@ func (km *eciesAEADHKDFPrivateKeyKeyManager) TypeURL() string {
 
 // validateKey validates the given ECDSAPrivateKey.
 func (km *eciesAEADHKDFPrivateKeyKeyManager) validateKey(key *eahpb.EciesAeadHkdfPrivateKey) error {
-	if err := keyset.ValidateKeyVersion(key.Version, eciesAEADHKDFPrivateKeyKeyVersion); err != nil {
+	if err := keyset.ValidateKeyVersion(key.GetVersion(), eciesAEADHKDFPrivateKeyKeyVersion); err != nil {
 		return fmt.Errorf("ecies_aead_hkdf_private_key_manager: invalid key: %s", err)
 	}
-	return checkECIESAEADHKDFParams(key.PublicKey.Params)
+	return checkECIESAEADHKDFParams(key.GetPublicKey().GetParams())
 }
 
 // validateKeyFormat validates the given ECDSAKeyFormat.
@@ -164,22 +166,22 @@ func (km *eciesAEADHKDFPrivateKeyKeyManager) validateKeyFormat(format *eahpb.Eci
 }
 
 func checkECIESAEADHKDFParams(params *eahpb.EciesAeadHkdfParams) error {
-	_, err := subtle.GetCurve(params.KemParams.CurveType.String())
+	_, err := subtle.GetCurve(params.GetKemParams().GetCurveType().String())
 	if err != nil {
 		return err
 	}
-	if params.KemParams.HkdfHashType == commonpb.HashType_UNKNOWN_HASH {
+	if params.GetKemParams().GetHkdfHashType() == commonpb.HashType_UNKNOWN_HASH {
 		return errors.New("hash unsupported for HMAC")
 	}
 
 	if params.EcPointFormat == commonpb.EcPointFormat_UNKNOWN_FORMAT {
 		return errors.New("unknown EC point format")
 	}
-	km, err := registry.GetKeyManager(params.DemParams.AeadDem.TypeUrl)
+	km, err := registry.GetKeyManager(params.GetDemParams().GetAeadDem().GetTypeUrl())
 	if err != nil {
 		return err
 	}
-	_, err = km.NewKeyData(params.DemParams.AeadDem.Value)
+	_, err = km.NewKeyData(params.GetDemParams().GetAeadDem().GetValue())
 	if err != nil {
 		return err
 	}

@@ -24,7 +24,6 @@ from botocore import exceptions
 
 import tink
 from tink import aead
-from tink.aead import _kms_aead_key_manager
 
 
 AWS_KEYURI_PREFIX = 'aws-kms://'
@@ -68,10 +67,52 @@ class _AwsKmsAead(aead.Aead):
       raise tink.TinkError(e)
 
 
+def _has_aws_key_uri_format(key_uri: str) -> bool:
+  match = re.match('aws-kms://arn:aws:kms:([a-z0-9-]+):', key_uri)
+  return match is not None
+
+
 def _key_uri_to_key_arn(key_uri: str) -> str:
   if not key_uri.startswith(AWS_KEYURI_PREFIX):
     raise tink.TinkError('invalid key URI')
   return key_uri[len(AWS_KEYURI_PREFIX) :]
+
+
+class _KmsClient(tink.KmsClient):
+  """KMS client returned by new_client."""
+
+  def __init__(self, boto3_client: Any, key_uri: Optional[str]):
+    if not key_uri:
+      self._key_uri = None
+    else:
+      if not _has_aws_key_uri_format(key_uri):
+        raise tink.TinkError('invalid key URI')
+      self._key_uri = key_uri
+    self._boto3_client = boto3_client
+
+  def does_support(self, key_uri: str) -> bool:
+    if not _has_aws_key_uri_format(key_uri):
+      return False
+    if not self._key_uri:
+      return True
+    return key_uri == self._key_uri
+
+  def get_aead(self, key_uri: str) -> aead.Aead:
+    if not self.does_support(key_uri):
+      if self._key_uri:
+        raise tink.TinkError(
+            'This client is bound to %s and cannot use key %s' %
+            (self._key_uri, key_uri))
+      raise tink.TinkError(
+          'This client does not support key %s' % key_uri)
+    return _AwsKmsAead(self._boto3_client, _key_uri_to_key_arn(key_uri))
+
+
+def new_client(
+    *, boto3_client: Any, key_uri: Optional[str] = None
+) -> tink.KmsClient:
+  """Creates a new Tink KmsClient from a boto3 client."""
+  return _KmsClient(boto3_client, key_uri)
 
 
 def _parse_config(config_path: str) -> Tuple[str, str]:
@@ -99,7 +140,7 @@ def _get_region_from_key_arn(key_arn: str) -> str:
   return key_arn_parts[3]
 
 
-class AwsKmsClient(_kms_aead_key_manager.KmsClient):
+class AwsKmsClient(tink.KmsClient):
   """Basic AWS client for AEAD."""
 
   def __init__(self, key_uri: Optional[str], credentials_path: Optional[str]):
@@ -119,12 +160,11 @@ class AwsKmsClient(_kms_aead_key_manager.KmsClient):
       TinkError: If the key uri is not valid.
     """
     if not key_uri:
-      self._key_arn = None
+      self._key_uri = None
     else:
-      match = re.match('aws-kms://arn:aws:kms:([a-z0-9-]+):', key_uri)
-      if not match:
+      if not _has_aws_key_uri_format(key_uri):
         raise tink.TinkError('invalid key URI')
-      self._key_arn = _key_uri_to_key_arn(key_uri)
+      self._key_uri = key_uri
     if not credentials_path:
       self._aws_access_key_id = None
       self._aws_secret_access_key = None
@@ -142,11 +182,11 @@ class AwsKmsClient(_kms_aead_key_manager.KmsClient):
     Returns: A boolean value which is true if the key is supported and false
       otherwise.
     """
-    if not key_uri.startswith(AWS_KEYURI_PREFIX):
+    if not _has_aws_key_uri_format(key_uri):
       return False
-    if not self._key_arn:
+    if not self._key_uri:
       return True
-    return _key_uri_to_key_arn(key_uri) == self._key_arn
+    return key_uri == self._key_uri
 
   def get_aead(self, key_uri: str) -> aead.Aead:
     """Returns an Aead-primitive backed by KMS key specified by 'key_uri'.
@@ -161,10 +201,10 @@ class AwsKmsClient(_kms_aead_key_manager.KmsClient):
       TinkError: If the key_uri is not supported.
     """
     if not self.does_support(key_uri):
-      if self._key_arn:
+      if self._key_uri:
         raise tink.TinkError(
             'This client is bound to %s and cannot use key %s' %
-            (self._key_arn, key_uri))
+            (self._key_uri, key_uri))
       raise tink.TinkError(
           'This client does not support key %s' % key_uri)
     key_arn = _key_uri_to_key_arn(key_uri)
@@ -190,6 +230,4 @@ class AwsKmsClient(_kms_aead_key_manager.KmsClient):
         DeprecationWarning,
         2,
     )
-    _kms_aead_key_manager.register_kms_client(  # pylint: disable=protected-access
-        AwsKmsClient(key_uri, credentials_path)
-    )
+    tink.register_kms_client(AwsKmsClient(key_uri, credentials_path))

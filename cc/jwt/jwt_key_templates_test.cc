@@ -48,7 +48,7 @@ TEST_P(JwtMacKeyTemplatesTest, CreateComputeVerify) {
   KeyTemplate key_template = GetParam();
 
   util::StatusOr<std::unique_ptr<crypto::tink::KeysetHandle>> keyset_handle =
-      KeysetHandle::GenerateNew(key_template);
+      KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry());
   ASSERT_THAT(keyset_handle, IsOk());
   util::StatusOr<std::unique_ptr<crypto::tink::JwtMac>> jwt_mac =
       (*keyset_handle)
@@ -94,7 +94,7 @@ TEST_P(JwtSignatureKeyTemplatesTest, CreateComputeVerify) {
   KeyTemplate key_template = GetParam();
 
   util::StatusOr<std::unique_ptr<KeysetHandle>> private_handle =
-      KeysetHandle::GenerateNew(key_template);
+      KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry());
   ASSERT_THAT(private_handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeySign>> sign =
       (*private_handle)
@@ -102,7 +102,7 @@ TEST_P(JwtSignatureKeyTemplatesTest, CreateComputeVerify) {
               ConfigGlobalRegistry());
   ASSERT_THAT(sign, IsOk());
   util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
-      (*private_handle)->GetPublicKeysetHandle();
+      (*private_handle)->GetPublicKeysetHandle(KeyGenConfigGlobalRegistry());
   ASSERT_THAT(public_handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> verify =
       (*public_handle)

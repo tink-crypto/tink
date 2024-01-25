@@ -47,8 +47,8 @@ tink_cc_test(
   DEPS
     tink::jwt::internal::json_util
     gmock
+    tink::util::statusor
     tink::util::test_matchers
-    tink::util::test_util
 )
 
 tink_cc_library(

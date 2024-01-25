@@ -22,9 +22,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.aead.AesEaxKey;
+import com.google.crypto.tink.aead.AesEaxParameters;
 import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
@@ -393,5 +398,113 @@ public class AesEaxJceTest {
     AesEaxJce eax = new AesEaxJce(Hex.decode(vector.hexKey), Hex.decode(vector.hexNonce).length);
     byte[] decryption = eax.decrypt(fullCiphertext, Hex.decode(vector.hexAad));
     assertThat(Hex.encode(decryption)).isEqualTo(vector.hexMessage);
+  }
+
+  @Test
+  public void testWithAesEaxKey_noPrefix_works() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+    // From the second test vector above.
+    byte[] plaintext = Hex.decode("f7fb");
+    byte[] associatedData = Hex.decode("fa3bfd4806eb53fa");
+    byte[] keyBytes = Hex.decode("91945d3f4dcbee0bf45ef52255f095a4");
+    AesEaxParameters parameters =
+        AesEaxParameters.builder()
+            .setKeySizeBytes(16)
+            .setTagSizeBytes(16)
+            .setIvSizeBytes(16)
+            .setVariant(AesEaxParameters.Variant.NO_PREFIX)
+            .build();
+    AesEaxKey key =
+        AesEaxKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(SecretBytes.copyFrom(keyBytes, InsecureSecretKeyAccess.get()))
+            .build();
+    Aead aead = AesEaxJce.create(key);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    assertThat(ciphertext)
+        .hasLength(
+            2 // plaintext_length
+                + parameters.getIvSizeBytes()
+                + parameters.getTagSizeBytes());
+
+    assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+
+    byte[] fixedCiphertext =
+        Hex.decode("becaf043b0a23d843194ba972c66debd19dd5c4c9331049d0bdab0277408f67967e5");
+    assertThat(aead.decrypt(fixedCiphertext, associatedData)).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void testWithAesEaxKey_tinkPrefix_works() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+    // From the second test vector above.
+    byte[] plaintext = Hex.decode("f7fb");
+    byte[] associatedData = Hex.decode("fa3bfd4806eb53fa");
+    byte[] keyBytes = Hex.decode("91945d3f4dcbee0bf45ef52255f095a4");
+    AesEaxParameters parameters =
+        AesEaxParameters.builder()
+            .setKeySizeBytes(16)
+            .setTagSizeBytes(16)
+            .setIvSizeBytes(16)
+            .setVariant(AesEaxParameters.Variant.TINK)
+            .build();
+    AesEaxKey key =
+        AesEaxKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(SecretBytes.copyFrom(keyBytes, InsecureSecretKeyAccess.get()))
+            .setIdRequirement(0x99887766)
+            .build();
+    Aead aead = AesEaxJce.create(key);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    assertThat(ciphertext)
+        .hasLength(
+            5 // prefix_length
+                + 2 // plaintext_length
+                + parameters.getIvSizeBytes()
+                + parameters.getTagSizeBytes());
+
+    assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+
+    byte[] fixedCiphertext =
+        Hex.decode(
+            "0199887766becaf043b0a23d843194ba972c66debd19dd5c4c9331049d0bdab0277408f67967e5");
+    assertThat(aead.decrypt(fixedCiphertext, associatedData)).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void testWithAesEaxKey_crunchyPrefix_works() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+    // From the second test vector above.
+    byte[] plaintext = Hex.decode("f7fb");
+    byte[] associatedData = Hex.decode("fa3bfd4806eb53fa");
+    byte[] keyBytes = Hex.decode("91945d3f4dcbee0bf45ef52255f095a4");
+    AesEaxParameters parameters =
+        AesEaxParameters.builder()
+            .setKeySizeBytes(16)
+            .setTagSizeBytes(16)
+            .setIvSizeBytes(16)
+            .setVariant(AesEaxParameters.Variant.CRUNCHY)
+            .build();
+    AesEaxKey key =
+        AesEaxKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(SecretBytes.copyFrom(keyBytes, InsecureSecretKeyAccess.get()))
+            .setIdRequirement(0x99887766)
+            .build();
+    Aead aead = AesEaxJce.create(key);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    assertThat(ciphertext)
+        .hasLength(
+            5 // prefix_length
+                + 2 // plaintext_length
+                + parameters.getIvSizeBytes()
+                + parameters.getTagSizeBytes());
+
+    assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+
+    byte[] fixedCiphertext =
+        Hex.decode(
+            "0099887766becaf043b0a23d843194ba972c66debd19dd5c4c9331049d0bdab0277408f67967e5");
+    assertThat(aead.decrypt(fixedCiphertext, associatedData)).isEqualTo(plaintext);
   }
 }

@@ -638,6 +638,7 @@ tink_cc_library(
     wycheproof_util.h
   DEPS
     tink::subtle::common_enums
+    absl::log
     absl::status
     absl::strings
     rapidjson
@@ -1017,9 +1018,12 @@ tink_cc_test(
     gmock
     absl::memory
     absl::status
+    absl::statusor
     absl::strings
     tink::core::output_stream
+    tink::core::random_access_stream
     tink::config::tink_fips
+    tink::internal::test_random_access_stream
     tink::util::istream_input_stream
     tink::util::ostream_output_stream
     tink::util::status
@@ -1039,9 +1043,13 @@ tink_cc_test(
     tink::subtle::stream_segment_encrypter
     tink::subtle::streaming_aead_test_util
     gmock
+    absl::memory
     absl::status
+    absl::statusor
     absl::strings
+    tink::core::random_access_stream
     tink::config::tink_fips
+    tink::internal::test_random_access_stream
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers

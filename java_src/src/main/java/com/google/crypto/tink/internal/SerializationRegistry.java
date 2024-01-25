@@ -162,7 +162,7 @@ public final class SerializationRegistry {
       return this;
     }
 
-    SerializationRegistry build() {
+    public SerializationRegistry build() {
       return new SerializationRegistry(this);
     }
   }

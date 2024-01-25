@@ -12,7 +12,7 @@ go_library(
 go_test(
     name = "subtle_test",
     srcs = ["kwp_test.go"],
-    data = ["@wycheproof//testvectors:all"],
+    data = ["//testdata/testvectors:keywrap"],
     deps = [
         ":subtle",
         "//subtle/random",

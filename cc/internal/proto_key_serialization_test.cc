@@ -19,6 +19,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/restricted_data.h"
@@ -206,6 +207,24 @@ TEST_F(ProtoKeySerializationTest, IdRequirementNotEqual) {
   ASSERT_THAT(other_serialization.status(), IsOk());
 
   EXPECT_THAT(Equals(*serialization, *other_serialization), IsFalse());
+}
+
+TEST_F(ProtoKeySerializationTest, AssignSecretToStringView) {
+  RestrictedData serialized_key =
+      RestrictedData("secret", InsecureSecretKeyAccess::Get());
+  util::StatusOr<ProtoKeySerialization> serialization =
+      ProtoKeySerialization::Create("type_url", serialized_key,
+                                    KeyData::SYMMETRIC, OutputPrefixType::TINK,
+                                    /*id_requirement=*/12345);
+  ASSERT_THAT(serialization.status(), IsOk());
+  ASSERT_THAT(serialization->SerializedKeyProto(), Eq(serialized_key));
+  ASSERT_THAT(serialization->SerializedKeyProto().GetSecret(
+                  InsecureSecretKeyAccess::Get()),
+              Eq("secret"));
+
+  absl::string_view secret = serialization->SerializedKeyProto().GetSecret(
+      InsecureSecretKeyAccess::Get());
+  EXPECT_THAT(secret, Eq("secret"));
 }
 
 }  // namespace internal

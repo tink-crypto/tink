@@ -36,29 +36,21 @@ using ::crypto::tink::JsonKeysetWriter;
 using ::crypto::tink::util::StatusOr;
 
 // Writes a `keyset` to `output_stream` in JSON format; the keyset is encrypted
-// through a KMS service using the KMS key `master_kms_key_uri`.
+// with `keyset_encryption_aead`.
 //
 // Prerequisites for this example:
 //  - Register AEAD implementations of Tink.
-//  - Register a KMS client that can use `master_kms_key_uri`.
+//  - Get the keyset encryption AEAD for a key URI with KmsClient::GetAead.
 //  - Create a keyset and obtain a KeysetHandle to it.
 crypto::tink::util::Status WriteEncryptedKeyset(
     const crypto::tink::KeysetHandle& keyset,
     std::unique_ptr<std::ostream> output_stream,
-    absl::string_view master_kms_key_uri) {
+    const crypto::tink::Aead& keyset_encryption_aead) {
   // Create a writer that will write the keyset to output_stream as JSON.
   StatusOr<std::unique_ptr<JsonKeysetWriter>> writer =
       JsonKeysetWriter::New(std::move(output_stream));
   if (!writer.ok()) return writer.status();
-  // Get a KMS client for the given key URI.
-  StatusOr<const crypto::tink::KmsClient*> kms_client =
-      crypto::tink::KmsClients::Get(master_kms_key_uri);
-  if (!kms_client.ok()) return kms_client.status();
-  // Get an Aead primitive that uses the KMS service to encrypt/decrypt.
-  StatusOr<std::unique_ptr<crypto::tink::Aead>> kms_aead =
-      (*kms_client)->GetAead(master_kms_key_uri);
-  if (!kms_aead.ok()) return kms_aead.status();
-  return keyset.Write(writer->get(), **kms_aead);
+  return keyset.Write(writer->get(), keyset_encryption_aead);
 }
 
 }  // namespace tink_walkthrough

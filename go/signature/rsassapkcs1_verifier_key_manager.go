@@ -57,7 +57,7 @@ func (km *rsaSSAPKCS1VerifierKeyManager) Primitive(serializedKey []byte) (interf
 		E: int(bytesToBigInt(key.GetE()).Int64()),
 		N: bytesToBigInt(key.GetN()),
 	}
-	return internal.New_RSA_SSA_PKCS1_Verifier(hashName(key.Params.HashType), keyData)
+	return internal.New_RSA_SSA_PKCS1_Verifier(hashName(key.GetParams().GetHashType()), keyData)
 }
 
 func validateRSAPKCS1PublicKey(pubKey *rsassapkcs1pb.RsaSsaPkcs1PublicKey) error {

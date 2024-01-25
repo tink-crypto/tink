@@ -7,7 +7,8 @@ def tink_py_deps_init(workspace_name):
     pip_install(
         name = "tink_py_pip_deps",
         quiet = False,
-        requirements = "@" + workspace_name + "//:requirements.txt",
+        extra_pip_args = ["--no-deps"],
+        requirements = "@" + workspace_name + "//:requirements_all.txt",
     )
 
     # Use `which python3` by default [1] unless PYTHON_BIN_PATH is specified [2].

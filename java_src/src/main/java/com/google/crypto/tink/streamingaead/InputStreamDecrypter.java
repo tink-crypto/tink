@@ -121,7 +121,7 @@ final class InputStreamDecrypter extends InputStream {
   public synchronized int read() throws IOException {
     byte[] oneByte = new byte[1];
     if (read(oneByte) == 1) {
-      return oneByte[0];
+      return oneByte[0] & 0xff;
     }
     return -1;
   }

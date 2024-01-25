@@ -42,7 +42,10 @@ func TestGetPrimitiveHKDFBasic(t *testing.T) {
 	}
 	testKeys := genValidHKDFKeys()
 	for i := 0; i < len(testKeys); i++ {
-		serializedKey, _ := proto.Marshal(testKeys[i])
+		serializedKey, err := proto.Marshal(testKeys[i])
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		p, err := km.Primitive(serializedKey)
 		if err != nil {
 			t.Errorf("unexpected error in test case %d: %s", i, err)
@@ -61,7 +64,10 @@ func TestGetPrimitiveHKDFWithInvalidInput(t *testing.T) {
 	// invalid key
 	testKeys := genInvalidHKDFKeys()
 	for i := 0; i < len(testKeys); i++ {
-		serializedKey, _ := proto.Marshal(testKeys[i])
+		serializedKey, err := proto.Marshal(testKeys[i])
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		if _, err := km.Primitive(serializedKey); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
@@ -80,15 +86,27 @@ func TestNewKeyHKDFMultipleTimes(t *testing.T) {
 	if err != nil {
 		t.Errorf("cannot obtain HKDF PRF key manager: %s", err)
 	}
-	serializedFormat, _ := proto.Marshal(testutil.NewHKDFPRFKeyFormat(commonpb.HashType_SHA256, make([]byte, 0)))
+	serializedFormat, err := proto.Marshal(testutil.NewHKDFPRFKeyFormat(commonpb.HashType_SHA256, make([]byte, 0)))
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %q, want nil", err)
+	}
 	keys := make(map[string]bool)
 	nTest := 26
 	for i := 0; i < nTest; i++ {
-		key, _ := km.NewKey(serializedFormat)
-		serializedKey, _ := proto.Marshal(key)
+		key, err := km.NewKey(serializedFormat)
+		if err != nil {
+			t.Fatalf("km.NewKey() err = %q, want nil", err)
+		}
+		serializedKey, err := proto.Marshal(key)
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		keys[string(serializedKey)] = true
 
-		keyData, _ := km.NewKeyData(serializedFormat)
+		keyData, err := km.NewKeyData(serializedFormat)
+		if err != nil {
+			t.Fatalf("km.NewKeyData() err = %q, want nil", err)
+		}
 		serializedKey = keyData.Value
 		keys[string(serializedKey)] = true
 	}
@@ -104,7 +122,10 @@ func TestNewKeyHKDFBasic(t *testing.T) {
 	}
 	testFormats := genValidHKDFKeyFormats()
 	for i := 0; i < len(testFormats); i++ {
-		serializedFormat, _ := proto.Marshal(testFormats[i])
+		serializedFormat, err := proto.Marshal(testFormats[i])
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		key, err := km.NewKey(serializedFormat)
 		if err != nil {
 			t.Errorf("unexpected error in test case %d: %s", i, err)
@@ -147,7 +168,10 @@ func TestNewKeyDataHKDFBasic(t *testing.T) {
 	}
 	testFormats := genValidHKDFKeyFormats()
 	for i := 0; i < len(testFormats); i++ {
-		serializedFormat, _ := proto.Marshal(testFormats[i])
+		serializedFormat, err := proto.Marshal(testFormats[i])
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		keyData, err := km.NewKeyData(serializedFormat)
 		if err != nil {
 			t.Errorf("unexpected error in test case %d: %s", i, err)
@@ -176,7 +200,10 @@ func TestNewKeyDataHKDFWithInvalidInput(t *testing.T) {
 	// invalid key formats
 	testFormats := genInvalidHKDFKeyFormats()
 	for i := 0; i < len(testFormats); i++ {
-		serializedFormat, _ := proto.Marshal(testFormats[i])
+		serializedFormat, err := proto.Marshal(testFormats[i])
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		if _, err := km.NewKeyData(serializedFormat); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
@@ -421,6 +448,8 @@ func genInvalidHKDFKeys() []proto.Message {
 	badVersionKey.Version++
 	shortKey := testutil.NewHKDFPRFKey(commonpb.HashType_SHA256, make([]byte, 0))
 	shortKey.KeyValue = []byte{1, 1}
+	nilParams := testutil.NewHKDFPRFKey(commonpb.HashType_SHA256, make([]byte, 0))
+	nilParams.Params = nil
 	return []proto.Message{
 		// not a HKDFPRFKey
 		testutil.NewHKDFPRFParams(commonpb.HashType_SHA256, make([]byte, 0)),
@@ -432,12 +461,16 @@ func genInvalidHKDFKeys() []proto.Message {
 		testutil.NewHKDFPRFKey(commonpb.HashType_SHA1, make([]byte, 0)),
 		// unknown hash type
 		testutil.NewHKDFPRFKey(commonpb.HashType_UNKNOWN_HASH, make([]byte, 0)),
+		// params field is unset
+		nilParams,
 	}
 }
 
 func genInvalidHKDFKeyFormats() []proto.Message {
 	shortKeyFormat := testutil.NewHKDFPRFKeyFormat(commonpb.HashType_SHA256, make([]byte, 0))
 	shortKeyFormat.KeySize = 1
+	nilParams := testutil.NewHKDFPRFKeyFormat(commonpb.HashType_SHA256, make([]byte, 0))
+	nilParams.Params = nil
 	return []proto.Message{
 		// not a HKDFPRFKeyFormat
 		testutil.NewHMACParams(commonpb.HashType_SHA256, 32),
@@ -447,6 +480,8 @@ func genInvalidHKDFKeyFormats() []proto.Message {
 		testutil.NewHKDFPRFKeyFormat(commonpb.HashType_SHA1, make([]byte, 0)),
 		// unknown hash type
 		testutil.NewHKDFPRFKeyFormat(commonpb.HashType_UNKNOWN_HASH, make([]byte, 0)),
+		// params field is unset
+		nilParams,
 	}
 }
 
@@ -482,7 +517,7 @@ func validateHKDFKey(format *hkdfpb.HkdfPrfKeyFormat, key *hkdfpb.HkdfPrfKey) er
 }
 
 // validateHKDFPrimitive checks whether the given primitive matches the given HKDFPRFKey
-func validateHKDFPrimitive(p interface{}, key *hkdfpb.HkdfPrfKey) error {
+func validateHKDFPrimitive(p any, key *hkdfpb.HkdfPrfKey) error {
 	hkdfPrimitive := p.(prf.PRF)
 	prfPrimitive, err := subtle.NewHKDFPRF(commonpb.HashType_name[int32(key.Params.Hash)], key.KeyValue, key.Params.Salt)
 	if err != nil {

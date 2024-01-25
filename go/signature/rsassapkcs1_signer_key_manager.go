@@ -56,6 +56,7 @@ func (km *rsaSSAPKCS1SignerKeyManager) Primitive(serializedKey []byte) (interfac
 	if err := validateRSAPKCS1PrivateKey(key); err != nil {
 		return nil, err
 	}
+
 	privKey := &rsa.PrivateKey{
 		D: bytesToBigInt(key.GetD()),
 		PublicKey: rsa.PublicKey{
@@ -66,12 +67,17 @@ func (km *rsaSSAPKCS1SignerKeyManager) Primitive(serializedKey []byte) (interfac
 			bytesToBigInt(key.GetP()),
 			bytesToBigInt(key.GetQ()),
 		},
-		Precomputed: rsa.PrecomputedValues{
-			Dp:   bytesToBigInt(key.GetDp()),
-			Dq:   bytesToBigInt(key.GetDq()),
-			Qinv: bytesToBigInt(key.GetCrt()),
-		},
 	}
+	if err := privKey.Validate(); err != nil {
+		return nil, err
+	}
+
+	// Instead of extracting Dp, Dq, and Qinv values from the key proto,
+	// the values must be computed by the Go library.
+	//
+	// See https://pkg.go.dev/crypto/rsa#PrivateKey.
+	privKey.Precompute()
+
 	h := hashName(key.GetPublicKey().GetParams().GetHashType())
 	if err := internal.Validate_RSA_SSA_PKCS1(h, privKey); err != nil {
 		return nil, err
@@ -80,7 +86,7 @@ func (km *rsaSSAPKCS1SignerKeyManager) Primitive(serializedKey []byte) (interfac
 }
 
 func validateRSAPKCS1PrivateKey(privKey *rsassapkcs1pb.RsaSsaPkcs1PrivateKey) error {
-	if err := keyset.ValidateKeyVersion(privKey.Version, rsaSSAPKCS1SignerKeyVersion); err != nil {
+	if err := keyset.ValidateKeyVersion(privKey.GetVersion(), rsaSSAPKCS1SignerKeyVersion); err != nil {
 		return err
 	}
 	if len(privKey.GetD()) == 0 ||
@@ -110,14 +116,14 @@ func (km *rsaSSAPKCS1SignerKeyManager) NewKey(serializedKeyFormat []byte) (proto
 		keyFormat.GetPublicExponent()); err != nil {
 		return nil, err
 	}
-	rsaKey, err := rsa.GenerateKey(rand.Reader, int(keyFormat.ModulusSizeInBits))
+	rsaKey, err := rsa.GenerateKey(rand.Reader, int(keyFormat.GetModulusSizeInBits()))
 	if err != nil {
 		return nil, fmt.Errorf("generating RSA key: %s", err)
 	}
 	pubKey := &rsassapkcs1pb.RsaSsaPkcs1PublicKey{
 		Version: rsaSSAPKCS1SignerKeyVersion,
 		Params: &rsassapkcs1pb.RsaSsaPkcs1Params{
-			HashType: keyFormat.Params.HashType,
+			HashType: keyFormat.GetParams().GetHashType(),
 		},
 		N: rsaKey.PublicKey.N.Bytes(),
 		E: big.NewInt(int64(rsaKey.PublicKey.E)).Bytes(),
@@ -130,7 +136,12 @@ func (km *rsaSSAPKCS1SignerKeyManager) NewKey(serializedKeyFormat []byte) (proto
 		Q:         rsaKey.Primes[1].Bytes(),
 		Dp:        rsaKey.Precomputed.Dp.Bytes(),
 		Dq:        rsaKey.Precomputed.Dq.Bytes(),
-		Crt:       rsaKey.Precomputed.Qinv.Bytes(),
+		// In crypto/rsa `Qinv` is the "Chinese Remainder Theorem
+		// coefficient q^(-1) mod p". This corresponds with `Crt` in
+		// the Tink proto. This is unrelated to `CRTValues`, which
+		// contains values specifically for additional primes, which
+		// are not supported by Tink.
+		Crt: rsaKey.Precomputed.Qinv.Bytes(),
 	}, nil
 }
 

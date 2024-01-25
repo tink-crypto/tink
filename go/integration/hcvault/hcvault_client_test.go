@@ -25,6 +25,8 @@ import (
 )
 
 func Example() {
+	// Use a key with key derivation enabled (with "derived=true") if you use a non-empty
+	// associated_data.
 	const keyURI = "hcvault://hcvault.corp.com:8200/transit/keys/key-1"
 
 	vaultClient, err := hcvault.NewClient(keyURI, tlsConfig(), vaultToken())

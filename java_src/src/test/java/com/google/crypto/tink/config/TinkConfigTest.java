@@ -21,7 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.daead.PredefinedDeterministicAeadParameters;
-import com.google.crypto.tink.hybrid.HybridKeyTemplates;
+import com.google.crypto.tink.hybrid.PredefinedHybridParameters;
 import com.google.crypto.tink.mac.PredefinedMacParameters;
 import com.google.crypto.tink.signature.PredefinedSignatureParameters;
 import com.google.crypto.tink.streamingaead.PredefinedStreamingAeadParameters;
@@ -42,7 +42,9 @@ public class TinkConfigTest {
         .isNotNull();
     assertThat(KeysetHandle.generateNew(PredefinedDeterministicAeadParameters.AES256_SIV))
         .isNotNull();
-    assertThat(KeysetHandle.generateNew(HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM))
+    assertThat(
+            KeysetHandle.generateNew(
+                PredefinedHybridParameters.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM))
         .isNotNull();
     assertThat(KeysetHandle.generateNew(PredefinedSignatureParameters.ECDSA_P256)).isNotNull();
     assertThat(KeysetHandle.generateNew(PredefinedStreamingAeadParameters.AES128_GCM_HKDF_4KB))

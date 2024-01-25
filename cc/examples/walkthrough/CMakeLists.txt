@@ -43,7 +43,6 @@ target_include_directories(write_cleartext_keyset PUBLIC
 target_link_libraries(write_cleartext_keyset tink::static)
 
 # Test targets.
-# NOTE: gmock and gtest_main are already exported by Tink.
 
 add_executable(create_keyset_test create_keyset_test.cc)
 add_test(NAME create_keyset_test COMMAND create_keyset_test WORKING_DIRECTORY ${CMAKE_BINARY_DIR})

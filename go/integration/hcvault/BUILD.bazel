@@ -11,6 +11,7 @@ go_library(
         "hcvault_client.go",
     ],
     importpath = "github.com/google/tink/go/integration/hcvault",
+    visibility = ["//visibility:public"],
     deps = [
         "//core/registry",
         "//tink",
@@ -25,10 +26,10 @@ go_test(
         "hcvault_aead_test.go",
         "hcvault_client_test.go",
     ],
-    data = ["//integration/hcvault/testdata:server_tls_files"],
     embed = [":hcvault"],
     deps = [
         "//aead",
+        "@com_github_hashicorp_vault_api//:api",
     ],
 )
 

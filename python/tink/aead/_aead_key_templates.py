@@ -115,6 +115,8 @@ def _create_aes_ctr_hmac_aead_key_template(
   return key_template
 
 
+# Deprecated. Instead, directly create the Aead object using
+# kms_client.get_aead(key_uri). There is no need to register the KMS client.
 def create_kms_aead_key_template(key_uri: str) -> tink_pb2.KeyTemplate:
   """Creates a KMS AEAD KeyTemplate from a KEK URI.
 
@@ -128,6 +130,8 @@ def create_kms_aead_key_template(key_uri: str) -> tink_pb2.KeyTemplate:
   Returns:
     A KMS Aead KeyTemplate.
   """
+  warnings.warn('The "create_kms_aead_key_template" function is deprecated.',
+                DeprecationWarning, 2)
   key_format = kms_aead_pb2.KmsAeadKeyFormat(key_uri=key_uri)
   key_template = tink_pb2.KeyTemplate(
       value=key_format.SerializeToString(),
@@ -137,6 +141,9 @@ def create_kms_aead_key_template(key_uri: str) -> tink_pb2.KeyTemplate:
   return key_template
 
 
+# Deprecated. Instead, directly create the envelope Aead object with
+# aead.KmsEnvelopeAead(dek_template, kms_client.get_aead(kek_uri)). There is no
+# need to register the KMS client.
 def create_kms_envelope_aead_key_template(
     kek_uri: str, dek_template: tink_pb2.KeyTemplate) -> tink_pb2.KeyTemplate:
   """Creates a KMS Envelope AEAD key template from a KEK URI and a DEK template.
@@ -152,6 +159,9 @@ def create_kms_envelope_aead_key_template(
   Returns:
       the resulting key template
   """
+  warnings.warn(
+      'The "create_kms_envelope_aead_key_template" function is deprecated.',
+      DeprecationWarning, 2)
   key_format = kms_envelope_pb2.KmsEnvelopeAeadKeyFormat(
       kek_uri=kek_uri, dek_template=dek_template
   )

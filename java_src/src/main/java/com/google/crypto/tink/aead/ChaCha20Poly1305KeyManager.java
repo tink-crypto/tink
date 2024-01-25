@@ -18,115 +18,79 @@ package com.google.crypto.tink.aead;
 
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.internal.KeyTypeManager;
-import com.google.crypto.tink.internal.PrimitiveFactory;
-import com.google.crypto.tink.proto.ChaCha20Poly1305Key;
-import com.google.crypto.tink.proto.ChaCha20Poly1305KeyFormat;
+import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
+import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.ChaCha20Poly1305;
-import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.Validators;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.crypto.tink.util.SecretBytes;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * This instance of {@code KeyManager} generates new {@code ChaCha20Poly1305} keys and produces new
  * instances of {@code ChaCha20Poly1305}.
  */
-public class ChaCha20Poly1305KeyManager extends KeyTypeManager<ChaCha20Poly1305Key> {
-  ChaCha20Poly1305KeyManager() {
-    super(
-        ChaCha20Poly1305Key.class,
-        new PrimitiveFactory<Aead, ChaCha20Poly1305Key>(Aead.class) {
-          @Override
-          public Aead getPrimitive(ChaCha20Poly1305Key key) throws GeneralSecurityException {
-            return new ChaCha20Poly1305(key.getKeyValue().toByteArray());
-          }
-        });
-  }
+public final class ChaCha20Poly1305KeyManager {
+  private static final PrimitiveConstructor<ChaCha20Poly1305Key, Aead>
+      CHA_CHA_20_POLY_1305_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              ChaCha20Poly1305::create, ChaCha20Poly1305Key.class, Aead.class);
 
   private static final int KEY_SIZE_IN_BYTES = 32;
 
-  @Override
-  public String getKeyType() {
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyCreationRegistry.KeyCreator<ChaCha20Poly1305Parameters>
+      KEY_CREATOR = ChaCha20Poly1305KeyManager::createChaChaKey;
+
+  private static final KeyManager<Aead> legacyKeyManager =
+      LegacyKeyManagerImpl.create(
+          getKeyType(),
+          Aead.class,
+          KeyMaterialType.SYMMETRIC,
+          com.google.crypto.tink.proto.ChaCha20Poly1305Key.parser());
+
+  @AccessesPartialKey
+  static com.google.crypto.tink.aead.ChaCha20Poly1305Key createChaChaKey(
+      ChaCha20Poly1305Parameters parameters, @Nullable Integer idRequirement)
+      throws GeneralSecurityException {
+    return com.google.crypto.tink.aead.ChaCha20Poly1305Key.create(
+        parameters.getVariant(), SecretBytes.randomBytes(KEY_SIZE_IN_BYTES), idRequirement);
+  }
+
+  static String getKeyType() {
     return "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key";
   }
 
-  @Override
-  public int getVersion() {
-    return 0;
-  }
-
-  @Override
-  public KeyMaterialType keyMaterialType() {
-    return KeyMaterialType.SYMMETRIC;
-  }
-
-  @Override
-  public void validateKey(ChaCha20Poly1305Key key) throws GeneralSecurityException {
-    Validators.validateVersion(key.getVersion(), getVersion());
-    if (key.getKeyValue().size() != KEY_SIZE_IN_BYTES) {
-      throw new GeneralSecurityException("invalid ChaCha20Poly1305Key: incorrect key length");
-    }
-  }
-
-  @Override
-  public ChaCha20Poly1305Key parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return ChaCha20Poly1305Key.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-  }
-
-  @Override
-  public KeyFactory<ChaCha20Poly1305KeyFormat, ChaCha20Poly1305Key> keyFactory() {
-    return new KeyFactory<ChaCha20Poly1305KeyFormat, ChaCha20Poly1305Key>(
-        ChaCha20Poly1305KeyFormat.class) {
-      @Override
-      public void validateKeyFormat(ChaCha20Poly1305KeyFormat format)
-          throws GeneralSecurityException {}
-
-      @Override
-      public ChaCha20Poly1305KeyFormat parseKeyFormat(ByteString byteString)
-          throws InvalidProtocolBufferException {
-        return ChaCha20Poly1305KeyFormat.parseFrom(
-            byteString, ExtensionRegistryLite.getEmptyRegistry());
-      }
-
-      @Override
-      public ChaCha20Poly1305Key createKey(ChaCha20Poly1305KeyFormat format)
-          throws GeneralSecurityException {
-        return ChaCha20Poly1305Key.newBuilder()
-            .setVersion(getVersion())
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(KEY_SIZE_IN_BYTES)))
-            .build();
-      }
-
-      @Override
-      public Map<String, KeyFactory.KeyFormat<ChaCha20Poly1305KeyFormat>> keyFormats()
-          throws GeneralSecurityException {
-        Map<String, KeyFactory.KeyFormat<ChaCha20Poly1305KeyFormat>> result = new HashMap<>();
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
         result.put(
             "CHACHA20_POLY1305",
-            new KeyFactory.KeyFormat<>(
-                ChaCha20Poly1305KeyFormat.getDefaultInstance(), KeyTemplate.OutputPrefixType.TINK));
+            ChaCha20Poly1305Parameters.create(ChaCha20Poly1305Parameters.Variant.TINK));
         result.put(
             "CHACHA20_POLY1305_RAW",
-            new KeyFactory.KeyFormat<>(
-                ChaCha20Poly1305KeyFormat.getDefaultInstance(), KeyTemplate.OutputPrefixType.RAW));
+            ChaCha20Poly1305Parameters.create(ChaCha20Poly1305Parameters.Variant.NO_PREFIX));
         return Collections.unmodifiableMap(result);
-      }
-    };
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
-    Registry.registerKeyManager(new ChaCha20Poly1305KeyManager(), newKeyAllowed);
     ChaCha20Poly1305ProtoSerialization.register();
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(CHA_CHA_20_POLY_1305_PRIMITIVE_CONSTRUCTOR);
+    MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, ChaCha20Poly1305Parameters.class);
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
+    Registry.registerKeyManager(legacyKeyManager, newKeyAllowed);
   }
 
   /**
@@ -150,4 +114,6 @@ public class ChaCha20Poly1305KeyManager extends KeyTypeManager<ChaCha20Poly1305K
             KeyTemplate.createFrom(
                 ChaCha20Poly1305Parameters.create(ChaCha20Poly1305Parameters.Variant.NO_PREFIX)));
   }
+
+  private ChaCha20Poly1305KeyManager() {}
 }

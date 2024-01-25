@@ -225,7 +225,8 @@ TEST(RawJwtHmacKeyManagerTest, GetPrimitiveFromNewKeysetHandle) {
   key_template.set_output_prefix_type(OutputPrefixType::RAW);
   key_format.SerializeToString(key_template.mutable_value());
 
-  auto handle_result = KeysetHandle::GenerateNew(key_template);
+  auto handle_result =
+      KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry());
   ASSERT_TRUE(handle_result.ok()) << handle_result.status();
   std::unique_ptr<KeysetHandle> handle = std::move(handle_result.value());
 

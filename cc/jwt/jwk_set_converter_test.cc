@@ -24,10 +24,10 @@
 #include "google/protobuf/util/message_differencer.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "absl/strings/match.h"
+#include "absl/strings/escaping.h"
+#include "absl/strings/string_view.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/json_keyset_reader.h"
-#include "tink/json_keyset_writer.h"
 #include "tink/jwt/internal/json_util.h"
 #include "tink/jwt/jwt_public_key_sign.h"
 #include "tink/jwt/jwt_public_key_verify.h"
@@ -35,7 +35,11 @@
 #include "tink/jwt/jwt_validator.h"
 #include "tink/jwt/verified_jwt.h"
 #include "tink/keyset_handle.h"
+#include "tink/keyset_reader.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
+#include "proto/ecdsa.pb.h"
 #include "proto/jwt_ecdsa.pb.h"
 #include "proto/jwt_rsa_ssa_pkcs1.pb.h"
 
@@ -389,6 +393,120 @@ constexpr absl::string_view kEs256JwkPublicKeyWithoutKid = R"({
   "x":"ytH8MlvqTx3X-eL0pdx4ULKUb2YOi2DPnIPpSaIk28M",
   "y":"AO5TMe5lNcjJpuGjjGtHd4gX9POG9dh_vG-8ptp7HJs",
   "use":"sig","alg":"ES256","key_ops":["verify"]}],
+})";
+
+constexpr absl::string_view kEs256WithBiggerCoordinates = R"(
+{
+  "primaryKeyId":858766452,
+  "key":[
+    {
+      "keyData": {
+        "typeUrl":"type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey",
+        "value":"EAEaIQAocb/rp/rsVlYMqlR2KB18kpSAPURySedsnfswHoqEviIhANrIMzHBtAQvDOKUf3BYVmV+AfwKyA0lq9gHOTY3gVm+",
+        "keyMaterialType":"ASYMMETRIC_PUBLIC"
+    },
+    "status":"ENABLED",
+    "keyId":858766452,
+    "outputPrefixType":"TINK"}]
+})";
+
+constexpr absl::string_view kEs256JwkWithEncodedBiggerCoordinates = R"({
+  "keys":[{
+  "alg":"ES256",
+  "crv":"P-256",
+  "key_ops":["verify"],
+  "kid":"My-8dA",
+  "kty":"EC",
+  "use":"sig",
+  "x":"KHG_66f67FZWDKpUdigdfJKUgD1EcknnbJ37MB6KhL4",
+  "y":"2sgzMcG0BC8M4pR_cFhWZX4B_ArIDSWr2Ac5NjeBWb4"}],
+})";
+
+constexpr absl::string_view kEs256WithSmallCoordinates = R"(
+{
+  "primaryKeyId": 2124611562,
+  "key": [
+    {
+      "keyData": {
+        "typeUrl": "type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey",
+        "value": "EAEaH2lFjtbwLgtzRDh7dV9sYmW4IWl3ZKA+WghvrQPiCNoiIEJ8pQXMyA/JywaGWT+IHmWxuVYWqdxkPsUSHLhSQm51",
+        "keyMaterialType": "ASYMMETRIC_PUBLIC"
+      },
+      "status": "ENABLED",
+      "keyId": 2124611562,
+      "outputPrefixType": "TINK"
+    }
+  ]
+})";
+
+constexpr absl::string_view kEs256JwkWithEncodedSmallCoordinates = R"({
+  "keys":[{
+  "alg":"ES256",
+  "crv":"P-256",
+  "key_ops":["verify"],
+  "kid":"fqL_6g",
+  "kty":"EC",
+  "use":"sig",
+  "x":"AGlFjtbwLgtzRDh7dV9sYmW4IWl3ZKA-WghvrQPiCNo",
+  "y":"QnylBczID8nLBoZZP4geZbG5Vhap3GQ-xRIcuFJCbnU"}],
+})";
+
+constexpr absl::string_view kEs384WithSmallCoordinates = R"(
+{
+  "primaryKeyId": 4159170178,
+  "key": [
+    {
+      "keyData": {
+        "typeUrl": "type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey",
+        "value": "EAIaL/bm1+e6X7gat+MJK3e65BGlZzKIf6I1q0Ro8zAKeyryUxgvZl8Ww/NlcVN2XJhEIjA3b73hm8eDfSEEUAAaJbrLZFOFGnSdTWng116r+hOvszYiov+WrsTyIgnL/9aRdN8=",
+        "keyMaterialType": "ASYMMETRIC_PUBLIC"
+      },
+      "status": "ENABLED",
+      "keyId": 4159170178,
+      "outputPrefixType": "TINK"
+    }
+  ]
+})";
+
+constexpr absl::string_view kEs384JwkWithEncodedSmallCoordinates = R"({
+  "keys":[{
+  "alg":"ES384",
+  "crv":"P-384",
+  "key_ops":["verify"],
+  "kid":"9-fmgg",
+  "kty":"EC",
+  "use":"sig",
+  "x":"APbm1-e6X7gat-MJK3e65BGlZzKIf6I1q0Ro8zAKeyryUxgvZl8Ww_NlcVN2XJhE",
+  "y":"N2-94ZvHg30hBFAAGiW6y2RThRp0nU1p4Ndeq_oTr7M2IqL_lq7E8iIJy__WkXTf"}],
+})";
+
+constexpr absl::string_view kEs512WithSmallCoordinates = R"(
+{
+  "primaryKeyId": 1286030637,
+  "key": [
+    {
+      "keyData": {
+        "typeUrl": "type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey",
+        "value": "EAMaQUgdEssWf+tdFT3vSoy/OAotV501af+XQ6JSXDjnOPCzZnFh8fYwrJ8Yu8XYF33IeHBdAIKyicKuW884JkjYR1qJIkH2OWoa4SOmk0FtpeRBZHPbs7U8SMFXVkaV+HZtjmfl11QGiQU9hqUhoW9ock2K0xg6wdcWBe67YTVFdQbThFmtCg==",
+        "keyMaterialType": "ASYMMETRIC_PUBLIC"
+      },
+      "status": "ENABLED",
+      "keyId": 1286030637,
+      "outputPrefixType": "TINK"
+    }
+  ]
+})";
+
+constexpr absl::string_view kEs512JwkWithEncodedSmallCoordinates = R"({
+  "keys":[{
+  "alg":"ES512",
+  "crv":"P-521",
+  "key_ops":["verify"],
+  "kid":"TKdFLQ",
+  "kty":"EC",
+  "use":"sig",
+  "x":"AEgdEssWf-tdFT3vSoy_OAotV501af-XQ6JSXDjnOPCzZnFh8fYwrJ8Yu8XYF33IeHBdAIKyicKuW884JkjYR1qJ",
+  "y":"APY5ahrhI6aTQW2l5EFkc9uztTxIwVdWRpX4dm2OZ-XXVAaJBT2GpSGhb2hyTYrTGDrB1xYF7rthNUV1BtOEWa0K"}],
 })";
 
 class JwkSetConverterTest : public testing::TestWithParam<std::string> {
@@ -1131,6 +1249,85 @@ TEST(JwkSetFromPublicKeysetHandleTest, EcdsaWithUnknownAlgorithmFails) {
       JwkSetFromPublicKeysetHandle(**keyset_handle);
   EXPECT_THAT(jwk_set, Not(IsOk()));
 }
+
+struct SmallCordinateTestCase {
+  std::string name;
+  std::string public_keyset;
+  std::string jwk_set;
+  int expected_encoded_size;
+};
+
+class JwkSetSmallCoordinateConverterTest
+    : public testing::TestWithParam<SmallCordinateTestCase> {
+  void SetUp() override { ASSERT_THAT(JwtSignatureRegister(), IsOk()); }
+};
+
+TEST_P(JwkSetSmallCoordinateConverterTest,
+       convertEcdsaKeysetsEncodesFixedSizedCoordinates) {
+  util::StatusOr<std::unique_ptr<KeysetReader>> reader =
+      JsonKeysetReader::New(GetParam().public_keyset);
+  ASSERT_THAT(reader, IsOk());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
+      CleartextKeysetHandle::Read(std::move(*reader));
+  ASSERT_THAT(keyset_handle, IsOk());
+  const google::crypto::tink::Keyset &public_keyset =
+      CleartextKeysetHandle::GetKeyset(**keyset_handle);
+  google::crypto::tink::EcdsaPublicKey public_key;
+  ASSERT_TRUE(
+      public_key.ParseFromString(public_keyset.key().at(0).key_data().value()));
+  // verify one of the coordinates is different than the field element size.
+  ASSERT_FALSE(public_key.x().size() == GetParam().expected_encoded_size &&
+               public_key.y().size() == GetParam().expected_encoded_size);
+
+  util::StatusOr<std::string> jwk_set_str =
+      JwkSetFromPublicKeysetHandle(**keyset_handle);
+  ASSERT_THAT(jwk_set_str, IsOk());
+
+  util::StatusOr<google::protobuf::Struct> output_struct =
+      jwt_internal::JsonStringToProtoStruct(*jwk_set_str);
+  ASSERT_THAT(output_struct, IsOk());
+  util::StatusOr<google::protobuf::Struct> expected_struct =
+      jwt_internal::JsonStringToProtoStruct(GetParam().jwk_set);
+  ASSERT_THAT(expected_struct, IsOk());
+
+  std::string differences;
+  MessageDifferencer message_differencer;
+  message_differencer.ReportDifferencesToString(&differences);
+  EXPECT_TRUE(message_differencer.Compare(*output_struct, *expected_struct))
+      << differences;
+
+  Struct key = (*expected_struct)
+                   .fields()
+                   .find("keys")
+                   ->second.list_value()
+                   .values()
+                   .Get(0)
+                   .struct_value();
+  std::string x, y;
+  EXPECT_TRUE(absl::WebSafeBase64Unescape(
+      key.fields().find("x")->second.string_value(), &x));
+  EXPECT_TRUE(absl::WebSafeBase64Unescape(
+      key.fields().find("y")->second.string_value(), &y));
+  EXPECT_EQ(x.size(), GetParam().expected_encoded_size);
+  EXPECT_EQ(y.size(), GetParam().expected_encoded_size);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    JwkSetSmallCoordinateConverterTests, JwkSetSmallCoordinateConverterTest,
+    testing::ValuesIn<SmallCordinateTestCase>({
+        {"ES256_smaller", std::string(kEs256WithSmallCoordinates),
+         std::string(kEs256JwkWithEncodedSmallCoordinates), 32},
+        {"ES256_larger", std::string(kEs256WithBiggerCoordinates),
+         std::string(kEs256JwkWithEncodedBiggerCoordinates), 32},
+        {"ES384_smaller", std::string(kEs384WithSmallCoordinates),
+         std::string(kEs384JwkWithEncodedSmallCoordinates), 48},
+        {"ES512_larger", std::string(kEs512WithSmallCoordinates),
+         std::string(kEs512JwkWithEncodedSmallCoordinates), 66},
+    }),
+    [](const testing::TestParamInfo<
+        JwkSetSmallCoordinateConverterTest::ParamType> &info) {
+      return info.param.name;
+    });
 
 TEST(JwkSetFromPublicKeysetHandleTest,
      JwtRsaSsaPkcs1WithUnknownAlgorithmFails) {

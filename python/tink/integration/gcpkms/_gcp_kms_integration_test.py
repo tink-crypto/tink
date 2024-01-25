@@ -20,9 +20,9 @@ import os
 from absl.testing import absltest
 
 import tink
+from tink import _kms_clients
 from tink import aead
-from tink import cleartext_keyset_handle
-from tink.aead import _kms_aead_key_manager
+from tink import secret_key_access
 from tink.integration import gcpkms
 from tink.testing import helper
 
@@ -56,7 +56,7 @@ class GcpKmsIntegrationTest(absltest.TestCase):
 
   def tearDown(self):
     super().tearDown()
-    _kms_aead_key_manager.reset_kms_clients()
+    _kms_clients.reset_kms_clients()
 
   def test_aead_from_keyset_handle_for_key_uri_works(self):
     # Register client not bound to a key URI.
@@ -194,8 +194,9 @@ class GcpKmsIntegrationTest(absltest.TestCase):
     gcp_aead = gcpkms.GcpKmsClient('', CREDENTIAL_PATH).get_aead(key_uri)
 
     unwrapped_keyset = gcp_aead.decrypt(wrapped_keyset, b'')
-    keyset_handle = cleartext_keyset_handle.read(
-        tink.BinaryKeysetReader(unwrapped_keyset))
+    keyset_handle = tink.proto_keyset_format.parse(
+        unwrapped_keyset, secret_key_access.TOKEN
+    )
     primitive = keyset_handle.primitive(aead.Aead)
     decrypted = primitive.decrypt(ciphertext, b'animal')
     self.assertEqual(decrypted, b'elephant')

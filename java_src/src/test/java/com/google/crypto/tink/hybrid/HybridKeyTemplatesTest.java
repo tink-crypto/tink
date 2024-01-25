@@ -52,7 +52,7 @@ public class HybridKeyTemplatesTest {
   @Test
   public void eciesP256HkdfHmaSha256Aes128Gcm() throws Exception {
     KeyTemplate template = HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM;
-    assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(EciesAeadHkdfPrivateKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     EciesAeadHkdfKeyFormat format =
         EciesAeadHkdfKeyFormat.parseFrom(
@@ -75,7 +75,7 @@ public class HybridKeyTemplatesTest {
   public void eciesP256HkdfHmacSha256Aes128GcmCompressedWithoutPrefix() throws Exception {
     KeyTemplate template =
         HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM_COMPRESSED_WITHOUT_PREFIX;
-    assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(EciesAeadHkdfPrivateKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
     EciesAeadHkdfKeyFormat format =
         EciesAeadHkdfKeyFormat.parseFrom(
@@ -97,7 +97,7 @@ public class HybridKeyTemplatesTest {
   @Test
   public void eciesP256HkdfHmacSha256Aes128CtrHmacSha256() throws Exception {
     KeyTemplate template = HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256;
-    assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(EciesAeadHkdfPrivateKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     EciesAeadHkdfKeyFormat format =
         EciesAeadHkdfKeyFormat.parseFrom(
@@ -128,7 +128,7 @@ public class HybridKeyTemplatesTest {
     KeyTemplate template = HybridKeyTemplates.createEciesAeadHkdfKeyTemplate(
         curveType, hashType, ecPointFormat, demKeyTemplate,
         OutputPrefixType.TINK, salt.getBytes(UTF_8));
-    assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(EciesAeadHkdfPrivateKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
     EciesAeadHkdfKeyFormat format =
         EciesAeadHkdfKeyFormat.parseFrom(

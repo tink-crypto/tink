@@ -348,7 +348,7 @@ public final class EciesProtoSerializationTest {
                         EcPointFormat.UNCOMPRESSED,
                         ByteString.copyFrom(SALT.toByteArray()),
                         KeyTemplate.newBuilder()
-                            .setTypeUrl("Non Existent Type Url")
+                            .setTypeUrl("NonExistentTypeUrl")
                             .setValue(
                                 XChaCha20Poly1305KeyFormat.newBuilder()
                                     .setVersion(0)

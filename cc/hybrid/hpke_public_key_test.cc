@@ -78,7 +78,7 @@ INSTANTIATE_TEST_SUITE_P(
            TestCase{subtle::EllipticCurveType::NIST_P521,
                     HpkeParameters::KemId::kDhkemP521HkdfSha512,
                     HpkeParameters::KdfId::kHkdfSha512,
-                    HpkeParameters::AeadId::kChaChaPoly1305,
+                    HpkeParameters::AeadId::kChaCha20Poly1305,
                     HpkeParameters::Variant::kNoPrefix,
                     /*id_requirement=*/absl::nullopt,
                     /*output_prefix=*/""}));
@@ -121,7 +121,7 @@ TEST(HpkePublicKeyTest, CreateX25519PublicKey) {
           .SetVariant(HpkeParameters::Variant::kNoPrefix)
           .SetKemId(HpkeParameters::KemId::kDhkemX25519HkdfSha256)
           .SetKdfId(HpkeParameters::KdfId::kHkdfSha256)
-          .SetAeadId(HpkeParameters::AeadId::kChaChaPoly1305)
+          .SetAeadId(HpkeParameters::AeadId::kChaCha20Poly1305)
           .Build();
   ASSERT_THAT(params, IsOk());
 
@@ -172,7 +172,7 @@ TEST(HpkePublicKeyTest, CreateX25519PublicKeyWithInvalidLength) {
           .SetVariant(HpkeParameters::Variant::kNoPrefix)
           .SetKemId(HpkeParameters::KemId::kDhkemX25519HkdfSha256)
           .SetKdfId(HpkeParameters::KdfId::kHkdfSha256)
-          .SetAeadId(HpkeParameters::AeadId::kChaChaPoly1305)
+          .SetAeadId(HpkeParameters::AeadId::kChaCha20Poly1305)
           .Build();
   ASSERT_THAT(params, IsOk());
 
@@ -225,7 +225,7 @@ TEST(HpkePublicKeyTest, CreatePublicKeyWithInvalidIdRequirementFails) {
           .SetVariant(HpkeParameters::Variant::kNoPrefix)
           .SetKemId(HpkeParameters::KemId::kDhkemX25519HkdfSha256)
           .SetKdfId(HpkeParameters::KdfId::kHkdfSha256)
-          .SetAeadId(HpkeParameters::AeadId::kChaChaPoly1305)
+          .SetAeadId(HpkeParameters::AeadId::kChaCha20Poly1305)
           .Build();
   ASSERT_THAT(no_prefix_params, IsOk());
 
@@ -234,7 +234,7 @@ TEST(HpkePublicKeyTest, CreatePublicKeyWithInvalidIdRequirementFails) {
           .SetVariant(HpkeParameters::Variant::kTink)
           .SetKemId(HpkeParameters::KemId::kDhkemX25519HkdfSha256)
           .SetKdfId(HpkeParameters::KdfId::kHkdfSha256)
-          .SetAeadId(HpkeParameters::AeadId::kChaChaPoly1305)
+          .SetAeadId(HpkeParameters::AeadId::kChaCha20Poly1305)
           .Build();
   ASSERT_THAT(tink_params, IsOk());
 
@@ -295,7 +295,7 @@ TEST(HpkePublicKeyTest, X25519PublicKeyEquals) {
           .SetVariant(HpkeParameters::Variant::kNoPrefix)
           .SetKemId(HpkeParameters::KemId::kDhkemX25519HkdfSha256)
           .SetKdfId(HpkeParameters::KdfId::kHkdfSha256)
-          .SetAeadId(HpkeParameters::AeadId::kChaChaPoly1305)
+          .SetAeadId(HpkeParameters::AeadId::kChaCha20Poly1305)
           .Build();
   ASSERT_THAT(params, IsOk());
 
@@ -323,7 +323,7 @@ TEST(HpkePublicKeyTest, DifferentVariantNotEqual) {
           .SetVariant(HpkeParameters::Variant::kCrunchy)
           .SetKemId(HpkeParameters::KemId::kDhkemX25519HkdfSha256)
           .SetKdfId(HpkeParameters::KdfId::kHkdfSha256)
-          .SetAeadId(HpkeParameters::AeadId::kChaChaPoly1305)
+          .SetAeadId(HpkeParameters::AeadId::kChaCha20Poly1305)
           .Build();
   ASSERT_THAT(crunchy_params, IsOk());
 
@@ -332,7 +332,7 @@ TEST(HpkePublicKeyTest, DifferentVariantNotEqual) {
           .SetVariant(HpkeParameters::Variant::kTink)
           .SetKemId(HpkeParameters::KemId::kDhkemX25519HkdfSha256)
           .SetKdfId(HpkeParameters::KdfId::kHkdfSha256)
-          .SetAeadId(HpkeParameters::AeadId::kChaChaPoly1305)
+          .SetAeadId(HpkeParameters::AeadId::kChaCha20Poly1305)
           .Build();
   ASSERT_THAT(tink_params, IsOk());
 
@@ -354,13 +354,13 @@ TEST(HpkePublicKeyTest, DifferentVariantNotEqual) {
   EXPECT_FALSE(*other_public_key == *public_key);
 }
 
-TEST(Ed25519PublicKeyTest, DifferentPublicKeyBytesNotEqual) {
+TEST(HpkePublicKeyTest, DifferentPublicKeyBytesNotEqual) {
   util::StatusOr<HpkeParameters> params =
       HpkeParameters::Builder()
           .SetVariant(HpkeParameters::Variant::kTink)
           .SetKemId(HpkeParameters::KemId::kDhkemX25519HkdfSha256)
           .SetKdfId(HpkeParameters::KdfId::kHkdfSha256)
-          .SetAeadId(HpkeParameters::AeadId::kChaChaPoly1305)
+          .SetAeadId(HpkeParameters::AeadId::kChaCha20Poly1305)
           .Build();
   ASSERT_THAT(params, IsOk());
 
@@ -383,13 +383,13 @@ TEST(Ed25519PublicKeyTest, DifferentPublicKeyBytesNotEqual) {
   EXPECT_FALSE(*other_public_key == *public_key);
 }
 
-TEST(Ed25519PublicKeyTest, DifferentIdRequirementNotEqual) {
+TEST(HpkePublicKeyTest, DifferentIdRequirementNotEqual) {
   util::StatusOr<HpkeParameters> params =
       HpkeParameters::Builder()
           .SetVariant(HpkeParameters::Variant::kTink)
           .SetKemId(HpkeParameters::KemId::kDhkemX25519HkdfSha256)
           .SetKdfId(HpkeParameters::KdfId::kHkdfSha256)
-          .SetAeadId(HpkeParameters::AeadId::kChaChaPoly1305)
+          .SetAeadId(HpkeParameters::AeadId::kChaCha20Poly1305)
           .Build();
   ASSERT_THAT(params, IsOk());
 

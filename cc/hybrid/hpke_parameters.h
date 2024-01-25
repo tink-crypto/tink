@@ -62,7 +62,7 @@ class HpkeParameters : public HybridParameters {
   enum class AeadId : int {
     kAesGcm128 = 1,
     kAesGcm256 = 2,
-    kChaChaPoly1305 = 3,
+    kChaCha20Poly1305 = 3,
     kDoNotUseInsteadUseDefaultWhenWritingSwitchStatements = 20,
   };
 

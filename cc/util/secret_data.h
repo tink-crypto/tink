@@ -90,7 +90,7 @@ class SecretUniquePtr {
   pointer get() const { return value_.get(); }
   deleter_type& get_deleter() { return value_.get_deleter(); }
   const deleter_type& get_deleter() const { return value_.get_deleter(); }
-  void swap(SecretUniquePtr& other) { value_.swap(other.value_); }
+  void swap(SecretUniquePtr& other) noexcept { value_.swap(other.value_); }
   void reset() { value_.reset(); }
 
   typename std::add_lvalue_reference<T>::type operator*() const {

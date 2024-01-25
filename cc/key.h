@@ -39,6 +39,14 @@ namespace tink {
 // minimum.
 class Key {
  public:
+  Key() = default;
+
+  // Copyable and movable.
+  Key(const Key& other) = default;
+  Key& operator=(const Key& other) = default;
+  Key(Key&& other) = default;
+  Key& operator=(Key&& other) = default;
+
   // Returns a `Parameters` object containing all the information about the key
   // that is not randomly chosen.
   //

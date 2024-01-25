@@ -256,7 +256,7 @@ py_test(
         "//tink/proto:jwt_hmac_py_pb2",
         "//tink/proto:tink_py_pb2",
         requirement("absl-py"),
-        "//tink:cleartext_keyset_handle",
+        "//tink:secret_key_access",
         "//tink:tink_python",
         "//tink/testing:keyset_builder",
     ],
@@ -328,7 +328,7 @@ py_test(
         "//tink/proto:jwt_rsa_ssa_pss_py_pb2",
         "//tink/proto:tink_py_pb2",
         requirement("absl-py"),
-        "//tink:cleartext_keyset_handle",
+        "//tink:secret_key_access",
         "//tink:tink_python",
         "//tink/testing:keyset_builder",
     ],
@@ -339,7 +339,6 @@ py_library(
     srcs = ["_jwk_set_converter.py"],
     srcs_version = "PY3",
     deps = [
-        "//tink:cleartext_keyset_handle",
         "//tink:tink_python",
         "//tink/proto:jwt_ecdsa_py_pb2",
         "//tink/proto:jwt_rsa_ssa_pkcs1_py_pb2",
@@ -356,7 +355,7 @@ py_test(
     deps = [
         ":jwt",
         requirement("absl-py"),
-        "//tink:cleartext_keyset_handle",
+        "//tink:secret_key_access",
         "//tink:tink_python",
     ],
 )

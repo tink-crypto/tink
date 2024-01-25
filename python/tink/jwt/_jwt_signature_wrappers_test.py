@@ -13,9 +13,6 @@
 # limitations under the License.
 """Tests for tink.python.tink.jwt._jwt_signature_wrappers_test."""
 
-import io
-
-
 from absl.testing import absltest
 from absl.testing import parameterized
 
@@ -24,11 +21,10 @@ from tink.proto import jwt_rsa_ssa_pkcs1_pb2
 from tink.proto import jwt_rsa_ssa_pss_pb2
 from tink.proto import tink_pb2
 import tink
-from tink import cleartext_keyset_handle
 from tink import jwt
+from tink import secret_key_access
 from tink.jwt import _json_util
 from tink.jwt import _jwt_format
-
 from tink.testing import keyset_builder
 
 
@@ -41,53 +37,61 @@ def setUpModule():
 
 def _change_key_id(keyset_handle: tink.KeysetHandle) -> tink.KeysetHandle:
   """Changes the key id of the first key and makes it primary."""
-  buffer = io.BytesIO()
-  cleartext_keyset_handle.write(
-      tink.BinaryKeysetWriter(buffer), keyset_handle)
-  keyset = tink_pb2.Keyset.FromString(buffer.getvalue())
+  serialization = tink.proto_keyset_format.serialize(
+      keyset_handle, secret_key_access.TOKEN
+  )
+  keyset = tink_pb2.Keyset.FromString(serialization)
   # XOR the key id with an arbitrary 32-bit string to get a new key id.
   new_key_id = keyset.key[0].key_id ^ 0xdeadbeef
   keyset.key[0].key_id = new_key_id
   keyset.primary_key_id = new_key_id
-  return cleartext_keyset_handle.from_keyset(keyset)
+  return tink.proto_keyset_format.parse(
+      keyset.SerializeToString(), secret_key_access.TOKEN
+  )
 
 
 def _change_output_prefix_to_tink(
     keyset_handle: tink.KeysetHandle) -> tink.KeysetHandle:
   """Changes the output prefix type of the first key to TINK."""
-  buffer = io.BytesIO()
-  cleartext_keyset_handle.write(
-      tink.BinaryKeysetWriter(buffer), keyset_handle)
-  keyset = tink_pb2.Keyset.FromString(buffer.getvalue())
+  serialization = tink.proto_keyset_format.serialize(
+      keyset_handle, secret_key_access.TOKEN
+  )
+  keyset = tink_pb2.Keyset.FromString(serialization)
   keyset.key[0].output_prefix_type = tink_pb2.TINK
-  return cleartext_keyset_handle.from_keyset(keyset)
+  return tink.proto_keyset_format.parse(
+      keyset.SerializeToString(), secret_key_access.TOKEN
+  )
 
 
 def _set_custom_kid(keyset_handle: tink.KeysetHandle,
                     custom_kid: str) -> tink.KeysetHandle:
   """Sets the custom_kid field of the first key."""
-  buffer = io.BytesIO()
-  cleartext_keyset_handle.write(
-      tink.BinaryKeysetWriter(buffer), keyset_handle)
-  keyset = tink_pb2.Keyset.FromString(buffer.getvalue())
+  serialization = tink.proto_keyset_format.serialize(
+      keyset_handle, secret_key_access.TOKEN
+  )
+  keyset = tink_pb2.Keyset.FromString(serialization)
   if keyset.key[0].key_data.type_url.endswith('JwtEcdsaPrivateKey'):
     jwt_ecdsa_key = jwt_ecdsa_pb2.JwtEcdsaPrivateKey.FromString(
         keyset.key[0].key_data.value)
     jwt_ecdsa_key.public_key.custom_kid.value = custom_kid
     keyset.key[0].key_data.value = jwt_ecdsa_key.SerializeToString()
   elif keyset.key[0].key_data.type_url.endswith('JwtRsaSsaPkcs1PrivateKey'):
-    rsa_key = jwt_rsa_ssa_pkcs1_pb2.JwtRsaSsaPkcs1PrivateKey.FromString(
-        keyset.key[0].key_data.value)
-    rsa_key.public_key.custom_kid.value = custom_kid
-    keyset.key[0].key_data.value = rsa_key.SerializeToString()
+    rsa_pkcs1_key = jwt_rsa_ssa_pkcs1_pb2.JwtRsaSsaPkcs1PrivateKey.FromString(
+        keyset.key[0].key_data.value
+    )
+    rsa_pkcs1_key.public_key.custom_kid.value = custom_kid
+    keyset.key[0].key_data.value = rsa_pkcs1_key.SerializeToString()
   elif keyset.key[0].key_data.type_url.endswith('JwtRsaSsaPssPrivateKey'):
-    rsa_key = jwt_rsa_ssa_pss_pb2.JwtRsaSsaPssPrivateKey.FromString(
-        keyset.key[0].key_data.value)
-    rsa_key.public_key.custom_kid.value = custom_kid
-    keyset.key[0].key_data.value = rsa_key.SerializeToString()
+    rsa_pss_key = jwt_rsa_ssa_pss_pb2.JwtRsaSsaPssPrivateKey.FromString(
+        keyset.key[0].key_data.value
+    )
+    rsa_pss_key.public_key.custom_kid.value = custom_kid
+    keyset.key[0].key_data.value = rsa_pss_key.SerializeToString()
   else:
     raise tink.TinkError('unknown key type')
-  return cleartext_keyset_handle.from_keyset(keyset)
+  return tink.proto_keyset_format.parse(
+      keyset.SerializeToString(), secret_key_access.TOKEN
+  )
 
 
 class JwtSignatureWrapperTest(parameterized.TestCase):

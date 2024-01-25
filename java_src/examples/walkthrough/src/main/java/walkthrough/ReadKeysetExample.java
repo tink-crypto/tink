@@ -20,7 +20,7 @@ import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import java.security.GeneralSecurityException;
 
 // [START_EXCLUDE]
-/** Examples to read a keyset from an input stream that was encrypted with a KMS key. */
+/** Example that reads a keyset that was encrypted with a KMS key. */
 final class ReadKeysetExample {
   private ReadKeysetExample() {}
 

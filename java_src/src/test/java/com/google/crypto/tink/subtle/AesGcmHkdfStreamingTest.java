@@ -18,208 +18,102 @@ package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.StreamingAead;
+import com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey;
+import com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingParameters;
+import com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingParameters.HashType;
 import com.google.crypto.tink.testing.StreamingTestUtil;
 import com.google.crypto.tink.testing.StreamingTestUtil.SeekableByteBufferChannel;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.util.SecretBytes;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
+import java.security.GeneralSecurityException;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /**
  * Test for {@code AesGcmHkdfStreaming}-implementation of {@code StreamingAead}-primitive.
- *
- * <p>TODO(b/66921440): adding more tests, including tests for other MAC and HKDF algos.
  */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public class AesGcmHkdfStreamingTest {
   @Rule public TemporaryFolder tmpFolder = new TemporaryFolder();
 
-  private AesGcmHkdfStreaming createAesGcmStreaming() throws Exception {
-    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f");
-    String hkdfAlgo = "HmacSha256";
-    int keySize = 16;
-    int segmentSize = 4096;
-    int offset = 0;
-    return new AesGcmHkdfStreaming(ikm, hkdfAlgo, keySize, segmentSize, offset);
-  }
+  @DataPoints("vanillaImplementationTestVectors")
+  public static AesGcmHkdfStreamingTestVector[] vanillaImplementationTestVectors;
+
+  @DataPoints("randomAccessTestVectors")
+  public static AesGcmHkdfStreamingTestVector[] randomAccessTestVectors;
+
+  @DataPoints("singleBytesTestVectors")
+  public static AesGcmHkdfStreamingTestVector[] singleBytesTestVectors;
+
+  @DataPoints("skipWithStreamTestVectors")
+  public static AesGcmHkdfStreamingTestVector[] skipWithStreamTestVectors;
+
+  private static AesGcmHkdfStreaming defaultAesHkdfStreamingInstance;
 
   /**
    * Encrypts and decrypts some plaintext in a stream and checks that the expected plaintext is
    * returned.
-   *
-   * @param keySizeInBytes the size of the AES key.
-   * @param segmentSize the size of the ciphertext segments.
-   * @param firstSegmentOffset number of bytes prepended to the ciphertext stream.
-   * @param plaintextSize the size of the plaintext
-   * @param chunkSize decryption read chunks of this size.
    */
+  @Theory
   public void testEncryptDecrypt(
-      int keySizeInBytes, int segmentSize, int firstSegmentOffset, int plaintextSize, int chunkSize)
+      @FromDataPoints("vanillaImplementationTestVectors") AesGcmHkdfStreamingTestVector t)
       throws Exception {
-    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
-    AesGcmHkdfStreaming ags =
-        new AesGcmHkdfStreaming(ikm, "HmacSha256", keySizeInBytes, segmentSize,
-            firstSegmentOffset);
-    StreamingTestUtil.testEncryptDecrypt(ags, firstSegmentOffset, plaintextSize, chunkSize);
+    StreamingTestUtil.testEncryptDecrypt(
+        t.directConstructorAgs,
+        t.directConstructorAgs.getFirstSegmentOffset(),
+        t.plaintextSize,
+        t.chunkSize);
   }
 
-  /* The ciphertext is smaller than 1 segment */
-  @Test
-  public void testEncryptDecryptSmall() throws Exception {
-    testEncryptDecrypt(16, 256, 0, 20, 64);
-    testEncryptDecrypt(16, 512, 0, 400, 64);
-  }
-
-  /* The ciphertext has a non-zero offset */
-  @Test
-  public void testEncryptDecryptSmallWithOffset() throws Exception {
-    testEncryptDecrypt(16, 256, 8, 20, 64);
-    testEncryptDecrypt(16, 512, 8, 400, 64);
-  }
-
-  /* Empty plaintext */
-  @Test
-  public void testEncryptDecryptEmpty() throws Exception {
-    testEncryptDecrypt(16, 256, 0, 0, 128);
-    testEncryptDecrypt(16, 256, 8, 0, 128);
-  }
-
-  /* The ciphertext contains more than 1 segment. */
-  @Test
-  public void testEncryptDecryptMedium() throws Exception {
-    testEncryptDecrypt(16, 256, 0, 1024, 128);
-    testEncryptDecrypt(16, 512, 0, 3086, 128);
-    testEncryptDecrypt(32, 1024, 0, 12345, 128);
-  }
-
-  /* During decryption large plaintext chunks are requested */
-  @Test
-  public void testEncryptDecryptLargeChunks() throws Exception {
-    testEncryptDecrypt(16, 256, 0, 1024, 4096);
-    testEncryptDecrypt(16, 512, 0, 5086, 4096);
-    testEncryptDecrypt(32, 1024, 0, 12345, 5000);
-  }
-
-  @Test
-  public void testEncryptDecryptMediumWithOffset() throws Exception {
-    testEncryptDecrypt(16, 256, 8, 1024, 64);
-    testEncryptDecrypt(16, 512, 20, 3086, 256);
-    testEncryptDecrypt(32, 1024, 10, 12345, 5000);
-  }
-
-  /* The ciphertext ends at a segment boundary. */
-  @Test
-  public void testEncryptDecryptLastSegmentFull() throws Exception {
-    testEncryptDecrypt(16, 256, 0, 216, 64);
-    testEncryptDecrypt(16, 256, 16, 200, 256);
-    testEncryptDecrypt(16, 256, 16, 440, 1024);
-  }
-
-  /* During decryption single bytes are requested */
-  @Test
-  public void testEncryptDecryptSingleBytes() throws Exception {
-    testEncryptDecrypt(16, 256, 0, 1024, 1);
-    testEncryptDecrypt(32, 512, 0, 5086, 1);
+  @Theory
+  public void testEncryptDecryptDifferentInstances(
+      @FromDataPoints("vanillaImplementationTestVectors") AesGcmHkdfStreamingTestVector t)
+      throws Exception {
+    assumeTrue(t.keyObjectAgs != null);
+    StreamingTestUtil.testEncryptDecryptDifferentInstances(
+        t.directConstructorAgs,
+        t.keyObjectAgs,
+        t.keyObjectAgs.getFirstSegmentOffset(),
+        t.plaintextSize,
+        t.chunkSize);
   }
 
   /** Encrypt and then decrypt partially, and check that the result is the same. */
+  @Theory
   public void testEncryptDecryptRandomAccess(
-      int keySizeInBytes, int segmentSize, int firstSegmentOffset, int plaintextSize)
+      @FromDataPoints("randomAccessTestVectors") AesGcmHkdfStreamingTestVector t) throws Exception {
+    StreamingTestUtil.testEncryptDecryptRandomAccess(
+        t.directConstructorAgs, t.directConstructorAgs.getFirstSegmentOffset(), t.plaintextSize);
+  }
+
+  @Theory
+  public void testEncryptSingleBytes(
+      @FromDataPoints("singleBytesTestVectors") AesGcmHkdfStreamingTestVector t) throws Exception {
+    StreamingTestUtil.testEncryptSingleBytes(t.directConstructorAgs, t.plaintextSize);
+  }
+
+  @Theory
+  public void testSkipWithStream(
+      @FromDataPoints("skipWithStreamTestVectors") AesGcmHkdfStreamingTestVector t)
       throws Exception {
-    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
-    AesGcmHkdfStreaming ags =
-        new AesGcmHkdfStreaming(ikm, "HmacSha256", keySizeInBytes, segmentSize,
-            firstSegmentOffset);
-    StreamingTestUtil.testEncryptDecryptRandomAccess(ags, firstSegmentOffset, plaintextSize);
-  }
-
-  /* The ciphertext is smaller than 1 segment. */
-  @Test
-  public void testEncryptDecryptRandomAccessSmall() throws Exception {
-    testEncryptDecryptRandomAccess(16, 256, 0, 100);
-    testEncryptDecryptRandomAccess(16, 512, 0, 400);
-  }
-
-  @Test
-  public void testEncryptDecryptRandomAccessSmallWithOffset() throws Exception {
-    testEncryptDecryptRandomAccess(16, 256, 8, 20);
-    testEncryptDecryptRandomAccess(16, 256, 8, 100);
-    testEncryptDecryptRandomAccess(16, 512, 8, 400);
-  }
-
-  /* Empty plaintext */
-  @Test
-  public void testEncryptDecryptRandomAccessEmpty() throws Exception {
-    testEncryptDecryptRandomAccess(16, 256, 0, 0);
-    testEncryptDecryptRandomAccess(16, 256, 8, 0);
-  }
-
-  @Test
-  public void testEncryptDecryptRandomAccessMedium() throws Exception {
-    testEncryptDecryptRandomAccess(16, 256, 0, 2048);
-    testEncryptDecryptRandomAccess(16, 256, 0, 4096);
-    testEncryptDecryptRandomAccess(32, 1024, 0, 12345);
-  }
-
-  @Test
-  public void testEncryptDecryptRandomAccessMediumWithOffset() throws Exception {
-    testEncryptDecryptRandomAccess(16, 256, 8, 2048);
-    testEncryptDecryptRandomAccess(16, 256, 10, 4096);
-    testEncryptDecryptRandomAccess(32, 1024, 20, 12345);
-    testEncryptDecryptRandomAccess(16, 4096, 0, 123456);
-  }
-
-  /* The ciphertext ends at a segment boundary. */
-  @Test
-  public void testEncryptDecryptRandomAccessLastSegmentFull() throws Exception {
-    testEncryptDecryptRandomAccess(16, 256, 0, 216);
-    testEncryptDecryptRandomAccess(16, 256, 16, 200);
-    testEncryptDecryptRandomAccess(16, 256, 16, 440);
-  }
-
-  public void testEncryptSingleBytes(int keySizeInBytes, int plaintextSize) throws Exception {
-    int firstSegmentOffset = 0;
-    int segmentSize = 512;
-    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
-    AesGcmHkdfStreaming ags =
-        new AesGcmHkdfStreaming(ikm, "HmacSha256", keySizeInBytes, segmentSize,
-            firstSegmentOffset);
-    StreamingTestUtil.testEncryptSingleBytes(ags, plaintextSize);
-  }
-
-  /* Encrypt with a stream writing single bytes. */
-  @Test
-  public void testEncryptWithStream() throws Exception {
-    testEncryptSingleBytes(16, 1024);
-    testEncryptSingleBytes(32, 1024);
-    testEncryptSingleBytes(16, 12345);
-    testEncryptSingleBytes(16, 111111);
-  }
-
-  @Test
-  public void testSkipWithStream() throws Exception {
-    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f");
-    int keySize = 16;
-    int tagSize = 12;
-    int segmentSize = 256;
-    int offset = 8;
-    int plaintextSize = 1 << 12;
-    AesCtrHmacStreaming ags =
-        new AesCtrHmacStreaming(
-            ikm, "HmacSha256", keySize, "HmacSha256", tagSize, segmentSize, offset);
-    // Smallest possible chunk size
-    StreamingTestUtil.testSkipWithStream(ags, offset, plaintextSize, 1);
-    // Chunk size < segmentSize
-    StreamingTestUtil.testSkipWithStream(ags, offset, plaintextSize, 37);
-    // Chunk size > segmentSize
-    StreamingTestUtil.testSkipWithStream(ags, offset, plaintextSize, 384);
-    // Chunk size > 3*segmentSize
-    StreamingTestUtil.testSkipWithStream(ags, offset, plaintextSize, 800);
+    StreamingTestUtil.testSkipWithStream(
+        t.directConstructorAgs,
+        t.directConstructorAgs.getFirstSegmentOffset(),
+        t.plaintextSize,
+        t.chunkSize);
   }
 
   /**
@@ -227,40 +121,33 @@ public class AesGcmHkdfStreamingTest {
    */
   @Test
   public void testEncryptDecryptString() throws Exception {
-    StreamingTestUtil.testEncryptDecryptString(createAesGcmStreaming());
+    StreamingTestUtil.testEncryptDecryptString(defaultAesHkdfStreamingInstance);
   }
 
   /** Test encryption with a simulated ciphertext channel, which has only a limited capacity. */
   @Test
   public void testEncryptLimitedCiphertextChannel() throws Exception {
-    int segmentSize = 512;
-    int firstSegmentOffset = 0;
-    int keySizeInBytes = 16;
-    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff");
-    AesGcmHkdfStreaming ags =
-        new AesGcmHkdfStreaming(ikm, "HmacSha256", keySizeInBytes, segmentSize,
-            firstSegmentOffset);
-    int plaintextSize = 1 << 15;
-    int maxChunkSize = 100;
+    // Test vector with a suitably large plaintext size.
+    AesGcmHkdfStreamingTestVector t = singleBytesTestVectors[3];
     byte[] aad = Hex.decode("aabbccddeeff");
-    byte[] plaintext = StreamingTestUtil.generatePlaintext(plaintextSize);
-    int ciphertextLength = (int) ags.expectedCiphertextSize(plaintextSize);
-    ByteBuffer ciphertext = ByteBuffer.allocate(ciphertextLength);
-    WritableByteChannel ctChannel = new SeekableByteBufferChannel(ciphertext, maxChunkSize);
-    WritableByteChannel encChannel = ags.newEncryptingChannel(ctChannel, aad);
+    byte[] plaintext = StreamingTestUtil.generatePlaintext(t.plaintextSize);
+    ByteBuffer ciphertext =
+        ByteBuffer.allocate((int) t.directConstructorAgs.expectedCiphertextSize(t.plaintextSize));
+    WritableByteChannel ctChannel = new SeekableByteBufferChannel(ciphertext, 100);
+    WritableByteChannel encChannel =
+        ((StreamingAead) t.directConstructorAgs).newEncryptingChannel(ctChannel, aad);
     ByteBuffer plaintextBuffer = ByteBuffer.wrap(plaintext);
     int loops = 0;
     while (plaintextBuffer.remaining() > 0) {
       encChannel.write(plaintextBuffer);
       loops += 1;
       if (loops > 100000) {
-        System.out.println(encChannel.toString());
         fail("Too many loops");
       }
     }
     encChannel.close();
     assertFalse(encChannel.isOpen());
-    StreamingTestUtil.isValidCiphertext(ags, plaintext, aad, ciphertext.array());
+    StreamingTestUtil.isValidCiphertext(t.directConstructorAgs, plaintext, aad, ciphertext.array());
   }
 
   // Modifies the ciphertext. Checks that decryption either results in correct plaintext
@@ -274,24 +161,22 @@ public class AesGcmHkdfStreamingTest {
   // (6) modify aad
   @Test
   public void testModifiedCiphertext() throws Exception {
-    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f");
-    int keySize = 16;
-    int segmentSize = 256;
-    int offset = 8;
-    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, "HmacSha256", keySize,
-        segmentSize, offset);
-    StreamingTestUtil.testModifiedCiphertext(ags, segmentSize, offset);
+    // Test vector with a short ikm.
+    AesGcmHkdfStreamingTestVector t = vanillaImplementationTestVectors[0];
+    StreamingTestUtil.testModifiedCiphertext(
+        t.directConstructorAgs,
+        t.directConstructorAgs.getCiphertextSegmentSize(),
+        t.directConstructorAgs.getFirstSegmentOffset());
   }
 
   @Test
   public void testModifiedCiphertextWithSeekableByteChannel() throws Exception {
-    byte[] ikm = Hex.decode("000102030405060708090a0b0c0d0e0f");
-    int keySize = 16;
-    int segmentSize = 256;
-    int offset = 8;
-    AesGcmHkdfStreaming ags = new AesGcmHkdfStreaming(ikm, "HmacSha256", keySize,
-        segmentSize, offset);
-    StreamingTestUtil.testModifiedCiphertextWithSeekableByteChannel(ags, segmentSize, offset);
+    // Test vector with a short ikm.
+    AesGcmHkdfStreamingTestVector t = vanillaImplementationTestVectors[0];
+    StreamingTestUtil.testModifiedCiphertextWithSeekableByteChannel(
+        t.directConstructorAgs,
+        t.directConstructorAgs.getCiphertextSegmentSize(),
+        t.directConstructorAgs.getFirstSegmentOffset());
   }
 
   /** Encrypt and decrypt a long ciphertext. */
@@ -302,7 +187,7 @@ public class AesGcmHkdfStreamingTest {
       return;
     }
     long plaintextSize = (1L << 32) + 1234567;
-    StreamingTestUtil.testEncryptDecryptLong(createAesGcmStreaming(), plaintextSize);
+    StreamingTestUtil.testEncryptDecryptLong(defaultAesHkdfStreamingInstance, plaintextSize);
   }
 
   /** Encrypt some plaintext to a file, then decrypt from the file */
@@ -310,6 +195,465 @@ public class AesGcmHkdfStreamingTest {
   public void testFileEncryption() throws Exception {
     int plaintextSize = 1 << 20;
     StreamingTestUtil.testFileEncryption(
-        createAesGcmStreaming(), tmpFolder.newFile(), plaintextSize);
+        defaultAesHkdfStreamingInstance, tmpFolder.newFile(), plaintextSize);
+  }
+
+  @BeforeClass
+  public static void setUp() throws Exception {
+    vanillaImplementationTestVectors =
+        new AesGcmHkdfStreamingTestVector[] {
+          // Short initial key material.
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 8,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f",
+              /* plaintextSize= */ 20,
+              /* chunkSize= */ 64),
+          // Ciphertext smaller than one segment.
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA1,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 20,
+              /* chunkSize= */ 64),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 512,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 400,
+              /* chunkSize= */ 64),
+          // Ciphertext smaller than one segment, with a non-zero offset.
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 8,
+              HashType.SHA512,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 20,
+              /* chunkSize= */ 64),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 512,
+              /* firstSegmentOffset= */ 8,
+              HashType.SHA1,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 400,
+              /* chunkSize= */ 64),
+          // Empty plaintext.
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 0,
+              /* chunkSize= */ 128),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 8,
+              HashType.SHA512,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 0,
+              /* chunkSize= */ 128),
+          // Ciphertext contains more than one segment.
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA1,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 1024,
+              /* chunkSize= */ 128),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 512,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 3086,
+              /* chunkSize= */ 128),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 32,
+              /* ciphertextSegmentSize= */ 1024,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA512,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 12345,
+              /* chunkSize= */ 128),
+          // During decryption large plaintext chunks are requested.
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA1,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 1024,
+              /* chunkSize= */ 4096),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 512,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 3086,
+              /* chunkSize= */ 4096),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 32,
+              /* ciphertextSegmentSize= */ 1024,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA512,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 12345,
+              /* chunkSize= */ 5000),
+          // Same as above but the offset is non-zero.
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 8,
+              HashType.SHA1,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 1024,
+              /* chunkSize= */ 64),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 512,
+              /* firstSegmentOffset= */ 20,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 3086,
+              /* chunkSize= */ 256),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 32,
+              /* ciphertextSegmentSize= */ 1024,
+              /* firstSegmentOffset= */ 10,
+              HashType.SHA512,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 12345,
+              /* chunkSize= */ 5000),
+          // The ciphertext ends at a segment boundary.
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA1,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 216,
+              /* chunkSize= */ 64),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 16,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 200,
+              /* chunkSize= */ 256),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 16,
+              HashType.SHA512,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 440,
+              /* chunkSize= */ 1024),
+          // During decryption single bytes are requested.
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 1024,
+              /* chunkSize= */ 1),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 512,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA512,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 5086,
+              /* chunkSize= */ 1)
+        };
+    // In the following test vectors the chunk sizes are zeroed since they are not needed for the
+    // test.
+    randomAccessTestVectors =
+        new AesGcmHkdfStreamingTestVector[] {
+          // The ciphertext is smaller than 1 segment.
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 100,
+              /* chunkSize= */ 0),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 512,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 400,
+              /* chunkSize= */ 0),
+          // Same as above with an offset.
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 8,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 20,
+              /* chunkSize= */ 0),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 8,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 100,
+              /* chunkSize= */ 0),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 512,
+              /* firstSegmentOffset= */ 8,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 400,
+              /* chunkSize= */ 0),
+          // Empty plaintext.
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 0,
+              /* chunkSize= */ 0),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 8,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 0,
+              /* chunkSize= */ 0),
+          // Ciphertext contains more than one segment.
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 2048,
+              /* chunkSize= */ 0),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 4096,
+              /* chunkSize= */ 0),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 32,
+              /* ciphertextSegmentSize= */ 1024,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 12345,
+              /* chunkSize= */ 0),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 4096,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 123456,
+              /* chunkSize= */ 0),
+          // Same as above but with an offset.
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 8,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 2048,
+              /* chunkSize= */ 0),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 10,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 4096,
+              /* chunkSize= */ 0),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 32,
+              /* ciphertextSegmentSize= */ 1024,
+              /* firstSegmentOffset= */ 20,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 12345,
+              /* chunkSize= */ 0),
+          // The ciphertext ends at a segment boundary.
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 216,
+              /* chunkSize= */ 0),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 16,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 200,
+              /* chunkSize= */ 0),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 16,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 440,
+              /* chunkSize= */ 0),
+        };
+    singleBytesTestVectors =
+        new AesGcmHkdfStreamingTestVector[] {
+          // Encrypting with the stream writing single bytes. Chunk size isn't used for this test.
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 512,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 1024,
+              /* chunkSize= */ 0),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 32,
+              /* ciphertextSegmentSize= */ 512,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 1024,
+              /* chunkSize= */ 0),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 512,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 12345,
+              /* chunkSize= */ 0),
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 512,
+              /* firstSegmentOffset= */ 0,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f00112233445566778899aabbccddeeff",
+              /* plaintextSize= */ 111111,
+              /* chunkSize= */ 0),
+        };
+    skipWithStreamTestVectors =
+        new AesGcmHkdfStreamingTestVector[] {
+          // Smallest chunk size.
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 8,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f",
+              /* plaintextSize= */ 4096,
+              /* chunkSize= */ 1),
+          // Chunk size < segmentSize.
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 8,
+              HashType.SHA1,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f",
+              /* plaintextSize= */ 4096,
+              /* chunkSize= */ 37),
+          // Chunk size > segmentSize.
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 8,
+              HashType.SHA512,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f",
+              /* plaintextSize= */ 4096,
+              /* chunkSize= */ 384),
+          // Chunk size > 3*segmentSize.
+          new AesGcmHkdfStreamingTestVector(
+              /* keySizeInBytes= */ 16,
+              /* ciphertextSegmentSize= */ 256,
+              /* firstSegmentOffset= */ 8,
+              HashType.SHA256,
+              /* ikm= */ "000102030405060708090a0b0c0d0e0f",
+              /* plaintextSize= */ 4096,
+              /* chunkSize= */ 800),
+        };
+    defaultAesHkdfStreamingInstance =
+        new AesGcmHkdfStreaming(
+            Hex.decode("000102030405060708090a0b0c0d0e0f"), "HmacSha256", 16, 4096, 0);
+  }
+
+  private static final class AesGcmHkdfStreamingTestVector {
+    final AesGcmHkdfStreaming directConstructorAgs;
+    final AesGcmHkdfStreaming keyObjectAgs;
+    final int plaintextSize;
+    final int chunkSize;
+
+    private AesGcmHkdfStreamingTestVector(
+        int keySizeInBytes,
+        int ciphertextSegmentSize,
+        int firstSegmentOffset,
+        HashType hashType,
+        String ikm,
+        int plaintextSize,
+        int chunkSize)
+        throws GeneralSecurityException {
+      String hkdfAlgString = "";
+      if (hashType.equals(HashType.SHA1)) {
+        hkdfAlgString = "HmacSha1";
+      } else if (hashType.equals(HashType.SHA256)) {
+        hkdfAlgString = "HmacSha256";
+      } else if (hashType.equals(HashType.SHA512)) {
+        hkdfAlgString = "HmacSha512";
+      }
+      this.directConstructorAgs =
+          new AesGcmHkdfStreaming(
+              Hex.decode(ikm),
+              hkdfAlgString,
+              keySizeInBytes,
+              ciphertextSegmentSize,
+              firstSegmentOffset);
+      if (firstSegmentOffset != 0) {
+        this.keyObjectAgs = null;
+      } else {
+        AesGcmHkdfStreamingKey aesGcmHkdfStreamingKey =
+            AesGcmHkdfStreamingKey.create(
+                AesGcmHkdfStreamingParameters.builder()
+                    .setDerivedAesGcmKeySizeBytes(keySizeInBytes)
+                    .setKeySizeBytes(Hex.decode(ikm).length)
+                    .setCiphertextSegmentSizeBytes(ciphertextSegmentSize)
+                    .setHkdfHashType(hashType)
+                    .build(),
+                SecretBytes.copyFrom(Hex.decode(ikm), InsecureSecretKeyAccess.get()));
+        this.keyObjectAgs =
+            (AesGcmHkdfStreaming) AesGcmHkdfStreaming.create(aesGcmHkdfStreamingKey);
+      }
+      this.plaintextSize = plaintextSize;
+      this.chunkSize = chunkSize;
+    }
   }
 }

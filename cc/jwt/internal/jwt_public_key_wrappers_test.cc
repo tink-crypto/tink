@@ -119,7 +119,8 @@ TEST_F(JwtPublicKeyWrappersTest, CannotWrapPrimitivesFromNonRawOrTinkKeys) {
   KeyTemplate tink_key_template = CreateTemplate(OutputPrefixType::LEGACY);
 
   util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
-      KeysetHandle::GenerateNew(tink_key_template);
+      KeysetHandle::GenerateNew(tink_key_template,
+                                KeyGenConfigGlobalRegistry());
   ASSERT_THAT(keyset_handle, IsOk());
   EXPECT_FALSE(
       (*keyset_handle)
@@ -128,7 +129,7 @@ TEST_F(JwtPublicKeyWrappersTest, CannotWrapPrimitivesFromNonRawOrTinkKeys) {
           .ok());
 
   util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
-      (*keyset_handle)->GetPublicKeysetHandle();
+      (*keyset_handle)->GetPublicKeysetHandle(KeyGenConfigGlobalRegistry());
   ASSERT_THAT(public_handle, IsOk());
   EXPECT_FALSE((*public_handle)
                    ->GetPrimitive<crypto::tink::JwtPublicKeyVerify>(
@@ -140,7 +141,7 @@ TEST_F(JwtPublicKeyWrappersTest, CannotWrapPrimitivesFromNonRawOrTinkKeys) {
 TEST_F(JwtPublicKeyWrappersTest, GenerateRawSignVerifySuccess) {
   KeyTemplate key_template = CreateTemplate(OutputPrefixType::RAW);
   util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
-      KeysetHandle::GenerateNew(key_template);
+      KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry());
   ASSERT_THAT(handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeySign>> jwt_sign =
       (*handle)->GetPrimitive<crypto::tink::JwtPublicKeySign>(
@@ -148,7 +149,7 @@ TEST_F(JwtPublicKeyWrappersTest, GenerateRawSignVerifySuccess) {
   EXPECT_THAT(jwt_sign, IsOk());
 
   util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
-      (*handle)->GetPublicKeysetHandle();
+      (*handle)->GetPublicKeysetHandle(KeyGenConfigGlobalRegistry());
   EXPECT_THAT(public_handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> jwt_verify =
       (*public_handle)
@@ -201,7 +202,7 @@ TEST_F(JwtPublicKeyWrappersTest, GenerateRawSignVerifySuccess) {
 TEST_F(JwtPublicKeyWrappersTest, GenerateTinkSignVerifySuccess) {
   KeyTemplate key_template = CreateTemplate(OutputPrefixType::TINK);
   util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
-      KeysetHandle::GenerateNew(key_template);
+      KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry());
   ASSERT_THAT(handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeySign>> jwt_sign =
       (*handle)->GetPrimitive<crypto::tink::JwtPublicKeySign>(
@@ -209,7 +210,7 @@ TEST_F(JwtPublicKeyWrappersTest, GenerateTinkSignVerifySuccess) {
   EXPECT_THAT(jwt_sign, IsOk());
 
   util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
-      (*handle)->GetPublicKeysetHandle();
+      (*handle)->GetPublicKeysetHandle(KeyGenConfigGlobalRegistry());
   EXPECT_THAT(public_handle, IsOk());
   util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> jwt_verify =
       (*public_handle)
@@ -280,7 +281,7 @@ TEST_F(JwtPublicKeyWrappersTest, KeyRotation) {
             ConfigGlobalRegistry());
     ASSERT_THAT(jwt_sign1, IsOk());
     util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle1 =
-        handle1->GetPublicKeysetHandle();
+        handle1->GetPublicKeysetHandle(KeyGenConfigGlobalRegistry());
     EXPECT_THAT(public_handle1, IsOk());
     util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> jwt_verify1 =
         (*public_handle1)
@@ -296,7 +297,7 @@ TEST_F(JwtPublicKeyWrappersTest, KeyRotation) {
             ConfigGlobalRegistry());
     ASSERT_THAT(jwt_sign2, IsOk());
     util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle2 =
-        handle2->GetPublicKeysetHandle();
+        handle2->GetPublicKeysetHandle(KeyGenConfigGlobalRegistry());
     EXPECT_THAT(public_handle2, IsOk());
     util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> jwt_verify2 =
         (*public_handle2)
@@ -311,7 +312,7 @@ TEST_F(JwtPublicKeyWrappersTest, KeyRotation) {
             ConfigGlobalRegistry());
     ASSERT_THAT(jwt_sign3, IsOk());
     util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle3 =
-        handle3->GetPublicKeysetHandle();
+        handle3->GetPublicKeysetHandle(KeyGenConfigGlobalRegistry());
     EXPECT_THAT(public_handle3, IsOk());
     util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> jwt_verify3 =
         (*public_handle3)
@@ -326,7 +327,7 @@ TEST_F(JwtPublicKeyWrappersTest, KeyRotation) {
             ConfigGlobalRegistry());
     ASSERT_THAT(jwt_sign4, IsOk());
     util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle4 =
-        handle4->GetPublicKeysetHandle();
+        handle4->GetPublicKeysetHandle(KeyGenConfigGlobalRegistry());
     EXPECT_THAT(public_handle4, IsOk());
     util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> jwt_verify4 =
         (*public_handle4)

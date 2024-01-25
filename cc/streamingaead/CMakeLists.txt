@@ -1,5 +1,7 @@
 tink_module(streamingaead)
 
+add_subdirectory(internal)
+
 tink_cc_library(
   NAME streaming_aead_wrapper
   SRCS
@@ -171,6 +173,7 @@ tink_cc_library(
     tink::streamingaead::shared_random_access_stream
     absl::memory
     absl::status
+    absl::string_view
     absl::synchronization
     tink::core::primitive_set
     tink::core::random_access_stream
@@ -179,6 +182,28 @@ tink_cc_library(
     tink::util::errors
     tink::util::status
     tink::util::statusor
+)
+
+tink_cc_library(
+  NAME config_v0
+  SRCS
+    config_v0.cc
+    config_v0.h
+  DEPS
+    absl::check
+    tink::core::configuration
+    tink::streamingaead::internal::config_v0
+)
+
+tink_cc_library(
+  NAME key_gen_config_v0
+  SRCS
+    key_gen_config_v0.cc
+    key_gen_config_v0.h
+  DEPS
+    absl::check
+    tink::core::key_gen_configuration
+    tink::streamingaead::internal::key_gen_config_v0
 )
 
 # tests
@@ -202,6 +227,7 @@ tink_cc_test(
     tink::core::proto_keyset_format
     tink::core::random_access_stream
     tink::core::streaming_aead
+    tink::config::global_registry
     tink::internal::test_random_access_stream
     tink::subtle::random
     tink::subtle::streaming_aead_test_util
@@ -367,8 +393,10 @@ tink_cc_test(
     tink::internal::test_random_access_stream
     tink::subtle::random
     tink::subtle::test_util
+    tink::util::buffer
     tink::util::ostream_output_stream
     tink::util::status
+    tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
@@ -405,4 +433,26 @@ tink_cc_test(
     tink::core::random_access_stream
     tink::internal::test_random_access_stream
     tink::subtle::random
+)
+
+tink_cc_test(
+  NAME config_v0_test
+  SRCS
+    config_v0_test.cc
+  DEPS
+    tink::streamingaead::config_v0
+    tink::streamingaead::key_gen_config_v0
+    tink::streamingaead::streaming_aead_key_templates
+    gmock
+    absl::memory
+    tink::core::input_stream
+    tink::core::keyset_handle
+    tink::core::output_stream
+    tink::core::streaming_aead
+    tink::subtle::test_util
+    tink::util::istream_input_stream
+    tink::util::ostream_output_stream
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::proto::tink_cc_proto
 )

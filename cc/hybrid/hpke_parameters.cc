@@ -63,7 +63,7 @@ util::StatusOr<HpkeParameters> HpkeParameters::Builder::Build() {
   }
 
   static const std::set<AeadId>* supported_aead_ids = new std::set<AeadId>(
-      {AeadId::kAesGcm128, AeadId::kAesGcm256, AeadId::kChaChaPoly1305});
+      {AeadId::kAesGcm128, AeadId::kAesGcm256, AeadId::kChaCha20Poly1305});
   if (supported_aead_ids->find(aead_id_) == supported_aead_ids->end()) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Cannot create HPKE parameters with unknown AEAD ID.");

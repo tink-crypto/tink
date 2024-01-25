@@ -35,7 +35,7 @@ const (
 )
 
 var (
-	credFile = "tink_go/testdata/gcp/credential.json"
+	credFile = "testdata/gcp/credential.json"
 )
 
 func init() {
@@ -49,9 +49,13 @@ func TestGetAeadWithEnvelopeAead(t *testing.T) {
 	if !ok {
 		t.Skip("TEST_SRCDIR not set")
 	}
+	workspaceDir, ok := os.LookupEnv("TEST_WORKSPACE")
+	if !ok {
+		t.Skip("TEST_WORKSPACE not set")
+	}
 	ctx := context.Background()
 	gcpClient, err := gcpkms.NewClientWithOptions(
-		ctx, keyURI, option.WithCredentialsFile(filepath.Join(srcDir, credFile)))
+		ctx, keyURI, option.WithCredentialsFile(filepath.Join(srcDir, workspaceDir, credFile)))
 	if err != nil {
 		t.Fatalf("gcpkms.NewClientWithOptions() err = %q, want nil", err)
 	}

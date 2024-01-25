@@ -24,10 +24,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/google/tink/go/integration/awskms/internal/fakeawskms"
-	"github.com/google/tink/go/core/registry"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/integration/awskms/internal/fakeawskms"
 )
 
 func TestNewClientWithOptions_URIPrefix(t *testing.T) {
@@ -35,9 +35,13 @@ func TestNewClientWithOptions_URIPrefix(t *testing.T) {
 	if !ok {
 		t.Skip("TEST_SRCDIR not set")
 	}
+	workspaceDir, ok := os.LookupEnv("TEST_WORKSPACE")
+	if !ok {
+		t.Skip("TEST_WORKSPACE not set")
+	}
 
 	// Necessary for testing deprecated factory functions.
-	credFile := filepath.Join(srcDir, "tink_go/testdata/aws/credentials.csv")
+	credFile := filepath.Join(srcDir, workspaceDir, "testdata/aws/credentials.csv")
 	keyARN := "arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
 	fakekms, err := fakeawskms.New([]string{keyARN})
 	if err != nil {
@@ -114,6 +118,10 @@ func TestNewClientWithOptions_WithCredentialPath(t *testing.T) {
 	if !ok {
 		t.Skip("TEST_SRCDIR not set")
 	}
+	workspaceDir, ok := os.LookupEnv("TEST_WORKSPACE")
+	if !ok {
+		t.Skip("TEST_WORKSPACE not set")
+	}
 
 	uriPrefix := "aws-kms://arn:aws-us-gov:kms:us-gov-east-1:235739564943:key/"
 
@@ -124,17 +132,17 @@ func TestNewClientWithOptions_WithCredentialPath(t *testing.T) {
 	}{
 		{
 			name:     "valid CSV credentials file",
-			credFile: filepath.Join(srcDir, "tink_go/testdata/aws/credentials.csv"),
+			credFile: filepath.Join(srcDir, workspaceDir, "testdata/aws/credentials.csv"),
 			valid:    true,
 		},
 		{
 			name:     "valid INI credentials file",
-			credFile: filepath.Join(srcDir, "tink_go/testdata/aws/credentials.cred"),
+			credFile: filepath.Join(srcDir, workspaceDir, "testdata/aws/credentials.cred"),
 			valid:    true,
 		},
 		{
 			name:     "invalid credentials file",
-			credFile: filepath.Join(srcDir, "tink_go/testdata/aws/access_keys_bad.csv"),
+			credFile: filepath.Join(srcDir, workspaceDir, "testdata/aws/access_keys_bad.csv"),
 			valid:    false,
 		},
 	}
@@ -374,13 +382,13 @@ func TestEncryptionContextName_defaultEncryptionContextName(t *testing.T) {
 	}
 
 	tests := []struct {
-		name string
-		client		func(t *testing.T) registry.KMSClient
+		name            string
+		client          func(t *testing.T) registry.KMSClient
 		wantContextName string
 	}{
 		{
 			name: "NewClientWithOptions",
-			client: func(t *testing.T) registry.KMSClient{
+			client: func(t *testing.T) registry.KMSClient {
 				t.Helper()
 				c, err := NewClientWithOptions(keyURI, WithKMS(fakekms))
 				if err != nil {
@@ -394,7 +402,7 @@ func TestEncryptionContextName_defaultEncryptionContextName(t *testing.T) {
 		// Test deprecated factory function.
 		{
 			name: "NewClientWithKMS",
-			client: func(t *testing.T) registry.KMSClient{
+			client: func(t *testing.T) registry.KMSClient {
 				t.Helper()
 				c, err := NewClientWithKMS(keyURI, fakekms)
 				if err != nil {

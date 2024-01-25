@@ -111,7 +111,6 @@ public final class GcpKmsClientTest {
         "gcp-kms://projects/tink-test/locations/global/keyRings/unit-test/cryptoKeys/aead-key";
 
     KmsClient client = new GcpKmsClient(keyUri).withCloudKms(new FakeCloudKms(asList(keyId)));
-
     Aead kmsEnvelopeAead =
         KmsEnvelopeAead.create(
             PredefinedAeadParameters.AES128_CTR_HMAC_SHA256, client.getAead(keyUri));
@@ -261,7 +260,8 @@ public final class GcpKmsClientTest {
     byte[] ciphertext = kmsAead.encrypt(plaintext, associatedData);
 
     Aead kmsAeadWithInvalidUri = client.getAead(invalidUri);
-    assertThrows(IllegalArgumentException.class,
+    assertThrows(
+        IllegalArgumentException.class,
         () -> kmsAeadWithInvalidUri.decrypt(ciphertext, associatedData));
   }
 }

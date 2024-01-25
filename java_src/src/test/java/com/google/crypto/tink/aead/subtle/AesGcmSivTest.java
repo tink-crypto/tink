@@ -16,24 +16,33 @@
 
 package com.google.crypto.tink.aead.subtle;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.aead.AesGcmSivKey;
+import com.google.crypto.tink.aead.AesGcmSivParameters;
+import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.TestUtil.BytesMutation;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
 import java.security.Security;
 import java.util.Arrays;
 import java.util.HashSet;
+import javax.annotation.Nullable;
 import org.conscrypt.Conscrypt;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,6 +61,9 @@ public class AesGcmSivTest {
 
   @Before
   public void setUpConscrypt() throws Exception {
+    if (TestUtil.isAndroid()) {
+      return;
+    }
     try {
       Conscrypt.checkAvailability();
       Security.addProvider(Conscrypt.newProvider());
@@ -62,6 +74,9 @@ public class AesGcmSivTest {
 
   @Test
   public void testEncryptDecrypt() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
     byte[] aad = new byte[] {1, 2, 3};
     for (int keySize : keySizeInBytes) {
       byte[] key = Random.randBytes(keySize);
@@ -99,6 +114,9 @@ public class AesGcmSivTest {
 
   @Test
   public void testModifyCiphertext() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
     byte[] aad = Random.randBytes(33);
     byte[] key = Random.randBytes(16);
     byte[] message = Random.randBytes(32);
@@ -133,6 +151,9 @@ public class AesGcmSivTest {
 
   @Test
   public void testWycheproofVectors() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
     JsonObject json =
         WycheproofTestUtil.readJson("../wycheproof/testvectors/aes_gcm_siv_test.json");
     int errors = 0;
@@ -200,6 +221,9 @@ public class AesGcmSivTest {
 
   @Test
   public void testNullPlaintextOrCiphertext() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
     for (int keySize : keySizeInBytes) {
       AesGcmSiv gcm = new AesGcmSiv(Random.randBytes(keySize));
       byte[] aad = new byte[] {1, 2, 3};
@@ -228,6 +252,9 @@ public class AesGcmSivTest {
 
   @Test
   public void testEmptyAssociatedData() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
     byte[] aad = new byte[0];
     for (int keySize : keySizeInBytes) {
       byte[] key = Random.randBytes(keySize);
@@ -270,6 +297,9 @@ public class AesGcmSivTest {
    * multiple ciphertexts of the same message are distinct.
    */
   public void testRandomNonce() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
     final int samples = 1 << 17;
     byte[] key = Random.randBytes(16);
     byte[] message = new byte[0];
@@ -282,5 +312,135 @@ public class AesGcmSivTest {
       assertFalse(ciphertexts.contains(ctHex));
       ciphertexts.add(ctHex);
     }
+  }
+
+  @Test
+  public void testCreate_encryptAndDecryptFailBeforeAndroid30() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeNotNull(apiLevel);
+    Assume.assumeTrue(apiLevel < 30);
+
+    // Use an AES GCM test vector from AesGcmJceTest.testWithAesGcmKey_noPrefix_works
+    byte[] keyBytes = Hex.decode("5b9604fe14eadba931b0ccf34843dab9");
+    AesGcmSivParameters parameters =
+        AesGcmSivParameters.builder()
+            .setKeySizeBytes(16)
+            .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+            .build();
+    AesGcmSivKey key =
+        AesGcmSivKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(SecretBytes.copyFrom(keyBytes, InsecureSecretKeyAccess.get()))
+            .build();
+    Aead aead = AesGcmSiv.create(key);
+
+    assertThrows(GeneralSecurityException.class, () -> aead.encrypt(new byte[] {}, new byte[] {}));
+    byte[] fixedCiphertext = Hex.decode("c3561ce7f48b8a6b9b8d5ef957d2e512368f7da837bcf2aeebe176e3");
+    assertThrows(
+        GeneralSecurityException.class, () -> aead.decrypt(fixedCiphertext, new byte[] {}));
+  }
+
+  @Test
+  public void testWithAesGcmSivKey_noPrefix_works() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
+    // Test vector draft-irtf-cfrg-gcmsiv-09 in Wycheproof
+    byte[] plaintext = Hex.decode("7a806c");
+    byte[] associatedData = Hex.decode("46bb91c3c5");
+    byte[] keyBytes = Hex.decode("36864200e0eaf5284d884a0e77d31646");
+    AesGcmSivParameters parameters =
+        AesGcmSivParameters.builder()
+            .setKeySizeBytes(16)
+            .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+            .build();
+    AesGcmSivKey key =
+        AesGcmSivKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(SecretBytes.copyFrom(keyBytes, InsecureSecretKeyAccess.get()))
+            .build();
+    Aead aead = AesGcmSiv.create(key);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    assertThat(ciphertext).hasLength(/* length= */ 3 + /* ivSize= */ 12 + /* tagSize= */ 16);
+
+    assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+
+    byte[] fixedCiphertext =
+        Hex.decode("bae8e37fc83441b16034566baf60eb711bd85bc1e4d3e0a462e074eea428a8");
+    assertThat(aead.decrypt(fixedCiphertext, associatedData)).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void testWithAesGcmSivKey_tinkPrefix_works() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
+    // Test vector draft-irtf-cfrg-gcmsiv-09 in Wycheproof
+    byte[] plaintext = Hex.decode("7a806c");
+    byte[] associatedData = Hex.decode("46bb91c3c5");
+    byte[] keyBytes = Hex.decode("36864200e0eaf5284d884a0e77d31646");
+    AesGcmSivParameters parameters =
+        AesGcmSivParameters.builder()
+            .setKeySizeBytes(16)
+            .setVariant(AesGcmSivParameters.Variant.TINK)
+            .build();
+    AesGcmSivKey key =
+        AesGcmSivKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(SecretBytes.copyFrom(keyBytes, InsecureSecretKeyAccess.get()))
+            .setIdRequirement(0x87654321)
+            .build();
+    Aead aead = AesGcmSiv.create(key);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    assertThat(ciphertext)
+        .hasLength(
+            5 // prefix
+                + 3 // plaintext length
+                + 12 // iv size
+                + 16 // tag size
+            );
+
+    assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+
+    byte[] fixedCiphertext =
+        Hex.decode("0187654321bae8e37fc83441b16034566baf60eb711bd85bc1e4d3e0a462e074eea428a8");
+    assertThat(aead.decrypt(fixedCiphertext, associatedData)).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void testWithAesGcmSivKey_crunchyPrefix_works() throws Exception {
+    @Nullable Integer apiLevel = Util.getAndroidApiLevel();
+    Assume.assumeTrue(apiLevel == null || apiLevel >= 30); // Run the test on java and android >= 30
+
+    // Test vector draft-irtf-cfrg-gcmsiv-09 in Wycheproof
+    byte[] plaintext = Hex.decode("7a806c");
+    byte[] associatedData = Hex.decode("46bb91c3c5");
+    byte[] keyBytes = Hex.decode("36864200e0eaf5284d884a0e77d31646");
+    AesGcmSivParameters parameters =
+        AesGcmSivParameters.builder()
+            .setKeySizeBytes(16)
+            .setVariant(AesGcmSivParameters.Variant.CRUNCHY)
+            .build();
+    AesGcmSivKey key =
+        AesGcmSivKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(SecretBytes.copyFrom(keyBytes, InsecureSecretKeyAccess.get()))
+            .setIdRequirement(0x87654321)
+            .build();
+    Aead aead = AesGcmSiv.create(key);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    assertThat(ciphertext)
+        .hasLength(
+            5 // prefix
+                + 3 // plaintext length
+                + 12 // iv size
+                + 16 // tag size
+            );
+
+    assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+
+    byte[] fixedCiphertext =
+        Hex.decode("0087654321bae8e37fc83441b16034566baf60eb711bd85bc1e4d3e0a462e074eea428a8");
+    assertThat(aead.decrypt(fixedCiphertext, associatedData)).isEqualTo(plaintext);
   }
 }

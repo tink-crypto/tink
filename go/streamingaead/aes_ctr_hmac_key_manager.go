@@ -61,12 +61,12 @@ func (km *aesCTRHMACKeyManager) Primitive(serializedKey []byte) (interface{}, er
 		return nil, err
 	}
 	p, err := subtle.NewAESCTRHMAC(
-		key.KeyValue,
-		key.Params.HkdfHashType.String(),
-		int(key.Params.DerivedKeySize),
-		key.Params.HmacParams.Hash.String(),
-		int(key.Params.HmacParams.TagSize),
-		int(key.Params.CiphertextSegmentSize),
+		key.GetKeyValue(),
+		key.GetParams().GetHkdfHashType().String(),
+		int(key.GetParams().GetDerivedKeySize()),
+		key.GetParams().GetHmacParams().GetHash().String(),
+		int(key.GetParams().GetHmacParams().GetTagSize()),
+		int(key.GetParams().GetCiphertextSegmentSize()),
 		// No first segment offset.
 		0)
 	if err != nil {
@@ -90,7 +90,7 @@ func (km *aesCTRHMACKeyManager) NewKey(serializedKeyFormat []byte) (proto.Messag
 	}
 	return &chpb.AesCtrHmacStreamingKey{
 		Version:  aesCTRHMACKeyVersion,
-		KeyValue: random.GetRandomBytes(keyFormat.KeySize),
+		KeyValue: random.GetRandomBytes(keyFormat.GetKeySize()),
 		Params:   keyFormat.Params,
 	}, nil
 }
@@ -127,14 +127,14 @@ func (km *aesCTRHMACKeyManager) TypeURL() string {
 
 // validateKey validates the given AESCTRHMACKey.
 func (km *aesCTRHMACKeyManager) validateKey(key *chpb.AesCtrHmacStreamingKey) error {
-	if err := keyset.ValidateKeyVersion(key.Version, aesCTRHMACKeyVersion); err != nil {
+	if err := keyset.ValidateKeyVersion(key.GetVersion(), aesCTRHMACKeyVersion); err != nil {
 		return err
 	}
-	keySize := uint32(len(key.KeyValue))
+	keySize := uint32(len(key.GetKeyValue()))
 	if err := subtleaead.ValidateAESKeySize(keySize); err != nil {
 		return err
 	}
-	if err := km.validateParams(key.Params); err != nil {
+	if err := km.validateParams(key.GetParams()); err != nil {
 		return err
 	}
 	return nil
@@ -145,7 +145,7 @@ func (km *aesCTRHMACKeyManager) validateKeyFormat(format *chpb.AesCtrHmacStreami
 	if err := subtleaead.ValidateAESKeySize(format.KeySize); err != nil {
 		return err
 	}
-	if err := km.validateParams(format.Params); err != nil {
+	if err := km.validateParams(format.GetParams()); err != nil {
 		return err
 	}
 	return nil
@@ -153,24 +153,24 @@ func (km *aesCTRHMACKeyManager) validateKeyFormat(format *chpb.AesCtrHmacStreami
 
 // validateParams validates the given AESCTRHMACStreamingParams.
 func (km *aesCTRHMACKeyManager) validateParams(params *chpb.AesCtrHmacStreamingParams) error {
-	if err := subtleaead.ValidateAESKeySize(params.DerivedKeySize); err != nil {
+	if err := subtleaead.ValidateAESKeySize(params.GetDerivedKeySize()); err != nil {
 		return err
 	}
-	if params.HkdfHashType != commonpb.HashType_SHA1 && params.HkdfHashType != commonpb.HashType_SHA256 && params.HkdfHashType != commonpb.HashType_SHA512 {
-		return fmt.Errorf("Invalid HKDF hash type (%s)", params.HkdfHashType)
+	if params.GetHkdfHashType() != commonpb.HashType_SHA1 && params.GetHkdfHashType() != commonpb.HashType_SHA256 && params.GetHkdfHashType() != commonpb.HashType_SHA512 {
+		return fmt.Errorf("Invalid HKDF hash type (%s)", params.GetHkdfHashType())
 	}
-	if params.HmacParams.Hash != commonpb.HashType_SHA1 && params.HmacParams.Hash != commonpb.HashType_SHA256 && params.HmacParams.Hash != commonpb.HashType_SHA512 {
-		return fmt.Errorf("Invalid tag algorithm (%s)", params.HmacParams.Hash)
+	if params.GetHmacParams().GetHash() != commonpb.HashType_SHA1 && params.GetHmacParams().GetHash() != commonpb.HashType_SHA256 && params.GetHmacParams().GetHash() != commonpb.HashType_SHA512 {
+		return fmt.Errorf("Invalid tag algorithm (%s)", params.GetHmacParams().GetHash())
 	}
-	hmacHash := commonpb.HashType_name[int32(params.HmacParams.Hash)]
-	if err := subtlemac.ValidateHMACParams(hmacHash, subtle.AESCTRHMACKeySizeInBytes, params.HmacParams.TagSize); err != nil {
+	hmacHash := commonpb.HashType_name[int32(params.GetHmacParams().GetHash())]
+	if err := subtlemac.ValidateHMACParams(hmacHash, subtle.AESCTRHMACKeySizeInBytes, params.GetHmacParams().GetTagSize()); err != nil {
 		return err
 	}
-	minSegmentSize := params.DerivedKeySize + subtle.AESCTRHMACNoncePrefixSizeInBytes + params.HmacParams.TagSize + 2
-	if params.CiphertextSegmentSize < minSegmentSize {
+	minSegmentSize := params.GetDerivedKeySize() + subtle.AESCTRHMACNoncePrefixSizeInBytes + params.GetHmacParams().GetTagSize() + 2
+	if params.GetCiphertextSegmentSize() < minSegmentSize {
 		return fmt.Errorf("ciphertext segment size must be at least (derivedKeySize + noncePrefixInBytes + tagSizeInBytes + 2)")
 	}
-	if params.CiphertextSegmentSize > 0x7fffffff {
+	if params.GetCiphertextSegmentSize() > 0x7fffffff {
 		return fmt.Errorf("ciphertext segment size must be at most 2^31 - 1")
 	}
 	return nil

@@ -39,7 +39,8 @@ StatusOr<std::unique_ptr<KeysetHandle>> CreateAead128GcmKeyset() {
   KeyTemplate key_template = crypto::tink::AeadKeyTemplates::Aes128Gcm();
   // This will generate a new keyset with only *one* key and return a keyset
   // handle to it.
-  return KeysetHandle::GenerateNew(key_template);
+  return KeysetHandle::GenerateNew(key_template,
+                                   crypto::tink::KeyGenConfigGlobalRegistry());
 }
 
 }  // namespace tink_walkthrough

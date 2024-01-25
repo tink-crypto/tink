@@ -52,7 +52,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * single {@link com.google.crypto.tink.proto.AesGcmKey}, one can do:
  *
  * <pre>{@code
- * Config.register(AeadConfig.TINK_1_1_0);
+ * AeadConfig.register();
  * KeysetHandle handle = KeysetHandle.generateNew(AeadKeyTemplates.AES128_GCM);
  * Aead aead = handle.getPrimitive(Aead.class);
  * }</pre>
@@ -148,7 +148,7 @@ public final class AeadKeyTemplates {
    */
   public static final KeyTemplate CHACHA20_POLY1305 =
       KeyTemplate.newBuilder()
-          .setTypeUrl(new ChaCha20Poly1305KeyManager().getKeyType())
+          .setTypeUrl(ChaCha20Poly1305KeyManager.getKeyType())
           .setOutputPrefixType(OutputPrefixType.TINK)
           .build();
 
@@ -160,7 +160,7 @@ public final class AeadKeyTemplates {
    */
   public static final KeyTemplate XCHACHA20_POLY1305 =
       KeyTemplate.newBuilder()
-          .setTypeUrl(new XChaCha20Poly1305KeyManager().getKeyType())
+          .setTypeUrl(XChaCha20Poly1305KeyManager.getKeyType())
           .setOutputPrefixType(OutputPrefixType.TINK)
           .build();
 
@@ -174,7 +174,7 @@ public final class AeadKeyTemplates {
         .build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(new AesGcmKeyManager().getKeyType())
+        .setTypeUrl(AesGcmKeyManager.getKeyType())
         .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }
@@ -190,7 +190,7 @@ public final class AeadKeyTemplates {
         .build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(new AesEaxKeyManager().getKeyType())
+        .setTypeUrl(AesEaxKeyManager.getKeyType())
         .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }
@@ -216,7 +216,7 @@ public final class AeadKeyTemplates {
         .build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(new AesCtrHmacAeadKeyManager().getKeyType())
+        .setTypeUrl(AesCtrHmacAeadKeyManager.getKeyType())
         .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }
@@ -237,7 +237,7 @@ public final class AeadKeyTemplates {
         .build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(new KmsEnvelopeAeadKeyManager().getKeyType())
+        .setTypeUrl(KmsEnvelopeAeadKeyManager.getKeyType())
         .setOutputPrefixType(OutputPrefixType.RAW)
         .build();
   }

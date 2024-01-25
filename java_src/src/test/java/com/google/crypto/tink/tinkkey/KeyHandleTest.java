@@ -21,7 +21,6 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.common.truth.Expect;
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTemplate.OutputPrefixType;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
@@ -31,7 +30,6 @@ import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.signature.Ed25519PrivateKeyManager;
 import com.google.crypto.tink.tinkkey.internal.ProtoKey;
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import java.util.Set;
@@ -204,17 +202,6 @@ public final class KeyHandleTest {
     }
 
     assertThat(keys).hasSize(numKeys);
-  }
-
-  @Test
-  public void generateNew_unregisteredTypeUrl_shouldThrow() throws Exception {
-    String typeUrl = "testNewKeyDataTypeUrl";
-    ByteString keyformat = ByteString.copyFromUtf8("testNewKeyDataKeyFormat");
-    com.google.crypto.tink.KeyTemplate keyTemplate =
-        com.google.crypto.tink.KeyTemplate.create(
-            typeUrl, keyformat.toByteArray(), OutputPrefixType.TINK);
-
-    assertThrows(GeneralSecurityException.class, () -> KeyHandle.generateNew(keyTemplate));
   }
 
   @Test

@@ -1,5 +1,5 @@
-load("//:tink_version.bzl", "TINK_VERSION_LABEL")
 load("//:template_rule.bzl", "template_rule")
+load("//:tink_version.bzl", "TINK_VERSION_LABEL")
 
 package(default_visibility = ["//:__subpackages__"])
 
@@ -120,6 +120,7 @@ cc_library(
         "//util:buffer",
         "//util:errors",
         "//util:protobuf_helper",
+        "//util:secret_proto",
         "//util:status",
         "//util:statusor",
         "//util:validation",
@@ -348,6 +349,7 @@ cc_library(
         "//util:protobuf_helper",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
@@ -498,6 +500,7 @@ cc_library(
         "//proto:tink_cc_proto",
         "//util:errors",
         "//util:keyset_util",
+        "//util:secret_proto",
         "//util:status",
         "//util:statusor",
         "//util:validation",
@@ -525,6 +528,7 @@ cc_library(
         "//internal:keyset_handle_builder_entry",
         "//proto:tink_cc_proto",
         "//subtle:random",
+        "//util:secret_proto",
         "@com_google_absl//absl/log:check",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
@@ -543,6 +547,7 @@ cc_library(
         ":keyset_reader",
         "//proto:tink_cc_proto",
         "//util:errors",
+        "//util:secret_proto",
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/container:flat_hash_map",
@@ -579,6 +584,7 @@ cc_library(
         "//proto:tink_cc_proto",
         "//util:enums",
         "//util:errors",
+        "//util:secret_proto",
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/base:core_headers",
@@ -784,6 +790,30 @@ cc_library(
     deps = ["//internal:key_type_info_store"],
 )
 
+cc_library(
+    name = "big_integer",
+    srcs = ["core/big_integer.cc"],
+    hdrs = ["big_integer.h"],
+    include_prefix = "tink",
+    deps = [
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings:string_view",
+    ],
+)
+
+cc_library(
+    name = "restricted_big_integer",
+    srcs = ["core/restricted_big_integer.cc"],
+    hdrs = ["restricted_big_integer.h"],
+    include_prefix = "tink",
+    deps = [
+        ":secret_key_access_token",
+        "//util:secret_data",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings:string_view",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -815,8 +845,18 @@ cc_test(
     srcs = ["core/binary_keyset_writer_test.cc"],
     deps = [
         ":binary_keyset_writer",
+        ":insecure_secret_key_access",
+        ":proto_keyset_format",
+        ":tink_cc",
+        "//aead:aead_config",
+        "//config:global_registry",
         "//proto:tink_cc_proto",
+        "//util:secret_data",
+        "//util:statusor",
+        "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -1152,6 +1192,29 @@ cc_test(
         "//util:secret_data",
         "//util:test_matchers",
         "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "core/big_integer_test",
+    srcs = ["core/big_integer_test.cc"],
+    deps = [
+        ":big_integer",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:string_view",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "core/restricted_big_integer_test",
+    srcs = ["core/restricted_big_integer_test.cc"],
+    deps = [
+        ":insecure_secret_key_access",
+        ":restricted_big_integer",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:string_view",
         "@com_google_googletest//:gtest_main",
     ],
 )

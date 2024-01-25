@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Definitions for Cloud Crypto SDK (Tink) library.
+// Tink Proto Keyset serialization format.
 syntax = "proto3";
 
 package google.crypto.tink;

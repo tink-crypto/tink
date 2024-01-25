@@ -66,13 +66,17 @@ class DecryptingRandomAccessStream : public crypto::tink::RandomAccessStream {
         associated_data_(associated_data),
         attempted_matching_(false),
         matching_stream_(nullptr) {}
+
+  crypto::tink::util::StatusOr<crypto::tink::RandomAccessStream*>
+  GetMatchedStream() const;
+
   std::shared_ptr<
       crypto::tink::PrimitiveSet<crypto::tink::StreamingAead>> primitives_;
   std::unique_ptr<crypto::tink::RandomAccessStream> ciphertext_source_;
   std::string associated_data_;
   mutable absl::Mutex matching_mutex_;
-  bool attempted_matching_ ABSL_GUARDED_BY(matching_mutex_);
-  std::unique_ptr<crypto::tink::RandomAccessStream> matching_stream_
+  mutable bool attempted_matching_ ABSL_GUARDED_BY(matching_mutex_);
+  mutable std::unique_ptr<crypto::tink::RandomAccessStream> matching_stream_
       ABSL_GUARDED_BY(matching_mutex_);
 };
 

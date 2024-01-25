@@ -127,7 +127,8 @@ TEST_F(DeterministicAeadConfigTest, RegisterFipsValidTemplates) {
   non_fips_key_templates.push_back(DeterministicAeadKeyTemplates::Aes256Siv());
 
   for (auto key_template : non_fips_key_templates) {
-    auto new_keyset_handle_result = KeysetHandle::GenerateNew(key_template);
+    auto new_keyset_handle_result =
+        KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry());
     EXPECT_THAT(new_keyset_handle_result.status(),
                StatusIs(absl::StatusCode::kNotFound));
   }

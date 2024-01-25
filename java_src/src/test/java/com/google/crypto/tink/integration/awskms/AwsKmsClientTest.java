@@ -123,7 +123,6 @@ public final class AwsKmsClientTest {
         "aws-kms://arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab";
 
     KmsClient client = new AwsKmsClient(kekUri).withAwsKms(new FakeAwsKms(asList(kekId)));
-
     Aead kmsEnvelopeAead =
         KmsEnvelopeAead.create(
             PredefinedAeadParameters.AES128_CTR_HMAC_SHA256, client.getAead(kekUri));

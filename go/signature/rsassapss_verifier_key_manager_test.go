@@ -311,6 +311,15 @@ func TestRSASSAPSSVerifierPrimitiveFailsWithInvalidKey(t *testing.T) {
 			pubKey: &rsppb.RsaSsaPssPublicKey{},
 		},
 		{
+			tag: "nil params",
+			pubKey: &rsppb.RsaSsaPssPublicKey{
+				Version: validPubKey.GetVersion(),
+				Params:  nil,
+				N:       validPubKey.GetN(),
+				E:       validPubKey.GetE(),
+			},
+		},
+		{
 			tag: "invalid public key version",
 			pubKey: &rsppb.RsaSsaPssPublicKey{
 				Version: validPubKey.GetVersion() + 1,

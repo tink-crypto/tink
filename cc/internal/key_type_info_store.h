@@ -33,6 +33,7 @@
 #include "tink/core/private_key_type_manager.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/key_manager.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -129,6 +130,17 @@ class KeyTypeInfoStore {
           key_factory_(&manager->get_key_factory()) {
       primitive_to_manager_.emplace(std::type_index(typeid(P)),
                                     absl::WrapUnique(manager));
+    }
+
+    template <typename P>
+    crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
+        const google::crypto::tink::KeyData& key_data) const {
+      crypto::tink::util::StatusOr<const KeyManager<P>*> key_manager =
+          get_key_manager<P>(key_data.type_url());
+      if (!key_manager.ok()) {
+        return key_manager.status();
+      }
+      return (*key_manager)->GetPrimitive(key_data);
     }
 
     template <typename P>

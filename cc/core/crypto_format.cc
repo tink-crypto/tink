@@ -16,6 +16,7 @@
 
 #include "tink/crypto_format.h"
 
+#include <cstdint>
 #include <string>
 
 #include "absl/status/status.h"
@@ -53,23 +54,22 @@ const absl::string_view CryptoFormat::kRawPrefix = "";
 // static
 crypto::tink::util::StatusOr<std::string> CryptoFormat::GetOutputPrefix(
     const google::crypto::tink::KeysetInfo::KeyInfo& key_info) {
+  static_assert(sizeof(key_info.key_id() == sizeof(uint32_t )), "");
   switch (key_info.output_prefix_type()) {
     case OutputPrefixType::TINK: {
-      std::string prefix;
-      prefix.assign(reinterpret_cast<const char*>(&kTinkStartByte), 1);
-      char key_id_buf[4];
-      uint32_as_big_endian(key_info.key_id(), key_id_buf);
-      prefix.append(key_id_buf, 4);
+      static_assert(kTinkPrefixSize == 1 + sizeof(uint32_t), "");
+      std::string prefix(kTinkPrefixSize, '\0');
+      prefix[0] = kTinkStartByte;
+      uint32_as_big_endian(key_info.key_id(), &prefix[1]);
       return prefix;
     }
     case OutputPrefixType::CRUNCHY:
       // FALLTHROUGH
     case OutputPrefixType::LEGACY: {
-      std::string prefix;
-      prefix.assign(reinterpret_cast<const char*>(&kLegacyStartByte), 1);
-      char key_id_buf[4];
-      uint32_as_big_endian(key_info.key_id(), key_id_buf);
-      prefix.append(key_id_buf, 4);
+      static_assert(kLegacyPrefixSize == 1 + sizeof(uint32_t), "");
+      std::string prefix(kLegacyPrefixSize, '\0');
+      prefix[0] = kLegacyStartByte;
+      uint32_as_big_endian(key_info.key_id(), &prefix[1]);
       return prefix;
     }
     case OutputPrefixType::RAW:

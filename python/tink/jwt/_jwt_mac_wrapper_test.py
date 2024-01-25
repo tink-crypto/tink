@@ -13,17 +13,14 @@
 # limitations under the License.
 """Tests for tink.python.tink.jwt._jwt_mac_wrapper."""
 
-import io
-
 from absl.testing import absltest
 from absl.testing import parameterized
-
 
 from tink.proto import jwt_hmac_pb2
 from tink.proto import tink_pb2
 import tink
-from tink import cleartext_keyset_handle
 from tink import jwt
+from tink import secret_key_access
 from tink.jwt import _json_util
 from tink.jwt import _jwt_format
 from tink.testing import keyset_builder
@@ -36,38 +33,44 @@ def setUpModule():
 def _set_custom_kid(keyset_handle: tink.KeysetHandle,
                     custom_kid: str) -> tink.KeysetHandle:
   """Set the custom_kid field of the first key."""
-  buffer = io.BytesIO()
-  cleartext_keyset_handle.write(
-      tink.BinaryKeysetWriter(buffer), keyset_handle)
-  keyset = tink_pb2.Keyset.FromString(buffer.getvalue())
+  serialized_keyset = tink.proto_keyset_format.serialize(
+      keyset_handle, secret_key_access.TOKEN
+  )
+  keyset = tink_pb2.Keyset.FromString(serialized_keyset)
   hmac_key = jwt_hmac_pb2.JwtHmacKey.FromString(keyset.key[0].key_data.value)
   hmac_key.custom_kid.value = custom_kid
   keyset.key[0].key_data.value = hmac_key.SerializeToString()
-  return cleartext_keyset_handle.from_keyset(keyset)
+  return tink.proto_keyset_format.parse(
+      keyset.SerializeToString(), secret_key_access.TOKEN
+  )
 
 
 def _change_key_id(keyset_handle: tink.KeysetHandle) -> tink.KeysetHandle:
   """Changes the key id of the first key and sets it primary."""
-  buffer = io.BytesIO()
-  cleartext_keyset_handle.write(
-      tink.BinaryKeysetWriter(buffer), keyset_handle)
-  keyset = tink_pb2.Keyset.FromString(buffer.getvalue())
+  serialized_keyset = tink.proto_keyset_format.serialize(
+      keyset_handle, secret_key_access.TOKEN
+  )
+  keyset = tink_pb2.Keyset.FromString(serialized_keyset)
   # XOR the key id with an arbitrary 32-bit string to get a new key id.
   new_key_id = keyset.key[0].key_id ^ 0xdeadbeef
   keyset.key[0].key_id = new_key_id
   keyset.primary_key_id = new_key_id
-  return cleartext_keyset_handle.from_keyset(keyset)
+  return tink.proto_keyset_format.parse(
+      keyset.SerializeToString(), secret_key_access.TOKEN
+  )
 
 
 def _change_output_prefix_to_tink(
     keyset_handle: tink.KeysetHandle) -> tink.KeysetHandle:
   """Changes the output prefix type of the first key to TINK."""
-  buffer = io.BytesIO()
-  cleartext_keyset_handle.write(
-      tink.BinaryKeysetWriter(buffer), keyset_handle)
-  keyset = tink_pb2.Keyset.FromString(buffer.getvalue())
+  serialization = tink.proto_keyset_format.serialize(
+      keyset_handle, secret_key_access.TOKEN
+  )
+  keyset = tink_pb2.Keyset.FromString(serialization)
   keyset.key[0].output_prefix_type = tink_pb2.TINK
-  return cleartext_keyset_handle.from_keyset(keyset)
+  return tink.proto_keyset_format.parse(
+      keyset.SerializeToString(), secret_key_access.TOKEN
+  )
 
 
 class JwtMacWrapperTest(parameterized.TestCase):

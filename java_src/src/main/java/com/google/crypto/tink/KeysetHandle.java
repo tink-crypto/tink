@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package com.google.crypto.tink;
 import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.internal.InternalConfiguration;
 import com.google.crypto.tink.internal.LegacyProtoParameters;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.ProtoParametersSerialization;
@@ -608,17 +609,9 @@ public final class KeysetHandle {
    * <p>{@code namedParameters} is the key template name that fully specifies the parameters, e.g.
    * "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM".
    */
-  public static KeysetHandle.Builder.Entry generateEntryFromParametersName(String namedParameters)
+  public static KeysetHandle.Builder.Entry generateEntryFromParametersName(String parametersName)
       throws GeneralSecurityException {
-    if (!Registry.keyTemplateMap().containsKey(namedParameters)) {
-      throw new GeneralSecurityException("cannot find key template: " + namedParameters);
-    }
-    KeyTemplate template = Registry.keyTemplateMap().get(namedParameters);
-    ProtoParametersSerialization serialization =
-        ProtoParametersSerialization.create(template.getProto());
-    Parameters parameters =
-        MutableSerializationRegistry.globalInstance()
-            .parseParametersWithLegacyFallback(serialization);
+    Parameters parameters = MutableParametersRegistry.globalInstance().get(parametersName);
     return new KeysetHandle.Builder.Entry(parameters);
   }
 
@@ -814,9 +807,11 @@ public final class KeysetHandle {
    * <p>If this is not possible, please inline the function in your code.
    *
    * @throws GeneralSecurityException if the key template is invalid.
+   * @deprecated Use the overload taking a Parameters object instead.
    */
-  public static final KeysetHandle generateNew(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
-      throws GeneralSecurityException {
+  @Deprecated
+  public static final KeysetHandle generateNew(
+      com.google.crypto.tink.proto.KeyTemplate keyTemplate) throws GeneralSecurityException {
     return generateNew(TinkProtoParametersFormat.parse(keyTemplate.toByteArray()));
   }
 
@@ -915,8 +910,10 @@ public final class KeysetHandle {
    *
    * @return a new {@link KeysetHandle} from {@code serialized} that is a serialized {@link Keyset}
    * @throws GeneralSecurityException if the keyset is invalid
+   * @deprecated Call {TinkProtoKeysetFormat.parseKeysetWithoutSecret} instead.
    */
   @SuppressWarnings("UnusedException")
+  @Deprecated
   public static final KeysetHandle readNoSecret(final byte[] serialized)
       throws GeneralSecurityException {
     try {
@@ -1030,23 +1027,7 @@ public final class KeysetHandle {
     }
     KeyData publicKeyData =
         Registry.getPublicKeyData(privateKeyData.getTypeUrl(), privateKeyData.getValue());
-    validate(publicKeyData);
     return publicKeyData;
-  }
-
-  @SuppressWarnings("deprecation")
-  private static void validate(KeyData keyData) throws GeneralSecurityException {
-    // This will throw GeneralSecurityException if the keyData is invalid.
-    // Note: this calls a deprecated function to validate the "KeyData" proto. The usage of this
-    // deprecated function is unfortunate. However, in the end we simply want to remove this call.
-    // The only usage of this is in "getPublicKeysetHandle". This should go away, in principle
-    // the code of getPublicKeysetHandle should simply look at each entry, cast each key to
-    // {@link PrivateKey} (throw a GeneralSecurityException if this fails), call getPublicKey()
-    // and insert the result into a new keyset with the same ID and status, then return the result.
-    // If done like this, there is no reason to validate the returned Key object.
-    // (However, also note that this particular call here isn't very problematic; the problematic
-    // part of Registry.getPrimitive is that it misuses generics, but here we just want any Object).
-    Object unused = Registry.getPrimitive(keyData);
   }
 
   /**

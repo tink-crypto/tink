@@ -20,7 +20,7 @@ import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import java.security.GeneralSecurityException;
 
 // [START_EXCLUDE]
-/** Examples to write a keyset to an output stream encrypted with a KMS key. */
+/** Example that encrypts a keyset with a Key Encryption Key and JSON serializes it. */
 final class WriteKeysetExample {
   private WriteKeysetExample() {}
 

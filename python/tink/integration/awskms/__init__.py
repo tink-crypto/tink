@@ -11,9 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """AWS KMS integration package."""
 
-from tink.integration.awskms import _aws_kms_client
+try:
+  # pylint: disable=g-import-not-at-top
+  from tink.integration.awskms import _aws_kms_client
+except ImportError as import_error:
+  raise ImportError(
+      'Error importing the Tink AWS KMS module; did you forget to install the'
+      ' `tink[awskms]` extras?'
+  ) from import_error
 
 AwsKmsClient = _aws_kms_client.AwsKmsClient
+
+new_client = _aws_kms_client.new_client

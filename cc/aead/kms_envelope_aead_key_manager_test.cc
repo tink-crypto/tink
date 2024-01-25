@@ -30,6 +30,7 @@
 #include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_eax_key_manager.h"
 #include "tink/aead/kms_envelope_aead.h"
+#include "tink/config/global_registry.h"
 #include "tink/kms_client.h"
 #include "tink/kms_clients.h"
 #include "tink/mac/mac_key_templates.h"
@@ -259,7 +260,7 @@ TEST_P(KmsEnvelopeAeadKeyManagerDekTemplatesTest, EncryptDecryp) {
   KeyTemplate env_template =
       AeadKeyTemplates::KmsEnvelopeAead(kek_uri, dek_template);
   util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
-      KeysetHandle::GenerateNew(env_template);
+      KeysetHandle::GenerateNew(env_template, KeyGenConfigGlobalRegistry());
   ASSERT_THAT(handle, IsOk());
   util::StatusOr<std::unique_ptr<Aead>> envelope_aead =
       (*handle)->GetPrimitive<crypto::tink::Aead>(ConfigGlobalRegistry());

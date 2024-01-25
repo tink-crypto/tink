@@ -20,7 +20,6 @@ py_library(
     deps = [
         "//tink:tink_python",
         "//tink/aead",
-        "//tink/aead:_kms_aead_key_manager",
         "//tink/core",
         requirement("boto3"),
     ],
@@ -35,11 +34,12 @@ py_test(
     ],
     srcs_version = "PY3",
     deps = [
-        ":awskms",
         ":_aws_kms_client",
+        ":awskms",
         "//tink:tink_python",
         "//tink/testing:helper",
         requirement("absl-py"),
+        requirement("boto3"),
     ],
 )
 
@@ -57,8 +57,8 @@ py_test(
         ":awskms",
         "//tink:tink_python",
         "//tink/aead",
-        "//tink/aead:_kms_aead_key_manager",
         "//tink/testing:helper",
         requirement("absl-py"),
+        requirement("boto3"),
     ],
 )

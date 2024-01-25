@@ -20,8 +20,8 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
-#include "tink/util/test_util.h"
 
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;

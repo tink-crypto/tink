@@ -40,7 +40,6 @@ namespace {
 
 using ::crypto::tink::subtle::Random;
 using ::crypto::tink::test::IsOk;
-using ::crypto::tink::test::IsOkAndHolds;
 using ::crypto::tink::test::StatusIs;
 using ::google::crypto::tink::AesCmacKeyFormat;
 using ::google::crypto::tink::KeyData;
@@ -67,6 +66,11 @@ class AesCmacProtoSerializationTest : public TestWithParam<TestCase> {
     internal::MutableSerializationRegistry::GlobalInstance().Reset();
   }
 };
+
+TEST_F(AesCmacProtoSerializationTest, RegisterTwiceSucceeds) {
+  ASSERT_THAT(RegisterAesCmacProtoSerialization(), IsOk());
+  ASSERT_THAT(RegisterAesCmacProtoSerialization(), IsOk());
+}
 
 INSTANTIATE_TEST_SUITE_P(
     AesCmacProtoSerializationTestSuite, AesCmacProtoSerializationTest,

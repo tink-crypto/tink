@@ -24,11 +24,11 @@
 namespace tink_walkthrough {
 
 // Writes a `keyset` to `output_stream` in JSON format; the keyset is encrypted
-// through a KMS service using the KMS key `master_kms_key_uri`.
+// with `keyset_encryption_aead`.
 crypto::tink::util::Status WriteEncryptedKeyset(
     const crypto::tink::KeysetHandle& keyset,
     std::unique_ptr<std::ostream> output_stream,
-    absl::string_view master_kms_key_uri);
+    const crypto::tink::Aead& keyset_encryption_aead);
 
 }  // namespace tink_walkthrough
 

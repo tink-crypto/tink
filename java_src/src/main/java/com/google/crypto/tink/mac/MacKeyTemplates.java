@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * {@link com.google.crypto.tink.proto.HmacKey}, one can do:
  *
  * <pre>{@code
- * Config.register(Mac.TINK_1_0_0);
+ * MacConfig.register();
  * KeysetHandle handle = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
  * Mac mac = handle.getPrimitive(Mac.class);
  * }</pre>
@@ -129,8 +129,9 @@ public final class MacKeyTemplates {
               AesCmacKeyFormat.newBuilder()
                   .setKeySize(32)
                   .setParams(AesCmacParams.newBuilder().setTagSize(16).build())
-                  .build().toByteString())
-          .setTypeUrl(new AesCmacKeyManager().getKeyType())
+                  .build()
+                  .toByteString())
+          .setTypeUrl("type.googleapis.com/google.crypto.tink.AesCmacKey")
           .setOutputPrefixType(OutputPrefixType.TINK)
           .build();
 
@@ -149,7 +150,7 @@ public final class MacKeyTemplates {
         .build();
     return KeyTemplate.newBuilder()
         .setValue(format.toByteString())
-        .setTypeUrl(new HmacKeyManager().getKeyType())
+        .setTypeUrl(HmacKeyManager.getKeyType())
         .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }

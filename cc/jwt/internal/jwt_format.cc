@@ -98,7 +98,6 @@ util::StatusOr<std::string> CreateHeader(
   google::protobuf::Struct header;
   auto fields = header.mutable_fields();
   if (kid.has_value()) {
-    google::protobuf::Value kid_value;
     (*fields)["kid"].set_string_value(std::string(kid.value()));
   }
   if (type_header.has_value()) {

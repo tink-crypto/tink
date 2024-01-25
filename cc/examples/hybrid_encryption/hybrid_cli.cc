@@ -142,9 +142,9 @@ int main(int argc, char** argv) {
 
   std::clog << "Using keyset from file " << keyset_filename << " to hybrid "
             << mode << " file " << input_filename << " with context info '"
-            << context_info << "'." << std::endl;
+            << context_info << "'." << '\n';
   std::clog << "The resulting output will be written to " << output_filename
-            << std::endl;
+            << '\n';
 
   CHECK_OK(tink_cc_examples::HybridCli(mode, keyset_filename, input_filename,
                                        output_filename, context_info));

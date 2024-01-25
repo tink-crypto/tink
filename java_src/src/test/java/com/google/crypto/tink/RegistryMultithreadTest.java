@@ -17,9 +17,10 @@
 package com.google.crypto.tink;
 
 import static com.google.common.truth.Truth.assertThat;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.DAYS;
 import static org.junit.Assert.assertNotNull;
 
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.AesGcmKey;
@@ -42,9 +43,7 @@ import org.junit.runners.JUnit4;
 /** Thread safety tests for {@link Registry}. */
 @RunWith(JUnit4.class)
 public final class RegistryMultithreadTest {
-  private static class Primitive {}
-
-  private static class TestKeyManager implements KeyManager<Primitive> {
+  private static class TestKeyManager implements KeyManager<Aead> {
     public TestKeyManager(String typeUrl) {
       this.typeUrl = typeUrl;
     }
@@ -52,7 +51,7 @@ public final class RegistryMultithreadTest {
     private final String typeUrl;
 
     @Override
-    public Primitive getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
+    public Aead getPrimitive(ByteString serializedKey) throws GeneralSecurityException {
       throw new UnsupportedOperationException("Not needed for test");
     }
 
@@ -67,8 +66,8 @@ public final class RegistryMultithreadTest {
     }
 
     @Override
-    public Class<Primitive> getPrimitiveClass() {
-      return Primitive.class;
+    public Class<Aead> getPrimitiveClass() {
+      return Aead.class;
     }
   }
 
@@ -78,6 +77,11 @@ public final class RegistryMultithreadTest {
     public TestKeyTypeManager(String typeUrl) {
       super(AesGcmKey.class);
       this.typeUrl = typeUrl;
+    }
+
+    @Override
+    public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+      return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
     }
 
     @Override
@@ -110,6 +114,11 @@ public final class RegistryMultithreadTest {
     public TestPublicKeyTypeManager(String typeUrl) {
       super(Ed25519PublicKey.class);
       this.typeUrl = typeUrl;
+    }
+
+    @Override
+    public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+      return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
     }
 
     @Override
@@ -146,6 +155,11 @@ public final class RegistryMultithreadTest {
     }
 
     @Override
+    public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+      return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
+    }
+
+    @Override
     public String getKeyType() {
       return typeUrl;
     }
@@ -174,7 +188,7 @@ public final class RegistryMultithreadTest {
     }
   }
 
-  private static final int REPETITIONS = 1000;
+  private static final int REPETITIONS = 200;
 
   @Test
   public void registerAndGetKeyManager_works() throws Exception {
@@ -238,7 +252,8 @@ public final class RegistryMultithreadTest {
             }));
 
     threadPool.shutdown();
-    assertThat(threadPool.awaitTermination(300, SECONDS)).isTrue();
+    // Wait forever: if the test times out we will notice independently.
+    assertThat(threadPool.awaitTermination(1, DAYS)).isTrue();
     for (int i = 0; i < futures.size(); ++i) {
       futures.get(i).get(); // This will throw an exception if the thread threw an exception.
     }

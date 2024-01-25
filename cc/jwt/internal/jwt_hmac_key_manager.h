@@ -113,6 +113,10 @@ class JwtHmacKeyManager
       const google::crypto::tink::JwtHmacKeyFormat& key_format,
       InputStream* input_stream) const override;
 
+  internal::FipsCompatibility FipsStatus() const override {
+    return internal::FipsCompatibility::kRequiresBoringCrypto;
+  }
+
  private:
   const RawJwtHmacKeyManager raw_key_manager_;
 };

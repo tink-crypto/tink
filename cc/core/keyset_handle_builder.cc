@@ -30,6 +30,7 @@
 #include "tink/key_status.h"
 #include "tink/keyset_handle.h"
 #include "tink/subtle/random.h"
+#include "tink/util/secret_proto.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -150,7 +151,7 @@ util::StatusOr<KeysetHandle> KeysetHandleBuilder::Build() {
           "KeysetHandleBuilder::Build may only be called once");
   }
   build_called_ = true;
-  Keyset keyset;
+  util::SecretProto<Keyset> keyset;
   absl::optional<int> primary_id = absl::nullopt;
 
   util::Status assigned_ids_status = CheckIdAssignments();
@@ -172,7 +173,7 @@ util::StatusOr<KeysetHandle> KeysetHandleBuilder::Build() {
     util::StatusOr<Keyset::Key> key = entry.CreateKeysetKey(*id);
     if (!key.ok()) return key.status();
 
-    *keyset.add_key() = *key;
+    *keyset->add_key() = *key;
     if (entry.IsPrimary()) {
       if (primary_id.has_value()) {
         return util::Status(
@@ -188,10 +189,10 @@ util::StatusOr<KeysetHandle> KeysetHandleBuilder::Build() {
     return util::Status(absl::StatusCode::kFailedPrecondition,
                         "No primary set in this keyset.");
   }
-  keyset.set_primary_key_id(*primary_id);
+  keyset->set_primary_key_id(*primary_id);
   util::StatusOr<std::vector<std::shared_ptr<const KeysetHandle::Entry>>>
-      entries = KeysetHandle::GetEntriesFromKeyset(keyset);
-  return KeysetHandle(keyset, *std::move(entries));
+      entries = KeysetHandle::GetEntriesFromKeyset(*keyset);
+  return KeysetHandle(std::move(keyset), *std::move(entries));
 }
 
 }  // namespace tink

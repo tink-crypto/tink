@@ -13,7 +13,8 @@ TINK_MAVEN_ARTIFACTS = [
     "com.google.auto.service:auto-service-annotations:1.0.1",
     "com.google.api-client:google-api-client:2.2.0",
     "com.google.apis:google-api-services-cloudkms:v1-rev20221107-2.0.0",
-    "com.google.auth:google-auth-library-oauth2-http:1.5.3",
+    "com.google.auth:google-auth-library-oauth2-http:1.20.0",
+    "com.google.cloud:google-cloud-kms:2.31.0",
     "com.google.code.findbugs:jsr305:3.0.2",
     "com.google.code.gson:gson:2.10.1",
     "com.google.errorprone:error_prone_annotations:2.18.0",
@@ -21,6 +22,7 @@ TINK_MAVEN_ARTIFACTS = [
     "com.google.http-client:google-http-client-gson:1.43.1",
     "com.google.oauth-client:google-oauth-client:1.34.1",
     "com.google.truth:truth:0.44",
+    "io.github.jopenlibs:vault-java-driver:5.4.0",
     "junit:junit:4.13.2",
     "org.conscrypt:conscrypt-openjdk-uber:2.5.2",
     "org.ow2.asm:asm:7.0",
@@ -37,7 +39,7 @@ def tink_java_deps():
             name = "google_root_pem",
             executable = 0,
             urls = ["https://pki.goog/roots.pem"],
-            sha256 = "9c9b9685ad319b9747c3fe69b46a61c11a0efabdfa09ca6a8b0c3da421036d27",
+            sha256 = "1acf0d4780541758be2c0f998e1e0275232626ed3f8793d8e2fe8e2753750613",
         )
 
     # Basic rules we need to add to bazel.
@@ -74,12 +76,12 @@ def tink_java_deps():
     # Transitive Maven artifact resolution and publishing rules for Bazel.
     # -------------------------------------------------------------------------
     if not native.existing_rule("rules_jvm_external"):
-        # Release from 2021-11-24
+        # Release from 2023-06-23
         http_archive(
             name = "rules_jvm_external",
-            strip_prefix = "rules_jvm_external-4.2",
-            sha256 = "cd1a77b7b02e8e008439ca76fd34f5b07aecb8c752961f9640dea15e9e5ba1ca",
-            url = "https://github.com/bazelbuild/rules_jvm_external/archive/4.2.zip",
+            strip_prefix = "rules_jvm_external-5.3",
+            url = "https://github.com/bazelbuild/rules_jvm_external/archive/5.3.zip",
+            sha256 = "6cc8444b20307113a62b676846c29ff018402fd4c7097fcd6d0a0fd5f2e86429",
         )
 
     # -------------------------------------------------------------------------

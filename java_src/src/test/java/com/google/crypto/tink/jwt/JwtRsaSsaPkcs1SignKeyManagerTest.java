@@ -16,39 +16,33 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1Algorithm;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1KeyFormat;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1PrivateKey;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1PublicKey;
-import com.google.crypto.tink.proto.JwtRsaSsaPkcs1PublicKey.CustomKid;
-import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.proto.Keyset;
+import com.google.crypto.tink.signature.RsaSsaPkcs1Parameters;
+import com.google.crypto.tink.signature.RsaSsaPkcs1PrivateKey;
+import com.google.crypto.tink.signature.RsaSsaPkcs1PublicKey;
+import com.google.crypto.tink.signature.SignatureConfig;
 import com.google.crypto.tink.subtle.Base64;
-import com.google.crypto.tink.subtle.EngineFactory;
-import com.google.crypto.tink.subtle.Enums;
 import com.google.crypto.tink.subtle.Hex;
-import com.google.crypto.tink.subtle.RsaSsaPkcs1SignJce;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
-import java.security.KeyFactory;
-import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.RSAKeyGenParameterSpec;
-import java.security.spec.RSAPrivateCrtKeySpec;
 import java.util.Set;
 import java.util.TreeSet;
 import org.junit.BeforeClass;
@@ -68,6 +62,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
+    SignatureConfig.register();
     JwtSignatureConfig.register();
   }
 
@@ -370,17 +365,35 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
 
   @Test
   public void testJwtRsa4096AlgoRS512F4TemplateWithManager_ok() throws Exception {
-    testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_RS512_4096_F4"));
+    if (TestUtil.isTsan()) {
+      // creating keys is too slow in Tsan.
+      // We do not use assume because Theories expects to find something which is not skipped.
+      return;
+    }
+    Parameters p = KeyTemplates.get("JWT_RS512_4096_F4").toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @Test
   public void testJwtRsa3072AlgoRS384F4TemplateWithManager_ok() throws Exception {
-    testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_RS384_3072_F4"));
+    if (TestUtil.isTsan()) {
+      // creating keys is too slow in Tsan.
+      // We do not use assume because Theories expects to find something which is not skipped.
+      return;
+    }
+    Parameters p = KeyTemplates.get("JWT_RS384_3072_F4").toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   @Test
   public void testJwtRsa3072AlgoRS256F4TemplateWithManager_ok() throws Exception {
-    testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_RS256_3072_F4"));
+    if (TestUtil.isTsan()) {
+      // creating keys is too slow in Tsan.
+      // We do not use assume because Theories expects to find something which is not skipped.
+      return;
+    }
+    Parameters p = KeyTemplates.get("JWT_RS256_3072_F4").toParameters();
+    assertThat(KeysetHandle.generateNew(p).getAt(0).getKey().getParameters()).isEqualTo(p);
   }
 
   // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
@@ -495,24 +508,8 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
         GeneralSecurityException.class, () -> verifier.verifyAndDecode(modifiedCompact, validator));
   }
 
-  private static final RSAPrivateCrtKey createPrivateKey(JwtRsaSsaPkcs1PrivateKey keyProto)
-      throws GeneralSecurityException {
-    KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("RSA");
-    return (RSAPrivateCrtKey)
-        kf.generatePrivate(
-            new RSAPrivateCrtKeySpec(
-                new BigInteger(1, keyProto.getPublicKey().getN().toByteArray()),
-                new BigInteger(1, keyProto.getPublicKey().getE().toByteArray()),
-                new BigInteger(1, keyProto.getD().toByteArray()),
-                new BigInteger(1, keyProto.getP().toByteArray()),
-                new BigInteger(1, keyProto.getQ().toByteArray()),
-                new BigInteger(1, keyProto.getDp().toByteArray()),
-                new BigInteger(1, keyProto.getDq().toByteArray()),
-                new BigInteger(1, keyProto.getCrt().toByteArray())));
-  }
-
   private static String generateSignedCompact(
-      RsaSsaPkcs1SignJce rawSigner, JsonObject header, JsonObject payload)
+      PublicKeySign rawSigner, JsonObject header, JsonObject payload)
       throws GeneralSecurityException {
     String payloadBase64 = Base64.urlSafeEncode(payload.toString().getBytes(UTF_8));
     String headerBase64 = Base64.urlSafeEncode(header.toString().getBytes(UTF_8));
@@ -531,14 +528,37 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     }
     KeyTemplate template = KeyTemplates.get("JWT_RS256_2048_F4_RAW");
     KeysetHandle handle = KeysetHandle.generateNew(template);
-    Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
-    JwtRsaSsaPkcs1PrivateKey keyProto =
-        JwtRsaSsaPkcs1PrivateKey.parseFrom(
-            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    RSAPrivateCrtKey privateKey = createPrivateKey(keyProto);
-    JwtRsaSsaPkcs1Algorithm algorithm = keyProto.getPublicKey().getAlgorithm();
-    Enums.HashType hash = JwtRsaSsaPkcs1VerifyKeyManager.hashForPkcs1Algorithm(algorithm);
-    RsaSsaPkcs1SignJce rawSigner = new RsaSsaPkcs1SignJce(privateKey, hash);
+    com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey key =
+        (com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey) handle.getAt(0).getKey();
+
+    RsaSsaPkcs1Parameters nonJwtParameters =
+        RsaSsaPkcs1Parameters.builder()
+            .setHashType(RsaSsaPkcs1Parameters.HashType.SHA256)
+            .setModulusSizeBits(2048)
+            .setPublicExponent(RsaSsaPkcs1Parameters.F4)
+            .setVariant(RsaSsaPkcs1Parameters.Variant.NO_PREFIX)
+            .build();
+    RsaSsaPkcs1PublicKey nonJwtPublicKey =
+        RsaSsaPkcs1PublicKey.builder()
+            .setParameters(nonJwtParameters)
+            .setModulus(key.getPublicKey().getModulus())
+            .build();
+    RsaSsaPkcs1PrivateKey nonJwtPrivateKey =
+        RsaSsaPkcs1PrivateKey.builder()
+            .setPublicKey(nonJwtPublicKey)
+            .setPrimes(key.getPrimeP(), key.getPrimeQ())
+            .setPrivateExponent(key.getPrivateExponent())
+            .setPrimeExponents(key.getPrimeExponentP(), key.getPrimeExponentQ())
+            .setCrtCoefficient(key.getCrtCoefficient())
+            .build();
+
+    // This nonJwtSigner computes signatures in the same way as one obtained from handle -- except
+    // that it doesn't do any of the JWT stuff.
+    PublicKeySign nonJwtSigner =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(nonJwtPrivateKey).makePrimary().withRandomId())
+            .build()
+            .getPrimitive(PublicKeySign.class);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
     JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
@@ -550,7 +570,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     JsonObject goodHeader = new JsonObject();
     goodHeader.addProperty("alg", "RS256");
     goodHeader.addProperty("typ", "typeHeader");
-    String goodSignedCompact = generateSignedCompact(rawSigner, goodHeader, payload);
+    String goodSignedCompact = generateSignedCompact(nonJwtSigner, goodHeader, payload);
     Object unused =
         verifier.verifyAndDecode(
             goodSignedCompact,
@@ -561,7 +581,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
 
     // invalid token with an empty header
     JsonObject emptyHeader = new JsonObject();
-    String emptyHeaderSignedCompact = generateSignedCompact(rawSigner, emptyHeader, payload);
+    String emptyHeaderSignedCompact = generateSignedCompact(nonJwtSigner, emptyHeader, payload);
     assertThrows(
         GeneralSecurityException.class,
         () -> verifier.verifyAndDecode(emptyHeaderSignedCompact, validator));
@@ -569,7 +589,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     // invalid token with an unknown algorithm in the header
     JsonObject badAlgoHeader = new JsonObject();
     badAlgoHeader.addProperty("alg", "RS255");
-    String badAlgoSignedCompact = generateSignedCompact(rawSigner, badAlgoHeader, payload);
+    String badAlgoSignedCompact = generateSignedCompact(nonJwtSigner, badAlgoHeader, payload);
     assertThrows(
         GeneralSecurityException.class,
         () -> verifier.verifyAndDecode(badAlgoSignedCompact, validator));
@@ -578,7 +598,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     JsonObject unknownKidHeader = new JsonObject();
     unknownKidHeader.addProperty("alg", "RS256");
     unknownKidHeader.addProperty("kid", "unknown");
-    String unknownKidSignedCompact = generateSignedCompact(rawSigner, unknownKidHeader, payload);
+    String unknownKidSignedCompact = generateSignedCompact(nonJwtSigner, unknownKidHeader, payload);
     unused = verifier.verifyAndDecode(unknownKidSignedCompact, validator);
   }
 
@@ -591,19 +611,40 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     }
     KeyTemplate template = KeyTemplates.get("JWT_RS256_2048_F4");
     KeysetHandle handle = KeysetHandle.generateNew(template);
-    Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
-    JwtRsaSsaPkcs1PrivateKey keyProto =
-        JwtRsaSsaPkcs1PrivateKey.parseFrom(
-            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    RSAPrivateCrtKey privateKey = createPrivateKey(keyProto);
-    JwtRsaSsaPkcs1Algorithm algorithm = keyProto.getPublicKey().getAlgorithm();
-    Enums.HashType hash = JwtRsaSsaPkcs1VerifyKeyManager.hashForPkcs1Algorithm(algorithm);
-    RsaSsaPkcs1SignJce rawSigner = new RsaSsaPkcs1SignJce(privateKey, hash);
+    com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey key =
+        (com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey) handle.getAt(0).getKey();
+    RsaSsaPkcs1Parameters nonJwtParameters =
+        RsaSsaPkcs1Parameters.builder()
+            .setHashType(RsaSsaPkcs1Parameters.HashType.SHA256)
+            .setModulusSizeBits(2048)
+            .setPublicExponent(RsaSsaPkcs1Parameters.F4)
+            .setVariant(RsaSsaPkcs1Parameters.Variant.NO_PREFIX)
+            .build();
+    RsaSsaPkcs1PublicKey nonJwtPublicKey =
+        RsaSsaPkcs1PublicKey.builder()
+            .setParameters(nonJwtParameters)
+            .setModulus(key.getPublicKey().getModulus())
+            .build();
+    RsaSsaPkcs1PrivateKey nonJwtPrivateKey =
+        RsaSsaPkcs1PrivateKey.builder()
+            .setPublicKey(nonJwtPublicKey)
+            .setPrimes(key.getPrimeP(), key.getPrimeQ())
+            .setPrivateExponent(key.getPrivateExponent())
+            .setPrimeExponents(key.getPrimeExponentP(), key.getPrimeExponentQ())
+            .setCrtCoefficient(key.getCrtCoefficient())
+            .build();
+    // This nonJwtSigner computes signatures in the same way as one obtained from handle -- except
+    // that it doesn't do any of the JWT stuff.
+    PublicKeySign nonJwtSigner =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(nonJwtPrivateKey).makePrimary().withRandomId())
+            .build()
+            .getPrimitive(PublicKeySign.class);
+
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
     JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
-    String kid =
-        JwtFormat.getKid(keyset.getKey(0).getKeyId(), keyset.getKey(0).getOutputPrefixType()).get();
+    String kid = key.getKid().get();
 
     JsonObject payload = new JsonObject();
     payload.addProperty("jti", "jwtId");
@@ -612,20 +653,20 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     JsonObject normalHeader = new JsonObject();
     normalHeader.addProperty("alg", "RS256");
     normalHeader.addProperty("kid", kid);
-    String validToken = generateSignedCompact(rawSigner, normalHeader, payload);
+    String validToken = generateSignedCompact(nonJwtSigner, normalHeader, payload);
     Object unused = verifier.verifyAndDecode(validToken, validator);
 
     // token without kid are rejected, even if they are valid.
     JsonObject headerWithoutKid = new JsonObject();
     headerWithoutKid.addProperty("alg", "RS256");
-    String tokenWithoutKid = generateSignedCompact(rawSigner, headerWithoutKid, payload);
+    String tokenWithoutKid = generateSignedCompact(nonJwtSigner, headerWithoutKid, payload);
     assertThrows(
         GeneralSecurityException.class, () -> verifier.verifyAndDecode(tokenWithoutKid, validator));
 
     // token without algorithm in header
     JsonObject headerWithoutAlg = new JsonObject();
     headerWithoutAlg.addProperty("kid", kid);
-    String tokenWithoutAlg = generateSignedCompact(rawSigner, headerWithoutAlg, payload);
+    String tokenWithoutAlg = generateSignedCompact(nonJwtSigner, headerWithoutAlg, payload);
     assertThrows(
         GeneralSecurityException.class,
         () -> verifier.verifyAndDecode(tokenWithoutAlg, validator));
@@ -634,7 +675,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     JsonObject headerWithBadAlg = new JsonObject();
     headerWithBadAlg.addProperty("alg", "PS256");
     headerWithBadAlg.addProperty("kid", kid);
-    String tokenWithBadAlg = generateSignedCompact(rawSigner, headerWithBadAlg, payload);
+    String tokenWithBadAlg = generateSignedCompact(nonJwtSigner, headerWithBadAlg, payload);
     assertThrows(
         GeneralSecurityException.class,
         () -> verifier.verifyAndDecode(tokenWithBadAlg, validator));
@@ -643,31 +684,41 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     JsonObject headerWithUnknownKid = new JsonObject();
     headerWithUnknownKid.addProperty("alg", "RS256");
     headerWithUnknownKid.addProperty("kid", "unknown");
-    String tokenWithUnknownKid = generateSignedCompact(rawSigner, headerWithUnknownKid, payload);
+    String tokenWithUnknownKid = generateSignedCompact(nonJwtSigner, headerWithUnknownKid, payload);
     assertThrows(
         GeneralSecurityException.class,
         () -> verifier.verifyAndDecode(tokenWithUnknownKid, validator));
   }
 
   /* Create a new keyset handle with the "custom_kid" value set. */
-  private KeysetHandle withCustomKid(KeysetHandle keysetHandle, String customKid)
-      throws Exception {
-    Keyset keyset = CleartextKeysetHandle.getKeyset(keysetHandle);
-    JwtRsaSsaPkcs1PrivateKey privateKey =
-        JwtRsaSsaPkcs1PrivateKey.parseFrom(
-            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    JwtRsaSsaPkcs1PublicKey publicKeyWithKid =
-        privateKey.getPublicKey().toBuilder()
-            .setCustomKid(CustomKid.newBuilder().setValue(customKid).build())
+  private KeysetHandle withCustomKid(KeysetHandle keysetHandle, String customKid) throws Exception {
+    com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey originalPrivateKey =
+        (com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey) keysetHandle.getAt(0).getKey();
+    JwtRsaSsaPkcs1Parameters customKidParameters =
+        JwtRsaSsaPkcs1Parameters.builder()
+            .setAlgorithm(originalPrivateKey.getParameters().getAlgorithm())
+            .setModulusSizeBits(originalPrivateKey.getParameters().getModulusSizeBits())
+            .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.CUSTOM)
             .build();
-    JwtRsaSsaPkcs1PrivateKey privateKeyWithKid =
-        privateKey.toBuilder().setPublicKey(publicKeyWithKid).build();
-    KeyData keyDataWithKid =
-        keyset.getKey(0).getKeyData().toBuilder()
-            .setValue(privateKeyWithKid.toByteString())
+    com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PublicKey customKidPublicKey =
+        com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PublicKey.builder()
+            .setParameters(customKidParameters)
+            .setModulus(originalPrivateKey.getPublicKey().getModulus())
+            .setCustomKid(customKid)
             .build();
-    Keyset.Key keyWithKid = keyset.getKey(0).toBuilder().setKeyData(keyDataWithKid).build();
-    return CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
+    com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey customKidPrivateKey =
+        com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey.builder()
+            .setPublicKey(customKidPublicKey)
+            .setPrimes(originalPrivateKey.getPrimeP(), originalPrivateKey.getPrimeQ())
+            .setPrivateExponent(originalPrivateKey.getPrivateExponent())
+            .setPrimeExponents(
+                originalPrivateKey.getPrimeExponentP(), originalPrivateKey.getPrimeExponentQ())
+            .setCrtCoefficient(originalPrivateKey.getCrtCoefficient())
+            .build();
+
+    return KeysetHandle.newBuilder()
+        .addEntry(KeysetHandle.importKey(customKidPrivateKey).makePrimary().withRandomId())
+        .build();
   }
 
   @Test
@@ -737,21 +788,5 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     assertThrows(
         JwtInvalidException.class,
         () -> verifierWithWrongKid.verifyAndDecode(signedCompactWithKid, validator));
-  }
-
-  @Test
-  public void getPrimitiveWithTinkKeyAndCustomKid_fails() throws Exception {
-    if (TestUtil.isTsan()) {
-      // creating keys is too slow in Tsan.
-      // We do not use assume because Theories expects to find something which is not skipped.
-      return;
-    }
-    KeyTemplate template = KeyTemplates.get("JWT_RS256_2048_F4");
-    KeysetHandle handleWithoutKid = KeysetHandle.generateNew(template);
-    KeysetHandle handleWithKid =
-        withCustomKid(handleWithoutKid, "Lorem ipsum dolor sit amet, consectetur adipiscing elit");
-
-    assertThrows(
-        GeneralSecurityException.class, () -> handleWithKid.getPrimitive(JwtPublicKeySign.class));
   }
 }

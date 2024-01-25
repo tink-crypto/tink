@@ -18,178 +18,148 @@ package com.google.crypto.tink.aead;
 
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.Mac;
-import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.crypto.tink.internal.KeyTypeManager;
-import com.google.crypto.tink.internal.PrimitiveFactory;
-import com.google.crypto.tink.mac.HmacKeyManager;
-import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
-import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
-import com.google.crypto.tink.proto.AesCtrKey;
-import com.google.crypto.tink.proto.AesCtrKeyFormat;
-import com.google.crypto.tink.proto.AesCtrParams;
-import com.google.crypto.tink.proto.HashType;
-import com.google.crypto.tink.proto.HmacKey;
-import com.google.crypto.tink.proto.HmacKeyFormat;
-import com.google.crypto.tink.proto.HmacParams;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
+import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
+import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
+import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
+import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.EncryptThenAuthenticate;
-import com.google.crypto.tink.subtle.IndCpaCipher;
-import com.google.crypto.tink.subtle.Validators;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
-import java.io.IOException;
+import com.google.crypto.tink.util.SecretBytes;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * This key manager generates new {@link AesCtrHmacAeadKey} keys and produces new instances of
  * {@link EncryptThenAuthenticate}.
  */
-public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAeadKey> {
-  AesCtrHmacAeadKeyManager() {
-    super(
-        AesCtrHmacAeadKey.class,
-        new PrimitiveFactory<Aead, AesCtrHmacAeadKey>(Aead.class) {
-          @Override
-          public Aead getPrimitive(AesCtrHmacAeadKey key) throws GeneralSecurityException {
-            return new EncryptThenAuthenticate(
-                new AesCtrKeyManager().getPrimitive(key.getAesCtrKey(), IndCpaCipher.class),
-                new HmacKeyManager().getPrimitive(key.getHmacKey(), Mac.class),
-                key.getHmacKey().getParams().getTagSize());
-          }
-        });
+public final class AesCtrHmacAeadKeyManager {
+  private static void validate(AesCtrHmacAeadParameters parameters)
+      throws GeneralSecurityException {
+    if (parameters.getAesKeySizeBytes() != 16 && parameters.getAesKeySizeBytes() != 32) {
+      throw new GeneralSecurityException("AES key size must be 16 or 32 bytes");
+    }
   }
 
-  // Static so we don't have to construct the object and handle the exception when we need the
-  // key type.
-  @Override
-  public String getKeyType() {
+  private static final PrimitiveConstructor<com.google.crypto.tink.aead.AesCtrHmacAeadKey, Aead>
+      AES_CTR_HMAC_AEAD_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              EncryptThenAuthenticate::create,
+              com.google.crypto.tink.aead.AesCtrHmacAeadKey.class,
+              Aead.class);
+
+  private static final KeyManager<Aead> legacyKeyManager =
+      LegacyKeyManagerImpl.create(
+          getKeyType(),
+          Aead.class,
+          KeyMaterialType.SYMMETRIC,
+          com.google.crypto.tink.proto.AesCtrHmacAeadKey.parser());
+
+  static String getKeyType() {
     return "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
   }
 
-  @Override
-  public int getVersion() {
-    return 0;
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyDerivationRegistry.InsecureKeyCreator<AesCtrHmacAeadParameters>
+      KEY_DERIVER = AesCtrHmacAeadKeyManager::createAesCtrHmacAeadKeyFromRandomness;
+
+  // To ensure that the derived key can provide key commitment, the AES-CTR key must be derived
+  // before the HMAC key.
+  // Consider the following malicious scenario using a brute-forced key InputStream with a 0 as
+  // its 32nd byte:
+  //     31 bytes || 1 byte of 0s || 16 bytes
+  // We give this stream to party A, saying that it is 32-byte HMAC key || 16-byte AES key. We
+  // also give this stream to party B, saying that it is 31-byte HMAC key || 16-byte AES key.
+  // Since HMAC pads the key with zeroes, this same stream will lead to both parties using the
+  // same HMAC key but different AES keys.
+  @AccessesPartialKey
+  static com.google.crypto.tink.aead.AesCtrHmacAeadKey createAesCtrHmacAeadKeyFromRandomness(
+      AesCtrHmacAeadParameters parameters,
+      InputStream stream,
+      @Nullable Integer idRequirement,
+      SecretKeyAccess access)
+      throws GeneralSecurityException {
+    return com.google.crypto.tink.aead.AesCtrHmacAeadKey.builder()
+        .setParameters(parameters)
+        .setIdRequirement(idRequirement)
+        .setAesKeyBytes(Util.readIntoSecretBytes(stream, parameters.getAesKeySizeBytes(), access))
+        .setHmacKeyBytes(Util.readIntoSecretBytes(stream, parameters.getHmacKeySizeBytes(), access))
+        .build();
   }
 
-  @Override
-  public KeyMaterialType keyMaterialType() {
-    return KeyMaterialType.SYMMETRIC;
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyCreationRegistry.KeyCreator<AesCtrHmacAeadParameters> KEY_CREATOR =
+      AesCtrHmacAeadKeyManager::createAesCtrHmacAeadKey;
+
+  @AccessesPartialKey
+  static com.google.crypto.tink.aead.AesCtrHmacAeadKey createAesCtrHmacAeadKey(
+      AesCtrHmacAeadParameters parameters, @Nullable Integer idRequirement)
+      throws GeneralSecurityException {
+    validate(parameters);
+    return com.google.crypto.tink.aead.AesCtrHmacAeadKey.builder()
+        .setParameters(parameters)
+        .setIdRequirement(idRequirement)
+        .setAesKeyBytes(SecretBytes.randomBytes(parameters.getAesKeySizeBytes()))
+        .setHmacKeyBytes(SecretBytes.randomBytes(parameters.getHmacKeySizeBytes()))
+        .build();
   }
 
-  @Override
-  public void validateKey(AesCtrHmacAeadKey key) throws GeneralSecurityException {
-    Validators.validateVersion(key.getVersion(), getVersion());
-    new AesCtrKeyManager().validateKey(key.getAesCtrKey());
-    new HmacKeyManager().validateKey(key.getHmacKey());
-  }
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+        Map<String, Parameters> result = new HashMap<>();
 
-  @Override
-  public AesCtrHmacAeadKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return AesCtrHmacAeadKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-  }
-
-  @Override
-  public KeyFactory<AesCtrHmacAeadKeyFormat, AesCtrHmacAeadKey> keyFactory() {
-    return new KeyFactory<AesCtrHmacAeadKeyFormat, AesCtrHmacAeadKey>(
-        AesCtrHmacAeadKeyFormat.class) {
-      @Override
-      public void validateKeyFormat(AesCtrHmacAeadKeyFormat format)
-          throws GeneralSecurityException {
-        new AesCtrKeyManager().keyFactory().validateKeyFormat(format.getAesCtrKeyFormat());
-        new HmacKeyManager().keyFactory().validateKeyFormat(format.getHmacKeyFormat());
-        Validators.validateAesKeySize(format.getAesCtrKeyFormat().getKeySize());
-      }
-
-      @Override
-      public AesCtrHmacAeadKeyFormat parseKeyFormat(ByteString byteString)
-          throws InvalidProtocolBufferException {
-        return AesCtrHmacAeadKeyFormat.parseFrom(
-            byteString, ExtensionRegistryLite.getEmptyRegistry());
-      }
-
-      @Override
-      public AesCtrHmacAeadKey createKey(AesCtrHmacAeadKeyFormat format)
-          throws GeneralSecurityException {
-        AesCtrKey aesCtrKey =
-            new AesCtrKeyManager().keyFactory().createKey(format.getAesCtrKeyFormat());
-        HmacKey hmacKey = new HmacKeyManager().keyFactory().createKey(format.getHmacKeyFormat());
-        return AesCtrHmacAeadKey.newBuilder()
-            .setAesCtrKey(aesCtrKey)
-            .setHmacKey(hmacKey)
-            .setVersion(getVersion())
-            .build();
-      }
-
-      // To ensure that the derived key can provide key commitment, the AES-CTR key must be derived
-      // before the HMAC key.
-      // Consider the following malicious scenario using a brute-forced key InputStream with a 0 as
-      // its 32nd byte:
-      //     31 bytes || 1 byte of 0s || 16 bytes
-      // We give this stream to party A, saying that it is 32-byte HMAC key || 16-byte AES key. We
-      // also give this stream to party B, saying that it is 31-byte HMAC key || 16-byte AES key.
-      // Since HMAC pads the key with zeroes, this same stream will lead to both parties using the
-      // same HMAC key but different AES keys.
-      @Override
-      public AesCtrHmacAeadKey deriveKey(AesCtrHmacAeadKeyFormat format, InputStream inputStream)
-          throws GeneralSecurityException {
-        validateKeyFormat(format);
-        byte[] aesCtrKeyBytes = new byte[format.getAesCtrKeyFormat().getKeySize()];
-        try {
-          readFully(inputStream, aesCtrKeyBytes);
-        } catch (IOException e) {
-          throw new GeneralSecurityException("Reading pseudorandomness failed", e);
-        }
-        HmacKey hmacKey =
-            new HmacKeyManager().keyFactory().deriveKey(format.getHmacKeyFormat(), inputStream);
-        AesCtrKey aesCtrKey =
-            AesCtrKey.newBuilder()
-                .setParams(format.getAesCtrKeyFormat().getParams())
-                .setVersion(getVersion())
-                .setKeyValue(ByteString.copyFrom(aesCtrKeyBytes))
-                .build();
-        return AesCtrHmacAeadKey.newBuilder()
-            .setVersion(getVersion())
-            .setAesCtrKey(aesCtrKey)
-            .setHmacKey(hmacKey)
-            .build();
-      }
-
-      @Override
-      public Map<String, KeyFactory.KeyFormat<AesCtrHmacAeadKeyFormat>> keyFormats()
-          throws GeneralSecurityException {
-        Map<String, KeyFactory.KeyFormat<AesCtrHmacAeadKeyFormat>> result = new HashMap<>();
-
-        result.put(
-            "AES128_CTR_HMAC_SHA256",
-            createKeyFormat(16, 16, 32, 16, HashType.SHA256, KeyTemplate.OutputPrefixType.TINK));
+        result.put("AES128_CTR_HMAC_SHA256", PredefinedAeadParameters.AES128_CTR_HMAC_SHA256);
         result.put(
             "AES128_CTR_HMAC_SHA256_RAW",
-            createKeyFormat(16, 16, 32, 16, HashType.SHA256, KeyTemplate.OutputPrefixType.RAW));
+            AesCtrHmacAeadParameters.builder()
+                .setAesKeySizeBytes(16)
+                .setHmacKeySizeBytes(32)
+                .setTagSizeBytes(16)
+                .setIvSizeBytes(16)
+                .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
+                .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
+                .build());
 
-        result.put(
-            "AES256_CTR_HMAC_SHA256",
-            createKeyFormat(32, 16, 32, 32, HashType.SHA256, KeyTemplate.OutputPrefixType.TINK));
+        result.put("AES256_CTR_HMAC_SHA256", PredefinedAeadParameters.AES256_CTR_HMAC_SHA256);
         result.put(
             "AES256_CTR_HMAC_SHA256_RAW",
-            createKeyFormat(32, 16, 32, 32, HashType.SHA256, KeyTemplate.OutputPrefixType.RAW));
+            AesCtrHmacAeadParameters.builder()
+                .setAesKeySizeBytes(32)
+                .setHmacKeySizeBytes(32)
+                .setTagSizeBytes(32)
+                .setIvSizeBytes(16)
+                .setHashType(AesCtrHmacAeadParameters.HashType.SHA256)
+                .setVariant(AesCtrHmacAeadParameters.Variant.NO_PREFIX)
+                .build());
 
         return Collections.unmodifiableMap(result);
-      }
-    };
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
-    Registry.registerKeyManager(new AesCtrHmacAeadKeyManager(), newKeyAllowed);
     AesCtrHmacAeadProtoSerialization.register();
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(AES_CTR_HMAC_AEAD_PRIMITIVE_CONSTRUCTOR);
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
+    MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, AesCtrHmacAeadParameters.class);
+    MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, AesCtrHmacAeadParameters.class);
+    KeyManagerRegistry.globalInstance()
+        .registerKeyManagerWithFipsCompatibility(
+            legacyKeyManager,
+            TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO,
+            newKeyAllowed);
   }
 
   /**
@@ -242,37 +212,5 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
                     .build()));
   }
 
-  private static KeyFactory.KeyFormat<AesCtrHmacAeadKeyFormat> createKeyFormat(
-      int aesKeySize,
-      int ivSize,
-      int hmacKeySize,
-      int tagSize,
-      HashType hashType,
-      KeyTemplate.OutputPrefixType prefixType) {
-    return new KeyFactory.KeyFormat<>(
-        createKeyFormat(aesKeySize, ivSize, hmacKeySize, tagSize, hashType), prefixType);
-  }
-
-  private static AesCtrHmacAeadKeyFormat createKeyFormat(
-      int aesKeySize, int ivSize, int hmacKeySize, int tagSize, HashType hashType) {
-    AesCtrKeyFormat aesCtrKeyFormat =
-        AesCtrKeyFormat.newBuilder()
-            .setParams(AesCtrParams.newBuilder().setIvSize(ivSize).build())
-            .setKeySize(aesKeySize)
-            .build();
-    HmacKeyFormat hmacKeyFormat =
-        HmacKeyFormat.newBuilder()
-            .setParams(HmacParams.newBuilder().setHash(hashType).setTagSize(tagSize).build())
-            .setKeySize(hmacKeySize)
-            .build();
-    return AesCtrHmacAeadKeyFormat.newBuilder()
-        .setAesCtrKeyFormat(aesCtrKeyFormat)
-        .setHmacKeyFormat(hmacKeyFormat)
-        .build();
-  }
-
-  @Override
-  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
-    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
-  };
+  private AesCtrHmacAeadKeyManager() {}
 }

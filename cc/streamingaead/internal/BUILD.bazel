@@ -1,1 +1,64 @@
+package(default_visibility = ["//:__subpackages__"])
+
 licenses(["notice"])
+
+cc_library(
+    name = "config_v0",
+    srcs = ["config_v0.cc"],
+    hdrs = ["config_v0.h"],
+    include_prefix = "tink/streamingaead/internal",
+    deps = [
+        "//:configuration",
+        "//internal:configuration_impl",
+        "//streamingaead:aes_ctr_hmac_streaming_key_manager",
+        "//streamingaead:aes_gcm_hkdf_streaming_key_manager",
+        "//streamingaead:streaming_aead_wrapper",
+        "//util:status",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
+cc_test(
+    name = "config_v0_test",
+    srcs = ["config_v0_test.cc"],
+    deps = [
+        ":config_v0",
+        ":key_gen_config_v0",
+        "//:configuration",
+        "//:input_stream",
+        "//:key_gen_configuration",
+        "//:keyset_handle",
+        "//:output_stream",
+        "//:streaming_aead",
+        "//internal:configuration_impl",
+        "//internal:key_gen_configuration_impl",
+        "//internal:key_type_info_store",
+        "//internal:keyset_wrapper_store",
+        "//proto:tink_cc_proto",
+        "//streamingaead:aes_ctr_hmac_streaming_key_manager",
+        "//streamingaead:aes_gcm_hkdf_streaming_key_manager",
+        "//streamingaead:streaming_aead_key_templates",
+        "//subtle:test_util",
+        "//util:istream_input_stream",
+        "//util:ostream_output_stream",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_absl//absl/memory",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "key_gen_config_v0",
+    srcs = ["key_gen_config_v0.cc"],
+    hdrs = ["key_gen_config_v0.h"],
+    include_prefix = "tink/streamingaead/internal",
+    deps = [
+        "//:key_gen_configuration",
+        "//internal:key_gen_configuration_impl",
+        "//streamingaead:aes_ctr_hmac_streaming_key_manager",
+        "//streamingaead:aes_gcm_hkdf_streaming_key_manager",
+        "//util:status",
+        "@com_google_absl//absl/memory",
+    ],
+)

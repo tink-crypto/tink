@@ -139,9 +139,11 @@ func XChaCha20Poly1305KeyTemplate() *tinkpb.KeyTemplate {
 //
 // If either uri or dekTemplate contain invalid input, an error is returned.
 //
-// Deprecated: Instead, call kmsClient.GetAEAD to get a remote AEAD, create
+// Deprecated: We do not recommend using this API, but there are no plans to remove it.
+// Instead, prefer kmsClient.GetAEAD to get a remote AEAD, and create
 // an envelope AEAD using aead.NewKMSEnvelopeAEAD2.
 // There is no need to call registry.RegisterKMSClient anymore.
+// See https://github.com/tink-crypto/tink-go/issues/10 for more details.
 func CreateKMSEnvelopeAEADKeyTemplate(uri string, dekTemplate *tinkpb.KeyTemplate) (*tinkpb.KeyTemplate, error) {
 	if !isSupporedKMSEnvelopeDEK(dekTemplate.GetTypeUrl()) {
 		return nil, fmt.Errorf("unsupported DEK key type %s. Only Tink AEAD key types are supported", dekTemplate.GetTypeUrl())

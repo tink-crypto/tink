@@ -54,25 +54,6 @@ java_test(
 )
 
 java_test(
-    name = "PrivateKeyManagerImplTest",
-    size = "small",
-    srcs = ["PrivateKeyManagerImplTest.java"],
-    deps = [
-        "//proto:ed25519_java_proto",
-        "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:private_key_manager",
-        "//src/main/java/com/google/crypto/tink:private_key_manager_impl",
-        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
-        "//src/main/java/com/google/crypto/tink/internal:private_key_type_manager",
-        "//src/main/java/com/google/crypto/tink/subtle:random",
-        "//src/main/java/com/google/crypto/tink/testing:test_util",
-        "@maven//:com_google_protobuf_protobuf_java",
-        "@maven//:com_google_truth_truth",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
     name = "JsonKeysetReaderTest",
     size = "small",
     srcs = ["JsonKeysetReaderTest.java"],
@@ -104,9 +85,7 @@ java_test(
     size = "small",
     srcs = ["KeysetManagerTest.java"],
     deps = [
-        "//proto:aes_gcm_java_proto",
         "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:aead",
         "//src/main/java/com/google/crypto/tink:key_status",
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:key_templates",
@@ -229,6 +208,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink:key_manager",
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:mac",
+        "//src/main/java/com/google/crypto/tink:parameters",
         "//src/main/java/com/google/crypto/tink:primitive_set",
         "//src/main/java/com/google/crypto/tink:primitive_wrapper",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
@@ -244,6 +224,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory",
         "//src/main/java/com/google/crypto/tink/internal:private_key_type_manager",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_mac",
         "//src/main/java/com/google/crypto/tink/mac:mac_config",
         "//src/main/java/com/google/crypto/tink/mac:predefined_mac_parameters",
         "//src/main/java/com/google/crypto/tink/signature:ecdsa_sign_key_manager",
@@ -376,26 +357,6 @@ java_test(
 )
 
 java_test(
-    name = "KeyManagerImplTest",
-    size = "small",
-    srcs = ["KeyManagerImplTest.java"],
-    deps = [
-        "//proto:aes_gcm_java_proto",
-        "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:aead",
-        "//src/main/java/com/google/crypto/tink:key_manager",
-        "//src/main/java/com/google/crypto/tink:key_manager_impl",
-        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
-        "//src/main/java/com/google/crypto/tink/internal:primitive_factory",
-        "//src/main/java/com/google/crypto/tink/subtle:aes_gcm_jce",
-        "//src/main/java/com/google/crypto/tink/subtle:random",
-        "@maven//:com_google_protobuf_protobuf_java",
-        "@maven//:com_google_truth_truth",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
     name = "PemKeyTypeTest",
     size = "small",
     srcs = ["PemKeyTypeTest.java"],
@@ -411,13 +372,10 @@ java_test(
     size = "small",
     srcs = ["KeyTemplatesTest.java"],
     deps = [
-        "//proto:empty_java_proto",
-        "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:key_templates",
-        "//src/main/java/com/google/crypto/tink:registry",
-        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
-        "@maven//:com_google_protobuf_protobuf_java",
+        "//src/main/java/com/google/crypto/tink:parameters",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_parameters_registry",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
@@ -436,39 +394,17 @@ java_test(
 )
 
 java_test(
-    name = "KeyManagerRegistryTest",
-    size = "small",
-    srcs = ["KeyManagerRegistryTest.java"],
-    tags = ["fips"],
+    name = "RegistryMultithreadTest",
+    size = "large",
+    srcs = ["RegistryMultithreadTest.java"],
     deps = [
         "//proto:aes_gcm_java_proto",
         "//proto:ed25519_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:aead",
         "//src/main/java/com/google/crypto/tink:key_manager",
-        "//src/main/java/com/google/crypto/tink:key_manager_registry",
-        "//src/main/java/com/google/crypto/tink:private_key_manager",
         "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
-        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
-        "//src/main/java/com/google/crypto/tink/internal:primitive_factory",
-        "//src/main/java/com/google/crypto/tink/internal:private_key_type_manager",
-        "@maven//:com_google_protobuf_protobuf_java",
-        "@maven//:com_google_truth_truth",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
-    name = "RegistryMultithreadTest",
-    size = "small",
-    srcs = ["RegistryMultithreadTest.java"],
-    deps = [
-        "//proto:aes_gcm_java_proto",
-        "//proto:ed25519_java_proto",
-        "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:key_manager",
-        "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "//src/main/java/com/google/crypto/tink/internal:private_key_type_manager",
         "@maven//:com_google_protobuf_protobuf_java",
@@ -507,12 +443,15 @@ java_test(
         "//src/main/java/com/google/crypto/tink:aead",
         "//src/main/java/com/google/crypto/tink:key",
         "//src/main/java/com/google/crypto/tink:key_status",
-        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:parameters",
         "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "//src/main/java/com/google/crypto/tink/internal:legacy_proto_key",
+        "//src/main/java/com/google/crypto/tink/internal:legacy_proto_parameters",
         "//src/main/java/com/google/crypto/tink/internal:primitive_factory",
+        "//src/main/java/com/google/crypto/tink/internal:proto_parameters_serialization",
         "//src/main/java/com/google/crypto/tink/subtle:aes_gcm_jce",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "@maven//:com_google_protobuf_protobuf_java",
@@ -558,6 +497,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink:tink_proto_keyset_format",
         "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/aead:aes_gcm_parameters",
         "//src/main/java/com/google/crypto/tink/mac:mac_config",
         "//src/main/java/com/google/crypto/tink/signature:signature_config",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
@@ -596,7 +536,6 @@ java_test(
     srcs = ["KeysetHandleFullPrimitiveTest.java"],
     deps = [
         "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
         "//src/main/java/com/google/crypto/tink:key",
         "//src/main/java/com/google/crypto/tink:key_status",
         "//src/main/java/com/google/crypto/tink:mac",
@@ -615,8 +554,6 @@ java_test(
         "//src/main/java/com/google/crypto/tink/mac:aes_cmac_key",
         "//src/main/java/com/google/crypto/tink/mac:aes_cmac_parameters",
         "//src/main/java/com/google/crypto/tink/mac:mac_config",
-        "//src/main/java/com/google/crypto/tink/subtle:prf_aes_cmac",
-        "//src/main/java/com/google/crypto/tink/subtle:prf_mac",
         "//src/main/java/com/google/crypto/tink/util:bytes",
         "//src/main/java/com/google/crypto/tink/util:secret_bytes",
         "@maven//:com_google_code_findbugs_jsr305",
@@ -706,6 +643,27 @@ java_test(
         "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pss_parameters",
         "//src/main/java/com/google/crypto/tink/streamingaead:predefined_streaming_aead_parameters",
         "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "LegacyKeysetSerializationTest",
+    size = "small",
+    srcs = ["LegacyKeysetSerializationTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:binary_keyset_reader",
+        "//src/main/java/com/google/crypto/tink:binary_keyset_writer",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink:key_status",
+        "//src/main/java/com/google/crypto/tink:keyset_writer",
+        "//src/main/java/com/google/crypto/tink:legacy_keyset_serialization",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink:tink_proto_keyset_format",
+        "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/mac:mac_config",
+        "//src/main/java/com/google/crypto/tink/signature:signature_config",
         "@maven//:junit_junit",
     ],
 )

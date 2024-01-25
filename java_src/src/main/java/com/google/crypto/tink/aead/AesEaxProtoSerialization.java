@@ -147,7 +147,7 @@ final class AesEaxProtoSerialization {
       throws GeneralSecurityException {
     if (!serialization.getKeyTemplate().getTypeUrl().equals(TYPE_URL)) {
       throw new IllegalArgumentException(
-          "Wrong type URL in call to AesEaxParameters.parseParameters: "
+          "Wrong type URL in call to AesEaxProtoSerialization.parseParameters: "
               + serialization.getKeyTemplate().getTypeUrl());
     }
     com.google.crypto.tink.proto.AesEaxKeyFormat format;
@@ -173,7 +173,7 @@ final class AesEaxProtoSerialization {
       throws GeneralSecurityException {
     if (!serialization.getTypeUrl().equals(TYPE_URL)) {
       throw new IllegalArgumentException(
-          "Wrong type URL in call to AesEaxParameters.parseParameters");
+          "Wrong type URL in call to AesEaxProtoSerialization.parseKey");
     }
     try {
       com.google.crypto.tink.proto.AesEaxKey protoKey =

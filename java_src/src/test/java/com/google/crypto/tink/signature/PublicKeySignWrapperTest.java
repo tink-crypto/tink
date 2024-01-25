@@ -20,12 +20,13 @@ import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
 import com.google.crypto.tink.internal.testing.FakeMonitoringClient;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
@@ -290,7 +291,9 @@ public class PublicKeySignWrapperTest {
         Keyset.newBuilder()
             .addKey(getPrivateKey(ecdsaPrivateKey, /*keyId=*/ 123, OutputPrefixType.TINK))
             .build();
-    KeysetHandle keysetHandle = CleartextKeysetHandle.fromKeyset(keysetWithoutPrimary);
+    KeysetHandle keysetHandle =
+        TinkProtoKeysetFormat.parseKeyset(
+            keysetWithoutPrimary.toByteArray(), InsecureSecretKeyAccess.get());
     assertThrows(
         GeneralSecurityException.class, () -> keysetHandle.getPrimitive(PublicKeySign.class));
   }

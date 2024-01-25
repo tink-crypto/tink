@@ -16,6 +16,7 @@
 
 #include "tink/experimental/pqcrypto/signature/subtle/sphincs_subtle_utils.h"
 
+#include <cstdint>
 #include <string>
 #include <utility>
 
@@ -39,7 +40,7 @@ crypto::tink::util::StatusOr<SphincsKeyPair> GenerateSphincsKeyPair(
     return valid_parameters;
   }
 
-  util::StatusOr<int32> key_size_index =
+  util::StatusOr<int32_t> key_size_index =
       SphincsKeySizeToIndex(params.private_key_size);
   if (!key_size_index.ok()) {
     return key_size_index.status();
@@ -69,7 +70,7 @@ crypto::tink::util::StatusOr<SphincsKeyPair> GenerateSphincsKeyPair(
   return key_pair;
 }
 
-crypto::tink::util::Status ValidatePrivateKeySize(int32 key_size) {
+crypto::tink::util::Status ValidatePrivateKeySize(int32_t key_size) {
   switch (key_size) {
     case kSphincsPrivateKeySize64:
     case kSphincsPrivateKeySize96:
@@ -85,7 +86,7 @@ crypto::tink::util::Status ValidatePrivateKeySize(int32 key_size) {
   }
 }
 
-crypto::tink::util::Status ValidatePublicKeySize(int32 key_size) {
+crypto::tink::util::Status ValidatePublicKeySize(int32_t key_size) {
   switch (key_size) {
     case kSphincsPublicKeySize32:
     case kSphincsPublicKeySize48:
@@ -101,7 +102,7 @@ crypto::tink::util::Status ValidatePublicKeySize(int32 key_size) {
   }
 }
 
-crypto::tink::util::StatusOr<int32> SphincsKeySizeToIndex(int32 key_size) {
+crypto::tink::util::StatusOr<int32_t> SphincsKeySizeToIndex(int32_t key_size) {
   switch (key_size) {
     case kSphincsPrivateKeySize64:
       return 0;

@@ -69,7 +69,8 @@ TEST_F(PrfConfigTest, RegisterNonFipsTemplates) {
   non_fips_key_templates.push_back(PrfKeyTemplates::AesCmac());
 
   for (auto key_template : non_fips_key_templates) {
-    auto new_keyset_handle_result = KeysetHandle::GenerateNew(key_template);
+    auto new_keyset_handle_result =
+        KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry());
     EXPECT_THAT(new_keyset_handle_result.status(),
                 StatusIs(absl::StatusCode::kNotFound));
   }
@@ -87,7 +88,8 @@ TEST_F(PrfConfigTest, RegisterFipsValidTemplates) {
   fips_key_templates.push_back(PrfKeyTemplates::HmacSha512());
 
   for (auto key_template : fips_key_templates) {
-    auto new_keyset_handle_result = KeysetHandle::GenerateNew(key_template);
+    auto new_keyset_handle_result =
+        KeysetHandle::GenerateNew(key_template, KeyGenConfigGlobalRegistry());
     EXPECT_THAT(new_keyset_handle_result, IsOk());
   }
 }

@@ -32,9 +32,9 @@ java_test(
 )
 
 java_test(
-    name = "WriteKeyserExampleTest",
+    name = "WriteKeysetExampleTest",
     size = "small",
-    srcs = ["WriteKeyserExampleTest.java"],
+    srcs = ["WriteKeysetExampleTest.java"],
     deps = [
         "//walkthrough/src/main/java/walkthrough:obtain_and_use_aead_primitive_example",
         "//walkthrough/src/main/java/walkthrough:write_keyset_example",
@@ -66,5 +66,35 @@ java_test(
         "@tink_java//src/main/java/com/google/crypto/tink:tink_json_proto_keyset_format",
         "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_config",
         "@tink_java//src/main/java/com/google/crypto/tink/testing:fake_kms_client",
+    ],
+)
+
+java_test(
+    name = "ReadCleartextKeysetExampleTest",
+    size = "small",
+    srcs = ["ReadCleartextKeysetExampleTest.java"],
+    deps = [
+        "//walkthrough/src/main/java/walkthrough:obtain_and_use_aead_primitive_example",
+        "//walkthrough/src/main/java/walkthrough:read_cleartext_keyset_example",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_config",
+    ],
+)
+
+java_test(
+    name = "WriteCleartextKeysetExampleTest",
+    size = "small",
+    srcs = ["WriteCleartextKeysetExampleTest.java"],
+    deps = [
+        "//walkthrough/src/main/java/walkthrough:obtain_and_use_aead_primitive_example",
+        "//walkthrough/src/main/java/walkthrough:write_cleartext_keyset_example",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@tink_java//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
+        "@tink_java//src/main/java/com/google/crypto/tink:tink_json_proto_keyset_format",
+        "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_config",
     ],
 )

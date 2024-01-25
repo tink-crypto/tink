@@ -54,8 +54,8 @@ class SlowBytesIO(io.BytesIO):
     self._seekable = seekable
     self._state = -1
 
-  def read(self, size: int = -1) -> bytes:
-    if size > 0:
+  def read(self, size: Optional[int] = -1) -> bytes:
+    if size and size > 0:
       self._state += 1
       if self._state > 10000000:
         raise AssertionError('too many read. Is there an infinite loop?')

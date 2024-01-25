@@ -64,7 +64,10 @@ func TestAESGCMSIVGetPrimitiveWithInvalidInput(t *testing.T) {
 	// invalid AESGCMSIVKey
 	testKeys := genInvalidAESGCMSIVKeys()
 	for i := 0; i < len(testKeys); i++ {
-		serializedKey, _ := proto.Marshal(testKeys[i])
+		serializedKey, err := proto.Marshal(testKeys[i])
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		if _, err := keyManager.Primitive(serializedKey); err == nil {
 			t.Errorf("Primitive(serializedKey=%v): Key %d, got err = nil, want err != nil.", serializedKey, i)
 		}
@@ -146,7 +149,10 @@ func TestAESGCMSIVNewKeyWithInvalidInput(t *testing.T) {
 	// bad format
 	badFormats := genInvalidAESGCMSIVKeyFormats()
 	for i := 0; i < len(badFormats); i++ {
-		serializedFormat, _ := proto.Marshal(badFormats[i])
+		serializedFormat, err := proto.Marshal(badFormats[i])
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		if _, err := keyManager.NewKey(serializedFormat); err == nil {
 			t.Errorf("NewKey(serializedKeyFormat=%v): Key %d, got err = nil, want err != nil", serializedFormat, i)
 		}

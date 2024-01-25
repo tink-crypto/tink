@@ -18,33 +18,26 @@ package com.google.crypto.tink.jwt;
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.internal.KeyTypeManager;
-import com.google.crypto.tink.proto.JwtEcdsaAlgorithm;
-import com.google.crypto.tink.proto.JwtEcdsaKeyFormat;
-import com.google.crypto.tink.proto.JwtEcdsaPrivateKey;
-import com.google.crypto.tink.proto.JwtEcdsaPublicKey;
-import com.google.crypto.tink.proto.JwtEcdsaPublicKey.CustomKid;
-import com.google.crypto.tink.proto.KeyData;
-import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.proto.Keyset;
+import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.PublicKeySign;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
+import com.google.crypto.tink.signature.EcdsaParameters;
+import com.google.crypto.tink.signature.EcdsaPrivateKey;
+import com.google.crypto.tink.signature.EcdsaPublicKey;
+import com.google.crypto.tink.signature.SignatureConfig;
 import com.google.crypto.tink.subtle.Base64;
-import com.google.crypto.tink.subtle.EcdsaSignJce;
-import com.google.crypto.tink.subtle.EllipticCurves;
-import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
-import com.google.crypto.tink.subtle.Enums;
-import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.gson.JsonObject;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
+import java.math.BigInteger;
 import java.security.GeneralSecurityException;
-import java.security.interfaces.ECPrivateKey;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
@@ -63,20 +56,15 @@ public class JwtEcdsaSignKeyManagerTest {
   @BeforeClass
   public static void setUp() throws Exception {
     JwtSignatureConfig.register();
-  }
-
-  private final JwtEcdsaSignKeyManager manager = new JwtEcdsaSignKeyManager();
-  private final KeyTypeManager.KeyFactory<JwtEcdsaKeyFormat, JwtEcdsaPrivateKey> factory =
-      manager.keyFactory();
-
-  private static JwtEcdsaKeyFormat createKeyFormat(JwtEcdsaAlgorithm algorithm) {
-    return JwtEcdsaKeyFormat.newBuilder().setAlgorithm(algorithm).build();
+    SignatureConfig.register();
   }
 
   @DataPoints("parametersAlgos")
-  public static final JwtEcdsaAlgorithm[] PARAMETERS_ALGOS =
-      new JwtEcdsaAlgorithm[] {
-        JwtEcdsaAlgorithm.ES256, JwtEcdsaAlgorithm.ES384, JwtEcdsaAlgorithm.ES512
+  public static final JwtEcdsaParameters.Algorithm[] PARAMETERS_ALGOS =
+      new JwtEcdsaParameters.Algorithm[] {
+        JwtEcdsaParameters.Algorithm.ES256,
+        JwtEcdsaParameters.Algorithm.ES384,
+        JwtEcdsaParameters.Algorithm.ES512
       };
 
   @DataPoints("templates")
@@ -86,96 +74,15 @@ public class JwtEcdsaSignKeyManagerTest {
       };
 
   @Test
-  public void basics() throws Exception {
-    assertThat(manager.getKeyType())
-        .isEqualTo("type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey");
-    assertThat(manager.getVersion()).isEqualTo(0);
-    assertThat(manager.keyMaterialType()).isEqualTo(KeyMaterialType.ASYMMETRIC_PRIVATE);
-  }
-
-  @Test
-  public void validateKeyFormat_empty_throw() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(JwtEcdsaKeyFormat.getDefaultInstance()));
-  }
-
-  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
-  @Theory
-  public void validateKeyFormat_ok(@FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm)
-      throws GeneralSecurityException {
-    JwtEcdsaKeyFormat format = createKeyFormat(algorithm);
-    factory.validateKeyFormat(format);
-  }
-
-  private static void checkConsistency(JwtEcdsaPrivateKey privateKey, JwtEcdsaKeyFormat keyFormat) {
-    assertThat(privateKey.getPublicKey().getAlgorithm()).isEqualTo(keyFormat.getAlgorithm());
-  }
-
-  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
-  @Theory
-  public void createKeys_ok(@FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm)
-      throws Exception {
-
-    JwtEcdsaKeyFormat format = createKeyFormat(algorithm);
-    JwtEcdsaPrivateKey key = factory.createKey(format);
-    checkConsistency(key, format);
-  }
-
-  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
-  @Theory
-  public void createKey_alwaysNewElement_ok(
-      @FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm) throws Exception {
-
-    JwtEcdsaKeyFormat format = createKeyFormat(algorithm);
-    Set<String> keys = new TreeSet<>();
-    // Calls newKey multiple times and make sure that they generate different keys -- takes about a
-    // second per key.
-    int numTests = 5;
-    for (int i = 0; i < numTests; i++) {
-      JwtEcdsaPrivateKey key = factory.createKey(format);
-      keys.add(Hex.encode(key.getKeyValue().toByteArray()));
+  public void callingCreateTwiceGivesDifferentKeys() throws Exception {
+    int numKeys = 10;
+    Parameters p = KeyTemplates.get("JWT_ES256").toParameters();
+    Set<BigInteger> keys = new TreeSet<>();
+    for (int i = 0; i < numKeys; ++i) {
+      JwtEcdsaPrivateKey key = (JwtEcdsaPrivateKey) KeysetHandle.generateNew(p).getAt(0).getKey();
+      keys.add(key.getPrivateValue().getBigInteger(InsecureSecretKeyAccess.get()));
     }
-    assertThat(keys).hasSize(numTests);
-  }
-
-  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
-  @Theory
-  public void getPublicKey_checkValues(
-      @FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm) throws Exception {
-    JwtEcdsaPrivateKey privateKey = factory.createKey(createKeyFormat(algorithm));
-    JwtEcdsaPublicKey publicKey = manager.getPublicKey(privateKey);
-
-    assertThat(publicKey).isEqualTo(privateKey.getPublicKey());
-  }
-
-  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
-  @Theory
-  public void createCorruptedPublicKeyPrimitive_throws(
-      @FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm) throws Exception {
-
-    JwtEcdsaKeyFormat format = createKeyFormat(algorithm);
-    JwtEcdsaPrivateKey originalKey = factory.createKey(format);
-    byte[] originalPubX = originalKey.getPublicKey().getX().toByteArray();
-    byte[] originalPubY = originalKey.getPublicKey().getY().toByteArray();
-    originalPubX[0] = (byte) (originalPubX[0] ^ 0x01);
-    ByteString corruptedPubX = ByteString.copyFrom(originalPubX);
-    JwtEcdsaPublicKey corruptedPub =
-        JwtEcdsaPublicKey.newBuilder()
-            .setVersion(originalKey.getPublicKey().getVersion())
-            .setAlgorithm(algorithm)
-            .setX(corruptedPubX)
-            .setY(ByteString.copyFrom(originalPubY))
-            .build();
-    JwtEcdsaPrivateKey corruptedKey =
-        JwtEcdsaPrivateKey.newBuilder()
-            .setVersion(originalKey.getVersion())
-            .setPublicKey(corruptedPub)
-            .setKeyValue(originalKey.getKeyValue())
-            .build();
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> manager.getPrimitive(corruptedKey, JwtPublicKeySignInternal.class));
+    assertThat(keys).hasSize(numKeys);
   }
 
   @Test
@@ -398,7 +305,7 @@ public class JwtEcdsaSignKeyManagerTest {
   }
 
   private static String generateSignedCompact(
-      EcdsaSignJce rawSigner, JsonObject header, JsonObject payload)
+      PublicKeySign rawSigner, JsonObject header, JsonObject payload)
       throws GeneralSecurityException {
     String payloadBase64 = Base64.urlSafeEncode(payload.toString().getBytes(UTF_8));
     String headerBase64 = Base64.urlSafeEncode(header.toString().getBytes(UTF_8));
@@ -411,19 +318,40 @@ public class JwtEcdsaSignKeyManagerTest {
   @Test
   public void createSignVerifyRaw_withDifferentHeaders() throws Exception {
     assumeFalse(TestUtil.isTsan());  // KeysetHandle.generateNew is too slow in Tsan.
-    KeyTemplate template = KeyTemplates.get("JWT_ES256_RAW");
-    KeysetHandle handle = KeysetHandle.generateNew(template);
-    Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
-    JwtEcdsaPrivateKey keyProto =
-        JwtEcdsaPrivateKey.parseFrom(
-            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    ECPrivateKey privateKey =
-        EllipticCurves.getEcPrivateKey(
-            JwtEcdsaVerifyKeyManager.getCurve(keyProto.getPublicKey().getAlgorithm()),
-            keyProto.getKeyValue().toByteArray());
-    JwtEcdsaAlgorithm algorithm = keyProto.getPublicKey().getAlgorithm();
-    Enums.HashType hash = JwtEcdsaVerifyKeyManager.hashForEcdsaAlgorithm(algorithm);
-    EcdsaSignJce rawSigner = new EcdsaSignJce(privateKey, hash, EcdsaEncoding.IEEE_P1363);
+    KeysetHandle handle =
+        KeysetHandle.generateNew(
+            JwtEcdsaParameters.builder()
+                .setAlgorithm(JwtEcdsaParameters.Algorithm.ES256)
+                .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
+                .build());
+
+    com.google.crypto.tink.jwt.JwtEcdsaPrivateKey key =
+        (com.google.crypto.tink.jwt.JwtEcdsaPrivateKey) handle.getAt(0).getKey();
+    EcdsaParameters nonJwtParameters =
+        EcdsaParameters.builder()
+            // JWT uses IEEE_P1363
+            .setSignatureEncoding(EcdsaParameters.SignatureEncoding.IEEE_P1363)
+            .setCurveType(EcdsaParameters.CurveType.NIST_P256)
+            .setHashType(EcdsaParameters.HashType.SHA256)
+            .setVariant(EcdsaParameters.Variant.NO_PREFIX)
+            .build();
+    EcdsaPublicKey nonJwtPublicKey =
+        EcdsaPublicKey.builder()
+            .setParameters(nonJwtParameters)
+            .setPublicPoint(key.getPublicKey().getPublicPoint())
+            .build();
+    EcdsaPrivateKey nonJwtPrivateKey =
+        EcdsaPrivateKey.builder()
+            .setPublicKey(nonJwtPublicKey)
+            .setPrivateValue(key.getPrivateValue())
+            .build();
+    // This nonJwtSigner computes signatures in the same way as one obtained from handle -- except
+    // that it doesn't do any of the JWT stuff.
+    PublicKeySign nonJwtSigner =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(nonJwtPrivateKey).makePrimary().withRandomId())
+            .build()
+            .getPrimitive(PublicKeySign.class);
 
     JsonObject payload = new JsonObject();
     payload.addProperty("jid", "jwtId");
@@ -434,14 +362,14 @@ public class JwtEcdsaSignKeyManagerTest {
     // Normal, valid signed compact.
     JsonObject normalHeader = new JsonObject();
     normalHeader.addProperty("alg", "ES256");
-    String normalSignedCompact = generateSignedCompact(rawSigner, normalHeader, payload);
+    String normalSignedCompact = generateSignedCompact(nonJwtSigner, normalHeader, payload);
     Object unused = verifier.verifyAndDecode(normalSignedCompact, validator);
 
     // valid token, with "typ" set in the header
     JsonObject goodHeader = new JsonObject();
     goodHeader.addProperty("alg", "ES256");
     goodHeader.addProperty("typ", "typeHeader");
-    String goodSignedCompact = generateSignedCompact(rawSigner, goodHeader, payload);
+    String goodSignedCompact = generateSignedCompact(nonJwtSigner, goodHeader, payload);
     unused =
         verifier.verifyAndDecode(
             goodSignedCompact,
@@ -452,7 +380,7 @@ public class JwtEcdsaSignKeyManagerTest {
 
     // invalid token with an empty header
     JsonObject emptyHeader = new JsonObject();
-    String emptyHeaderSignedCompact = generateSignedCompact(rawSigner, emptyHeader, payload);
+    String emptyHeaderSignedCompact = generateSignedCompact(nonJwtSigner, emptyHeader, payload);
     assertThrows(
         GeneralSecurityException.class,
         () -> verifier.verifyAndDecode(emptyHeaderSignedCompact, validator));
@@ -460,7 +388,7 @@ public class JwtEcdsaSignKeyManagerTest {
     // invalid token with a valid but incorrect algorithm in the header
     JsonObject badAlgoHeader = new JsonObject();
     badAlgoHeader.addProperty("alg", "RS256");
-    String badAlgoSignedCompact = generateSignedCompact(rawSigner, badAlgoHeader, payload);
+    String badAlgoSignedCompact = generateSignedCompact(nonJwtSigner, badAlgoHeader, payload);
     assertThrows(
         GeneralSecurityException.class,
         () -> verifier.verifyAndDecode(badAlgoSignedCompact, validator));
@@ -469,28 +397,49 @@ public class JwtEcdsaSignKeyManagerTest {
     JsonObject unknownKidHeader = new JsonObject();
     unknownKidHeader.addProperty("alg", "ES256");
     unknownKidHeader.addProperty("kid", "unknown");
-    String unknownKidSignedCompact = generateSignedCompact(rawSigner, unknownKidHeader, payload);
+    String unknownKidSignedCompact = generateSignedCompact(nonJwtSigner, unknownKidHeader, payload);
     unused = verifier.verifyAndDecode(unknownKidSignedCompact, validator);
   }
 
   @Test
   public void createSignVerifyTink_withDifferentHeaders() throws Exception {
     assumeFalse(TestUtil.isTsan()); // KeysetHandle.generateNew is too slow in Tsan.
-    KeyTemplate template = KeyTemplates.get("JWT_ES256");
-    KeysetHandle handle = KeysetHandle.generateNew(template);
-    Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
-    JwtEcdsaPrivateKey keyProto =
-        JwtEcdsaPrivateKey.parseFrom(
-            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    ECPrivateKey privateKey =
-        EllipticCurves.getEcPrivateKey(
-            JwtEcdsaVerifyKeyManager.getCurve(keyProto.getPublicKey().getAlgorithm()),
-            keyProto.getKeyValue().toByteArray());
-    JwtEcdsaAlgorithm algorithm = keyProto.getPublicKey().getAlgorithm();
-    Enums.HashType hash = JwtEcdsaVerifyKeyManager.hashForEcdsaAlgorithm(algorithm);
-    EcdsaSignJce rawSigner = new EcdsaSignJce(privateKey, hash, EcdsaEncoding.IEEE_P1363);
-    String kid =
-        JwtFormat.getKid(keyset.getKey(0).getKeyId(), keyset.getKey(0).getOutputPrefixType()).get();
+    KeysetHandle handle =
+        KeysetHandle.generateNew(
+            JwtEcdsaParameters.builder()
+                .setAlgorithm(JwtEcdsaParameters.Algorithm.ES256)
+                .setKidStrategy(JwtEcdsaParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+                .build());
+
+    com.google.crypto.tink.jwt.JwtEcdsaPrivateKey key =
+        (com.google.crypto.tink.jwt.JwtEcdsaPrivateKey) handle.getAt(0).getKey();
+    EcdsaParameters nonJwtParameters =
+        EcdsaParameters.builder()
+            // JWT uses IEEE_P1363
+            .setSignatureEncoding(EcdsaParameters.SignatureEncoding.IEEE_P1363)
+            .setCurveType(EcdsaParameters.CurveType.NIST_P256)
+            .setHashType(EcdsaParameters.HashType.SHA256)
+            .setVariant(EcdsaParameters.Variant.NO_PREFIX)
+            .build();
+    EcdsaPublicKey nonJwtPublicKey =
+        EcdsaPublicKey.builder()
+            .setParameters(nonJwtParameters)
+            .setPublicPoint(key.getPublicKey().getPublicPoint())
+            .build();
+    EcdsaPrivateKey nonJwtPrivateKey =
+        EcdsaPrivateKey.builder()
+            .setPublicKey(nonJwtPublicKey)
+            .setPrivateValue(key.getPrivateValue())
+            .build();
+    // This nonJwtSigner computes signatures in the same way as one obtained from handle -- except
+    // that it doesn't do any of the JWT stuff.
+    PublicKeySign nonJwtSigner =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(nonJwtPrivateKey).makePrimary().withRandomId())
+            .build()
+            .getPrimitive(PublicKeySign.class);
+
+    String kid = key.getPublicKey().getKid().get();
 
     JsonObject payload = new JsonObject();
     payload.addProperty("jti", "jwtId");
@@ -502,20 +451,20 @@ public class JwtEcdsaSignKeyManagerTest {
     JsonObject normalHeader = new JsonObject();
     normalHeader.addProperty("alg", "ES256");
     normalHeader.addProperty("kid", kid);
-    String normalToken = generateSignedCompact(rawSigner, normalHeader, payload);
+    String normalToken = generateSignedCompact(nonJwtSigner, normalHeader, payload);
     Object unused = verifier.verifyAndDecode(normalToken, validator);
 
     // token without kid are rejected, even if they are valid.
     JsonObject headerWithoutKid = new JsonObject();
     headerWithoutKid.addProperty("alg", "ES256");
-    String tokenWithoutKid = generateSignedCompact(rawSigner, headerWithoutKid, payload);
+    String tokenWithoutKid = generateSignedCompact(nonJwtSigner, headerWithoutKid, payload);
     assertThrows(
         GeneralSecurityException.class, () -> verifier.verifyAndDecode(tokenWithoutKid, validator));
 
     // token without algorithm in the header
     JsonObject headerWithoutAlg = new JsonObject();
     headerWithoutAlg.addProperty("kid", kid);
-    String tokenWithoutAlg = generateSignedCompact(rawSigner, headerWithoutAlg, payload);
+    String tokenWithoutAlg = generateSignedCompact(nonJwtSigner, headerWithoutAlg, payload);
     assertThrows(
         GeneralSecurityException.class, () -> verifier.verifyAndDecode(tokenWithoutAlg, validator));
 
@@ -523,7 +472,7 @@ public class JwtEcdsaSignKeyManagerTest {
     JsonObject headerWithBadAlg = new JsonObject();
     headerWithBadAlg.addProperty("kid", kid);
     headerWithBadAlg.addProperty("alg", "RS256");
-    String badAlgToken = generateSignedCompact(rawSigner, headerWithBadAlg, payload);
+    String badAlgToken = generateSignedCompact(nonJwtSigner, headerWithBadAlg, payload);
     assertThrows(
         GeneralSecurityException.class, () -> verifier.verifyAndDecode(badAlgToken, validator));
 
@@ -531,7 +480,7 @@ public class JwtEcdsaSignKeyManagerTest {
     JsonObject unknownKidHeader = new JsonObject();
     unknownKidHeader.addProperty("alg", "ES256");
     unknownKidHeader.addProperty("kid", "unknown");
-    String unknownKidSignedCompact = generateSignedCompact(rawSigner, unknownKidHeader, payload);
+    String unknownKidSignedCompact = generateSignedCompact(nonJwtSigner, unknownKidHeader, payload);
     assertThrows(
         GeneralSecurityException.class,
         () -> verifier.verifyAndDecode(unknownKidSignedCompact, validator));
@@ -540,22 +489,25 @@ public class JwtEcdsaSignKeyManagerTest {
   /* Create a new keyset handle with the "custom_kid" value set. */
   private KeysetHandle withCustomKid(KeysetHandle keysetHandle, String customKid)
       throws Exception {
-    Keyset keyset = CleartextKeysetHandle.getKeyset(keysetHandle);
-    JwtEcdsaPrivateKey privateKey =
-        JwtEcdsaPrivateKey.parseFrom(
-            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    JwtEcdsaPublicKey publicKeyWithKid =
-        privateKey.getPublicKey().toBuilder()
-            .setCustomKid(CustomKid.newBuilder().setValue(customKid).build())
+    com.google.crypto.tink.jwt.JwtEcdsaPrivateKey originalPrivateKey =
+        (com.google.crypto.tink.jwt.JwtEcdsaPrivateKey) keysetHandle.getAt(0).getKey();
+    JwtEcdsaParameters customKidParameters =
+        JwtEcdsaParameters.builder()
+            .setAlgorithm(originalPrivateKey.getParameters().getAlgorithm())
+            .setKidStrategy(JwtEcdsaParameters.KidStrategy.CUSTOM)
             .build();
-    JwtEcdsaPrivateKey privateKeyWithKid =
-        privateKey.toBuilder().setPublicKey(publicKeyWithKid).build();
-    KeyData keyDataWithKid =
-        keyset.getKey(0).getKeyData().toBuilder()
-            .setValue(privateKeyWithKid.toByteString())
+    com.google.crypto.tink.jwt.JwtEcdsaPublicKey customKidPublicKey =
+        com.google.crypto.tink.jwt.JwtEcdsaPublicKey.builder()
+            .setParameters(customKidParameters)
+            .setPublicPoint(originalPrivateKey.getPublicKey().getPublicPoint())
+            .setCustomKid(customKid)
             .build();
-    Keyset.Key keyWithKid = keyset.getKey(0).toBuilder().setKeyData(keyDataWithKid).build();
-    return CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
+    com.google.crypto.tink.jwt.JwtEcdsaPrivateKey customKidPrivateKey =
+        com.google.crypto.tink.jwt.JwtEcdsaPrivateKey.create(
+            customKidPublicKey, originalPrivateKey.getPrivateValue());
+    return KeysetHandle.newBuilder()
+        .addEntry(KeysetHandle.importKey(customKidPrivateKey).makePrimary().withRandomId())
+        .build();
   }
 
   @Test
@@ -617,5 +569,25 @@ public class JwtEcdsaSignKeyManagerTest {
     assertThrows(
         JwtInvalidException.class,
         () -> verifierWithWrongKid.verifyAndDecode(signedCompactWithKid, validator));
+  }
+
+  @Test
+  public void serializeAndDeserializeKeysets() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_ES256_RAW");
+    KeysetHandle handle = KeysetHandle.generateNew(template);
+
+    byte[] serializedKeyset =
+        TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get());
+    KeysetHandle parsed =
+        TinkProtoKeysetFormat.parseKeyset(serializedKeyset, InsecureSecretKeyAccess.get());
+    assertTrue(parsed.equalsKeyset(handle));
+  }
+
+  @Test
+  public void testKeyManagersRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getUntypedKeyManager("type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey"))
+        .isNotNull();
   }
 }

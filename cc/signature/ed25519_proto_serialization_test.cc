@@ -72,6 +72,11 @@ class Ed25519ProtoSerializationTest : public TestWithParam<TestCase> {
   }
 };
 
+TEST_F(Ed25519ProtoSerializationTest, RegisterTwiceSucceeds) {
+  ASSERT_THAT(RegisterEd25519ProtoSerialization(), IsOk());
+  ASSERT_THAT(RegisterEd25519ProtoSerialization(), IsOk());
+}
+
 INSTANTIATE_TEST_SUITE_P(
     Ed25519ProtoSerializationTestSuite, Ed25519ProtoSerializationTest,
     Values(TestCase{Ed25519Parameters::Variant::kTink, OutputPrefixType::TINK,

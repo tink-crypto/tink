@@ -18,170 +18,103 @@ package com.google.crypto.tink.mac;
 
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
 
+import com.google.crypto.tink.AccessesPartialKey;
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
+import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
+import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
-import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.mac.internal.ChunkedAesCmacImpl;
-import com.google.crypto.tink.proto.AesCmacKey;
-import com.google.crypto.tink.proto.AesCmacKeyFormat;
-import com.google.crypto.tink.proto.AesCmacParams;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.subtle.PrfAesCmac;
 import com.google.crypto.tink.subtle.PrfMac;
-import com.google.crypto.tink.subtle.Random;
-import com.google.crypto.tink.subtle.Validators;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.crypto.tink.util.SecretBytes;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * This key manager generates new {@code AesCmacKey} keys and produces new instances of {@code
  * AesCmac}.
  */
-public final class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
-  AesCmacKeyManager() {
-    super(
-        AesCmacKey.class,
-        new PrimitiveFactory<Mac, AesCmacKey>(Mac.class) {
-          @Override
-          public Mac getPrimitive(AesCmacKey key) throws GeneralSecurityException {
-            return new PrfMac(
-                new PrfAesCmac(key.getKeyValue().toByteArray()), key.getParams().getTagSize());
-          }
-        });
-  }
-
-  private static final int VERSION = 0;
+public final class AesCmacKeyManager {
   private static final int KEY_SIZE_IN_BYTES = 32;
-  private static final int MIN_TAG_SIZE_IN_BYTES = 10;
-  private static final int MAX_TAG_SIZE_IN_BYTES = 16;
-  private static final PrimitiveConstructor<com.google.crypto.tink.mac.AesCmacKey, ChunkedMac>
-      CHUNKED_MAC_PRIMITIVE_CONSTRUCTOR =
-          PrimitiveConstructor.create(
-              ChunkedAesCmacImpl::new,
-              com.google.crypto.tink.mac.AesCmacKey.class,
-              ChunkedMac.class);
-  private static final PrimitiveConstructor<com.google.crypto.tink.mac.AesCmacKey, Mac>
-      MAC_PRIMITIVE_CONSTRUCTOR =
-      PrimitiveConstructor.create(
-          PrfMac::create,
-          com.google.crypto.tink.mac.AesCmacKey.class,
-          Mac.class);
 
-  @Override
-  public String getKeyType() {
-    return "type.googleapis.com/google.crypto.tink.AesCmacKey";
-  }
-
-  @Override
-  public int getVersion() {
-    return VERSION;
-  }
-
-  @Override
-  public KeyMaterialType keyMaterialType() {
-    return KeyMaterialType.SYMMETRIC;
-  }
-
-  @Override
-  public void validateKey(AesCmacKey key) throws GeneralSecurityException {
-    Validators.validateVersion(key.getVersion(), getVersion());
-    validateSize(key.getKeyValue().size());
-    validateParams(key.getParams());
-  }
-
-  @Override
-  public AesCmacKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-    return AesCmacKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-  }
-
-  private static void validateParams(AesCmacParams params) throws GeneralSecurityException {
-    if (params.getTagSize() < MIN_TAG_SIZE_IN_BYTES) {
-      throw new GeneralSecurityException("tag size too short");
-    }
-    if (params.getTagSize() > MAX_TAG_SIZE_IN_BYTES) {
-      throw new GeneralSecurityException("tag size too long");
-    }
-  }
-
-  private static void validateSize(int size) throws GeneralSecurityException {
-    if (size != KEY_SIZE_IN_BYTES) {
+  // AesCmacParameters can be instantiated with 16 byte keys, but we only allow 32 byte keys
+  // with non-subtle API.
+  private static void validateParameters(AesCmacParameters parameters)
+      throws GeneralSecurityException {
+    if (parameters.getKeySizeBytes() != KEY_SIZE_IN_BYTES) {
       throw new GeneralSecurityException("AesCmacKey size wrong, must be 32 bytes");
     }
   }
 
-  @Override
-  public KeyFactory<AesCmacKeyFormat, AesCmacKey> keyFactory() {
-    return new KeyFactory<AesCmacKeyFormat, AesCmacKey>(AesCmacKeyFormat.class) {
-      @Override
-      public void validateKeyFormat(AesCmacKeyFormat format) throws GeneralSecurityException {
-        validateParams(format.getParams());
-        validateSize(format.getKeySize());
-      }
-
-      @Override
-      public AesCmacKeyFormat parseKeyFormat(ByteString byteString)
-          throws InvalidProtocolBufferException {
-        return AesCmacKeyFormat.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-      }
-
-      @Override
-      public AesCmacKey createKey(AesCmacKeyFormat format) throws GeneralSecurityException {
-        return AesCmacKey.newBuilder()
-            .setVersion(VERSION)
-            .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
-            .setParams(format.getParams())
-            .build();
-      }
-
-      @Override
-      public Map<String, KeyFactory.KeyFormat<AesCmacKeyFormat>> keyFormats()
-          throws GeneralSecurityException {
-        Map<String, KeyFactory.KeyFormat<AesCmacKeyFormat>> result = new HashMap<>();
-        result.put(
-            "AES_CMAC", // backward compatibility with MacKeyTemplates
-            new KeyFactory.KeyFormat<>(
-                AesCmacKeyFormat.newBuilder()
-                    .setKeySize(32)
-                    .setParams(AesCmacParams.newBuilder().setTagSize(16).build())
-                    .build(),
-                KeyTemplate.OutputPrefixType.TINK));
-        result.put(
-            "AES256_CMAC",
-            new KeyFactory.KeyFormat<>(
-                AesCmacKeyFormat.newBuilder()
-                    .setKeySize(32)
-                    .setParams(AesCmacParams.newBuilder().setTagSize(16).build())
-                    .build(),
-                KeyTemplate.OutputPrefixType.TINK));
-        result.put(
-            "AES256_CMAC_RAW",
-            new KeyFactory.KeyFormat<>(
-                AesCmacKeyFormat.newBuilder()
-                    .setKeySize(32)
-                    .setParams(AesCmacParams.newBuilder().setTagSize(16).build())
-                    .build(),
-                KeyTemplate.OutputPrefixType.RAW));
-        return Collections.unmodifiableMap(result);
-      }
-    };
+  @AccessesPartialKey
+  private static AesCmacKey createAesCmacKey(
+      AesCmacParameters parameters, @Nullable Integer idRequirement)
+      throws GeneralSecurityException {
+    validateParameters(parameters);
+    return AesCmacKey.builder()
+        .setParameters(parameters)
+        .setAesKeyBytes(SecretBytes.randomBytes(parameters.getKeySizeBytes()))
+        .setIdRequirement(idRequirement)
+        .build();
   }
 
+  private static ChunkedMac createChunkedMac(AesCmacKey key) throws GeneralSecurityException {
+    validateParameters(key.getParameters());
+    return new ChunkedAesCmacImpl(key);
+  }
+
+  private static Mac createMac(AesCmacKey key) throws GeneralSecurityException {
+    validateParameters(key.getParameters());
+    return PrfMac.create(key);
+  }
+
+  private static final MutableKeyCreationRegistry.KeyCreator<AesCmacParameters> KEY_CREATOR =
+      AesCmacKeyManager::createAesCmacKey;
+  private static final PrimitiveConstructor<AesCmacKey, ChunkedMac>
+      CHUNKED_MAC_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              AesCmacKeyManager::createChunkedMac, AesCmacKey.class, ChunkedMac.class);
+  private static final PrimitiveConstructor<AesCmacKey, Mac> MAC_PRIMITIVE_CONSTRUCTOR =
+      PrimitiveConstructor.create(AesCmacKeyManager::createMac, AesCmacKey.class, Mac.class);
+  private static final KeyManager<Mac> legacyKeyManager =
+      LegacyKeyManagerImpl.create(
+          "type.googleapis.com/google.crypto.tink.AesCmacKey",
+          Mac.class,
+          KeyMaterialType.SYMMETRIC,
+          com.google.crypto.tink.proto.AesCmacKey.parser());
+
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
-    Registry.registerKeyManager(new AesCmacKeyManager(), newKeyAllowed);
     AesCmacProtoSerialization.register();
+    MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, AesCmacParameters.class);
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(CHUNKED_MAC_PRIMITIVE_CONSTRUCTOR);
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(MAC_PRIMITIVE_CONSTRUCTOR);
+    MutableParametersRegistry.globalInstance().putAll(namedParameters());
+    Registry.registerKeyManager(legacyKeyManager, newKeyAllowed);
+  }
+
+  private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {
+    Map<String, Parameters> result = new HashMap<>();
+    result.put("AES_CMAC", PredefinedMacParameters.AES_CMAC);
+    result.put("AES256_CMAC", PredefinedMacParameters.AES_CMAC);
+    result.put(
+        "AES256_CMAC_RAW",
+        AesCmacParameters.builder()
+            .setKeySizeBytes(32)
+            .setTagSizeBytes(16)
+            .setVariant(AesCmacParameters.Variant.NO_PREFIX)
+            .build());
+    return Collections.unmodifiableMap(result);
   }
 
   /**
@@ -223,4 +156,6 @@ public final class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
                     .setVariant(AesCmacParameters.Variant.NO_PREFIX)
                     .build()));
   }
+
+  private AesCmacKeyManager() {}
 }

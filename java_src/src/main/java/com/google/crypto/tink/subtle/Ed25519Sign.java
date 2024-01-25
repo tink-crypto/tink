@@ -16,10 +16,14 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.AccessesPartialKey;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.Ed25519;
 import com.google.crypto.tink.internal.Field25519;
+import com.google.crypto.tink.signature.Ed25519Parameters;
+import com.google.crypto.tink.signature.Ed25519PrivateKey;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
@@ -45,15 +49,22 @@ public final class Ed25519Sign implements PublicKeySign {
 
   private final byte[] hashedPrivateKey;
   private final byte[] publicKey;
+  private final byte[] outputPrefix;
+  private final byte[] messageSuffix;
 
-  /**
-   * Constructs a Ed25519Sign with the {@code privateKey}.
-   *
-   * @param privateKey 32-byte random sequence.
-   * @throws GeneralSecurityException if there is no SHA-512 algorithm defined in {@link
-   *     EngineFactory}.MESSAGE_DIGEST.
-   */
-  public Ed25519Sign(final byte[] privateKey) throws GeneralSecurityException {
+  @AccessesPartialKey
+  public static PublicKeySign create(Ed25519PrivateKey key) throws GeneralSecurityException {
+    return new Ed25519Sign(
+        key.getPrivateKeyBytes().toByteArray(InsecureSecretKeyAccess.get()),
+        key.getOutputPrefix().toByteArray(),
+        key.getParameters().getVariant().equals(Ed25519Parameters.Variant.LEGACY)
+            ? new byte[] {0}
+            : new byte[0]);
+  }
+
+  private Ed25519Sign(
+      final byte[] privateKey, final byte[] outputPrefix, final byte[] messageSuffix)
+      throws GeneralSecurityException {
     if (!FIPS.isCompatible()) {
       throw new GeneralSecurityException("Can not use Ed25519 in FIPS-mode.");
     }
@@ -65,11 +76,38 @@ public final class Ed25519Sign implements PublicKeySign {
 
     this.hashedPrivateKey = Ed25519.getHashedScalar(privateKey);
     this.publicKey = Ed25519.scalarMultWithBaseToBytes(this.hashedPrivateKey);
+    this.outputPrefix = outputPrefix;
+    this.messageSuffix = messageSuffix;
+  }
+
+  /**
+   * Constructs a Ed25519Sign with the {@code privateKey}.
+   *
+   * @param privateKey 32-byte random sequence.
+   * @throws GeneralSecurityException if there is no SHA-512 algorithm defined in {@link
+   *     EngineFactory}.MESSAGE_DIGEST.
+   */
+  public Ed25519Sign(final byte[] privateKey) throws GeneralSecurityException {
+    this(privateKey, new byte[0], new byte[0]);
+  }
+
+  private byte[] noPrefixSign(final byte[] data) throws GeneralSecurityException {
+    return Ed25519.sign(data, publicKey, hashedPrivateKey);
   }
 
   @Override
   public byte[] sign(final byte[] data) throws GeneralSecurityException {
-    return Ed25519.sign(data, publicKey, hashedPrivateKey);
+    byte[] signature;
+    if (messageSuffix.length == 0) {
+      signature = noPrefixSign(data);
+    } else {
+      signature = noPrefixSign(Bytes.concat(data, messageSuffix));
+    }
+    if (outputPrefix.length == 0) {
+      return signature;
+    } else {
+      return Bytes.concat(outputPrefix, signature);
+    }
   }
 
   /** Defines the KeyPair consisting of a private key and its corresponding public key. */

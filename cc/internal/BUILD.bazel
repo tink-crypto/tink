@@ -572,6 +572,7 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",
         "@com_google_googletest//:gtest_main",
     ],
@@ -1085,6 +1086,11 @@ cc_library(
         ":key_type_info_store",
         ":keyset_wrapper_store",
         "//:configuration",
+        "//:key_manager",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings:string_view",
     ],
 )
 
@@ -1093,14 +1099,31 @@ cc_test(
     srcs = ["configuration_impl_test.cc"],
     deps = [
         ":configuration_impl",
+        ":key_type_info_store",
+        ":keyset_wrapper",
         ":keyset_wrapper_store",
         "//:cleartext_keyset_handle",
         "//:configuration",
+        "//:core/key_manager_impl",
+        "//:core/key_type_manager",
+        "//:core/private_key_type_manager",
+        "//:core/template_util",
+        "//:input_stream",
+        "//:key_manager",
+        "//:keyset_handle",
+        "//:primitive_set",
+        "//:primitive_wrapper",
+        "//:public_key_sign",
+        "//:public_key_verify",
+        "//:registry",
         "//proto:aes_gcm_cc_proto",
         "//proto:rsa_ssa_pss_cc_proto",
         "//subtle:random",
+        "//util:status",
+        "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
@@ -1143,7 +1166,9 @@ cc_test(
         "//proto:ecdsa_cc_proto",
         "//signature:ecdsa_sign_key_manager",
         "//signature:ecdsa_verify_key_manager",
+        "//util:statusor",
         "//util:test_matchers",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/types:optional",
         "@com_google_googletest//:gtest_main",
@@ -1191,6 +1216,11 @@ cc_library(
     deps = [
         ":key_type_info_store",
         "//:key_gen_configuration",
+        "//:key_manager",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings:string_view",
     ],
 )
 
@@ -1199,12 +1229,27 @@ cc_test(
     srcs = ["key_gen_configuration_impl_test.cc"],
     deps = [
         ":key_gen_configuration_impl",
+        ":key_type_info_store",
+        "//:core/key_manager_impl",
+        "//:core/key_type_manager",
+        "//:core/private_key_type_manager",
+        "//:core/template_util",
+        "//:input_stream",
         "//:key_gen_configuration",
+        "//:key_manager",
+        "//:keyset_handle",
+        "//:public_key_sign",
+        "//:public_key_verify",
+        "//:registry",
         "//aead:aead_key_templates",
         "//proto:aes_gcm_cc_proto",
         "//proto:rsa_ssa_pss_cc_proto",
+        "//util:status",
+        "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -1212,4 +1257,44 @@ cc_test(
 cc_library(
     name = "call_with_core_dump_protection",
     hdrs = ["call_with_core_dump_protection.h"],
+    include_prefix = "tink/internal",
+)
+
+cc_test(
+    name = "call_with_core_dump_protection_test",
+    srcs = ["call_with_core_dump_protection_test.cc"],
+    deps = [
+        ":call_with_core_dump_protection",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "bn_encoding_util",
+    srcs = ["bn_encoding_util.cc"],
+    hdrs = ["bn_encoding_util.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        "//util:status",
+        "//util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+        "@com_google_absl//absl/strings:string_view",
+    ],
+)
+
+cc_test(
+    name = "bn_encoding_util_test",
+    srcs = ["bn_encoding_util_test.cc"],
+    deps = [
+        ":bn_encoding_util",
+        "//:big_integer",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
 )

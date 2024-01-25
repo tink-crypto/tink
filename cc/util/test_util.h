@@ -24,6 +24,7 @@
 #include <utility>
 
 #include "absl/base/thread_annotations.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/cord.h"
 #include "absl/strings/match.h"
@@ -37,6 +38,7 @@
 #include "tink/hybrid_encrypt.h"
 #include "tink/input_stream.h"
 #include "tink/keyset_handle.h"
+#include "tink/keyset_writer.h"
 #include "tink/kms_client.h"
 #include "tink/mac.h"
 #include "tink/output_stream.h"
@@ -686,21 +688,19 @@ class DummyStatefulMac : public subtle::StatefulMac {
 // A dummy implementation of KeysetWriter-interface.
 class DummyKeysetWriter : public KeysetWriter {
  public:
-  static crypto::tink::util::StatusOr<std::unique_ptr<DummyKeysetWriter>> New(
+  static util::StatusOr<std::unique_ptr<DummyKeysetWriter>> New(
       std::unique_ptr<std::ostream> destination_stream) {
-    std::unique_ptr<DummyKeysetWriter> writer(
+    return absl::WrapUnique(
         new DummyKeysetWriter(std::move(destination_stream)));
-    return std::move(writer);
   }
 
-  crypto::tink::util::Status Write(
-      const google::crypto::tink::Keyset& keyset) override {
-    return crypto::tink::util::OkStatus();
+  util::Status Write(const google::crypto::tink::Keyset& keyset) override {
+    return util::OkStatus();
   }
 
-  crypto::tink::util::Status Write(
+  util::Status Write(
       const google::crypto::tink::EncryptedKeyset& encrypted_keyset) override {
-    return crypto::tink::util::OkStatus();
+    return util::OkStatus();
   }
 
  private:

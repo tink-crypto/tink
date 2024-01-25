@@ -45,7 +45,7 @@ public final class TinkUser {
     return TinkProtoKeysetFormat.parseKeysetWithoutSecret(b).getPrimitive(Aead.class);
   }
   public Aead useAnyReader(KeysetReader r) throws GeneralSecurityException, IOException {
-    return TinkProtoKeysetFormat.parseKeysetWithoutSecret(r.read().toByteArray()).getPrimitive(Aead.class);
+    return KeysetHandle.readNoSecret(r).getPrimitive(Aead.class);
   }
 
   public void macKeyTemplateUser() throws Exception {

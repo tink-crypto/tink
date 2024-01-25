@@ -45,7 +45,7 @@ public class StreamingAeadKeyTemplatesTest {
   @Test
   public void testAes128CtrHmacSha256_4KB() throws Exception {
     KeyTemplate template = StreamingAeadKeyTemplates.AES128_CTR_HMAC_SHA256_4KB;
-    assertEquals(new AesCtrHmacStreamingKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(AesCtrHmacStreamingKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
     AesCtrHmacStreamingKeyFormat format =
         AesCtrHmacStreamingKeyFormat.parseFrom(
@@ -62,7 +62,7 @@ public class StreamingAeadKeyTemplatesTest {
   @Test
   public void testAes128CtrHmacSha256_1MB() throws Exception {
     KeyTemplate template = StreamingAeadKeyTemplates.AES128_CTR_HMAC_SHA256_1MB;
-    assertEquals(new AesCtrHmacStreamingKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(AesCtrHmacStreamingKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
     AesCtrHmacStreamingKeyFormat format =
         AesCtrHmacStreamingKeyFormat.parseFrom(
@@ -79,7 +79,7 @@ public class StreamingAeadKeyTemplatesTest {
   @Test
   public void testAes256CtrHmacSha256_4KB() throws Exception {
     KeyTemplate template = StreamingAeadKeyTemplates.AES256_CTR_HMAC_SHA256_4KB;
-    assertEquals(new AesCtrHmacStreamingKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(AesCtrHmacStreamingKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
     AesCtrHmacStreamingKeyFormat format =
         AesCtrHmacStreamingKeyFormat.parseFrom(
@@ -96,7 +96,7 @@ public class StreamingAeadKeyTemplatesTest {
   @Test
   public void testAes256CtrHmacSha256_1MB() throws Exception {
     KeyTemplate template = StreamingAeadKeyTemplates.AES256_CTR_HMAC_SHA256_1MB;
-    assertEquals(new AesCtrHmacStreamingKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(AesCtrHmacStreamingKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
     AesCtrHmacStreamingKeyFormat format =
         AesCtrHmacStreamingKeyFormat.parseFrom(
@@ -113,7 +113,7 @@ public class StreamingAeadKeyTemplatesTest {
   @Test
   public void testAes128GcmHkdf_4KB() throws Exception {
     KeyTemplate template = StreamingAeadKeyTemplates.AES128_GCM_HKDF_4KB;
-    assertEquals(new AesGcmHkdfStreamingKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(AesGcmHkdfStreamingKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
     AesGcmHkdfStreamingKeyFormat format =
         AesGcmHkdfStreamingKeyFormat.parseFrom(
@@ -128,7 +128,7 @@ public class StreamingAeadKeyTemplatesTest {
   @Test
   public void testAes128GcmHkdf_1MB() throws Exception {
     KeyTemplate template = StreamingAeadKeyTemplates.AES128_GCM_HKDF_1MB;
-    assertEquals(new AesGcmHkdfStreamingKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(AesGcmHkdfStreamingKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
     AesGcmHkdfStreamingKeyFormat format =
         AesGcmHkdfStreamingKeyFormat.parseFrom(
@@ -143,7 +143,7 @@ public class StreamingAeadKeyTemplatesTest {
   @Test
   public void testAes256GcmHkdf_4KB() throws Exception {
     KeyTemplate template = StreamingAeadKeyTemplates.AES256_GCM_HKDF_4KB;
-    assertEquals(new AesGcmHkdfStreamingKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(AesGcmHkdfStreamingKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
     AesGcmHkdfStreamingKeyFormat format =
         AesGcmHkdfStreamingKeyFormat.parseFrom(
@@ -158,7 +158,7 @@ public class StreamingAeadKeyTemplatesTest {
   @Test
   public void testAes256GcmHkdf_1MB() throws Exception {
     KeyTemplate template = StreamingAeadKeyTemplates.AES256_GCM_HKDF_1MB;
-    assertEquals(new AesGcmHkdfStreamingKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(AesGcmHkdfStreamingKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
     AesGcmHkdfStreamingKeyFormat format =
         AesGcmHkdfStreamingKeyFormat.parseFrom(
@@ -183,7 +183,7 @@ public class StreamingAeadKeyTemplatesTest {
     KeyTemplate template = StreamingAeadKeyTemplates.createAesCtrHmacStreamingKeyTemplate(
         mainKeySize, hkdfHashType, derivedKeySize,
         macHashType, tagSize, ciphertextSegmentSize);
-    assertEquals(new AesCtrHmacStreamingKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(AesCtrHmacStreamingKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
     AesCtrHmacStreamingKeyFormat format =
         AesCtrHmacStreamingKeyFormat.parseFrom(
@@ -207,7 +207,7 @@ public class StreamingAeadKeyTemplatesTest {
     HashType hkdfHashType = HashType.SHA512;
     KeyTemplate template = StreamingAeadKeyTemplates.createAesGcmHkdfStreamingKeyTemplate(
         mainKeySize, hkdfHashType, derivedKeySize, ciphertextSegmentSize);
-    assertEquals(new AesGcmHkdfStreamingKeyManager().getKeyType(), template.getTypeUrl());
+    assertEquals(AesGcmHkdfStreamingKeyManager.getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
     AesGcmHkdfStreamingKeyFormat format =
         AesGcmHkdfStreamingKeyFormat.parseFrom(

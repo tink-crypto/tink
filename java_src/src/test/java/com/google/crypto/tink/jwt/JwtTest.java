@@ -267,5 +267,4 @@ public final class JwtTest {
     assertThrows(GeneralSecurityException.class, () -> handle.getPrimitive(JwtMac.class));
   }
 
-  // TODO(juerg): Add tests for Jwt signatures.
 }

@@ -69,7 +69,7 @@ util::StatusOr<std::string> GcpKmsAead::Encrypt(
 
   if (!status.ok()) {
     return util::Status(
-        absl::StatusCode::kInvalidArgument,
+        static_cast<absl::StatusCode>(status.error_code()),
         absl::StrCat("GCP KMS encryption failed: ", status.error_message()));
   }
   return resp.ciphertext();
@@ -91,7 +91,7 @@ util::StatusOr<std::string> GcpKmsAead::Decrypt(
 
   if (!status.ok()) {
     return util::Status(
-        absl::StatusCode::kInvalidArgument,
+        static_cast<absl::StatusCode>(status.error_code()),
         absl::StrCat("GCP KMS encryption failed: ", status.error_message()));
   }
   return resp.plaintext();

@@ -22,9 +22,13 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.DeterministicAead;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.daead.AesSivKey;
+import com.google.crypto.tink.daead.AesSivParameters;
 import com.google.crypto.tink.mac.internal.AesUtil;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
@@ -79,6 +83,61 @@ public class AesSivTest {
         // "invalid" are test vectors with invalid parameters or invalid ciphertext.
         String result = testcase.get("result").getAsString();
         DeterministicAead daead = new AesSiv(key);
+        if (result.equals("valid")) {
+          byte[] ciphertext = daead.encryptDeterministically(msg, aad);
+          assertEquals(tcId, Hex.encode(ct), Hex.encode(ciphertext));
+          byte[] plaintext = daead.decryptDeterministically(ct, aad);
+          assertEquals(tcId, Hex.encode(msg), Hex.encode(plaintext));
+        } else {
+          assertThrows(
+              String.format("FAIL %s: decrypted invalid ciphertext", tcId),
+              GeneralSecurityException.class,
+              () -> daead.decryptDeterministically(ct, aad));
+        }
+      }
+    }
+    System.out.printf("Number of tests skipped: %d", cntSkippedTests);
+  }
+
+  @Test
+  public void testWycheproofVectors_createNoPrefix() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
+    JsonObject json =
+        WycheproofTestUtil.readJson("../wycheproof/testvectors/aes_siv_cmac_test.json");
+    JsonArray testGroups = json.getAsJsonArray("testGroups");
+    int cntSkippedTests = 0;
+    for (int i = 0; i < testGroups.size(); i++) {
+      JsonObject group = testGroups.get(i).getAsJsonObject();
+      int keySize = group.get("keySize").getAsInt();
+      JsonArray tests = group.getAsJsonArray("tests");
+      if (!Arrays.asList(keySizeInBytes).contains(keySize / 8)) {
+        cntSkippedTests += tests.size();
+        continue;
+      }
+      for (int j = 0; j < tests.size(); j++) {
+        JsonObject testcase = tests.get(j).getAsJsonObject();
+        String tcId =
+            String.format(
+                "testcase %d (%s)",
+                testcase.get("tcId").getAsInt(), testcase.get("comment").getAsString());
+        byte[] key = Hex.decode(testcase.get("key").getAsString());
+        byte[] msg = Hex.decode(testcase.get("msg").getAsString());
+        byte[] aad = Hex.decode(testcase.get("aad").getAsString());
+        byte[] ct = Hex.decode(testcase.get("ct").getAsString());
+        // Result is one of "valid" and "invalid".
+        // "valid" are test vectors with matching plaintext and ciphertext.
+        // "invalid" are test vectors with invalid parameters or invalid ciphertext.
+        String result = testcase.get("result").getAsString();
+        AesSivParameters parameters =
+            AesSivParameters.builder()
+                .setKeySizeBytes(64)
+                .setVariant(AesSivParameters.Variant.NO_PREFIX)
+                .build();
+        SecretBytes keyBytes = SecretBytes.copyFrom(key, InsecureSecretKeyAccess.get());
+        AesSivKey aesSivKey =
+            AesSivKey.builder().setParameters(parameters).setKeyBytes(keyBytes).build();
+        DeterministicAead daead = AesSiv.create(aesSivKey);
         if (result.equals("valid")) {
           byte[] ciphertext = daead.encryptDeterministically(msg, aad);
           assertEquals(tcId, Hex.encode(ct), Hex.encode(ciphertext));
@@ -321,5 +380,159 @@ public class AesSivTest {
 
     byte[] key = Random.randBytes(16);
     assertThrows(GeneralSecurityException.class, () -> new AesSiv(key));
+  }
+
+  @Test
+  public void testCreate_constructor_singleTest() throws GeneralSecurityException {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+    byte[] key =
+        Hex.decode(
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+                + "202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f");
+
+    DeterministicAead daead = new AesSiv(key);
+    assertThat(daead.encryptDeterministically(Hex.decode(""), Hex.decode("FF")))
+        .isEqualTo(Hex.decode("1BC49C6A894EF5744A0A01D46608CBCC"));
+    assertThat(
+            daead.decryptDeterministically(
+                Hex.decode("1BC49C6A894EF5744A0A01D46608CBCC"), Hex.decode("FF")))
+        .isEqualTo(Hex.decode(""));
+  }
+
+  /** Same value as in testCreate_constructor_singleTest. */
+  @Test
+  public void testCreateForEncryptConstructorForDecrypt_noPrefix() throws GeneralSecurityException {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+    AesSivParameters parameters =
+        AesSivParameters.builder()
+            .setKeySizeBytes(64)
+            .setVariant(AesSivParameters.Variant.NO_PREFIX)
+            .build();
+    SecretBytes keyBytes =
+        SecretBytes.copyFrom(
+            Hex.decode(
+                "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+                    + "202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f"),
+            InsecureSecretKeyAccess.get());
+
+    AesSivKey key = AesSivKey.builder().setParameters(parameters).setKeyBytes(keyBytes).build();
+    DeterministicAead daead = AesSiv.create(key);
+    assertThat(daead.encryptDeterministically(Hex.decode(""), Hex.decode("FF")))
+        .isEqualTo(Hex.decode("1BC49C6A894EF5744A0A01D46608CBCC"));
+    assertThat(
+            daead.decryptDeterministically(
+                Hex.decode("1BC49C6A894EF5744A0A01D46608CBCC"), Hex.decode("FF")))
+        .isEqualTo(Hex.decode(""));
+  }
+
+  @Test
+  public void testCreateForEncryptConstructorForDecrypt_tinkPrefix()
+      throws GeneralSecurityException {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+    AesSivParameters parameters =
+        AesSivParameters.builder()
+            .setKeySizeBytes(64)
+            .setVariant(AesSivParameters.Variant.TINK)
+            .build();
+    SecretBytes keyBytes =
+        SecretBytes.copyFrom(
+            Hex.decode(
+                "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+                    + "202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f"),
+            InsecureSecretKeyAccess.get());
+
+    AesSivKey key =
+        AesSivKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(keyBytes)
+            .setIdRequirement(0x44556677)
+            .build();
+    DeterministicAead daead = AesSiv.create(key);
+    assertThat(daead.encryptDeterministically(Hex.decode(""), Hex.decode("FF")))
+        .isEqualTo(Hex.decode("01445566771BC49C6A894EF5744A0A01D46608CBCC"));
+    assertThat(
+            daead.decryptDeterministically(
+                Hex.decode("01445566771BC49C6A894EF5744A0A01D46608CBCC"), Hex.decode("FF")))
+        .isEqualTo(Hex.decode(""));
+  }
+
+  @Test
+  public void testCreateForEncryptConstructorForDecrypt_crunchyPrefix()
+      throws GeneralSecurityException {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+    AesSivParameters parameters =
+        AesSivParameters.builder()
+            .setKeySizeBytes(64)
+            .setVariant(AesSivParameters.Variant.CRUNCHY)
+            .build();
+    SecretBytes keyBytes =
+        SecretBytes.copyFrom(
+            Hex.decode(
+                "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+                    + "202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f"),
+            InsecureSecretKeyAccess.get());
+
+    AesSivKey key =
+        AesSivKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(keyBytes)
+            .setIdRequirement(0x44556677)
+            .build();
+    DeterministicAead daead = AesSiv.create(key);
+    assertThat(daead.encryptDeterministically(Hex.decode(""), Hex.decode("FF")))
+        .isEqualTo(Hex.decode("00445566771BC49C6A894EF5744A0A01D46608CBCC"));
+    assertThat(
+            daead.decryptDeterministically(
+                Hex.decode("00445566771BC49C6A894EF5744A0A01D46608CBCC"), Hex.decode("FF")))
+        .isEqualTo(Hex.decode(""));
+  }
+
+  @Test
+  public void testKeySize32_throws() throws GeneralSecurityException {
+    AesSivParameters parameters =
+        AesSivParameters.builder()
+            .setKeySizeBytes(32)
+            .setVariant(AesSivParameters.Variant.TINK)
+            .build();
+    SecretBytes keyBytes = SecretBytes.randomBytes(32);
+
+    AesSivKey key =
+        AesSivKey.builder()
+            .setParameters(parameters)
+            .setKeyBytes(keyBytes)
+            .setIdRequirement(0x44556677)
+            .build();
+    assertThrows(GeneralSecurityException.class, () -> AesSiv.create(key));
+  }
+
+  @Test
+  public void testKeySize48_throws() throws GeneralSecurityException {
+    AesSivParameters parameters =
+        AesSivParameters.builder()
+            .setKeySizeBytes(48)
+            .setVariant(AesSivParameters.Variant.NO_PREFIX)
+            .build();
+    SecretBytes keyBytes = SecretBytes.randomBytes(48);
+
+    AesSivKey key = AesSivKey.builder().setParameters(parameters).setKeyBytes(keyBytes).build();
+    assertThrows(GeneralSecurityException.class, () -> AesSiv.create(key));
+  }
+
+  @Test
+  public void testCreateThrowsInFipsMode() throws GeneralSecurityException {
+    Assume.assumeTrue(TinkFips.useOnlyFips());
+    AesSivParameters parameters =
+        AesSivParameters.builder()
+            .setKeySizeBytes(64)
+            .setVariant(AesSivParameters.Variant.NO_PREFIX)
+            .build();
+    SecretBytes keyBytes =
+        SecretBytes.copyFrom(
+            Hex.decode(
+                "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+                    + "202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f"),
+            InsecureSecretKeyAccess.get());
+    AesSivKey key = AesSivKey.builder().setParameters(parameters).setKeyBytes(keyBytes).build();
+    assertThrows(GeneralSecurityException.class, () -> AesSiv.create(key));
   }
 }

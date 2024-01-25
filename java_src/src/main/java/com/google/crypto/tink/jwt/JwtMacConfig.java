@@ -32,7 +32,7 @@ import java.security.GeneralSecurityException;
  * com.google.crypto.tink.KeysetHandle#getPrimitive}.
  */
 public final class JwtMacConfig {
-  public static final String JWT_HMAC_TYPE_URL = new JwtHmacKeyManager().getKeyType();
+  public static final String JWT_HMAC_TYPE_URL = JwtHmacKeyManager.getKeyType();
 
   /**
    * Tries to register with the {@link com.google.crypto.tink.Registry} all instances of {@link

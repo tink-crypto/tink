@@ -78,7 +78,13 @@ def main(argv):
     # Encrypt the keyset_handle with the remote key-encryption key (KEK)
     with open(FLAGS.keyset_path, 'wt') as keyset_file:
       try:
-        keyset_handle.write(tink.JsonKeysetWriter(keyset_file), remote_aead)
+        keyset_encryption_associated_data = 'encrypted keyset example'
+        serialized_encrypted_keyset = (
+            tink.json_proto_keyset_format.serialize_encrypted(
+                keyset_handle, remote_aead, keyset_encryption_associated_data
+            )
+        )
+        keyset_file.write(serialized_encrypted_keyset)
       except tink.TinkError as e:
         logging.exception('Error writing key: %s', e)
         return 1
@@ -90,9 +96,12 @@ def main(argv):
   # Read the encrypted keyset into a keyset_handle
   with open(FLAGS.keyset_path, 'rt') as keyset_file:
     try:
-      text = keyset_file.read()
-      keyset_handle = tink.KeysetHandle.read(
-          tink.JsonKeysetReader(text), remote_aead
+      serialized_encrypted_keyset = keyset_file.read()
+      keyset_encryption_associated_data = 'encrypted keyset example'
+      keyset_handle = tink.json_proto_keyset_format.parse_encrypted(
+          serialized_encrypted_keyset,
+          remote_aead,
+          keyset_encryption_associated_data,
       )
     except tink.TinkError as e:
       logging.exception('Error reading key: %s', e)

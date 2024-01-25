@@ -16,8 +16,7 @@
 from typing import TextIO
 
 import tink
-
-from tink import cleartext_keyset_handle
+from tink import secret_key_access
 
 
 def WriteKeyset(keyset: tink.KeysetHandle, text_io_stream: TextIO) -> None:
@@ -30,7 +29,10 @@ def WriteKeyset(keyset: tink.KeysetHandle, text_io_stream: TextIO) -> None:
   Raises:
     tink.TinkError in case of errors.
   """
-  cleartext_keyset_handle.write(tink.JsonKeysetWriter(text_io_stream), keyset)
+  serialized_keyset = tink.json_proto_keyset_format.serialize(
+      keyset, secret_key_access.TOKEN
+  )
+  text_io_stream.write(serialized_keyset)
 
 
 # [END tink_walkthrough_write_cleartext_keyset]

@@ -16,7 +16,7 @@ py_binary(
     python_version = "PY3",
     deps = [
         requirement("absl-py"),
-        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:secret_key_access",
         "@tink_py//tink:tink_python",
         "@tink_py//tink/signature",
     ],
@@ -26,7 +26,7 @@ py_library(
     name = "signature_basic",
     srcs = ["signature_basic.py"],
     deps = [
-        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:secret_key_access",
         "@tink_py//tink:tink_python",
         "@tink_py//tink/signature",
     ],
@@ -38,7 +38,7 @@ py_test(
     python_version = "PY3",
     deps = [
         requirement("absl-py"),
-        ":signature_basic"
+        ":signature_basic",
     ],
 )
 

@@ -65,7 +65,7 @@ class SecretProto {
 
   SecretProto(const SecretProto& other) { *value_ = *other.value_; }
 
-  SecretProto(SecretProto&& other) { *this = std::move(other); }
+  SecretProto(SecretProto&& other) noexcept { *this = std::move(other); }
 
   explicit SecretProto(const T& value) { *value_ = value; }
 
@@ -74,7 +74,7 @@ class SecretProto {
     return *this;
   }
 
-  SecretProto& operator=(SecretProto&& other) {
+  SecretProto& operator=(SecretProto&& other) noexcept {
     using std::swap;
     swap(arena_, other.arena_);
     swap(value_, other.value_);

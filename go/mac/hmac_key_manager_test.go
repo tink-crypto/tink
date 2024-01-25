@@ -43,7 +43,10 @@ func TestGetPrimitiveBasic(t *testing.T) {
 	}
 	testKeys := genValidHMACKeys()
 	for i := 0; i < len(testKeys); i++ {
-		serializedKey, _ := proto.Marshal(testKeys[i])
+		serializedKey, err := proto.Marshal(testKeys[i])
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		p, err := km.Primitive(serializedKey)
 		if err != nil {
 			t.Errorf("unexpected error in test case %d: %s", i, err)
@@ -62,7 +65,10 @@ func TestGetPrimitiveWithInvalidInput(t *testing.T) {
 	// invalid key
 	testKeys := genInvalidHMACKeys()
 	for i := 0; i < len(testKeys); i++ {
-		serializedKey, _ := proto.Marshal(testKeys[i])
+		serializedKey, err := proto.Marshal(testKeys[i])
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		if _, err := km.Primitive(serializedKey); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
@@ -81,15 +87,27 @@ func TestNewKeyMultipleTimes(t *testing.T) {
 	if err != nil {
 		t.Errorf("cannot obtain HMAC key manager: %s", err)
 	}
-	serializedFormat, _ := proto.Marshal(testutil.NewHMACKeyFormat(commonpb.HashType_SHA256, 32))
+	serializedFormat, err := proto.Marshal(testutil.NewHMACKeyFormat(commonpb.HashType_SHA256, 32))
+	if err != nil {
+		t.Fatalf("proto.Marshal() err = %q, want nil", err)
+	}
 	keys := make(map[string]bool)
 	nTest := 26
 	for i := 0; i < nTest; i++ {
-		key, _ := km.NewKey(serializedFormat)
-		serializedKey, _ := proto.Marshal(key)
+		key, err := km.NewKey(serializedFormat)
+		if err != nil {
+			t.Fatalf("km.NewKey() err = %q, want nil", err)
+		}
+		serializedKey, err := proto.Marshal(key)
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		keys[string(serializedKey)] = true
 
-		keyData, _ := km.NewKeyData(serializedFormat)
+		keyData, err := km.NewKeyData(serializedFormat)
+		if err != nil {
+			t.Fatalf("km.NewKeyData() err = %q, want nil", err)
+		}
 		serializedKey = keyData.Value
 		keys[string(serializedKey)] = true
 	}
@@ -105,7 +123,10 @@ func TestNewKeyBasic(t *testing.T) {
 	}
 	testFormats := genValidHMACKeyFormats()
 	for i := 0; i < len(testFormats); i++ {
-		serializedFormat, _ := proto.Marshal(testFormats[i])
+		serializedFormat, err := proto.Marshal(testFormats[i])
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		key, err := km.NewKey(serializedFormat)
 		if err != nil {
 			t.Errorf("unexpected error in test case %d: %s", i, err)
@@ -148,7 +169,10 @@ func TestNewKeyDataBasic(t *testing.T) {
 	}
 	testFormats := genValidHMACKeyFormats()
 	for i := 0; i < len(testFormats); i++ {
-		serializedFormat, _ := proto.Marshal(testFormats[i])
+		serializedFormat, err := proto.Marshal(testFormats[i])
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		keyData, err := km.NewKeyData(serializedFormat)
 		if err != nil {
 			t.Errorf("unexpected error in test case %d: %s", i, err)
@@ -177,7 +201,10 @@ func TestNewKeyDataWithInvalidInput(t *testing.T) {
 	// invalid key formats
 	testFormats := genInvalidHMACKeyFormats()
 	for i := 0; i < len(testFormats); i++ {
-		serializedFormat, _ := proto.Marshal(testFormats[i])
+		serializedFormat, err := proto.Marshal(testFormats[i])
+		if err != nil {
+			t.Fatalf("proto.Marshal() err = %q, want nil", err)
+		}
 		if _, err := km.NewKeyData(serializedFormat); err == nil {
 			t.Errorf("expect an error in test case %d", i)
 		}
@@ -424,6 +451,8 @@ func genInvalidHMACKeys() []proto.Message {
 	badVersionKey.Version++
 	shortKey := testutil.NewHMACKey(commonpb.HashType_SHA256, 32)
 	shortKey.KeyValue = []byte{1, 1}
+	nilParams := testutil.NewHMACKey(commonpb.HashType_SHA256, 32)
+	nilParams.Params = nil
 	return []proto.Message{
 		// not a HMACKey
 		testutil.NewHMACParams(commonpb.HashType_SHA256, 32),
@@ -439,12 +468,16 @@ func genInvalidHMACKeys() []proto.Message {
 		shortKey,
 		// unknown hash type
 		testutil.NewHMACKey(commonpb.HashType_UNKNOWN_HASH, 32),
+		// params field is unset
+		nilParams,
 	}
 }
 
 func genInvalidHMACKeyFormats() []proto.Message {
 	shortKeyFormat := testutil.NewHMACKeyFormat(commonpb.HashType_SHA256, 32)
 	shortKeyFormat.KeySize = 1
+	nilParams := testutil.NewHMACKeyFormat(commonpb.HashType_SHA256, 32)
+	nilParams.Params = nil
 	return []proto.Message{
 		// not a HMACKeyFormat
 		testutil.NewHMACParams(commonpb.HashType_SHA256, 32),
@@ -458,6 +491,8 @@ func genInvalidHMACKeyFormats() []proto.Message {
 		shortKeyFormat,
 		// unknown hash type
 		testutil.NewHMACKeyFormat(commonpb.HashType_UNKNOWN_HASH, 32),
+		// params field is unset
+		nilParams,
 	}
 }
 

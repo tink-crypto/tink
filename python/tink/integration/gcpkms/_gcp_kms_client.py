@@ -13,6 +13,7 @@
 # limitations under the License.
 """A client for Google Cloud KMS."""
 
+import re
 from typing import Optional
 import warnings
 
@@ -22,19 +23,34 @@ from google.oauth2 import service_account
 
 import tink
 from tink import aead
-from tink.aead import _kms_aead_key_manager
 
 GCP_KEYURI_PREFIX = 'gcp-kms://'
+_KMS_KEY_REGEX = re.compile(
+    'projects/([^/]+)/'
+    'locations/([a-zA-Z0-9_-]{1,63})/'
+    'keyRings/([a-zA-Z0-9_-]{1,63})/'
+    'cryptoKeys/([a-zA-Z0-9_-]{1,63})$'
+)
 
 
 class _GcpKmsAead(aead.Aead):
   """Implements the Aead interface for GCP KMS."""
 
   def __init__(
-      self, client: kms_v1.KeyManagementServiceClient, name: str
+      self, client: kms_v1.KeyManagementServiceClient, key_name: str
   ) -> None:
+    if not key_name:
+      raise tink.TinkError('key_name cannot be null.')
+    if not _KMS_KEY_REGEX.match(key_name):
+      raise tink.TinkError(
+          'Invalid key_name format: {}.\nKMS keys should follow the format: '
+          '"projects/<project-id>/locations/<location>/keyRings/<keyring>/'
+          'cryptoKeys/<key-name>"'.format(key_name)
+      )
+    if not client:
+      raise tink.TinkError('client cannot be null.')
     self.client = client
-    self.name = name
+    self.name = key_name
 
   def encrypt(self, plaintext: bytes, associated_data: bytes) -> bytes:
     try:
@@ -63,7 +79,7 @@ class _GcpKmsAead(aead.Aead):
       raise tink.TinkError(e)
 
 
-class GcpKmsClient(_kms_aead_key_manager.KmsClient):
+class GcpKmsClient(tink.KmsClient):
   """Basic GCP client for AEAD."""
 
   def __init__(
@@ -147,6 +163,4 @@ class GcpKmsClient(_kms_aead_key_manager.KmsClient):
         DeprecationWarning,
         2,
     )
-    _kms_aead_key_manager.register_kms_client(  # pylint: disable=protected-access
-        GcpKmsClient(key_uri, credentials_path)
-    )
+    tink.register_kms_client(GcpKmsClient(key_uri, credentials_path))

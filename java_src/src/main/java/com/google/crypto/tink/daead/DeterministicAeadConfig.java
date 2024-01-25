@@ -38,7 +38,8 @@ import java.security.GeneralSecurityException;
  * @since 1.1.0
  */
 public final class DeterministicAeadConfig {
-  public static final String AES_SIV_TYPE_URL = new AesSivKeyManager().getKeyType();
+  public static final String AES_SIV_TYPE_URL =
+      initializeClassReturnInput("type.googleapis.com/google.crypto.tink.AesSivKey");
 
   /**
    * @deprecated use {@link #register}
@@ -59,6 +60,26 @@ public final class DeterministicAeadConfig {
     } catch (GeneralSecurityException e) {
       throw new ExceptionInInitializerError(e);
     }
+  }
+
+  /**
+   * Returns the input, but crucially also calls the static initializer just above.
+   *
+   * <p>Before some refactorings, the string constants in this class were defined as: <code>
+   * private final static string AES_CTR_HMAC_AEAD_TYPE_URL = new SomeKeyMananger().get();
+   * </code>. After the refactorings, it would be tempting to define them as <code>
+   * AES_CTR_HMAC_AEAD_TYPE_URL = "...";</code> However, this would change the behavior. By the JLS
+   * §12.4.1, the static initializer of the class is called if "A static field declared by T is used
+   * and the field is not a constant variable". The §4.12.4 explains that a constant variable is a
+   * "final variable of type String which is initialized with a constant expression". Hence, after
+   * the above refactoring the initializer wouldn't be called anymore.
+   *
+   * <p>Because of this, we always call this function here to enforce calling the static
+   * initializer, i.e. to enforce that when a user accesses any of the variables here, the class is
+   * initialized.
+   */
+  private static String initializeClassReturnInput(String s) {
+    return s;
   }
 
   /**

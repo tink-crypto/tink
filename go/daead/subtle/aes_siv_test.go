@@ -19,16 +19,14 @@ package subtle_test
 import (
 	"bytes"
 	"encoding/hex"
-	"encoding/json"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/google/tink/go/daead/subtle"
 	"github.com/google/tink/go/subtle/random"
+	"github.com/google/tink/go/testutil"
 )
 
-type testData struct {
+type AESSIVSuite struct {
 	Algorithm        string
 	GeneratorVersion string
 	NumberOfTests    uint32
@@ -54,7 +52,10 @@ func TestAESSIV_EncryptDecrypt(t *testing.T) {
 	keyStr :=
 		"000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f" +
 			"00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"
-	key, _ := hex.DecodeString(keyStr)
+	key, err := hex.DecodeString(keyStr)
+	if err != nil {
+		t.Fatalf("hex.DecodeString() err = %q, want nil", err)
+	}
 	msg := []byte("Some data to encrypt.")
 	aad := []byte("Additional data")
 
@@ -79,7 +80,10 @@ func TestAESSIV_EmptyPlaintext(t *testing.T) {
 	keyStr :=
 		"000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f" +
 			"00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"
-	key, _ := hex.DecodeString(keyStr)
+	key, err := hex.DecodeString(keyStr)
+	if err != nil {
+		t.Fatalf("hex.DecodeString() err = %q, want nil", err)
+	}
 	aad := []byte("Additional data")
 
 	a, err := subtle.NewAESSIV(key)
@@ -112,8 +116,10 @@ func TestAESSIV_EmptyAdditionalData(t *testing.T) {
 	keyStr :=
 		"000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f" +
 			"00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"
-	key, _ := hex.DecodeString(keyStr)
-
+	key, err := hex.DecodeString(keyStr)
+	if err != nil {
+		t.Fatalf("hex.DecodeString() err = %q, want nil", err)
+	}
 	a, err := subtle.NewAESSIV(key)
 	if err != nil {
 		t.Errorf("NewAESSIV(key) = _, %v, want _, nil", err)
@@ -144,8 +150,10 @@ func TestAESSIV_KeySizes(t *testing.T) {
 			"812731321de508761437195ff231765aa4913219873ac6918639816312130011" +
 			"abc900bba11400187984719827431246bbab1231eb4145215ff7141436616beb" +
 			"9817298148712fed3aab61000ff123313e"
-	key, _ := hex.DecodeString(keyStr)
-
+	key, err := hex.DecodeString(keyStr)
+	if err != nil {
+		t.Fatalf("hex.DecodeString() err = %q, want nil", err)
+	}
 	for i := 0; i < len(key); i++ {
 		_, err := subtle.NewAESSIV(key[:i])
 		if i == subtle.AESSIVKeySize && err != nil {
@@ -161,7 +169,10 @@ func TestAESSIV_MessageSizes(t *testing.T) {
 	keyStr :=
 		"000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f" +
 			"00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"
-	key, _ := hex.DecodeString(keyStr)
+	key, err := hex.DecodeString(keyStr)
+	if err != nil {
+		t.Fatalf("hex.DecodeString() err = %q, want nil", err)
+	}
 	aad := []byte("Additional data")
 
 	a, err := subtle.NewAESSIV(key)
@@ -200,7 +211,10 @@ func TestAESSIV_AdditionalDataSizes(t *testing.T) {
 	keyStr :=
 		"000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f" +
 			"00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"
-	key, _ := hex.DecodeString(keyStr)
+	key, err := hex.DecodeString(keyStr)
+	if err != nil {
+		t.Fatalf("hex.DecodeString() err = %q, want nil", err)
+	}
 	msg := []byte("Some data to encrypt.")
 
 	a, err := subtle.NewAESSIV(key)
@@ -226,7 +240,10 @@ func TestAESSIV_CiphertextModifications(t *testing.T) {
 	keyStr :=
 		"000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f" +
 			"00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"
-	key, _ := hex.DecodeString(keyStr)
+	key, err := hex.DecodeString(keyStr)
+	if err != nil {
+		t.Fatalf("hex.DecodeString() err = %q, want nil", err)
+	}
 	aad := []byte("Additional data")
 
 	a, err := subtle.NewAESSIV(key)
@@ -253,21 +270,13 @@ func TestAESSIV_CiphertextModifications(t *testing.T) {
 }
 
 func TestAESSIV_WycheproofVectors(t *testing.T) {
-	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
-	if !ok {
-		t.Skip("TEST_SRCDIR not set")
-	}
-	f, err := os.Open(filepath.Join(srcDir, "wycheproof/testvectors/aes_siv_cmac_test.json"))
-	if err != nil {
-		t.Fatalf("Cannot open file: %s", err)
-	}
-	parser := json.NewDecoder(f)
-	data := new(testData)
-	if err := parser.Decode(data); err != nil {
-		t.Fatalf("Cannot decode test data: %s", err)
+	testutil.SkipTestIfTestSrcDirIsNotSet(t)
+	suite := new(AESSIVSuite)
+	if err := testutil.PopulateSuite(suite, "aes_siv_cmac_test.json"); err != nil {
+		t.Fatalf("testutil.PopulateSuite: %v", err)
 	}
 
-	for _, g := range data.TestGroups {
+	for _, g := range suite.TestGroups {
 		if g.KeySize/8 != subtle.AESSIVKeySize {
 			continue
 		}

@@ -59,6 +59,10 @@ class JwtEcdsaVerifyKeyManager
   crypto::tink::util::Status ValidateKey(
       const google::crypto::tink::JwtEcdsaPublicKey& key) const override;
 
+  internal::FipsCompatibility FipsStatus() const override {
+    return internal::FipsCompatibility::kRequiresBoringCrypto;
+  }
+
  private:
   static crypto::tink::util::StatusOr<std::string> AlgorithmName(
       const google::crypto::tink::JwtEcdsaAlgorithm& algorithm);

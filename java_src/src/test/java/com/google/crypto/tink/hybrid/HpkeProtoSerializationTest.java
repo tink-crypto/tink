@@ -36,6 +36,7 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
+import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
@@ -384,6 +385,10 @@ public final class HpkeProtoSerializationTest {
       @FromDataPoints("kdfs") KdfTuple kdfTuple,
       @FromDataPoints("aeads") AeadTuple aeadTuple)
       throws Exception {
+    if (TestUtil.isTsan()) {
+      // skip test, it's too slow in Tsan.
+      return;
+    }
     HpkeParameters parameters =
         HpkeParameters.builder()
             .setKemId(kemTuple.kemId)
@@ -430,6 +435,10 @@ public final class HpkeProtoSerializationTest {
       @FromDataPoints("kdfs") KdfTuple kdfTuple,
       @FromDataPoints("aeads") AeadTuple aeadTuple)
       throws Exception {
+    if (TestUtil.isTsan()) {
+      // skip test, it's too slow in Tsan.
+      return;
+    }
     HpkeParameters parameters =
         HpkeParameters.builder()
             .setKemId(kemTuple.kemId)
@@ -469,6 +478,10 @@ public final class HpkeProtoSerializationTest {
       @FromDataPoints("kdfs") KdfTuple kdfTuple,
       @FromDataPoints("aeads") AeadTuple aeadTuple)
       throws Exception {
+    if (TestUtil.isTsan()) {
+      // skip test, it's too slow in Tsan.
+      return;
+    }
     HpkeParameters parameters =
         HpkeParameters.builder()
             .setKemId(kemTuple.kemId)

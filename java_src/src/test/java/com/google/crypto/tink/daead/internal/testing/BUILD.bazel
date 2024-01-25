@@ -1,0 +1,21 @@
+licenses(["notice"])
+
+package(default_testonly = 1)
+
+java_test(
+    name = "LegacyAesSivTestKeyManagerTest",
+    size = "small",
+    srcs = ["LegacyAesSivTestKeyManagerTest.java"],
+    deps = [
+        "//proto:aes_siv_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:deterministic_aead",
+        "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/daead/internal/testing:legacy_aes_siv_test_key_manager",
+        "//src/main/java/com/google/crypto/tink/subtle:aes_siv",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

@@ -86,18 +86,13 @@ public final class AesGcmParameters extends AeadParameters {
       this.ivSizeBytes = ivSizeBytes;
       return this;
     }
-    /** Tag size must be one of the following five values: 128, 120, 112, 104 or 96 bytes */
+    /** Tag size must be between 12 and 16 bytes. */
     @CanIgnoreReturnValue
     public Builder setTagSizeBytes(int tagSizeBytes) throws GeneralSecurityException {
-      if (tagSizeBytes != 12
-          && tagSizeBytes != 13
-          && tagSizeBytes != 14
-          && tagSizeBytes != 15
-          && tagSizeBytes != 16) {
+      if (tagSizeBytes < 12 || tagSizeBytes > 16) {
         throw new GeneralSecurityException(
             String.format(
-                "Invalid tag size in bytes %d; value must be one of the following: 12, 13, 14, 15"
-                    + " or 16 bytes",
+                "Invalid tag size in bytes %d; value must be between 12 and 16 bytes",
                 tagSizeBytes));
       }
       this.tagSizeBytes = tagSizeBytes;
