@@ -1,0 +1,23 @@
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+exports_files(srcs = ["credential.json"])
+
+filegroup(
+    name = "credentials",
+    testonly = 1,
+    srcs = [
+        "credential.json",
+        "key_name.txt",
+    ],
+)
+
+filegroup(
+    name = "bad_credentials",
+    testonly = 1,
+    srcs = [
+        "credential_bad.json",
+        "key_name_bad.txt",
+    ],
+)
