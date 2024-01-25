@@ -20,9 +20,9 @@ import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
-import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.MonitoringUtil;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.monitoring.MonitoringClient;
 import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
 import com.google.crypto.tink.subtle.Bytes;
@@ -137,6 +137,6 @@ public class DeterministicAeadWrapper
   }
 
   public static void register() throws GeneralSecurityException {
-    Registry.registerPrimitiveWrapper(WRAPPER);
+    MutablePrimitiveRegistry.globalInstance().registerPrimitiveWrapper(WRAPPER);
   }
 }

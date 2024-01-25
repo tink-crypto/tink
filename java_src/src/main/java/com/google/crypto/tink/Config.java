@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink;
 
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.proto.KeyTypeEntry;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
@@ -94,7 +95,8 @@ public final class Config {
       return;
     }
     Catalogue<?> catalogue = Registry.getCatalogue(entry.getCatalogueName());
-    Registry.registerPrimitiveWrapper(catalogue.getPrimitiveWrapper());
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveWrapper(catalogue.getPrimitiveWrapper());
     KeyManager<?> keyManager =
         catalogue.getKeyManager(
             entry.getTypeUrl(), entry.getPrimitiveName(), entry.getKeyManagerVersion());

@@ -20,7 +20,7 @@ import com.google.crypto.tink.Key;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
-import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.keyderivation.KeysetDeriver;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
@@ -94,6 +94,6 @@ public final class KeysetDeriverWrapper implements PrimitiveWrapper<KeyDeriver, 
 
   /** Registers this wrapper with Tink, allowing to use the primitive. */
   public static void register() throws GeneralSecurityException {
-    Registry.registerPrimitiveWrapper(WRAPPER);
+    MutablePrimitiveRegistry.globalInstance().registerPrimitiveWrapper(WRAPPER);
   }
 }
