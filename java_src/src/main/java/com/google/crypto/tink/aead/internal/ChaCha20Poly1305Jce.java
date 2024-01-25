@@ -129,6 +129,15 @@ public final class ChaCha20Poly1305Jce implements Aead {
         key.getOutputPrefix().toByteArray());
   }
 
+  /**
+   * Returns a thread-local instance of the ChaCha20Poly1305, or null if ChaCha20Poly1305 is
+   * not supported.
+   */
+  @Nullable
+  static Cipher getThreadLocalCipherOrNull() {
+    return localCipher.get();
+  }
+
   public static boolean isSupported() {
     return localCipher.get() != null;
   }

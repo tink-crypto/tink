@@ -383,3 +383,25 @@ android_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
+
+java_library(
+    name = "insecure_nonce_cha_cha20_poly1305_jce",
+    srcs = ["InsecureNonceChaCha20Poly1305Jce.java"],
+    deps = [
+        ":cha_cha20_poly1305_jce",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "insecure_nonce_cha_cha20_poly1305_jce-android",
+    srcs = ["InsecureNonceChaCha20Poly1305Jce.java"],
+    deps = [
+        ":cha_cha20_poly1305_jce-android",
+        "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
