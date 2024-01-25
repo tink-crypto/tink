@@ -258,6 +258,7 @@ def main():
 
   gcpkms_extra_requirements = _parse_requirements('requirements_gcpkms.in')
   awskms_extra_requirements = _parse_requirements('requirements_awskms.in')
+  hcvault_extra_requirements = _parse_requirements('requirements_hcvault.in')
 
   setuptools.setup(
       name='tink',
@@ -278,7 +279,12 @@ def main():
       extras_require={
           'gcpkms': gcpkms_extra_requirements,
           'awskms': awskms_extra_requirements,
-          'all': gcpkms_extra_requirements + awskms_extra_requirements,
+          'hcvault': hcvault_extra_requirements,
+          'all': (
+              gcpkms_extra_requirements
+              + awskms_extra_requirements
+              + hcvault_extra_requirements
+          ),
       },
       cmdclass={
           'build_ext': BuildBazelExtension,
