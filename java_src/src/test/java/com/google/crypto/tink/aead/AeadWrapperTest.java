@@ -24,14 +24,16 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.PrimitiveSet;
-import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.aead.AesCtrHmacAeadParameters.HashType;
+import com.google.crypto.tink.aead.AesCtrHmacAeadParameters.Variant;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.testing.FakeMonitoringClient;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
-import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.Keyset.Key;
@@ -40,6 +42,7 @@ import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.util.SecretBytes;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
@@ -55,362 +58,408 @@ import org.junit.runner.RunWith;
 @RunWith(Theories.class)
 public class AeadWrapperTest {
 
-  private static AesCtrHmacAeadKey aesCtrHmacAeadKey;
-  private static AesCtrHmacAeadKey aesCtrHmacAeadKey2;
+  private static com.google.crypto.tink.aead.AesCtrHmacAeadKey tinkKey;
+  private static com.google.crypto.tink.aead.AesCtrHmacAeadKey tinkFixedKey;
+  private static com.google.crypto.tink.aead.AesCtrHmacAeadKey tinkFixedKeyDifferentId;
+  private static com.google.crypto.tink.aead.AesCtrHmacAeadKey crunchyFixedKey;
+  private static com.google.crypto.tink.aead.AesCtrHmacAeadKey rawKey0;
+  private static com.google.crypto.tink.aead.AesCtrHmacAeadKey rawKey1;
+  private static com.google.crypto.tink.aead.AesCtrHmacAeadKey rawFixedKey;
+
+  @DataPoints("keys")
+  public static com.google.crypto.tink.Key[] keys;
 
   @BeforeClass
   public static void setUpClass() throws Exception {
+    AesCtrHmacAeadKeyManager.register(true);
+
+    AesCtrHmacAeadParameters tinkParameters =
+        AesCtrHmacAeadParameters.builder()
+            .setAesKeySizeBytes(32)
+            .setHmacKeySizeBytes(32)
+            .setHashType(HashType.SHA512)
+            .setIvSizeBytes(16)
+            .setTagSizeBytes(16)
+            .setVariant(Variant.TINK)
+            .build();
+    tinkKey =
+        com.google.crypto.tink.aead.AesCtrHmacAeadKey.builder()
+            .setParameters(tinkParameters)
+            .setAesKeyBytes(SecretBytes.randomBytes(32))
+            .setHmacKeyBytes(SecretBytes.randomBytes(32))
+            .setIdRequirement(42)
+            .build();
+    tinkFixedKey =
+        com.google.crypto.tink.aead.AesCtrHmacAeadKey.builder()
+            .setParameters(tinkParameters)
+            .setAesKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("0011223344556677889910111213141516171819202122232425262728293031"),
+                    InsecureSecretKeyAccess.get()))
+            .setHmacKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("0011223344556677889910111213141516171819202122232425262728293031"),
+                    InsecureSecretKeyAccess.get()))
+            .setIdRequirement(42)
+            .build();
+    tinkFixedKeyDifferentId =
+        com.google.crypto.tink.aead.AesCtrHmacAeadKey.builder()
+            .setParameters(tinkParameters)
+            .setAesKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("0011223344556677889910111213141516171819202122232425262728293031"),
+                    InsecureSecretKeyAccess.get()))
+            .setHmacKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("0011223344556677889910111213141516171819202122232425262728293031"),
+                    InsecureSecretKeyAccess.get()))
+            .setIdRequirement(43)
+            .build();
+    AesCtrHmacAeadParameters crunchyParameters =
+        AesCtrHmacAeadParameters.builder()
+            .setAesKeySizeBytes(32)
+            .setHmacKeySizeBytes(32)
+            .setHashType(HashType.SHA512)
+            .setIvSizeBytes(16)
+            .setTagSizeBytes(16)
+            .setVariant(Variant.CRUNCHY)
+            .build();
+    crunchyFixedKey =
+        com.google.crypto.tink.aead.AesCtrHmacAeadKey.builder()
+            .setParameters(crunchyParameters)
+            .setAesKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("0011223344556677889910111213141516171819202122232425262728293031"),
+                    InsecureSecretKeyAccess.get()))
+            .setHmacKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("0011223344556677889910111213141516171819202122232425262728293031"),
+                    InsecureSecretKeyAccess.get()))
+            .setIdRequirement(42)
+            .build();
+    AesCtrHmacAeadParameters rawParameters =
+        AesCtrHmacAeadParameters.builder()
+            .setAesKeySizeBytes(32)
+            .setHmacKeySizeBytes(32)
+            .setHashType(HashType.SHA512)
+            .setIvSizeBytes(16)
+            .setTagSizeBytes(16)
+            .setVariant(Variant.NO_PREFIX)
+            .build();
+    rawKey0 =
+        com.google.crypto.tink.aead.AesCtrHmacAeadKey.builder()
+            .setParameters(rawParameters)
+            .setAesKeyBytes(SecretBytes.randomBytes(32))
+            .setHmacKeyBytes(SecretBytes.randomBytes(32))
+            .build();
+    rawKey1 =
+        com.google.crypto.tink.aead.AesCtrHmacAeadKey.builder()
+            .setParameters(rawParameters)
+            .setAesKeyBytes(SecretBytes.randomBytes(32))
+            .setHmacKeyBytes(SecretBytes.randomBytes(32))
+            .build();
+    rawFixedKey =
+        com.google.crypto.tink.aead.AesCtrHmacAeadKey.builder()
+            .setParameters(rawParameters)
+            .setAesKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("0011223344556677889910111213141516171819202122232425262728293031"),
+                    InsecureSecretKeyAccess.get()))
+            .setHmacKeyBytes(
+                SecretBytes.copyFrom(
+                    Hex.decode("0011223344556677889910111213141516171819202122232425262728293031"),
+                    InsecureSecretKeyAccess.get()))
+            .build();
+
+    keys = new com.google.crypto.tink.Key[] {tinkKey, crunchyFixedKey, rawKey0};
+  }
+
+  @Test
+  public void wrappedNonRawEncrypt_addsPrefixToRawCiphertext() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
     AeadConfig.register();
 
-    int aesKeySize = 16;
-    int hmacKeySize = 20;
-    int ivSize = 12;
-    int tagSize = 16;
-    aesCtrHmacAeadKey =
-        AesCtrHmacAeadKey.newBuilder()
-        .setAesCtrKey(TestUtil.createAesCtrKey(Random.randBytes(aesKeySize), ivSize))
-        .setHmacKey(TestUtil.createHmacKey(Random.randBytes(hmacKeySize), tagSize)).build();
-    aesCtrHmacAeadKey2 =
-        AesCtrHmacAeadKey.newBuilder()
-        .setAesCtrKey(TestUtil.createAesCtrKey(Random.randBytes(aesKeySize), ivSize))
-        .setHmacKey(TestUtil.createHmacKey(Random.randBytes(hmacKeySize), tagSize)).build();
-  }
-
-  private static Key getKey(
-      AesCtrHmacAeadKey aesCtrHmacAeadKey, int keyId, OutputPrefixType prefixType)
-      throws Exception {
-    return TestUtil.createKey(
-        TestUtil.createKeyData(
-            aesCtrHmacAeadKey,
-            "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
-            KeyData.KeyMaterialType.SYMMETRIC),
-        keyId,
-        KeyStatusType.ENABLED,
-        prefixType);
-  }
-
-  @Theory
-  public void wrappedRawEncrypt_canBeDecryptedByRawPrimitive() throws Exception {
-    Key key = getKey(aesCtrHmacAeadKey, /*keyId=*/ 0x66AABBCC, OutputPrefixType.RAW);
-    Aead rawAead = Registry.getPrimitive(key.getKeyData(), Aead.class);
-
-    PrimitiveSet<Aead> primitives =
-        PrimitiveSet.newBuilder(Aead.class)
-            .addPrimaryPrimitive(rawAead, key)
-            .build();
-    Aead wrappedAead = new AeadWrapper().wrap(primitives);
-
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);
-    byte[] ciphertext = wrappedAead.encrypt(plaintext, associatedData);
+    byte[] outputPrefix = Hex.decode("000000002a");
 
-    assertThat(rawAead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
-  }
-
-  @Theory
-  public void wrappedRawDecrypt_decryptsRawCiphertext() throws Exception {
-    Key key = getKey(aesCtrHmacAeadKey, /*keyId=*/ 0x66AABBCC, OutputPrefixType.RAW);
-    Aead rawAead = Registry.getPrimitive(key.getKeyData(), Aead.class);
-
-    byte[] plaintext = "plaintext".getBytes(UTF_8);
-    byte[] associatedData = "associatedData".getBytes(UTF_8);
-    byte[] rawCiphertext = rawAead.encrypt(plaintext, associatedData);
-
-    PrimitiveSet<Aead> primitives =
-        PrimitiveSet.newBuilder(Aead.class)
-            .addPrimaryPrimitive(rawAead, key)
+    KeysetHandle rawKeysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(rawFixedKey).withFixedId(0x0000002a).makePrimary())
             .build();
-    Aead wrappedAead = new AeadWrapper().wrap(primitives);
-
-    assertThat(wrappedAead.decrypt(rawCiphertext, associatedData)).isEqualTo(plaintext);
-    byte[] invalid = "invalid".getBytes(UTF_8);
-    assertThrows(
-        GeneralSecurityException.class, () -> wrappedAead.decrypt(rawCiphertext, invalid));
-    assertThrows(
-        GeneralSecurityException.class, () -> wrappedAead.decrypt(invalid, associatedData));
-    byte[] ciphertextWithTinkPrefix = Bytes.concat(Hex.decode("0166AABBCC"), rawCiphertext);
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> wrappedAead.decrypt(ciphertextWithTinkPrefix, associatedData));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> wrappedAead.decrypt("".getBytes(UTF_8), associatedData));
-  }
-
-  @Theory
-  public void wrappedNonRawEncrypt_addsPrefixToRawCiphertext() throws Exception {
-    Key key = getKey(aesCtrHmacAeadKey, /*keyId=*/ 0x66AABBCC, OutputPrefixType.TINK);
-    Aead rawAead = Registry.getPrimitive(key.getKeyData(), Aead.class);
-
-    PrimitiveSet<Aead> primitives =
-        PrimitiveSet.newBuilder(Aead.class)
-            .addPrimaryPrimitive(rawAead, key)
+    Aead rawAead = rawKeysetHandle.getPrimitive(Aead.class);
+    KeysetHandle tinkKeysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(crunchyFixedKey).makePrimary())
             .build();
-    Aead wrappedAead = new AeadWrapper().wrap(primitives);
+    Aead crunchyAead = tinkKeysetHandle.getPrimitive(Aead.class);
 
-    byte[] plaintext = "plaintext".getBytes(UTF_8);
-    byte[] associatedData = "associatedData".getBytes(UTF_8);
-    byte[] ciphertext = wrappedAead.encrypt(plaintext, associatedData);
+    byte[] ciphertext = crunchyAead.encrypt(plaintext, associatedData);
+    byte[] ciphertextPrefix = Arrays.copyOf(ciphertext, 5);
+    byte[] ciphertextWithoutPrefix = Arrays.copyOfRange(ciphertext, 5, ciphertext.length);
 
-    byte[] tinkPrefix = Arrays.copyOf(ciphertext, 5);
-    byte[] ciphertextWithoutPrefix =
-        Arrays.copyOfRange(ciphertext, 5, ciphertext.length);
-    assertThat(tinkPrefix).isEqualTo(Hex.decode("0166AABBCC"));
+    assertThat(ciphertextPrefix).isEqualTo(outputPrefix);
     assertThat(rawAead.decrypt(ciphertextWithoutPrefix, associatedData)).isEqualTo(plaintext);
   }
 
-  @Theory
+  @Test
   public void wrappedNonRawDecrypt_decryptsRawCiphertextWithPrefix() throws Exception {
-    Key key = getKey(aesCtrHmacAeadKey, /*keyId=*/ 0x66AABBCC, OutputPrefixType.TINK);
-    Aead rawAead = Registry.getPrimitive(key.getKeyData(), Aead.class);
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    AeadConfig.register();
 
-    PrimitiveSet<Aead> primitives =
-        PrimitiveSet.newBuilder(Aead.class)
-            .addPrimaryPrimitive(rawAead, key)
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] associatedData = "associatedData".getBytes(UTF_8);
+    byte[] outputPrefix = Hex.decode("010000002a");
+    byte[] invalid = "invalid".getBytes(UTF_8);
+
+    KeysetHandle rawKeysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(rawFixedKey).withFixedId(0x0000002a).makePrimary())
             .build();
-    Aead wrappedAead = new AeadWrapper().wrap(primitives);
+    Aead rawAead = rawKeysetHandle.getPrimitive(Aead.class);
+    KeysetHandle tinkKeysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(tinkFixedKey).makePrimary())
+            .build();
+    Aead tinkAead = tinkKeysetHandle.getPrimitive(Aead.class);
 
-    byte[] plaintext = "plaintext".getBytes(UTF_8);
-    byte[] associatedData = "associatedData".getBytes(UTF_8);
     byte[] rawCiphertext = rawAead.encrypt(plaintext, associatedData);
-    byte[] rawCiphertextWithTinkPrefix = Bytes.concat(Hex.decode("0166AABBCC"), rawCiphertext);
+    byte[] rawCiphertextWithTinkPrefix = Bytes.concat(outputPrefix, rawCiphertext);
 
-    assertThat(wrappedAead.decrypt(rawCiphertextWithTinkPrefix, associatedData))
-        .isEqualTo(plaintext);
-
-    byte[] invalid = "invalid".getBytes(UTF_8);
+    assertThat(tinkAead.decrypt(rawCiphertextWithTinkPrefix, associatedData)).isEqualTo(plaintext);
+    assertThrows(
+        GeneralSecurityException.class, () -> tinkAead.decrypt(rawCiphertext, associatedData));
     assertThrows(
         GeneralSecurityException.class,
-        () -> wrappedAead.decrypt(rawCiphertextWithTinkPrefix, invalid));
+        () -> tinkAead.decrypt(rawCiphertextWithTinkPrefix, invalid));
+    assertThrows(GeneralSecurityException.class, () -> tinkAead.decrypt(invalid, associatedData));
     assertThrows(
-        GeneralSecurityException.class,
-        () -> wrappedAead.decrypt(invalid, associatedData));
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> wrappedAead.decrypt("".getBytes(UTF_8), associatedData));
+        GeneralSecurityException.class, () -> tinkAead.decrypt("".getBytes(UTF_8), associatedData));
   }
 
-  @DataPoints("outputPrefixType")
-  public static final OutputPrefixType[] OUTPUT_PREFIX_TYPES =
-      new OutputPrefixType[] {
-        OutputPrefixType.LEGACY,
-        OutputPrefixType.CRUNCHY,
-        OutputPrefixType.TINK,
-        OutputPrefixType.RAW
-      };
-
   @Theory
-  public void encrytAndDecrypt_success(
-      @FromDataPoints("outputPrefixType") OutputPrefixType prefix) throws Exception {
-    Key key = getKey(aesCtrHmacAeadKey, /*keyId=*/ 123, prefix);
-    Aead aead =
-        new AeadWrapper()
-            .wrap(TestUtil.createPrimitiveSet(TestUtil.createKeyset(key), Aead.class));
+  public void encryptAndDecrypt_success(@FromDataPoints("keys") com.google.crypto.tink.Key key)
+      throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    AeadConfig.register();
 
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);
+
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).withFixedId(42).makePrimary())
+            .build();
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+
     assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+  }
 
+  @Theory
+  public void encryptAndDecrypt_incorrectInputsFail(
+      @FromDataPoints("keys") com.google.crypto.tink.Key key) throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    AeadConfig.register();
+
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] associatedData = "associatedData".getBytes(UTF_8);
     byte[] invalid = "invalid".getBytes(UTF_8);
+
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).withFixedId(42).makePrimary())
+            .build();
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
+    KeysetHandle incorrectKeyKeysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(rawKey1).withFixedId(42).makePrimary())
+            .build();
+    Aead incorrectKeyAead = incorrectKeyKeysetHandle.getPrimitive(Aead.class);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+
     assertThrows(GeneralSecurityException.class, () -> aead.decrypt(ciphertext, invalid));
+    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(invalid, associatedData));
     assertThrows(
-        GeneralSecurityException.class,
-        () -> aead.decrypt(invalid, associatedData));
+        GeneralSecurityException.class, () -> aead.decrypt("".getBytes(UTF_8), associatedData));
     assertThrows(
-        GeneralSecurityException.class,
-        () -> aead.decrypt("".getBytes(UTF_8), associatedData));
-
-    // decrypt with a different key should fail
-    Key otherKey = getKey(aesCtrHmacAeadKey2, /*keyId=*/ 234, prefix);
-    Aead otherAead =
-        new AeadWrapper()
-            .wrap(TestUtil.createPrimitiveSet(TestUtil.createKeyset(otherKey), Aead.class));
-    assertThrows(
-        GeneralSecurityException.class, () -> otherAead.decrypt(ciphertext, associatedData));
+        GeneralSecurityException.class, () -> incorrectKeyAead.decrypt(ciphertext, associatedData));
   }
 
-  @Theory
-  public void decryptWorksIfCiphertextIsValidForAnyPrimitiveInThePrimitiveSet(
-      @FromDataPoints("outputPrefixType") OutputPrefixType prefix1,
-      @FromDataPoints("outputPrefixType") OutputPrefixType prefix2)
-      throws Exception {
-    Key key1 = getKey(aesCtrHmacAeadKey, /*keyId=*/ 123, prefix1);
-    Key key2 = getKey(aesCtrHmacAeadKey2, /*keyId=*/ 234, prefix2);
-    Aead aead1 =
-        new AeadWrapper()
-            .wrap(TestUtil.createPrimitiveSet(TestUtil.createKeyset(key1), Aead.class));
-    Aead aead2 =
-        new AeadWrapper()
-            .wrap(TestUtil.createPrimitiveSet(TestUtil.createKeyset(key2), Aead.class));
-    Aead aead12 =
-        new AeadWrapper()
-            .wrap(TestUtil.createPrimitiveSet(TestUtil.createKeyset(key1, key2), Aead.class));
+  @Test
+  public void decryptWorksIfCiphertextIsValidForAnyPrimitiveInThePrimitiveSet() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    AeadConfig.register();
 
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);
+
+    KeysetHandle keysetHandle0 =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(rawKey0).withRandomId().makePrimary())
+            .build();
+    Aead aead0 = keysetHandle0.getPrimitive(Aead.class);
+    KeysetHandle keysetHandle1 =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(rawKey1).withRandomId().makePrimary())
+            .build();
+    Aead aead1 = keysetHandle1.getPrimitive(Aead.class);
+    KeysetHandle keysetHandle01 =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(rawKey0).withRandomId().makePrimary())
+            .addEntry(KeysetHandle.importKey(rawKey1).withRandomId())
+            .build();
+    Aead aead01 = keysetHandle01.getPrimitive(Aead.class);
+    byte[] ciphertext0 = aead0.encrypt(plaintext, associatedData);
     byte[] ciphertext1 = aead1.encrypt(plaintext, associatedData);
-    byte[] ciphertext2 = aead2.encrypt(plaintext, associatedData);
-    assertThat(aead12.decrypt(ciphertext1, associatedData)).isEqualTo(plaintext);
-    assertThat(aead12.decrypt(ciphertext2, associatedData)).isEqualTo(plaintext);
+
+    assertThat(aead01.decrypt(ciphertext0, associatedData)).isEqualTo(plaintext);
+    assertThat(aead01.decrypt(ciphertext1, associatedData)).isEqualTo(plaintext);
   }
 
-  @Theory
-  public void encryptUsesPrimaryPrimitive()
-      throws Exception {
-    Key key1 = getKey(aesCtrHmacAeadKey, /*keyId=*/ 123, OutputPrefixType.TINK);
-    Key key2 = getKey(aesCtrHmacAeadKey2, /*keyId=*/ 234, OutputPrefixType.TINK);
-    Aead aead1 =
-        new AeadWrapper()
-            .wrap(TestUtil.createPrimitiveSet(TestUtil.createKeyset(key1), Aead.class));
-    Aead aead2 =
-        new AeadWrapper()
-            .wrap(TestUtil.createPrimitiveSet(TestUtil.createKeyset(key2), Aead.class));
-    Aead aead12 =
-        new AeadWrapper()
-            .wrap(
-                TestUtil.createPrimitiveSet(
-                    TestUtil.createKeyset(/*primary=*/ key1, key2), Aead.class));
+  @Test
+  public void encryptUsesPrimaryPrimitive() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    AeadConfig.register();
 
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);
-    byte[] ciphertext = aead12.encrypt(plaintext, associatedData);
 
-    // key1 is the primary key of aead12. Therefore, aead1 should be able to decrypt, and aead2 not.
-    assertThat(aead1.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
-    assertThrows(
-        GeneralSecurityException.class, () -> aead2.decrypt(ciphertext, associatedData));
+    KeysetHandle keysetHandle0 =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(rawKey0).withRandomId().makePrimary())
+            .build();
+    Aead aead0 = keysetHandle0.getPrimitive(Aead.class);
+    KeysetHandle keysetHandle1 =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(rawKey1).withRandomId().makePrimary())
+            .build();
+    Aead aead1 = keysetHandle1.getPrimitive(Aead.class);
+    KeysetHandle keysetHandle01 =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(rawKey0).withRandomId().makePrimary())
+            .addEntry(KeysetHandle.importKey(rawKey1).withRandomId())
+            .build();
+    Aead aead01 = keysetHandle01.getPrimitive(Aead.class);
+    byte[] ciphertext = aead01.encrypt(plaintext, associatedData);
+
+    // rawKey0 is the primary key of aead01. Therefore, aead0 should be able to decrypt, and aead1
+    // not.
+    assertThat(aead0.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+    assertThrows(GeneralSecurityException.class, () -> aead1.decrypt(ciphertext, associatedData));
   }
 
   @Theory
   public void decryptFailsIfEncryptedWithOtherKeyEvenIfKeyIdsAreEqual(
-      @FromDataPoints("outputPrefixType") OutputPrefixType prefix) throws Exception {
-    Key key1 = getKey(aesCtrHmacAeadKey, /*keyId=*/ 123, prefix);
-    Key key2 = getKey(aesCtrHmacAeadKey2, /*keyId=*/ 123, prefix);
-
-    Aead aead =
-        new AeadWrapper()
-            .wrap(TestUtil.createPrimitiveSet(TestUtil.createKeyset(key1), Aead.class));
-    Aead aead2 =
-        new AeadWrapper()
-            .wrap(TestUtil.createPrimitiveSet(TestUtil.createKeyset(key2), Aead.class));
+      @FromDataPoints("keys") com.google.crypto.tink.Key key) throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    AeadConfig.register();
 
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);
-    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
-    assertThrows(
-        GeneralSecurityException.class, () -> aead2.decrypt(ciphertext, associatedData));
-  }
 
-  @DataPoints("nonRawOutputPrefixType")
-  public static final OutputPrefixType[] NON_RAW_OUTPUT_PREFIX_TYPES =
-      new OutputPrefixType[] {
-        OutputPrefixType.LEGACY, OutputPrefixType.CRUNCHY, OutputPrefixType.TINK
-      };
-
-  @Theory
-  public void nonRawKeysWithSameKeyMaterialButDifferentKeyIds_decryptFails(
-      @FromDataPoints("nonRawOutputPrefixType") OutputPrefixType prefix) throws Exception {
-    Key key1 = getKey(aesCtrHmacAeadKey, /*keyId=*/ 123, prefix);
-    Key key2 = getKey(aesCtrHmacAeadKey, /*keyId=*/ 234, prefix);
-
-    Aead aead =
-        new AeadWrapper()
-            .wrap(TestUtil.createPrimitiveSet(TestUtil.createKeyset(key1), Aead.class));
-    Aead aead2 =
-        new AeadWrapper()
-            .wrap(TestUtil.createPrimitiveSet(TestUtil.createKeyset(key2), Aead.class));
-
-    byte[] plaintext = "plaintext".getBytes(UTF_8);
-    byte[] associatedData = "associatedData".getBytes(UTF_8);
-    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
-    assertThrows(
-        GeneralSecurityException.class, () -> aead2.decrypt(ciphertext, associatedData));
-  }
-
-  @Theory
-  public void rawKeysWithSameKeyMaterialButDifferentKeyIds_decryptWorks() throws Exception {
-    Key key1 = getKey(aesCtrHmacAeadKey, /*keyId=*/ 123, OutputPrefixType.RAW);
-    Key key2 = getKey(aesCtrHmacAeadKey, /*keyId=*/ 234, OutputPrefixType.RAW);
-
-    Aead aead =
-        new AeadWrapper()
-            .wrap(TestUtil.createPrimitiveSet(TestUtil.createKeyset(key1), Aead.class));
-    Aead aead2 =
-        new AeadWrapper()
-            .wrap(TestUtil.createPrimitiveSet(TestUtil.createKeyset(key2), Aead.class));
-
-    byte[] plaintext = "plaintext".getBytes(UTF_8);
-    byte[] associatedData = "associatedData".getBytes(UTF_8);
-    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
-    assertThat(aead2.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
-  }
-
-  @Theory
-  public void noPrimary_decryptWorks() throws Exception {
-    Key key = getKey(aesCtrHmacAeadKey, /*keyId=*/ 123, OutputPrefixType.TINK);
-    Aead rawAead = Registry.getPrimitive(key.getKeyData(), Aead.class);
-
-    Aead wrappedAead = new AeadWrapper().wrap(
-        PrimitiveSet.newBuilder(Aead.class)
-            .addPrimaryPrimitive(rawAead, key)
-            .build());
-    Aead wrappedAeadWithoutPrimary = new AeadWrapper().wrap(
-        PrimitiveSet.newBuilder(Aead.class)
-            .addPrimitive(rawAead, key)
-            .build());
-
-    byte[] plaintext = "plaintext".getBytes(UTF_8);
-    byte[] associatedData = "associatedData".getBytes(UTF_8);
-    byte[] ciphertext = wrappedAead.encrypt(plaintext, associatedData);
-    assertThat(wrappedAeadWithoutPrimary.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
-  }
-
-  @Theory
-  public void noPrimary_encryptThrowsNullPointerException() throws Exception {
-    Key key = getKey(aesCtrHmacAeadKey, /*keyId=*/ 123, OutputPrefixType.TINK);
-    Aead rawAead = Registry.getPrimitive(key.getKeyData(), Aead.class);
-
-    Aead wrappedAeadWithoutPrimary = new AeadWrapper().wrap(
-        PrimitiveSet.newBuilder(Aead.class)
-            .addPrimitive(rawAead, key)
-            .build());
-
-    byte[] plaintext = "plaintext".getBytes(UTF_8);
-    byte[] associatedData = "associatedData".getBytes(UTF_8);
-    // This usually should not happen, since the wrapper is generated by KeysetHandle,
-    // which validates the keyset. See getPrimitiveFromKeysetHandleWithoutPrimary_throws test.
-    assertThrows(
-        NullPointerException.class,
-        () -> wrappedAeadWithoutPrimary.encrypt(plaintext, associatedData));
-  }
-
-  @Theory
-  public void getPrimitiveFromKeysetHandleWithoutPrimary_throws() throws Exception {
-    Keyset keysetWithoutPrimary =
-        Keyset.newBuilder()
-            .addKey(getKey(aesCtrHmacAeadKey, /*keyId=*/ 123, OutputPrefixType.TINK))
+    KeysetHandle keysetHandle0 =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).withFixedId(42).makePrimary())
             .build();
-    KeysetHandle keysetHandle =
-        TinkProtoKeysetFormat.parseKeyset(
-            keysetWithoutPrimary.toByteArray(), InsecureSecretKeyAccess.get());
+    Aead aead0 = keysetHandle0.getPrimitive(Aead.class);
+    KeysetHandle keysetHandle1 =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(rawKey1).withFixedId(42).makePrimary())
+            .build();
+    Aead aead1 = keysetHandle1.getPrimitive(Aead.class);
+    byte[] ciphertext = aead0.encrypt(plaintext, associatedData);
+
+    assertThrows(GeneralSecurityException.class, () -> aead1.decrypt(ciphertext, associatedData));
+  }
+
+  @Test
+  public void nonRawKeysWithSameKeyMaterialButDifferentKeyIds_decryptFails() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    AeadConfig.register();
+
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] associatedData = "associatedData".getBytes(UTF_8);
+
+    KeysetHandle tinkKeysetHandle0 =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(tinkFixedKey).makePrimary())
+            .build();
+    Aead tinkAead0 = tinkKeysetHandle0.getPrimitive(Aead.class);
+    KeysetHandle tinkKeysetHandle1 =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(tinkFixedKeyDifferentId).makePrimary())
+            .build();
+    Aead tinkAead1 = tinkKeysetHandle1.getPrimitive(Aead.class);
+
+    byte[] ciphertext = tinkAead0.encrypt(plaintext, associatedData);
+
     assertThrows(
-        GeneralSecurityException.class, () -> keysetHandle.getPrimitive(Aead.class));
+        GeneralSecurityException.class, () -> tinkAead1.decrypt(ciphertext, associatedData));
+  }
+
+  @Test
+  public void rawKeysWithSameKeyMaterialButDifferentKeyIds_decryptWorks() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    AeadConfig.register();
+
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] associatedData = "associatedData".getBytes(UTF_8);
+
+    KeysetHandle keysetHandle0 =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(rawKey0).withFixedId(123).makePrimary())
+            .build();
+    Aead aead0 = keysetHandle0.getPrimitive(Aead.class);
+    KeysetHandle keysetHandle1 =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(rawKey0).withFixedId(42).makePrimary())
+            .build();
+    Aead aead1 = keysetHandle1.getPrimitive(Aead.class);
+    byte[] ciphertext = aead0.encrypt(plaintext, associatedData);
+
+    assertThat(aead1.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void getPrimitiveFromKeysetHandleWithoutPrimary_throws() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    AeadConfig.register();
+
+    AesCtrHmacAeadKey aesCtrHmacAeadProtoKey =
+        AesCtrHmacAeadKey.newBuilder()
+            .setAesCtrKey(TestUtil.createAesCtrKey(Random.randBytes(16), 12))
+            .setHmacKey(TestUtil.createHmacKey(Random.randBytes(20), 16))
+            .build();
+    Key key =
+        TestUtil.createKey(
+            TestUtil.createKeyData(
+                aesCtrHmacAeadProtoKey,
+                "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
+                KeyMaterialType.SYMMETRIC),
+            123,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.TINK);
+    Keyset keysetWithoutPrimary = Keyset.newBuilder().addKey(key).build();
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            TinkProtoKeysetFormat.parseKeyset(
+                    keysetWithoutPrimary.toByteArray(), InsecureSecretKeyAccess.get())
+                .getPrimitive(Aead.class));
   }
 
   @Test
   public void testAeadWithoutAnnotations_hasNoMonitoring() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    AeadConfig.register();
     FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
     MutableMonitoringRegistry.globalInstance().clear();
     MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
 
-    Aead aead =
-        new AeadWrapper()
-            .wrap(
-                TestUtil.createPrimitiveSet(
-                    TestUtil.createKeyset(
-                        getKey(aesCtrHmacAeadKey, /*keyId=*/ 123, OutputPrefixType.TINK)),
-                    Aead.class));
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder().addEntry(KeysetHandle.importKey(tinkKey).makePrimary()).build();
+    Aead aead = keysetHandle.getPrimitive(Aead.class);
 
     byte[] plaintext = "plaintext".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);
@@ -426,33 +475,35 @@ public class AeadWrapperTest {
 
   @Test
   public void testAeadWithAnnotations_hasMonitoring() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    AeadConfig.register();
     FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
     MutableMonitoringRegistry.globalInstance().clear();
     MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
-
-    Key key1 = getKey(aesCtrHmacAeadKey, /*keyId=*/ 42, OutputPrefixType.TINK);
-    Key key2 = getKey(aesCtrHmacAeadKey, /*keyId=*/ 43, OutputPrefixType.RAW);
 
     byte[] plaintext = Random.randBytes(20);
     byte[] plaintext2 = Random.randBytes(30);
     byte[] associatedData = Random.randBytes(40);
 
     // generate ciphertext2 using key2
-    Aead aead2 =
-        new AeadWrapper()
-            .wrap(TestUtil.createPrimitiveSet(TestUtil.createKeyset(key2), Aead.class));
+    KeysetHandle singleKeyKeysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(rawKey0).withFixedId(43).makePrimary())
+            .build();
+    Aead aead2 = singleKeyKeysetHandle.getPrimitive(Aead.class);
     byte[] ciphertext2 = aead2.encrypt(plaintext2, associatedData);
 
     MonitoringAnnotations annotations =
         MonitoringAnnotations.newBuilder().add("annotation_name", "annotation_value").build();
-    PrimitiveSet<Aead> primitives =
-        TestUtil.createPrimitiveSetWithAnnotations(
-            TestUtil.createKeyset(key1, key2), // key1 is the primary key
-            annotations,
-            Aead.class);
-    Aead aead = new AeadWrapper().wrap(primitives);
+    KeysetHandle twoKeysKeysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(tinkKey).makePrimary())
+            .addEntry(KeysetHandle.importKey(rawKey0).withFixedId(43))
+            .setMonitoringAnnotations(annotations)
+            .build();
+    Aead aead = twoKeysKeysetHandle.getPrimitive(Aead.class);
 
-    byte[] ciphertext = aead.encrypt(plaintext, associatedData);  // uses key1 to encrypt
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData); // uses key1 to encrypt
     byte[] decrypted = aead.decrypt(ciphertext, associatedData);
     assertThat(decrypted).isEqualTo(plaintext);
     byte[] decrypted2 = aead.decrypt(ciphertext2, associatedData);
@@ -498,7 +549,7 @@ public class AeadWrapperTest {
   }
 
   private static class AlwaysFailingAead implements Aead {
-    public AlwaysFailingAead() {}
+    public AlwaysFailingAead(com.google.crypto.tink.aead.AesCtrHmacAeadKey key) {}
 
     @Override
     public byte[] encrypt(byte[] plaintext, byte[] aad) throws GeneralSecurityException {
@@ -513,20 +564,26 @@ public class AeadWrapperTest {
 
   @Test
   public void testFailingAeadWithAnnotations_hasMonitoring() throws Exception {
+    MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(
+            PrimitiveConstructor.create(
+                AlwaysFailingAead::new,
+                com.google.crypto.tink.aead.AesCtrHmacAeadKey.class,
+                Aead.class));
+    AeadWrapper.register();
     FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
     MutableMonitoringRegistry.globalInstance().clear();
     MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
 
     MonitoringAnnotations annotations =
         MonitoringAnnotations.newBuilder().add("annotation_name", "annotation_value").build();
-    PrimitiveSet<Aead> primitives =
-        PrimitiveSet.newBuilder(Aead.class)
-            .setAnnotations(annotations)
-            .addPrimaryPrimitive(
-                new AlwaysFailingAead(),
-                getKey(aesCtrHmacAeadKey, /*keyId=*/ 42, OutputPrefixType.TINK))
+    KeysetHandle aesCtrHmacAeadKeysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(tinkKey).makePrimary())
+            .setMonitoringAnnotations(annotations)
             .build();
-    Aead aead = new AeadWrapper().wrap(primitives);
+    Aead aead = aesCtrHmacAeadKeysetHandle.getPrimitive(Aead.class);
 
     byte[] randomBytes = Random.randBytes(20);
     byte[] associatedData = Random.randBytes(20);
@@ -550,5 +607,4 @@ public class AeadWrapperTest {
     assertThat(decFailure.getKeysetInfo().getPrimaryKeyId()).isEqualTo(42);
     assertThat(decFailure.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
   }
-
 }
