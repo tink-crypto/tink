@@ -436,6 +436,24 @@ tink_cc_library(
     exclude_if_boringssl
 )
 
+tink_cc_library(
+  NAME ecies_parameters
+  SRCS
+    ecies_parameters.cc
+    ecies_parameters.h
+  DEPS
+    tink::hybrid::hybrid_parameters
+    absl::memory
+    absl::status
+    absl::strings
+    absl::optional
+    tink::core::parameters
+    tink::aead::aes_gcm_parameters
+    tink::daead::aes_siv_parameters
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -849,4 +867,22 @@ tink_cc_test(
     tink::proto::tink_cc_proto
   TAGS
     exclude_if_boringssl
+)
+
+tink_cc_test(
+  NAME ecies_parameters_test
+  SRCS
+    ecies_parameters_test.cc
+  DEPS
+    tink::hybrid::ecies_parameters
+    gmock
+    absl::status
+    absl::strings
+    absl::string_view
+    absl::optional
+    tink::core::parameters
+    tink::aead::aes_gcm_parameters
+    tink::daead::aes_siv_parameters
+    tink::util::statusor
+    tink::util::test_matchers
 )
