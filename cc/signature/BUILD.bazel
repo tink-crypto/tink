@@ -738,6 +738,23 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "ecdsa_parameters",
+    srcs = ["ecdsa_parameters.cc"],
+    hdrs = ["ecdsa_parameters.h"],
+    include_prefix = "tink/signature",
+    deps = [
+        ":signature_parameters",
+        "//:parameters",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/algorithm:container",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings:string_view",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -1403,6 +1420,18 @@ cc_test(
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings:string_view",
         "@com_google_absl//absl/types:optional",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "ecdsa_parameters_test",
+    srcs = ["ecdsa_parameters_test.cc"],
+    deps = [
+        ":ecdsa_parameters",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )

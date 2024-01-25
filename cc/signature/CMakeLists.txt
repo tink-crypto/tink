@@ -704,6 +704,22 @@ tink_cc_library(
     tink::proto::tink_cc_proto
 )
 
+tink_cc_library(
+  NAME ecdsa_parameters
+  SRCS
+    ecdsa_parameters.cc
+    ecdsa_parameters.h
+  DEPS
+    tink::signature::signature_parameters
+    absl::algorithm_container
+    absl::status
+    absl::string_view
+    absl::optional
+    tink::core::parameters
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -1355,4 +1371,16 @@ tink_cc_test(
     tink::proto::common_cc_proto
     tink::proto::rsa_ssa_pss_cc_proto
     tink::proto::tink_cc_proto
+)
+
+tink_cc_test(
+  NAME ecdsa_parameters_test
+  SRCS
+    ecdsa_parameters_test.cc
+  DEPS
+    tink::signature::ecdsa_parameters
+    gmock
+    absl::status
+    tink::util::statusor
+    tink::util::test_matchers
 )
