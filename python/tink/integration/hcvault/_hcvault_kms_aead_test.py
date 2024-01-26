@@ -11,56 +11,31 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for tink.python.tink.integration.hcvault_kms_client."""
+"""Tests for _hcvault_kms_client.py."""
 
 import base64
 import http.server
 import json
 import threading
-
 from absl.testing import absltest
+from absl.testing import parameterized
 import hvac
-
 import tink
 from tink.integration import hcvault
 
-TOKEN = ''  # Your auth token
+_TOKEN = ''
+_KEY_PATH = '/transit/keys/key-1'
+_KEY_URI = f'http://localhost:8200{_KEY_PATH}'
 
-# Replace this with your vault URI
-KEY_URI = 'http://localhost:8200/transit/keys/key-1'
-
-GCP_KEY_URI = (
+_GCP_KEY_URI = (
     'gcp-kms://projects/tink-test-infrastructure/locations/global/'
     'keyRings/unit-and-integration-testing/cryptoKeys/aead-key'
 )
 
-VALID_EP_KEY_URIS = {
-    'hcvault://localhost:8200/transit/keys/key-1': ['transit', 'key-1'],
-    'hcvault://vault.example.com/transit/keys/foo': ['transit', 'foo'],
-    'hcvault://vault.example.com/teams/billing/something/transit/keys/pci-key': [
-        'teams/billing/something/transit',
-        'pci-key',
-    ],
-    'hcvault://vault.example.com/transit/keys/something/transit/keys/my-key': [
-        'transit/keys/something/transit',
-        'my-key',
-    ],
-    'hcvault://vault-prd.example.com/transit/keys/hi': ['transit', 'hi'],
-    'hcvault:///transit/keys/hi': ['transit', 'hi'],
-    'hcvault:///cipher/keys/hi': ['cipher', 'hi'],
-}
-
-INVALID_EP_KEY_URIS = [
-    'hcvault://vault.com',
-    'hcvault://vault.com/',
-    'hcvault://vault.example.com/foo/bar/baz',
-    'hcvault://vault.example.com/transit/keys/bar/baz',
-]
-
 
 class MockHandler(http.server.BaseHTTPRequestHandler):
 
-  def do_post(self):
+  def do_POST(self):  # pylint: disable=invalid-name
     if 'encrypt' in self.path:
       post_body = self.rfile.read(int(self.headers.get('Content-Length')))
       req = json.loads(post_body)
@@ -86,10 +61,10 @@ class MockHandler(http.server.BaseHTTPRequestHandler):
 
     self.send_error(404)
 
-  def do_get(self):
+  def do_GET(self):  # pylint: disable=invalid-name
     self.send_error(404)
 
-  def do_put(self):
+  def do_PUT(self):  # pylint: disable=invalid-name
     self.send_error(404)
 
   def encrypt(self, data):
@@ -130,12 +105,10 @@ class MockHandler(http.server.BaseHTTPRequestHandler):
     return plaintext
 
 
-class HcVaultKmsAeadTest(absltest.TestCase):
-  server = None
+class HcVaultKmsAeadTest(parameterized.TestCase):
 
   def setUp(self):
     super().setUp()
-    print('Running setup')
     self.server = http.server.HTTPServer(('localhost', 8200), MockHandler)
     threading.Thread(target=self.server.serve_forever).start()
 
@@ -146,8 +119,8 @@ class HcVaultKmsAeadTest(absltest.TestCase):
       self.server.server_close()
 
   def test_encrypt_decrypt(self):
-    client = hvac.Client(url=KEY_URI, token=TOKEN, verify=False)
-    vaultaead = hcvault.create_aead(KEY_URI, client)
+    client = hvac.Client(url=_KEY_URI, token=_TOKEN, verify=False)
+    vaultaead = hcvault.create_aead(_KEY_PATH, client)
     plaintext = b'hello'
     associated_data = b'world'
     ciphertext = vaultaead.encrypt(plaintext, associated_data)
@@ -158,8 +131,8 @@ class HcVaultKmsAeadTest(absltest.TestCase):
     self.assertEqual(plaintext, vaultaead.decrypt(ciphertext, b''))
 
   def test_invalid_context(self):
-    client = hvac.Client(url=KEY_URI, token=TOKEN, verify=False)
-    vaultaead = hcvault.create_aead(KEY_URI, client)
+    client = hvac.Client(url=_KEY_URI, token=_TOKEN, verify=False)
+    vaultaead = hcvault.create_aead(_KEY_PATH, client)
 
     plaintext = b'helloworld'
     ciphertext = vaultaead.encrypt(plaintext, b'')
@@ -168,20 +141,54 @@ class HcVaultKmsAeadTest(absltest.TestCase):
       vaultaead.decrypt(ciphertext, b'a')
 
   def test_encrypt_with_bad_uri(self):
-    client = hvac.Client(url=KEY_URI, token=TOKEN, verify=False)
+    client = hvac.Client(url=_KEY_URI, token=_TOKEN, verify=False)
     with self.assertRaises(tink.TinkError):
-      hcvault.create_aead(GCP_KEY_URI, client)
+      hcvault.create_aead(_GCP_KEY_URI, client)
 
-  def test_endpoint_paths(self):
+  @parameterized.named_parameters([
+      ('simple', '/transit/keys/key-1', 'transit', 'key-1'),
+      (
+          'escaped',
+          '/transit/keys/this%2Band+that',
+          'transit',
+          'this%252Band%2Bthat',
+      ),
+      (
+          'sub_path',
+          '/teams/billing/something/transit/keys/pci-key',
+          'teams/billing/something/transit',
+          'pci-key',
+      ),
+      (
+          'transit_twice',
+          '/transit/keys/something/transit/keys/my-key',
+          'transit/keys/something/transit',
+          'my-key',
+      ),
+      ('mount_not_named_transit', '/cipher/keys/hi', 'cipher', 'hi'),
+  ])
+  def test_valid_get_endpoint_paths(
+      self, path, expected_mount, expected_key_name
+  ):
+    mount, path = hcvault._hcvault_kms_client._get_endpoint_paths(path)
+    self.assertEqual(mount, expected_mount)
+    self.assertEqual(path, expected_key_name)
 
-    for e in VALID_EP_KEY_URIS:
-      mount, path = hcvault._hcvault_kms_client._endpoint_paths(e)
-      self.assertEqual(mount, VALID_EP_KEY_URIS[e][0])
-      self.assertEqual(path, VALID_EP_KEY_URIS[e][1])
-
-    for e in INVALID_EP_KEY_URIS:
-      with self.assertRaises(tink.TinkError):
-        _, _ = hcvault._hcvault_kms_client._endpoint_paths(e)
+  @parameterized.named_parameters([
+      ('empty', ''),
+      ('slash_only', '/'),
+      ('no_mount', '/keys/foo'),
+      ('traling_slash', 'mount/keys/foo/'),
+      ('no_leading_slash', 'mount/keys/foo'),
+      ('invalid_mount', '////keys/foo'),
+      ('invalid_mount_and_trailing_slash', '////keys/foo/'),
+      ('invalid_mount_with_empty_component_in_between', '/foo//bar/keys/baz'),
+      ('invalid_mount_with_empty_trailing_components', '/foo/bar///keys/baz'),
+      ('invalid_key_name', '/transit/keys/bar/baz'),
+  ])
+  def test_invalid_get_endpoint_paths(self, path):
+    with self.assertRaises(tink.TinkError):
+      _, _ = hcvault._hcvault_kms_client._get_endpoint_paths(path)
 
 
 if __name__ == '__main__':

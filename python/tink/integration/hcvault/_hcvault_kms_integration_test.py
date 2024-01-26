@@ -22,11 +22,11 @@ from tink.integration import hcvault
 
 
 TOKEN = ''  # Your auth token
-
 BAD_TOKEN = 'notavalidtoken'
 
 # Replace this with your vault URI
-KEY_URI = 'hcvault://hcvault.corp.com:8200/transit/keys/key-1'
+_KEY_PATH = 'transit/keys/key-1'
+_KEY_URI = f'hcvault://hcvault.corp.com:8200/{_KEY_PATH}'
 
 GCP_KEY_URI = (
     'gcp-kms://projects/tink-test-infrastructure/locations/global/'
@@ -41,14 +41,14 @@ def setUpModule():
   aead.register()
   global CLIENT
   global BAD_CLIENT
-  CLIENT = hvac.Client(url=KEY_URI, token=TOKEN, verify=False)
-  BAD_CLIENT = hvac.Client(url=KEY_URI, token=BAD_TOKEN, verify=False)
+  CLIENT = hvac.Client(url=_KEY_URI, token=TOKEN, verify=False)
+  BAD_CLIENT = hvac.Client(url=_KEY_URI, token=BAD_TOKEN, verify=False)
 
 
 class HcVaultAeadTest(absltest.TestCase):
 
   def test_encrypt_decrypt(self):
-    vaultaead = hcvault.create_aead(KEY_URI, CLIENT)
+    vaultaead = hcvault.create_aead(_KEY_PATH, CLIENT)
 
     plaintext = b'hello'
     associated_data = b'world'
@@ -60,7 +60,7 @@ class HcVaultAeadTest(absltest.TestCase):
     self.assertEqual(plaintext, vaultaead.decrypt(ciphertext, b''))
 
   def test_corrupted_ciphertext(self):
-    vaultaead = hcvault.create_aead(KEY_URI, CLIENT)
+    vaultaead = hcvault.create_aead(_KEY_PATH, CLIENT)
 
     plaintext = b'helloworld'
     ciphertext = vaultaead.encrypt(plaintext, b'')
@@ -80,7 +80,7 @@ class HcVaultAeadTest(absltest.TestCase):
 
   def test_encrypt_with_bad_client(self):
     with self.assertRaises(tink.TinkError):
-      vaultaead = hcvault.create_aead(KEY_URI, BAD_CLIENT)
+      vaultaead = hcvault.create_aead(_KEY_PATH, BAD_CLIENT)
 
       plaintext = b'hello'
       associated_data = b'world'

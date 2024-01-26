@@ -15,53 +15,56 @@
 """A client for Hashicorp Vault."""
 
 import base64
+import re
 from typing import Tuple
-import urllib
+import urllib.parse
 import hvac
 import tink
 from tink import aead
 
+# Matches strings like /{mount}/keys/{key_name}.
+# - The initial `^/` matches strings that start with '/'
+# - The string "/keys/" splits the path into two parts:
+# - The first part (mount) is captured by the group ([^/]+(?:/[^/]+)*):
+#   - [^/]+: Sequence of one or more characters that aren't '/', followed by
+#   - (?:/[^/]+)*: Zero or more strings that start with '/' and followed by a
+#     sequence of one or more characters that aren't '/'.
+# - The second part (key_name) is captured by ([^/]+).
+_PATH_MATCHER = re.compile(r'^/([^/]+(?:/[^/]+)*)/keys/([^/]+)$')
 
-def _endpoint_paths(key_uri: str) -> Tuple[str, str]:
-  """Transforms key_uri into Vault transit encrypt/decrypt mount point and transit key.
 
-  The key_uri is expected to end in "/{mount}/keys/{keyName}". For example, the
-  key_uri "hcvault:///transit/keys/key-foo" will be transformed to
-  "transit" and "key-foo", and
-  "hcvault://my-vault.example.com/teams/billing/service/cipher/keys/key-bar"
-  will be transformed into "teams/billing/service/cipher" and "key-bar".
+def _get_endpoint_paths(key_path: str) -> Tuple[str, str]:
+  """Extracts mount point and key name from the given key_path.
+
+  The key_path is expected of the form "/{mount}/keys/{key_name}". For example,
+  "/transit/keys/key-foo" will be transformed to "transit" and "key-foo", and
+  "/teams/billing/service/cipher/keys/key-bar" will be transformed into
+  "teams/billing/service/cipher" and "key-bar".
 
   Args:
-    key_uri: Key URI
+    key_path: Key path of the form "/{mount}/keys/{key_name}".
+
   Returns:
-    Vault transit encryp/decrypt mount point and transit key.
+    Vault transit encryp/decrypt mount point and transit key name.
   """
-  u = urllib.parse.urlparse(key_uri)
-
-  escaped_path = urllib.parse.quote(u.path)
-  parts = escaped_path.split('/')
-  length = len(parts)
-  if length < 4 or parts[length - 2] != 'keys':
-    raise tink.TinkError('malformed URL')
-
-  parts[length - 2] = ''
-  parts = [x for x in parts if x]
-  return (
-      '/'.join(parts[:-1]),
-      parts[-1:][0],
-  )  # First entry i.e. "transit" and last entry i.e. "key-bar"
+  escaped_path = urllib.parse.quote(key_path)
+  # Make sure that we have a path of the form: /{mount}/keys/{key_name}.
+  mount_and_key_name = _PATH_MATCHER.fullmatch(escaped_path)
+  if not mount_and_key_name:
+    raise tink.TinkError('Invalid key_path')
+  return mount_and_key_name.groups()
 
 
-def create_aead(key_uri: str, client: hvac.Client) -> aead.Aead:
-  return _HcVaultKmsAead(client, key_uri)
+def create_aead(key_path: str, client: hvac.Client) -> aead.Aead:
+  return _HcVaultKmsAead(client, key_path)
 
 
 class _HcVaultKmsAead(aead.Aead):
   """Implements the Aead interface for Hashicorp Vault."""
 
-  def __init__(self, client: hvac.Client, key_uri: str) -> None:
+  def __init__(self, client: hvac.Client, key_path: str) -> None:
     self.client = client
-    mount_point, key_name = _endpoint_paths(key_uri)
+    mount_point, key_name = _get_endpoint_paths(key_path)
     self.key_name = key_name
     self.mount_point = mount_point
 
