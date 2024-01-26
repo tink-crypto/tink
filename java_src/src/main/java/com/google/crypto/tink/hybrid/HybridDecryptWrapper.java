@@ -19,9 +19,9 @@ import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
-import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.MonitoringUtil;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.monitoring.MonitoringClient;
 import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
 import java.security.GeneralSecurityException;
@@ -115,6 +115,6 @@ public class HybridDecryptWrapper implements PrimitiveWrapper<HybridDecrypt, Hyb
    * argument.
    */
   public static void register() throws GeneralSecurityException {
-    Registry.registerPrimitiveWrapper(WRAPPER);
+    MutablePrimitiveRegistry.globalInstance().registerPrimitiveWrapper(WRAPPER);
   }
 }

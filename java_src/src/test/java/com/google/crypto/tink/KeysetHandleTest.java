@@ -150,7 +150,7 @@ public class KeysetHandleTest {
     }
 
     static void register() throws GeneralSecurityException {
-      Registry.registerPrimitiveWrapper(WRAPPER);
+      MutablePrimitiveRegistry.globalInstance().registerPrimitiveWrapper(WRAPPER);
     }
   }
 

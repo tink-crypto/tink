@@ -109,7 +109,7 @@ public class KeysetHandleFullPrimitiveTest {
     }
 
     public static void register() throws GeneralSecurityException {
-      Registry.registerPrimitiveWrapper(WRAPPER);
+      MutablePrimitiveRegistry.globalInstance().registerPrimitiveWrapper(WRAPPER);
     }
   }
 
@@ -200,7 +200,7 @@ public class KeysetHandleFullPrimitiveTest {
     }
 
     public static void register() throws GeneralSecurityException {
-      Registry.registerPrimitiveWrapper(WRAPPER);
+      MutablePrimitiveRegistry.globalInstance().registerPrimitiveWrapper(WRAPPER);
     }
   }
 

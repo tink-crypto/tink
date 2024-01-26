@@ -539,7 +539,7 @@ java_library(
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:primitive_set",
         "//src/main/java/com/google/crypto/tink:primitive_wrapper",
-        "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_primitive_registry",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -575,7 +575,7 @@ android_library(
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:primitive_set-android",
         "//src/main/java/com/google/crypto/tink:primitive_wrapper-android",
-        "//src/main/java/com/google/crypto/tink:registry-android",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_primitive_registry-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
