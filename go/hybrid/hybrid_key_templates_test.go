@@ -30,22 +30,38 @@ func TestKeyTemplates(t *testing.T) {
 		name     string
 		template *tinkpb.KeyTemplate
 	}{
-		{name: "ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM",
-			template: hybrid.ECIESHKDFAES128GCMKeyTemplate()},
-		{name: "ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256",
-			template: hybrid.ECIESHKDFAES128CTRHMACSHA256KeyTemplate()},
-		{name: "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM",
-			template: hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Key_Template()},
-		{name: "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_RAW",
-			template: hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Raw_Key_Template()},
-		{name: "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM",
-			template: hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_Key_Template()},
-		{name: "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_RAW",
-			template: hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_Raw_Key_Template()},
-		{name: "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305",
-			template: hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_Key_Template()},
-		{name: "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_RAW",
-			template: hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_Raw_Key_Template()},
+		{
+			name:     "ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM",
+			template: hybrid.ECIESHKDFAES128GCMKeyTemplate(),
+		},
+		{
+			name:     "ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256",
+			template: hybrid.ECIESHKDFAES128CTRHMACSHA256KeyTemplate(),
+		},
+		{
+			name:     "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM",
+			template: hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Key_Template(),
+		},
+		{
+			name:     "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_RAW",
+			template: hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_Raw_Key_Template(),
+		},
+		{
+			name:     "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM",
+			template: hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_Key_Template(),
+		},
+		{
+			name:     "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_RAW",
+			template: hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_Raw_Key_Template(),
+		},
+		{
+			name:     "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305",
+			template: hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_Key_Template(),
+		},
+		{
+			name:     "DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_RAW",
+			template: hybrid.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_Raw_Key_Template(),
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -74,35 +90,43 @@ func TestKeyTemplates(t *testing.T) {
 					plaintext: []byte("this data needs to be encrypted"),
 					context1:  []byte("encryption context"),
 					context2:  []byte("encryption context"),
-				}, {
+				},
+				{
 					plaintext: []byte("this data needs to be encrypted"),
 					context1:  []byte(""),
 					context2:  []byte(""),
-				}, {
+				},
+				{
 					plaintext: []byte("this data needs to be encrypted"),
 					context1:  nil,
 					context2:  nil,
-				}, {
+				},
+				{
 					plaintext: []byte(""),
 					context1:  nil,
 					context2:  nil,
-				}, {
+				},
+				{
 					plaintext: nil,
 					context1:  []byte("encryption context"),
 					context2:  []byte("encryption context"),
-				}, {
+				},
+				{
 					plaintext: nil,
 					context1:  []byte(""),
 					context2:  []byte(""),
-				}, {
+				},
+				{
 					plaintext: nil,
 					context1:  nil,
 					context2:  nil,
-				}, {
+				},
+				{
 					plaintext: []byte("this data needs to be encrypted"),
 					context1:  []byte(""),
 					context2:  nil,
-				}, {
+				},
+				{
 					plaintext: []byte("this data needs to be encrypted"),
 					context1:  nil,
 					context2:  []byte(""),
