@@ -32,7 +32,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
 /** A KeyManager for a PublicKeySign primitive for testing. */
-final class LegacyPublicKeySignKeyManager implements PrivateKeyManager<PublicKeySign> {
+public final class LegacyPublicKeySignKeyManager implements PrivateKeyManager<PublicKeySign> {
   private static final String TYPE_URL = "type.googleapis.com/custom.Ed25519PrivateKey";
 
   @AccessesPartialKey

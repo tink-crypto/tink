@@ -29,7 +29,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
 /** A KeyManager for a PublicKeyVerify primitive for testing. */
-final class LegacyPublicKeyVerifyKeyManager implements KeyManager<PublicKeyVerify> {
+public final class LegacyPublicKeyVerifyKeyManager implements KeyManager<PublicKeyVerify> {
   static final String TYPE_URL = "type.googleapis.com/custom.Ed25519PublicKey";
 
   @AccessesPartialKey
