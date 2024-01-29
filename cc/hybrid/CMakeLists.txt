@@ -454,6 +454,30 @@ tink_cc_library(
     tink::util::statusor
 )
 
+tink_cc_library(
+  NAME ecies_public_key
+  SRCS
+    ecies_public_key.cc
+    ecies_public_key.h
+  DEPS
+    tink::hybrid::ecies_parameters
+    tink::hybrid::hybrid_public_key
+    absl::status
+    absl::strings
+    absl::str_format
+    absl::optional
+    crypto
+    tink::core::ec_point
+    tink::core::key
+    tink::core::partial_key_access_token
+    tink::internal::ec_util
+    tink::internal::ssl_unique_ptr
+    tink::subtle::common_enums
+    tink::subtle::subtle_util
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -883,6 +907,28 @@ tink_cc_test(
     tink::core::parameters
     tink::aead::aes_gcm_parameters
     tink::daead::aes_siv_parameters
+    tink::util::statusor
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME ecies_public_key_test
+  SRCS
+    ecies_public_key_test.cc
+  DEPS
+    tink::hybrid::ecies_parameters
+    tink::hybrid::ecies_public_key
+    gmock
+    absl::status
+    absl::strings
+    absl::optional
+    crypto
+    tink::core::big_integer
+    tink::core::ec_point
+    tink::core::partial_key_access
+    tink::internal::ec_util
+    tink::subtle::common_enums
+    tink::subtle::random
     tink::util::statusor
     tink::util::test_matchers
 )

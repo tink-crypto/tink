@@ -454,6 +454,31 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "ecies_public_key",
+    srcs = ["ecies_public_key.cc"],
+    hdrs = ["ecies_public_key.h"],
+    include_prefix = "tink/hybrid",
+    deps = [
+        ":ecies_parameters",
+        ":hybrid_public_key",
+        "//:ec_point",
+        "//:key",
+        "//:partial_key_access_token",
+        "//internal:ec_util",
+        "//internal:ssl_unique_ptr",
+        "//subtle:common_enums",
+        "//subtle:subtle_util",
+        "//util:status",
+        "//util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -872,6 +897,28 @@ cc_test(
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:string_view",
+        "@com_google_absl//absl/types:optional",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "ecies_public_key_test",
+    srcs = ["ecies_public_key_test.cc"],
+    deps = [
+        ":ecies_parameters",
+        ":ecies_public_key",
+        "//:big_integer",
+        "//:ec_point",
+        "//:partial_key_access",
+        "//internal:ec_util",
+        "//subtle:common_enums",
+        "//subtle:random",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",
         "@com_google_googletest//:gtest_main",
     ],
