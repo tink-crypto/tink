@@ -3,40 +3,19 @@
 > **NOTE**: **Tink moved to github.com/tink-crypto and this repository will be archived**
 >
 > As planned, we have split Tink into
-> [multiple GitHub repositories](https://developers.google.com/tink/roadmap#splitting_tink_into_multiple_github_repositories)
-> that are hosted at
+> [multiple GitHub repositories][split_repo_roadmap_url] that are hosted at
 > [github.com/tink-crypto](https://github.com/tink-crypto). This repository is
 > going to be archived by the end of Q1 2024 (March 31st, 2024).
 >
 > All future releases will be made from repositories in
 > https://github.com/tink-crypto, which are independently versioned.
 >
-> Please use our
-> [mailing list](https://groups.google.com/forum/#!forum/tink-users)
-> if you have any questions or concerns.
+> Please use our [mailing list][tink_mailing_list_url] if you have any questions
+> or concerns.
 
 *A multi-language, cross-platform library that provides cryptographic APIs that
 are secure, easy to use correctly, and hard(er) to misuse. See also:
 https://developers.google.com/tink*.
-
-> **NOTE**: **We are removing Tink for JavaScript/TypeScript**
->
-> We are removing the Tink JavaScript/TypeScript library from our current Github
-> repository (master branch). As part of our effort to migrate Tink to
-> https://github.com/tink-crypto, we will not release an individual
-> JavaScript/Typescript repository. Furthermore, the JavaScript/TypeScript
-> [directory](https://github.com/google/tink/tree/master/javascript) in the
-> current release branch (v1.7.0) will no longer be actively supported.
->
-> _We aim to remove the JS/TS directory from the current Tink Github repository
-> (master branch) on **June 22, 2023**. We will also deprecate the Tink npm
-> package on this date._
->
-> See [this](https://github.com/google/tink/issues/689) tracking issue for more
-> details.
->
-> Feel free to use our [mailing list][tink_mailing_list_url] to raise any
-> questions, issues or concerns.
 
 [split_repo_roadmap_url]: https://developers.google.com/tink/roadmap#splitting_tink_into_multiple_github_repositories
 [tink_mailing_list_url]: https://groups.google.com/forum/#!forum/tink-users
