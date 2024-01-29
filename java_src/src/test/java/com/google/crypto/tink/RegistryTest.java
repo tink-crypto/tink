@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.jwt.JwtMac;
@@ -167,7 +168,8 @@ public class RegistryTest {
     TinkFipsUtil.unsetFipsRestricted();
     Registry.reset();
     TinkConfig.register();
-    Registry.registerPrimitiveWrapper(AeadToEncryptOnlyWrapper.WRAPPER);
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveWrapper(AeadToEncryptOnlyWrapper.WRAPPER);
   }
 
   private void testGetKeyManagerShouldWork(String typeUrl, String className) throws Exception {
@@ -1416,23 +1418,24 @@ public class RegistryTest {
     assertThrows(
         GeneralSecurityException.class,
         () -> {
-          Registry.registerPrimitiveWrapper(
-              new PrimitiveWrapper<Mac, EncryptOnly>() {
-                @Override
-                public EncryptOnly wrap(PrimitiveSet<Mac> primitiveSet) {
-                  return null;
-                }
+          MutablePrimitiveRegistry.globalInstance()
+              .registerPrimitiveWrapper(
+                  new PrimitiveWrapper<Mac, EncryptOnly>() {
+                    @Override
+                    public EncryptOnly wrap(PrimitiveSet<Mac> primitiveSet) {
+                      return null;
+                    }
 
-                @Override
-                public Class<EncryptOnly> getPrimitiveClass() {
-                  return EncryptOnly.class;
-                }
+                    @Override
+                    public Class<EncryptOnly> getPrimitiveClass() {
+                      return EncryptOnly.class;
+                    }
 
-                @Override
-                public Class<Mac> getInputPrimitiveClass() {
-                  return Mac.class;
-                }
-              });
+                    @Override
+                    public Class<Mac> getInputPrimitiveClass() {
+                      return Mac.class;
+                    }
+                  });
         });
   }
 

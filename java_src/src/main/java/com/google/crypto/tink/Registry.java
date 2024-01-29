@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -329,23 +329,6 @@ public final class Registry {
     }
     KeyManagerRegistry.globalInstance()
         .registerAsymmetricKeyManagers(privateKeyTypeManager, publicKeyTypeManager, newKeyAllowed);
-  }
-
-  /**
-   * Tries to register {@code wrapper} as a new SetWrapper for primitive {@code P}.
-   *
-   * <p>If no SetWrapper is registered for {@code P}, registers the given one. If there already is a
-   * SetWrapper registered which is of the same class ass the passed in set wrapper, the call is
-   * silently ignored. If the new set wrapper is of a different type, the call fails with a {@code
-   * GeneralSecurityException}.
-   *
-   * @throws GeneralSecurityException if there's an existing key manager and it is not an instance
-   *     of the class of {@code manager}, or the registration tries to re-enable the generation of
-   *     new keys.
-   */
-  public static synchronized <B, P> void registerPrimitiveWrapper(
-      final PrimitiveWrapper<B, P> wrapper) throws GeneralSecurityException {
-    MutablePrimitiveRegistry.globalInstance().registerPrimitiveWrapper(wrapper);
   }
 
   /**
