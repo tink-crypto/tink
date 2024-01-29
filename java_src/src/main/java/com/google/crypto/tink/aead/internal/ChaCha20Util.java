@@ -19,6 +19,7 @@ package com.google.crypto.tink.aead.internal;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+import java.util.Arrays;
 
 /** Internal utility methods for {X}ChaCha20 implementations. */
 final class ChaCha20Util {
@@ -79,10 +80,40 @@ final class ChaCha20Util {
 
   /** Converts {@code input} byte array to an int array */
   static int[] toIntArray(final byte[] input) {
+    if (input.length % 4 != 0) {
+      throw new IllegalArgumentException("invalid input length");
+    }
     IntBuffer intBuffer = ByteBuffer.wrap(input).order(ByteOrder.LITTLE_ENDIAN).asIntBuffer();
     int[] ret = new int[intBuffer.remaining()];
     intBuffer.get(ret);
     return ret;
+  }
+
+  static byte[] toByteArray(final int[] input) {
+    ByteBuffer byteBuffer = ByteBuffer.allocate(input.length * 4).order(ByteOrder.LITTLE_ENDIAN);
+    byteBuffer.asIntBuffer().put(input);
+    return byteBuffer.array();
+  }
+
+  // See https://tools.ietf.org/html/draft-arciszewski-xchacha-01#section-2.2.
+  static int[] hChaCha20(final int[] key, final int[] nonce) {
+    int[] state = new int[BLOCK_SIZE_IN_INTS];
+    setSigmaAndKey(state, key);
+    state[12] = nonce[0];
+    state[13] = nonce[1];
+    state[14] = nonce[2];
+    state[15] = nonce[3];
+    shuffleState(state);
+    // state[0] = state[0], state[1] = state[1], state[2] = state[2], state[3] = state[3]
+    state[4] = state[12];
+    state[5] = state[13];
+    state[6] = state[14];
+    state[7] = state[15];
+    return Arrays.copyOf(state, ChaCha20Util.KEY_SIZE_IN_INTS);
+  }
+
+  static byte[] hChaCha20(final byte[] key, final byte[] nonce) {
+    return toByteArray(hChaCha20(toIntArray(key), toIntArray(nonce)));
   }
 
   private static int rotateLeft(int x, int y) {

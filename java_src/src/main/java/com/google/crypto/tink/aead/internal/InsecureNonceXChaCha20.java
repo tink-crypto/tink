@@ -17,7 +17,6 @@
 package com.google.crypto.tink.aead.internal;
 
 import java.security.InvalidKeyException;
-import java.util.Arrays;
 
 /**
  * {@link InsecureNonceXChaCha20} stream cipher based on
@@ -53,7 +52,7 @@ public class InsecureNonceXChaCha20 extends InsecureNonceChaCha20Base {
     // Set the initial state based on
     // https://tools.ietf.org/html/draft-arciszewski-xchacha-01#section-2.3.
     int[] state = new int[ChaCha20Util.BLOCK_SIZE_IN_INTS];
-    ChaCha20Util.setSigmaAndKey(state, hChaCha20(this.key, nonce));
+    ChaCha20Util.setSigmaAndKey(state, ChaCha20Util.hChaCha20(this.key, nonce));
     state[12] = counter;
     state[13] = 0;
     state[14] = nonce[4];
@@ -64,22 +63,5 @@ public class InsecureNonceXChaCha20 extends InsecureNonceChaCha20Base {
   @Override
   int nonceSizeInBytes() {
     return NONCE_SIZE_IN_BYTES;
-  }
-
-  // See https://tools.ietf.org/html/draft-arciszewski-xchacha-01#section-2.2.
-  static int[] hChaCha20(final int[] key, final int[] nonce) {
-    int[] state = new int[ChaCha20Util.BLOCK_SIZE_IN_INTS];
-    ChaCha20Util.setSigmaAndKey(state, key);
-    state[12] = nonce[0];
-    state[13] = nonce[1];
-    state[14] = nonce[2];
-    state[15] = nonce[3];
-    ChaCha20Util.shuffleState(state);
-    // state[0] = state[0], state[1] = state[1], state[2] = state[2], state[3] = state[3]
-    state[4] = state[12];
-    state[5] = state[13];
-    state[6] = state[14];
-    state[7] = state[15];
-    return Arrays.copyOf(state, ChaCha20Util.KEY_SIZE_IN_INTS);
   }
 }
