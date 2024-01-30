@@ -37,7 +37,7 @@ import java.util.Arrays;
  * primitives to a common denominator with our primitives over which we have control.
  */
 @Immutable
-final class LegacyFullHybridDecrypt implements HybridDecrypt {
+public final class LegacyFullHybridDecrypt implements HybridDecrypt {
   // We need to assume that the given HybridDecrypt is immutable. However, this assumption is
   // harmless: This class only provides "HybridDecrypt.create()" in the public API -- so as long as
   // the HybridDecrypt interface itself is not annotated with @Immutable, annotating this class

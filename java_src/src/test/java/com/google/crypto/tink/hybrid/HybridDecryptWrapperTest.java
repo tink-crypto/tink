@@ -285,7 +285,7 @@ public class HybridDecryptWrapperTest {
     assertThat(signEntry.getKeyId()).isEqualTo(123);
     assertThat(signEntry.getPrimitive()).isEqualTo("hybrid_decrypt");
     assertThat(signEntry.getApi()).isEqualTo("decrypt");
-    assertThat(signEntry.getNumBytesAsInput()).isEqualTo(ciphertext.length - 5);
+    assertThat(signEntry.getNumBytesAsInput()).isEqualTo(ciphertext.length);
     assertThat(signEntry.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
   }
 
@@ -347,7 +347,7 @@ public class HybridDecryptWrapperTest {
     assertThat(signEntry1.getKeyId()).isEqualTo(200);
     assertThat(signEntry1.getPrimitive()).isEqualTo("hybrid_decrypt");
     assertThat(signEntry1.getApi()).isEqualTo("decrypt");
-    assertThat(signEntry1.getNumBytesAsInput()).isEqualTo(ciphertext1.length - 5);
+    assertThat(signEntry1.getNumBytesAsInput()).isEqualTo(ciphertext1.length);
     assertThat(signEntry1.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
   }
 }
