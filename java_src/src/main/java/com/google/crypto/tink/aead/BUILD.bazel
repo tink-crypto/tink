@@ -2,7 +2,7 @@ load("@build_bazel_rules_android//android:rules.bzl", "android_library")
 
 licenses(["notice"])
 
-package(default_visibility = ["//visibility:public"])
+package(default_visibility = ["//visibility:public"])  #
 
 java_library(
     name = "aes_gcm_key_manager",
@@ -180,6 +180,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink:parameters",
         "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink:secret_key_access",
+        "//src/main/java/com/google/crypto/tink/aead/internal:x_cha_cha20_poly1305_jce",
         "//src/main/java/com/google/crypto/tink/aead/internal:x_cha_cha20_poly1305_proto_serialization",
         "//src/main/java/com/google/crypto/tink/internal:legacy_key_manager_impl",
         "//src/main/java/com/google/crypto/tink/internal:mutable_key_creation_registry",
@@ -646,6 +647,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink:parameters-android",
         "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink:secret_key_access-android",
+        "//src/main/java/com/google/crypto/tink/aead/internal:x_cha_cha20_poly1305_jce-android",
         "//src/main/java/com/google/crypto/tink/aead/internal:x_cha_cha20_poly1305_proto_serialization-android",
         "//src/main/java/com/google/crypto/tink/internal:legacy_key_manager_impl-android",
         "//src/main/java/com/google/crypto/tink/internal:mutable_key_creation_registry-android",

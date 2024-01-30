@@ -25,6 +25,7 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.SecretKeyAccess;
+import com.google.crypto.tink.aead.internal.XChaCha20Poly1305Jce;
 import com.google.crypto.tink.aead.internal.XChaCha20Poly1305ProtoSerialization;
 import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
 import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
@@ -48,10 +49,18 @@ import javax.annotation.Nullable;
  * instances of {@code XChaCha20Poly1305}.
  */
 public final class XChaCha20Poly1305KeyManager {
+
+  private static Aead createAead(XChaCha20Poly1305Key key) throws GeneralSecurityException {
+    if (XChaCha20Poly1305Jce.isSupported()) {
+      return XChaCha20Poly1305Jce.create(key);
+    }
+    return XChaCha20Poly1305.create(key);
+  }
+
   private static final PrimitiveConstructor<XChaCha20Poly1305Key, Aead>
       X_CHA_CHA_20_POLY_1305_PRIMITIVE_CONSTRUCTOR =
           PrimitiveConstructor.create(
-              XChaCha20Poly1305::create, XChaCha20Poly1305Key.class, Aead.class);
+              XChaCha20Poly1305KeyManager::createAead, XChaCha20Poly1305Key.class, Aead.class);
 
   private static final int KEY_SIZE_IN_BYTES = 32;
 
