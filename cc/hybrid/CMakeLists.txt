@@ -478,6 +478,36 @@ tink_cc_library(
     tink::util::statusor
 )
 
+tink_cc_library(
+  NAME ecies_private_key
+  SRCS
+    ecies_private_key.cc
+    ecies_private_key.h
+  DEPS
+    tink::hybrid::ecies_parameters
+    tink::hybrid::ecies_public_key
+    tink::hybrid::hybrid_private_key
+    absl::status
+    absl::strings
+    absl::str_format
+    absl::optional
+    crypto
+    tink::core::ec_point
+    tink::core::insecure_secret_key_access
+    tink::core::key
+    tink::core::partial_key_access_token
+    tink::core::restricted_big_integer
+    tink::core::restricted_data
+    tink::internal::bn_util
+    tink::internal::ec_util
+    tink::internal::err_util
+    tink::internal::ssl_unique_ptr
+    tink::subtle::common_enums
+    tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -919,16 +949,48 @@ tink_cc_test(
     tink::hybrid::ecies_parameters
     tink::hybrid::ecies_public_key
     gmock
+    absl::memory
     absl::status
     absl::strings
     absl::optional
     crypto
     tink::core::big_integer
     tink::core::ec_point
+    tink::core::parameters
     tink::core::partial_key_access
+    tink::daead::aes_siv_parameters
+    tink::internal::ec_util
+    tink::internal::ssl_unique_ptr
+    tink::subtle::common_enums
+    tink::subtle::random
+    tink::util::statusor
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME ecies_private_key_test
+  SRCS
+    ecies_private_key_test.cc
+  DEPS
+    tink::hybrid::ecies_parameters
+    tink::hybrid::ecies_private_key
+    tink::hybrid::ecies_public_key
+    gmock
+    absl::status
+    absl::strings
+    absl::string_view
+    absl::optional
+    crypto
+    tink::core::big_integer
+    tink::core::ec_point
+    tink::core::insecure_secret_key_access
+    tink::core::partial_key_access
+    tink::core::restricted_big_integer
+    tink::core::restricted_data
     tink::internal::ec_util
     tink::subtle::common_enums
     tink::subtle::random
+    tink::util::secret_data
     tink::util::statusor
     tink::util::test_matchers
 )
