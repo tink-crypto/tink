@@ -16,15 +16,20 @@
 
 package com.google.crypto.tink.signature.internal.testing;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
+import com.google.crypto.tink.proto.Ed25519KeyFormat;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
 import com.google.crypto.tink.proto.Ed25519PublicKey;
 import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Ed25519Verify;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.util.Bytes;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -93,5 +98,18 @@ public final class LegacyPublicKeySignKeyManagerTest {
 
     byte[] message = new byte[] {1, 2, 3, 4, 5};
     verifier.verify(signer.sign(message), message);
+  }
+
+  @Test
+  public void testNewKeyData_works() throws Exception {
+    KeyData keyData =
+        signKeyManager.newKeyData(Ed25519KeyFormat.getDefaultInstance().toByteString());
+    assertThat(keyData.getTypeUrl()).isEqualTo("type.googleapis.com/custom.Ed25519PrivateKey");
+    assertThat(keyData.getKeyMaterialType()).isEqualTo(KeyMaterialType.ASYMMETRIC_PRIVATE);
+
+    Ed25519PrivateKey protoPrivateKey =
+        Ed25519PrivateKey.parseFrom(keyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(protoPrivateKey.getVersion()).isEqualTo(0);
+    assertThat(protoPrivateKey.getKeyValue().size()).isEqualTo(32);
   }
 }

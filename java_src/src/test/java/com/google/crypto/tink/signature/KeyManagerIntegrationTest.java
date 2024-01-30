@@ -20,15 +20,19 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.TinkProtoParametersFormat;
+import com.google.crypto.tink.proto.Ed25519KeyFormat;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
 import com.google.crypto.tink.proto.Ed25519PublicKey;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyStatusType;
+import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.signature.internal.testing.LegacyPublicKeySignKeyManager;
@@ -41,6 +45,8 @@ import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
+import java.util.Set;
+import java.util.TreeSet;
 import javax.annotation.Nullable;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -258,5 +264,49 @@ public final class KeyManagerIntegrationTest {
     byte[] message = new byte[] {1, 2, 3};
     byte[] signature = tinkSigner.sign(message);
     customVerifier.verify(signature, message);
+  }
+
+  @Theory
+  public void testKeyGeneration_givesNewKeys_works(
+      @FromDataPoints("allOutputPrefixTypes") OutputPrefixType outputPrefixType) throws Exception {
+
+    KeyTemplate protoKeyTemplate =
+        KeyTemplate.newBuilder()
+            .setOutputPrefixType(outputPrefixType)
+            .setTypeUrl(PRIVATE_TYPE_URL)
+            .setValue(Ed25519KeyFormat.getDefaultInstance().toByteString())
+            .build();
+    Parameters parameters = TinkProtoParametersFormat.parse(protoKeyTemplate.toByteArray());
+
+    Set<String> keys = new TreeSet<>();
+    int numKeys = 20;
+
+    for (int i = 0; i < numKeys; i++) {
+      KeysetHandle handle =
+          KeysetHandle.newBuilder()
+              .addEntry(
+                  KeysetHandle.generateEntryFromParameters(parameters)
+                      .withFixedId(0x88117722)
+                      .makePrimary())
+              .build();
+
+      Keyset keyset =
+          Keyset.parseFrom(
+              TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get()),
+              ExtensionRegistryLite.getEmptyRegistry());
+      assertThat(keyset.getPrimaryKeyId()).isEqualTo(0x88117722);
+      assertThat(keyset.getKeyCount()).isEqualTo(1);
+      assertThat(keyset.getKey(0).getKeyId()).isEqualTo(0x88117722);
+      assertThat(keyset.getKey(0).getStatus()).isEqualTo(KeyStatusType.ENABLED);
+      assertThat(keyset.getKey(0).getOutputPrefixType()).isEqualTo(outputPrefixType);
+      assertThat(keyset.getKey(0).getKeyData().getTypeUrl()).isEqualTo(PRIVATE_TYPE_URL);
+      assertThat(keyset.getKey(0).getKeyData().getKeyMaterialType())
+          .isEqualTo(KeyMaterialType.ASYMMETRIC_PRIVATE);
+      Ed25519PrivateKey privateKey =
+          Ed25519PrivateKey.parseFrom(
+              keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+      keys.add(Hex.encode(privateKey.getKeyValue().toByteArray()));
+    }
+    assertThat(keys).hasSize(numKeys);
   }
 }

@@ -21,9 +21,9 @@ import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.PrivateKeyManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
+import com.google.crypto.tink.proto.Ed25519PublicKey;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.signature.Ed25519PublicKey;
 import com.google.crypto.tink.subtle.Ed25519Sign;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
@@ -38,7 +38,7 @@ public final class LegacyPublicKeySignKeyManager implements PrivateKeyManager<Pu
   @AccessesPartialKey
   private static com.google.crypto.tink.signature.Ed25519PrivateKey parsePrivateKey(
       Ed25519PrivateKey protoKey) throws GeneralSecurityException {
-    Ed25519PublicKey publicKey =
+    com.google.crypto.tink.signature.Ed25519PublicKey publicKey =
         LegacyPublicKeyVerifyKeyManager.parsePublicKey(protoKey.getPublicKey());
     return com.google.crypto.tink.signature.Ed25519PrivateKey.create(
         publicKey,
@@ -68,7 +68,23 @@ public final class LegacyPublicKeySignKeyManager implements PrivateKeyManager<Pu
 
   @Override
   public KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException {
-    throw new UnsupportedOperationException("not needed for tests");
+    Ed25519Sign.KeyPair keyPair = Ed25519Sign.KeyPair.newKeyPair();
+    Ed25519PublicKey publicKey =
+        Ed25519PublicKey.newBuilder()
+            .setVersion(0)
+            .setKeyValue(ByteString.copyFrom(keyPair.getPublicKey()))
+            .build();
+    Ed25519PrivateKey privateKey =
+        Ed25519PrivateKey.newBuilder()
+            .setVersion(0)
+            .setKeyValue(ByteString.copyFrom(keyPair.getPrivateKey()))
+            .setPublicKey(publicKey)
+            .build();
+    return KeyData.newBuilder()
+        .setTypeUrl(TYPE_URL)
+        .setValue(privateKey.toByteString())
+        .setKeyMaterialType(KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE)
+        .build();
   }
 
   @Override
