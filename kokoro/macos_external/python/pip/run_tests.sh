@@ -28,6 +28,12 @@ pyenv install "3.8"
 pyenv global "3.8"
 
 source ./kokoro/testutils/install_protoc.sh
+source ./kokoro/testutils/install_vault.sh
+source ./kokoro/testutils/run_hcvault_test_server.sh
+
+# Install a test transit key.
+vault write -f transit/keys/key-1
+
 ./kokoro/testutils/install_tink_via_pip.sh -a "${PWD}/python"
 
 # Get root certificates for gRPC

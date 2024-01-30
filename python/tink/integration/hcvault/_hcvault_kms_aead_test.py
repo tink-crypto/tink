@@ -25,7 +25,8 @@ from tink.integration import hcvault
 
 _TOKEN = ''
 _KEY_PATH = '/transit/keys/key-1'
-_KEY_URI = f'http://localhost:8200{_KEY_PATH}'
+_PORT = 8205
+_VAULT_URI = f'http://localhost:{_PORT}'
 
 _GCP_KEY_URI = (
     'gcp-kms://projects/tink-test-infrastructure/locations/global/'
@@ -109,7 +110,7 @@ class HcVaultKmsAeadTest(parameterized.TestCase):
 
   def setUp(self):
     super().setUp()
-    self.server = http.server.HTTPServer(('localhost', 8200), MockHandler)
+    self.server = http.server.HTTPServer(('localhost', _PORT), MockHandler)
     threading.Thread(target=self.server.serve_forever).start()
 
   def tearDown(self):
@@ -119,7 +120,7 @@ class HcVaultKmsAeadTest(parameterized.TestCase):
       self.server.server_close()
 
   def test_encrypt_decrypt(self):
-    client = hvac.Client(url=_KEY_URI, token=_TOKEN, verify=False)
+    client = hvac.Client(url=_VAULT_URI, token=_TOKEN, verify=False)
     vaultaead = hcvault.create_aead(_KEY_PATH, client)
     plaintext = b'hello'
     associated_data = b'world'
@@ -131,7 +132,7 @@ class HcVaultKmsAeadTest(parameterized.TestCase):
     self.assertEqual(plaintext, vaultaead.decrypt(ciphertext, b''))
 
   def test_invalid_context(self):
-    client = hvac.Client(url=_KEY_URI, token=_TOKEN, verify=False)
+    client = hvac.Client(url=_VAULT_URI, token=_TOKEN, verify=False)
     vaultaead = hcvault.create_aead(_KEY_PATH, client)
 
     plaintext = b'helloworld'
@@ -141,7 +142,7 @@ class HcVaultKmsAeadTest(parameterized.TestCase):
       vaultaead.decrypt(ciphertext, b'a')
 
   def test_encrypt_with_bad_uri(self):
-    client = hvac.Client(url=_KEY_URI, token=_TOKEN, verify=False)
+    client = hvac.Client(url=_VAULT_URI, token=_TOKEN, verify=False)
     with self.assertRaises(tink.TinkError):
       hcvault.create_aead(_GCP_KEY_URI, client)
 

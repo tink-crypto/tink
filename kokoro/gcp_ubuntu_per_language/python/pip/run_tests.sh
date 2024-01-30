@@ -14,7 +14,6 @@
 # limitations under the License.
 ################################################################################
 
-
 set -euo pipefail
 
 # If we are running on Kokoro cd into the repository.
@@ -28,6 +27,12 @@ fi
 # Sourcing required to update callers environment.
 source ./kokoro/testutils/install_python3.sh
 source ./kokoro/testutils/install_protoc.sh
+source ./kokoro/testutils/install_vault.sh
+source ./kokoro/testutils/run_hcvault_test_server.sh
+
+# Install a test transit key.
+vault write -f transit/keys/key-1
+
 ./kokoro/testutils/install_tink_via_pip.sh -a "${PWD}/python"
 
 cd python
