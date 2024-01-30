@@ -136,7 +136,7 @@ func (km *aesCTRHMACAEADKeyManager) TypeURL() string {
 
 // validateKey validates the given AesCtrHmacAeadKey proto.
 func (km *aesCTRHMACAEADKeyManager) validateKey(key *aeadpb.AesCtrHmacAeadKey) error {
-	if err := keyset.ValidateKeyVersion(key.Version, aesCTRHMACAEADKeyVersion); err != nil {
+	if err := keyset.ValidateKeyVersion(key.GetVersion(), aesCTRHMACAEADKeyVersion); err != nil {
 		return fmt.Errorf("aes_ctr_hmac_aead_key_manager: %v", err)
 	}
 	if err := keyset.ValidateKeyVersion(key.GetAesCtrKey().GetVersion(), aesCTRHMACAEADKeyVersion); err != nil {
@@ -146,11 +146,11 @@ func (km *aesCTRHMACAEADKeyManager) validateKey(key *aeadpb.AesCtrHmacAeadKey) e
 		return fmt.Errorf("aes_ctr_hmac_aead_key_manager: %v", err)
 	}
 	// Validate AesCtrKey.
-	keySize := uint32(len(key.AesCtrKey.KeyValue))
+	keySize := uint32(len(key.GetAesCtrKey().GetKeyValue()))
 	if err := subtle.ValidateAESKeySize(keySize); err != nil {
 		return fmt.Errorf("aes_ctr_hmac_aead_key_manager: %v", err)
 	}
-	params := key.AesCtrKey.GetParams()
+	params := key.GetAesCtrKey().GetParams()
 	if params.GetIvSize() < subtle.AESCTRMinIVSize || params.GetIvSize() > 16 {
 		return errors.New("aes_ctr_hmac_aead_key_manager: invalid AesCtrHmacAeadKey: IV size out of range")
 	}
