@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,13 +19,14 @@ package com.google.crypto.tink.signature;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.PublicKeySign;
+import com.google.crypto.tink.internal.LegacyProtoKey;
 import com.google.crypto.tink.internal.MonitoringUtil;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.monitoring.MonitoringClient;
 import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
-import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.Bytes;
+import com.google.crypto.tink.signature.internal.LegacyFullSign;
 import java.security.GeneralSecurityException;
 
 /**
@@ -37,8 +38,11 @@ import java.security.GeneralSecurityException;
  */
 public class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign, PublicKeySign> {
 
-  private static final byte[] FORMAT_VERSION = new byte[] {0};
   private static final PublicKeySignWrapper WRAPPER = new PublicKeySignWrapper();
+  private static final PrimitiveConstructor<LegacyProtoKey, PublicKeySign>
+      LEGACY_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              LegacyFullSign::create, LegacyProtoKey.class, PublicKeySign.class);
 
   private static class WrappedPublicKeySign implements PublicKeySign {
     private final PrimitiveSet<PublicKeySign> primitives;
@@ -58,16 +62,9 @@ public class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign, Pub
 
     @Override
     public byte[] sign(final byte[] data) throws GeneralSecurityException {
-      byte[] data2 = data;
-      if (primitives.getPrimary().getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
-        data2 = Bytes.concat(data, FORMAT_VERSION);
-      }
       try {
-        byte[] output =
-            Bytes.concat(
-                primitives.getPrimary().getIdentifier(),
-                primitives.getPrimary().getPrimitive().sign(data2));
-        logger.log(primitives.getPrimary().getKeyId(), data2.length);
+        byte[] output = primitives.getPrimary().getFullPrimitive().sign(data);
+        logger.log(primitives.getPrimary().getKeyId(), data.length);
         return output;
       } catch (GeneralSecurityException e) {
         logger.logFailure();
@@ -101,5 +98,7 @@ public class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign, Pub
    */
   public static void register() throws GeneralSecurityException {
     MutablePrimitiveRegistry.globalInstance().registerPrimitiveWrapper(WRAPPER);
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(LEGACY_PRIMITIVE_CONSTRUCTOR);
   }
 }

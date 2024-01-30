@@ -398,7 +398,7 @@ public class PublicKeyVerifyWrapperTest {
   }
 
   @Test
-  public void monitorsWithAnnotations_legacyOneLonger() throws Exception {
+  public void monitorsWithAnnotations_legacySameLength() throws Exception {
     FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
     MutableMonitoringRegistry.globalInstance().clear();
     MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
@@ -438,7 +438,7 @@ public class PublicKeyVerifyWrapperTest {
     assertThat(verifyEntry.getPrimitive()).isEqualTo("public_key_verify");
     assertThat(verifyEntry.getApi()).isEqualTo("verify");
     // For keys of type legacy we report 1 more.
-    assertThat(verifyEntry.getNumBytesAsInput()).isEqualTo(data.length + 1);
+    assertThat(verifyEntry.getNumBytesAsInput()).isEqualTo(data.length);
     assertThat(verifyEntry.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
 
     List<FakeMonitoringClient.LogFailureEntry> failures =

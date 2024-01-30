@@ -255,7 +255,7 @@ public class PublicKeySignWrapperTest {
   }
 
   @Theory
-  public void monitorsWithAnnotations_legacyDataLengthIsOneBigger() throws Exception {
+  public void monitorsWithAnnotations_legacyDataLengthIsTheSame() throws Exception {
     FakeMonitoringClient fakeMonitoringClient = new FakeMonitoringClient();
     MutableMonitoringRegistry.globalInstance().clear();
     MutableMonitoringRegistry.globalInstance().registerMonitoringClient(fakeMonitoringClient);
@@ -288,7 +288,7 @@ public class PublicKeySignWrapperTest {
     assertThat(signEntry.getKeyId()).isEqualTo(123);
     assertThat(signEntry.getPrimitive()).isEqualTo("public_key_sign");
     assertThat(signEntry.getApi()).isEqualTo("sign");
-    assertThat(signEntry.getNumBytesAsInput()).isEqualTo(data.length + 1);
+    assertThat(signEntry.getNumBytesAsInput()).isEqualTo(data.length);
     assertThat(signEntry.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
   }
 

@@ -36,7 +36,7 @@ import java.util.Arrays;
  * of it.
  */
 @Immutable
-final class LegacyFullVerify implements PublicKeyVerify {
+public final class LegacyFullVerify implements PublicKeyVerify {
   /** Creates the full primitive corresponding to the key. */
   public static PublicKeyVerify create(LegacyProtoKey key) throws GeneralSecurityException {
     ProtoKeySerialization protoKeySerialization =
