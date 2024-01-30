@@ -11,9 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""HashiCorp Vault KMS integration package."""
 
-"""Hashicorp Vault KMS integration package."""
-
-from tink.integration.hcvault import _hcvault_kms_client
+try:
+  # pylint: disable=g-import-not-at-top
+  from tink.integration.hcvault import _hcvault_kms_client
+except ImportError as import_error:
+  raise ImportError(
+      'Error importing the Tink HashiCorp Vault KMS module; did you forget to'
+      ' install the `tink[hcvault]` extras?'
+  ) from import_error
 
 create_aead = _hcvault_kms_client.create_aead
