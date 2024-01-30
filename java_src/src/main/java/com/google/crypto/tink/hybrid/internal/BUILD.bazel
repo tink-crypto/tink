@@ -22,6 +22,7 @@ java_library(
         ":hpke_aead",
         ":hpke_util",
         "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_cha_cha20_poly1305",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_cha_cha20_poly1305_jce",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -299,6 +300,7 @@ android_library(
         ":hpke_aead-android",
         ":hpke_util-android",
         "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_cha_cha20_poly1305-android",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_cha_cha20_poly1305_jce-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )

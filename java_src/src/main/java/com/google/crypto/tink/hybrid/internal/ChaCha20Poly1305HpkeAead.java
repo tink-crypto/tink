@@ -17,6 +17,7 @@
 package com.google.crypto.tink.hybrid.internal;
 
 import com.google.crypto.tink.aead.internal.InsecureNonceChaCha20Poly1305;
+import com.google.crypto.tink.aead.internal.InsecureNonceChaCha20Poly1305Jce;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
@@ -30,6 +31,10 @@ final class ChaCha20Poly1305HpkeAead implements HpkeAead {
     if (key.length != getKeyLength()) {
       throw new InvalidAlgorithmParameterException("Unexpected key length: " + getKeyLength());
     }
+    if (InsecureNonceChaCha20Poly1305Jce.isSupported()) {
+      InsecureNonceChaCha20Poly1305Jce aead = InsecureNonceChaCha20Poly1305Jce.create(key);
+      return aead.encrypt(nonce, plaintext, associatedData);
+    }
     InsecureNonceChaCha20Poly1305 aead = new InsecureNonceChaCha20Poly1305(key);
     return aead.encrypt(nonce, plaintext, associatedData);
   }
@@ -39,6 +44,10 @@ final class ChaCha20Poly1305HpkeAead implements HpkeAead {
       throws GeneralSecurityException {
     if (key.length != getKeyLength()) {
       throw new InvalidAlgorithmParameterException("Unexpected key length: " + getKeyLength());
+    }
+    if (InsecureNonceChaCha20Poly1305Jce.isSupported()) {
+      InsecureNonceChaCha20Poly1305Jce aead = InsecureNonceChaCha20Poly1305Jce.create(key);
+      return aead.decrypt(nonce, ciphertext, associatedData);
     }
     InsecureNonceChaCha20Poly1305 aead = new InsecureNonceChaCha20Poly1305(key);
     return aead.decrypt(nonce, ciphertext, associatedData);
