@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for _hcvault_kms_client.py."""
+"""Tests for _hcvault_kms_aead.py."""
 
 import base64
 import http.server
@@ -171,7 +171,7 @@ class HcVaultKmsAeadTest(parameterized.TestCase):
   def test_valid_get_endpoint_paths(
       self, path, expected_mount, expected_key_name
   ):
-    mount, path = hcvault._hcvault_kms_client._get_endpoint_paths(path)
+    mount, path = hcvault._hcvault_kms_aead._get_endpoint_paths(path)
     self.assertEqual(mount, expected_mount)
     self.assertEqual(path, expected_key_name)
 
@@ -189,7 +189,7 @@ class HcVaultKmsAeadTest(parameterized.TestCase):
   ])
   def test_invalid_get_endpoint_paths(self, path):
     with self.assertRaises(tink.TinkError):
-      _, _ = hcvault._hcvault_kms_client._get_endpoint_paths(path)
+      _, _ = hcvault._hcvault_kms_aead._get_endpoint_paths(path)
 
 
 if __name__ == '__main__':

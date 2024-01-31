@@ -15,11 +15,11 @@
 
 try:
   # pylint: disable=g-import-not-at-top
-  from tink.integration.hcvault import _hcvault_kms_client
+  from tink.integration.hcvault import _hcvault_kms_aead
 except ImportError as import_error:
   raise ImportError(
       'Error importing the Tink HashiCorp Vault KMS module; did you forget to'
       ' install the `tink[hcvault]` extras?'
   ) from import_error
 
-create_aead = _hcvault_kms_client.create_aead
+create_aead = _hcvault_kms_aead.create_aead

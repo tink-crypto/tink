@@ -9,13 +9,13 @@ py_library(
     srcs_version = "PY3",
     visibility = ["//visibility:public"],
     deps = [
-        ":_hcvault_kms_client",
+        ":_hcvault_kms_aead",
     ],
 )
 
 py_library(
-    name = "_hcvault_kms_client",
-    srcs = ["_hcvault_kms_client.py"],
+    name = "_hcvault_kms_aead",
+    srcs = ["_hcvault_kms_aead.py"],
     srcs_version = "PY3",
     deps = [
         "//tink:tink_python",
@@ -32,7 +32,7 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":hcvault",
-        ":_hcvault_kms_client",
+        ":_hcvault_kms_aead",
         "//tink:tink_python",
         "//tink/testing:helper",
         requirement("absl-py"),
