@@ -22,4 +22,4 @@ except ImportError as import_error:
       ' install the `tink[hcvault]` extras?'
   ) from import_error
 
-create_aead = _hcvault_kms_aead.create_aead
+new_aead = _hcvault_kms_aead.new_aead

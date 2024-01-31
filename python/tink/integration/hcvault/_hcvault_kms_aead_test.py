@@ -121,7 +121,7 @@ class HcVaultKmsAeadTest(parameterized.TestCase):
 
   def test_encrypt_decrypt(self):
     client = hvac.Client(url=_VAULT_URI, token=_TOKEN, verify=False)
-    vaultaead = hcvault.create_aead(_KEY_PATH, client)
+    vaultaead = hcvault.new_aead(_KEY_PATH, client)
     plaintext = b'hello'
     associated_data = b'world'
     ciphertext = vaultaead.encrypt(plaintext, associated_data)
@@ -133,7 +133,7 @@ class HcVaultKmsAeadTest(parameterized.TestCase):
 
   def test_invalid_context(self):
     client = hvac.Client(url=_VAULT_URI, token=_TOKEN, verify=False)
-    vaultaead = hcvault.create_aead(_KEY_PATH, client)
+    vaultaead = hcvault.new_aead(_KEY_PATH, client)
 
     plaintext = b'helloworld'
     ciphertext = vaultaead.encrypt(plaintext, b'')
@@ -144,7 +144,7 @@ class HcVaultKmsAeadTest(parameterized.TestCase):
   def test_encrypt_with_bad_uri(self):
     client = hvac.Client(url=_VAULT_URI, token=_TOKEN, verify=False)
     with self.assertRaises(tink.TinkError):
-      hcvault.create_aead(_GCP_KEY_URI, client)
+      hcvault.new_aead(_GCP_KEY_URI, client)
 
   @parameterized.named_parameters([
       ('simple', '/transit/keys/key-1', 'transit', 'key-1'),

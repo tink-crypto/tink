@@ -55,7 +55,7 @@ def _get_endpoint_paths(key_path: str) -> Tuple[str, str]:
   return mount_and_key_name.groups()
 
 
-def create_aead(key_path: str, client: hvac.Client) -> aead.Aead:
+def new_aead(key_path: str, client: hvac.Client) -> aead.Aead:
   return _HcVaultKmsAead(client, key_path)
 
 
