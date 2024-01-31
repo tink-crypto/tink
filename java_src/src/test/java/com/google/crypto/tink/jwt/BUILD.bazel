@@ -694,6 +694,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/jwt:jwt_validator",
         "//src/main/java/com/google/crypto/tink/jwt:raw_jwt",
         "//src/main/java/com/google/crypto/tink/jwt:verified_jwt",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],

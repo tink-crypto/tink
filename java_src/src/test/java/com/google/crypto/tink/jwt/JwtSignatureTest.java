@@ -18,6 +18,7 @@ package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assume.assumeTrue;
 
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
@@ -25,6 +26,7 @@ import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
+import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import java.time.Clock;
 import java.time.Instant;
@@ -54,6 +56,10 @@ public final class JwtSignatureTest {
   @Theory
   public void createSignVerifyJwt(@FromDataPoints("jwt_signature_templates") String templateName)
       throws Exception {
+    if (TestUtil.isTsan()) {
+      // Only run for JWT_E256 under TSAN -- too slow otherwise.
+      assumeTrue(templateName.equals("JWT_ES256"));
+    }
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateName));
     JwtPublicKeySign jwtPublicKeySign = handle.getPrimitive(JwtPublicKeySign.class);
     Instant now = Clock.systemUTC().instant();
