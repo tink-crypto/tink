@@ -26,18 +26,18 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
-#include "tink/big_integer.h"
-#include "tink/ec_point.h"
-#include "tink/restricted_big_integer.h"
 #ifdef OPENSSL_IS_BORINGSSL
 #include "openssl/base.h"
 #include "openssl/ec_key.h"
 #endif
+#include "tink/big_integer.h"
+#include "tink/ec_point.h"
 #include "tink/hybrid/ecies_parameters.h"
 #include "tink/hybrid/ecies_public_key.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/ec_util.h"
 #include "tink/partial_key_access.h"
+#include "tink/restricted_big_integer.h"
 #include "tink/restricted_data.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/random.h"
@@ -366,7 +366,7 @@ TEST(EciesPrivateKeyTest, X25519PrivateKeyEquals) {
   util::StatusOr<EciesPrivateKey> other_private_key =
       EciesPrivateKey::CreateForCurveX25519(*public_key, private_key_bytes,
                                             GetPartialKeyAccess());
-  ASSERT_THAT(private_key, IsOk());
+  ASSERT_THAT(other_private_key, IsOk());
 
   EXPECT_TRUE(*private_key == *other_private_key);
   EXPECT_TRUE(*other_private_key == *private_key);
