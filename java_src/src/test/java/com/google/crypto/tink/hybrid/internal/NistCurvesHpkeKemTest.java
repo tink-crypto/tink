@@ -21,10 +21,10 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.common.io.Files;
 import com.google.common.truth.Expect;
-import com.google.crypto.tink.proto.HpkeKem;
-import com.google.crypto.tink.proto.HpkeParams;
-import com.google.crypto.tink.proto.HpkePrivateKey;
-import com.google.crypto.tink.proto.HpkePublicKey;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.hybrid.HpkeParameters;
+import com.google.crypto.tink.hybrid.HpkePrivateKey;
+import com.google.crypto.tink.hybrid.HpkePublicKey;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.EllipticCurves.PointFormatType;
 import com.google.crypto.tink.testing.HpkeTestId;
@@ -32,7 +32,8 @@ import com.google.crypto.tink.testing.HpkeTestSetup;
 import com.google.crypto.tink.testing.HpkeTestUtil;
 import com.google.crypto.tink.testing.HpkeTestVector;
 import com.google.crypto.tink.testing.TestUtil;
-import com.google.protobuf.ByteString;
+import com.google.crypto.tink.util.Bytes;
+import com.google.crypto.tink.util.SecretBytes;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -120,15 +121,16 @@ public final class NistCurvesHpkeKemTest {
     throw new GeneralSecurityException("invalid NIST kem id");
   }
 
-  private HpkeKem kemIdToKemProtoParam(byte[] kemId) throws GeneralSecurityException {
+  private HpkeParameters.KemId kemIdToHpkeParametersKemId(byte[] kemId)
+      throws GeneralSecurityException {
     if (Arrays.equals(kemId, HpkeUtil.P256_HKDF_SHA256_KEM_ID)) {
-      return HpkeKem.DHKEM_P256_HKDF_SHA256;
+      return HpkeParameters.KemId.DHKEM_P256_HKDF_SHA256;
     }
     if (Arrays.equals(kemId, HpkeUtil.P384_HKDF_SHA384_KEM_ID)) {
-      return HpkeKem.DHKEM_P384_HKDF_SHA384;
+      return HpkeParameters.KemId.DHKEM_P384_HKDF_SHA384;
     }
     if (Arrays.equals(kemId, HpkeUtil.P521_HKDF_SHA512_KEM_ID)) {
-      return HpkeKem.DHKEM_P521_HKDF_SHA512;
+      return HpkeParameters.KemId.DHKEM_P521_HKDF_SHA512;
     }
     throw new GeneralSecurityException("invalid NIST kem id");
   }
@@ -194,19 +196,23 @@ public final class NistCurvesHpkeKemTest {
             hpkeNistKemParams.hkdfId,
             hpkeNistKemParams.aeadId);
     HpkeTestSetup testSetup = testVectors.get(testId).getTestSetup();
-    HpkeKemPrivateKey recipientKeyPair =
-        HpkeKemKeyFactory.createPrivate(
-            HpkePrivateKey.newBuilder()
-                .setPrivateKey(ByteString.copyFrom(testSetup.recipientPrivateKey))
-                .setPublicKey(
-                    HpkePublicKey.newBuilder()
-                        .setPublicKey(ByteString.copyFrom(testSetup.recipientPublicKey))
-                        .setParams(
-                            HpkeParams.newBuilder()
-                                .setKem(kemIdToKemProtoParam(hpkeNistKemParams.kemId))
-                                .build())
-                        .build())
-                .build());
+    HpkeParameters hpkeParameters =
+        HpkeParameters.builder()
+            .setVariant(HpkeParameters.Variant.NO_PREFIX)
+            .setKemId(kemIdToHpkeParametersKemId(hpkeNistKemParams.kemId))
+            .setKdfId(HpkeParameters.KdfId.HKDF_SHA256)
+            .setAeadId(HpkeParameters.AeadId.AES_128_GCM)
+            .build();
+    HpkePublicKey hpkePublicKey =
+        HpkePublicKey.create(
+            hpkeParameters,
+            Bytes.copyFrom(testSetup.recipientPublicKey),
+            /* idRequirement= */ null);
+    HpkePrivateKey hpkePrivateKey =
+        HpkePrivateKey.create(
+            hpkePublicKey,
+            SecretBytes.copyFrom(testSetup.recipientPrivateKey, InsecureSecretKeyAccess.get()));
+    HpkeKemPrivateKey recipientKeyPair = HpkeKemKeyFactory.createPrivate(hpkePrivateKey);
     NistCurvesHpkeKem kem =
         NistCurvesHpkeKem.fromCurve(curveTypeFromKemId(hpkeNistKemParams.kemId));
     byte[] result = kem.decapsulate(testSetup.encapsulatedKey, recipientKeyPair);
@@ -224,19 +230,23 @@ public final class NistCurvesHpkeKemTest {
             hpkeNistKemParams.hkdfId,
             hpkeNistKemParams.aeadId);
     HpkeTestSetup testSetup = testVectors.get(testId).getTestSetup();
-    HpkeKemPrivateKey recipientKeyPair =
-        HpkeKemKeyFactory.createPrivate(
-            HpkePrivateKey.newBuilder()
-                .setPrivateKey(ByteString.copyFrom(testSetup.recipientPrivateKey))
-                .setPublicKey(
-                    HpkePublicKey.newBuilder()
-                        .setPublicKey(ByteString.copyFrom(testSetup.recipientPublicKey))
-                        .setParams(
-                            HpkeParams.newBuilder()
-                                .setKem(kemIdToKemProtoParam(hpkeNistKemParams.kemId))
-                                .build())
-                        .build())
-                .build());
+    HpkeParameters hpkeParameters =
+        HpkeParameters.builder()
+            .setVariant(HpkeParameters.Variant.NO_PREFIX)
+            .setKemId(kemIdToHpkeParametersKemId(hpkeNistKemParams.kemId))
+            .setKdfId(HpkeParameters.KdfId.HKDF_SHA256)
+            .setAeadId(HpkeParameters.AeadId.AES_128_GCM)
+            .build();
+    HpkePublicKey hpkePublicKey =
+        HpkePublicKey.create(
+            hpkeParameters,
+            Bytes.copyFrom(testSetup.recipientPublicKey),
+            /* idRequirement= */ null);
+    HpkePrivateKey hpkePrivateKey =
+        HpkePrivateKey.create(
+            hpkePublicKey,
+            SecretBytes.copyFrom(testSetup.recipientPrivateKey, InsecureSecretKeyAccess.get()));
+    HpkeKemPrivateKey recipientKeyPair = HpkeKemKeyFactory.createPrivate(hpkePrivateKey);
     NistCurvesHpkeKem kem =
         NistCurvesHpkeKem.fromCurve(curveTypeFromKemId(hpkeNistKemParams.kemId));
     byte[] result =

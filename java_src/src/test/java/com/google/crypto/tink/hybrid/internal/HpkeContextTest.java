@@ -33,7 +33,6 @@ import com.google.crypto.tink.testing.HpkeTestVector;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
-import com.google.protobuf.ByteString;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -132,11 +131,7 @@ public final class HpkeContextTest {
 
   /** Helper method to verify context API provided to Tink users. */
   private void testSenderAndRecipientContexts(
-      byte[] mode,
-      byte[] kemId,
-      byte[] kdfId,
-      byte[] aeadId,
-      com.google.crypto.tink.proto.HpkeKem hpkeKem)
+      byte[] mode, byte[] kemId, byte[] kdfId, byte[] aeadId, HpkeParameters.KemId hpkeKem)
       throws GeneralSecurityException {
     HpkeTestVector testVector = getTestVector(mode, kemId, kdfId, aeadId);
     HpkeTestSetup testSetup = testVector.getTestSetup();
@@ -145,20 +140,26 @@ public final class HpkeContextTest {
     HpkeKdf kdf = HpkePrimitiveFactory.createKdf(kdfId);
     HpkeAead aead = HpkePrimitiveFactory.createAead(aeadId);
 
-    com.google.crypto.tink.proto.HpkePublicKey recipientPublicKey =
-        com.google.crypto.tink.proto.HpkePublicKey.newBuilder()
-            .setPublicKey(ByteString.copyFrom(testSetup.recipientPublicKey))
-            .setParams(com.google.crypto.tink.proto.HpkeParams.newBuilder().setKem(hpkeKem).build())
+    HpkeParameters hpkeParameters =
+        HpkeParameters.builder()
+            .setVariant(HpkeParameters.Variant.NO_PREFIX)
+            .setKemId(hpkeKem)
+            .setKdfId(HpkeParameters.KdfId.HKDF_SHA256)
+            .setAeadId(HpkeParameters.AeadId.AES_128_GCM)
             .build();
-    com.google.crypto.tink.proto.HpkePrivateKey recipientPrivateKey =
-        com.google.crypto.tink.proto.HpkePrivateKey.newBuilder()
-            .setPrivateKey(ByteString.copyFrom(testSetup.recipientPrivateKey))
-            .setPublicKey(recipientPublicKey)
-            .build();
+    HpkePublicKey recipientPublicKey =
+        HpkePublicKey.create(
+            hpkeParameters,
+            Bytes.copyFrom(testSetup.recipientPublicKey),
+            /* idRequirement= */ null);
+    HpkePrivateKey recipientPrivateKey =
+        HpkePrivateKey.create(
+            recipientPublicKey,
+            SecretBytes.copyFrom(testSetup.recipientPrivateKey, InsecureSecretKeyAccess.get()));
 
     HpkeContext senderContext =
         HpkeContext.createSenderContext(
-            recipientPublicKey.getPublicKey().toByteArray(), kem, kdf, aead, testSetup.info);
+            recipientPublicKey.getPublicKeyBytes().toByteArray(), kem, kdf, aead, testSetup.info);
 
     HpkeKemPrivateKey recipientKemPrivateKey = HpkeKemKeyFactory.createPrivate(recipientPrivateKey);
     HpkeContext recipientContext =
@@ -271,7 +272,7 @@ public final class HpkeContextTest {
         HpkeUtil.X25519_HKDF_SHA256_KEM_ID,
         HpkeUtil.HKDF_SHA256_KDF_ID,
         HpkeUtil.AES_128_GCM_AEAD_ID,
-        com.google.crypto.tink.proto.HpkeKem.DHKEM_X25519_HKDF_SHA256);
+        HpkeParameters.KemId.DHKEM_X25519_HKDF_SHA256);
   }
 
   @Test
@@ -300,7 +301,7 @@ public final class HpkeContextTest {
         HpkeUtil.P256_HKDF_SHA256_KEM_ID,
         HpkeUtil.HKDF_SHA256_KDF_ID,
         HpkeUtil.AES_128_GCM_AEAD_ID,
-        com.google.crypto.tink.proto.HpkeKem.DHKEM_P256_HKDF_SHA256);
+        HpkeParameters.KemId.DHKEM_P256_HKDF_SHA256);
   }
 
   @Test
@@ -349,7 +350,7 @@ public final class HpkeContextTest {
         HpkeUtil.X25519_HKDF_SHA256_KEM_ID,
         HpkeUtil.HKDF_SHA256_KDF_ID,
         HpkeUtil.AES_256_GCM_AEAD_ID,
-        com.google.crypto.tink.proto.HpkeKem.DHKEM_X25519_HKDF_SHA256);
+        HpkeParameters.KemId.DHKEM_X25519_HKDF_SHA256);
   }
 
   @Test
@@ -378,7 +379,7 @@ public final class HpkeContextTest {
         HpkeUtil.P256_HKDF_SHA256_KEM_ID,
         HpkeUtil.HKDF_SHA256_KDF_ID,
         HpkeUtil.AES_256_GCM_AEAD_ID,
-        com.google.crypto.tink.proto.HpkeKem.DHKEM_P256_HKDF_SHA256);
+        HpkeParameters.KemId.DHKEM_P256_HKDF_SHA256);
   }
 
   @Test
