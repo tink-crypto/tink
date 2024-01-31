@@ -144,8 +144,16 @@ public final class JwtHmacKeyManager {
           com.google.crypto.tink.proto.JwtHmacKey.parser());
 
   @AccessesPartialKey
-  private static JwtHmac createJwtHmac(JwtHmacKey key) throws GeneralSecurityException {
+  private static JwtMacInternal createJwtHmac(JwtHmacKey key) throws GeneralSecurityException {
     validate(key.getParameters());
+    if (key.getParameters()
+        .getKidStrategy()
+        .equals(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)) {
+      throw new GeneralSecurityException(
+          "createJwtHmac cannot be used with key which uses BASE64_ENCODED_KEY_ID -- these must be"
+              + " converted to IGNORED and then the base 64 encoded key id must be passed into the"
+              + " JwtMacInternal interface.");
+    }
     HmacKey hmacKey =
         HmacKey.builder()
             .setParameters(
