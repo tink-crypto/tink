@@ -34,8 +34,10 @@ import java.security.GeneralSecurityException;
  * }</pre>
  */
 public final class JwtSignatureConfig {
-  public static final String JWT_ECDSA_PUBLIC_KEY_TYPE_URL = JwtEcdsaVerifyKeyManager.getKeyType();
-  public static final String JWT_ECDSA_PRIVATE_KEY_TYPE_URL = JwtEcdsaSignKeyManager.getKeyType();
+  public static final String JWT_ECDSA_PUBLIC_KEY_TYPE_URL =
+      new JwtEcdsaVerifyKeyManager().getKeyType();
+  public static final String JWT_ECDSA_PRIVATE_KEY_TYPE_URL =
+      new JwtEcdsaSignKeyManager().getKeyType();
 
   public static final String JWT_RSA_PKCS1_PRIVATE_KEY_TYPE_URL =
       new JwtRsaSsaPkcs1SignKeyManager().getKeyType();

@@ -16,41 +16,112 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTemplates;
-import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.TinkProtoKeysetFormat;
-import com.google.crypto.tink.internal.KeyManagerRegistry;
-import org.junit.BeforeClass;
+import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.proto.JwtEcdsaAlgorithm;
+import com.google.crypto.tink.proto.JwtEcdsaKeyFormat;
+import com.google.crypto.tink.proto.JwtEcdsaPrivateKey;
+import com.google.crypto.tink.proto.JwtEcdsaPublicKey;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.testing.TestUtil;
+import java.security.GeneralSecurityException;
+import java.util.Optional;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Unit tests for EcdsaVerifyKeyManager. */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public final class JwtEcdsaVerifyKeyManagerTest {
-  @BeforeClass
-  public static void setUp() throws Exception {
-    JwtSignatureConfig.register();
+  private final JwtEcdsaSignKeyManager signManager = new JwtEcdsaSignKeyManager();
+  private final KeyTypeManager.KeyFactory<JwtEcdsaKeyFormat, JwtEcdsaPrivateKey> factory =
+      signManager.keyFactory();
+  private final JwtEcdsaVerifyKeyManager verifyManager = new JwtEcdsaVerifyKeyManager();
+
+  @DataPoints("parametersAlgos")
+  public static final JwtEcdsaAlgorithm[] PARAMETERS_ALGOS =
+      new JwtEcdsaAlgorithm[] {
+        JwtEcdsaAlgorithm.ES256, JwtEcdsaAlgorithm.ES384, JwtEcdsaAlgorithm.ES512
+      };
+
+  @Test
+  public void basics() throws Exception {
+    assertThat(verifyManager.getKeyType())
+        .isEqualTo("type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey");
+    assertThat(verifyManager.getVersion()).isEqualTo(0);
+    assertThat(verifyManager.keyMaterialType()).isEqualTo(KeyMaterialType.ASYMMETRIC_PUBLIC);
   }
 
   @Test
-  public void testKeyManagersRegistered() throws Exception {
-    assertThat(
-            KeyManagerRegistry.globalInstance()
-                .getUntypedKeyManager("type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey"))
-        .isNotNull();
+  public void validateKey_empty_throw() throws Exception {
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> verifyManager.validateKey(JwtEcdsaPublicKey.getDefaultInstance()));
   }
 
-  @Test
-  public void serializeAndDeserializeKeysets() throws Exception {
-    KeyTemplate template = KeyTemplates.get("JWT_ES256_RAW");
-    KeysetHandle handle = KeysetHandle.generateNew(template).getPublicKeysetHandle();
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void validateKey_ok(@FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm)
+      throws Exception {
+    if (TestUtil.isTsan()) {
+      // factory.createKey is too slow in Tsan.
+      return;
+    }
+    JwtEcdsaKeyFormat keyFormat = JwtEcdsaKeyFormat.newBuilder().setAlgorithm(algorithm).build();
+    JwtEcdsaPrivateKey privateKey = factory.createKey(keyFormat);
+    JwtEcdsaPublicKey publicKey = signManager.getPublicKey(privateKey);
+    verifyManager.validateKey(publicKey);
+  }
 
-    byte[] serializedKeyset = TinkProtoKeysetFormat.serializeKeysetWithoutSecret(handle);
-    KeysetHandle parsed = TinkProtoKeysetFormat.parseKeysetWithoutSecret(serializedKeyset);
-    assertTrue(parsed.equalsKeyset(handle));
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createPrimitive_ok(@FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm)
+      throws Exception {
+    if (TestUtil.isTsan()) {
+      // factory.createKey is too slow in Tsan.
+      return;
+    }
+    JwtEcdsaKeyFormat keyFormat = JwtEcdsaKeyFormat.newBuilder().setAlgorithm(algorithm).build();
+    JwtEcdsaPrivateKey privateKey = factory.createKey(keyFormat);
+    JwtEcdsaPublicKey publicKey = signManager.getPublicKey(privateKey);
+    JwtPublicKeySignInternal signer =
+        signManager.getPrimitive(privateKey, JwtPublicKeySignInternal.class);
+    JwtPublicKeyVerifyInternal verifier =
+        verifyManager.getPrimitive(publicKey, JwtPublicKeyVerifyInternal.class);
+    RawJwt token = RawJwt.newBuilder().withoutExpiration().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
+    Object unused =
+        verifier.verifyAndDecodeWithKid(
+            signer.signAndEncodeWithKid(token, Optional.empty()), validator, Optional.empty());
+  }
+
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createPrimitive_anotherKey_throw(
+      @FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm) throws Exception {
+    if (TestUtil.isTsan()) {
+      // factory.createKey is too slow in Tsan.
+      return;
+    }
+    JwtEcdsaKeyFormat keyFormat = JwtEcdsaKeyFormat.newBuilder().setAlgorithm(algorithm).build();
+
+    JwtEcdsaPrivateKey privateKey = factory.createKey(keyFormat);
+    // Create a different key.
+    JwtEcdsaPublicKey publicKey = signManager.getPublicKey(factory.createKey(keyFormat));
+    JwtPublicKeySignInternal signer =
+        signManager.getPrimitive(privateKey, JwtPublicKeySignInternal.class);
+    JwtPublicKeyVerifyInternal verifier =
+        verifyManager.getPrimitive(publicKey, JwtPublicKeyVerifyInternal.class);
+    RawJwt token = RawJwt.newBuilder().withoutExpiration().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            verifier.verifyAndDecodeWithKid(
+                signer.signAndEncodeWithKid(token, Optional.empty()), validator, Optional.empty()));
   }
 }
