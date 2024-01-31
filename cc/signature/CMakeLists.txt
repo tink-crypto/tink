@@ -720,6 +720,31 @@ tink_cc_library(
     tink::util::statusor
 )
 
+tink_cc_library(
+  NAME ecdsa_public_key
+  SRCS
+    ecdsa_public_key.cc
+    ecdsa_public_key.h
+  DEPS
+    tink::signature::ecdsa_parameters
+    tink::signature::signature_public_key
+    absl::core_headers
+    absl::status
+    absl::strings
+    absl::string_view
+    absl::optional
+    crypto
+    tink::core::ec_point
+    tink::core::key
+    tink::core::partial_key_access_token
+    tink::internal::ec_util
+    tink::internal::ssl_unique_ptr
+    tink::subtle::common_enums
+    tink::subtle::subtle_util
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -1381,6 +1406,28 @@ tink_cc_test(
     tink::signature::ecdsa_parameters
     gmock
     absl::status
+    tink::util::statusor
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME ecdsa_public_key_test
+  SRCS
+    ecdsa_public_key_test.cc
+  DEPS
+    tink::signature::ecdsa_parameters
+    tink::signature::ecdsa_public_key
+    gmock
+    absl::status
+    absl::strings
+    absl::string_view
+    absl::optional
+    crypto
+    tink::core::big_integer
+    tink::core::ec_point
+    tink::core::partial_key_access
+    tink::internal::ec_util
+    tink::subtle::common_enums
     tink::util::statusor
     tink::util::test_matchers
 )

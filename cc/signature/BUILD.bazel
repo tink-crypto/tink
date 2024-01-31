@@ -755,6 +755,32 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "ecdsa_public_key",
+    srcs = ["ecdsa_public_key.cc"],
+    hdrs = ["ecdsa_public_key.h"],
+    include_prefix = "tink/signature",
+    deps = [
+        ":ecdsa_parameters",
+        ":signature_public_key",
+        "//:ec_point",
+        "//:key",
+        "//:partial_key_access_token",
+        "//internal:ec_util",
+        "//internal:ssl_unique_ptr",
+        "//subtle:common_enums",
+        "//subtle:subtle_util",
+        "//util:status",
+        "//util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:string_view",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -1432,6 +1458,28 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "ecdsa_public_key_test",
+    srcs = ["ecdsa_public_key_test.cc"],
+    deps = [
+        ":ecdsa_parameters",
+        ":ecdsa_public_key",
+        "//:big_integer",
+        "//:ec_point",
+        "//:partial_key_access",
+        "//internal:ec_util",
+        "//subtle:common_enums",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:string_view",
+        "@com_google_absl//absl/types:optional",
         "@com_google_googletest//:gtest_main",
     ],
 )
