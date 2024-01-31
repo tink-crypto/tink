@@ -1165,10 +1165,25 @@ public final class KeysetHandle {
     throw new GeneralSecurityException("No primary key found in keyset.");
   }
 
+  private static Set<Class<?>> createSetWhichDoesNotNeedLegacyPrimitive() {
+    HashSet<Class<?>> result = new HashSet<>();
+    result.add(PublicKeySign.class);
+    result.add(PublicKeyVerify.class);
+    result.add(HybridEncrypt.class);
+    result.add(HybridDecrypt.class);
+    return result;
+  }
+
+  private static final Set<Class<?>> doesNotNeedLegacyPrimitive =
+      Collections.unmodifiableSet(createSetWhichDoesNotNeedLegacyPrimitive());
+
   @Nullable
   private static <B> B getLegacyPrimitiveOrNull(
       InternalConfiguration config, Keyset.Key key, Class<B> inputPrimitiveClassObject)
       throws GeneralSecurityException {
+    if (doesNotNeedLegacyPrimitive.contains(inputPrimitiveClassObject)) {
+      return null;
+    }
     try {
       return config.getLegacyPrimitive(key.getKeyData(), inputPrimitiveClassObject);
     } catch (GeneralSecurityException e) {
