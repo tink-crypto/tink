@@ -21,6 +21,7 @@ import (
 
 	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/aead"
+	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/testing/fakekms"
@@ -64,6 +65,12 @@ func TestNewKMSEnvelopeAEADKeyWithInvalidSerializedKeyFormat(t *testing.T) {
 	if err != nil {
 		t.Fatalf("fakekms.NewKeyURI() err = %v", err)
 	}
+	fakeClient, err := fakekms.NewClient(keyURI)
+	if err != nil {
+		t.Fatalf("fakekms.NewClient() err = %v", err)
+	}
+	registry.RegisterKMSClient(fakeClient)
+	defer registry.ClearKMSClients()
 
 	// Create DEK template with unset embedded key parameters.
 	dekFormat := &ctrhmacpb.AesCtrHmacAeadKeyFormat{
