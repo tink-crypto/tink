@@ -22,10 +22,10 @@ import hvac
 import tink
 from tink import aead
 
-# Matches strings like /{mount}/keys/{key_name}.
+# Matches strings like {mount}/keys/{key_name}.
 _PATH_MATCHER = re.compile(r'''
-    # starts with '/'
-    ^/
+    # starts with 0 or one '/'
+    [/]?
     # the capture group for {mount}
     (
       # a sequence of one or more characters that aren't '/'
@@ -46,9 +46,9 @@ _PATH_MATCHER = re.compile(r'''
 def _get_endpoint_paths(key_path: str) -> Tuple[str, str]:
   """Extracts mount point and key name from the given key_path.
 
-  The key_path is expected of the form "/{mount}/keys/{key_name}". For example,
-  "/transit/keys/key-foo" will be transformed to "transit" and "key-foo", and
-  "/teams/billing/service/cipher/keys/key-bar" will be transformed into
+  The key_path is expected of the form "{mount}/keys/{key_name}". For example,
+  "transit/keys/key-foo" will be transformed to "transit" and "key-foo", and
+  "teams/billing/service/cipher/keys/key-bar" will be transformed into
   "teams/billing/service/cipher" and "key-bar".
 
   Args:

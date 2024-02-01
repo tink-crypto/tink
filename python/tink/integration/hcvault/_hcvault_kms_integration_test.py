@@ -30,7 +30,7 @@ _VAULT_ADDR = os.getenv('VAULT_ADDR', '')
 _BAD_TOKEN = 'notavalidtoken'
 
 # Replace this with your vault URI
-_KEY_PATH = '/transit/keys/key-1'
+_KEY_PATH = 'transit/keys/key-1'
 
 
 def setUpModule():

@@ -24,7 +24,7 @@ import tink
 from tink.integration import hcvault
 
 _TOKEN = ''
-_KEY_PATH = '/transit/keys/key-1'
+_KEY_PATH = 'transit/keys/key-1'
 _PORT = 8205
 _VAULT_URI = f'http://localhost:{_PORT}'
 
@@ -148,6 +148,7 @@ class HcVaultKmsAeadTest(parameterized.TestCase):
 
   @parameterized.named_parameters([
       ('simple', '/transit/keys/key-1', 'transit', 'key-1'),
+      ('simple_no_leading_slash', 'transit/keys/key-1', 'transit', 'key-1'),
       (
           'escaped',
           '/transit/keys/this%2Band+that',
@@ -180,7 +181,6 @@ class HcVaultKmsAeadTest(parameterized.TestCase):
       ('slash_only', '/'),
       ('no_mount', '/keys/foo'),
       ('traling_slash', 'mount/keys/foo/'),
-      ('no_leading_slash', 'mount/keys/foo'),
       ('invalid_mount', '////keys/foo'),
       ('invalid_mount_and_trailing_slash', '////keys/foo/'),
       ('invalid_mount_with_empty_component_in_between', '/foo//bar/keys/baz'),
