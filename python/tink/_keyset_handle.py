@@ -57,6 +57,19 @@ class KeysetHandle:
     _validate_keyset(keyset)
     self._keyset = keyset
 
+  def __getstate__(self) -> None:
+    raise core.TinkError(
+        'calling __getstate__ is not permitted. Use'
+        ' tink.proto_keyset_format to serialize or deserialize a KeysetHandle.'
+    )
+
+  def __setstate__(self, state) -> None:
+    _ = state
+    raise core.TinkError(
+        'calling __setstate__ is not permitted. Use'
+        ' tink.proto_keyset_format to serialize or deserialize a KeysetHandle.'
+    )
+
   @classmethod
   def generate_new(cls, key_template: tink_pb2.KeyTemplate) -> 'KeysetHandle':
     """Return a new KeysetHandle.

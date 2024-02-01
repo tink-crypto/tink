@@ -14,8 +14,11 @@
 """Tests for tink.python.tink._keyset_handle."""
 
 import io
+# We are using Pickle only to test that Pickle doesn't work with keyset_handle.
+import pickle  # pylint: disable=pickle-use
 
 from absl.testing import absltest
+
 from tink.proto import tink_pb2
 import tink
 from tink import aead
@@ -341,6 +344,11 @@ class KeysetHandleTest(absltest.TestCase):
     info2.output_prefix_type = tink_pb2.RAW
     info2.key_id = 2
     self.assertEqual(expected_keyset_info, handle.keyset_info())
+
+  def test_pickle_dumps_fails(self):
+    handle = tink.new_keyset_handle(mac.mac_key_templates.HMAC_SHA256_128BITTAG)
+    with self.assertRaises(tink.TinkError):
+      _ = pickle.dumps(handle)
 
 
 if __name__ == '__main__':
