@@ -23,14 +23,24 @@ import tink
 from tink import aead
 
 # Matches strings like /{mount}/keys/{key_name}.
-# - The initial `^/` matches strings that start with '/'
-# - The string "/keys/" splits the path into two parts:
-# - The first part (mount) is captured by the group ([^/]+(?:/[^/]+)*):
-#   - [^/]+: Sequence of one or more characters that aren't '/', followed by
-#   - (?:/[^/]+)*: Zero or more strings that start with '/' and followed by a
-#     sequence of one or more characters that aren't '/'.
-# - The second part (key_name) is captured by ([^/]+).
-_PATH_MATCHER = re.compile(r'^/([^/]+(?:/[^/]+)*)/keys/([^/]+)$')
+_PATH_MATCHER = re.compile(r'''
+    # starts with '/'
+    ^/
+    # the capture group for {mount}
+    (
+      # a sequence of one or more characters that aren't '/'
+      [^/]+
+      # zero or more strings that start with '/' followed by a sequence of one
+      # or more characters that aren't '/'
+      (?:/[^/]+)*
+    )
+    /keys/
+    # the capture group for {key_name}
+    (
+      # a sequence of one or more characters that aren't '/'
+      [^/]+
+    )
+    $''', re.VERBOSE)
 
 
 def _get_endpoint_paths(key_path: str) -> Tuple[str, str]:
@@ -45,7 +55,7 @@ def _get_endpoint_paths(key_path: str) -> Tuple[str, str]:
     key_path: Key path of the form "/{mount}/keys/{key_name}".
 
   Returns:
-    Vault transit encryp/decrypt mount point and transit key name.
+    Vault transit encrypt/decrypt mount point and transit key name.
   """
   escaped_path = urllib.parse.quote(key_path)
   # Make sure that we have a path of the form: /{mount}/keys/{key_name}.
