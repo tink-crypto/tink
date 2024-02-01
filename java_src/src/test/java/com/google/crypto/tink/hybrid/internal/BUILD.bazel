@@ -136,7 +136,6 @@ java_test(
     size = "small",
     srcs = ["HpkePrimitiveFactoryTest.java"],
     deps = [
-        "//proto:hpke_java_proto",
         "//src/main/java/com/google/crypto/tink/hybrid:hpke_parameters",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:aes_gcm_hpke_aead",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:chacha20_poly1305_hpke_aead",

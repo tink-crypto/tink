@@ -20,8 +20,6 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.common.truth.Expect;
 import com.google.crypto.tink.hybrid.HpkeParameters;
-import com.google.crypto.tink.proto.HpkeParams;
-import java.security.GeneralSecurityException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
@@ -37,17 +35,11 @@ public final class HpkePrimitiveFactoryTest {
 
   private static final class KemTestCase {
     final byte[] bytesId;
-    final com.google.crypto.tink.proto.HpkeKem protoId;
     final HpkeParameters.KemId kemId;
     final Class<? extends HpkeKem> kemClass;
 
-    KemTestCase(
-        byte[] bytesId,
-        com.google.crypto.tink.proto.HpkeKem protoId,
-        HpkeParameters.KemId kemId,
-        Class<? extends HpkeKem> kemClass) {
+    KemTestCase(byte[] bytesId, HpkeParameters.KemId kemId, Class<? extends HpkeKem> kemClass) {
       this.bytesId = bytesId;
-      this.protoId = protoId;
       this.kemId = kemId;
       this.kemClass = kemClass;
     }
@@ -55,17 +47,11 @@ public final class HpkePrimitiveFactoryTest {
 
   private static final class KdfTestCase {
     final byte[] bytesId;
-    final com.google.crypto.tink.proto.HpkeKdf protoId;
     final HpkeParameters.KdfId kdfId;
     final Class<? extends HpkeKdf> kdfClass;
 
-    KdfTestCase(
-        byte[] bytesId,
-        com.google.crypto.tink.proto.HpkeKdf protoId,
-        HpkeParameters.KdfId kdfId,
-        Class<? extends HpkeKdf> kdfClass) {
+    KdfTestCase(byte[] bytesId, HpkeParameters.KdfId kdfId, Class<? extends HpkeKdf> kdfClass) {
       this.bytesId = bytesId;
-      this.protoId = protoId;
       this.kdfId = kdfId;
       this.kdfClass = kdfClass;
     }
@@ -73,7 +59,6 @@ public final class HpkePrimitiveFactoryTest {
 
   private static final class AeadTestCase {
     final byte[] bytesId;
-    final com.google.crypto.tink.proto.HpkeAead protoId;
     final HpkeParameters.AeadId aeadId;
     final Class<? extends HpkeAead> aeadClass;
     final int keyLength;
@@ -81,13 +66,11 @@ public final class HpkePrimitiveFactoryTest {
 
     AeadTestCase(
         byte[] bytesId,
-        com.google.crypto.tink.proto.HpkeAead protoId,
         HpkeParameters.AeadId aeadId,
         Class<? extends HpkeAead> aeadClass,
         int keyLength,
         int nonceLength) {
       this.bytesId = bytesId;
-      this.protoId = protoId;
       this.aeadId = aeadId;
       this.aeadClass = aeadClass;
       this.keyLength = keyLength;
@@ -100,22 +83,18 @@ public final class HpkePrimitiveFactoryTest {
       new KemTestCase[] {
         new KemTestCase(
             HpkeUtil.X25519_HKDF_SHA256_KEM_ID,
-            com.google.crypto.tink.proto.HpkeKem.DHKEM_X25519_HKDF_SHA256,
             HpkeParameters.KemId.DHKEM_X25519_HKDF_SHA256,
             X25519HpkeKem.class),
         new KemTestCase(
             HpkeUtil.P256_HKDF_SHA256_KEM_ID,
-            com.google.crypto.tink.proto.HpkeKem.DHKEM_P256_HKDF_SHA256,
             HpkeParameters.KemId.DHKEM_P256_HKDF_SHA256,
             NistCurvesHpkeKem.class),
         new KemTestCase(
             HpkeUtil.P384_HKDF_SHA384_KEM_ID,
-            com.google.crypto.tink.proto.HpkeKem.DHKEM_P384_HKDF_SHA384,
             HpkeParameters.KemId.DHKEM_P384_HKDF_SHA384,
             NistCurvesHpkeKem.class),
         new KemTestCase(
             HpkeUtil.P521_HKDF_SHA512_KEM_ID,
-            com.google.crypto.tink.proto.HpkeKem.DHKEM_P521_HKDF_SHA512,
             HpkeParameters.KemId.DHKEM_P521_HKDF_SHA512,
             NistCurvesHpkeKem.class)
       };
@@ -124,20 +103,11 @@ public final class HpkePrimitiveFactoryTest {
   public static final KdfTestCase[] KDFS =
       new KdfTestCase[] {
         new KdfTestCase(
-            HpkeUtil.HKDF_SHA256_KDF_ID,
-            com.google.crypto.tink.proto.HpkeKdf.HKDF_SHA256,
-            HpkeParameters.KdfId.HKDF_SHA256,
-            HkdfHpkeKdf.class),
+            HpkeUtil.HKDF_SHA256_KDF_ID, HpkeParameters.KdfId.HKDF_SHA256, HkdfHpkeKdf.class),
         new KdfTestCase(
-            HpkeUtil.HKDF_SHA384_KDF_ID,
-            com.google.crypto.tink.proto.HpkeKdf.HKDF_SHA384,
-            HpkeParameters.KdfId.HKDF_SHA384,
-            HkdfHpkeKdf.class),
+            HpkeUtil.HKDF_SHA384_KDF_ID, HpkeParameters.KdfId.HKDF_SHA384, HkdfHpkeKdf.class),
         new KdfTestCase(
-            HpkeUtil.HKDF_SHA512_KDF_ID,
-            com.google.crypto.tink.proto.HpkeKdf.HKDF_SHA512,
-            HpkeParameters.KdfId.HKDF_SHA512,
-            HkdfHpkeKdf.class)
+            HpkeUtil.HKDF_SHA512_KDF_ID, HpkeParameters.KdfId.HKDF_SHA512, HkdfHpkeKdf.class)
       };
 
   @DataPoints("aeads")
@@ -145,21 +115,18 @@ public final class HpkePrimitiveFactoryTest {
       new AeadTestCase[] {
         new AeadTestCase(
             HpkeUtil.AES_128_GCM_AEAD_ID,
-            com.google.crypto.tink.proto.HpkeAead.AES_128_GCM,
             HpkeParameters.AeadId.AES_128_GCM,
             AesGcmHpkeAead.class,
             /* keyLength= */ 16,
             /* nonceLength= */ 12),
         new AeadTestCase(
             HpkeUtil.AES_256_GCM_AEAD_ID,
-            com.google.crypto.tink.proto.HpkeAead.AES_256_GCM,
             HpkeParameters.AeadId.AES_256_GCM,
             AesGcmHpkeAead.class,
             /* keyLength= */ 32,
             /* nonceLength= */ 12),
         new AeadTestCase(
             HpkeUtil.CHACHA20_POLY1305_AEAD_ID,
-            com.google.crypto.tink.proto.HpkeAead.CHACHA20_POLY1305,
             HpkeParameters.AeadId.CHACHA20_POLY1305,
             ChaCha20Poly1305HpkeAead.class,
             /* keyLength= */ 32,
@@ -193,24 +160,6 @@ public final class HpkePrimitiveFactoryTest {
   }
 
   @Theory
-  public void createKem_fromValidHpkeParams_succeeds(@FromDataPoints("kems") KemTestCase testCase)
-      throws Exception {
-    HpkeParams params = HpkeParams.newBuilder().setKem(testCase.protoId).build();
-    HpkeKem kem = HpkePrimitiveFactory.createKem(params);
-
-    expect.that(kem).isInstanceOf(testCase.kemClass);
-    expect.that(kem.getKemId()).isEqualTo(testCase.bytesId);
-  }
-
-  @Test
-  public void createKem_fromInvalidHpkeParams_fails() {
-    HpkeParams params =
-        HpkeParams.newBuilder().setKem(com.google.crypto.tink.proto.HpkeKem.KEM_UNKNOWN).build();
-
-    assertThrows(IllegalArgumentException.class, () -> HpkePrimitiveFactory.createKem(params));
-  }
-
-  @Theory
   public void createKdf_fromValidKdfBytesId_succeeds(@FromDataPoints("kdfs") KdfTestCase testCase)
       throws Exception {
     HpkeKdf kdf = HpkePrimitiveFactory.createKdf(testCase.bytesId);
@@ -234,24 +183,6 @@ public final class HpkePrimitiveFactoryTest {
 
     expect.that(kdf).isInstanceOf(testCase.kdfClass);
     expect.that(kdf.getKdfId()).isEqualTo(testCase.bytesId);
-  }
-
-  @Theory
-  public void createKdf_fromValidHpkeParams_succeeds(@FromDataPoints("kdfs") KdfTestCase testCase)
-      throws GeneralSecurityException {
-    HpkeParams params = HpkeParams.newBuilder().setKdf(testCase.protoId).build();
-    HpkeKdf kdf = HpkePrimitiveFactory.createKdf(params);
-
-    expect.that(kdf).isInstanceOf(testCase.kdfClass);
-    expect.that(kdf.getKdfId()).isEqualTo(testCase.bytesId);
-  }
-
-  @Test
-  public void createKdf_fromInvalidHpkeParams_fails() {
-    HpkeParams params =
-        HpkeParams.newBuilder().setKdf(com.google.crypto.tink.proto.HpkeKdf.KDF_UNKNOWN).build();
-
-    assertThrows(IllegalArgumentException.class, () -> HpkePrimitiveFactory.createKdf(params));
   }
 
   @Theory
@@ -282,25 +213,5 @@ public final class HpkePrimitiveFactoryTest {
     expect.that(aead.getAeadId()).isEqualTo(testCase.bytesId);
     expect.that(aead.getKeyLength()).isEqualTo(testCase.keyLength);
     expect.that(aead.getNonceLength()).isEqualTo(testCase.nonceLength);
-  }
-
-  @Theory
-  public void createAead_fromValidHpkeParams_succeeds(
-      @FromDataPoints("aeads") AeadTestCase testCase) throws Exception {
-    HpkeParams params = HpkeParams.newBuilder().setAead(testCase.protoId).build();
-    HpkeAead aead = HpkePrimitiveFactory.createAead(params);
-
-    expect.that(aead).isInstanceOf(testCase.aeadClass);
-    expect.that(aead.getAeadId()).isEqualTo(testCase.bytesId);
-    expect.that(aead.getKeyLength()).isEqualTo(testCase.keyLength);
-    expect.that(aead.getNonceLength()).isEqualTo(testCase.nonceLength);
-  }
-
-  @Test
-  public void createAead_fromInvalidHpkeParams_fails() {
-    HpkeParams params =
-        HpkeParams.newBuilder().setAead(com.google.crypto.tink.proto.HpkeAead.AEAD_UNKNOWN).build();
-
-    assertThrows(IllegalArgumentException.class, () -> HpkePrimitiveFactory.createAead(params));
   }
 }
