@@ -1093,12 +1093,18 @@ public final class KeysetHandle {
       if (protoKey.getStatus().equals(KeyStatusType.ENABLED)) {
         @Nullable
         B primitive = getLegacyPrimitiveOrNull(config, protoKey, inputPrimitiveClassObject);
-        @Nullable B fullPrimitive = null;
         // Entries.get(i) may be null (if the status is invalid in the proto, or parsing failed).
-        if (entries.get(i) != null) {
-          fullPrimitive =
-              getFullPrimitiveOrNull(config, entries.get(i).getKey(), inputPrimitiveClassObject);
+        if (entries.get(i) == null) {
+          throw new GeneralSecurityException(
+              "Key parsing of key with index "
+                  + i
+                  + " and type_url "
+                  + protoKey.getKeyData().getTypeUrl()
+                  + " failed, unable to get primitive");
         }
+        @Nullable
+        B fullPrimitive =
+            getFullPrimitiveOrNull(config, entries.get(i).getKey(), inputPrimitiveClassObject);
         if (fullPrimitive == null && primitive == null) {
           throw new GeneralSecurityException(
               "Unable to get primitive "
