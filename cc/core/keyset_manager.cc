@@ -36,7 +36,6 @@ namespace tink {
 using ::crypto::tink::util::Enums;
 using ::crypto::tink::util::Status;
 using ::crypto::tink::util::StatusOr;
-using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::KeyTemplate;
 
