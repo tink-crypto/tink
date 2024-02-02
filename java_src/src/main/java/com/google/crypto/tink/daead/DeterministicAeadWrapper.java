@@ -20,12 +20,14 @@ import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
+import com.google.crypto.tink.daead.internal.LegacyFullDeterministicAead;
+import com.google.crypto.tink.internal.LegacyProtoKey;
 import com.google.crypto.tink.internal.MonitoringUtil;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.monitoring.MonitoringClient;
 import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
-import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
@@ -43,6 +45,10 @@ public class DeterministicAeadWrapper
     implements PrimitiveWrapper<DeterministicAead, DeterministicAead> {
 
   private static final DeterministicAeadWrapper WRAPPER = new DeterministicAeadWrapper();
+  private static final PrimitiveConstructor<LegacyProtoKey, DeterministicAead>
+      LEGACY_FULL_DAEAD_PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              LegacyFullDeterministicAead::create, LegacyProtoKey.class, DeterministicAead.class);
 
   private static class WrappedDeterministicAead implements DeterministicAead {
     private final PrimitiveSet<DeterministicAead> primitives;
@@ -68,12 +74,10 @@ public class DeterministicAeadWrapper
         throws GeneralSecurityException {
       try {
         byte[] output =
-            Bytes.concat(
-                primitives.getPrimary().getIdentifier(),
-                primitives
-                    .getPrimary()
-                    .getPrimitive()
-                    .encryptDeterministically(plaintext, associatedData));
+            primitives
+                .getPrimary()
+                .getFullPrimitive()
+                .encryptDeterministically(plaintext, associatedData);
         encLogger.log(primitives.getPrimary().getKeyId(), plaintext.length);
         return output;
       } catch (GeneralSecurityException e) {
@@ -87,14 +91,12 @@ public class DeterministicAeadWrapper
         throws GeneralSecurityException {
       if (ciphertext.length > CryptoFormat.NON_RAW_PREFIX_SIZE) {
         byte[] prefix = Arrays.copyOf(ciphertext, CryptoFormat.NON_RAW_PREFIX_SIZE);
-        byte[] ciphertextNoPrefix =
-            Arrays.copyOfRange(ciphertext, CryptoFormat.NON_RAW_PREFIX_SIZE, ciphertext.length);
         List<PrimitiveSet.Entry<DeterministicAead>> entries = primitives.getPrimitive(prefix);
         for (PrimitiveSet.Entry<DeterministicAead> entry : entries) {
           try {
             byte[] output =
-                entry.getPrimitive().decryptDeterministically(ciphertextNoPrefix, associatedData);
-            decLogger.log(entry.getKeyId(), ciphertextNoPrefix.length);
+                entry.getFullPrimitive().decryptDeterministically(ciphertext, associatedData);
+            decLogger.log(entry.getKeyId(), ciphertext.length);
             return output;
           } catch (GeneralSecurityException e) {
             continue;
@@ -106,7 +108,8 @@ public class DeterministicAeadWrapper
       List<PrimitiveSet.Entry<DeterministicAead>> entries = primitives.getRawPrimitives();
       for (PrimitiveSet.Entry<DeterministicAead> entry : entries) {
         try {
-          byte[] output = entry.getPrimitive().decryptDeterministically(ciphertext, associatedData);
+          byte[] output =
+              entry.getFullPrimitive().decryptDeterministically(ciphertext, associatedData);
           decLogger.log(entry.getKeyId(), ciphertext.length);
           return output;
         } catch (GeneralSecurityException e) {
@@ -138,5 +141,7 @@ public class DeterministicAeadWrapper
 
   public static void register() throws GeneralSecurityException {
     MutablePrimitiveRegistry.globalInstance().registerPrimitiveWrapper(WRAPPER);
+    MutablePrimitiveRegistry.globalInstance()
+        .registerPrimitiveConstructor(LEGACY_FULL_DAEAD_PRIMITIVE_CONSTRUCTOR);
   }
 }
