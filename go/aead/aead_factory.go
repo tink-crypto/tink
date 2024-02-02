@@ -28,41 +28,12 @@ import (
 	"github.com/google/tink/go/tink"
 )
 
-type newOptions struct {
-	Config Config
-}
-
-// NewOption configures [New].
-type NewOption func(*newOptions) error
-
-// WithConfig sets the Config used by [New] to create primitives.
-func WithConfig(c Config) NewOption {
-	return func(options *newOptions) error {
-		if options.Config != nil {
-			return fmt.Errorf("aead_factory: more than one config provided")
-		}
-		options.Config = c
-		return nil
-	}
-}
-
 // New returns an AEAD primitive from the given keyset handle.
-//
-// It will use a Config when provided via [WithConfig]. If no Config is
-// provided, New uses the global registry instead.
-func New(handle *keyset.Handle, opts ...NewOption) (tink.AEAD, error) {
-	var options newOptions
-	for _, opt := range opts {
-		if err := opt(&options); err != nil {
-			return nil, err
-		}
-	}
-
-	ps, err := handle.Primitives(keyset.WithConfig(options.Config))
+func New(handle *keyset.Handle) (tink.AEAD, error) {
+	ps, err := handle.Primitives()
 	if err != nil {
 		return nil, fmt.Errorf("aead_factory: cannot obtain primitive set: %s", err)
 	}
-
 	return newWrappedAead(ps)
 }
 
