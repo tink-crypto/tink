@@ -72,7 +72,7 @@ class PrivateKeyFactoryImpl : public PrivateKeyFactory {
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
   GetPublicKeyData(absl::string_view serialized_private_key) const override {
     PrivateKeyProto private_key;
-    if (!private_key.ParseFromString(std::string(serialized_private_key))) {
+    if (!private_key.ParseFromString(serialized_private_key)) {
       return crypto::tink::util::Status(
           absl::StatusCode::kInvalidArgument,
           absl::StrCat("Could not parse the passed string as proto '",

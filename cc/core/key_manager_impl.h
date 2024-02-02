@@ -78,7 +78,7 @@ class KeyFactoryImpl<
   crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
   NewKey(absl::string_view serialized_key_format) const override {
     KeyFormatProto key_format;
-    if (!key_format.ParseFromString(std::string(serialized_key_format))) {
+    if (!key_format.ParseFromString(serialized_key_format)) {
       return crypto::tink::util::Status(
           absl::StatusCode::kInvalidArgument,
           absl::StrCat("Could not parse the passed string as proto '",
@@ -256,7 +256,7 @@ CreateDeriverFunctionFor(
                             InputStream* randomness)
              -> crypto::tink::util::StatusOr<google::crypto::tink::KeyData> {
     KeyFormatProto key_format;
-    if (!key_format.ParseFromString(std::string(serialized_key_format))) {
+    if (!key_format.ParseFromString(serialized_key_format)) {
       return crypto::tink::util::Status(
           absl::StatusCode::kInvalidArgument,
           absl::StrCat("Could not parse the passed string as proto '",
