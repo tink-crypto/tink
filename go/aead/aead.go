@@ -23,8 +23,22 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/internal/internalapi"
 	"github.com/google/tink/go/internal/internalregistry"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
+
+// Config is an interface used by key managers and primitive factories to
+// represent the relevant Config functionality.
+//
+// Note that the interface is not public and meant for package-internal use
+// only, despite it being exported.
+//
+// TODO: b/286235179 -- link the implementation.
+type Config interface {
+	RegisterKeyManager(km registry.KeyManager, t internalapi.Token) error
+	PrimitiveFromKeyData(keyData *tinkpb.KeyData, _ internalapi.Token) (any, error)
+}
 
 func init() {
 	if err := registry.RegisterKeyManager(new(aesCTRHMACAEADKeyManager)); err != nil {
