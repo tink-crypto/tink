@@ -138,6 +138,8 @@ class MonitoringClient {
 };
 
 // Interface for a factory class that creates monitoring clients.
+//
+// Implementations of this interface should be thread-safe.
 class MonitoringClientFactory {
  public:
   virtual ~MonitoringClientFactory() = default;

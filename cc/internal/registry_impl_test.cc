@@ -2012,9 +2012,25 @@ TEST_F(RegistryImplTest, CanRegisterOnlyOneMonitoringFactory) {
                   std::move(monitoring_client_factory)),
               IsOk());
   ASSERT_THAT(registry_impl.GetMonitoringClientFactory(), Not(IsNull()));
+  auto another_monitoring_client_factory =
+      absl::make_unique<MockMonitoringClientFactory>();
+  EXPECT_THAT(registry_impl.RegisterMonitoringClientFactory(
+                  std::move(another_monitoring_client_factory)),
+              StatusIs(absl::StatusCode::kAlreadyExists));
+}
+
+TEST_F(RegistryImplTest, CannotRegisterNullFactory) {
+  RegistryImpl registry_impl;
+  EXPECT_THAT(registry_impl.RegisterMonitoringClientFactory(nullptr),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+  auto monitoring_client_factory =
+      absl::make_unique<MockMonitoringClientFactory>();
   EXPECT_THAT(registry_impl.RegisterMonitoringClientFactory(
                   std::move(monitoring_client_factory)),
-              StatusIs(absl::StatusCode::kAlreadyExists));
+              IsOk());
+  ASSERT_THAT(registry_impl.GetMonitoringClientFactory(), Not(IsNull()));
+  EXPECT_THAT(registry_impl.RegisterMonitoringClientFactory(nullptr),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 }  // namespace

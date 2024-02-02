@@ -18,6 +18,8 @@
 #define TINK_INTERNAL_REGISTRY_IMPL_H_
 
 #include <algorithm>
+#include <atomic>
+#include <cstdlib>
 #include <memory>
 #include <string>
 #include <utility>
@@ -58,6 +60,7 @@ class RegistryImpl {
   RegistryImpl() = default;
   RegistryImpl(const RegistryImpl&) = delete;
   RegistryImpl& operator=(const RegistryImpl&) = delete;
+  ~RegistryImpl() { Reset(); }
 
   // Registers the given 'manager' for the key type 'manager->get_key_type()'.
   // Takes ownership of 'manager', which must be non-nullptr. KeyManager is the
@@ -137,10 +140,8 @@ class RegistryImpl {
 
   // Returns a pointer to the registered monitoring factory if any, and nullptr
   // otherwise.
-  crypto::tink::MonitoringClientFactory* GetMonitoringClientFactory() const
-      ABSL_LOCKS_EXCLUDED(monitoring_factory_mutex_) {
-    absl::MutexLock lock(&monitoring_factory_mutex_);
-    return monitoring_factory_.get();
+  crypto::tink::MonitoringClientFactory* GetMonitoringClientFactory() const {
+    return monitoring_factory_.load(std::memory_order_acquire);
   }
 
  private:
@@ -162,9 +163,11 @@ class RegistryImpl {
   // PrimitiveWrapper.
   KeysetWrapperStore keyset_wrapper_store_ ABSL_GUARDED_BY(maps_mutex_);
 
+  // Mutex to protect writes to `monitoring_factory_`.
   mutable absl::Mutex monitoring_factory_mutex_;
-  std::unique_ptr<crypto::tink::MonitoringClientFactory> monitoring_factory_
-      ABSL_GUARDED_BY(monitoring_factory_mutex_);
+  // Owned.
+  std::atomic<crypto::tink::MonitoringClientFactory*> monitoring_factory_{
+      nullptr};
 };
 
 template <class P>

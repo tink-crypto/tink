@@ -16,15 +16,16 @@
 
 #include "tink/internal/registry_impl.h"
 
+#include <atomic>
 #include <functional>
 #include <memory>
-#include <utility>
 
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
 #include "tink/input_stream.h"
+#include "tink/internal/key_type_info_store.h"
 #include "tink/internal/keyset_wrapper_store.h"
 #include "tink/key_manager.h"
 #include "tink/monitoring/monitoring.h"
@@ -101,12 +102,16 @@ util::StatusOr<KeyData> RegistryImpl::DeriveKey(const KeyTemplate& key_template,
 
 util::Status RegistryImpl::RegisterMonitoringClientFactory(
     std::unique_ptr<MonitoringClientFactory> factory) {
+  if (factory == nullptr) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Monitoring factory must not be null");
+  }
   absl::MutexLock lock(&monitoring_factory_mutex_);
-  if (monitoring_factory_ != nullptr) {
+  if (GetMonitoringClientFactory() != nullptr) {
     return util::Status(absl::StatusCode::kAlreadyExists,
                         "A monitoring factory is already registered");
   }
-  monitoring_factory_ = std::move(factory);
+  monitoring_factory_.store(factory.release(), std::memory_order_release);
   return util::OkStatus();
 }
 
@@ -118,7 +123,8 @@ void RegistryImpl::Reset() {
   }
   {
     absl::MutexLock lock(&monitoring_factory_mutex_);
-    monitoring_factory_.reset();
+    MonitoringClientFactory* factory = monitoring_factory_.exchange(nullptr);
+    delete factory;
   }
 }
 
