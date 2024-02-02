@@ -39,10 +39,10 @@ import com.google.crypto.tink.util.SecretBytes;
 import com.google.errorprone.annotations.Immutable;
 import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import javax.annotation.Nullable;
 
 /**
@@ -51,46 +51,67 @@ import javax.annotation.Nullable;
  */
 public final class JwtHmacKeyManager {
   @Immutable
-  private static final class JwtHmac implements JwtMacInternal {
+  private static final class JwtHmac implements JwtMac {
     @SuppressWarnings("Immutable") // Mac objects obtained from PrfMac.create are immutable.
     private final Mac mac;
 
     private final String algorithm;
-    private final Optional<String> customKidFromHmacKey;
+    private final JwtHmacKey jwtHmacKey;
 
-    private JwtHmac(String algorithm, Optional<String> customKidFromHmacKey, HmacKey hmacKey)
-        throws GeneralSecurityException {
-      this.algorithm = algorithm;
-      this.customKidFromHmacKey = customKidFromHmacKey;
-      this.mac = PrfMac.create(hmacKey);
+    private JwtHmac(Mac plainMac, JwtHmacKey jwtHmacKey) {
+      this.algorithm = jwtHmacKey.getParameters().getAlgorithm().getStandardName();
+      this.mac = plainMac;
+      this.jwtHmacKey = jwtHmacKey;
+    }
+
+    private void validateHeader(JsonObject parsedHeader) throws GeneralSecurityException {
+      String receivedAlgorithm = JwtFormat.getStringHeader(parsedHeader, JwtNames.HEADER_ALGORITHM);
+      if (!receivedAlgorithm.equals(this.algorithm)) {
+        throw new InvalidAlgorithmParameterException(
+            String.format(
+                "invalid algorithm; expected %s, got %s", this.algorithm, receivedAlgorithm));
+      }
+      if (parsedHeader.has(JwtNames.HEADER_CRITICAL)) {
+        throw new JwtInvalidException("all tokens with crit headers are rejected");
+      }
+      boolean headerHasKid = parsedHeader.has(JwtNames.HEADER_KEY_ID);
+      if (!headerHasKid && jwtHmacKey.getParameters().allowKidAbsent()) {
+        return;
+      }
+      if (!headerHasKid && !jwtHmacKey.getParameters().allowKidAbsent()) {
+        throw new JwtInvalidException("missing kid in header");
+      }
+      // Header is guaranteed to have a kid at this point.
+      if (!jwtHmacKey.getKid().isPresent()) {
+        // We allow the header to have a kid when the key does not have one (which implies that
+        // KidStrategy = IGNORED)
+        return;
+      }
+      String kid = JwtFormat.getStringHeader(parsedHeader, JwtNames.HEADER_KEY_ID);
+      if (!kid.equals(jwtHmacKey.getKid().get())) {
+        throw new JwtInvalidException("invalid kid in header");
+      }
     }
 
     @Override
-    public String computeMacAndEncodeWithKid(RawJwt rawJwt, Optional<String> kid)
-        throws GeneralSecurityException {
-      if (customKidFromHmacKey.isPresent()) {
-        if (kid.isPresent()) {
-          throw new JwtInvalidException("custom_kid can only be set for RAW keys.");
-        }
-        kid = customKidFromHmacKey;
-      }
-      String unsignedCompact = JwtFormat.createUnsignedCompact(algorithm, kid, rawJwt);
+    public String computeMacAndEncode(RawJwt rawJwt) throws GeneralSecurityException {
+      String unsignedCompact =
+          JwtFormat.createUnsignedCompact(algorithm, jwtHmacKey.getKid(), rawJwt);
       return JwtFormat.createSignedCompact(
           unsignedCompact, mac.computeMac(unsignedCompact.getBytes(US_ASCII)));
     }
 
     @Override
-    public VerifiedJwt verifyMacAndDecodeWithKid(
-        String compact, JwtValidator validator, Optional<String> kid)
+    public VerifiedJwt verifyMacAndDecode(String compact, JwtValidator validator)
         throws GeneralSecurityException {
       JwtFormat.Parts parts = JwtFormat.splitSignedCompact(compact);
       mac.verifyMac(parts.signatureOrMac, parts.unsignedCompact.getBytes(US_ASCII));
       JsonObject parsedHeader = JsonUtil.parseJson(parts.header);
-      JwtFormat.validateHeader(algorithm, kid, customKidFromHmacKey, parsedHeader);
+      validateHeader(parsedHeader);
       RawJwt token = RawJwt.fromJsonPayload(JwtFormat.getTypeHeader(parsedHeader), parts.payload);
       return validator.validate(token);
     }
-  };
+  }
 
   private static void validate(JwtHmacParameters parameters) throws GeneralSecurityException {
     int minKeySize = Integer.MAX_VALUE;
@@ -136,24 +157,16 @@ public final class JwtHmacKeyManager {
     throw new GeneralSecurityException("Unsupported algorithm: " + algorithm);
   }
 
-  private static final KeyManager<JwtMacInternal> legacyKeyManager =
+  private static final KeyManager<JwtMac> legacyKeyManager =
       LegacyKeyManagerImpl.create(
           "type.googleapis.com/google.crypto.tink.JwtHmacKey",
-          JwtMacInternal.class,
+          JwtMac.class,
           KeyMaterialType.SYMMETRIC,
           com.google.crypto.tink.proto.JwtHmacKey.parser());
 
   @AccessesPartialKey
-  private static JwtMacInternal createJwtHmac(JwtHmacKey key) throws GeneralSecurityException {
+  private static JwtMac createFullJwtHmac(JwtHmacKey key) throws GeneralSecurityException {
     validate(key.getParameters());
-    if (key.getParameters()
-        .getKidStrategy()
-        .equals(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)) {
-      throw new GeneralSecurityException(
-          "createJwtHmac cannot be used with key which uses BASE64_ENCODED_KEY_ID -- these must be"
-              + " converted to IGNORED and then the base 64 encoded key id must be passed into the"
-              + " JwtMacInternal interface.");
-    }
     HmacKey hmacKey =
         HmacKey.builder()
             .setParameters(
@@ -164,12 +177,12 @@ public final class JwtHmacKeyManager {
                     .build())
             .setKeyBytes(key.getKeyBytes())
             .build();
-    return new JwtHmac(key.getParameters().getAlgorithm().toString(), key.getKid(), hmacKey);
+    return new JwtHmac(PrfMac.create(hmacKey), key);
   }
 
-  private static final PrimitiveConstructor<JwtHmacKey, JwtMacInternal> PRIMITIVE_CONSTRUCTOR =
+  private static final PrimitiveConstructor<JwtHmacKey, JwtMac> PRIMITIVE_CONSTRUCTOR =
       PrimitiveConstructor.create(
-          JwtHmacKeyManager::createJwtHmac, JwtHmacKey.class, JwtMacInternal.class);
+          JwtHmacKeyManager::createFullJwtHmac, JwtHmacKey.class, JwtMac.class);
 
   static String getKeyType() {
     return "type.googleapis.com/google.crypto.tink.JwtHmacKey";

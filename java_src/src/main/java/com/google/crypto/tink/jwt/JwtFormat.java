@@ -168,7 +168,7 @@ final class JwtFormat {
     return Optional.empty();
   }
 
-  private static String getStringHeader(JsonObject header, String name) throws JwtInvalidException {
+  static String getStringHeader(JsonObject header, String name) throws JwtInvalidException {
     if (!header.has(name)) {
       throw new JwtInvalidException("header " + name + " does not exist");
     }

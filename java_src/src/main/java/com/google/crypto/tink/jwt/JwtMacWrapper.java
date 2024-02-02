@@ -19,59 +19,45 @@ package com.google.crypto.tink.jwt;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
-import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * JwtMacWrapper is the implementation of {@link PrimitiveWrapper} for the {@link JwtMac} primitive.
  */
-class JwtMacWrapper implements PrimitiveWrapper<JwtMacInternal, JwtMac> {
+class JwtMacWrapper implements PrimitiveWrapper<JwtMac, JwtMac> {
 
   private static final JwtMacWrapper WRAPPER = new JwtMacWrapper();
 
-  private static void validate(PrimitiveSet<JwtMacInternal> primitiveSet)
-      throws GeneralSecurityException {
+  private static void validate(PrimitiveSet<JwtMac> primitiveSet) throws GeneralSecurityException {
     if (primitiveSet.getPrimary() == null) {
       throw new GeneralSecurityException("Primitive set has no primary.");
-    }
-    for (List<PrimitiveSet.Entry<JwtMacInternal>> entries : primitiveSet.getAll()) {
-      for (PrimitiveSet.Entry<JwtMacInternal> entry : entries) {
-        if ((entry.getOutputPrefixType() != OutputPrefixType.RAW)
-            && (entry.getOutputPrefixType() != OutputPrefixType.TINK)) {
-          throw new GeneralSecurityException("unsupported OutputPrefixType");
-        }
-      }
     }
   }
 
   @Immutable
   private static class WrappedJwtMac implements JwtMac {
     @SuppressWarnings("Immutable") // We do not mutate the primitive set.
-    private final PrimitiveSet<JwtMacInternal> primitives;
+    private final PrimitiveSet<JwtMac> primitives;
 
-    private WrappedJwtMac(PrimitiveSet<JwtMacInternal> primitives) {
+    private WrappedJwtMac(PrimitiveSet<JwtMac> primitives) {
       this.primitives = primitives;
     }
 
     @Override
     public String computeMacAndEncode(RawJwt token) throws GeneralSecurityException {
-      PrimitiveSet.Entry<JwtMacInternal> entry = primitives.getPrimary();
-      Optional<String> kid = JwtFormat.getKid(entry.getKeyId(), entry.getOutputPrefixType());
-      return entry.getPrimitive().computeMacAndEncodeWithKid(token, kid);
+      return primitives.getPrimary().getFullPrimitive().computeMacAndEncode(token);
     }
 
     @Override
     public VerifiedJwt verifyMacAndDecode(String compact, JwtValidator validator)
         throws GeneralSecurityException {
       GeneralSecurityException interestingException = null;
-      for (List<PrimitiveSet.Entry<JwtMacInternal>> entries : primitives.getAll()) {
-        for (PrimitiveSet.Entry<JwtMacInternal> entry : entries) {
+      for (List<PrimitiveSet.Entry<JwtMac>> entries : primitives.getAll()) {
+        for (PrimitiveSet.Entry<JwtMac> entry : entries) {
           try {
-            Optional<String> kid = JwtFormat.getKid(entry.getKeyId(), entry.getOutputPrefixType());
-            return entry.getPrimitive().verifyMacAndDecodeWithKid(compact, validator, kid);
+            return entry.getFullPrimitive().verifyMacAndDecode(compact, validator);
           } catch (GeneralSecurityException e) {
             if (e instanceof JwtInvalidException) {
               // Keep this exception so that we are able to throw a meaningful message in the end
@@ -91,8 +77,7 @@ class JwtMacWrapper implements PrimitiveWrapper<JwtMacInternal, JwtMac> {
   JwtMacWrapper() {}
 
   @Override
-  public JwtMac wrap(final PrimitiveSet<JwtMacInternal> primitives)
-      throws GeneralSecurityException {
+  public JwtMac wrap(final PrimitiveSet<JwtMac> primitives) throws GeneralSecurityException {
     validate(primitives);
     return new WrappedJwtMac(primitives);
   }
@@ -103,8 +88,8 @@ class JwtMacWrapper implements PrimitiveWrapper<JwtMacInternal, JwtMac> {
   }
 
   @Override
-  public Class<JwtMacInternal> getInputPrimitiveClass() {
-    return JwtMacInternal.class;
+  public Class<JwtMac> getInputPrimitiveClass() {
+    return JwtMac.class;
   }
 
  public static void register() throws GeneralSecurityException {

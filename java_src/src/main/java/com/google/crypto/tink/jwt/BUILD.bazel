@@ -16,17 +16,6 @@ java_library(
 )
 
 java_library(
-    name = "jwt_mac_internal",
-    srcs = ["JwtMacInternal.java"],
-    deps = [
-        ":jwt_validator",
-        ":raw_jwt",
-        ":verified_jwt",
-        "@maven//:com_google_errorprone_error_prone_annotations",
-    ],
-)
-
-java_library(
     name = "jwt_public_key_verify",
     srcs = ["JwtPublicKeyVerify.java"],
     deps = [
@@ -117,7 +106,8 @@ java_library(
         ":jwt_hmac_parameters",
         ":jwt_hmac_proto_serialization",
         ":jwt_invalid_exception",
-        ":jwt_mac_internal",
+        ":jwt_mac",
+        ":jwt_names",
         ":jwt_validator",
         ":raw_jwt",
         ":verified_jwt",
@@ -150,14 +140,11 @@ java_library(
     name = "jwt_mac_wrapper",
     srcs = ["JwtMacWrapper.java"],
     deps = [
-        ":jwt_format",
         ":jwt_invalid_exception",
         ":jwt_mac",
-        ":jwt_mac_internal",
         ":jwt_validator",
         ":raw_jwt",
         ":verified_jwt",
-        "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:primitive_set",
         "//src/main/java/com/google/crypto/tink:primitive_wrapper",
         "//src/main/java/com/google/crypto/tink/internal:mutable_primitive_registry",
@@ -580,17 +567,6 @@ android_library(
 )
 
 android_library(
-    name = "jwt_mac_internal-android",
-    srcs = ["JwtMacInternal.java"],
-    deps = [
-        ":jwt_validator-android",
-        ":raw_jwt-android",
-        ":verified_jwt-android",
-        "@maven//:com_google_errorprone_error_prone_annotations",
-    ],
-)
-
-android_library(
     name = "verified_jwt-android",
     srcs = ["VerifiedJwt.java"],
     deps = [
@@ -633,7 +609,8 @@ android_library(
         ":jwt_hmac_parameters-android",
         ":jwt_hmac_proto_serialization-android",
         ":jwt_invalid_exception-android",
-        ":jwt_mac_internal-android",
+        ":jwt_mac-android",
+        ":jwt_names-android",
         ":jwt_validator-android",
         ":raw_jwt-android",
         ":verified_jwt-android",
@@ -666,14 +643,11 @@ android_library(
     name = "jwt_mac_wrapper-android",
     srcs = ["JwtMacWrapper.java"],
     deps = [
-        ":jwt_format-android",
         ":jwt_invalid_exception-android",
         ":jwt_mac-android",
-        ":jwt_mac_internal-android",
         ":jwt_validator-android",
         ":raw_jwt-android",
         ":verified_jwt-android",
-        "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:primitive_set-android",
         "//src/main/java/com/google/crypto/tink:primitive_wrapper-android",
         "//src/main/java/com/google/crypto/tink/internal:mutable_primitive_registry-android",
