@@ -41,7 +41,7 @@ public final class FakeHcVaultTest {
 
   @Test
   public void testEncryptDecryptWithValidKeyId_success() throws Exception {
-    Logical kms = FakeHcVault.fromURI(KEY_URI);
+    Logical kms = new FakeHcVault();
 
     byte[] plaintext = "plaintext1".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);

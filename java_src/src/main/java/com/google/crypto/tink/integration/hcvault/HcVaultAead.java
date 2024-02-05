@@ -20,8 +20,6 @@ import com.google.crypto.tink.Aead;
 import io.github.jopenlibs.vault.VaultException;
 import io.github.jopenlibs.vault.api.Logical;
 import io.github.jopenlibs.vault.response.LogicalResponse;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Base64;
@@ -32,31 +30,30 @@ import java.util.stream.Collectors;
 /**
  * A {@link Aead} that forwards encryption/decryption requests to a key in <a
  * href="https://www.vaultproject.io/">Hashicorp Vault</a>.
- *
- * @since 1.0.0
  */
 final class HcVaultAead implements Aead {
+  private final String encPath;
+  private final String decPath;
+  private final Logical vaultApi;
 
-  /** This client knows how to talk to Hashicorp Vault. */
-  private final Logical kmsClient;
+  private HcVaultAead(String keyPath, Logical vaultApi) throws GeneralSecurityException {
+    this.encPath = getOperationEndpoint(keyPath, "encrypt");
+    this.decPath = getOperationEndpoint(keyPath, "decrypt");
+    this.vaultApi = vaultApi;
+  }
 
-  // The location of a crypto key in Hashicorp Vault
-  private final String keyUri;
-
-  public HcVaultAead(Logical kmsClient, String keyUri) {
-    this.kmsClient = kmsClient;
-    this.keyUri = keyUri;
+  public static Aead newAead(String keyPath, Logical vaultApi) throws GeneralSecurityException {
+    return new HcVaultAead(keyPath, vaultApi);
   }
 
   @Override
   public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
       throws GeneralSecurityException {
     try {
-      String encPath = getOperationEndpoint(this.keyUri, "encrypt");
       Map<String, Object> content = new HashMap<>();
       content.put("plaintext", Base64.getEncoder().encodeToString(plaintext));
       content.put("context", Base64.getEncoder().encodeToString(associatedData));
-      LogicalResponse resp = kmsClient.write(encPath, content);
+      LogicalResponse resp = vaultApi.write(encPath, content);
       handleResponse(resp);
       return resp.getData().get("ciphertext").getBytes();
     } catch (VaultException e) {
@@ -68,11 +65,10 @@ final class HcVaultAead implements Aead {
   public byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
       throws GeneralSecurityException {
     try {
-      String encPath = getOperationEndpoint(this.keyUri, "decrypt");
       Map<String, Object> content = new HashMap<>();
       content.put("ciphertext", new String(ciphertext));
       content.put("context", Base64.getEncoder().encodeToString(associatedData));
-      LogicalResponse resp = kmsClient.write(encPath, content);
+      LogicalResponse resp = vaultApi.write(decPath, content);
       handleResponse(resp);
       return Base64.getDecoder().decode(resp.getData().get("plaintext").getBytes());
     } catch (VaultException e) {
@@ -80,26 +76,14 @@ final class HcVaultAead implements Aead {
     }
   }
 
-  public static String getOperationEndpoint(String keyUri, String operation)
+  public static String getOperationEndpoint(String keyPath, String operation)
       throws GeneralSecurityException {
-    try {
-      URI u = new URI(keyUri);
-      if (!u.getScheme().equals("hcvault")) {
-        throw new GeneralSecurityException("malformed URL");
-      }
-
-      String[] parts = u.getPath().split("/");
-      if (parts.length < 4 || !parts[parts.length - 2].equals("keys")) {
-        throw new GeneralSecurityException(String.format("malformed URL"));
-      }
-
-      parts[parts.length - 2] = operation;
-      return Arrays.asList(parts).stream().collect(Collectors.joining("/")).replaceFirst("/", "");
-    } catch (URISyntaxException e) {
-      throw new GeneralSecurityException("malformed URL", e);
-    } catch (Exception e) {
-      throw new GeneralSecurityException("unknown exception, keyUri: " + keyUri, e);
+    String[] parts = keyPath.split("/");
+    if (parts.length < 3 || !parts[parts.length - 2].equals("keys")) {
+      throw new GeneralSecurityException(String.format("malformed URL"));
     }
+    parts[parts.length - 2] = operation;
+    return Arrays.asList(parts).stream().collect(Collectors.joining("/")).replaceFirst("/", "");
   }
 
   /* This shouldn't be necessary, but in older versions of the client library failing requests

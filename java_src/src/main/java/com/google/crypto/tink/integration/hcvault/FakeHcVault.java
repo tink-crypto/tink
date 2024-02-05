@@ -38,8 +38,14 @@ final class FakeHcVault extends Logical {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
   private final Aead aead;
 
-  public FakeHcVault(VaultConfig config) {
-    super(config);
+  public FakeHcVault() {
+    super(
+        new VaultConfig()
+            .address("https://hcvault.corp.com:8200")
+            .token(null)
+            .readTimeout(30)
+            .openTimeout(30)
+            .engineVersion(2));
     try {
       aead = KeysetHandle.generateNew(KeyTemplates.get("AES128_GCM")).getPrimitive(Aead.class);
     } catch (GeneralSecurityException e) {
@@ -76,16 +82,5 @@ final class FakeHcVault extends Logical {
       throw new VaultException(e.getMessage());
     }
     return null; // Will never be hit, just for compiler
-  }
-
-  public static FakeHcVault fromURI(String keyUri) {
-    VaultConfig conf =
-        new VaultConfig()
-            .address(keyUri)
-            .token(null)
-            .readTimeout(30)
-            .openTimeout(30)
-            .engineVersion(2);
-    return new FakeHcVault(conf);
   }
 }
