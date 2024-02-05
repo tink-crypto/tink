@@ -19,37 +19,23 @@ package com.google.crypto.tink.jwt;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
-import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.util.List;
-import java.util.Optional;
 
 /** The implementation of {@code PrimitiveWrapper<JwtPublicKeyVerify>}. */
 class JwtPublicKeyVerifyWrapper
-    implements PrimitiveWrapper<JwtPublicKeyVerifyInternal, JwtPublicKeyVerify> {
+    implements PrimitiveWrapper<JwtPublicKeyVerify, JwtPublicKeyVerify> {
 
   private static final JwtPublicKeyVerifyWrapper WRAPPER = new JwtPublicKeyVerifyWrapper();
-
-  private static void validate(PrimitiveSet<JwtPublicKeyVerifyInternal> primitiveSet)
-      throws GeneralSecurityException {
-    for (List<PrimitiveSet.Entry<JwtPublicKeyVerifyInternal>> entries : primitiveSet.getAll()) {
-      for (PrimitiveSet.Entry<JwtPublicKeyVerifyInternal> entry : entries) {
-        if ((entry.getOutputPrefixType() != OutputPrefixType.RAW)
-            && (entry.getOutputPrefixType() != OutputPrefixType.TINK)) {
-          throw new GeneralSecurityException("unsupported OutputPrefixType");
-        }
-      }
-    }
-  }
 
   @Immutable
   private static class WrappedJwtPublicKeyVerify implements JwtPublicKeyVerify {
 
     @SuppressWarnings("Immutable")
-    private final PrimitiveSet<JwtPublicKeyVerifyInternal> primitives;
+    private final PrimitiveSet<JwtPublicKeyVerify> primitives;
 
-    public WrappedJwtPublicKeyVerify(PrimitiveSet<JwtPublicKeyVerifyInternal> primitives) {
+    public WrappedJwtPublicKeyVerify(PrimitiveSet<JwtPublicKeyVerify> primitives) {
       this.primitives = primitives;
     }
 
@@ -57,11 +43,10 @@ class JwtPublicKeyVerifyWrapper
     public VerifiedJwt verifyAndDecode(String compact, JwtValidator validator)
         throws GeneralSecurityException {
       GeneralSecurityException interestingException = null;
-      for (List<PrimitiveSet.Entry<JwtPublicKeyVerifyInternal>> entries : primitives.getAll()) {
-        for (PrimitiveSet.Entry<JwtPublicKeyVerifyInternal> entry : entries) {
+      for (List<PrimitiveSet.Entry<JwtPublicKeyVerify>> entries : primitives.getAll()) {
+        for (PrimitiveSet.Entry<JwtPublicKeyVerify> entry : entries) {
           try {
-            Optional<String> kid = JwtFormat.getKid(entry.getKeyId(), entry.getOutputPrefixType());
-            return entry.getPrimitive().verifyAndDecodeWithKid(compact, validator, kid);
+            return entry.getFullPrimitive().verifyAndDecode(compact, validator);
           } catch (GeneralSecurityException e) {
             if (e instanceof JwtInvalidException) {
               // Keep this exception so that we are able to throw a meaningful message in the end
@@ -79,9 +64,8 @@ class JwtPublicKeyVerifyWrapper
   }
 
   @Override
-  public JwtPublicKeyVerify wrap(final PrimitiveSet<JwtPublicKeyVerifyInternal> primitives)
+  public JwtPublicKeyVerify wrap(final PrimitiveSet<JwtPublicKeyVerify> primitives)
       throws GeneralSecurityException {
-    validate(primitives);
     return new WrappedJwtPublicKeyVerify(primitives);
   }
 
@@ -91,8 +75,8 @@ class JwtPublicKeyVerifyWrapper
   }
 
   @Override
-  public Class<JwtPublicKeyVerifyInternal> getInputPrimitiveClass() {
-    return JwtPublicKeyVerifyInternal.class;
+  public Class<JwtPublicKeyVerify> getInputPrimitiveClass() {
+    return JwtPublicKeyVerify.class;
   }
 
   /**

@@ -17,12 +17,17 @@ package com.google.crypto.tink.jwt;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
+import com.google.crypto.tink.AccessesPartialKey;
+import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.proto.JwtEcdsaAlgorithm;
 import com.google.crypto.tink.proto.JwtEcdsaPublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.signature.EcdsaParameters;
+import com.google.crypto.tink.signature.EcdsaPublicKey;
 import com.google.crypto.tink.subtle.EcdsaVerifyJce;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
@@ -41,6 +46,80 @@ import java.util.Optional;
  * generation.
  */
 class JwtEcdsaVerifyKeyManager extends KeyTypeManager<JwtEcdsaPublicKey> {
+  static EcdsaParameters.CurveType getCurveType(JwtEcdsaParameters parameters)
+      throws GeneralSecurityException {
+    if (parameters.getAlgorithm().equals(JwtEcdsaParameters.Algorithm.ES256)) {
+      return EcdsaParameters.CurveType.NIST_P256;
+    }
+    if (parameters.getAlgorithm().equals(JwtEcdsaParameters.Algorithm.ES384)) {
+      return EcdsaParameters.CurveType.NIST_P384;
+    }
+    if (parameters.getAlgorithm().equals(JwtEcdsaParameters.Algorithm.ES512)) {
+      return EcdsaParameters.CurveType.NIST_P521;
+    }
+    throw new GeneralSecurityException("unknown algorithm in parameters: " + parameters);
+  }
+
+  static EcdsaParameters.HashType getHash(JwtEcdsaParameters parameters)
+      throws GeneralSecurityException {
+    if (parameters.getAlgorithm().equals(JwtEcdsaParameters.Algorithm.ES256)) {
+      return EcdsaParameters.HashType.SHA256;
+    }
+    if (parameters.getAlgorithm().equals(JwtEcdsaParameters.Algorithm.ES384)) {
+      return EcdsaParameters.HashType.SHA384;
+    }
+    if (parameters.getAlgorithm().equals(JwtEcdsaParameters.Algorithm.ES512)) {
+      return EcdsaParameters.HashType.SHA512;
+    }
+    throw new GeneralSecurityException("unknown algorithm in parameters: " + parameters);
+  }
+
+  @AccessesPartialKey
+  static EcdsaPublicKey toEcdsaPublicKey(com.google.crypto.tink.jwt.JwtEcdsaPublicKey publicKey)
+      throws GeneralSecurityException {
+    EcdsaParameters ecdsaParameters =
+        EcdsaParameters.builder()
+            .setSignatureEncoding(EcdsaParameters.SignatureEncoding.IEEE_P1363)
+            .setCurveType(getCurveType(publicKey.getParameters()))
+            .setHashType(getHash(publicKey.getParameters()))
+            .build();
+    return EcdsaPublicKey.builder()
+        .setParameters(ecdsaParameters)
+        .setPublicPoint(publicKey.getPublicPoint())
+        .build();
+  }
+
+  @SuppressWarnings("Immutable") // EcdsaVerifyJce.create returns an immutable verifier.
+  static JwtPublicKeyVerify createFullPrimitive(
+      com.google.crypto.tink.jwt.JwtEcdsaPublicKey publicKey) throws GeneralSecurityException {
+    EcdsaPublicKey ecdsaPublicKey = toEcdsaPublicKey(publicKey);
+    final PublicKeyVerify verifier = EcdsaVerifyJce.create(ecdsaPublicKey);
+
+    return new JwtPublicKeyVerify() {
+      @Override
+      public VerifiedJwt verifyAndDecode(String compact, JwtValidator validator)
+          throws GeneralSecurityException {
+        JwtFormat.Parts parts = JwtFormat.splitSignedCompact(compact);
+        verifier.verify(parts.signatureOrMac, parts.unsignedCompact.getBytes(US_ASCII));
+        JsonObject parsedHeader = JsonUtil.parseJson(parts.header);
+        JwtFormat.validateHeader(
+            parsedHeader,
+            publicKey.getParameters().getAlgorithm().getStandardName(),
+            publicKey.getKid(),
+            publicKey.getParameters().allowKidAbsent());
+        RawJwt token = RawJwt.fromJsonPayload(JwtFormat.getTypeHeader(parsedHeader), parts.payload);
+        return validator.validate(token);
+      }
+    };
+  }
+
+  static final PrimitiveConstructor<
+          com.google.crypto.tink.jwt.JwtEcdsaPublicKey, JwtPublicKeyVerify>
+      PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              JwtEcdsaVerifyKeyManager::createFullPrimitive,
+              com.google.crypto.tink.jwt.JwtEcdsaPublicKey.class,
+              JwtPublicKeyVerify.class);
 
   static final EllipticCurves.CurveType getCurve(JwtEcdsaAlgorithm algorithm)
       throws GeneralSecurityException {
