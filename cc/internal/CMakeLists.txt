@@ -833,6 +833,7 @@ tink_cc_library(
     tink::core::registry
     tink::core::restricted_data
     tink::core::secret_key_access_token
+    tink::util::secret_proto
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
@@ -865,6 +866,7 @@ tink_cc_test(
     tink::mac::aes_cmac_key
     tink::mac::aes_cmac_parameters
     tink::mac::mac_key_templates
+    tink::util::secret_proto
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers

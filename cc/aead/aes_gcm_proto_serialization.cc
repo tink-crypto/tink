@@ -32,6 +32,8 @@
 #include "tink/partial_key_access.h"
 #include "tink/restricted_data.h"
 #include "tink/secret_key_access_token.h"
+#include "tink/util/secret_data.h"
+#include "tink/util/secret_proto.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/aes_gcm.pb.h"
@@ -41,6 +43,8 @@ namespace crypto {
 namespace tink {
 namespace {
 
+using ::crypto::tink::util::SecretData;
+using ::crypto::tink::util::SecretProto;
 using ::google::crypto::tink::AesGcmKeyFormat;
 using ::google::crypto::tink::OutputPrefixType;
 
@@ -165,15 +169,13 @@ util::StatusOr<AesGcmKey> ParseKey(
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "SecretKeyAccess is required");
   }
-  google::crypto::tink::AesGcmKey proto_key;
+  SecretProto<google::crypto::tink::AesGcmKey> proto_key;
   RestrictedData restricted_data = serialization.SerializedKeyProto();
-  // OSS proto library complains if input is not converted to a string.
-  if (!proto_key.ParseFromString(
-          std::string(restricted_data.GetSecret(*token)))) {
+  if (!proto_key->ParseFromString(restricted_data.GetSecret(*token))) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Failed to parse AesGcmKey proto");
   }
-  if (proto_key.version() != 0) {
+  if (proto_key->version() != 0) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Only version 0 keys are accepted.");
   }
@@ -187,14 +189,14 @@ util::StatusOr<AesGcmKey> ParseKey(
   util::StatusOr<AesGcmParameters> parameters =
       AesGcmParameters::Builder()
           .SetVariant(*variant)
-          .SetKeySizeInBytes(proto_key.key_value().length())
+          .SetKeySizeInBytes(proto_key->key_value().length())
           .SetIvSizeInBytes(12)
           .SetTagSizeInBytes(16)
           .Build();
   if (!parameters.ok()) return parameters.status();
 
   return AesGcmKey::Create(
-      *parameters, RestrictedData(proto_key.key_value(), *token),
+      *parameters, RestrictedData(proto_key->key_value(), *token),
       serialization.IdRequirement(), GetPartialKeyAccess());
 }
 
@@ -211,17 +213,20 @@ util::StatusOr<internal::ProtoKeySerialization> SerializeKey(
                         "SecretKeyAccess is required");
   }
 
-  google::crypto::tink::AesGcmKey proto_key;
-  proto_key.set_version(0);
-  // OSS proto library complains if input is not converted to a string.
-  proto_key.set_key_value(std::string(restricted_input->GetSecret(*token)));
+  SecretProto<google::crypto::tink::AesGcmKey> proto_key;
+  proto_key->set_version(0);
+  proto_key->set_key_value(restricted_input->GetSecret(*token));
 
   util::StatusOr<OutputPrefixType> output_prefix_type =
       ToOutputPrefixType(key.GetParameters().GetVariant());
   if (!output_prefix_type.ok()) return output_prefix_type.status();
 
+  util::StatusOr<SecretData> serialized_key = proto_key.SerializeAsSecretData();
+  if (!serialized_key.ok()) {
+    return serialized_key.status();
+  }
   RestrictedData restricted_output =
-      RestrictedData(proto_key.SerializeAsString(), *token);
+      RestrictedData(util::SecretDataAsStringView(*serialized_key), *token);
   return internal::ProtoKeySerialization::Create(
       kTypeUrl, restricted_output, google::crypto::tink::KeyData::SYMMETRIC,
       *output_prefix_type, key.GetIdRequirement());

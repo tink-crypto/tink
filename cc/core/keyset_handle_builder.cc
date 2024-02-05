@@ -170,10 +170,11 @@ util::StatusOr<KeysetHandle> KeysetHandleBuilder::Build() {
     }
     ids_so_far.insert(*id);
 
-    util::StatusOr<Keyset::Key> key = entry.CreateKeysetKey(*id);
+    util::StatusOr<util::SecretProto<Keyset::Key>> key =
+        entry.CreateKeysetKey(*id);
     if (!key.ok()) return key.status();
 
-    *keyset->add_key() = *key;
+    *keyset->add_key() = **key;
     if (entry.IsPrimary()) {
       if (primary_id.has_value()) {
         return util::Status(

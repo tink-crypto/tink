@@ -40,6 +40,7 @@
 #include "tink/partial_key_access.h"
 #include "tink/restricted_data.h"
 #include "tink/secret_key_access_token.h"
+#include "tink/util/secret_proto.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -137,15 +138,16 @@ TEST_F(CreateKeysetKeyTest, CreateKeysetKeyFromParameters) {
       ParametersEntry(absl::make_unique<LegacyProtoParameters>(*parameters));
   entry.SetStatus(KeyStatus::kEnabled);
   entry.SetFixedId(123);
-  util::StatusOr<Keyset::Key> keyset_key = entry.CreateKeysetKey(/*id=*/123);
+  util::StatusOr<util::SecretProto<Keyset::Key>> keyset_key =
+      entry.CreateKeysetKey(/*id=*/123);
   ASSERT_THAT(keyset_key, IsOk());
 
-  EXPECT_THAT(keyset_key->status(), Eq(KeyStatusType::ENABLED));
-  EXPECT_THAT(keyset_key->key_id(), Eq(123));
+  EXPECT_THAT((*keyset_key)->status(), Eq(KeyStatusType::ENABLED));
+  EXPECT_THAT((*keyset_key)->key_id(), Eq(123));
   EXPECT_THAT(
-      keyset_key->output_prefix_type(),
+      (*keyset_key)->output_prefix_type(),
       Eq(parameters->Serialization().GetKeyTemplate().output_prefix_type()));
-  EXPECT_THAT(keyset_key->key_data().type_url(),
+  EXPECT_THAT((*keyset_key)->key_data().type_url(),
               Eq(parameters->Serialization().GetKeyTemplate().type_url()));
 }
 
@@ -158,7 +160,8 @@ TEST_F(CreateKeysetKeyTest, CreateKeysetKeyFromParametersWithDifferentKeyId) {
       ParametersEntry(absl::make_unique<LegacyProtoParameters>(*parameters));
   entry.SetStatus(KeyStatus::kEnabled);
   entry.SetFixedId(123);
-  util::StatusOr<Keyset::Key> keyset_key = entry.CreateKeysetKey(/*id=*/456);
+  util::StatusOr<util::SecretProto<Keyset::Key>> keyset_key =
+      entry.CreateKeysetKey(/*id=*/456);
   EXPECT_THAT(keyset_key.status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
 }
@@ -179,16 +182,17 @@ TEST_F(CreateKeysetKeyTest, CreateKeysetKeyFromKey) {
   KeyEntry entry = KeyEntry(absl::make_unique<LegacyProtoKey>(*key));
   entry.SetStatus(KeyStatus::kEnabled);
   entry.SetFixedId(123);
-  util::StatusOr<Keyset::Key> keyset_key = entry.CreateKeysetKey(/*id=*/123);
+  util::StatusOr<util::SecretProto<Keyset::Key>> keyset_key =
+      entry.CreateKeysetKey(/*id=*/123);
   ASSERT_THAT(keyset_key, IsOk());
 
-  EXPECT_THAT(keyset_key->status(), Eq(KeyStatusType::ENABLED));
-  EXPECT_THAT(keyset_key->key_id(), Eq(123));
-  EXPECT_THAT(keyset_key->output_prefix_type(), OutputPrefixType::TINK);
-  EXPECT_THAT(keyset_key->key_data().type_url(), Eq("type_url"));
-  EXPECT_THAT(keyset_key->key_data().key_material_type(),
+  EXPECT_THAT((*keyset_key)->status(), Eq(KeyStatusType::ENABLED));
+  EXPECT_THAT((*keyset_key)->key_id(), Eq(123));
+  EXPECT_THAT((*keyset_key)->output_prefix_type(), OutputPrefixType::TINK);
+  EXPECT_THAT((*keyset_key)->key_data().type_url(), Eq("type_url"));
+  EXPECT_THAT((*keyset_key)->key_data().key_material_type(),
               Eq(KeyData::SYMMETRIC));
-  EXPECT_THAT(keyset_key->key_data().value(), Eq("serialized_key"));
+  EXPECT_THAT((*keyset_key)->key_data().value(), Eq("serialized_key"));
 }
 
 TEST_F(CreateKeysetKeyTest, CreateKeysetKeyFromKeyWithDifferentEntryKeyId) {
@@ -207,7 +211,8 @@ TEST_F(CreateKeysetKeyTest, CreateKeysetKeyFromKeyWithDifferentEntryKeyId) {
   KeyEntry entry = KeyEntry(absl::make_unique<LegacyProtoKey>(*key));
   entry.SetStatus(KeyStatus::kEnabled);
   entry.SetFixedId(123);
-  util::StatusOr<Keyset::Key> keyset_key = entry.CreateKeysetKey(/*id=*/456);
+  util::StatusOr<util::SecretProto<Keyset::Key>> keyset_key =
+      entry.CreateKeysetKey(/*id=*/456);
   EXPECT_THAT(keyset_key.status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
 }
@@ -228,7 +233,8 @@ TEST_F(CreateKeysetKeyTest,
 
   KeyEntry entry = KeyEntry(absl::make_unique<LegacyProtoKey>(*key));
   entry.SetStatus(KeyStatus::kEnabled);
-  util::StatusOr<Keyset::Key> keyset_key = entry.CreateKeysetKey(/*id=*/456);
+  util::StatusOr<util::SecretProto<Keyset::Key>> keyset_key =
+      entry.CreateKeysetKey(/*id=*/456);
   EXPECT_THAT(keyset_key.status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
 }

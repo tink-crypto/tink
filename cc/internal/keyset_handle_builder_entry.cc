@@ -35,6 +35,7 @@
 #include "tink/registry.h"
 #include "tink/restricted_data.h"
 #include "tink/secret_key_access_token.h"
+#include "tink/util/secret_proto.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -44,23 +45,22 @@ namespace tink {
 namespace internal {
 namespace {
 
+using ::crypto::tink::util::SecretProto;
 using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::Keyset;
 using ::google::crypto::tink::KeyStatusType;
 
-Keyset::Key ToKeysetKey(int id, KeyStatusType status,
-                        const ProtoKeySerialization& serialization) {
-  KeyData key_data;
-  key_data.set_type_url(std::string(serialization.TypeUrl()));
-  // OSS proto library complains if serialized key is not converted to string.
-  key_data.set_value(std::string(serialization.SerializedKeyProto().GetSecret(
-      InsecureSecretKeyAccess::Get())));
-  key_data.set_key_material_type(serialization.KeyMaterialType());
-  Keyset::Key key;
-  key.set_status(status);
-  key.set_key_id(id);
-  key.set_output_prefix_type(serialization.GetOutputPrefixType());
-  *key.mutable_key_data() = key_data;
+SecretProto<Keyset::Key> ToKeysetKey(
+    int id, KeyStatusType status, const ProtoKeySerialization& serialization) {
+  SecretProto<Keyset::Key> key;
+  key->set_status(status);
+  key->set_key_id(id);
+  key->set_output_prefix_type(serialization.GetOutputPrefixType());
+  KeyData* key_data = key->mutable_key_data();
+  key_data->set_type_url(std::string(serialization.TypeUrl()));
+  key_data->set_value(serialization.SerializedKeyProto().GetSecret(
+      InsecureSecretKeyAccess::Get()));
+  key_data->set_key_material_type(serialization.KeyMaterialType());
   return key;
 }
 
@@ -122,24 +122,27 @@ util::StatusOr<ProtoKeySerialization> SerializeLegacyKey(const Key* key) {
   return **serialized_key;
 }
 
-util::StatusOr<Keyset::Key> CreateKeysetKeyFromProtoParametersSerialization(
+util::StatusOr<SecretProto<Keyset::Key>>
+CreateKeysetKeyFromProtoParametersSerialization(
     const ProtoParametersSerialization& serialization, int id,
     KeyStatusType status) {
+  // TODO(tholenst): ensure this doesn't leak.
   util::StatusOr<std::unique_ptr<KeyData>> key_data =
       Registry::NewKeyData(serialization.GetKeyTemplate());
   if (!key_data.ok()) return key_data.status();
 
-  Keyset::Key key;
-  key.set_status(status);
-  key.set_key_id(id);
-  key.set_output_prefix_type(
+  SecretProto<Keyset::Key> key;
+  key->set_status(status);
+  key->set_key_id(id);
+  key->set_output_prefix_type(
       serialization.GetKeyTemplate().output_prefix_type());
-  *key.mutable_key_data() = **key_data;
+  *key->mutable_key_data() = **key_data;
   return key;
 }
 
-util::StatusOr<Keyset::Key> CreateKeysetKeyFromProtoKeySerialization(
-    const ProtoKeySerialization& key, int id, KeyStatusType status) {
+util::StatusOr<SecretProto<Keyset::Key>>
+CreateKeysetKeyFromProtoKeySerialization(const ProtoKeySerialization& key,
+                                         int id, KeyStatusType status) {
   absl::optional<int> id_requirement = key.IdRequirement();
   if (id_requirement.has_value() && *id_requirement != id) {
     return util::Status(absl::StatusCode::kInvalidArgument,
@@ -160,7 +163,7 @@ void KeysetHandleBuilderEntry::SetRandomId() {
   strategy_.id_requirement = absl::nullopt;
 }
 
-util::StatusOr<Keyset::Key> KeyEntry::CreateKeysetKey(int id) {
+util::StatusOr<SecretProto<Keyset::Key>> KeyEntry::CreateKeysetKey(int id) {
   util::StatusOr<KeyStatusType> key_status = ToKeyStatusType(key_status_);
   if (!key_status.ok()) return key_status.status();
 
@@ -185,7 +188,8 @@ util::StatusOr<Keyset::Key> KeyEntry::CreateKeysetKey(int id) {
                                                   *key_status);
 }
 
-util::StatusOr<Keyset::Key> ParametersEntry::CreateKeysetKey(int id) {
+util::StatusOr<SecretProto<Keyset::Key>> ParametersEntry::CreateKeysetKey(
+    int id) {
   util::StatusOr<KeyStatusType> key_status = ToKeyStatusType(key_status_);
   if (!key_status.ok()) return key_status.status();
 

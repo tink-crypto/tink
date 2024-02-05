@@ -492,6 +492,8 @@ tink_cc_library(
     tink::internal::keyset_handle_builder_entry
     tink::subtle::random
     tink::util::secret_proto
+    tink::util::status
+    tink::util::statusor
     tink::proto::tink_cc_proto
 )
 

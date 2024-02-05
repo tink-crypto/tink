@@ -24,6 +24,7 @@
 #include "tink/key.h"
 #include "tink/key_status.h"
 #include "tink/parameters.h"
+#include "tink/util/secret_proto.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
@@ -76,7 +77,8 @@ class KeysetHandleBuilderEntry {
 
   // Creates a Keyset::Key proto with the specified key `id` from either a
   // `Key` object or a `Parameters` object.
-  virtual crypto::tink::util::StatusOr<google::crypto::tink::Keyset::Key>
+  virtual crypto::tink::util::StatusOr<
+      crypto::tink::util::SecretProto<google::crypto::tink::Keyset::Key>>
   CreateKeysetKey(int id) = 0;
 
  protected:
@@ -99,7 +101,8 @@ class KeyEntry : public KeysetHandleBuilderEntry {
 
   explicit KeyEntry(std::shared_ptr<const Key> key) : key_(std::move(key)) {}
 
-  crypto::tink::util::StatusOr<google::crypto::tink::Keyset::Key>
+  crypto::tink::util::StatusOr<
+      crypto::tink::util::SecretProto<google::crypto::tink::Keyset::Key>>
   CreateKeysetKey(int id) override;
 
  private:
@@ -118,7 +121,8 @@ class ParametersEntry : public KeysetHandleBuilderEntry {
   explicit ParametersEntry(std::shared_ptr<const Parameters> parameters)
       : parameters_(std::move(parameters)) {}
 
-  crypto::tink::util::StatusOr<google::crypto::tink::Keyset::Key>
+  crypto::tink::util::StatusOr<
+      crypto::tink::util::SecretProto<google::crypto::tink::Keyset::Key>>
   CreateKeysetKey(int id) override;
 
  private:

@@ -23,11 +23,15 @@
 #include <utility>
 #include <vector>
 
+#include "absl/types/optional.h"
 #include "tink/internal/keyset_handle_builder_entry.h"
 #include "tink/key.h"
 #include "tink/key_status.h"
 #include "tink/keyset_handle.h"
 #include "tink/parameters.h"
+#include "tink/util/secret_proto.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -117,7 +121,8 @@ class KeysetHandleBuilder {
       return entry_->GetKeyIdStrategy();
     }
 
-    crypto::tink::util::StatusOr<google::crypto::tink::Keyset::Key>
+    crypto::tink::util::StatusOr<
+        crypto::tink::util::SecretProto<google::crypto::tink::Keyset::Key>>
     CreateKeysetKey(int id) {
       return entry_->CreateKeysetKey(id);
     }

@@ -107,7 +107,7 @@ util::Status ValidateNoSecret(const Keyset& keyset) {
 }
 
 util::StatusOr<internal::ProtoKeySerialization> ToProtoKeySerialization(
-    Keyset::Key key) {
+    const Keyset::Key& key) {
   absl::optional<int> id_requirement = absl::nullopt;
   if (key.output_prefix_type() != OutputPrefixType::RAW) {
     id_requirement = key.key_id();
