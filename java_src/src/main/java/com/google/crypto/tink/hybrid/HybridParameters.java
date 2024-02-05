@@ -17,7 +17,6 @@
 package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.Parameters;
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.errorprone.annotations.Immutable;
 
 /**
@@ -25,5 +24,4 @@ import com.google.errorprone.annotations.Immutable;
  * HybridPublicKey} excluding the randomly chosen key material.
  */
 @Immutable
-@Alpha
 public abstract class HybridParameters extends Parameters {}

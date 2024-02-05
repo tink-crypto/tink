@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.internal.EllipticCurvesUtil;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
@@ -24,13 +23,7 @@ import java.security.GeneralSecurityException;
 import java.security.spec.ECParameterSpec;
 import java.util.Objects;
 
-/**
- * Describes the parameters of an ECDSA signature primitive.
- *
- * <p>This API is annotated with Alpha because it is not yet stable and might be changed in the
- * future.
- */
-@Alpha
+/** Describes the parameters of an ECDSA signature primitive. */
 public final class EcdsaParameters extends SignatureParameters {
   /**
    * Describes details of the ECDSA signature computation.

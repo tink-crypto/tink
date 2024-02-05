@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.prf;
 
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
@@ -24,13 +23,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
-/**
- * Describes the parameters of an {@link HmacPrfKey}.
- *
- * <p>This API is annotated with {@link com.google.crypto.tink.annotations.Alpha} because it is not
- * yet stable and might change in the future.
- */
-@Alpha
+/** Describes the parameters of an {@link HmacPrfKey}. */
 public final class HmacPrfParameters extends PrfParameters {
   private static final int MIN_KEY_SIZE = 16;
 

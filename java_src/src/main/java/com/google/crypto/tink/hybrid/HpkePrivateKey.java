@@ -19,7 +19,6 @@ package com.google.crypto.tink.hybrid;
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Key;
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.internal.BigIntegerEncoding;
 import com.google.crypto.tink.internal.EllipticCurvesUtil;
 import com.google.crypto.tink.subtle.EllipticCurves;
@@ -34,7 +33,6 @@ import java.security.spec.ECPoint;
 import java.util.Arrays;
 
 /** Representation of the decryption function for an HPKE hybrid encryption primitive. */
-@Alpha
 @Immutable
 public final class HpkePrivateKey extends HybridPrivateKey {
   private final HpkePublicKey publicKey;

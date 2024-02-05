@@ -17,15 +17,11 @@
 package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.Key;
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
 
-/**
- * A SignaturePublicKey represents the verification portion of a digital signature primitive.
- */
+/** A SignaturePublicKey represents the verification portion of a digital signature primitive. */
 @Immutable
-@Alpha
 public abstract class SignaturePublicKey extends Key {
   /**
    * Returns a {@link Bytes} instance which is prefixed to every signature.

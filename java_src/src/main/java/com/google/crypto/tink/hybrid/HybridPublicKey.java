@@ -17,15 +17,11 @@
 package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.Key;
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
 
-/**
- * Representation of the encryption function for a hybrid encryption primitive.
- */
+/** Representation of the encryption function for a hybrid encryption primitive. */
 @Immutable
-@Alpha
 public abstract class HybridPublicKey extends Key {
   /**
    * Returns a {@link Bytes} instance, which is prefixed to every ciphertext.

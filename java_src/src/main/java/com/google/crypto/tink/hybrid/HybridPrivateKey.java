@@ -18,7 +18,6 @@ package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.PrivateKey;
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
 import javax.annotation.Nullable;
@@ -29,7 +28,6 @@ import javax.annotation.Nullable;
  * <p>The encryption function is available via {@link #getPublicKey}.
  */
 @Immutable
-@Alpha
 public abstract class HybridPrivateKey extends Key implements PrivateKey {
   @Override
   public abstract HybridPublicKey getPublicKey();

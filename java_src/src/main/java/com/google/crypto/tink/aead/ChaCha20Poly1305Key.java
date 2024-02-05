@@ -18,7 +18,6 @@ package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Key;
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.errorprone.annotations.Immutable;
@@ -35,7 +34,6 @@ import javax.annotation.Nullable;
  * However, Tink allows prefixing every ciphertext with an ID-dependent prefix, see {@link
  * ChaCha20Poly1305Parameters.Variant}.
  */
-@Alpha
 @Immutable
 public final class ChaCha20Poly1305Key extends AeadKey {
   private final ChaCha20Poly1305Parameters parameters;

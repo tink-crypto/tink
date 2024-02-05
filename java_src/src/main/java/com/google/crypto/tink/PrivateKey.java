@@ -16,14 +16,11 @@
 
 package com.google.crypto.tink;
 
-import com.google.crypto.tink.annotations.Alpha;
-
 /**
  * Interface to be implemented by all private keys, that gives access to the public key.
  *
  * <p>Note that in Tink, a private key always includes the public key.
  */
-@Alpha
 public interface PrivateKey {
 
   public Key getPublicKey();

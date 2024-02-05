@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink;
 
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.errorprone.annotations.Immutable;
 
 /**
@@ -26,7 +25,6 @@ import com.google.errorprone.annotations.Immutable;
  * the information about the function which is not randomly chosen with each instance.
  */
 @Immutable
-@Alpha
 public abstract class Parameters {
   /**
    * Returns true if a key created with the parameters in this object has to have a certain ID when

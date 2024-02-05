@@ -18,7 +18,6 @@ package com.google.crypto.tink.prf;
 
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Key;
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
@@ -26,13 +25,7 @@ import com.google.errorprone.annotations.RestrictedApi;
 import java.security.GeneralSecurityException;
 import javax.annotation.Nullable;
 
-/**
- * Represents a key computing HMAC PRF.
- *
- * <p>This API is annotated with {@link com.google.crypto.tink.annotations.Alpha} because it is not
- * yet stable and might change in the future.
- */
-@Alpha
+/** Represents a key computing HMAC PRF. */
 @Immutable
 public final class HmacPrfKey extends PrfKey {
   private final HmacPrfParameters parameters;

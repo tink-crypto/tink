@@ -19,7 +19,6 @@ package com.google.crypto.tink.signature;
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Key;
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.util.SecretBigInteger;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.RestrictedApi;
@@ -31,11 +30,7 @@ import javax.annotation.Nullable;
  * Represents a private key for RSA SSA PKCS1 signatures.
  *
  * <p>Standard: https://www.rfc-editor.org/rfc/rfc8017#section-3.2.
- *
- * <p>This API is annotated with Alpha because it is not yet stable and might be changed in the
- * future.
  */
-@Alpha
 public final class RsaSsaPkcs1PrivateKey extends SignaturePrivateKey {
   private final RsaSsaPkcs1PublicKey publicKey;
   private final SecretBigInteger d;

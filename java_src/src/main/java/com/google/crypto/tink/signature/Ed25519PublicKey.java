@@ -18,7 +18,6 @@ package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Key;
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.RestrictedApi;
@@ -27,13 +26,7 @@ import java.security.GeneralSecurityException;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
-/**
- * Ed25519PublicKey represents the public portion of the Ed25519 signature primitive.
- *
- * <p>This API is annotated with Alpha because it is not yet stable and might be changed in the
- * future.
- */
-@Alpha
+/** Ed25519PublicKey represents the public portion of the Ed25519 signature primitive. */
 @Immutable
 public final class Ed25519PublicKey extends SignaturePublicKey {
   private final Ed25519Parameters parameters;

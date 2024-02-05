@@ -18,7 +18,6 @@ package com.google.crypto.tink.daead;
 
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Key;
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -32,11 +31,7 @@ import javax.annotation.Nullable;
 /**
  * Represents an AES--SIV key used for computing deterministic AEAD, as described in
  * https://www.rfc-editor.org/rfc/rfc5297.
- *
- * <p>This API is annotated with Alpha because it is not yet stable and might be changed in the
- * future.
  */
-@Alpha
 @Immutable
 public final class AesSivKey extends DeterministicAeadKey {
   private final AesSivParameters parameters;

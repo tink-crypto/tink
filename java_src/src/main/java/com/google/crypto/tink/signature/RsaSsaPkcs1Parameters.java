@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import java.math.BigInteger;
@@ -29,11 +28,7 @@ import javax.annotation.Nullable;
  * Describes the parameters of a {@link RsaSsaPkcs1PublicKey} and {@link RsaSsaPkcs1PrivateKey}.
  *
  * <p>Standard: https://www.rfc-editor.org/rfc/rfc8017.txt
- *
- * <p>This API is annotated with Alpha because it is not yet stable and might be changed in the
- * future.
  */
-@Alpha
 public final class RsaSsaPkcs1Parameters extends SignatureParameters {
   /**
    * Describes details of the signature.

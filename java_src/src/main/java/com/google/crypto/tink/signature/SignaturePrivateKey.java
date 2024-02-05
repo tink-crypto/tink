@@ -18,7 +18,6 @@ package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.PrivateKey;
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
 import javax.annotation.Nullable;
@@ -30,7 +29,6 @@ import javax.annotation.Nullable;
  * <p>The verify function is only available indirectly, with {@link #getPublicKey}.
  */
 @Immutable
-@Alpha
 public abstract class SignaturePrivateKey extends Key implements PrivateKey {
   /**
    * Returns the {@link SignaturePublicKey}, which contains the verify function of the digital

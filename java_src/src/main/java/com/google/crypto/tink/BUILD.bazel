@@ -701,7 +701,6 @@ java_library(
     srcs = ["Key.java"],
     deps = [
         ":parameters",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
@@ -712,7 +711,6 @@ android_library(
     srcs = ["Key.java"],
     deps = [
         ":parameters-android",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
@@ -721,37 +719,25 @@ android_library(
 java_library(
     name = "private_key",
     srcs = ["PrivateKey.java"],
-    deps = [
-        ":key",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha",
-    ],
+    deps = [":key"],
 )
 
 android_library(
     name = "private_key-android",
     srcs = ["PrivateKey.java"],
-    deps = [
-        ":key-android",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
-    ],
+    deps = [":key-android"],
 )
 
 java_library(
     name = "parameters",
     srcs = ["Parameters.java"],
-    deps = [
-        "//src/main/java/com/google/crypto/tink/annotations:alpha",
-        "@maven//:com_google_errorprone_error_prone_annotations",
-    ],
+    deps = ["@maven//:com_google_errorprone_error_prone_annotations"],
 )
 
 android_library(
     name = "parameters-android",
     srcs = ["Parameters.java"],
-    deps = [
-        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
-        "@maven//:com_google_errorprone_error_prone_annotations",
-    ],
+    deps = ["@maven//:com_google_errorprone_error_prone_annotations"],
 )
 
 android_library(

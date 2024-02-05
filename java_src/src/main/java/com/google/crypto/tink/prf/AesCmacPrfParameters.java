@@ -16,18 +16,11 @@
 
 package com.google.crypto.tink.prf;
 
-import com.google.crypto.tink.annotations.Alpha;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.Objects;
 
-/**
- * Describes the parameters of an {@link AesCmacPrfKey}.
- *
- * <p>This API is annotated with {@link com.google.crypto.tink.annotations.Alpha} because it is not
- * yet stable and might change in the future.
- */
-@Alpha
+/** Describes the parameters of an {@link AesCmacPrfKey}. */
 public final class AesCmacPrfParameters extends PrfParameters {
   public static AesCmacPrfParameters create(int keySizeBytes) throws GeneralSecurityException {
     if (keySizeBytes != 16 && keySizeBytes != 32) {

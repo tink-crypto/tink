@@ -18,7 +18,6 @@ package com.google.crypto.tink.mac;
 
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Key;
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -29,13 +28,7 @@ import java.security.GeneralSecurityException;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
-/**
- * Represents a key computing HMAC.
- *
- * <p>This API is annotated with Alpha because it is not yet stable and might be changed in the
- * future.
- */
-@Alpha
+/** Represents a key computing HMAC. */
 @Immutable
 public final class HmacKey extends MacKey {
   private final HmacParameters parameters;

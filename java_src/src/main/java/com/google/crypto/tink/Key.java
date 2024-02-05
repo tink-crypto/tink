@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink;
 
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.errorprone.annotations.Immutable;
 import javax.annotation.Nullable;
 
@@ -35,7 +34,6 @@ import javax.annotation.Nullable;
  * dependencies need to be kept at a minimum.
  */
 @Immutable
-@Alpha
 public abstract class Key {
   /**
    * Returns a {@link Parameters} object containing all the information about the key which is not

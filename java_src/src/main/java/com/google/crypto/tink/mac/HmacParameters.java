@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.mac;
 
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
@@ -24,13 +23,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
-/**
- * Describes the parameters of an {@link HmacKey}.
- *
- * <p>This API is annotated with Alpha because it is not yet stable and might be changed in the
- * future.
- */
-@Alpha
+/** Describes the parameters of an {@link HmacKey}. */
 public final class HmacParameters extends MacParameters {
   /**
    * Describes details of the mac computation.

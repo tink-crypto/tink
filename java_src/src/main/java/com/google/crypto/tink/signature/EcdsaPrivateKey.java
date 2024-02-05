@@ -19,7 +19,6 @@ package com.google.crypto.tink.signature;
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Key;
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.internal.EllipticCurvesUtil;
 import com.google.crypto.tink.util.SecretBigInteger;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -33,11 +32,7 @@ import java.security.spec.ECPoint;
  * Represents a key for computing ECDSA signatures.
  *
  * <p>ECDSA is defined in http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf, section 6.
- *
- * <p>This API is annotated with Alpha because it is not yet stable and might be changed in the
- * future.
  */
-@Alpha
 @Immutable
 public final class EcdsaPrivateKey extends SignaturePrivateKey {
   private final EcdsaPublicKey publicKey;

@@ -18,7 +18,6 @@ package com.google.crypto.tink.jwt;
 
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.PrivateKey;
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.errorprone.annotations.Immutable;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -28,7 +27,6 @@ import javax.annotation.Nullable;
  * JwtPublicKeySign} interface).
  */
 @Immutable
-@Alpha
 public abstract class JwtSignaturePrivateKey extends Key implements PrivateKey {
   @Override
   public abstract JwtSignaturePublicKey getPublicKey();

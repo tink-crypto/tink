@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.prf;
 
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
@@ -25,13 +24,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
-/**
- * Describes the parameters of an {@link HkdfPrfKey}.
- *
- * <p>This API is annotated with {@link com.google.crypto.tink.annotations.Alpha} because it is not
- * yet stable and might change in the future.
- */
-@Alpha
+/** Describes the parameters of an {@link HkdfPrfKey}. */
 public final class HkdfPrfParameters extends PrfParameters {
   private static final int MIN_KEY_SIZE = 16;
 
