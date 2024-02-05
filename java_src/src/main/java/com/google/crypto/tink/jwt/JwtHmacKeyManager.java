@@ -39,7 +39,6 @@ import com.google.crypto.tink.util.SecretBytes;
 import com.google.errorprone.annotations.Immutable;
 import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
-import java.security.InvalidAlgorithmParameterException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,35 +63,6 @@ public final class JwtHmacKeyManager {
       this.jwtHmacKey = jwtHmacKey;
     }
 
-    private void validateHeader(JsonObject parsedHeader) throws GeneralSecurityException {
-      String receivedAlgorithm = JwtFormat.getStringHeader(parsedHeader, JwtNames.HEADER_ALGORITHM);
-      if (!receivedAlgorithm.equals(this.algorithm)) {
-        throw new InvalidAlgorithmParameterException(
-            String.format(
-                "invalid algorithm; expected %s, got %s", this.algorithm, receivedAlgorithm));
-      }
-      if (parsedHeader.has(JwtNames.HEADER_CRITICAL)) {
-        throw new JwtInvalidException("all tokens with crit headers are rejected");
-      }
-      boolean headerHasKid = parsedHeader.has(JwtNames.HEADER_KEY_ID);
-      if (!headerHasKid && jwtHmacKey.getParameters().allowKidAbsent()) {
-        return;
-      }
-      if (!headerHasKid && !jwtHmacKey.getParameters().allowKidAbsent()) {
-        throw new JwtInvalidException("missing kid in header");
-      }
-      // Header is guaranteed to have a kid at this point.
-      if (!jwtHmacKey.getKid().isPresent()) {
-        // We allow the header to have a kid when the key does not have one (which implies that
-        // KidStrategy = IGNORED)
-        return;
-      }
-      String kid = JwtFormat.getStringHeader(parsedHeader, JwtNames.HEADER_KEY_ID);
-      if (!kid.equals(jwtHmacKey.getKid().get())) {
-        throw new JwtInvalidException("invalid kid in header");
-      }
-    }
-
     @Override
     public String computeMacAndEncode(RawJwt rawJwt) throws GeneralSecurityException {
       String unsignedCompact =
@@ -107,7 +77,11 @@ public final class JwtHmacKeyManager {
       JwtFormat.Parts parts = JwtFormat.splitSignedCompact(compact);
       mac.verifyMac(parts.signatureOrMac, parts.unsignedCompact.getBytes(US_ASCII));
       JsonObject parsedHeader = JsonUtil.parseJson(parts.header);
-      validateHeader(parsedHeader);
+      JwtFormat.validateHeader(
+          parsedHeader,
+          jwtHmacKey.getParameters().getAlgorithm().getStandardName(),
+          jwtHmacKey.getKid(),
+          jwtHmacKey.getParameters().allowKidAbsent());
       RawJwt token = RawJwt.fromJsonPayload(JwtFormat.getTypeHeader(parsedHeader), parts.payload);
       return validator.validate(token);
     }

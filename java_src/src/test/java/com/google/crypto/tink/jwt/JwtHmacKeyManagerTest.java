@@ -862,6 +862,44 @@ public class JwtHmacKeyManagerTest {
   }
 
   @Test
+  public void keyWithKid_tokenWithoutKid() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_HS256_RAW");
+    KeysetHandle handleWithoutKid = KeysetHandle.generateNew(template);
+
+    com.google.crypto.tink.jwt.JwtHmacKey key =
+        (com.google.crypto.tink.jwt.JwtHmacKey) handleWithoutKid.getAt(0).getKey();
+
+    JwtHmacParameters newParameters =
+        JwtHmacParameters.builder()
+            .setKeySizeBytes(key.getParameters().getKeySizeBytes())
+            .setKidStrategy(JwtHmacParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+            .setAlgorithm(key.getParameters().getAlgorithm())
+            .build();
+    com.google.crypto.tink.jwt.JwtHmacKey newKey =
+        com.google.crypto.tink.jwt.JwtHmacKey.builder()
+            .setParameters(newParameters)
+            .setIdRequirement(0x22446688)
+            .setKeyBytes(key.getKeyBytes())
+            .build();
+
+    KeysetHandle handleWithTinkKid =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(newKey).withFixedId(0x22446688).makePrimary())
+            .build();
+
+    JwtMac jwtMacWithKid = handleWithTinkKid.getPrimitive(JwtMac.class);
+    JwtMac jwtMacWithoutKid = handleWithoutKid.getPrimitive(JwtMac.class);
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
+
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
+    String compactWithKid = jwtMacWithoutKid.computeMacAndEncode(rawToken);
+
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> jwtMacWithKid.verifyMacAndDecode(compactWithKid, validator));
+  }
+
+  @Test
   public void macWithTinkKeyAndCustomKid_fails() throws Exception {
     KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
