@@ -22,6 +22,7 @@
 
 #include "google/cloud/kms/v1/service.grpc.pb.h"
 #include "absl/strings/string_view.h"
+#include "third_party/cloud_cpp/google/cloud/kms/v1/key_management_client.h"
 #include "tink/aead.h"
 #include "tink/util/statusor.h"
 
@@ -31,8 +32,7 @@ namespace integration {
 namespace gcpkms {
 
 // GcpKmsAead is an implementation of AEAD that forwards encryption/decryption
-// requests to a key managed by the Google Cloud KMS
-// (https://cloud.google.com/kms/).
+// requests to the Google Cloud KMS (https://cloud.google.com/kms/).
 class GcpKmsAead : public Aead {
  public:
   // Move only.
@@ -66,11 +66,33 @@ class GcpKmsAead : public Aead {
       std::shared_ptr<google::cloud::kms::v1::KeyManagementService::Stub>
           kms_stub)
       : key_name_(key_name), kms_stub_(kms_stub) {}
+  explicit GcpKmsAead(
+      absl::string_view key_name,
+      std::shared_ptr<google::cloud::kms_v1::KeyManagementServiceClient>
+          kms_client)
+      : key_name_(key_name), kms_client_(kms_client) {}
+  friend crypto::tink::util::StatusOr<std::unique_ptr<Aead>> NewGcpKmsAead(
+      absl::string_view key_name,
+      std::shared_ptr<google::cloud::kms_v1::KeyManagementServiceClient>
+          kms_client);
 
   // The location of a crypto key in GCP KMS.
   std::string key_name_;
   std::shared_ptr<google::cloud::kms::v1::KeyManagementService::Stub> kms_stub_;
+  std::shared_ptr<google::cloud::kms_v1::KeyManagementServiceClient>
+      kms_client_;
 };
+
+// Creates a new `GcpKmsAead` object that is bound to the key specified in
+// `key_name`, and that uses the `kms_client` to communicate with the KMS.
+//
+// Valid values for `key_name` have the following format:
+//    projects/*/locations/*/keyRings/*/cryptoKeys/*.
+// See https://cloud.google.com/kms/docs/object-hierarchy for more info.
+crypto::tink::util::StatusOr<std::unique_ptr<Aead>> NewGcpKmsAead(
+    absl::string_view key_name,
+    std::shared_ptr<google::cloud::kms_v1::KeyManagementServiceClient>
+        kms_client);
 
 }  // namespace gcpkms
 }  // namespace integration

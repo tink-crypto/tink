@@ -158,6 +158,14 @@ def tink_cc_gcpkms_deps():
             urls = ["https://github.com/tink-crypto/tink-cc/releases/download/v2.1.1/tink-cc-2.1.1.zip"],
         )
 
+    if not native.existing_rule("com_googlesource_code_re2"):
+        http_archive(
+            name = "com_googlesource_code_re2",
+            sha256 = "cd191a311b84fcf37310e5cd876845b4bf5aee76fdd755008eef3b6478ce07bb",
+            strip_prefix = "re2-2024-02-01",
+            url = "https://github.com/google/re2/releases/download/2024-02-01/re2-2024-02-01.tar.gz",
+        )
+
 def tink_cc_gcpkms_testonly_deps():
     """Test only dependencies."""
 
