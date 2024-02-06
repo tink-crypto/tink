@@ -16,17 +16,15 @@
 
 package com.google.crypto.tink;
 
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.errorprone.annotations.Immutable;
 
 /**
  * Represents the status of a key in a keyset.
  *
- * <p>Note that the status of a key is not part of the key itself, it is metadata about the key
- * that is for example stored in a keyset.
+ * <p>Note that the status of a key is not part of the key itself, it is metadata about the key that
+ * is for example stored in a keyset.
  */
 @Immutable
-@Alpha
 public final class KeyStatus {
   public static final KeyStatus ENABLED = new KeyStatus("ENABLED");
   public static final KeyStatus DISABLED = new KeyStatus("DISABLED");
