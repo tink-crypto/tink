@@ -89,3 +89,74 @@ tink_cc_test(
     tink::proto::prf_based_deriver_cc_proto
     tink::proto::tink_cc_proto
 )
+
+tink_cc_library(
+  NAME key_derivers
+  SRCS
+    key_derivers.cc
+    key_derivers.h
+  DEPS
+    absl::flat_hash_map
+    absl::any_invocable
+    absl::check
+    absl::memory
+    absl::status
+    absl::strings
+    absl::string_view
+    absl::optional
+    tink::core::input_stream
+    tink::core::insecure_secret_key_access
+    tink::core::key
+    tink::core::parameters
+    tink::core::partial_key_access
+    tink::core::restricted_data
+    tink::aead::aes_gcm_key
+    tink::aead::aes_gcm_parameters
+    tink::aead::aes_gcm_proto_serialization
+    tink::util::input_stream_util
+    tink::util::status
+    tink::util::statusor
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_test(
+  NAME key_derivers_test
+  SRCS
+    key_derivers_test.cc
+  DEPS
+    tink::keyderivation::internal::key_derivers
+    gmock
+    absl::memory
+    absl::status
+    tink::core::input_stream
+    tink::core::insecure_secret_key_access
+    tink::core::key
+    tink::core::key_status
+    tink::core::keyset_handle
+    tink::core::keyset_handle_builder
+    tink::core::partial_key_access
+    tink::core::registry
+    tink::core::restricted_data
+    tink::core::secret_key_access_token
+    tink::aead::aes_eax_parameters
+    tink::aead::aes_eax_proto_serialization
+    tink::aead::aes_gcm_key
+    tink::aead::aes_gcm_key_manager
+    tink::aead::aes_gcm_parameters
+    tink::aead::aes_gcm_proto_serialization
+    tink::internal::mutable_serialization_registry
+    tink::internal::proto_parameters_serialization
+    tink::internal::serialization
+    tink::prf::hkdf_prf_key_manager
+    tink::subtle::common_enums
+    tink::subtle::random
+    tink::subtle::prf::hkdf_streaming_prf
+    tink::subtle::prf::streaming_prf
+    tink::util::istream_input_stream
+    tink::util::secret_data
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::util::test_util
+    tink::proto::aes_gcm_cc_proto
+)
