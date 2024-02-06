@@ -1117,8 +1117,11 @@ tink_cc_library(
     tink::core::cleartext_keyset_handle
     tink::core::keyset_handle
     tink::core::secret_key_access_token
+    absl::status
     absl::strings
     tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
 )
 
 tink_cc_test(

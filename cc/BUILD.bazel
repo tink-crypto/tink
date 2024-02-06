@@ -1184,6 +1184,9 @@ cc_library(
         ":keyset_handle",
         ":secret_key_access_token",
         "//util:secret_data",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )

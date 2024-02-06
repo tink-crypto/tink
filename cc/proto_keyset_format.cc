@@ -24,10 +24,16 @@
 #include <string>
 #include <utility>
 
+#include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/binary_keyset_writer.h"
 #include "tink/cleartext_keyset_handle.h"
+#include "tink/keyset_handle.h"
+#include "tink/secret_key_access_token.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -50,20 +56,14 @@ crypto::tink::util::StatusOr<KeysetHandle> ParseKeysetFromProtoKeysetFormat(
 crypto::tink::util::StatusOr<util::SecretData>
 SerializeKeysetToProtoKeysetFormat(const KeysetHandle& keyset_handle,
                                    SecretKeyAccessToken token) {
-  std::stringbuf string_buf(std::ios_base::out);
-  crypto::tink::util::StatusOr<std::unique_ptr<BinaryKeysetWriter>>
-      keyset_writer = BinaryKeysetWriter::New(
-          std::make_unique<std::ostream>(&string_buf));
-  if (!keyset_writer.ok()) {
-    return keyset_writer.status();
+  const google::crypto::tink::Keyset& keyset =
+      CleartextKeysetHandle::GetKeyset(keyset_handle);
+  util::SecretData result(keyset.ByteSizeLong());
+  if (!keyset.SerializeToArray(result.data(), result.size())) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "Failed to serialize keyset");
   }
-  crypto::tink::util::Status status =
-      CleartextKeysetHandle::Write(keyset_writer->get(), keyset_handle);
-  if (!status.ok()) {
-    return status;
-  }
-  // TODO(tholenst): directly write into a secret data.
-  return util::SecretDataFromStringView(string_buf.str());
+  return result;
 }
 
 crypto::tink::util::StatusOr<KeysetHandle>
