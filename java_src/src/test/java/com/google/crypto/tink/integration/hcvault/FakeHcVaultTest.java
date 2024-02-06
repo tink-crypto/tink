@@ -17,8 +17,11 @@ package com.google.crypto.tink.integration.hcvault;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.aead.AeadConfig;
+import io.github.jopenlibs.vault.VaultException;
 import io.github.jopenlibs.vault.api.Logical;
 import io.github.jopenlibs.vault.response.LogicalResponse;
 import java.util.Base64;
@@ -32,25 +35,24 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class FakeHcVaultTest {
 
-  private static final String KEY_URI = "hcvault://hcvault.corp.com:8200/transit/keys/key-1";
-
   @BeforeClass
   public static void setUpClass() throws Exception {
     AeadConfig.register();
   }
 
   @Test
-  public void testEncryptDecryptWithValidKeyId_success() throws Exception {
-    Logical kms = new FakeHcVault();
+  public void testEncryptDecryptWithValidKeyId() throws Exception {
+    Logical kms =
+        new FakeHcVault(/* mountPath= */ "transit", /* validKeyNames= */ asList("key-1", "key-2"));
 
     byte[] plaintext = "plaintext1".getBytes(UTF_8);
     byte[] associatedData = "associatedData".getBytes(UTF_8);
 
     String encPath = "transit/encrypt/key-1";
-    Map<String, Object> content = new HashMap<>();
-    content.put("plaintext", Base64.getEncoder().encodeToString(plaintext));
-    content.put("context", Base64.getEncoder().encodeToString(associatedData));
-    LogicalResponse encResp = kms.write(encPath, content);
+    Map<String, Object> encReq = new HashMap<>();
+    encReq.put("plaintext", Base64.getEncoder().encodeToString(plaintext));
+    encReq.put("context", Base64.getEncoder().encodeToString(associatedData));
+    LogicalResponse encResp = kms.write(encPath, encReq);
 
     String ciphertext = (String) encResp.getData().get("ciphertext");
 
@@ -61,5 +63,26 @@ public final class FakeHcVaultTest {
     LogicalResponse decResp = kms.write(decPath, decReq);
 
     assertThat(Base64.getDecoder().decode(decResp.getData().get("plaintext"))).isEqualTo(plaintext);
+
+    // valid encResp with an invalid encrypt path fails.
+    assertThrows(VaultException.class, () -> kms.write("transit/encrypt/invalid-key", encReq));
+    assertThrows(VaultException.class, () -> kms.write("invalid/encrypt/key-1", encReq));
+
+    // valid decReq with a valid path of different key fails.
+    assertThrows(VaultException.class, () -> kms.write("transit/decrypt/key-2", decReq));
+
+    // valid decReq with an invalid decrypt path fails.
+    assertThrows(VaultException.class, () -> kms.write("transit/decrypt/invalid-key", decReq));
+    assertThrows(VaultException.class, () -> kms.write("invalid/decrypt/key-1", decReq));
+
+    // valid decPath with an invalid decrypt request fails.
+    Map<String, Object> invalidDecReq = new HashMap<>();
+    invalidDecReq.put("context", Base64.getEncoder().encodeToString(associatedData));
+    invalidDecReq.put("ciphertext", "invalid");
+    assertThrows(VaultException.class, () -> kms.write(decPath, invalidDecReq));
+
+    // valid request with invalid path fails.
+    assertThrows(VaultException.class, () -> kms.write("invalid/path", encReq));
+    assertThrows(VaultException.class, () -> kms.write("invalid/path", decReq));
   }
 }

@@ -76,14 +76,14 @@ final class HcVaultAead implements Aead {
     }
   }
 
-  public static String getOperationEndpoint(String keyPath, String operation)
+  static String getOperationEndpoint(String keyPath, String operation)
       throws GeneralSecurityException {
     String[] parts = keyPath.split("/");
     if (parts.length < 3 || !parts[parts.length - 2].equals("keys")) {
       throw new GeneralSecurityException(String.format("malformed URL"));
     }
     parts[parts.length - 2] = operation;
-    return Arrays.asList(parts).stream().collect(Collectors.joining("/")).replaceFirst("/", "");
+    return Arrays.asList(parts).stream().collect(Collectors.joining("/"));
   }
 
   /* This shouldn't be necessary, but in older versions of the client library failing requests

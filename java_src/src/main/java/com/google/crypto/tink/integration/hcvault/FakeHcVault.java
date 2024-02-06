@@ -26,6 +26,8 @@ import io.github.jopenlibs.vault.rest.RestResponse;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,9 +38,11 @@ import java.util.Map;
  */
 final class FakeHcVault extends Logical {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
-  private final Aead aead;
+  private final String encPathPrefix;
+  private final String decPathPrefix;
+  private final Map<String, Aead> aeads = new HashMap<>();
 
-  public FakeHcVault() {
+  public FakeHcVault(String mountPath, List<String> validKeyNames) {
     super(
         new VaultConfig()
             .address("https://hcvault.corp.com:8200")
@@ -46,8 +50,14 @@ final class FakeHcVault extends Logical {
             .readTimeout(30)
             .openTimeout(30)
             .engineVersion(2));
+    this.encPathPrefix = mountPath + "/encrypt/";
+    this.decPathPrefix = mountPath + "/decrypt/";
     try {
-      aead = KeysetHandle.generateNew(KeyTemplates.get("AES128_GCM")).getPrimitive(Aead.class);
+      for (String keyName : validKeyNames) {
+        Aead aead =
+            KeysetHandle.generateNew(KeyTemplates.get("AES128_GCM")).getPrimitive(Aead.class);
+        aeads.put(keyName, aead);
+      }
     } catch (GeneralSecurityException e) {
       throw new IllegalArgumentException(e);
     }
@@ -56,31 +66,45 @@ final class FakeHcVault extends Logical {
   @Override
   public LogicalResponse write(final String path, final Map<String, Object> nameValuePairs)
       throws VaultException {
-    if (!path.contains("encrypt") && !path.contains("decrypt")) {
-      return super.write(path, nameValuePairs);
-    }
-
-    try {
-      byte[] context = Base64.getDecoder().decode((String) nameValuePairs.get("context"));
-      if (path.contains("encrypt")) {
-        byte[] plaintext = Base64.getDecoder().decode((String) nameValuePairs.get("plaintext"));
-        byte[] ciphertext = aead.encrypt(plaintext, context);
-        RestResponse restResp = new RestResponse(200, null, null);
-        LogicalResponse resp = new LogicalResponse(restResp, 0, null);
-        resp.getData().put("ciphertext", new String(Base64.getEncoder().encode(ciphertext)));
-        return resp;
-      } else if (path.contains("decrypt")) {
-        String ciphertext = (String) nameValuePairs.get("ciphertext");
-        byte[] ciphertextBytes = Base64.getDecoder().decode(ciphertext);
-        byte[] plaintext = aead.decrypt(ciphertextBytes, context);
-        RestResponse restResp = new RestResponse(200, null, null);
-        LogicalResponse resp = new LogicalResponse(restResp, 0, null);
-        resp.getData().put("plaintext", Base64.getEncoder().encodeToString(plaintext));
-        return resp;
+    if (path.startsWith(encPathPrefix)) {
+      String keyName = path.substring(encPathPrefix.length());
+      if (!aeads.containsKey(keyName)) {
+        throw new VaultException("Key not found: " + keyName);
       }
-    } catch (GeneralSecurityException e) {
-      throw new VaultException(e.getMessage());
+      Aead aead = aeads.get(keyName);
+      byte[] context = Base64.getDecoder().decode((String) nameValuePairs.get("context"));
+      byte[] plaintext = Base64.getDecoder().decode((String) nameValuePairs.get("plaintext"));
+      byte[] ciphertext;
+      try {
+        ciphertext = aead.encrypt(plaintext, context);
+      } catch (GeneralSecurityException e) {
+        throw new VaultException(e.getMessage());
+      }
+      RestResponse restResp = new RestResponse(200, null, null);
+      LogicalResponse resp = new LogicalResponse(restResp, 0, null);
+      resp.getData().put("ciphertext", new String(Base64.getEncoder().encode(ciphertext)));
+      return resp;
     }
-    return null; // Will never be hit, just for compiler
+    if (path.startsWith(decPathPrefix)) {
+      String keyName = path.substring(decPathPrefix.length());
+      if (!aeads.containsKey(keyName)) {
+        throw new VaultException("Key not found: " + keyName);
+      }
+      Aead aead = aeads.get(keyName);
+      byte[] context = Base64.getDecoder().decode((String) nameValuePairs.get("context"));
+      String ciphertext = (String) nameValuePairs.get("ciphertext");
+      byte[] ciphertextBytes = Base64.getDecoder().decode(ciphertext);
+      byte[] plaintext;
+      try {
+        plaintext = aead.decrypt(ciphertextBytes, context);
+      } catch (GeneralSecurityException e) {
+        throw new VaultException(e.getMessage());
+      }
+      RestResponse restResp = new RestResponse(200, null, null);
+      LogicalResponse resp = new LogicalResponse(restResp, 0, null);
+      resp.getData().put("plaintext", Base64.getEncoder().encodeToString(plaintext));
+      return resp;
+    }
+    throw new VaultException("Unsupported path: " + path);
   }
 }
