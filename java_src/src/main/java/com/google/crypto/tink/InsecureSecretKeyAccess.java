@@ -16,13 +16,11 @@
 
 package com.google.crypto.tink;
 
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.errorprone.annotations.Immutable;
 
 /** A helper class to create {@link SecretKeyAccess} tokens. */
 @CheckReturnValue
-@Alpha
 @Immutable
 public final class InsecureSecretKeyAccess {
   private InsecureSecretKeyAccess() {}

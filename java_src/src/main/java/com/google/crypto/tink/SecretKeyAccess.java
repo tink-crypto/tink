@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink;
 
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.errorprone.annotations.Immutable;
@@ -44,7 +43,6 @@ import javax.annotation.Nullable;
  * via {@code InsecureSecretKeyAccess.get()}.
  */
 @CheckReturnValue
-@Alpha
 @Immutable
 public final class SecretKeyAccess {
   private SecretKeyAccess() {}

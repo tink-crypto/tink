@@ -17,13 +17,11 @@
 package com.google.crypto.tink.util;
 
 import com.google.crypto.tink.SecretKeyAccess;
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.errorprone.annotations.Immutable;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 
 /** A class storing a secret BigInteger, protecting the value via {@link SecretKeyAccess}. */
-@Alpha
 @Immutable
 public final class SecretBigInteger {
   private final BigInteger value;

@@ -17,13 +17,11 @@
 package com.google.crypto.tink.util;
 
 import com.google.crypto.tink.SecretKeyAccess;
-import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.subtle.Random;
 import com.google.errorprone.annotations.Immutable;
 import java.security.MessageDigest;
 
 /** A class storing an immutable byte array, protecting the data via {@link SecretKeyAccess}. */
-@Alpha
 @Immutable
 public final class SecretBytes {
   private final Bytes bytes;

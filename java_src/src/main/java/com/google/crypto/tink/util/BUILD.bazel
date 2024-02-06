@@ -20,7 +20,6 @@ java_library(
     deps = [
         ":bytes",
         "//src/main/java/com/google/crypto/tink:secret_key_access",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
@@ -32,7 +31,6 @@ android_library(
     deps = [
         ":bytes-android",
         "//src/main/java/com/google/crypto/tink:secret_key_access-android",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
         "//src/main/java/com/google/crypto/tink/subtle:random-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
@@ -61,7 +59,6 @@ java_library(
     srcs = ["SecretBigInteger.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:secret_key_access",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -71,7 +68,6 @@ android_library(
     srcs = ["SecretBigInteger.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:secret_key_access-android",
-        "//src/main/java/com/google/crypto/tink/annotations:alpha-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )

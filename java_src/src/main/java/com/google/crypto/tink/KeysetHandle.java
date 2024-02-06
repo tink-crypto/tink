@@ -437,7 +437,6 @@ public final class KeysetHandle {
    * There should always be exactly one key which is marked as a primary, however, at the moment
    * Tink still accepts keysets which have none. This will be changed in the future.
    */
-  @Alpha
   @Immutable
   public static final class Entry {
     private Entry(Key key, KeyStatus keyStatus, int id, boolean isPrimary) {
