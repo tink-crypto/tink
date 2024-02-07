@@ -70,6 +70,7 @@ using ::google::crypto::tink::KeyData;
 using ::testing::Eq;
 using ::testing::IsTrue;
 using ::testing::NotNull;
+using ::testing::SizeIs;
 using ::testing::Test;
 
 class KeyDeriversTest : public Test {
@@ -103,7 +104,7 @@ TEST_F(KeyDeriversTest, DeriveKey) {
       dynamic_cast<const AesGcmKey*>(&**std::move(generic_key));
   ASSERT_THAT(key, NotNull());
   EXPECT_THAT(key->GetOutputPrefix(), Eq(""));
-  EXPECT_THAT(key->GetKeyBytes(GetPartialKeyAccess()).size(), Eq(key_size));
+  EXPECT_THAT(key->GetKeyBytes(GetPartialKeyAccess()), SizeIs(key_size));
 
   KeysetHandleBuilder::Entry entry =
       KeysetHandleBuilder::Entry::CreateFromCopyableKey(*key,
@@ -143,7 +144,7 @@ TEST_F(KeyDeriversTest, InsufficientRandomness) {
 }
 
 // Test vector from https://tools.ietf.org/html/rfc5869#appendix-A.2.
-class KeyDeriversRfcVectorTest : public ::testing::Test {
+class KeyDeriversRfcVectorTest : public Test {
  public:
   void SetUp() override {
     Registry::Reset();
