@@ -55,13 +55,10 @@ class HcVaultAeadTest(absltest.TestCase):
     vaultaead = hcvault.new_aead(_KEY_PATH, self.client)
 
     plaintext = b'hello'
-    associated_data = b'world'
-    ciphertext = vaultaead.encrypt(plaintext, associated_data)
-    self.assertEqual(plaintext, vaultaead.decrypt(ciphertext, associated_data))
-
-    plaintext = b'hello'
-    ciphertext = vaultaead.encrypt(plaintext, b'')
-    self.assertEqual(plaintext, vaultaead.decrypt(ciphertext, b''))
+    ciphertext = vaultaead.encrypt(plaintext, associated_data=b'')
+    self.assertEqual(
+        plaintext, vaultaead.decrypt(ciphertext, associated_data=b'')
+    )
 
   def test_corrupted_ciphertext(self):
     vaultaead = hcvault.new_aead(_KEY_PATH, self.client)
@@ -102,13 +99,10 @@ class HcVaultAeadTest(absltest.TestCase):
         )
 
   def test_encrypt_with_bad_client(self):
+    bad_client = hvac.Client(url=_VAULT_ADDR, token=_BAD_TOKEN, verify=False)
+    vaultaead = hcvault.new_aead(_KEY_PATH, bad_client)
     with self.assertRaises(tink.TinkError):
-      bad_client = hvac.Client(url=_VAULT_ADDR, token=_BAD_TOKEN, verify=False)
-      vaultaead = hcvault.new_aead(_KEY_PATH, bad_client)
-
-      plaintext = b'hello'
-      associated_data = b'world'
-      vaultaead.encrypt(plaintext, associated_data)
+      vaultaead.encrypt(plaintext=b'hello', associated_data=b'')
 
 
 if __name__ == '__main__':

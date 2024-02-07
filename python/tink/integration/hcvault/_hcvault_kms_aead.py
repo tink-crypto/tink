@@ -23,7 +23,8 @@ import tink
 from tink import aead
 
 # Matches strings like {mount}/keys/{key_name}.
-_PATH_MATCHER = re.compile(r'''
+_PATH_MATCHER = re.compile(
+    r"""
     # starts with 0 or one '/'
     [/]?
     # the capture group for {mount}
@@ -40,7 +41,9 @@ _PATH_MATCHER = re.compile(r'''
       # a sequence of one or more characters that aren't '/'
       [^/]+
     )
-    $''', re.VERBOSE)
+    $""",
+    re.VERBOSE,
+)
 
 
 def _get_endpoint_paths(key_path: str) -> Tuple[str, str]:
@@ -80,10 +83,16 @@ class _HcVaultKmsAead(aead.Aead):
 
   def encrypt(self, plaintext: bytes, associated_data: bytes) -> bytes:
     try:
+      if associated_data:
+        raise NotImplementedError(
+            'Tink HashiCorp Vault integration only allows empty associated'
+            ' data. `associated_data` is not supported as of hvac==v2.1.0. See'
+            ' https://github.com/hvac/hvac/issues/1107'
+        )
       response = self.client.secrets.transit.encrypt_data(
           name=self.key_name,
           plaintext=base64.urlsafe_b64encode(plaintext).decode(),
-          context=base64.urlsafe_b64encode(associated_data).decode(),
+          context='',  # Always empty. Tink assumes derived=false.
           mount_point=self.mount_point,
       )
       return response['data']['ciphertext'].encode()
@@ -92,10 +101,16 @@ class _HcVaultKmsAead(aead.Aead):
 
   def decrypt(self, ciphertext: bytes, associated_data: bytes) -> bytes:
     try:
+      if associated_data:
+        raise NotImplementedError(
+            'Tink HashiCorp Vault integration only allows empty associated'
+            ' data. `associated_data` is not supported as of hvac==v2.1.0. See'
+            ' https://github.com/hvac/hvac/issues/1107'
+        )
       response = self.client.secrets.transit.decrypt_data(
           name=self.key_name,
           ciphertext=ciphertext.decode(),
-          context=base64.urlsafe_b64encode(associated_data).decode(),
+          context='',  # Always empty. Tink assumes derived=false.
           mount_point=self.mount_point,
       )
       return base64.urlsafe_b64decode(response['data']['plaintext'])

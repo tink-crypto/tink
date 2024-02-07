@@ -16,6 +16,7 @@
 import base64
 import http.server
 import json
+import re
 import threading
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -27,11 +28,6 @@ _TOKEN = ''
 _KEY_PATH = 'transit/keys/key-1'
 _PORT = 8205
 _VAULT_URI = f'http://localhost:{_PORT}'
-
-_GCP_KEY_URI = (
-    'gcp-kms://projects/tink-test-infrastructure/locations/global/'
-    'keyRings/unit-and-integration-testing/cryptoKeys/aead-key'
-)
 
 
 class MockHandler(http.server.BaseHTTPRequestHandler):
@@ -119,32 +115,23 @@ class HcVaultKmsAeadTest(parameterized.TestCase):
       self.server.shutdown()
       self.server.server_close()
 
-  def test_encrypt_decrypt(self):
+  def test_encrypt_decrypt_with_empty_associated_data(self):
     client = hvac.Client(url=_VAULT_URI, token=_TOKEN, verify=False)
     vaultaead = hcvault.new_aead(_KEY_PATH, client)
     plaintext = b'hello'
-    associated_data = b'world'
-    ciphertext = vaultaead.encrypt(plaintext, associated_data)
-    self.assertEqual(plaintext, vaultaead.decrypt(ciphertext, associated_data))
+    ciphertext = vaultaead.encrypt(plaintext, associated_data=b'')
+    self.assertEqual(
+        plaintext, vaultaead.decrypt(ciphertext, associated_data=b'')
+    )
 
-    plaintext = b'hello'
-    ciphertext = vaultaead.encrypt(plaintext, b'')
-    self.assertEqual(plaintext, vaultaead.decrypt(ciphertext, b''))
-
-  def test_invalid_context(self):
+  def test_encrypt_decrypt_fails_with_nonempty_associated_data(self):
     client = hvac.Client(url=_VAULT_URI, token=_TOKEN, verify=False)
     vaultaead = hcvault.new_aead(_KEY_PATH, client)
-
-    plaintext = b'helloworld'
-    ciphertext = vaultaead.encrypt(plaintext, b'')
-    self.assertEqual(plaintext, vaultaead.decrypt(ciphertext, b''))
-    with self.assertRaises(tink.TinkError):
-      vaultaead.decrypt(ciphertext, b'a')
-
-  def test_encrypt_with_bad_uri(self):
-    client = hvac.Client(url=_VAULT_URI, token=_TOKEN, verify=False)
-    with self.assertRaises(tink.TinkError):
-      hcvault.new_aead(_GCP_KEY_URI, client)
+    expected_error_msg_re = re.compile(r'.*only allows empty associated data.*')
+    with self.assertRaisesRegex(tink.TinkError, expected_error_msg_re):
+      _ = vaultaead.encrypt(plaintext=b'hello', associated_data=b'non-empty')
+    with self.assertRaisesRegex(tink.TinkError, expected_error_msg_re):
+      _ = vaultaead.decrypt(ciphertext=b'hello', associated_data=b'non-empty')
 
   @parameterized.named_parameters([
       ('simple', '/transit/keys/key-1', 'transit', 'key-1'),
@@ -187,9 +174,10 @@ class HcVaultKmsAeadTest(parameterized.TestCase):
       ('invalid_mount_with_empty_trailing_components', '/foo/bar///keys/baz'),
       ('invalid_key_name', '/transit/keys/bar/baz'),
   ])
-  def test_invalid_get_endpoint_paths(self, path):
+  def test_invalid_path_raises_error(self, path):
+    client = hvac.Client(url=_VAULT_URI, token=_TOKEN, verify=False)
     with self.assertRaises(tink.TinkError):
-      _, _ = hcvault._hcvault_kms_aead._get_endpoint_paths(path)
+      hcvault.new_aead(path, client)
 
 
 if __name__ == '__main__':
