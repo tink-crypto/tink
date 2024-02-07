@@ -659,6 +659,7 @@ cc_library(
         ":key_manager",
         "//proto:tink_cc_proto",
         "//util:constants",
+        "//util:secret_proto",
         "//util:status",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/memory",

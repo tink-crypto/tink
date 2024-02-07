@@ -44,8 +44,7 @@ crypto::tink::util::StatusOr<KeysetHandle> ParseKeysetFromProtoKeysetFormat(
     absl::string_view serialized_keyset, SecretKeyAccessToken token) {
   crypto::tink::util::SecretProto<google::crypto::tink::Keyset> keyset_proto;
   if (!keyset_proto->ParseFromString(serialized_keyset)) {
-    return util::Status(absl::StatusCode::kInternal,
-                        "Failed to parse keyset");
+    return util::Status(absl::StatusCode::kInternal, "Failed to parse keyset");
   }
   util::StatusOr<std::vector<std::shared_ptr<const KeysetHandle::Entry>>>
       entries = KeysetHandle::GetEntriesFromKeyset(*keyset_proto);

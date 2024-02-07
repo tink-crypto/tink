@@ -28,6 +28,7 @@
 #include "tink/core/key_type_manager.h"
 #include "tink/key_manager.h"
 #include "tink/util/constants.h"
+#include "tink/util/secret_proto.h"
 #include "tink/util/status.h"
 #include "proto/tink.pb.h"
 
@@ -180,17 +181,17 @@ class KeyManagerImpl<
                        "Key type '%s' is not supported by this manager.",
                        key_data.type_url());
     }
-    KeyProto key_proto;
-    if (!key_proto.ParseFromString(key_data.value())) {
+    crypto::tink::util::SecretProto<KeyProto> key_proto;
+    if (!key_proto->ParseFromString(key_data.value())) {
       return ToStatusF(absl::StatusCode::kInvalidArgument,
                        "Could not parse key_data.value as key type '%s'.",
                        key_data.type_url());
     }
-    auto validation = key_type_manager_->ValidateKey(key_proto);
+    auto validation = key_type_manager_->ValidateKey(*key_proto);
     if (!validation.ok()) {
       return validation;
     }
-    return key_type_manager_->template GetPrimitive<Primitive>(key_proto);
+    return key_type_manager_->template GetPrimitive<Primitive>(*key_proto);
   }
 
   crypto::tink::util::StatusOr<std::unique_ptr<Primitive>> GetPrimitive(

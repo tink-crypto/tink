@@ -613,6 +613,7 @@ tink_cc_library(
     absl::status
     absl::strings
     tink::util::constants
+    tink::util::secret_proto
     tink::util::status
     tink::proto::tink_cc_proto
 )
