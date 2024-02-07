@@ -598,6 +598,26 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "xchacha20_poly1305_key",
+    srcs = ["xchacha20_poly1305_key.cc"],
+    hdrs = ["xchacha20_poly1305_key.h"],
+    include_prefix = "tink/aead",
+    deps = [
+        ":aead_key",
+        ":xchacha20_poly1305_parameters",
+        "//:key",
+        "//:partial_key_access_token",
+        "//:restricted_data",
+        "//subtle:subtle_util",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -1141,6 +1161,22 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "xchacha20_poly1305_key_test",
+    srcs = ["xchacha20_poly1305_key_test.cc"],
+    deps = [
+        ":xchacha20_poly1305_key",
+        ":xchacha20_poly1305_parameters",
+        "//:partial_key_access",
+        "//:restricted_data",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/types:optional",
         "@com_google_googletest//:gtest_main",
     ],
 )
