@@ -447,6 +447,7 @@ tink_cc_library(
     tink::core::primitive_set
     tink::core::registry
     tink::core::restricted_data
+    tink::core::secret_key_access_token
     absl::core_headers
     absl::flat_hash_map
     absl::check
@@ -1120,6 +1121,7 @@ tink_cc_library(
     absl::status
     absl::strings
     tink::util::secret_data
+    tink::util::secret_proto
     tink::util::status
     tink::util::statusor
 )

@@ -45,6 +45,7 @@
 #include "tink/keyset_writer.h"
 #include "tink/primitive_set.h"
 #include "tink/registry.h"
+#include "tink/secret_key_access_token.h"
 #include "tink/util/secret_proto.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -247,6 +248,10 @@ class KeysetHandle {
 
   // KeysetHandleBuilder::Build() needs access to KeysetHandle(Keyset).
   friend class KeysetHandleBuilder;
+
+  friend crypto::tink::util::StatusOr<KeysetHandle>
+  ParseKeysetFromProtoKeysetFormat(absl::string_view serialized_keyset,
+                                   SecretKeyAccessToken token);
 
   // Creates a handle that contains the given keyset.
   explicit KeysetHandle(util::SecretProto<google::crypto::tink::Keyset> keyset)

@@ -23,6 +23,7 @@
 #include <sstream>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
@@ -32,6 +33,7 @@
 #include "tink/keyset_handle.h"
 #include "tink/secret_key_access_token.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/secret_proto.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -40,17 +42,21 @@ namespace tink {
 
 crypto::tink::util::StatusOr<KeysetHandle> ParseKeysetFromProtoKeysetFormat(
     absl::string_view serialized_keyset, SecretKeyAccessToken token) {
-  crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::KeysetReader>>
-      keyset_reader = BinaryKeysetReader::New(serialized_keyset);
-  if (!keyset_reader.ok()) {
-    return keyset_reader.status();
+  crypto::tink::util::SecretProto<google::crypto::tink::Keyset> keyset_proto;
+  if (!keyset_proto->ParseFromString(serialized_keyset)) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "Failed to parse keyset");
   }
-  crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>> result =
-    CleartextKeysetHandle::Read(std::move(*keyset_reader));
-  if (!result.ok()) {
-    return result.status();
+  util::StatusOr<std::vector<std::shared_ptr<const KeysetHandle::Entry>>>
+      entries = KeysetHandle::GetEntriesFromKeyset(*keyset_proto);
+  if (!entries.ok()) {
+    return entries.status();
   }
-  return std::move(**result);
+  if (entries->size() != keyset_proto->key_size()) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "Error converting keyset proto into key entries.");
+  }
+  return KeysetHandle(std::move(keyset_proto), *entries);
 }
 
 crypto::tink::util::StatusOr<util::SecretData>
