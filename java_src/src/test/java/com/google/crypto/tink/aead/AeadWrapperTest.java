@@ -21,7 +21,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
@@ -524,10 +523,7 @@ public class AeadWrapperTest {
     assertThat(decEntry.getKeyId()).isEqualTo(42);
     assertThat(decEntry.getPrimitive()).isEqualTo("aead");
     assertThat(decEntry.getApi()).isEqualTo("decrypt");
-    // ciphertext was encrypted with key1, which has a TINK ouput prefix. This adds a 5 bytes prefix
-    // to the ciphertext. This prefix is not included in getNumBytesAsInput.
-    assertThat(decEntry.getNumBytesAsInput())
-        .isEqualTo(ciphertext.length - CryptoFormat.NON_RAW_PREFIX_SIZE);
+    assertThat(decEntry.getNumBytesAsInput()).isEqualTo(ciphertext.length);
     assertThat(decEntry.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
 
     FakeMonitoringClient.LogEntry dec2Entry = logEntries.get(2);
