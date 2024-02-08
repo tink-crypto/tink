@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,33 +16,10 @@
 
 package com.google.crypto.tink.hybrid;
 
-import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.proto.EcPointFormat;
-import com.google.crypto.tink.proto.EciesAeadHkdfParams;
-import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
-import com.google.crypto.tink.subtle.EllipticCurves;
-import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 
 final class HybridUtil {
-  /**
-   * Validates EciesAeadHkdf params.
-   *
-   * @param params the EciesAeadHkdfParams protocol buffer.
-   * @throws GeneralSecurityException iff it's invalid.
-   */
-  public static void validate(EciesAeadHkdfParams params) throws GeneralSecurityException {
-    Object unused =
-        EllipticCurves.getCurveSpec(HybridUtil.toCurveType(params.getKemParams().getCurveType()));
-    unused = HybridUtil.toHmacAlgo(params.getKemParams().getHkdfHashType());
-    if (params.getEcPointFormat() == EcPointFormat.UNKNOWN_FORMAT) {
-      throw new GeneralSecurityException("unknown EC point format");
-    }
-    // Check that we can generate new keys from the DEM AEAD key format.
-    unused = Registry.newKeyData(params.getDemParams().getAeadDem());
-  }
-
   /**
    * Returns the HMAC algorithm name corresponding to a hash type.
    *
@@ -63,36 +40,6 @@ final class HybridUtil {
         return "HmacSha512";
       default:
         throw new NoSuchAlgorithmException("hash unsupported for HMAC: " + hash);
-    }
-  }
-
-  /** Converts protobuf enum {@code EllipticCurveType} to raw Java enum {@code CurveType}. */
-  public static EllipticCurves.CurveType toCurveType(EllipticCurveType type)
-      throws GeneralSecurityException {
-    switch (type) {
-      case NIST_P256:
-        return EllipticCurves.CurveType.NIST_P256;
-      case NIST_P384:
-        return EllipticCurves.CurveType.NIST_P384;
-      case NIST_P521:
-        return EllipticCurves.CurveType.NIST_P521;
-      default:
-        throw new GeneralSecurityException("unknown curve type: " + type);
-    }
-  }
-
-  /** Converts protobuf enum {@code EcPointFormat} to raw Java enum {@code PointFormatType}. */
-  public static EllipticCurves.PointFormatType toPointFormatType(EcPointFormat format)
-      throws GeneralSecurityException {
-    switch (format) {
-      case UNCOMPRESSED:
-        return EllipticCurves.PointFormatType.UNCOMPRESSED;
-      case DO_NOT_USE_CRUNCHY_UNCOMPRESSED:
-        return EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED;
-      case COMPRESSED:
-        return EllipticCurves.PointFormatType.COMPRESSED;
-      default:
-        throw new GeneralSecurityException("unknown point format: " + format);
     }
   }
 
