@@ -23,6 +23,7 @@
 #include <utility>
 #include <vector>
 
+#include "absl/container/flat_hash_map.h"
 #include "absl/types/optional.h"
 #include "tink/internal/keyset_handle_builder_entry.h"
 #include "tink/key.h"
@@ -143,6 +144,13 @@ class KeysetHandleBuilder {
   // Returns entry from keyset builder at `index`.
   KeysetHandleBuilder::Entry& operator[](int index) { return entries_[index]; }
 
+  // Sets MonitoringAnnotations. If not called, then the default value of an
+  // empty map is used. When called multiple times, previous values are
+  // replaced.
+  KeysetHandleBuilder& SetMonitoringAnnotations(
+      const absl::flat_hash_map<std::string, std::string>&
+          monitoring_annotations);
+
   // Creates a new `KeysetHandle` object.
   //
   // Note: Since KeysetHandleBuilder::Entry objects might have randomly
@@ -164,6 +172,7 @@ class KeysetHandleBuilder {
   crypto::tink::util::Status CheckIdAssignments();
 
   std::vector<KeysetHandleBuilder::Entry> entries_;
+  absl::flat_hash_map<std::string, std::string> monitoring_annotations_;
 
   bool build_called_ = false;
 };

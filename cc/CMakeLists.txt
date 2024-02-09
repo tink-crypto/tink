@@ -486,6 +486,7 @@ tink_cc_library(
     tink::core::key_status
     tink::core::keyset_handle
     tink::core::parameters
+    absl::flat_hash_map
     absl::check
     absl::status
     absl::strings
@@ -905,13 +906,23 @@ tink_cc_test(
   SRCS
     core/keyset_handle_builder_test.cc
   DEPS
+    tink::core::aead
+    tink::core::key_type_manager
+    tink::core::template_util
+    tink::core::input_stream
     tink::core::insecure_secret_key_access
     tink::core::key_status
+    tink::core::keyset_handle
     tink::core::keyset_handle_builder
     tink::core::partial_key_access
+    tink::core::primitive_set
+    tink::core::primitive_wrapper
+    tink::core::registry
     gmock
+    absl::flat_hash_map
     absl::status
     absl::strings
+    tink::aead::aes_gcm_parameters
     tink::config::tink_config
     tink::internal::legacy_proto_key
     tink::internal::legacy_proto_parameters
@@ -922,9 +933,11 @@ tink_cc_test(
     tink::mac::mac_key_templates
     tink::subtle::random
     tink::util::status
+    tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::aes_cmac_cc_proto
+    tink::proto::aes_gcm_cc_proto
     tink::proto::tink_cc_proto
 )
 

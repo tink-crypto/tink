@@ -23,6 +23,7 @@
 #include <utility>
 #include <vector>
 
+#include "absl/container/flat_hash_map.h"
 #include "absl/log/check.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
@@ -144,6 +145,13 @@ util::Status KeysetHandleBuilder::CheckIdAssignments() {
   return util::OkStatus();
 }
 
+KeysetHandleBuilder& KeysetHandleBuilder::SetMonitoringAnnotations(
+    const absl::flat_hash_map<std::string, std::string>&
+        monitoring_annotations) {
+  monitoring_annotations_ = monitoring_annotations;
+  return *this;
+}
+
 util::StatusOr<KeysetHandle> KeysetHandleBuilder::Build() {
   if (build_called_) {
       return util::Status(
@@ -193,7 +201,8 @@ util::StatusOr<KeysetHandle> KeysetHandleBuilder::Build() {
   keyset->set_primary_key_id(*primary_id);
   util::StatusOr<std::vector<std::shared_ptr<const KeysetHandle::Entry>>>
       entries = KeysetHandle::GetEntriesFromKeyset(*keyset);
-  return KeysetHandle(std::move(keyset), *std::move(entries));
+  return KeysetHandle(std::move(keyset), *std::move(entries),
+                      monitoring_annotations_);
 }
 
 }  // namespace tink
