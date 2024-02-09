@@ -45,16 +45,6 @@ public final class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
   private final EciesAeadHkdfDemHelper demHelper;
   private final byte[] outputPrefix;
 
-  public EciesAeadHkdfHybridDecrypt(
-      final ECPrivateKey recipientPrivateKey,
-      final byte[] hkdfSalt,
-      String hkdfHmacAlgo,
-      EllipticCurves.PointFormatType ecPointFormat,
-      EciesAeadHkdfDemHelper demHelper)
-      throws GeneralSecurityException {
-    this(recipientPrivateKey, hkdfSalt, hkdfHmacAlgo, ecPointFormat, demHelper, new byte[0]);
-  }
-
   private EciesAeadHkdfHybridDecrypt(
       final ECPrivateKey recipientPrivateKey,
       final byte[] hkdfSalt,

@@ -180,16 +180,6 @@ public final class EciesAeadHkdfHybridEncrypt implements HybridEncrypt {
                   EciesParameters.PointFormat.LEGACY_UNCOMPRESSED)
               .build();
 
-  public EciesAeadHkdfHybridEncrypt(
-      final ECPublicKey recipientPublicKey,
-      final byte[] hkdfSalt,
-      String hkdfHmacAlgo,
-      EllipticCurves.PointFormatType ecPointFormat,
-      EciesAeadHkdfDemHelper demHelper)
-      throws GeneralSecurityException {
-    this(recipientPublicKey, hkdfSalt, hkdfHmacAlgo, ecPointFormat, demHelper, new byte[0]);
-  }
-
   private EciesAeadHkdfHybridEncrypt(
       final ECPublicKey recipientPublicKey,
       final byte[] hkdfSalt,
