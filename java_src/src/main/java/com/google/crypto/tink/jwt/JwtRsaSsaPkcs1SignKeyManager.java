@@ -17,12 +17,15 @@ package com.google.crypto.tink.jwt;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1Algorithm;
@@ -30,6 +33,7 @@ import com.google.crypto.tink.proto.JwtRsaSsaPkcs1KeyFormat;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1PrivateKey;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1PublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.signature.RsaSsaPkcs1PrivateKey;
 import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.Enums;
 import com.google.crypto.tink.subtle.RsaSsaPkcs1SignJce;
@@ -129,6 +133,46 @@ public final class JwtRsaSsaPkcs1SignKeyManager
       };
     }
   }
+
+  @AccessesPartialKey
+  private static RsaSsaPkcs1PrivateKey toRsaSsaPkcs1PrivateKey(
+      com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey privateKey)
+      throws GeneralSecurityException {
+    return RsaSsaPkcs1PrivateKey.builder()
+        .setPublicKey(
+            JwtRsaSsaPkcs1VerifyKeyManager.toRsaSsaPkcs1PublicKey(privateKey.getPublicKey()))
+        .setPrimes(privateKey.getPrimeP(), privateKey.getPrimeQ())
+        .setPrivateExponent(privateKey.getPrivateExponent())
+        .setPrimeExponents(privateKey.getPrimeExponentP(), privateKey.getPrimeExponentQ())
+        .setCrtCoefficient(privateKey.getCrtCoefficient())
+        .build();
+  }
+
+  @SuppressWarnings("Immutable") // RsaSsaPkcs1SignJce.create returns an immutable signer.
+  static JwtPublicKeySign createFullPrimitive(
+      com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey privateKey)
+      throws GeneralSecurityException {
+    RsaSsaPkcs1PrivateKey rsaSsaPkcs1PrivateKey = toRsaSsaPkcs1PrivateKey(privateKey);
+    final PublicKeySign signer = RsaSsaPkcs1SignJce.create(rsaSsaPkcs1PrivateKey);
+    String algorithm = privateKey.getParameters().getAlgorithm().getStandardName();
+    return new JwtPublicKeySign() {
+      @Override
+      public String signAndEncode(RawJwt rawJwt) throws GeneralSecurityException {
+        String unsignedCompact =
+            JwtFormat.createUnsignedCompact(algorithm, privateKey.getPublicKey().getKid(), rawJwt);
+        return JwtFormat.createSignedCompact(
+            unsignedCompact, signer.sign(unsignedCompact.getBytes(US_ASCII)));
+      }
+    };
+  }
+
+  private static final PrimitiveConstructor<
+          com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey, JwtPublicKeySign>
+      PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              JwtRsaSsaPkcs1SignKeyManager::createFullPrimitive,
+              com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey.class,
+              JwtPublicKeySign.class);
 
   JwtRsaSsaPkcs1SignKeyManager() {
     super(
@@ -315,6 +359,7 @@ public final class JwtRsaSsaPkcs1SignKeyManager
     JwtRsaSsaPkcs1ProtoSerialization.register();
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(JwtRsaSsaPkcs1VerifyKeyManager.PRIMITIVE_CONSTRUCTOR);
+    MutablePrimitiveRegistry.globalInstance().registerPrimitiveConstructor(PRIMITIVE_CONSTRUCTOR);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 }

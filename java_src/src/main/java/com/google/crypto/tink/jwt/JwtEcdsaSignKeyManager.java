@@ -17,12 +17,15 @@ package com.google.crypto.tink.jwt;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
+import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.internal.PrimitiveFactory;
 import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.proto.JwtEcdsaAlgorithm;
@@ -30,6 +33,7 @@ import com.google.crypto.tink.proto.JwtEcdsaKeyFormat;
 import com.google.crypto.tink.proto.JwtEcdsaPrivateKey;
 import com.google.crypto.tink.proto.JwtEcdsaPublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.signature.EcdsaPrivateKey;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
@@ -113,6 +117,40 @@ public final class JwtEcdsaSignKeyManager
       };
     }
   }
+
+  @AccessesPartialKey
+  private static EcdsaPrivateKey toEcdsaPrivateKey(
+      com.google.crypto.tink.jwt.JwtEcdsaPrivateKey privateKey) throws GeneralSecurityException {
+    return EcdsaPrivateKey.builder()
+        .setPublicKey(JwtEcdsaVerifyKeyManager.toEcdsaPublicKey(privateKey.getPublicKey()))
+        .setPrivateValue(privateKey.getPrivateValue())
+        .build();
+  }
+
+  @SuppressWarnings("Immutable") // EcdsaVerifyJce.create returns an immutable verifier.
+  static JwtPublicKeySign createFullPrimitive(
+      com.google.crypto.tink.jwt.JwtEcdsaPrivateKey privateKey) throws GeneralSecurityException {
+    EcdsaPrivateKey ecdsaPrivateKey = toEcdsaPrivateKey(privateKey);
+    final PublicKeySign signer = EcdsaSignJce.create(ecdsaPrivateKey);
+    String algorithm = privateKey.getParameters().getAlgorithm().getStandardName();
+    return new JwtPublicKeySign() {
+      @Override
+      public String signAndEncode(RawJwt rawJwt) throws GeneralSecurityException {
+        String unsignedCompact =
+            JwtFormat.createUnsignedCompact(algorithm, privateKey.getPublicKey().getKid(), rawJwt);
+        return JwtFormat.createSignedCompact(
+            unsignedCompact, signer.sign(unsignedCompact.getBytes(US_ASCII)));
+      }
+    };
+  }
+
+  private static final PrimitiveConstructor<
+          com.google.crypto.tink.jwt.JwtEcdsaPrivateKey, JwtPublicKeySign>
+      PRIMITIVE_CONSTRUCTOR =
+          PrimitiveConstructor.create(
+              JwtEcdsaSignKeyManager::createFullPrimitive,
+              com.google.crypto.tink.jwt.JwtEcdsaPrivateKey.class,
+              JwtPublicKeySign.class);
 
   JwtEcdsaSignKeyManager() {
     super(JwtEcdsaPrivateKey.class, JwtEcdsaPublicKey.class, new JwtPublicKeySignFactory());
@@ -252,6 +290,7 @@ public final class JwtEcdsaSignKeyManager
     JwtEcdsaProtoSerialization.register();
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(JwtEcdsaVerifyKeyManager.PRIMITIVE_CONSTRUCTOR);
+    MutablePrimitiveRegistry.globalInstance().registerPrimitiveConstructor(PRIMITIVE_CONSTRUCTOR);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
   }
 
