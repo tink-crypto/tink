@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,12 +16,9 @@
 
 package com.google.crypto.tink.signature.internal;
 
-import com.google.crypto.tink.proto.EcdsaParams;
 import com.google.crypto.tink.proto.EcdsaSignatureEncoding;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
-import com.google.crypto.tink.proto.RsaSsaPkcs1Params;
-import com.google.crypto.tink.proto.RsaSsaPssParams;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Enums;
 import com.google.protobuf.ByteString;
@@ -31,82 +28,6 @@ import java.security.GeneralSecurityException;
 /** Utility functions to convert to and from signature-related proto. */
 public final class SigUtil {
   static final String INVALID_PARAMS = "Invalid ECDSA parameters";
-
-  /**
-   * Validates Ecdsa's parameters. The hash's strength must not be weaker than the curve's strength.
-   *
-   * @param params the Ecdsa's parameters protocol buffer.
-   * @throws GeneralSecurityException iff it's invalid.
-   */
-  public static void validateEcdsaParams(EcdsaParams params) throws GeneralSecurityException {
-    EcdsaSignatureEncoding encoding = params.getEncoding();
-    HashType hash = params.getHashType();
-    EllipticCurveType curve = params.getCurve();
-    switch (encoding) {
-      case DER: // fall through
-      case IEEE_P1363:
-        break;
-      default:
-        throw new GeneralSecurityException("unsupported signature encoding");
-    }
-    switch (curve) {
-      case NIST_P256:
-        // Using SHA512 for curve P256 is fine. However, only the 256 leftmost bits of the hash is
-        // used in signature computation. Therefore, we don't allow it here to prevent security
-        // illusion.
-        if (hash != HashType.SHA256) {
-          throw new GeneralSecurityException(INVALID_PARAMS);
-        }
-        break;
-      case NIST_P384:
-        if (hash != HashType.SHA384 && hash != HashType.SHA512) {
-          throw new GeneralSecurityException(INVALID_PARAMS);
-        }
-        break;
-      case NIST_P521:
-        if (hash != HashType.SHA512) {
-          throw new GeneralSecurityException(INVALID_PARAMS);
-        }
-        break;
-      default:
-        throw new GeneralSecurityException(INVALID_PARAMS);
-    }
-  }
-
-  /**
-   * Validates RsaSsaPkcs1's parameters. As SHA1 is unsafe, we will only support SHA256 and SHA512
-   * for digital signature.
-   *
-   * @param params the RsaSsaPkcs1Params protocol buffer.
-   * @throws GeneralSecurityException iff it's invalid.
-   */
-  public static void validateRsaSsaPkcs1Params(RsaSsaPkcs1Params params)
-      throws GeneralSecurityException {
-    Enums.HashType unused = toHashType(params.getHashType());
-  }
-
-  /**
-   * Validates RsaSsaPss's parameters.
-   *
-   * <ul>
-   *   <li>The MGF1 hash function must be the same as the signature hash function.
-   *   <li>The hash function used must be either SHA256, SHA384, or SHA512.
-   *   <li>The salt length must be non-zero.
-   *       <ul>
-   *
-   * @param params the RsaSsaPssParams protocol buffer.
-   * @throws GeneralSecurityException iff it's invalid.
-   */
-  public static void validateRsaSsaPssParams(RsaSsaPssParams params)
-      throws GeneralSecurityException {
-    Object unused = toHashType(params.getSigHash());
-    if (params.getSigHash() != params.getMgf1Hash()) {
-      throw new GeneralSecurityException("MGF1 hash is different from signature hash");
-    }
-    if (params.getSaltLength() < 0) {
-      throw new GeneralSecurityException("salt length is negative");
-    }
-  }
 
   /**
    * Converts protobuf enum {@code HashType} to raw Java enum {@code Enums.HashType}.
