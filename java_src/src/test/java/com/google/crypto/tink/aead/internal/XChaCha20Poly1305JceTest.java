@@ -173,6 +173,35 @@ public class XChaCha20Poly1305JceTest {
   }
 
   @Test
+  public void testNullPlaintextOrCiphertext() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+    Assume.assumeTrue(XChaCha20Poly1305Jce.isSupported());
+
+    Aead aead = createInstance(Random.randBytes(KEY_SIZE));
+    byte[] aad = new byte[] {1, 2, 3};
+    assertThrows(
+        NullPointerException.class,
+        () -> {
+          byte[] unused = aead.encrypt(null, aad);
+        });
+    assertThrows(
+        NullPointerException.class,
+        () -> {
+          byte[] unused = aead.encrypt(null, null);
+        });
+    assertThrows(
+        NullPointerException.class,
+        () -> {
+          byte[] unused = aead.decrypt(null, aad);
+        });
+    assertThrows(
+        NullPointerException.class,
+        () -> {
+          byte[] unused = aead.decrypt(null, null);
+        });
+  }
+
+  @Test
   public void testLongMessages() throws Exception {
     Assume.assumeFalse(TinkFips.useOnlyFips());
     Assume.assumeTrue(XChaCha20Poly1305Jce.isSupported());
