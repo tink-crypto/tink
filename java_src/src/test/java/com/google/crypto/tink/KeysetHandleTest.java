@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import static org.junit.Assume.assumeFalse;
 import com.google.common.truth.Expect;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
+import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.aead.XChaCha20Poly1305Key;
 import com.google.crypto.tink.aead.XChaCha20Poly1305Parameters;
 import com.google.crypto.tink.internal.InternalConfiguration;
@@ -1966,5 +1967,15 @@ public class KeysetHandleTest {
             .build();
 
     assertTrue(keysetHandle1.equalsKeyset(keysetHandle2));
+  }
+
+  @Test
+  public void getPrimitive_wrongType_linksToDevsite() throws Exception {
+    KeysetHandle handle = KeysetHandle.generateNew(PredefinedAeadParameters.AES128_EAX);
+    GeneralSecurityException ex =
+        assertThrows(GeneralSecurityException.class, () -> handle.getPrimitive(Mac.class));
+    assertThat(ex)
+        .hasMessageThat()
+        .contains("https://developers.google.com/tink/registration_errors");
   }
 }

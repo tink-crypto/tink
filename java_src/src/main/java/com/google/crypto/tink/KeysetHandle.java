@@ -1109,7 +1109,8 @@ public final class KeysetHandle {
               "Unable to get primitive "
                   + inputPrimitiveClassObject
                   + " for key of type "
-                  + protoKey.getKeyData().getTypeUrl());
+                  + protoKey.getKeyData().getTypeUrl()
+                  + ", see https://developers.google.com/tink/registration_errors");
         }
         if (protoKey.getKeyId() == keyset.getPrimaryKeyId()) {
           builder.addPrimaryFullPrimitiveAndOptionalPrimitive(fullPrimitive, primitive, protoKey);
