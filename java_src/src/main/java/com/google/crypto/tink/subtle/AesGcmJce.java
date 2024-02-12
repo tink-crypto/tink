@@ -27,7 +27,11 @@ import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
+import java.security.spec.AlgorithmParameterSpec;
 import java.util.Arrays;
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * This primitive implements AesGcm using JCE.
@@ -39,8 +43,11 @@ public final class AesGcmJce implements Aead {
   public static final TinkFipsUtil.AlgorithmFipsCompatibility FIPS =
       TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
 
+  private static final int IV_SIZE_IN_BYTES = InsecureNonceAesGcmJce.IV_SIZE_IN_BYTES;
+  private static final int TAG_SIZE_IN_BYTES = InsecureNonceAesGcmJce.TAG_SIZE_IN_BYTES;
+
   @SuppressWarnings("Immutable")
-  private final InsecureNonceAesGcmJce insecureNonceAesGcmJce;
+  private final SecretKey keySpec;
 
   @SuppressWarnings("Immutable")
   private final byte[] outputPrefix;
@@ -50,7 +57,8 @@ public final class AesGcmJce implements Aead {
       throw new GeneralSecurityException(
           "Can not use AES-GCM in FIPS-mode, as BoringCrypto module is not available.");
     }
-    this.insecureNonceAesGcmJce = new InsecureNonceAesGcmJce(key, /*prependIv=*/ true);
+    Validators.validateAesKeySize(key.length);
+    this.keySpec = new SecretKeySpec(key, "AES");
     this.outputPrefix = outputPrefix.toByteArray();
   }
 
@@ -60,11 +68,11 @@ public final class AesGcmJce implements Aead {
 
   @AccessesPartialKey
   public static Aead create(AesGcmKey key) throws GeneralSecurityException {
-    if (key.getParameters().getIvSizeBytes() != InsecureNonceAesGcmJce.IV_SIZE_IN_BYTES) {
+    if (key.getParameters().getIvSizeBytes() != IV_SIZE_IN_BYTES) {
       throw new GeneralSecurityException(
           "Expected IV Size 12, got " + key.getParameters().getIvSizeBytes());
     }
-    if (key.getParameters().getTagSizeBytes() != InsecureNonceAesGcmJce.TAG_SIZE_IN_BYTES) {
+    if (key.getParameters().getTagSizeBytes() != TAG_SIZE_IN_BYTES) {
       throw new GeneralSecurityException(
           "Expected tag Size 16, got " + key.getParameters().getTagSizeBytes());
     }
@@ -80,33 +88,65 @@ public final class AesGcmJce implements Aead {
   @Override
   public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
       throws GeneralSecurityException {
-    byte[] iv = Random.randBytes(InsecureNonceAesGcmJce.IV_SIZE_IN_BYTES);
-    if (outputPrefix.length == 0) {
-      return insecureNonceAesGcmJce.encrypt(iv, plaintext, associatedData);
-    } else {
-      return com.google.crypto.tink.subtle.Bytes.concat(
-          outputPrefix, insecureNonceAesGcmJce.encrypt(iv, plaintext, associatedData));
+    if (plaintext == null) {
+      throw new NullPointerException("plaintext is null");
     }
+    byte[] nonce = Random.randBytes(IV_SIZE_IN_BYTES);
+    AlgorithmParameterSpec params = InsecureNonceAesGcmJce.getParams(nonce);
+    Cipher cipher = InsecureNonceAesGcmJce.getThreadLocalCipher();
+    cipher.init(Cipher.ENCRYPT_MODE, keySpec, params);
+    if (associatedData != null && associatedData.length != 0) {
+      cipher.updateAAD(associatedData);
+    }
+    int outputSize = cipher.getOutputSize(plaintext.length);
+    if (outputSize > Integer.MAX_VALUE - outputPrefix.length - IV_SIZE_IN_BYTES) {
+      throw new GeneralSecurityException("plaintext too long");
+    }
+    int len = outputPrefix.length + IV_SIZE_IN_BYTES + outputSize;
+    byte[] output = Arrays.copyOf(outputPrefix, len);
+    System.arraycopy(
+        /* src= */ nonce,
+        /* srcPos= */ 0,
+        /* dest= */ output,
+        /* destPos= */ outputPrefix.length,
+        /* length= */ IV_SIZE_IN_BYTES);
+    int written =
+        cipher.doFinal(
+            plaintext, 0, plaintext.length, output, outputPrefix.length + IV_SIZE_IN_BYTES);
+    if (written != outputSize) {
+      throw new GeneralSecurityException("not enough data written");
+    }
+    return output;
   }
 
-  /**
-   * On Android KitKat (API level 19) this method does not support non null or non empty {@code
-   * associatedData}. It might not work at all in older versions.
-   */
   @Override
   public byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
       throws GeneralSecurityException {
-    if (outputPrefix.length == 0) {
-      byte[] iv = Arrays.copyOf(ciphertext, InsecureNonceAesGcmJce.IV_SIZE_IN_BYTES);
-      return insecureNonceAesGcmJce.decrypt(iv, ciphertext, associatedData);
-    } else {
-      if (!isPrefix(outputPrefix, ciphertext)) {
-        throw new GeneralSecurityException("Decryption failed (OutputPrefix mismatch).");
-      }
-      byte[] ciphertextNoPrefix =
-          Arrays.copyOfRange(ciphertext, outputPrefix.length, ciphertext.length);
-      byte[] iv = Arrays.copyOf(ciphertextNoPrefix, InsecureNonceAesGcmJce.IV_SIZE_IN_BYTES);
-      return insecureNonceAesGcmJce.decrypt(iv, ciphertextNoPrefix, associatedData);
+    if (ciphertext == null) {
+      throw new NullPointerException("ciphertext is null");
     }
+    if (ciphertext.length < outputPrefix.length + IV_SIZE_IN_BYTES + TAG_SIZE_IN_BYTES) {
+      throw new GeneralSecurityException("ciphertext too short");
+    }
+    if (!isPrefix(outputPrefix, ciphertext)) {
+      throw new GeneralSecurityException("Decryption failed (OutputPrefix mismatch).");
+    }
+    byte[] nonce = new byte[IV_SIZE_IN_BYTES];
+    System.arraycopy(
+        /* src= */ ciphertext,
+        /* srcPos= */ outputPrefix.length,
+        /* dest= */ nonce,
+        /* destPos= */ 0,
+        /* length= */ IV_SIZE_IN_BYTES);
+    AlgorithmParameterSpec params = InsecureNonceAesGcmJce.getParams(nonce);
+
+    Cipher cipher = InsecureNonceAesGcmJce.getThreadLocalCipher();
+    cipher.init(Cipher.DECRYPT_MODE, keySpec, params);
+    if (associatedData != null && associatedData.length != 0) {
+      cipher.updateAAD(associatedData);
+    }
+    int offset = outputPrefix.length + IV_SIZE_IN_BYTES;
+    int len = ciphertext.length - outputPrefix.length - IV_SIZE_IN_BYTES;
+    return cipher.doFinal(ciphertext, offset, len);
   }
 }

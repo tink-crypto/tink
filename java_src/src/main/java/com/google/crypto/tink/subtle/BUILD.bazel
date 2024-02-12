@@ -340,8 +340,8 @@ java_library(
     name = "aes_gcm_jce",
     srcs = ["AesGcmJce.java"],
     deps = [
-        ":bytes",
         ":random",
+        ":validators",
         "//src/main/java/com/google/crypto/tink:accesses_partial_key",
         "//src/main/java/com/google/crypto/tink:aead",
         "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
@@ -680,8 +680,8 @@ android_library(
     name = "aes_gcm_jce-android",
     srcs = ["AesGcmJce.java"],
     deps = [
-        ":bytes-android",
         ":random-android",
+        ":validators-android",
         "//src/main/java/com/google/crypto/tink:accesses_partial_key-android",
         "//src/main/java/com/google/crypto/tink:aead-android",
         "//src/main/java/com/google/crypto/tink:insecure_secret_key_access-android",

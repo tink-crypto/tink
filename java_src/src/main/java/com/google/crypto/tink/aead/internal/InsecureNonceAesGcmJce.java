@@ -54,6 +54,11 @@ public final class InsecureNonceAesGcmJce {
         }
       };
 
+  /** Returns a thread-local instance of the AES-GCM cipher. */
+  public static Cipher getThreadLocalCipher() {
+    return localCipher.get();
+  }
+
   private final SecretKey keySpec;
   private final boolean prependIv;
 
@@ -143,7 +148,7 @@ public final class InsecureNonceAesGcmJce {
     return localCipher.get().doFinal(ciphertext, ciphertextInputOffset, ciphertextLength);
   }
 
-  private static AlgorithmParameterSpec getParams(final byte[] iv) throws GeneralSecurityException {
+  public static AlgorithmParameterSpec getParams(final byte[] iv) throws GeneralSecurityException {
     return getParams(iv, 0, iv.length);
   }
 
