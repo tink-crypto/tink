@@ -161,7 +161,12 @@ public final class ChaCha20Poly1305Jce implements Aead {
     }
     int len = outputPrefix.length + NONCE_SIZE_IN_BYTES + outputSize;
     byte[] output = Arrays.copyOf(outputPrefix, len);
-    System.arraycopy(nonce, 0, output, outputPrefix.length, NONCE_SIZE_IN_BYTES);
+    System.arraycopy(
+        /* src= */ nonce,
+        /* srcPos= */ 0,
+        /* dest= */ output,
+        /* destPos= */ outputPrefix.length,
+        /* length= */ NONCE_SIZE_IN_BYTES);
     int written =
         cipher.doFinal(
             plaintext, 0, plaintext.length, output, outputPrefix.length + NONCE_SIZE_IN_BYTES);
@@ -185,7 +190,12 @@ public final class ChaCha20Poly1305Jce implements Aead {
     }
 
     byte[] nonce = new byte[NONCE_SIZE_IN_BYTES];
-    System.arraycopy(ciphertext, outputPrefix.length, nonce, 0, NONCE_SIZE_IN_BYTES);
+    System.arraycopy(
+        /* src= */ ciphertext,
+        /* srcPos= */ outputPrefix.length,
+        /* dest= */ nonce,
+        /* destPos= */ 0,
+        /* length= */ NONCE_SIZE_IN_BYTES);
     AlgorithmParameterSpec params = new IvParameterSpec(nonce);
 
     Cipher cipher = localCipher.get();
