@@ -19,6 +19,7 @@ package com.google.crypto.tink;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.crypto.tink.internal.MonitoringUtil;
+import com.google.crypto.tink.internal.PrimitiveSet;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
 import com.google.crypto.tink.proto.KeyStatusType;

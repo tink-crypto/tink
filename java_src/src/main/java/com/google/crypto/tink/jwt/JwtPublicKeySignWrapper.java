@@ -16,9 +16,9 @@
 
 package com.google.crypto.tink.jwt;
 
-import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveSet;
 import java.security.GeneralSecurityException;
 
 /**

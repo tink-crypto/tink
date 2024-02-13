@@ -17,7 +17,6 @@
 package com.google.crypto.tink.internal;
 
 import com.google.crypto.tink.Key;
-import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.atomic.AtomicReference;

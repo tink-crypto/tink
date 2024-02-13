@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink;
+package com.google.crypto.tink.internal;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
@@ -23,7 +23,9 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.internal.LegacyProtoKey;
+import com.google.crypto.tink.CryptoFormat;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.mac.HmacKey;
 import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
