@@ -580,6 +580,23 @@ tink_cc_library(
     tink::util::statusor
 )
 
+tink_cc_library(
+  NAME aes_ctr_hmac_aead_parameters
+  SRCS
+    aes_ctr_hmac_aead_parameters.cc
+    aes_ctr_hmac_aead_parameters.h
+  DEPS
+    tink::aead::aead_parameters
+    absl::algorithm_container
+    absl::flat_hash_map
+    absl::status
+    absl::strings
+    absl::optional
+    tink::core::parameters
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -1122,6 +1139,18 @@ tink_cc_test(
     absl::optional
     tink::core::partial_key_access
     tink::core::restricted_data
+    tink::util::statusor
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME aes_ctr_hmac_aead_parameters_test
+  SRCS
+    aes_ctr_hmac_aead_parameters_test.cc
+  DEPS
+    tink::aead::aes_ctr_hmac_aead_parameters
+    gmock
+    absl::status
     tink::util::statusor
     tink::util::test_matchers
 )
