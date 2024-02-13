@@ -18,6 +18,8 @@ package com.google.crypto.tink;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.crypto.tink.aead.AesGcmKey;
+import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.internal.MonitoringUtil;
 import com.google.crypto.tink.internal.PrimitiveSet;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
@@ -25,8 +27,10 @@ import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.subtle.AesGcmJce;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.util.SecretBytes;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +44,15 @@ public final class MonitoringUtilTest {
 
   @Test
   public void monitoringKeysetInfoFromPrimitiveSet() throws Exception {
-    Keyset.Key key =
+    AesGcmKey key =
+        AesGcmKey.builder()
+            .setParameters(PredefinedAeadParameters.AES128_GCM)
+            .setKeyBytes(SecretBytes.copyFrom(KEY, InsecureSecretKeyAccess.get()))
+            .setIdRequirement(42)
+            .build();
+    Aead fullPrimitive = AesGcmJce.create(key);
+    // Also create protoKey, because it is currently needed.
+    Keyset.Key protoKey =
         TestUtil.createKey(
             TestUtil.createAesGcmKeyData(KEY), 42, KeyStatusType.ENABLED, OutputPrefixType.TINK);
     MonitoringAnnotations annotations =
@@ -48,7 +60,7 @@ public final class MonitoringUtilTest {
     PrimitiveSet<Aead> primitives =
         PrimitiveSet.newBuilder(Aead.class)
             .setAnnotations(annotations)
-            .addPrimaryPrimitive(Registry.getPrimitive(key.getKeyData(), Aead.class), key)
+            .addPrimaryFullPrimitiveAndOptionalPrimitive(fullPrimitive, null, protoKey)
             .build();
     MonitoringKeysetInfo keysetInfo = MonitoringUtil.getMonitoringKeysetInfo(primitives);
     assertThat(keysetInfo.getAnnotations()).isEqualTo(annotations);
@@ -63,10 +75,25 @@ public final class MonitoringUtilTest {
 
   @Test
   public void monitoringKeysetInfoFromPrimitiveSetTwoEntries() throws Exception {
-    Keyset.Key key1 =
+    AesGcmKey key1 =
+        AesGcmKey.builder()
+            .setParameters(PredefinedAeadParameters.AES128_GCM)
+            .setKeyBytes(SecretBytes.copyFrom(KEY, InsecureSecretKeyAccess.get()))
+            .setIdRequirement(42)
+            .build();
+    Aead fullPrimitive1 = AesGcmJce.create(key1);
+    AesGcmKey key2 =
+        AesGcmKey.builder()
+            .setParameters(PredefinedAeadParameters.AES128_GCM)
+            .setKeyBytes(SecretBytes.copyFrom(KEY2, InsecureSecretKeyAccess.get()))
+            .setIdRequirement(43)
+            .build();
+    Aead fullPrimitive2 = AesGcmJce.create(key2);
+    // Also create protoKey, because it is currently needed.
+    Keyset.Key protoKey1 =
         TestUtil.createKey(
             TestUtil.createAesGcmKeyData(KEY), 42, KeyStatusType.ENABLED, OutputPrefixType.TINK);
-    Keyset.Key key2 =
+    Keyset.Key protoKey2 =
         TestUtil.createKey(
             TestUtil.createAesGcmKeyData(KEY2), 43, KeyStatusType.ENABLED, OutputPrefixType.RAW);
     MonitoringAnnotations annotations =
@@ -74,8 +101,8 @@ public final class MonitoringUtilTest {
     PrimitiveSet<Aead> primitives =
         PrimitiveSet.newBuilder(Aead.class)
             .setAnnotations(annotations)
-            .addPrimaryPrimitive(Registry.getPrimitive(key1.getKeyData(), Aead.class), key1)
-            .addPrimitive(Registry.getPrimitive(key2.getKeyData(), Aead.class), key2)
+            .addPrimaryFullPrimitiveAndOptionalPrimitive(fullPrimitive1, null, protoKey1)
+            .addFullPrimitiveAndOptionalPrimitive(fullPrimitive2, null, protoKey2)
             .build();
     MonitoringKeysetInfo keysetInfo = MonitoringUtil.getMonitoringKeysetInfo(primitives);
     assertThat(keysetInfo.getEntries()).hasSize(2);
@@ -83,12 +110,20 @@ public final class MonitoringUtilTest {
 
   @Test
   public void monitoringKeysetInfoFromPrimitiveSetWithoutPrimaryAndAnnotations() throws Exception {
-    Keyset.Key key1 =
+    AesGcmKey key =
+        AesGcmKey.builder()
+            .setParameters(PredefinedAeadParameters.AES128_GCM)
+            .setKeyBytes(SecretBytes.copyFrom(KEY, InsecureSecretKeyAccess.get()))
+            .setIdRequirement(42)
+            .build();
+    Aead fullPrimitive = AesGcmJce.create(key);
+    // Also create protoKey, because it is currently needed.
+    Keyset.Key protoKey =
         TestUtil.createKey(
             TestUtil.createAesGcmKeyData(KEY), 42, KeyStatusType.ENABLED, OutputPrefixType.TINK);
     PrimitiveSet<Aead> primitives =
         PrimitiveSet.newBuilder(Aead.class)
-            .addPrimitive(Registry.getPrimitive(key1.getKeyData(), Aead.class), key1)
+            .addFullPrimitiveAndOptionalPrimitive(fullPrimitive, null, protoKey)
             .build();
     MonitoringKeysetInfo keysetInfo = MonitoringUtil.getMonitoringKeysetInfo(primitives);
     assertThat(keysetInfo.getPrimaryKeyId()).isNull();
