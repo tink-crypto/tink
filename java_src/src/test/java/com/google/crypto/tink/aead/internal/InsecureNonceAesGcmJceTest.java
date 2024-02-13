@@ -71,31 +71,13 @@ public class InsecureNonceAesGcmJceTest {
   }
 
   @Test
-  public void testEncryptDecrypt_withPrependedIv() throws Exception {
+  public void testEncryptDecrypt() throws Exception {
     Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     byte[] aad = generateAad();
     for (int keySize : keySizeInBytes) {
       byte[] key = Random.randBytes(keySize);
-      InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(key, /*prependIv=*/ true);
-      for (int messageSize = 0; messageSize < 75; messageSize++) {
-        byte[] message = Random.randBytes(messageSize);
-        byte[] iv = Random.randBytes(InsecureNonceAesGcmJce.IV_SIZE_IN_BYTES);
-        byte[] ciphertext = gcm.encrypt(iv, message, aad);
-        byte[] decrypted = gcm.decrypt(iv, ciphertext, aad);
-        assertArrayEquals(message, decrypted);
-      }
-    }
-  }
-
-  @Test
-  public void testEncryptDecrypt_withoutPrependedIv() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
-
-    byte[] aad = generateAad();
-    for (int keySize : keySizeInBytes) {
-      byte[] key = Random.randBytes(keySize);
-      InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(key, /*prependIv=*/ false);
+      InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(key);
       for (int messageSize = 0; messageSize < 75; messageSize++) {
         byte[] message = Random.randBytes(messageSize);
         byte[] iv = Random.randBytes(InsecureNonceAesGcmJce.IV_SIZE_IN_BYTES);
@@ -113,8 +95,7 @@ public class InsecureNonceAesGcmJceTest {
     Assume.assumeNotNull(apiLevel);
     Assume.assumeTrue(apiLevel <= 19);
 
-    InsecureNonceAesGcmJce gcm =
-        new InsecureNonceAesGcmJce(Random.randBytes(16), /*prependIv=*/ false);
+    InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(Random.randBytes(16));
     byte[] message = Random.randBytes(20);
     byte[] aad = Random.randBytes(20);
     byte[] iv = Random.randBytes(InsecureNonceAesGcmJce.IV_SIZE_IN_BYTES);
@@ -134,7 +115,7 @@ public class InsecureNonceAesGcmJceTest {
       byte[] aad = Random.randBytes(dataSize / 3);
       for (int keySize : keySizeInBytes) {
         byte[] key = Random.randBytes(keySize);
-        InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(key, /*prependIv=*/ false);
+        InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(key);
         byte[] iv = Random.randBytes(InsecureNonceAesGcmJce.IV_SIZE_IN_BYTES);
         byte[] ciphertext = gcm.encrypt(iv, plaintext, aad);
         byte[] decrypted = gcm.decrypt(iv, ciphertext, aad);
@@ -151,7 +132,7 @@ public class InsecureNonceAesGcmJceTest {
     byte[] aad = generateAad();
     byte[] key = Random.randBytes(16);
     byte[] message = Random.randBytes(32);
-    InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(key, /*prependIv=*/ false);
+    InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(key);
     byte[] iv = Random.randBytes(InsecureNonceAesGcmJce.IV_SIZE_IN_BYTES);
     byte[] ciphertext = gcm.encrypt(iv, message, aad);
 
@@ -184,45 +165,13 @@ public class InsecureNonceAesGcmJceTest {
   }
 
   @Test
-  public void testModifyPrependedIv() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
-
-    byte[] aad = generateAad();
-    byte[] key = Random.randBytes(16);
-    byte[] message = Random.randBytes(32);
-    InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(key, /*prependIv=*/ true);
-    byte[] iv = Random.randBytes(InsecureNonceAesGcmJce.IV_SIZE_IN_BYTES);
-
-    byte[] ciphertext = gcm.encrypt(iv, message, aad);
-    ciphertext[0] = (byte) (ciphertext[0] ^ 1);  // Flip single bit in prepended IV.
-
-    assertThrows(GeneralSecurityException.class, () -> gcm.decrypt(iv, ciphertext, aad));
-  }
-
-  @Test
   public void testTruncatedCiphertext() throws Exception {
     Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     byte[] aad = generateAad();
     byte[] key = Random.randBytes(16);
     byte[] message = new byte[0];
-    InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(key, /*prependIv=*/ false);
-    byte[] iv = Random.randBytes(InsecureNonceAesGcmJce.IV_SIZE_IN_BYTES);
-
-    byte[] ciphertext = gcm.encrypt(iv, message, aad);
-    byte[] truncatedCiphertext = Arrays.copyOf(ciphertext, ciphertext.length - 1);
-
-    assertThrows(GeneralSecurityException.class, () -> gcm.decrypt(iv, truncatedCiphertext, aad));
-  }
-
-  @Test
-  public void testTruncatedCiphertextWithPrependedIv() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
-
-    byte[] aad = generateAad();
-    byte[] key = Random.randBytes(16);
-    byte[] message = new byte[0];
-    InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(key, /*prependIv=*/ true);
+    InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(key);
     byte[] iv = Random.randBytes(InsecureNonceAesGcmJce.IV_SIZE_IN_BYTES);
 
     byte[] ciphertext = gcm.encrypt(iv, message, aad);
@@ -276,7 +225,7 @@ public class InsecureNonceAesGcmJceTest {
         }
 
         try {
-          InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(key, /*prependIv=*/ false);
+          InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(key);
           // Encryption.
           byte[] encrypted = gcm.encrypt(iv, msg, aad);
           boolean ciphertextMatches = TestUtil.arrayEquals(encrypted, ciphertext);
@@ -319,8 +268,7 @@ public class InsecureNonceAesGcmJceTest {
     Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     for (int keySize : keySizeInBytes) {
-      InsecureNonceAesGcmJce gcm =
-          new InsecureNonceAesGcmJce(Random.randBytes(keySize), /*prependIv=*/ false);
+      InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(Random.randBytes(keySize));
       byte[] aad = generateAad();
       byte[] iv = Random.randBytes(InsecureNonceAesGcmJce.IV_SIZE_IN_BYTES);
       assertThrows(
@@ -353,7 +301,7 @@ public class InsecureNonceAesGcmJceTest {
     byte[] aad = new byte[0];
     for (int keySize : keySizeInBytes) {
       byte[] key = Random.randBytes(keySize);
-      InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(key, /*prependIv=*/ false);
+      InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(key);
       for (int messageSize = 0; messageSize < 75; messageSize++) {
         byte[] message = Random.randBytes(messageSize);
         {  // encrypting with aad as a 0-length array
@@ -412,7 +360,7 @@ public class InsecureNonceAesGcmJceTest {
     byte[] key = Random.randBytes(16);
     byte[] message = new byte[0];
     byte[] aad = generateAad();
-    InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(key, /*prependIv=*/ false);
+    InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(key);
     HashSet<String> ciphertexts = new HashSet<>();
     for (int i = 0; i < samples; i++) {
       byte[] iv = Random.randBytes(InsecureNonceAesGcmJce.IV_SIZE_IN_BYTES);
@@ -439,8 +387,6 @@ public class InsecureNonceAesGcmJceTest {
     Assume.assumeTrue(TinkFips.useOnlyFips() && !TinkFipsUtil.fipsModuleAvailable());
 
     byte[] key = Random.randBytes(16);
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> new InsecureNonceAesGcmJce(key, /*prependIv=*/ false));
+    assertThrows(GeneralSecurityException.class, () -> new InsecureNonceAesGcmJce(key));
   }
 }

@@ -39,7 +39,7 @@ final class AesGcmHpkeAead implements HpkeAead {
     if (key.length != keyLength) {
       throw new InvalidAlgorithmParameterException("Unexpected key length: " + key.length);
     }
-    InsecureNonceAesGcmJce aead = new InsecureNonceAesGcmJce(key, /*prependIv=*/ false);
+    InsecureNonceAesGcmJce aead = new InsecureNonceAesGcmJce(key);
     return aead.encrypt(nonce, plaintext, associatedData);
   }
 
@@ -49,7 +49,7 @@ final class AesGcmHpkeAead implements HpkeAead {
     if (key.length != keyLength) {
       throw new InvalidAlgorithmParameterException("Unexpected key length: " + key.length);
     }
-    InsecureNonceAesGcmJce aead = new InsecureNonceAesGcmJce(key, /*prependIv=*/ false);
+    InsecureNonceAesGcmJce aead = new InsecureNonceAesGcmJce(key);
     return aead.decrypt(nonce, ciphertext, associatedData);
   }
 
