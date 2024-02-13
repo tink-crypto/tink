@@ -31,9 +31,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Map;
 import javax.annotation.Nullable;
 
 /**
@@ -50,10 +50,6 @@ import javax.annotation.Nullable;
  * to do the actual crypto operations: to encrypt data the primary Aead-primitive from the set is
  * used, and upon decryption the ciphertext's prefix determines the id of the primitive from the
  * set.
- *
- * <p>PrimitiveSet is a public class to allow its use in implementations of custom primitives.
- *
- * @since 1.0.0
  */
 public final class PrimitiveSet<P> {
 
@@ -189,7 +185,7 @@ public final class PrimitiveSet<P> {
 
   private static <P> void storeEntryInPrimitiveSet(
       Entry<P> entry,
-      ConcurrentMap<Prefix, List<Entry<P>>> primitives,
+      Map<Prefix, List<Entry<P>>> primitives,
       List<Entry<P>> primitivesInKeysetOrder) {
     List<Entry<P>> list = new ArrayList<>();
     list.add(entry);
@@ -245,7 +241,7 @@ public final class PrimitiveSet<P> {
    * prefix). This allows quickly retrieving the list of primitives sharing some particular prefix.
    * Because all RAW keys are using an empty prefix, this also quickly allows retrieving them.
    */
-  private final ConcurrentMap<Prefix, List<Entry<P>>> primitives;
+  private final Map<Prefix, List<Entry<P>>> primitives;
 
   /** Stores entries in the original keyset key order. */
   private final List<Entry<P>> primitivesInKeysetOrder;
@@ -256,7 +252,7 @@ public final class PrimitiveSet<P> {
 
   /** Creates an immutable PrimitiveSet. It is used by the Builder. */
   private PrimitiveSet(
-      ConcurrentMap<Prefix, List<Entry<P>>> primitives,
+      Map<Prefix, List<Entry<P>>> primitives,
       List<Entry<P>> primitivesInKeysetOrder,
       Entry<P> primary,
       MonitoringAnnotations annotations,
@@ -318,7 +314,7 @@ public final class PrimitiveSet<P> {
 
     // primitives == null indicates that build has been called and the builder can't be used
     // anymore.
-    private ConcurrentMap<Prefix, List<Entry<P>>> primitives = new ConcurrentHashMap<>();
+    private Map<Prefix, List<Entry<P>>> primitives = new HashMap<>();
     private final List<Entry<P>> primitivesInKeysetOrder = new ArrayList<>();
     private Entry<P> primary;
     private MonitoringAnnotations annotations;
