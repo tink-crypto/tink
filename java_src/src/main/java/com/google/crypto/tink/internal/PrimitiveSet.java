@@ -250,18 +250,9 @@ public final class PrimitiveSet<P> {
   /** Stores entries in the original keyset key order. */
   private final List<Entry<P>> primitivesInKeysetOrder;
 
-  private Entry<P> primary;
+  private final Entry<P> primary;
   private final Class<P> primitiveClass;
   private final MonitoringAnnotations annotations;
-  private final boolean isMutable;
-
-  private PrimitiveSet(Class<P> primitiveClass) {
-    this.primitives = new ConcurrentHashMap<>();
-    this.primitivesInKeysetOrder = new ArrayList<>();
-    this.primitiveClass = primitiveClass;
-    this.annotations = MonitoringAnnotations.EMPTY;
-    this.isMutable = true;
-  }
 
   /** Creates an immutable PrimitiveSet. It is used by the Builder. */
   private PrimitiveSet(
@@ -275,65 +266,6 @@ public final class PrimitiveSet<P> {
     this.primary = primary;
     this.primitiveClass = primitiveClass;
     this.annotations = annotations;
-    this.isMutable = false;
-  }
-
-  /**
-   * Creates a new mutable PrimitiveSet.
-   *
-   * @deprecated use {@link Builder} instead.
-   */
-  @Deprecated
-  public static <P> PrimitiveSet<P> newPrimitiveSet(Class<P> primitiveClass) {
-    return new PrimitiveSet<P>(primitiveClass);
-  }
-
-  /**
-   * Sets given Entry {@code primary} as the primary one.
-   *
-   * @throws IllegalStateException if object has been created by the {@link Builder}.
-   * @deprecated use {@link Builder.addPrimaryPrimitive} instead.
-   */
-  @Deprecated
-  public void setPrimary(final Entry<P> primary) {
-    if (!isMutable) {
-      throw new IllegalStateException("setPrimary cannot be called on an immutable primitive set");
-    }
-    if (primary == null) {
-      throw new IllegalArgumentException("the primary entry must be non-null");
-    }
-    if (primary.getStatus() != KeyStatusType.ENABLED) {
-      throw new IllegalArgumentException("the primary entry has to be ENABLED");
-    }
-    List<Entry<P>> entries = getPrimitive(primary.getIdentifier());
-    if (entries.isEmpty()) {
-      throw new IllegalArgumentException(
-          "the primary entry cannot be set to an entry which is not held by this primitive set");
-    }
-    this.primary = primary;
-  }
-
-  /**
-   * Creates an entry in the primitive table.
-   *
-   * @return the added {@link Entry}
-   * @throws IllegalStateException if object has been created by the {@link Builder}.
-   * @deprecated use {@link Builder.addPrimitive} or {@link Builder.addPrimaryPrimitive} instead.
-   */
-  @CanIgnoreReturnValue
-  @Deprecated
-  public Entry<P> addPrimitive(final P primitive, Keyset.Key key)
-      throws GeneralSecurityException {
-    if (!isMutable) {
-      throw new IllegalStateException(
-          "addPrimitive cannot be called on an immutable primitive set");
-    }
-    if (key.getStatus() != KeyStatusType.ENABLED) {
-      throw new GeneralSecurityException("only ENABLED key is allowed");
-    }
-    Entry<P> entry = createEntry(null, primitive, key);
-    storeEntryInPrimitiveSet(entry, primitives, primitivesInKeysetOrder);
-    return entry;
   }
 
   public Class<P> getPrimitiveClass() {
