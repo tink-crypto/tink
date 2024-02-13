@@ -141,9 +141,8 @@ public class RegistryTest {
     public EncryptOnly wrap(PrimitiveSet<Aead> set) throws GeneralSecurityException {
       return new EncryptOnly() {
         @Override
-        public byte[] encrypt(final byte[] plaintext)
-            throws GeneralSecurityException {
-          return set.getPrimary().getPrimitive().encrypt(plaintext, new byte[0]);
+        public byte[] encrypt(final byte[] plaintext) throws GeneralSecurityException {
+          return set.getPrimary().getFullPrimitive().encrypt(plaintext, new byte[0]);
         }
       };
     }

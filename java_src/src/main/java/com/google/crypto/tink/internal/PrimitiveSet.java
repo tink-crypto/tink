@@ -117,7 +117,7 @@ public final class PrimitiveSet<P> {
      * this is a primitive which <b>ignores</b> the output prefix and assumes "RAW".
      */
     @Nullable
-    public P getPrimitive() {
+    P getPrimitive() {
       return this.primitive;
     }
 

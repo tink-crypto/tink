@@ -132,7 +132,7 @@ public class KeysetHandleTest {
       @Override
       public byte[] encrypt(final byte[] plaintext) throws GeneralSecurityException {
         logger.log(primitiveSet.getPrimary().getKeyId(), plaintext.length);
-        return primitiveSet.getPrimary().getPrimitive().encrypt(plaintext, new byte[0]);
+        return primitiveSet.getPrimary().getFullPrimitive().encrypt(plaintext, new byte[0]);
       }
     }
 

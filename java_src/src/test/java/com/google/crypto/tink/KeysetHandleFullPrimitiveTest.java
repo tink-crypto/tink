@@ -239,7 +239,6 @@ public class KeysetHandleFullPrimitiveTest {
     for (List<Entry<SingleTestPrimitive>> list : primitive.getPrimitiveSet().getAll()) {
       for (PrimitiveSet.Entry<SingleTestPrimitive> entry : list) {
         assertThat(entry.getFullPrimitive()).isNotNull();
-        assertThat(entry.getPrimitive()).isNull();
       }
     }
   }
@@ -332,7 +331,6 @@ public class KeysetHandleFullPrimitiveTest {
     for (List<Entry<Mac>> list : primitive.getPrimitiveSet().getAll()) {
       for (PrimitiveSet.Entry<Mac> entry : list) {
         assertThat(entry.getFullPrimitive()).isNotNull();
-        assertThat(entry.getPrimitive()).isNotNull();
       }
     }
   }
