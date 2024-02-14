@@ -36,7 +36,7 @@ import java.security.GeneralSecurityException;
 public class LegacyAesGcmHkdfStreamingTestKeyManager implements KeyManager<StreamingAead> {
   /** Type url that this manager does support. */
   public static final String TYPE_URL =
-      "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey";
+      "type.googleapis.com/custom.AesGcmHkdfStreamingKey";
 
   private static final int NONCE_PREFIX_IN_BYTES = 7;
   private static final int TAG_SIZE_IN_BYTES = 16;

@@ -45,7 +45,7 @@ import org.junit.runners.JUnit4;
 public class LegacyAesGcmHkdfStreamingTestKeyManagerTest {
   /** Type url that this manager supports. */
   public static final String TYPE_URL =
-      "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey";
+      "type.googleapis.com/custom.AesGcmHkdfStreamingKey";
 
   @BeforeClass
   public static void setUp() throws Exception {
