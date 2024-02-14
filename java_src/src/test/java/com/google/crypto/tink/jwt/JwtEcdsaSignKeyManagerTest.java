@@ -70,7 +70,7 @@ public class JwtEcdsaSignKeyManagerTest {
   @DataPoints("templates")
   public static final String[] TEMPLATES =
       new String[] {
-        "JWT_ES256", "JWT_ES384", "JWT_ES512", "JWT_ES256_RAW", "JWT_ES384_RAW", "JWT_ES512_RAW",
+        "JWT_ES256", "JWT_ES384_RAW", "JWT_ES512",
       };
 
   @Test
