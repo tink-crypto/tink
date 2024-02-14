@@ -159,8 +159,7 @@ public class RegistryConfigurationTest {
         RegistryConfiguration.get()
             .wrap(
                 PrimitiveSet.newBuilder(Mac.class)
-                    .addPrimaryFullPrimitiveAndOptionalPrimitive(
-                        LegacyFullMac.create(legacyProtoRawKey), null, rawKeysetKey)
+                    .addPrimaryFullPrimitive(LegacyFullMac.create(legacyProtoRawKey), rawKeysetKey)
                     .build(),
                 Mac.class);
 

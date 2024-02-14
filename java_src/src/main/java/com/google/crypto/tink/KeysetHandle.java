@@ -1091,10 +1091,9 @@ public final class KeysetHandle {
     for (int i = 0; i < size(); ++i) {
       Keyset.Key protoKey = keyset.getKey(i);
       if (protoKey.getStatus().equals(KeyStatusType.ENABLED)) {
-        @Nullable
-        B primitive = getLegacyPrimitiveOrNull(config, protoKey, inputPrimitiveClassObject);
-        // Entries.get(i) may be null (if the status is invalid in the proto, or parsing failed).
-        if (entries.get(i) == null) {
+        KeysetHandle.Entry entry = entries.get(i);
+        // entry may be null (if the status is invalid in the proto, or parsing failed).
+        if (entry == null) {
           throw new GeneralSecurityException(
               "Key parsing of key with index "
                   + i
@@ -1102,10 +1101,10 @@ public final class KeysetHandle {
                   + protoKey.getKeyData().getTypeUrl()
                   + " failed, unable to get primitive");
         }
-        @Nullable
-        B fullPrimitive =
-            getFullPrimitiveOrNull(config, entries.get(i).getKey(), inputPrimitiveClassObject);
-        if (fullPrimitive == null && primitive == null) {
+        Key key = entry.getKey();
+        // TODO(tholenst) Pass the exception from getFullPrimitiveOrNull.
+        @Nullable B fullPrimitive = getFullPrimitiveOrNull(config, key, inputPrimitiveClassObject);
+        if (fullPrimitive == null) {
           throw new GeneralSecurityException(
               "Unable to get primitive "
                   + inputPrimitiveClassObject
@@ -1114,9 +1113,9 @@ public final class KeysetHandle {
                   + ", see https://developers.google.com/tink/registration_errors");
         }
         if (protoKey.getKeyId() == keyset.getPrimaryKeyId()) {
-          builder.addPrimaryFullPrimitiveAndOptionalPrimitive(fullPrimitive, primitive, protoKey);
+          builder.addPrimaryFullPrimitive(fullPrimitive, protoKey);
         } else {
-          builder.addFullPrimitiveAndOptionalPrimitive(fullPrimitive, primitive, protoKey);
+          builder.addFullPrimitive(fullPrimitive, protoKey);
         }
       }
     }
@@ -1170,41 +1169,6 @@ public final class KeysetHandle {
       }
     }
     throw new GeneralSecurityException("No primary key found in keyset.");
-  }
-
-  private static Set<Class<?>> createSetWhichDoesNotNeedLegacyPrimitive() {
-    HashSet<Class<?>> result = new HashSet<>();
-    result.add(PublicKeySign.class);
-    result.add(PublicKeyVerify.class);
-    result.add(HybridEncrypt.class);
-    result.add(HybridDecrypt.class);
-    return result;
-  }
-
-  private static final Set<Class<?>> doesNotNeedLegacyPrimitive =
-      Collections.unmodifiableSet(createSetWhichDoesNotNeedLegacyPrimitive());
-
-  @Nullable
-  private static <B> B getLegacyPrimitiveOrNull(
-      InternalConfiguration config, Keyset.Key key, Class<B> inputPrimitiveClassObject)
-      throws GeneralSecurityException {
-    if (doesNotNeedLegacyPrimitive.contains(inputPrimitiveClassObject)) {
-      return null;
-    }
-    try {
-      return config.getLegacyPrimitive(key.getKeyData(), inputPrimitiveClassObject);
-    } catch (GeneralSecurityException e) {
-      if (e.getMessage().contains("No key manager found for key type ")
-          || e.getMessage().contains(" not supported by key manager of type ")) {
-        // Ignoring because the key may not have a corresponding legacy key manager.
-        return null;
-      }
-      // Otherwise the error is likely legit. Do not swallow.
-      throw e;
-    } catch (UnsupportedOperationException e) {
-      // We are using the new configuration that doesn't work with proto keys.
-      return null;
-    }
   }
 
   @Nullable
