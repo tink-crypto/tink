@@ -1399,8 +1399,8 @@ public class RegistryTest {
         TestUtil.createKey(
             TestUtil.createAesGcmKeyData(KEY2), 43, KeyStatusType.ENABLED, OutputPrefixType.RAW);
     return PrimitiveSet.newBuilder(Aead.class)
-        .addPrimaryFullPrimitive(fullPrimitive1, protoKey1)
-        .addFullPrimitive(fullPrimitive2, protoKey2)
+        .addPrimaryFullPrimitive(fullPrimitive1, key1, protoKey1)
+        .addFullPrimitive(fullPrimitive2, key2, protoKey2)
         .build();
   }
 

@@ -1112,9 +1112,9 @@ public final class KeysetHandle {
                   + ", see https://developers.google.com/tink/registration_errors");
         }
         if (protoKey.getKeyId() == keyset.getPrimaryKeyId()) {
-          builder.addPrimaryFullPrimitive(fullPrimitive, protoKey);
+          builder.addPrimaryFullPrimitive(fullPrimitive, key, protoKey);
         } else {
-          builder.addFullPrimitive(fullPrimitive, protoKey);
+          builder.addFullPrimitive(fullPrimitive, key, protoKey);
         }
       }
     }

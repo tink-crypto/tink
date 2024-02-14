@@ -60,7 +60,7 @@ public final class MonitoringUtilTest {
     PrimitiveSet<Aead> primitives =
         PrimitiveSet.newBuilder(Aead.class)
             .setAnnotations(annotations)
-            .addPrimaryFullPrimitive(fullPrimitive, protoKey)
+            .addPrimaryFullPrimitive(fullPrimitive, key, protoKey)
             .build();
     MonitoringKeysetInfo keysetInfo = MonitoringUtil.getMonitoringKeysetInfo(primitives);
     assertThat(keysetInfo.getAnnotations()).isEqualTo(annotations);
@@ -101,8 +101,8 @@ public final class MonitoringUtilTest {
     PrimitiveSet<Aead> primitives =
         PrimitiveSet.newBuilder(Aead.class)
             .setAnnotations(annotations)
-            .addPrimaryFullPrimitive(fullPrimitive1, protoKey1)
-            .addFullPrimitive(fullPrimitive2, protoKey2)
+            .addPrimaryFullPrimitive(fullPrimitive1, key1, protoKey1)
+            .addFullPrimitive(fullPrimitive2, key2, protoKey2)
             .build();
     MonitoringKeysetInfo keysetInfo = MonitoringUtil.getMonitoringKeysetInfo(primitives);
     assertThat(keysetInfo.getEntries()).hasSize(2);
@@ -122,7 +122,7 @@ public final class MonitoringUtilTest {
         TestUtil.createKey(
             TestUtil.createAesGcmKeyData(KEY), 42, KeyStatusType.ENABLED, OutputPrefixType.TINK);
     PrimitiveSet<Aead> primitives =
-        PrimitiveSet.newBuilder(Aead.class).addFullPrimitive(fullPrimitive, protoKey).build();
+        PrimitiveSet.newBuilder(Aead.class).addFullPrimitive(fullPrimitive, key, protoKey).build();
     MonitoringKeysetInfo keysetInfo = MonitoringUtil.getMonitoringKeysetInfo(primitives);
     assertThat(keysetInfo.getPrimaryKeyId()).isNull();
     assertThat(keysetInfo.getAnnotations().toMap()).isEmpty();

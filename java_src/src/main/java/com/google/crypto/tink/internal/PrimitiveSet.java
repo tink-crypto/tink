@@ -17,7 +17,6 @@
 package com.google.crypto.tink.internal;
 
 import com.google.crypto.tink.CryptoFormat;
-import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
@@ -140,30 +139,16 @@ public final class PrimitiveSet<P> {
     }
   }
 
-  private static <P> Entry<P> createEntry(@Nullable P fullPrimitive, Keyset.Key key)
+  private static <P> Entry<P> createEntry(@Nullable P fullPrimitive, Key key, Keyset.Key protoKey)
       throws GeneralSecurityException {
-    @Nullable Integer idRequirement = key.getKeyId();
-    if (key.getOutputPrefixType() == OutputPrefixType.RAW) {
-      idRequirement = null;
-    }
-    Key keyObject =
-        MutableSerializationRegistry.globalInstance()
-            .parseKeyWithLegacyFallback(
-                ProtoKeySerialization.create(
-                    key.getKeyData().getTypeUrl(),
-                    key.getKeyData().getValue(),
-                    key.getKeyData().getKeyMaterialType(),
-                    key.getOutputPrefixType(),
-                    idRequirement),
-                InsecureSecretKeyAccess.get());
     return new Entry<P>(
         fullPrimitive,
-        CryptoFormat.getOutputPrefix(key),
-        key.getStatus(),
-        key.getOutputPrefixType(),
-        key.getKeyId(),
-        key.getKeyData().getTypeUrl(),
-        keyObject);
+        CryptoFormat.getOutputPrefix(protoKey),
+        protoKey.getStatus(),
+        protoKey.getOutputPrefixType(),
+        protoKey.getKeyId(),
+        protoKey.getKeyData().getTypeUrl(),
+        key);
   }
 
   private static <P> void storeEntryInPrimitiveSet(
@@ -304,7 +289,7 @@ public final class PrimitiveSet<P> {
 
     @CanIgnoreReturnValue
     private Builder<P> addPrimitive(
-        @Nullable final P fullPrimitive, Keyset.Key key, boolean asPrimary)
+        @Nullable final P fullPrimitive, Key key, Keyset.Key protoKey, boolean asPrimary)
         throws GeneralSecurityException {
       if (primitives == null) {
         throw new IllegalStateException("addPrimitive cannot be called after build");
@@ -312,10 +297,10 @@ public final class PrimitiveSet<P> {
       if (fullPrimitive == null) {
         throw new GeneralSecurityException("at least one of the `fullPrimitive` must be set");
       }
-      if (key.getStatus() != KeyStatusType.ENABLED) {
+      if (protoKey.getStatus() != KeyStatusType.ENABLED) {
         throw new GeneralSecurityException("only ENABLED key is allowed");
       }
-      Entry<P> entry = createEntry(fullPrimitive, key);
+      Entry<P> entry = createEntry(fullPrimitive, key, protoKey);
       storeEntryInPrimitiveSet(entry, primitives, primitivesInKeysetOrder);
       if (asPrimary) {
         if (this.primary != null) {
@@ -327,9 +312,10 @@ public final class PrimitiveSet<P> {
     }
 
     @CanIgnoreReturnValue
-    public Builder<P> addFullPrimitive(@Nullable final P fullPrimitive, Keyset.Key key)
+    public Builder<P> addFullPrimitive(
+        @Nullable final P fullPrimitive, Key key, Keyset.Key protoKey)
         throws GeneralSecurityException {
-      return addPrimitive(fullPrimitive, key, false);
+      return addPrimitive(fullPrimitive, key, protoKey, false);
     }
 
     /**
@@ -337,9 +323,10 @@ public final class PrimitiveSet<P> {
      * exactly once per PrimitiveSet.
      */
     @CanIgnoreReturnValue
-    public Builder<P> addPrimaryFullPrimitive(@Nullable final P fullPrimitive, Keyset.Key key)
+    public Builder<P> addPrimaryFullPrimitive(
+        @Nullable final P fullPrimitive, Key key, Keyset.Key protoKey)
         throws GeneralSecurityException {
-      return addPrimitive(fullPrimitive, key, true);
+      return addPrimitive(fullPrimitive, key, protoKey, true);
     }
 
     @CanIgnoreReturnValue
