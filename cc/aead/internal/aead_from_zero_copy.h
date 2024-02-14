@@ -22,6 +22,7 @@
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/aead/internal/zero_copy_aead.h"
 #include "tink/subtle/subtle_util.h"

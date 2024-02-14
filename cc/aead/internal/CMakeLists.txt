@@ -8,6 +8,7 @@ tink_cc_library(
   DEPS
     absl::flat_hash_set
     absl::status
+    absl::string_view
     crypto
     tink::util::errors
     tink::util::statusor
@@ -32,6 +33,7 @@ tink_cc_library(
     ssl_aead.h
   DEPS
     tink::aead::internal::aead_util
+    absl::core_headers
     absl::cleanup
     absl::memory
     absl::status
@@ -54,8 +56,10 @@ tink_cc_library(
     cord_aes_gcm_boringssl.h
   DEPS
     tink::aead::internal::aead_util
+    absl::memory
     absl::status
     absl::cord
+    absl::string_view
     crypto
     tink::aead::cord_aead
     tink::internal::ssl_unique_ptr
@@ -74,6 +78,7 @@ tink_cc_library(
     tink::aead::internal::zero_copy_aead
     gmock
     absl::strings
+    absl::span
     tink::util::statusor
   TESTONLY
 )
@@ -87,6 +92,8 @@ tink_cc_library(
     tink::aead::internal::zero_copy_aead
     absl::memory
     absl::status
+    absl::string_view
+    absl::span
     tink::core::aead
     tink::subtle::subtle_util
     tink::util::status
@@ -99,6 +106,7 @@ tink_cc_library(
     zero_copy_aead.h
   DEPS
     absl::strings
+    absl::span
     tink::util::statusor
 )
 
@@ -109,12 +117,16 @@ tink_cc_library(
     zero_copy_aead_wrapper.h
   DEPS
     tink::aead::internal::zero_copy_aead
+    absl::memory
+    absl::status
     absl::strings
+    absl::span
     tink::core::aead
     tink::core::crypto_format
     tink::core::primitive_set
     tink::core::primitive_wrapper
     tink::subtle::subtle_util
+    tink::util::status
     tink::util::statusor
 )
 
@@ -131,6 +143,7 @@ tink_cc_library(
     absl::memory
     absl::status
     absl::strings
+    absl::span
     tink::internal::util
     tink::subtle::random
     tink::subtle::subtle_util
@@ -182,6 +195,7 @@ tink_cc_test(
     tink::aead::internal::aead_util
     gmock
     crypto
+    tink::util::statusor
     tink::util::test_matchers
 )
 
@@ -239,6 +253,7 @@ tink_cc_test(
     absl::status
     absl::strings
     absl::span
+    tink::util::status
     tink::util::statusor
     tink::util::test_matchers
 )
@@ -259,6 +274,7 @@ tink_cc_test(
     absl::span
     crypto
     tink::subtle::subtle_util
+    tink::util::secret_data
     tink::util::statusor
     tink::util::test_matchers
 )
@@ -280,6 +296,7 @@ tink_cc_test(
     tink::internal::util
     tink::subtle::subtle_util
     tink::util::secret_data
+    tink::util::status
     tink::util::statusor
     tink::util::test_matchers
 )
@@ -290,10 +307,20 @@ tink_cc_test(
     zero_copy_aead_wrapper_test.cc
   DEPS
     tink::aead::internal::mock_zero_copy_aead
+    tink::aead::internal::zero_copy_aead
     tink::aead::internal::zero_copy_aead_wrapper
     gmock
+    absl::memory
+    absl::status
+    absl::string_view
+    absl::span
+    tink::core::aead
+    tink::core::crypto_format
+    tink::core::primitive_set
     tink::subtle::subtle_util
+    tink::util::statusor
     tink::util::test_matchers
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(

@@ -21,6 +21,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/types/optional.h"
 #include "tink/aead/aes_gcm_parameters.h"
 #include "tink/partial_key_access.h"

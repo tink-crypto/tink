@@ -98,6 +98,7 @@ tink_cc_library(
     aead_key_templates.cc
     aead_key_templates.h
   DEPS
+    absl::core_headers
     absl::strings
     tink::proto::aes_ctr_cc_proto
     tink::proto::aes_ctr_hmac_aead_cc_proto
@@ -193,6 +194,7 @@ tink_cc_library(
     tink::core::aead
     tink::core::key_type_manager
     tink::core::template_util
+    tink::core::input_stream
     tink::core::mac
     tink::internal::fips_utils
     tink::mac::hmac_key_manager
@@ -320,8 +322,12 @@ tink_cc_library(
     failing_aead.cc
     failing_aead.h
   DEPS
+    absl::memory
+    absl::status
     absl::strings
     tink::core::aead
+    tink::util::status
+    tink::util::statusor
   TESTONLY
 )
 
@@ -350,7 +356,9 @@ tink_cc_library(
     aes_gcm_parameters.h
   DEPS
     tink::aead::aead_parameters
+    absl::status
     absl::strings
+    tink::core::parameters
     tink::util::status
     tink::util::statusor
 )
@@ -363,8 +371,10 @@ tink_cc_library(
   DEPS
     tink::aead::aead_key
     tink::aead::aes_gcm_parameters
+    absl::status
     absl::strings
     absl::optional
+    tink::core::key
     tink::core::partial_key_access_token
     tink::core::restricted_data
     tink::subtle::subtle_util
@@ -380,7 +390,9 @@ tink_cc_library(
   DEPS
     tink::aead::aes_gcm_key
     tink::aead::aes_gcm_parameters
+    absl::core_headers
     absl::status
+    absl::string_view
     absl::optional
     tink::core::partial_key_access
     tink::core::restricted_data
@@ -822,6 +834,7 @@ tink_cc_test(
   DEPS
     tink::aead::aes_ctr_hmac_aead_key_manager
     gmock
+    absl::memory
     absl::status
     tink::core::aead
     tink::subtle::subtle
@@ -908,6 +921,7 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::aes_gcm_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -924,6 +938,7 @@ tink_cc_test(
     absl::memory
     absl::status
     tink::core::aead
+    tink::core::keyset_handle
     tink::core::kms_client
     tink::core::kms_clients
     tink::core::registry
@@ -966,6 +981,7 @@ tink_cc_test(
     tink::aead::failing_aead
     gmock
     absl::status
+    tink::core::aead
     tink::util::test_matchers
 )
 
@@ -976,6 +992,7 @@ tink_cc_test(
   DEPS
     tink::aead::aes_gcm_parameters
     gmock
+    absl::status
     tink::util::statusor
     tink::util::test_matchers
 )
@@ -988,6 +1005,7 @@ tink_cc_test(
     tink::aead::aes_gcm_key
     tink::aead::aes_gcm_parameters
     gmock
+    absl::status
     absl::optional
     tink::core::partial_key_access
     tink::core::restricted_data
@@ -1004,13 +1022,19 @@ tink_cc_test(
     tink::aead::aes_gcm_parameters
     tink::aead::aes_gcm_proto_serialization
     gmock
+    absl::status
+    absl::optional
     tink::core::insecure_secret_key_access
+    tink::core::key
+    tink::core::parameters
     tink::core::partial_key_access
     tink::core::restricted_data
     tink::internal::mutable_serialization_registry
     tink::internal::proto_key_serialization
     tink::internal::proto_parameters_serialization
+    tink::internal::serialization
     tink::subtle::random
+    tink::util::statusor
     tink::util::test_matchers
     tink::proto::aes_gcm_cc_proto
     tink::proto::tink_cc_proto
@@ -1085,6 +1109,7 @@ tink_cc_test(
     tink::internal::ssl_util
     tink::util::statusor
     tink::util::test_matchers
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(

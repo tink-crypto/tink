@@ -15,9 +15,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/aead/internal/aead_util.h"
 
+#include <cstdint>
 #include <string>
 
+#include "absl/container/flat_hash_set.h"
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "openssl/evp.h"
 #include "tink/util/errors.h"
 #include "tink/util/statusor.h"

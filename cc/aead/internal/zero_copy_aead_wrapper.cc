@@ -16,14 +16,23 @@
 
 #include "tink/aead/internal/zero_copy_aead_wrapper.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/span.h"
+#include "tink/aead.h"
+#include "tink/aead/internal/zero_copy_aead.h"
 #include "tink/crypto_format.h"
+#include "tink/primitive_set.h"
 #include "tink/subtle/subtle_util.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

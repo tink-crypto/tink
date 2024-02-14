@@ -17,10 +17,14 @@
 #include "tink/aead/aes_gcm_key.h"
 
 #include <string>
+#include <utility>
 
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
+#include "absl/strings/str_cat.h"
 #include "absl/types/optional.h"
 #include "tink/aead/aes_gcm_parameters.h"
+#include "tink/key.h"
 #include "tink/partial_key_access_token.h"
 #include "tink/restricted_data.h"
 #include "tink/subtle/subtle_util.h"

@@ -43,6 +43,7 @@
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/aes_gcm.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

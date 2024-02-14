@@ -16,12 +16,14 @@
 #include "tink/aead/internal/ssl_aead.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <memory>
 #include <string>
 #include <utility>
 
+#include "absl/base/attributes.h"
 #include "absl/cleanup/cleanup.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"

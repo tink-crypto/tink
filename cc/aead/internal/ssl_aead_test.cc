@@ -16,6 +16,7 @@
 #include "tink/aead/internal/ssl_aead.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <iterator>

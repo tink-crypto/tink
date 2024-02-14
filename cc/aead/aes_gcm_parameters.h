@@ -18,6 +18,7 @@
 #define TINK_AEAD_AES_GCM_PARAMETERS_H_
 
 #include "tink/aead/aead_parameters.h"
+#include "tink/parameters.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

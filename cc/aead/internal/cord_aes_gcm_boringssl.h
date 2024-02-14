@@ -20,6 +20,7 @@
 #include <memory>
 #include <utility>
 
+#include "absl/strings/cord.h"
 #include "openssl/evp.h"
 #include "tink/aead/cord_aead.h"
 #include "tink/internal/ssl_unique_ptr.h"

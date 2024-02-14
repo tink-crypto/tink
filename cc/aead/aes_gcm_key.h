@@ -24,6 +24,7 @@
 #include "absl/types/optional.h"
 #include "tink/aead/aead_key.h"
 #include "tink/aead/aes_gcm_parameters.h"
+#include "tink/key.h"
 #include "tink/partial_key_access_token.h"
 #include "tink/restricted_data.h"
 #include "tink/util/statusor.h"

@@ -26,6 +26,7 @@
 #include "tink/aead.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/core/template_util.h"
+#include "tink/input_stream.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/util/constants.h"
 #include "tink/util/status.h"

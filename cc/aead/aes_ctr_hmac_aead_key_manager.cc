@@ -27,6 +27,7 @@
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
+#include "tink/input_stream.h"
 #include "tink/mac.h"
 #include "tink/mac/hmac_key_manager.h"
 #include "tink/subtle/aes_ctr_boringssl.h"

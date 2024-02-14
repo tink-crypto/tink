@@ -21,6 +21,7 @@
 
 #include "absl/types/optional.h"
 #include "tink/aead/aead_parameters.h"
+#include "tink/parameters.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

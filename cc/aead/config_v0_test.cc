@@ -28,6 +28,7 @@
 #include "tink/keyset_handle.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

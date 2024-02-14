@@ -20,6 +20,7 @@
 #include <cstdint>
 
 #include "absl/strings/string_view.h"
+#include "absl/types/span.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

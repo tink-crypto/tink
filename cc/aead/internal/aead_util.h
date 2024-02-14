@@ -16,9 +16,11 @@
 #ifndef TINK_AEAD_INTERNAL_AEAD_UTIL_H_
 #define TINK_AEAD_INTERNAL_AEAD_UTIL_H_
 
+#include <cstdint>
 #include <string>
 
 #include "absl/container/flat_hash_set.h"
+#include "absl/strings/string_view.h"
 #include "openssl/evp.h"
 #include "tink/util/statusor.h"
 

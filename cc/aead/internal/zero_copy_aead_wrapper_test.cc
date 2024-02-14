@@ -16,16 +16,28 @@
 
 #include "tink/aead/internal/zero_copy_aead_wrapper.h"
 
+#include <cstdint>
 #include <cstring>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
+#include "absl/status/status.h"
+#include "absl/strings/string_view.h"
+#include "absl/types/span.h"
+#include "tink/aead.h"
 #include "tink/aead/internal/mock_zero_copy_aead.h"
+#include "tink/aead/internal/zero_copy_aead.h"
+#include "tink/crypto_format.h"
+#include "tink/primitive_set.h"
 #include "tink/subtle/subtle_util.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

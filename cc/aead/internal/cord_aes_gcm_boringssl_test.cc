@@ -16,6 +16,7 @@
 
 #include "tink/aead/internal/cord_aes_gcm_boringssl.h"
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <utility>
@@ -28,8 +29,11 @@
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
+#include "absl/strings/string_view.h"
 #include "openssl/err.h"
 #include "include/rapidjson/document.h"
+#include "tink/aead.h"
+#include "tink/aead/cord_aead.h"
 #include "tink/subtle/aes_gcm_boringssl.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/secret_data.h"

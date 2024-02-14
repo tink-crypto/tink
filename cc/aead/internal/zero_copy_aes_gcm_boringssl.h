@@ -22,6 +22,8 @@
 #include <utility>
 
 #include "absl/base/macros.h"
+#include "absl/strings/string_view.h"
+#include "absl/types/span.h"
 #include "tink/aead/internal/ssl_aead.h"
 #include "tink/aead/internal/zero_copy_aead.h"
 #include "tink/util/secret_data.h"

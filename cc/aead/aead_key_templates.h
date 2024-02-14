@@ -17,6 +17,7 @@
 #ifndef TINK_AEAD_AEAD_KEY_TEMPLATES_H_
 #define TINK_AEAD_AEAD_KEY_TEMPLATES_H_
 
+#include "absl/base/attributes.h"
 #include "absl/strings/string_view.h"
 #include "proto/tink.pb.h"
 

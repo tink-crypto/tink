@@ -21,8 +21,10 @@
 #include <string>
 #include <utility>
 
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/cord.h"
+#include "absl/strings/string_view.h"
 #include "openssl/evp.h"
 #include "tink/aead/cord_aead.h"
 #include "tink/aead/internal/aead_util.h"
