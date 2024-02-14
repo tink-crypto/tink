@@ -469,6 +469,7 @@ tink_cc_library(
     tink::internal::util
     tink::util::errors
     tink::util::keyset_util
+    tink::util::secret_data
     tink::util::secret_proto
     tink::util::status
     tink::util::statusor

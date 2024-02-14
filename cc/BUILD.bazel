@@ -501,6 +501,7 @@ cc_library(
         "//proto:tink_cc_proto",
         "//util:errors",
         "//util:keyset_util",
+        "//util:secret_data",
         "//util:secret_proto",
         "//util:status",
         "//util:statusor",

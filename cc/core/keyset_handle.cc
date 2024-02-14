@@ -48,6 +48,7 @@
 #include "tink/restricted_data.h"
 #include "tink/util/errors.h"
 #include "tink/util/keyset_util.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/secret_proto.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -84,7 +85,9 @@ util::StatusOr<util::SecretProto<Keyset>> Decrypt(
       master_key_aead.Decrypt(enc_keyset.encrypted_keyset(), associated_data);
   if (!decrypt_result.ok()) return decrypt_result.status();
   util::SecretProto<Keyset> keyset;
-  if (!keyset->ParseFromString(decrypt_result.value())) {
+  bool parsed = keyset->ParseFromString(decrypt_result.value());
+  util::SafeZeroString(&decrypt_result.value());
+  if (!parsed) {
     return util::Status(
         absl::StatusCode::kInvalidArgument,
         "Could not parse the decrypted data as a Keyset-proto.");
