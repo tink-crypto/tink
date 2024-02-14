@@ -218,8 +218,8 @@ public class EciesAeadHkdfHybridDecryptTest {
     for (BytesMutation mutation : TestUtil.generateMutations(ciphertext)) {
       assertThrows(
           GeneralSecurityException.class, () -> hybridDecrypt.decrypt(mutation.value, context));
-      // The test takes too long in TSan, so we stop after the first case.
-      if (TestUtil.isTsan()) {
+      // The test takes too long in TSan and on Android, so we stop after the first case.
+      if (TestUtil.isTsan() || TestUtil.isAndroid()) {
         return;
       }
     }
@@ -310,10 +310,10 @@ public class EciesAeadHkdfHybridDecryptTest {
 
     byte[] ciphertext = hybridEncrypt.encrypt(plaintext, context);
     for (BytesMutation mutation : TestUtil.generateMutations(context)) {
-      // The test takes too long in TSan, so we stop after the first case.
+      // The test takes too long in TSan and on Android, so we stop after the first case.
       assertThrows(
           GeneralSecurityException.class, () -> hybridDecrypt.decrypt(ciphertext, mutation.value));
-      if (TestUtil.isTsan()) {
+      if (TestUtil.isTsan() || TestUtil.isAndroid()) {
         return;
       }
     }
@@ -415,8 +415,8 @@ public class EciesAeadHkdfHybridDecryptTest {
         HybridDecrypt hybridDecrypt = EciesAeadHkdfHybridDecrypt.create(modifiedEciesPrivateKey);
         assertThrows(
             GeneralSecurityException.class, () -> hybridDecrypt.decrypt(ciphertext, context));
-        // The test takes too long in TSan, so we stop after the first case.
-        if (TestUtil.isTsan()) {
+        // The test takes too long in TSan and on Android, so we stop after the first case.
+        if (TestUtil.isTsan() || TestUtil.isAndroid()) {
           return;
         }
       }
