@@ -711,21 +711,20 @@ public final class KeysetHandle {
    * parsed.
    */
   public KeysetHandle.Entry getPrimary() {
-    for (int i = 0; i < keyset.getKeyCount(); ++i) {
-      if (keyset.getKey(i).getKeyId() == keyset.getPrimaryKeyId()) {
-        KeysetHandle.Entry result = entryByIndex(i);
-        if (result.getStatus() != KeyStatus.ENABLED) {
+    for (Entry entry : entries) {
+      if (entry != null && entry.isPrimary()) {
+        if (entry.getStatus() != KeyStatus.ENABLED) {
           throw new IllegalStateException("Keyset has primary which isn't enabled");
         }
-        return result;
+        return entry;
       }
     }
-    throw new IllegalStateException("Keyset has no primary");
+    throw new IllegalStateException("Keyset has no valid primary");
   }
 
   /** Returns the size of this keyset. */
   public int size() {
-    return keyset.getKeyCount();
+    return entries.size();
   }
 
   /**
