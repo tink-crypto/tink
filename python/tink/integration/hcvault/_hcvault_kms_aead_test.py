@@ -22,6 +22,7 @@ from absl.testing import absltest
 from absl.testing import parameterized
 import hvac
 import tink
+from tink import aead
 from tink.integration import hcvault
 
 _TOKEN = ''
@@ -30,24 +31,42 @@ _PORT = 8205
 _VAULT_URI = f'http://localhost:{_PORT}'
 
 
+_KEY_NAME_TO_AEAD = {}
+
+
+def _new_aead() -> aead.Aead:
+  handle = tink.new_keyset_handle(aead.aead_key_templates.AES128_GCM)
+  return handle.primitive(aead.Aead)
+
+
+def setUpModule():
+  global _KEY_NAME_TO_AEAD
+  aead.register()
+  _KEY_NAME_TO_AEAD = {k: _new_aead() for k in ['key-1', 'key-2']}
+
+
 class MockHandler(http.server.BaseHTTPRequestHandler):
 
   def do_POST(self):  # pylint: disable=invalid-name
-    if 'encrypt' in self.path:
+    path_prefix, key_name = self.path.rsplit('/', 1)
+    if key_name not in _KEY_NAME_TO_AEAD:
+      self.send_error(404)
+      return
+    if path_prefix == '/v1/transit/encrypt':
       post_body = self.rfile.read(int(self.headers.get('Content-Length')))
       req = json.loads(post_body)
-      ret = self.encrypt(req)
+      ret = self.encrypt(key_name, req)
       self.send_response(200)
       self.send_header('Content-Type', 'application/json')
       self.end_headers()
       self.wfile.write(ret.encode('utf-8'))
       return
 
-    if 'decrypt' in self.path:
+    if path_prefix == '/v1/transit/decrypt':
       try:
         post_body = self.rfile.read(int(self.headers.get('Content-Length')))
         req = json.loads(post_body)
-        ret = self.decrypt(req)
+        ret = self.decrypt(key_name, req)
         self.send_response(200)
         self.send_header('Content-Type', 'application/json')
         self.end_headers()
@@ -64,42 +83,19 @@ class MockHandler(http.server.BaseHTTPRequestHandler):
   def do_PUT(self):  # pylint: disable=invalid-name
     self.send_error(404)
 
-  def encrypt(self, data):
-    pt64 = data['plaintext']
-    context64 = data['context']
-    pt = base64.b64decode(pt64)
-    context = base64.b64decode(context64)
-    resp = {'ciphertext': self._encrypt(pt, context)}
+  def encrypt(self, key_name, data):
+    plaintext = base64.b64decode(data['plaintext'])
+    context = base64.b64decode(data['context'])
+    ciphertext = _KEY_NAME_TO_AEAD[key_name].encrypt(plaintext, context)
+    resp = {'ciphertext': base64.b64encode(ciphertext).decode()}
     return json.dumps({'data': resp})
 
-  def decrypt(self, data):
-    ct64 = data['ciphertext']
-    context64 = data['context']
-    context = base64.b64decode(context64)
-    resp = {
-        'plaintext': base64.b64encode(self._decrypt(ct64, context)).decode()
-    }
+  def decrypt(self, key_name, data):
+    ciphertext = base64.b64decode(data['ciphertext'])
+    context = base64.b64decode(data['context'])
+    plaintext = _KEY_NAME_TO_AEAD[key_name].decrypt(ciphertext, context)
+    resp = {'plaintext': base64.b64encode(plaintext).decode()}
     return json.dumps({'data': resp})
-
-  def _encrypt(self, plaintext: str, context: str) -> str:
-    s = 'enc:%s:%s' % (
-        base64.b64encode(context).decode(),
-        base64.b64encode(plaintext).decode(),
-    )
-    return s
-
-  def _decrypt(self, ciphertext: str, context: str) -> bytes:
-    parts = ciphertext.split(':')
-    if len(parts) != 3 or parts[0] != 'enc':
-      raise tink.TinkError('malformed ciphertext')
-
-    context2 = base64.b64decode(parts[1])
-
-    if context != context2:
-      raise tink.TinkError("context doesn't match")
-
-    plaintext = base64.b64decode(parts[2])
-    return plaintext
 
 
 class HcVaultKmsAeadTest(parameterized.TestCase):
@@ -132,6 +128,22 @@ class HcVaultKmsAeadTest(parameterized.TestCase):
       _ = vaultaead.encrypt(plaintext=b'hello', associated_data=b'non-empty')
     with self.assertRaisesRegex(tink.TinkError, expected_error_msg_re):
       _ = vaultaead.decrypt(ciphertext=b'hello', associated_data=b'non-empty')
+
+  def test_encrypt_fails_with_unknown_key_name(self):
+    client = hvac.Client(url=_VAULT_URI, token=_TOKEN, verify=False)
+    vaultaead = hcvault.new_aead('transit/keys/unknown-key', client)
+    with self.assertRaises(tink.TinkError):
+      _ = vaultaead.encrypt(plaintext=b'plaintext', associated_data=b'')
+
+  def test_decrypt_with_wrong_key_fails(self):
+    client = hvac.Client(url=_VAULT_URI, token=_TOKEN, verify=False)
+    vaultaead1 = hcvault.new_aead('transit/keys/key-1', client)
+    vaultaead2 = hcvault.new_aead('transit/keys/key-2', client)
+    plaintext = b'plaintext'
+    associated_data = b''
+    ciphertext1 = vaultaead1.encrypt(plaintext, associated_data)
+    with self.assertRaises(tink.TinkError):
+      _ = vaultaead2.decrypt(ciphertext1, associated_data)
 
   @parameterized.named_parameters([
       ('simple', '/transit/keys/key-1', 'transit', 'key-1'),
