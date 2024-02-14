@@ -27,6 +27,7 @@ import static org.junit.Assert.fail;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
+import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
@@ -55,10 +56,12 @@ import com.google.crypto.tink.signature.EcdsaSignKeyManager;
 import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.subtle.AesEaxJce;
 import com.google.crypto.tink.subtle.AesGcmJce;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.PrfMac;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.TestUtil.DummyAead;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -1370,31 +1373,44 @@ public class RegistryTest {
     assertThat(count).isEqualTo(2);
   }
 
+  private static final byte[] KEY = Hex.decode("000102030405060708090a0b0c0d0e0f");
+  private static final byte[] KEY2 = Hex.decode("100102030405060708090a0b0c0d0e0f");
+
   private static PrimitiveSet<Aead> createAeadPrimitiveSet() throws Exception {
-    return TestUtil.createPrimitiveSet(
-        TestUtil.createKeyset(
-            Keyset.Key.newBuilder()
-                .setKeyData(Registry.newKeyData(AesEaxKeyManager.aes128EaxTemplate()))
-                .setKeyId(1)
-                .setStatus(KeyStatusType.ENABLED)
-                .setOutputPrefixType(OutputPrefixType.TINK)
-                .build()),
-        Aead.class);
+    com.google.crypto.tink.aead.AesGcmKey key1 =
+        com.google.crypto.tink.aead.AesGcmKey.builder()
+            .setParameters(PredefinedAeadParameters.AES128_GCM)
+            .setKeyBytes(SecretBytes.copyFrom(KEY, InsecureSecretKeyAccess.get()))
+            .setIdRequirement(42)
+            .build();
+    Aead fullPrimitive1 = AesGcmJce.create(key1);
+    com.google.crypto.tink.aead.AesGcmKey key2 =
+        com.google.crypto.tink.aead.AesGcmKey.builder()
+            .setParameters(PredefinedAeadParameters.AES128_GCM)
+            .setKeyBytes(SecretBytes.copyFrom(KEY2, InsecureSecretKeyAccess.get()))
+            .setIdRequirement(43)
+            .build();
+    Aead fullPrimitive2 = AesGcmJce.create(key2);
+    // Also create protoKey, because it is currently needed in PrimitiveSet.newBuilder.
+    Keyset.Key protoKey1 =
+        TestUtil.createKey(
+            TestUtil.createAesGcmKeyData(KEY), 42, KeyStatusType.ENABLED, OutputPrefixType.TINK);
+    Keyset.Key protoKey2 =
+        TestUtil.createKey(
+            TestUtil.createAesGcmKeyData(KEY2), 43, KeyStatusType.ENABLED, OutputPrefixType.RAW);
+    return PrimitiveSet.newBuilder(Aead.class)
+        .addPrimaryFullPrimitiveAndOptionalPrimitive(fullPrimitive1, null, protoKey1)
+        .addFullPrimitiveAndOptionalPrimitive(fullPrimitive2, null, protoKey2)
+        .build();
   }
 
   @Test
   public void testWrap_wrapperRegistered() throws Exception {
-    // Skip test if in FIPS mode, as EAX is not allowed in FipsMode.
-    Assume.assumeFalse(TinkFips.useOnlyFips());
-
     assertNotNull(Registry.wrap(createAeadPrimitiveSet()));
   }
 
   @Test
   public void testWrap_noWrapperRegistered_throws() throws Exception {
-    // Skip test if in FIPS mode, as EAX is not allowed in FipsMode.
-    Assume.assumeFalse(TinkFips.useOnlyFips());
-
     PrimitiveSet<Aead> aeadSet = createAeadPrimitiveSet();
     Registry.reset();
     GeneralSecurityException e =
@@ -1405,9 +1421,6 @@ public class RegistryTest {
 
   @Test
   public void testWrap_wrapAsEncryptOnly() throws Exception {
-    // Skip test if in FIPS mode, as EAX is not allowed in FipsMode.
-    Assume.assumeFalse(TinkFips.useOnlyFips());
-
     // Check that Registry.wrap can be assigned to an EncryptOnly (as there's a suppress warning).
     EncryptOnly encrypt = Registry.wrap(createAeadPrimitiveSet(), EncryptOnly.class);
     assertThat(encrypt).isNotNull();
