@@ -660,6 +660,20 @@ cc_library(
 )
 
 cc_library(
+    name = "chacha20_poly1305_parameters",
+    srcs = ["chacha20_poly1305_parameters.cc"],
+    hdrs = ["chacha20_poly1305_parameters.h"],
+    include_prefix = "tink/aead",
+    deps = [
+        ":aead_parameters",
+        "//:parameters",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/status",
+    ],
+)
+
+cc_library(
     name = "aes_ctr_hmac_aead_parameters",
     srcs = ["aes_ctr_hmac_aead_parameters.cc"],
     hdrs = ["aes_ctr_hmac_aead_parameters.h"],
@@ -1277,6 +1291,18 @@ cc_test(
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings:string_view",
         "@com_google_absl//absl/types:optional",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "chacha20_poly1305_parameters_test",
+    srcs = ["chacha20_poly1305_parameters_test.cc"],
+    deps = [
+        ":chacha20_poly1305_parameters",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )

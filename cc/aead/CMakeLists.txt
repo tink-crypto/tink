@@ -621,6 +621,19 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME chacha20_poly1305_parameters
+  SRCS
+    chacha20_poly1305_parameters.cc
+    chacha20_poly1305_parameters.h
+  DEPS
+    tink::aead::aead_parameters
+    absl::status
+    tink::core::parameters
+    tink::util::status
+    tink::util::statusor
+)
+
+tink_cc_library(
   NAME aes_ctr_hmac_aead_parameters
   SRCS
     aes_ctr_hmac_aead_parameters.cc
@@ -1222,6 +1235,18 @@ tink_cc_test(
     tink::util::test_matchers
     tink::proto::tink_cc_proto
     tink::proto::xchacha20_poly1305_cc_proto
+)
+
+tink_cc_test(
+  NAME chacha20_poly1305_parameters_test
+  SRCS
+    chacha20_poly1305_parameters_test.cc
+  DEPS
+    tink::aead::chacha20_poly1305_parameters
+    gmock
+    absl::status
+    tink::util::statusor
+    tink::util::test_matchers
 )
 
 tink_cc_test(
