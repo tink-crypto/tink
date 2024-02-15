@@ -16,75 +16,42 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
-import com.google.crypto.tink.internal.KeyTypeManager;
-import com.google.crypto.tink.proto.JwtRsaSsaPssAlgorithm;
-import com.google.crypto.tink.proto.JwtRsaSsaPssKeyFormat;
-import com.google.crypto.tink.proto.JwtRsaSsaPssPrivateKey;
-import com.google.crypto.tink.proto.JwtRsaSsaPssPublicKey;
-import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.testing.TestUtil;
-import com.google.protobuf.ByteString;
-import java.security.GeneralSecurityException;
-import java.security.spec.RSAKeyGenParameterSpec;
+import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
+import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.experimental.theories.DataPoints;
-import org.junit.experimental.theories.FromDataPoints;
 import org.junit.experimental.theories.Theories;
-import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
 /** Unit tests for RsaSsaPssVerifyKeyManager. */
 @RunWith(Theories.class)
 public final class JwtRsaSsaPssVerifyKeyManagerTest {
-  private final JwtRsaSsaPssSignKeyManager signManager = new JwtRsaSsaPssSignKeyManager();
-  private final KeyTypeManager.KeyFactory<JwtRsaSsaPssKeyFormat, JwtRsaSsaPssPrivateKey> factory =
-      signManager.keyFactory();
-  private final JwtRsaSsaPssVerifyKeyManager verifyManager = new JwtRsaSsaPssVerifyKeyManager();
-
-  @DataPoints("algorithmParam")
-  public static final JwtRsaSsaPssAlgorithm[] ALGO_PARAMETER =
-      new JwtRsaSsaPssAlgorithm[] {
-        JwtRsaSsaPssAlgorithm.PS256, JwtRsaSsaPssAlgorithm.PS384, JwtRsaSsaPssAlgorithm.PS512
-      };
-
-  @DataPoints("size")
-  public static final int[] SIZE = new int[] {2048, 3072, 4096};
-
-  @Test
-  public void basics() throws Exception {
-    assertThat(verifyManager.getKeyType())
-        .isEqualTo("type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPublicKey");
-    assertThat(verifyManager.getVersion()).isEqualTo(0);
-    assertThat(verifyManager.keyMaterialType()).isEqualTo(KeyMaterialType.ASYMMETRIC_PUBLIC);
+  @BeforeClass
+  public static void setUp() throws Exception {
+    JwtSignatureConfig.register();
   }
 
   @Test
-  public void validateKey_empty_throw() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> verifyManager.validateKey(JwtRsaSsaPssPublicKey.getDefaultInstance()));
+  public void testKeyManagersRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getUntypedKeyManager(
+                    "type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPublicKey"))
+        .isNotNull();
   }
 
-  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
-  @Theory
-  public void validateKey_ok(
-      @FromDataPoints("algorithmParam") JwtRsaSsaPssAlgorithm algorithm,
-      @FromDataPoints("size") int keySize)
-      throws Exception {
-    if (TestUtil.isTsan()) {
-      // factory.createKey is too slow in Tsan.
-      return;
-    }
-    JwtRsaSsaPssKeyFormat keyFormat =
-        JwtRsaSsaPssKeyFormat.newBuilder()
-            .setAlgorithm(algorithm)
-            .setModulusSizeInBits(keySize)
-            .setPublicExponent(ByteString.copyFrom(RSAKeyGenParameterSpec.F4.toByteArray()))
-            .build();
-    JwtRsaSsaPssPrivateKey privateKey = factory.createKey(keyFormat);
-    JwtRsaSsaPssPublicKey publicKey = signManager.getPublicKey(privateKey);
-    verifyManager.validateKey(publicKey);
+  @Test
+  public void serializeAndDeserializeKeysets() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_PS256_2048_F4");
+    KeysetHandle handle = KeysetHandle.generateNew(template).getPublicKeysetHandle();
+
+    byte[] serializedKeyset = TinkProtoKeysetFormat.serializeKeysetWithoutSecret(handle);
+    KeysetHandle parsed = TinkProtoKeysetFormat.parseKeysetWithoutSecret(serializedKeyset);
+    assertTrue(parsed.equalsKeyset(handle));
   }
 }

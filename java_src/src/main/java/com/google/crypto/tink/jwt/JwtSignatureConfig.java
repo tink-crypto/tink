@@ -43,9 +43,9 @@ public final class JwtSignatureConfig {
       JwtRsaSsaPkcs1VerifyKeyManager.getKeyType();
 
   public static final String JWT_RSA_PSS_PRIVATE_KEY_TYPE_URL =
-      new JwtRsaSsaPssSignKeyManager().getKeyType();
+      JwtRsaSsaPssSignKeyManager.getKeyType();
   public static final String JWT_RSA_PSS_PUBLIC_KEY_TYPE_URL =
-      new JwtRsaSsaPssVerifyKeyManager().getKeyType();
+      JwtRsaSsaPssVerifyKeyManager.getKeyType();
 
   public static final RegistryConfig LATEST = RegistryConfig.getDefaultInstance();
 

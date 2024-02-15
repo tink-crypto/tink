@@ -18,30 +18,22 @@ package com.google.crypto.tink.jwt;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
 import com.google.crypto.tink.AccessesPartialKey;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.PrivateKeyManager;
 import com.google.crypto.tink.PublicKeySign;
-import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
+import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
+import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
-import com.google.crypto.tink.internal.PrimitiveFactory;
-import com.google.crypto.tink.internal.PrivateKeyTypeManager;
-import com.google.crypto.tink.proto.JwtRsaSsaPssAlgorithm;
-import com.google.crypto.tink.proto.JwtRsaSsaPssKeyFormat;
-import com.google.crypto.tink.proto.JwtRsaSsaPssPrivateKey;
-import com.google.crypto.tink.proto.JwtRsaSsaPssPublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.signature.RsaSsaPssPrivateKey;
 import com.google.crypto.tink.subtle.EngineFactory;
-import com.google.crypto.tink.subtle.Enums;
 import com.google.crypto.tink.subtle.RsaSsaPssSignJce;
-import com.google.crypto.tink.subtle.SelfKeyTestValidators;
-import com.google.crypto.tink.subtle.Validators;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.crypto.tink.util.SecretBigInteger;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -49,91 +41,72 @@ import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAKeyGenParameterSpec;
-import java.security.spec.RSAPrivateCrtKeySpec;
-import java.security.spec.RSAPublicKeySpec;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  * This key manager generates new {@code JwtRsaSsaPssPrivateKey} keys and produces new instances of
  * {@code JwtPublicKeySign}.
  */
-public final class JwtRsaSsaPssSignKeyManager
-    extends PrivateKeyTypeManager<JwtRsaSsaPssPrivateKey, JwtRsaSsaPssPublicKey> {
+public final class JwtRsaSsaPssSignKeyManager {
+  private static final PrivateKeyManager<Void> legacyPrivateKeyManager =
+      LegacyKeyManagerImpl.createPrivateKeyManager(
+          getKeyType(), Void.class, com.google.crypto.tink.proto.JwtRsaSsaPssPrivateKey.parser());
 
-  private static final void selfTestKey(
-      RSAPrivateCrtKey privateKey, JwtRsaSsaPssPrivateKey keyProto)
+  private static final KeyManager<Void> legacyPublicKeyManager =
+      LegacyKeyManagerImpl.create(
+          JwtRsaSsaPssVerifyKeyManager.getKeyType(),
+          Void.class,
+          KeyMaterialType.ASYMMETRIC_PUBLIC,
+          com.google.crypto.tink.proto.JwtRsaSsaPssPublicKey.parser());
+
+  @AccessesPartialKey
+  private static JwtRsaSsaPssPrivateKey createKey(
+      JwtRsaSsaPssParameters parameters, @Nullable Integer idRequirement)
       throws GeneralSecurityException {
-    java.security.KeyFactory factory = EngineFactory.KEY_FACTORY.getInstance("RSA");
-    RSAPublicKey publicKey =
-        (RSAPublicKey)
-            factory.generatePublic(
-                new RSAPublicKeySpec(
-                    new BigInteger(1, keyProto.getPublicKey().getN().toByteArray()),
-                    new BigInteger(1, keyProto.getPublicKey().getE().toByteArray())));
-    // Sign and verify a test message to make sure that the key is correct.
-    JwtRsaSsaPssAlgorithm algorithm = keyProto.getPublicKey().getAlgorithm();
-    Enums.HashType hash = JwtRsaSsaPssVerifyKeyManager.hashForPssAlgorithm(algorithm);
-    int saltLength = JwtRsaSsaPssVerifyKeyManager.saltLengthForPssAlgorithm(algorithm);
-    SelfKeyTestValidators.validateRsaSsaPss(privateKey, publicKey, hash, hash, saltLength);
-  }
+    KeyPairGenerator keyGen = EngineFactory.KEY_PAIR_GENERATOR.getInstance("RSA");
+    RSAKeyGenParameterSpec spec =
+        new RSAKeyGenParameterSpec(
+            parameters.getModulusSizeBits(),
+            new BigInteger(1, parameters.getPublicExponent().toByteArray()));
+    keyGen.initialize(spec);
+    KeyPair keyPair = keyGen.generateKeyPair();
+    RSAPublicKey pubKey = (RSAPublicKey) keyPair.getPublic();
+    RSAPrivateCrtKey privKey = (RSAPrivateCrtKey) keyPair.getPrivate();
 
-  private static final RSAPrivateCrtKey createPrivateKey(JwtRsaSsaPssPrivateKey keyProto)
-      throws GeneralSecurityException {
-    java.security.KeyFactory factory = EngineFactory.KEY_FACTORY.getInstance("RSA");
-    return (RSAPrivateCrtKey)
-        factory.generatePrivate(
-            new RSAPrivateCrtKeySpec(
-                new BigInteger(1, keyProto.getPublicKey().getN().toByteArray()),
-                new BigInteger(1, keyProto.getPublicKey().getE().toByteArray()),
-                new BigInteger(1, keyProto.getD().toByteArray()),
-                new BigInteger(1, keyProto.getP().toByteArray()),
-                new BigInteger(1, keyProto.getQ().toByteArray()),
-                new BigInteger(1, keyProto.getDp().toByteArray()),
-                new BigInteger(1, keyProto.getDq().toByteArray()),
-                new BigInteger(1, keyProto.getCrt().toByteArray())));
-  }
-
-  private static class JwtPublicKeySignFactory
-      extends PrimitiveFactory<JwtPublicKeySignInternal, JwtRsaSsaPssPrivateKey> {
-    public JwtPublicKeySignFactory() {
-      super(JwtPublicKeySignInternal.class);
+    // Creates JwtRsaSsaPssPublicKey.
+    JwtRsaSsaPssPublicKey.Builder jwtRsaSsaPssPublicKeyBuilder =
+        JwtRsaSsaPssPublicKey.builder().setParameters(parameters).setModulus(pubKey.getModulus());
+    if (idRequirement != null) {
+      jwtRsaSsaPssPublicKeyBuilder.setIdRequirement(idRequirement);
     }
+    JwtRsaSsaPssPublicKey jwtRsaSsaPssPublicKey = jwtRsaSsaPssPublicKeyBuilder.build();
 
-    @Override
-    public JwtPublicKeySignInternal getPrimitive(JwtRsaSsaPssPrivateKey keyProto)
-        throws GeneralSecurityException {
-      RSAPrivateCrtKey privateKey = createPrivateKey(keyProto);
-      selfTestKey(privateKey, keyProto);
-      JwtRsaSsaPssAlgorithm algorithm = keyProto.getPublicKey().getAlgorithm();
-      Enums.HashType hash = JwtRsaSsaPssVerifyKeyManager.hashForPssAlgorithm(algorithm);
-      int saltLength = JwtRsaSsaPssVerifyKeyManager.saltLengthForPssAlgorithm(algorithm);
-      final RsaSsaPssSignJce signer = new RsaSsaPssSignJce(privateKey, hash, hash, saltLength);
-      final String algorithmName = algorithm.name();
-      final Optional<String> customKid =
-          keyProto.getPublicKey().hasCustomKid()
-              ? Optional.of(keyProto.getPublicKey().getCustomKid().getValue())
-              : Optional.empty();
-
-      return new JwtPublicKeySignInternal() {
-        @Override
-        public String signAndEncodeWithKid(RawJwt rawJwt, Optional<String> kid)
-            throws GeneralSecurityException {
-          if (customKid.isPresent()) {
-            if (kid.isPresent()) {
-              throw new JwtInvalidException("custom_kid can only be set for RAW keys.");
-            }
-            kid = customKid;
-          }
-          String unsignedCompact = JwtFormat.createUnsignedCompact(algorithmName, kid, rawJwt);
-          return JwtFormat.createSignedCompact(
-              unsignedCompact, signer.sign(unsignedCompact.getBytes(US_ASCII)));
-        }
-      };
-    }
+    // Creates RsaSsaPssPrivateKey.
+    return JwtRsaSsaPssPrivateKey.builder()
+        .setPublicKey(jwtRsaSsaPssPublicKey)
+        .setPrimes(
+            SecretBigInteger.fromBigInteger(privKey.getPrimeP(), InsecureSecretKeyAccess.get()),
+            SecretBigInteger.fromBigInteger(privKey.getPrimeQ(), InsecureSecretKeyAccess.get()))
+        .setPrivateExponent(
+            SecretBigInteger.fromBigInteger(
+                privKey.getPrivateExponent(), InsecureSecretKeyAccess.get()))
+        .setPrimeExponents(
+            SecretBigInteger.fromBigInteger(
+                privKey.getPrimeExponentP(), InsecureSecretKeyAccess.get()),
+            SecretBigInteger.fromBigInteger(
+                privKey.getPrimeExponentQ(), InsecureSecretKeyAccess.get()))
+        .setCrtCoefficient(
+            SecretBigInteger.fromBigInteger(
+                privKey.getCrtCoefficient(), InsecureSecretKeyAccess.get()))
+        .build();
   }
+
+  @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
+  private static final MutableKeyCreationRegistry.KeyCreator<JwtRsaSsaPssParameters> KEY_CREATOR =
+      JwtRsaSsaPssSignKeyManager::createKey;
 
   @AccessesPartialKey
   private static RsaSsaPssPrivateKey toRsaSsaPssPrivateKey(
@@ -174,103 +147,8 @@ public final class JwtRsaSsaPssSignKeyManager
               com.google.crypto.tink.jwt.JwtRsaSsaPssPrivateKey.class,
               JwtPublicKeySign.class);
 
-  JwtRsaSsaPssSignKeyManager() {
-    super(JwtRsaSsaPssPrivateKey.class, JwtRsaSsaPssPublicKey.class, new JwtPublicKeySignFactory());
-  }
-
-  @Override
-  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
-    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
-  }
-
-  @Override
-  public String getKeyType() {
+  static String getKeyType() {
     return "type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPrivateKey";
-  }
-
-  @Override
-  public int getVersion() {
-    return 0;
-  }
-
-  @Override
-  public JwtRsaSsaPssPublicKey getPublicKey(JwtRsaSsaPssPrivateKey privKeyProto) {
-    return privKeyProto.getPublicKey();
-  }
-
-  @Override
-  public KeyMaterialType keyMaterialType() {
-    return KeyMaterialType.ASYMMETRIC_PRIVATE;
-  }
-
-  @Override
-  public JwtRsaSsaPssPrivateKey parseKey(ByteString byteString)
-      throws InvalidProtocolBufferException {
-    return JwtRsaSsaPssPrivateKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
-  }
-
-  @Override
-  public void validateKey(JwtRsaSsaPssPrivateKey privKey) throws GeneralSecurityException {
-    Validators.validateVersion(privKey.getVersion(), getVersion());
-    Validators.validateRsaModulusSize(
-        new BigInteger(1, privKey.getPublicKey().getN().toByteArray()).bitLength());
-    Validators.validateRsaPublicExponent(
-        new BigInteger(1, privKey.getPublicKey().getE().toByteArray()));
-  }
-
-  @Override
-  public KeyTypeManager.KeyFactory<JwtRsaSsaPssKeyFormat, JwtRsaSsaPssPrivateKey> keyFactory() {
-    return new KeyTypeManager.KeyFactory<JwtRsaSsaPssKeyFormat, JwtRsaSsaPssPrivateKey>(
-        JwtRsaSsaPssKeyFormat.class) {
-      @Override
-      public void validateKeyFormat(JwtRsaSsaPssKeyFormat keyFormat)
-          throws GeneralSecurityException {
-        Validators.validateRsaModulusSize(keyFormat.getModulusSizeInBits());
-        Validators.validateRsaPublicExponent(
-            new BigInteger(1, keyFormat.getPublicExponent().toByteArray()));
-      }
-
-      @Override
-      public JwtRsaSsaPssKeyFormat parseKeyFormat(ByteString byteString)
-          throws InvalidProtocolBufferException {
-        return JwtRsaSsaPssKeyFormat.parseFrom(
-            byteString, ExtensionRegistryLite.getEmptyRegistry());
-      }
-
-      @Override
-      public JwtRsaSsaPssPrivateKey createKey(JwtRsaSsaPssKeyFormat format)
-          throws GeneralSecurityException {
-        JwtRsaSsaPssAlgorithm algorithm = format.getAlgorithm();
-        KeyPairGenerator keyGen = EngineFactory.KEY_PAIR_GENERATOR.getInstance("RSA");
-        RSAKeyGenParameterSpec spec =
-            new RSAKeyGenParameterSpec(
-                format.getModulusSizeInBits(),
-                new BigInteger(1, format.getPublicExponent().toByteArray()));
-        keyGen.initialize(spec);
-        KeyPair keyPair = keyGen.generateKeyPair();
-        RSAPublicKey pubKey = (RSAPublicKey) keyPair.getPublic();
-        RSAPrivateCrtKey privKey = (RSAPrivateCrtKey) keyPair.getPrivate();
-        // Creates JwtRsaSsaPssPublicKey.
-        JwtRsaSsaPssPublicKey pssPubKey =
-            JwtRsaSsaPssPublicKey.newBuilder()
-                .setVersion(getVersion())
-                .setAlgorithm(algorithm)
-                .setE(ByteString.copyFrom(pubKey.getPublicExponent().toByteArray()))
-                .setN(ByteString.copyFrom(pubKey.getModulus().toByteArray()))
-                .build();
-        // Creates JwtRsaSsaPssPrivateKey.
-        return JwtRsaSsaPssPrivateKey.newBuilder()
-            .setVersion(getVersion())
-            .setPublicKey(pssPubKey)
-            .setD(ByteString.copyFrom(privKey.getPrivateExponent().toByteArray()))
-            .setP(ByteString.copyFrom(privKey.getPrimeP().toByteArray()))
-            .setQ(ByteString.copyFrom(privKey.getPrimeQ().toByteArray()))
-            .setDp(ByteString.copyFrom(privKey.getPrimeExponentP().toByteArray()))
-            .setDq(ByteString.copyFrom(privKey.getPrimeExponentQ().toByteArray()))
-            .setCrt(ByteString.copyFrom(privKey.getCrtCoefficient().toByteArray()))
-            .build();
-      }
-    };
   }
 
   /**
@@ -351,12 +229,15 @@ public final class JwtRsaSsaPssSignKeyManager
    * the registry, so that the the RsaSsaPss-Keys can be used with Tink.
    */
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
-    Registry.registerAsymmetricKeyManagers(
-        new JwtRsaSsaPssSignKeyManager(), new JwtRsaSsaPssVerifyKeyManager(), newKeyAllowed);
     JwtRsaSsaPssProtoSerialization.register();
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(JwtRsaSsaPssVerifyKeyManager.PRIMITIVE_CONSTRUCTOR);
     MutablePrimitiveRegistry.globalInstance().registerPrimitiveConstructor(PRIMITIVE_CONSTRUCTOR);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
+    MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, JwtRsaSsaPssParameters.class);
+    KeyManagerRegistry.globalInstance().registerKeyManager(legacyPrivateKeyManager, newKeyAllowed);
+    KeyManagerRegistry.globalInstance().registerKeyManager(legacyPublicKeyManager, false);
   }
+
+  private JwtRsaSsaPssSignKeyManager() {}
 }
