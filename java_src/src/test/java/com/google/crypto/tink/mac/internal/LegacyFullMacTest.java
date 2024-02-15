@@ -21,15 +21,19 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Mac;
-import com.google.crypto.tink.PrimitiveWrapper;
+import com.google.crypto.tink.SecretKeyAccess;
+import com.google.crypto.tink.internal.EnumTypeProtoConverter;
 import com.google.crypto.tink.internal.LegacyProtoKey;
-import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
-import com.google.crypto.tink.internal.MutableSerializationRegistry;
-import com.google.crypto.tink.internal.PrimitiveConstructor;
-import com.google.crypto.tink.internal.PrimitiveSet;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.mac.HmacKey;
+import com.google.crypto.tink.mac.HmacParameters;
+import com.google.crypto.tink.mac.HmacParameters.Variant;
+import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.internal.HmacTestUtil.HmacTestVector;
+import com.google.crypto.tink.proto.HashType;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import org.junit.BeforeClass;
@@ -41,19 +45,29 @@ import org.junit.runner.RunWith;
 
 @RunWith(Theories.class)
 public class LegacyFullMacTest {
+  private static final String TYPE_URL = "type.googleapis.com/custom.HmacKey";
+  private static final EnumTypeProtoConverter<OutputPrefixType, Variant>
+      OUTPUT_PREFIX_TYPE_CONVERTER =
+          EnumTypeProtoConverter.<OutputPrefixType, HmacParameters.Variant>builder()
+              .add(OutputPrefixType.RAW, HmacParameters.Variant.NO_PREFIX)
+              .add(OutputPrefixType.TINK, HmacParameters.Variant.TINK)
+              .add(OutputPrefixType.LEGACY, HmacParameters.Variant.LEGACY)
+              .add(OutputPrefixType.CRUNCHY, HmacParameters.Variant.CRUNCHY)
+              .build();
+  private static final EnumTypeProtoConverter<HashType, HmacParameters.HashType>
+      HASH_TYPE_CONVERTER =
+          EnumTypeProtoConverter.<HashType, HmacParameters.HashType>builder()
+              .add(HashType.SHA1, HmacParameters.HashType.SHA1)
+              .add(HashType.SHA224, HmacParameters.HashType.SHA224)
+              .add(HashType.SHA256, HmacParameters.HashType.SHA256)
+              .add(HashType.SHA384, HmacParameters.HashType.SHA384)
+              .add(HashType.SHA512, HmacParameters.HashType.SHA512)
+              .build();
 
   @BeforeClass
   public static void setUp() throws Exception {
+    MacConfig.register();
     LegacyHmacTestKeyManager.register();
-    HmacProtoSerialization.register();
-    // This is to ensure that the tests indeed get the objects we are testing for.
-    MutablePrimitiveRegistry.globalInstance()
-        .registerPrimitiveConstructor(
-            PrimitiveConstructor.create(
-                (LegacyProtoKey key) -> (LegacyFullMac) LegacyFullMac.create(key),
-                LegacyProtoKey.class,
-                LegacyFullMac.class));
-    TestLegacyMacWrapper.register();
 
     hmacImplementationTestVectors =
         Arrays.copyOf(
@@ -77,8 +91,7 @@ public class LegacyFullMacTest {
   @Theory
   public void computeHmac_isCorrect(@FromDataPoints("allHmacTestVectors") HmacTestVector t)
       throws Exception {
-    LegacyProtoKey key = getLegacyProtoKey(t.key);
-    Mac hmac = LegacyFullMac.create(key);
+    Mac hmac = LegacyFullMac.create(getLegacyProtoKey(t.key));
 
     assertThat(hmac.computeMac(t.message)).isEqualTo(t.tag);
   }
@@ -86,8 +99,7 @@ public class LegacyFullMacTest {
   @Theory
   public void verifyHmac_isCorrect(@FromDataPoints("allHmacTestVectors") HmacTestVector t)
       throws Exception {
-    LegacyProtoKey key = getLegacyProtoKey(t.key);
-    Mac hmac = LegacyFullMac.create(key);
+    Mac hmac = LegacyFullMac.create(getLegacyProtoKey(t.key));
 
     hmac.verifyMac(t.tag, t.message);
   }
@@ -95,40 +107,33 @@ public class LegacyFullMacTest {
   @Theory
   public void verifyHmac_throwsOnWrongTag(
       @FromDataPoints("failingHmacTestVectors") HmacTestVector t) throws Exception {
-    LegacyProtoKey key = getLegacyProtoKey(t.key);
-    Mac hmac = LegacyFullMac.create(key);
+    Mac hmac = LegacyFullMac.create(getLegacyProtoKey(t.key));
 
     assertThrows(GeneralSecurityException.class, () -> hmac.verifyMac(t.tag, t.message));
   }
 
   private static LegacyProtoKey getLegacyProtoKey(HmacKey hmacKey) throws GeneralSecurityException {
     return new LegacyProtoKey(
-        MutableSerializationRegistry.globalInstance()
-            .serializeKey(hmacKey, ProtoKeySerialization.class, InsecureSecretKeyAccess.get()),
+        ProtoKeySerialization.create(
+            TYPE_URL,
+            com.google.crypto.tink.proto.HmacKey.newBuilder()
+                .setParams(
+                    com.google.crypto.tink.proto.HmacParams.newBuilder()
+                        .setTagSize(hmacKey.getParameters().getCryptographicTagSizeBytes())
+                        .setHash(
+                            HASH_TYPE_CONVERTER.toProtoEnum(hmacKey.getParameters().getHashType()))
+                        .build())
+                .setKeyValue(
+                    ByteString.copyFrom(
+                        hmacKey
+                            .getKeyBytes()
+                            .toByteArray(
+                                SecretKeyAccess.requireAccess(InsecureSecretKeyAccess.get()))))
+                .build()
+                .toByteString(),
+            KeyMaterialType.SYMMETRIC,
+            OUTPUT_PREFIX_TYPE_CONVERTER.toProtoEnum(hmacKey.getParameters().getVariant()),
+            hmacKey.getIdRequirementOrNull()),
         InsecureSecretKeyAccess.get());
-  }
-
-  private static final class TestLegacyMacWrapper implements PrimitiveWrapper<LegacyFullMac, Mac> {
-    static final TestLegacyMacWrapper WRAPPER = new TestLegacyMacWrapper();
-
-    @Override
-    public LegacyFullMac wrap(PrimitiveSet<LegacyFullMac> primitiveSet)
-        throws GeneralSecurityException {
-      return primitiveSet.getPrimary().getFullPrimitive();
-    }
-
-    @Override
-    public Class<Mac> getPrimitiveClass() {
-      return Mac.class;
-    }
-
-    @Override
-    public Class<LegacyFullMac> getInputPrimitiveClass() {
-      return LegacyFullMac.class;
-    }
-
-    static void register() throws GeneralSecurityException {
-      MutablePrimitiveRegistry.globalInstance().registerPrimitiveWrapper(WRAPPER);
-    }
   }
 }

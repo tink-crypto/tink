@@ -16,21 +16,17 @@
 
 package com.google.crypto.tink.mac.internal;
 
-import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
-import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.internal.EnumTypeProtoConverter;
-import com.google.crypto.tink.internal.LegacyProtoKey;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
-import com.google.crypto.tink.internal.PrimitiveConstructor;
-import com.google.crypto.tink.internal.PrimitiveSet;
 import com.google.crypto.tink.mac.HmacKey;
 import com.google.crypto.tink.mac.HmacParameters;
+import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.internal.HmacTestUtil.HmacTestVector;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacParams;
@@ -53,7 +49,7 @@ import org.junit.runner.RunWith;
 /** Verifies that LegacyFullMac is correctly integrated with the Tink ecosystem. */
 @RunWith(Theories.class)
 public class LegacyFullMacIntegrationTest {
-  private static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.HmacKey";
+  private static final String TYPE_URL = "type.googleapis.com/custom.HmacKey";
   private static final EnumTypeProtoConverter<OutputPrefixType, HmacParameters.Variant>
       OUTPUT_PREFIX_TYPE_CONVERTER =
           EnumTypeProtoConverter.<OutputPrefixType, HmacParameters.Variant>builder()
@@ -95,16 +91,11 @@ public class LegacyFullMacIntegrationTest {
   public void endToEnd_works(@FromDataPoints("allHmacTestVectors") HmacTestVector t)
       throws Exception {
     MutablePrimitiveRegistry.resetGlobalInstanceTestOnly();
-    // This is to ensure that the tests indeed get the objects we are testing for.
-    MutablePrimitiveRegistry.globalInstance()
-        .registerPrimitiveConstructor(
-            PrimitiveConstructor.create(LegacyFullMac::create, LegacyProtoKey.class, Mac.class));
-    TestLegacyMacWrapper.register();
+    MacConfig.register();
 
     KeysetHandle keysetHandle = getKeysetHandleFromKeyNoSerialization(t.key);
     Mac mac = keysetHandle.getPrimitive(Mac.class);
 
-    assertThat(mac).isInstanceOf(LegacyFullMac.class);
     mac.verifyMac(t.tag, t.message);
   }
 
@@ -163,29 +154,5 @@ public class LegacyFullMacIntegrationTest {
     return TinkProtoKeysetFormat.parseKeyset(
         Keyset.newBuilder().addKey(rawKeysetKey).setPrimaryKeyId(id).build().toByteArray(),
         InsecureSecretKeyAccess.get());
-  }
-
-  private static final class TestLegacyMacWrapper implements PrimitiveWrapper<Mac, Mac> {
-    static final TestLegacyMacWrapper WRAPPER = new TestLegacyMacWrapper();
-
-    @Override
-    public Mac wrap(PrimitiveSet<Mac> primitiveSet) throws GeneralSecurityException {
-      // This is a dummy test wrapper that act as a proxy to a single primitive object under test.
-      return primitiveSet.getPrimary().getFullPrimitive();
-    }
-
-    @Override
-    public Class<Mac> getPrimitiveClass() {
-      return Mac.class;
-    }
-
-    @Override
-    public Class<Mac> getInputPrimitiveClass() {
-      return Mac.class;
-    }
-
-    static void register() throws GeneralSecurityException {
-      MutablePrimitiveRegistry.globalInstance().registerPrimitiveWrapper(WRAPPER);
-    }
   }
 }
