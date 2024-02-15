@@ -16,6 +16,9 @@
 
 #include "tink/experimental/pqcrypto/signature/sphincs_key_template.h"
 
+#include <cstdint>
+
+#include "absl/strings/str_cat.h"
 #include "tink/util/constants.h"
 #include "proto/experimental/pqcrypto/sphincs.pb.h"
 #include "proto/tink.pb.h"

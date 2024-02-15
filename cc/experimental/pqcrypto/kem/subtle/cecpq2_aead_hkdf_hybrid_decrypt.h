@@ -21,6 +21,7 @@
 #include <string>
 #include <utility>
 
+#include "absl/strings/string_view.h"
 #include "tink/experimental/pqcrypto/kem/cecpq2_aead_hkdf_dem_helper.h"
 #include "tink/experimental/pqcrypto/kem/subtle/cecpq2_hkdf_recipient_kem_boringssl.h"
 #include "tink/experimental/pqcrypto/kem/subtle/cecpq2_subtle_boringssl_util.h"

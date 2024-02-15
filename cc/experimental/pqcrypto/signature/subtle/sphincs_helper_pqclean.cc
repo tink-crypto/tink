@@ -17,6 +17,7 @@
 #include "tink/experimental/pqcrypto/signature/subtle/sphincs_helper_pqclean.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <vector>
 

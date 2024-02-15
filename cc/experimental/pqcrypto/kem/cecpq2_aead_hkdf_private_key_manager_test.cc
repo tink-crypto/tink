@@ -18,12 +18,15 @@
 
 #include <string>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/experimental/pqcrypto/kem/cecpq2_aead_hkdf_public_key_manager.h"
+#include "tink/experimental/pqcrypto/kem/subtle/cecpq2_aead_hkdf_hybrid_encrypt.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/registry.h"
 #include "tink/util/status.h"

@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "gtest/gtest.h"
 #include "openssl/hrss.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"

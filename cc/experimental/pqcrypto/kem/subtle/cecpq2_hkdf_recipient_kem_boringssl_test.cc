@@ -25,7 +25,9 @@
 #include "openssl/curve25519.h"
 #include "openssl/hrss.h"
 #include "tink/config/tink_fips.h"
+#include "tink/subtle/common_enums.h"
 #include "tink/subtle/random.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 

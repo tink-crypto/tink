@@ -16,6 +16,7 @@
 
 #include "tink/experimental/pqcrypto/signature/dilithium_key_template.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -25,7 +26,11 @@
 #include "tink/core/private_key_manager_impl.h"
 #include "tink/experimental/pqcrypto/signature/dilithium_sign_key_manager.h"
 #include "tink/experimental/pqcrypto/signature/dilithium_verify_key_manager.h"
+#include "tink/key_manager.h"
+#include "tink/public_key_sign.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
+#include "proto/experimental/pqcrypto/dilithium.pb.h"
 #include "proto/tink.pb.h"
 
 extern "C" {

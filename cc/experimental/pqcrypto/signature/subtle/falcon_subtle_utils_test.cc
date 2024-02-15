@@ -17,6 +17,7 @@
 #include "tink/experimental/pqcrypto/signature/subtle/falcon_subtle_utils.h"
 
 #include <climits>
+#include <cstdint>
 #include <string>
 #include <utility>
 #include <vector>
@@ -24,6 +25,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"

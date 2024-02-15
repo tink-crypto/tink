@@ -21,10 +21,12 @@
 #include <string>
 #include <utility>
 
+#include "absl/strings/string_view.h"
 #include "tink/experimental/pqcrypto/signature/subtle/falcon_subtle_utils.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/public_key_verify.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

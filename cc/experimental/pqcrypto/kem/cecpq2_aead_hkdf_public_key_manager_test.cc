@@ -16,6 +16,7 @@
 
 #include "tink/experimental/pqcrypto/kem/cecpq2_aead_hkdf_public_key_manager.h"
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "tink/aead/aead_key_templates.h"

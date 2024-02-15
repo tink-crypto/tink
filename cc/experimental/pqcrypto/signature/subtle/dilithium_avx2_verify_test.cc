@@ -16,6 +16,7 @@
 
 #include "tink/experimental/pqcrypto/signature/subtle/dilithium_avx2_verify.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
@@ -24,8 +25,10 @@
 #include "testing/base/public/googletest.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "tink/config/tink_fips.h"
 #include "tink/experimental/pqcrypto/signature/subtle/dilithium_avx2_sign.h"
 #include "tink/experimental/pqcrypto/signature/subtle/dilithium_key.h"

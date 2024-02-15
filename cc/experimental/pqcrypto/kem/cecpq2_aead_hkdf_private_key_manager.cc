@@ -27,6 +27,7 @@
 #include "tink/experimental/pqcrypto/kem/subtle/cecpq2_aead_hkdf_hybrid_decrypt.h"
 #include "tink/experimental/pqcrypto/kem/subtle/cecpq2_subtle_boringssl_util.h"
 #include "tink/hybrid_decrypt.h"
+#include "tink/subtle/common_enums.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/enums.h"

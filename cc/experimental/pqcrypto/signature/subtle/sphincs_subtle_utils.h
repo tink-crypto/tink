@@ -24,6 +24,7 @@
 #include "absl/memory/memory.h"
 #include "absl/strings/str_format.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

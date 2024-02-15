@@ -22,15 +22,23 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
 #include "tink/config/tink_config.h"
 #include "tink/daead/aes_siv_key_manager.h"
+#include "tink/daead/subtle/aead_or_daead.h"
 #include "tink/registry.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
+#include "proto/aes_gcm.pb.h"
+#include "proto/aes_siv.pb.h"
+#include "proto/tink.pb.h"
+#include "proto/xchacha20_poly1305.pb.h"
 
 namespace crypto {
 namespace tink {

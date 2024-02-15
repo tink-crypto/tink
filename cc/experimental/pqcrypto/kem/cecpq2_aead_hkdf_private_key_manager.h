@@ -16,6 +16,7 @@
 #ifndef TINK_EXPERIMENTAL_PQCRYPTO_KEM_CECPQ2_AEAD_HKDF_PRIVATE_KEY_MANAGER_H_
 #define TINK_EXPERIMENTAL_PQCRYPTO_KEM_CECPQ2_AEAD_HKDF_PRIVATE_KEY_MANAGER_H_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -24,6 +25,7 @@
 #include "openssl/hrss.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/core/private_key_type_manager.h"
+#include "tink/core/template_util.h"
 #include "tink/experimental/pqcrypto/kem/cecpq2_aead_hkdf_dem_helper.h"
 #include "tink/experimental/pqcrypto/kem/subtle/cecpq2_aead_hkdf_hybrid_decrypt.h"
 #include "tink/hybrid_decrypt.h"

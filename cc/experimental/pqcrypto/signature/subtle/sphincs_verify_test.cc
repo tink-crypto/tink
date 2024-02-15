@@ -16,6 +16,7 @@
 
 #include "tink/experimental/pqcrypto/signature/subtle/sphincs_verify.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
@@ -23,10 +24,12 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "tink/config/tink_fips.h"
 #include "tink/experimental/pqcrypto/signature/subtle/sphincs_helper_pqclean.h"
 #include "tink/experimental/pqcrypto/signature/subtle/sphincs_sign.h"
+#include "tink/experimental/pqcrypto/signature/subtle/sphincs_subtle_utils.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/util/status.h"

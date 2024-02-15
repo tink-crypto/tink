@@ -16,12 +16,14 @@
 
 #include "tink/experimental/pqcrypto/signature/subtle/falcon_subtle_utils.h"
 
+#include <cstdint>
 #include <string>
 #include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_format.h"
+#include "absl/strings/string_view.h"
 #include "tink/experimental/pqcrypto/signature/subtle/sphincs_helper_pqclean.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"

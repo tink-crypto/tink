@@ -16,13 +16,16 @@
 
 #include "tink/experimental/pqcrypto/signature/subtle/dilithium_key.h"
 
+#include <cstdint>
 #include <string>
 #include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_format.h"
+#include "absl/strings/string_view.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 extern "C" {

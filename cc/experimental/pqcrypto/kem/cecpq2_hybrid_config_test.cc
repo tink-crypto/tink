@@ -22,18 +22,23 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
 #include "tink/config/tink_fips.h"
+#include "tink/crypto_format.h"
 #include "tink/experimental/pqcrypto/kem/cecpq2_aead_hkdf_private_key_manager.h"
 #include "tink/experimental/pqcrypto/kem/cecpq2_aead_hkdf_public_key_manager.h"
 #include "tink/experimental/pqcrypto/kem/cecpq2_hybrid_key_templates.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/keyset_handle.h"
+#include "tink/primitive_set.h"
 #include "tink/registry.h"
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

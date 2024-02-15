@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <iterator>
 #include <memory>
 #include <string>
@@ -28,7 +29,9 @@
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
 #include "tink/experimental/pqcrypto/signature/subtle/dilithium_key.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/public_key_verify.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 extern "C" {

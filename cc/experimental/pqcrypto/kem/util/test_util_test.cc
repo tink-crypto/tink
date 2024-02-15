@@ -16,6 +16,7 @@
 
 #include "tink/experimental/pqcrypto/kem/util/test_util.h"
 
+#include <cstdint>
 #include <vector>
 
 #include "gtest/gtest.h"

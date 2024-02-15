@@ -17,6 +17,7 @@
 #ifndef TINK_EXPERIMENTAL_PQCRYPTO_KEM_SUBTLE_CECPQ2_HKDF_SENDER_KEM_BORINGSSL_H_
 #define TINK_EXPERIMENTAL_PQCRYPTO_KEM_SUBTLE_CECPQ2_HKDF_SENDER_KEM_BORINGSSL_H_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>

@@ -17,6 +17,7 @@
 #ifndef TINK_EXPERIMENTAL_PQCRYPTO_KEM_CECPQ2_AEAD_HKDF_DEM_HELPER_H_
 #define TINK_EXPERIMENTAL_PQCRYPTO_KEM_CECPQ2_AEAD_HKDF_DEM_HELPER_H_
 
+#include <cstdint>
 #include <memory>
 
 #include "tink/aead.h"

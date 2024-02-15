@@ -17,6 +17,8 @@
 #ifndef TINK_EXPERIMENTAL_PQCRYPTO_KEM_UTIL_TEST_UTIL_H_
 #define TINK_EXPERIMENTAL_PQCRYPTO_KEM_UTIL_TEST_UTIL_H_
 
+#include <cstdint>
+
 #include "proto/experimental/pqcrypto/cecpq2_aead_hkdf.pb.h"
 
 namespace crypto {

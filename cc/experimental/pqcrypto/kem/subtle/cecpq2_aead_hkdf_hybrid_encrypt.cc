@@ -16,6 +16,7 @@
 
 #include "tink/experimental/pqcrypto/kem/subtle/cecpq2_aead_hkdf_hybrid_encrypt.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
@@ -23,9 +24,16 @@
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "tink/aead.h"
+#include "tink/daead/subtle/aead_or_daead.h"
+#include "tink/experimental/pqcrypto/kem/cecpq2_aead_hkdf_dem_helper.h"
+#include "tink/experimental/pqcrypto/kem/subtle/cecpq2_hkdf_sender_kem_boringssl.h"
+#include "tink/hybrid_encrypt.h"
 #include "tink/util/enums.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
+#include "proto/common.pb.h"
 
 namespace crypto {
 namespace tink {

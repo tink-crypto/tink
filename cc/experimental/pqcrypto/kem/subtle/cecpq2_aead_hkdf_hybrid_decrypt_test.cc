@@ -16,6 +16,7 @@
 
 #include "tink/experimental/pqcrypto/kem/subtle/cecpq2_aead_hkdf_hybrid_decrypt.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
@@ -26,6 +27,8 @@
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/match.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "openssl/curve25519.h"
 #include "openssl/hrss.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
@@ -37,17 +40,22 @@
 #include "tink/experimental/pqcrypto/kem/subtle/cecpq2_subtle_boringssl_util.h"
 #include "tink/experimental/pqcrypto/kem/util/test_util.h"
 #include "tink/hybrid_decrypt.h"
+#include "tink/hybrid_encrypt.h"
 #include "tink/registry.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
+#include "tink/util/constants.h"
 #include "tink/util/enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
+#include "proto/aes_gcm.pb.h"
+#include "proto/aes_siv.pb.h"
 #include "proto/experimental/pqcrypto/cecpq2_aead_hkdf.pb.h"
+#include "proto/xchacha20_poly1305.pb.h"
 
 using crypto::tink::subtle::Random;
 using ::crypto::tink::test::IsOk;

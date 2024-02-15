@@ -16,6 +16,7 @@
 
 #include "tink/experimental/pqcrypto/kem/util/test_util.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
@@ -30,6 +31,8 @@
 #include "tink/util/enums.h"
 #include "proto/aes_ctr.pb.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
+#include "proto/aes_gcm.pb.h"
+#include "proto/common.pb.h"
 #include "proto/hmac.pb.h"
 #include "proto/xchacha20_poly1305.pb.h"
 

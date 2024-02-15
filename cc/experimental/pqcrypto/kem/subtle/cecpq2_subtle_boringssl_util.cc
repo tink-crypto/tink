@@ -16,6 +16,7 @@
 
 #include "tink/experimental/pqcrypto/kem/subtle/cecpq2_subtle_boringssl_util.h"
 
+#include <cstdint>
 #include <utility>
 
 #include "openssl/curve25519.h"
@@ -24,6 +25,7 @@
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

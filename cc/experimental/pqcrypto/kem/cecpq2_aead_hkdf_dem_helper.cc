@@ -16,6 +16,7 @@
 
 #include "tink/experimental/pqcrypto/kem/cecpq2_aead_hkdf_dem_helper.h"
 
+#include <cstdint>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -23,13 +24,17 @@
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "tink/aead.h"
+#include "tink/daead/subtle/aead_or_daead.h"
 #include "tink/deterministic_aead.h"
+#include "tink/internal/registry_impl.h"
 #include "tink/registry.h"
 #include "tink/util/errors.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 

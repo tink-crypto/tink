@@ -16,20 +16,26 @@
 
 #include "tink/experimental/pqcrypto/kem/subtle/cecpq2_hkdf_recipient_kem_boringssl.h"
 
+#include <cstdint>
 #include <memory>
 #include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "openssl/bn.h"
 #include "openssl/curve25519.h"
 #include "openssl/ec.h"
 #include "openssl/hrss.h"
 #include "tink/experimental/pqcrypto/kem/subtle/cecpq2_hkdf_sender_kem_boringssl.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/util/errors.h"
+#include "tink/util/secret_data.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

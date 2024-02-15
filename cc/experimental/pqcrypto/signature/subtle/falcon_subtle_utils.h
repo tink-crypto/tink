@@ -17,6 +17,7 @@
 #ifndef TINK_EXPERIMENTAL_PQCRYPTO_SIGNATURE_SUBTLE_FALCON_SUBTLE_UTILS_H_
 #define TINK_EXPERIMENTAL_PQCRYPTO_SIGNATURE_SUBTLE_FALCON_SUBTLE_UTILS_H_
 
+#include <cstdint>
 #include <string>
 #include <utility>
 
@@ -24,6 +25,7 @@
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

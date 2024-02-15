@@ -16,6 +16,7 @@
 
 #include "tink/experimental/pqcrypto/signature/subtle/sphincs_subtle_utils.h"
 
+#include <cstdint>
 #include <string>
 #include <utility>
 
@@ -23,6 +24,7 @@
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
 #include "tink/experimental/pqcrypto/signature/subtle/sphincs_helper_pqclean.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"

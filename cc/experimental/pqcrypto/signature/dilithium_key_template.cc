@@ -16,6 +16,9 @@
 
 #include "tink/experimental/pqcrypto/signature/dilithium_key_template.h"
 
+#include <cstdint>
+
+#include "absl/strings/str_cat.h"
 #include "tink/util/constants.h"
 #include "proto/experimental/pqcrypto/dilithium.pb.h"
 #include "proto/tink.pb.h"

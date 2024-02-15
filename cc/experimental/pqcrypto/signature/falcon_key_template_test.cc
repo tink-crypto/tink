@@ -16,6 +16,7 @@
 
 #include "tink/experimental/pqcrypto/signature/falcon_key_template.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -26,7 +27,11 @@
 #include "tink/experimental/pqcrypto/signature/falcon_sign_key_manager.h"
 #include "tink/experimental/pqcrypto/signature/falcon_verify_key_manager.h"
 #include "tink/experimental/pqcrypto/signature/subtle/falcon_subtle_utils.h"
+#include "tink/key_manager.h"
+#include "tink/public_key_sign.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
+#include "proto/experimental/pqcrypto/falcon.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {

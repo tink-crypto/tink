@@ -16,6 +16,9 @@
 
 #include "tink/experimental/pqcrypto/signature/util/enums.h"
 
+#include "tink/experimental/pqcrypto/signature/subtle/dilithium_key.h"
+#include "tink/experimental/pqcrypto/signature/subtle/sphincs_subtle_utils.h"
+
 namespace crypto {
 namespace tink {
 namespace util {
