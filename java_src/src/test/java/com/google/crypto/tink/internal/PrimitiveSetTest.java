@@ -568,7 +568,7 @@ public class PrimitiveSetTest {
   }
 
   @Test
-  public void testAddPrimive_withUnknownPrefixType_shouldFail() throws Exception {
+  public void testAddFullPrimive_withUnknownPrefixType_shouldFail() throws Exception {
     Key key1 = Key.newBuilder().setKeyId(1).setStatus(KeyStatusType.ENABLED).build();
 
     assertThrows(
@@ -586,7 +586,7 @@ public class PrimitiveSetTest {
   }
 
   @Test
-  public void testAddPrimive_withDisabledKey_shouldFail() throws Exception {
+  public void testAddFullPrimive_withDisabledKey_shouldFail() throws Exception {
     Key key1 =
         Key.newBuilder()
             .setKeyId(1)
@@ -606,6 +606,28 @@ public class PrimitiveSetTest {
             PrimitiveSet.newBuilder(Mac.class)
                 .addPrimaryFullPrimitive(new DummyMac1(), getKeyFromProtoKey(key1), key1)
                 .build());
+  }
+
+  @Test
+  public void testAddFullPrimive_withNullPrimitive_throwsNullPointerException() throws Exception {
+    Key key =
+        Key.newBuilder()
+            .setKeyId(1)
+            .setStatus(KeyStatusType.ENABLED)
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .build();
+
+    assertThrows(
+        NullPointerException.class,
+        () ->
+            PrimitiveSet.newBuilder(Mac.class)
+                .addFullPrimitive(null, getKeyFromProtoKey(key), key));
+
+    assertThrows(
+        NullPointerException.class,
+        () ->
+            PrimitiveSet.newBuilder(Mac.class)
+                .addPrimaryFullPrimitive(null, getKeyFromProtoKey(key), key));
   }
 
   @Test

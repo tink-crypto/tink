@@ -58,11 +58,11 @@ public final class PrimitiveSet<P> {
    */
   public static final class Entry<P> {
     // If set, this is a primitive of a key.
-    @Nullable private final P fullPrimitive;
+    private final P fullPrimitive;
     // Identifies the primitive within the set.
     // It is the ciphertext prefix of the corresponding key.
     private final byte[] identifier;
-    // The status of the key represented by the primitive.
+    // The status of the key represented by the primitive. Currently always equal to "ENABLED".
     private final KeyStatusType status;
     // The output prefix type of the key represented by the primitive.
     private final OutputPrefixType outputPrefixType;
@@ -72,7 +72,7 @@ public final class PrimitiveSet<P> {
     private final Key key;
 
     Entry(
-        @Nullable P fullPrimitive,
+        P fullPrimitive,
         final byte[] identifier,
         KeyStatusType status,
         OutputPrefixType outputPrefixType,
@@ -96,7 +96,6 @@ public final class PrimitiveSet<P> {
      * primitive is contained in the primitive (most likely through the new Key interface), as
      * opposed to the {@code primitive} field (see {@link #getPrimitive} for details).
      */
-    @Nullable
     public P getFullPrimitive() {
       return this.fullPrimitive;
     }
@@ -288,14 +287,14 @@ public final class PrimitiveSet<P> {
     private MonitoringAnnotations annotations;
 
     @CanIgnoreReturnValue
-    private Builder<P> addPrimitive(
-        @Nullable final P fullPrimitive, Key key, Keyset.Key protoKey, boolean asPrimary)
+    private Builder<P> addEntry(
+        final P fullPrimitive, Key key, Keyset.Key protoKey, boolean asPrimary)
         throws GeneralSecurityException {
       if (primitives == null) {
-        throw new IllegalStateException("addPrimitive cannot be called after build");
+        throw new IllegalStateException("addEntry cannot be called after build");
       }
       if (fullPrimitive == null) {
-        throw new GeneralSecurityException("at least one of the `fullPrimitive` must be set");
+        throw new NullPointerException("`fullPrimitive` must not be null");
       }
       if (protoKey.getStatus() != KeyStatusType.ENABLED) {
         throw new GeneralSecurityException("only ENABLED key is allowed");
@@ -312,10 +311,9 @@ public final class PrimitiveSet<P> {
     }
 
     @CanIgnoreReturnValue
-    public Builder<P> addFullPrimitive(
-        @Nullable final P fullPrimitive, Key key, Keyset.Key protoKey)
+    public Builder<P> addFullPrimitive(final P fullPrimitive, Key key, Keyset.Key protoKey)
         throws GeneralSecurityException {
-      return addPrimitive(fullPrimitive, key, protoKey, false);
+      return addEntry(fullPrimitive, key, protoKey, false);
     }
 
     /**
@@ -323,10 +321,9 @@ public final class PrimitiveSet<P> {
      * exactly once per PrimitiveSet.
      */
     @CanIgnoreReturnValue
-    public Builder<P> addPrimaryFullPrimitive(
-        @Nullable final P fullPrimitive, Key key, Keyset.Key protoKey)
+    public Builder<P> addPrimaryFullPrimitive(final P fullPrimitive, Key key, Keyset.Key protoKey)
         throws GeneralSecurityException {
-      return addPrimitive(fullPrimitive, key, protoKey, true);
+      return addEntry(fullPrimitive, key, protoKey, true);
     }
 
     @CanIgnoreReturnValue
