@@ -16,15 +16,20 @@
 
 #include "tink/hybrid/internal/hpke_decrypt_boringssl.h"
 
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
 
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "openssl/base.h"
 #include "openssl/err.h"
 #include "openssl/hpke.h"
+#include "tink/hybrid/internal/hpke_key_boringssl.h"
 #include "tink/hybrid/internal/hpke_util_boringssl.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/status.h"

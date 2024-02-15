@@ -16,12 +16,14 @@
 
 #include "tink/hybrid/ecies_aead_hkdf_hybrid_encrypt.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/internal/ec_util.h"

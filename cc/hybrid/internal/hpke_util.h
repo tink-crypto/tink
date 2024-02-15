@@ -17,6 +17,8 @@
 #ifndef TINK_HYBRID_INTERNAL_HPKE_UTIL_H_
 #define TINK_HYBRID_INTERNAL_HPKE_UTIL_H_
 
+#include <cstdint>
+
 #include "tink/util/statusor.h"
 #include "proto/hpke.pb.h"
 

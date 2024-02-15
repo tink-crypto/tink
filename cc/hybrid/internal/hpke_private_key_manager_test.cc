@@ -19,10 +19,12 @@
 #include <memory>
 #include <string>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/container/btree_set.h"
 #include "absl/status/status.h"
 #include "tink/hybrid/internal/hpke_encrypt.h"
+#include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/subtle/hybrid_test_util.h"
 #include "tink/util/statusor.h"

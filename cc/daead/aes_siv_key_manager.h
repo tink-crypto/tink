@@ -16,6 +16,7 @@
 #ifndef TINK_DAEAD_AES_SIV_KEY_MANAGER_H_
 #define TINK_DAEAD_AES_SIV_KEY_MANAGER_H_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -23,7 +24,9 @@
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/core/key_type_manager.h"
+#include "tink/core/template_util.h"
 #include "tink/deterministic_aead.h"
+#include "tink/input_stream.h"
 #include "tink/subtle/aes_siv_boringssl.h"
 #include "tink/subtle/random.h"
 #include "tink/util/constants.h"
@@ -35,6 +38,7 @@
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
 #include "proto/aes_siv.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

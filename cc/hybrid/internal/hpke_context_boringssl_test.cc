@@ -20,12 +20,14 @@
 #include <string>
 #include <utility>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "tink/hybrid/internal/hpke_test_util.h"
 #include "tink/hybrid/internal/hpke_util.h"
 #include "tink/hybrid/internal/test_hpke_context_boringssl.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 
 namespace crypto {

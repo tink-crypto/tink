@@ -22,6 +22,8 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
 #include "tink/hybrid/internal/hpke_test_util.h"
 #include "tink/hybrid/internal/hpke_util.h"
 #include "tink/util/secret_data.h"

@@ -16,6 +16,7 @@
 #ifndef TINK_HYBRID_ECIES_AEAD_HKDF_PRIVATE_KEY_MANAGER_H_
 #define TINK_HYBRID_ECIES_AEAD_HKDF_PRIVATE_KEY_MANAGER_H_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -23,6 +24,7 @@
 #include "absl/strings/str_cat.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/core/private_key_type_manager.h"
+#include "tink/core/template_util.h"
 #include "tink/hybrid/ecies_aead_hkdf_hybrid_decrypt.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/key_manager.h"

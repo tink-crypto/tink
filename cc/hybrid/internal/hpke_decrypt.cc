@@ -16,13 +16,17 @@
 
 #include "tink/hybrid/internal/hpke_decrypt.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
 
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "tink/hybrid/internal/hpke_context.h"
 #include "tink/hybrid/internal/hpke_util.h"
+#include "tink/hybrid_decrypt.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"

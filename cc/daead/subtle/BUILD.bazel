@@ -11,7 +11,9 @@ cc_library(
     deps = [
         "//:aead",
         "//:deterministic_aead",
+        "//util:statusor",
         "@com_google_absl//absl/functional:bind_front",
+        "@com_google_absl//absl/strings:string_view",
         "@com_google_absl//absl/types:variant",
     ],
 )
@@ -22,8 +24,14 @@ cc_test(
     srcs = ["aead_or_daead_test.cc"],
     deps = [
         ":aead_or_daead",
+        "//:aead",
+        "//:deterministic_aead",
+        "//util:status",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings:string_view",
         "@com_google_googletest//:gtest_main",
     ],
 )

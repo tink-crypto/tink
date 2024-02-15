@@ -19,9 +19,14 @@
 #include <memory>
 #include <string>
 
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "tink/hybrid/internal/hpke_context.h"
 #include "tink/hybrid/internal/hpke_util.h"
+#include "tink/hybrid_encrypt.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "proto/hpke.pb.h"
 
 namespace crypto {

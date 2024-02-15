@@ -23,9 +23,14 @@
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "tink/aead.h"
+#include "tink/hybrid/ecies_aead_hkdf_dem_helper.h"
+#include "tink/hybrid_encrypt.h"
+#include "tink/subtle/ecies_hkdf_sender_kem_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 
 using ::google::crypto::tink::EciesAeadHkdfPublicKey;

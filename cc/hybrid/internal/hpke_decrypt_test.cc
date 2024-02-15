@@ -20,11 +20,15 @@
 #include <string>
 #include <vector>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "tink/hybrid/internal/hpke_encrypt.h"
 #include "tink/hybrid/internal/hpke_test_util.h"
+#include "tink/hybrid_decrypt.h"
+#include "tink/hybrid_encrypt.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/hpke.pb.h"

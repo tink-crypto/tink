@@ -16,12 +16,14 @@
 
 #include "tink/hybrid/internal/hpke_public_key_manager.h"
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "tink/hybrid/internal/hpke_test_util.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/hpke.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

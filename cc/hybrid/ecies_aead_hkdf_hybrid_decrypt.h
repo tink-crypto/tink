@@ -21,6 +21,7 @@
 #include <string>
 #include <utility>
 
+#include "absl/strings/string_view.h"
 #include "tink/hybrid/ecies_aead_hkdf_dem_helper.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/subtle/ecies_hkdf_recipient_kem_boringssl.h"

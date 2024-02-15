@@ -17,6 +17,7 @@
 #ifndef TINK_HYBRID_INTERNAL_HPKE_KEY_MANAGER_UTIL_H_
 #define TINK_HYBRID_INTERNAL_HPKE_KEY_MANAGER_UTIL_H_
 
+#include <cstdint>
 #include <string>
 
 #include "tink/util/status.h"

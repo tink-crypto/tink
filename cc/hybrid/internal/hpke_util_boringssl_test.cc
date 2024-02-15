@@ -18,11 +18,13 @@
 
 #include <string>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "openssl/base.h"
 #include "openssl/hpke.h"
 #include "tink/hybrid/internal/hpke_test_util.h"
 #include "tink/hybrid/internal/hpke_util.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/hpke.pb.h"

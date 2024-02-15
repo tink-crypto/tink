@@ -18,6 +18,7 @@
 #define TINK_DAEAD_AES_SIV_PARAMETERS_H_
 
 #include "tink/daead/deterministic_aead_parameters.h"
+#include "tink/parameters.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

@@ -22,8 +22,10 @@
 #include <utility>
 
 #include "absl/base/attributes.h"
+#include "absl/strings/string_view.h"
 #include "openssl/hpke.h"
 #include "tink/hybrid/internal/hpke_key_boringssl.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/hpke.pb.h"
 

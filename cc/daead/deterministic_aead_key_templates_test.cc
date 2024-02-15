@@ -21,6 +21,7 @@
 #include "gtest/gtest.h"
 #include "tink/core/key_manager_impl.h"
 #include "tink/daead/aes_siv_key_manager.h"
+#include "tink/deterministic_aead.h"
 #include "proto/aes_siv.pb.h"
 #include "proto/common.pb.h"
 #include "proto/tink.pb.h"

@@ -18,6 +18,7 @@
 #define TINK_HYBRID_HYBRID_PRIVATE_KEY_H_
 
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 #include "tink/hybrid/hybrid_parameters.h"
 #include "tink/hybrid/hybrid_public_key.h"
 #include "tink/key.h"

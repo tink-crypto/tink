@@ -21,6 +21,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "tink/hybrid_decrypt.h"
+#include "tink/hybrid_encrypt.h"
 #include "tink/util/test_matchers.h"
 
 namespace crypto {

@@ -16,21 +16,27 @@
 
 #include "tink/hybrid/ecies_aead_hkdf_hybrid_decrypt.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
 #include "tink/daead/aes_siv_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_hybrid_encrypt.h"
 #include "tink/hybrid_decrypt.h"
+#include "tink/hybrid_encrypt.h"
 #include "tink/internal/ec_util.h"
 #include "tink/internal/ssl_util.h"
+#include "tink/registry.h"
 #include "tink/subtle/random.h"
 #include "tink/util/enums.h"
 #include "tink/util/statusor.h"

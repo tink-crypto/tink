@@ -14,12 +14,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/daead/failing_daead.h"
+
 #include <memory>
 #include <string>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "tink/deterministic_aead.h"
 #include "tink/util/test_matchers.h"
 
 namespace crypto {

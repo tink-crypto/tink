@@ -16,6 +16,7 @@
 
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "tink/aead/aead_key_templates.h"

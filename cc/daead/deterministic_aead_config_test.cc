@@ -22,7 +22,9 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "tink/config/global_registry.h"
 #include "tink/config/tink_fips.h"
 #include "tink/daead/aes_siv_key.h"
 #include "tink/daead/aes_siv_key_manager.h"
@@ -33,12 +35,21 @@
 #include "tink/internal/mutable_serialization_registry.h"
 #include "tink/internal/proto_key_serialization.h"
 #include "tink/internal/proto_parameters_serialization.h"
+#include "tink/internal/serialization.h"
+#include "tink/key.h"
 #include "tink/keyset_handle.h"
+#include "tink/parameters.h"
 #include "tink/partial_key_access.h"
+#include "tink/primitive_set.h"
 #include "tink/registry.h"
+#include "tink/restricted_data.h"
+#include "tink/subtle/random.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
+#include "proto/aes_siv.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

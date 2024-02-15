@@ -20,6 +20,7 @@
 #include <memory>
 #include <string>
 
+#include "absl/strings/string_view.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/util/statusor.h"
 #include "proto/hpke.pb.h"

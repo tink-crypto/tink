@@ -48,6 +48,7 @@ tink_cc_library(
     hybrid_decrypt_wrapper.cc
     hybrid_decrypt_wrapper.h
   DEPS
+    absl::memory
     absl::status
     absl::strings
     tink::core::crypto_format
@@ -69,6 +70,7 @@ tink_cc_library(
     hybrid_encrypt_wrapper.cc
     hybrid_encrypt_wrapper.h
   DEPS
+    absl::memory
     absl::status
     absl::strings
     tink::core::crypto_format
@@ -151,6 +153,7 @@ tink_cc_library(
     tink::util::errors
     tink::util::protobuf_helper
     tink::util::secret_data
+    tink::util::status
     tink::util::statusor
     tink::proto::aes_ctr_cc_proto
     tink::proto::aes_ctr_hmac_aead_cc_proto
@@ -171,6 +174,7 @@ tink_cc_library(
     tink::hybrid::ecies_aead_hkdf_dem_helper
     absl::memory
     absl::status
+    absl::string_view
     tink::core::hybrid_decrypt
     tink::internal::ec_util
     tink::subtle::ecies_hkdf_recipient_kem_boringssl
@@ -213,6 +217,7 @@ tink_cc_library(
     absl::strings
     tink::core::key_type_manager
     tink::core::private_key_type_manager
+    tink::core::template_util
     tink::core::hybrid_decrypt
     tink::core::key_manager
     tink::internal::ec_util
@@ -239,6 +244,7 @@ tink_cc_library(
     absl::status
     absl::strings
     tink::core::key_type_manager
+    tink::core::template_util
     tink::core::hybrid_encrypt
     tink::core::key_manager
     tink::util::constants
@@ -258,9 +264,13 @@ tink_cc_library(
     failing_hybrid.cc
     failing_hybrid.h
   DEPS
+    absl::memory
+    absl::status
     absl::strings
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt
+    tink::util::status
+    tink::util::statusor
 )
 
 tink_cc_library(
@@ -289,6 +299,7 @@ tink_cc_library(
     tink::hybrid::hybrid_parameters
     tink::hybrid::hybrid_public_key
     absl::strings
+    absl::optional
     tink::core::key
     tink::core::private_key
 )
@@ -520,17 +531,22 @@ tink_cc_test(
     tink::hybrid::hybrid_config
     tink::hybrid::hybrid_key_templates
     gmock
+    absl::memory
     absl::status
+    absl::strings
     crypto
+    tink::core::crypto_format
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt
     tink::core::keyset_handle
+    tink::core::primitive_set
     tink::core::registry
     tink::config::global_registry
     tink::internal::fips_utils
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -580,14 +596,18 @@ tink_cc_test(
     tink::hybrid::failing_hybrid
     tink::hybrid::hybrid_decrypt_wrapper
     gmock
+    absl::flat_hash_map
+    absl::memory
+    absl::status
     absl::strings
     tink::core::hybrid_decrypt
-    tink::core::hybrid_encrypt
     tink::core::primitive_set
+    tink::core::registry
     tink::internal::registry_impl
     tink::monitoring::monitoring
     tink::monitoring::monitoring_client_mocks
     tink::util::status
+    tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
@@ -601,13 +621,18 @@ tink_cc_test(
     tink::hybrid::failing_hybrid
     tink::hybrid::hybrid_encrypt_wrapper
     gmock
+    absl::flat_hash_map
+    absl::memory
     absl::status
+    absl::string_view
     tink::core::hybrid_encrypt
     tink::core::primitive_set
+    tink::core::registry
     tink::internal::registry_impl
     tink::monitoring::monitoring
     tink::monitoring::monitoring_client_mocks
     tink::util::status
+    tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
@@ -681,11 +706,17 @@ tink_cc_test(
     tink::hybrid::ecies_aead_hkdf_dem_helper
     gmock
     absl::status
+    absl::string_view
     tink::aead::aes_gcm_key_manager
     tink::daead::aes_siv_key_manager
+    tink::daead::subtle::aead_or_daead
     tink::util::secret_data
+    tink::util::status
     tink::util::test_matchers
     tink::util::test_util
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::aes_siv_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -697,7 +728,11 @@ tink_cc_test(
     tink::hybrid::ecies_aead_hkdf_hybrid_encrypt
     gmock
     absl::memory
+    absl::status
+    absl::string_view
     tink::core::hybrid_decrypt
+    tink::core::hybrid_encrypt
+    tink::core::registry
     tink::aead::aes_ctr_hmac_aead_key_manager
     tink::aead::aes_gcm_key_manager
     tink::aead::xchacha20_poly1305_key_manager
@@ -722,6 +757,7 @@ tink_cc_test(
     tink::hybrid::ecies_aead_hkdf_hybrid_encrypt
     gmock
     absl::memory
+    absl::status
     tink::core::hybrid_encrypt
     tink::aead::aes_gcm_key_manager
     tink::internal::ec_util
@@ -737,10 +773,12 @@ tink_cc_test(
   SRCS
     ecies_aead_hkdf_private_key_manager_test.cc
   DEPS
+    tink::hybrid::ecies_aead_hkdf_hybrid_encrypt
     tink::hybrid::ecies_aead_hkdf_private_key_manager
     tink::hybrid::ecies_aead_hkdf_public_key_manager
     tink::hybrid::hybrid_key_templates
     gmock
+    absl::memory
     absl::status
     tink::core::hybrid_decrypt
     tink::core::registry
@@ -789,6 +827,8 @@ tink_cc_test(
     tink::hybrid::failing_hybrid
     gmock
     absl::status
+    tink::core::hybrid_decrypt
+    tink::core::hybrid_encrypt
     tink::util::test_matchers
 )
 

@@ -16,10 +16,14 @@
 
 #include "tink/hybrid/internal/hpke_context_boringssl.h"
 
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
 
+#include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "openssl/base.h"
 #include "openssl/hpke.h"
@@ -28,6 +32,7 @@
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

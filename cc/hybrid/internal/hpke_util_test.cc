@@ -18,7 +18,9 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/hybrid/internal/hpke_test_util.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/hpke.pb.h"
 

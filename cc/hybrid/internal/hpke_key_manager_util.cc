@@ -16,6 +16,8 @@
 
 #include "tink/hybrid/internal/hpke_key_manager_util.h"
 
+#include <cstdint>
+
 #include "absl/status/status.h"
 #include "tink/util/status.h"
 #include "tink/util/validation.h"

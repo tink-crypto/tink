@@ -20,6 +20,7 @@
 #include <string>
 
 #include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
 #include "openssl/base.h"
 #include "tink/hybrid/internal/hpke_key_manager_util.h"
 #include "tink/internal/ec_util.h"

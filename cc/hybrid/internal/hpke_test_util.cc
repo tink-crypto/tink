@@ -19,8 +19,11 @@
 #include <string>
 
 #include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "tink/hybrid/internal/hpke_util.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "proto/hpke.pb.h"
 
 namespace crypto {

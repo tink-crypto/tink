@@ -16,9 +16,14 @@
 
 #include "tink/hybrid/internal/hpke_util.h"
 
+#include <cstdint>
+
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/internal/ec_util.h"
 #include "tink/subtle/common_enums.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "proto/hpke.pb.h"
 
 namespace crypto {

@@ -18,7 +18,9 @@
 
 #include <string>
 
+#include "absl/base/attributes.h"
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "tink/daead/aes_siv_key.h"
 #include "tink/daead/aes_siv_parameters.h"

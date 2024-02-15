@@ -21,6 +21,7 @@
 #include <string>
 #include <utility>
 
+#include "absl/strings/string_view.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
