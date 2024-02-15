@@ -38,9 +38,9 @@ public final class JwtSignatureConfig {
   public static final String JWT_ECDSA_PRIVATE_KEY_TYPE_URL = JwtEcdsaSignKeyManager.getKeyType();
 
   public static final String JWT_RSA_PKCS1_PRIVATE_KEY_TYPE_URL =
-      new JwtRsaSsaPkcs1SignKeyManager().getKeyType();
+      JwtRsaSsaPkcs1SignKeyManager.getKeyType();
   public static final String JWT_RSA_PKCS1_PUBLIC_KEY_TYPE_URL =
-      new JwtRsaSsaPkcs1VerifyKeyManager().getKeyType();
+      JwtRsaSsaPkcs1VerifyKeyManager.getKeyType();
 
   public static final String JWT_RSA_PSS_PRIVATE_KEY_TYPE_URL =
       new JwtRsaSsaPssSignKeyManager().getKeyType();

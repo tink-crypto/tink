@@ -17,32 +17,26 @@ package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
+import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.PublicKeySign;
-import com.google.crypto.tink.internal.KeyTypeManager;
-import com.google.crypto.tink.proto.JwtRsaSsaPkcs1Algorithm;
-import com.google.crypto.tink.proto.JwtRsaSsaPkcs1KeyFormat;
-import com.google.crypto.tink.proto.JwtRsaSsaPkcs1PrivateKey;
-import com.google.crypto.tink.proto.JwtRsaSsaPkcs1PublicKey;
-import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.signature.RsaSsaPkcs1Parameters;
 import com.google.crypto.tink.signature.RsaSsaPkcs1PrivateKey;
 import com.google.crypto.tink.signature.RsaSsaPkcs1PublicKey;
 import com.google.crypto.tink.signature.SignatureConfig;
 import com.google.crypto.tink.subtle.Base64;
-import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.gson.JsonObject;
-import com.google.protobuf.ByteString;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
-import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Set;
 import java.util.TreeSet;
 import org.junit.BeforeClass;
@@ -56,29 +50,18 @@ import org.junit.runner.RunWith;
 /** Unit tests for JwtRsaSsaPkcs1SignKeyManager. */
 @RunWith(Theories.class)
 public class JwtRsaSsaPkcs1SignKeyManagerTest {
-  private final JwtRsaSsaPkcs1SignKeyManager manager = new JwtRsaSsaPkcs1SignKeyManager();
-  private final KeyTypeManager.KeyFactory<JwtRsaSsaPkcs1KeyFormat, JwtRsaSsaPkcs1PrivateKey>
-      factory = manager.keyFactory();
-
   @BeforeClass
   public static void setUp() throws Exception {
     SignatureConfig.register();
     JwtSignatureConfig.register();
   }
 
-  private static JwtRsaSsaPkcs1KeyFormat createKeyFormat(
-      JwtRsaSsaPkcs1Algorithm algorithm, int modulusSizeInBits, BigInteger publicExponent) {
-    return JwtRsaSsaPkcs1KeyFormat.newBuilder()
-        .setAlgorithm(algorithm)
-        .setModulusSizeInBits(modulusSizeInBits)
-        .setPublicExponent(ByteString.copyFrom(publicExponent.toByteArray()))
-        .build();
-  }
-
   @DataPoints("algorithmParam")
-  public static final JwtRsaSsaPkcs1Algorithm[] ALGO_PARAMETER =
-      new JwtRsaSsaPkcs1Algorithm[] {
-        JwtRsaSsaPkcs1Algorithm.RS256, JwtRsaSsaPkcs1Algorithm.RS384, JwtRsaSsaPkcs1Algorithm.RS512
+  public static final JwtRsaSsaPkcs1Parameters.Algorithm[] ALGO_PARAMETER =
+      new JwtRsaSsaPkcs1Parameters.Algorithm[] {
+        JwtRsaSsaPkcs1Parameters.Algorithm.RS256,
+        JwtRsaSsaPkcs1Parameters.Algorithm.RS384,
+        JwtRsaSsaPkcs1Parameters.Algorithm.RS512
       };
 
   @DataPoints("sizes")
@@ -97,31 +80,6 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
         "JWT_RS512_4096_F4_RAW",
       };
 
-  @Test
-  public void basics() throws Exception {
-    assertThat(manager.getKeyType())
-        .isEqualTo("type.googleapis.com/google.crypto.tink.JwtRsaSsaPkcs1PrivateKey");
-    assertThat(manager.getVersion()).isEqualTo(0);
-    assertThat(manager.keyMaterialType()).isEqualTo(KeyMaterialType.ASYMMETRIC_PRIVATE);
-  }
-
-  @Test
-  public void validateKeyFormat_empty_throw() throws Exception {
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> factory.validateKeyFormat(JwtRsaSsaPkcs1KeyFormat.getDefaultInstance()));
-  }
-
-  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
-  @Theory
-  public void validateKeyFormat_ok(
-      @FromDataPoints("algorithmParam") JwtRsaSsaPkcs1Algorithm algorithm,
-      @FromDataPoints("sizes") int keySize)
-      throws GeneralSecurityException {
-    JwtRsaSsaPkcs1KeyFormat format = createKeyFormat(algorithm, keySize, RSAKeyGenParameterSpec.F4);
-    factory.validateKeyFormat(format);
-  }
-
   @Theory
   public void testTemplates(@FromDataPoints("templates") String templateName) throws Exception {
     if (TestUtil.isTsan()) {
@@ -135,69 +93,6 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
         .isEqualTo(KeyTemplates.get(templateName).toParameters());
   }
 
-  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
-  @Theory
-  public void invalidKeyFormat_smallKey_throw(
-      @FromDataPoints("algorithmParam") JwtRsaSsaPkcs1Algorithm algorithm)
-      throws GeneralSecurityException {
-    JwtRsaSsaPkcs1KeyFormat format = createKeyFormat(algorithm, 2047, RSAKeyGenParameterSpec.F4);
-    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
-  }
-
-  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
-  @Theory
-  public void invalidKeyFormat_smallPublicExponents_throw(
-      @FromDataPoints("algorithmParam") JwtRsaSsaPkcs1Algorithm algorithm,
-      @FromDataPoints("sizes") int keySize)
-      throws GeneralSecurityException {
-    JwtRsaSsaPkcs1KeyFormat format =
-        createKeyFormat(algorithm, keySize, RSAKeyGenParameterSpec.F4.subtract(BigInteger.ONE));
-    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
-  }
-
-  private static void checkConsistency(
-      JwtRsaSsaPkcs1PrivateKey privateKey, JwtRsaSsaPkcs1KeyFormat keyFormat) {
-    assertThat(privateKey.getPublicKey().getAlgorithm()).isEqualTo(keyFormat.getAlgorithm());
-    assertThat(privateKey.getPublicKey().getE()).isEqualTo(keyFormat.getPublicExponent());
-    assertThat(privateKey.getPublicKey().getN().toByteArray().length)
-        .isGreaterThan(keyFormat.getModulusSizeInBits() / 8);
-  }
-
-  private static void checkKey(JwtRsaSsaPkcs1PrivateKey privateKey) throws Exception {
-    JwtRsaSsaPkcs1PublicKey publicKey = privateKey.getPublicKey();
-    assertThat(privateKey.getVersion()).isEqualTo(0);
-    assertThat(publicKey.getVersion()).isEqualTo(privateKey.getVersion());
-    BigInteger p = new BigInteger(1, privateKey.getP().toByteArray());
-    BigInteger q = new BigInteger(1, privateKey.getQ().toByteArray());
-    BigInteger n = new BigInteger(1, privateKey.getPublicKey().getN().toByteArray());
-    BigInteger d = new BigInteger(1, privateKey.getD().toByteArray());
-    BigInteger dp = new BigInteger(1, privateKey.getDp().toByteArray());
-    BigInteger dq = new BigInteger(1, privateKey.getDq().toByteArray());
-    BigInteger crt = new BigInteger(1, privateKey.getCrt().toByteArray());
-    assertThat(p).isGreaterThan(BigInteger.ONE);
-    assertThat(q).isGreaterThan(BigInteger.ONE);
-    assertEquals(n, p.multiply(q));
-    assertEquals(dp, d.mod(p.subtract(BigInteger.ONE)));
-    assertEquals(dq, d.mod(q.subtract(BigInteger.ONE)));
-    assertEquals(crt, q.modInverse(p));
-  }
-
-  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
-  @Theory
-  public void createKeys_ok(@FromDataPoints("algorithmParam") JwtRsaSsaPkcs1Algorithm algorithm)
-      throws Exception {
-    int keySize = 2048;
-    if (TestUtil.isTsan()) {
-      // creating keys is too slow in Tsan.
-      // We do not use assume because Theories expects to find something which is not skipped.
-      return;
-    }
-    JwtRsaSsaPkcs1KeyFormat format = createKeyFormat(algorithm, keySize, RSAKeyGenParameterSpec.F4);
-    JwtRsaSsaPkcs1PrivateKey key = factory.createKey(format);
-    checkConsistency(key, format);
-    checkKey(key);
-  }
-
   // This test needs to create several new keys, which is expensive. Therefore, we only do it for
   // one set of parameters.
   @Test
@@ -208,56 +103,24 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
       // We do not use assume because Theories expects to find something which is not skipped.
       return;
     }
-    JwtRsaSsaPkcs1KeyFormat format =
-        createKeyFormat(JwtRsaSsaPkcs1Algorithm.RS256, 2048, RSAKeyGenParameterSpec.F4);
-    Set<String> keys = new TreeSet<>();
+    JwtRsaSsaPkcs1Parameters parameters =
+        JwtRsaSsaPkcs1Parameters.builder()
+            .setModulusSizeBits(2048)
+            .setPublicExponent(JwtRsaSsaPkcs1Parameters.F4)
+            .setAlgorithm(JwtRsaSsaPkcs1Parameters.Algorithm.RS256)
+            .setKidStrategy(JwtRsaSsaPkcs1Parameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+            .build();
+    Set<BigInteger> keys = new TreeSet<>();
     // Calls newKey multiple times and make sure that they generate different keys -- takes about a
     // second per key.
     int numTests = 5;
     for (int i = 0; i < numTests; i++) {
-      JwtRsaSsaPkcs1PrivateKey key = factory.createKey(format);
-      keys.add(Hex.encode(key.getQ().toByteArray()));
-      keys.add(Hex.encode(key.getP().toByteArray()));
+      JwtRsaSsaPkcs1PrivateKey key =
+          (JwtRsaSsaPkcs1PrivateKey) KeysetHandle.generateNew(parameters).getPrimary().getKey();
+      keys.add(key.getPrimeP().getBigInteger(InsecureSecretKeyAccess.get()));
+      keys.add(key.getPrimeQ().getBigInteger(InsecureSecretKeyAccess.get()));
     }
     assertThat(keys).hasSize(2 * numTests);
-  }
-
-  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
-  @Theory
-  public void createCorruptedModulusPrimitive_throws(
-      @FromDataPoints("algorithmParam") JwtRsaSsaPkcs1Algorithm algorithm,
-      @FromDataPoints("sizes") int keySize)
-      throws Exception {
-    if (TestUtil.isTsan()) {
-      // creating keys is too slow in Tsan.
-      // We do not use assume because Theories expects to find something which is not skipped.
-      return;
-    }
-    JwtRsaSsaPkcs1KeyFormat format = createKeyFormat(algorithm, keySize, RSAKeyGenParameterSpec.F4);
-    JwtRsaSsaPkcs1PrivateKey originalKey = factory.createKey(format);
-    byte[] originalN = originalKey.getPublicKey().getN().toByteArray();
-    originalN[0] = (byte) (originalN[0] ^ 0x01);
-    ByteString corruptedN = ByteString.copyFrom(originalN);
-    JwtRsaSsaPkcs1PublicKey corruptedPub =
-        JwtRsaSsaPkcs1PublicKey.newBuilder()
-            .setVersion(originalKey.getPublicKey().getVersion())
-            .setN(corruptedN)
-            .setE(originalKey.getPublicKey().getE())
-            .build();
-    JwtRsaSsaPkcs1PrivateKey corruptedKey =
-        JwtRsaSsaPkcs1PrivateKey.newBuilder()
-            .setVersion(originalKey.getVersion())
-            .setPublicKey(corruptedPub)
-            .setD(originalKey.getD())
-            .setP(originalKey.getP())
-            .setQ(originalKey.getQ())
-            .setDp(originalKey.getDp())
-            .setDq(originalKey.getDq())
-            .setCrt(originalKey.getCrt())
-            .build();
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> manager.getPrimitive(corruptedKey, JwtPublicKeySignInternal.class));
   }
 
   @Test
@@ -349,9 +212,8 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("JWT_RS256_2048_F4"));
     
     com.google.crypto.tink.Key key = handle.getAt(0).getKey();
-    assertThat(key).isInstanceOf(com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey.class);
-    com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey jwtPrivateKey =
-        (com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey) key;
+    assertThat(key).isInstanceOf(JwtRsaSsaPkcs1PrivateKey.class);
+    JwtRsaSsaPkcs1PrivateKey jwtPrivateKey = (JwtRsaSsaPkcs1PrivateKey) key;
 
     assertThat(jwtPrivateKey.getParameters())
         .isEqualTo(
@@ -528,8 +390,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     }
     KeyTemplate template = KeyTemplates.get("JWT_RS256_2048_F4_RAW");
     KeysetHandle handle = KeysetHandle.generateNew(template);
-    com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey key =
-        (com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey) handle.getAt(0).getKey();
+    JwtRsaSsaPkcs1PrivateKey key = (JwtRsaSsaPkcs1PrivateKey) handle.getAt(0).getKey();
 
     RsaSsaPkcs1Parameters nonJwtParameters =
         RsaSsaPkcs1Parameters.builder()
@@ -611,8 +472,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     }
     KeyTemplate template = KeyTemplates.get("JWT_RS256_2048_F4");
     KeysetHandle handle = KeysetHandle.generateNew(template);
-    com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey key =
-        (com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey) handle.getAt(0).getKey();
+    JwtRsaSsaPkcs1PrivateKey key = (JwtRsaSsaPkcs1PrivateKey) handle.getAt(0).getKey();
     RsaSsaPkcs1Parameters nonJwtParameters =
         RsaSsaPkcs1Parameters.builder()
             .setHashType(RsaSsaPkcs1Parameters.HashType.SHA256)
@@ -692,8 +552,8 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
 
   /* Create a new keyset handle with the "custom_kid" value set. */
   private KeysetHandle withCustomKid(KeysetHandle keysetHandle, String customKid) throws Exception {
-    com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey originalPrivateKey =
-        (com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey) keysetHandle.getAt(0).getKey();
+    JwtRsaSsaPkcs1PrivateKey originalPrivateKey =
+        (JwtRsaSsaPkcs1PrivateKey) keysetHandle.getAt(0).getKey();
     JwtRsaSsaPkcs1Parameters customKidParameters =
         JwtRsaSsaPkcs1Parameters.builder()
             .setAlgorithm(originalPrivateKey.getParameters().getAlgorithm())
@@ -706,8 +566,8 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
             .setModulus(originalPrivateKey.getPublicKey().getModulus())
             .setCustomKid(customKid)
             .build();
-    com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey customKidPrivateKey =
-        com.google.crypto.tink.jwt.JwtRsaSsaPkcs1PrivateKey.builder()
+    JwtRsaSsaPkcs1PrivateKey customKidPrivateKey =
+        JwtRsaSsaPkcs1PrivateKey.builder()
             .setPublicKey(customKidPublicKey)
             .setPrimes(originalPrivateKey.getPrimeP(), originalPrivateKey.getPrimeQ())
             .setPrivateExponent(originalPrivateKey.getPrivateExponent())
@@ -788,5 +648,39 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     assertThrows(
         JwtInvalidException.class,
         () -> verifierWithWrongKid.verifyAndDecode(signedCompactWithKid, validator));
+  }
+
+  @Test
+  public void serializeAndDeserializeKeysets() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_RS256_2048_F4");
+    KeysetHandle handle = KeysetHandle.generateNew(template);
+
+    byte[] serializedKeyset =
+        TinkProtoKeysetFormat.serializeKeyset(handle, InsecureSecretKeyAccess.get());
+    KeysetHandle parsed =
+        TinkProtoKeysetFormat.parseKeyset(serializedKeyset, InsecureSecretKeyAccess.get());
+    assertTrue(parsed.equalsKeyset(handle));
+  }
+
+  @Test
+  public void serializeAndDeserializePublicKeysets() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_RS256_2048_F4");
+    KeysetHandle handle = KeysetHandle.generateNew(template).getPublicKeysetHandle();
+
+    byte[] serializedKeyset = TinkProtoKeysetFormat.serializeKeysetWithoutSecret(handle);
+    KeysetHandle parsed = TinkProtoKeysetFormat.parseKeysetWithoutSecret(serializedKeyset);
+    assertTrue(parsed.equalsKeyset(handle));
+  }
+
+  @Test
+  public void testKeyManagersRegistered() throws Exception {
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getUntypedKeyManager("type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey"))
+        .isNotNull();
+    assertThat(
+            KeyManagerRegistry.globalInstance()
+                .getUntypedKeyManager("type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey"))
+        .isNotNull();
   }
 }
