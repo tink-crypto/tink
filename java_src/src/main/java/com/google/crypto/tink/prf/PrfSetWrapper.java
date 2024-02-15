@@ -25,7 +25,6 @@ import com.google.crypto.tink.internal.PrimitiveSet;
 import com.google.crypto.tink.monitoring.MonitoringClient;
 import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
 import com.google.crypto.tink.prf.internal.LegacyFullPrf;
-import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
@@ -101,10 +100,6 @@ public class PrfSetWrapper implements PrimitiveWrapper<Prf, PrfSet> {
       List<PrimitiveSet.Entry<Prf>> entries = primitives.getRawPrimitives();
       Map<Integer, Prf> mutablePrfMap = new HashMap<>();
       for (PrimitiveSet.Entry<Prf> entry : entries) {
-        if (!entry.getOutputPrefixType().equals(OutputPrefixType.RAW)) {
-          throw new GeneralSecurityException(
-              "Key " + entry.getKeyId() + " has non raw prefix type");
-        }
         // Likewise, the key IDs of the PrfSet passed
         mutablePrfMap.put(
             entry.getKeyId(),
