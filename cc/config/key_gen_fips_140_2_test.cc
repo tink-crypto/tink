@@ -18,11 +18,13 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/internal/key_gen_configuration_impl.h"
+#include "tink/internal/key_type_info_store.h"
 #include "tink/keyset_handle.h"
 #include "tink/mac/aes_cmac_key_manager.h"
 #include "tink/mac/hmac_key_manager.h"
@@ -30,6 +32,7 @@
 #include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/signature/rsa_ssa_pkcs1_verify_key_manager.h"
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 
 namespace crypto {

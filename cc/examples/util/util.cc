@@ -24,6 +24,8 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/json_keyset_reader.h"
 #include "tink/json_keyset_writer.h"

@@ -26,6 +26,7 @@
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/aead/aead_config.h"
+#include "tink/config/global_registry.h"
 #include "util/util.h"
 #include "tink/keyset_handle.h"
 #include "tink/util/status.h"

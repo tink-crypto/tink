@@ -20,8 +20,10 @@
 #include <memory>
 
 #include "tink/aead/aead_key_templates.h"
+#include "tink/config/global_registry.h"
 #include "tink/keyset_handle.h"
 #include "tink/util/statusor.h"
+#include "proto/tink.pb.h"
 
 namespace tink_walkthrough {
 

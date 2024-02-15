@@ -24,6 +24,8 @@
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
 #include "absl/log/check.h"
+#include "absl/strings/string_view.h"
+#include "tink/config/global_registry.h"
 #include "util/util.h"
 #include "tink/jwt/jwk_set_converter.h"
 #include "tink/jwt/jwt_public_key_verify.h"

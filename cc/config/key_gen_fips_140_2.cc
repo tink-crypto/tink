@@ -17,6 +17,7 @@
 #include "tink/config/key_gen_fips_140_2.h"
 
 #include "absl/log/check.h"
+#include "absl/memory/memory.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/internal/fips_utils.h"
@@ -29,6 +30,7 @@
 #include "tink/signature/rsa_ssa_pkcs1_verify_key_manager.h"
 #include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
+#include "tink/util/status.h"
 #include "tink/signature/ecdsa_sign_key_manager.h"
 
 namespace crypto {

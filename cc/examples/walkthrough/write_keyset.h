@@ -19,7 +19,9 @@
 #include <memory>
 #include <ostream>
 
+#include "tink/aead.h"
 #include "tink/keyset_handle.h"
+#include "tink/util/status.h"
 
 namespace tink_walkthrough {
 

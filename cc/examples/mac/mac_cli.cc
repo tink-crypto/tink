@@ -16,6 +16,7 @@
 // [START mac-example]
 // A command-line utility for showcasing using the Tink MAC primitive.
 
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -28,6 +29,7 @@
 #include "absl/flags/parse.h"
 #include "absl/log/check.h"
 #include "absl/strings/string_view.h"
+#include "tink/config/global_registry.h"
 #include "util/util.h"
 #include "tink/keyset_handle.h"
 #include "tink/mac.h"

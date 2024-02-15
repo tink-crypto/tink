@@ -23,6 +23,7 @@
 #include <utility>
 
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
@@ -32,6 +33,7 @@
 #include "walkthrough/load_cleartext_keyset.h"
 #include "walkthrough/load_encrypted_keyset.h"
 #include "walkthrough/test_util.h"
+#include "tink/keyset_handle.h"
 #include "tink/kms_clients.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"

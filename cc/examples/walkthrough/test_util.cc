@@ -18,9 +18,14 @@
 
 #include <memory>
 
+#include "absl/status/status.h"
 #include "absl/strings/match.h"
+#include "absl/strings/string_view.h"
+#include "tink/aead.h"
+#include "tink/config/global_registry.h"
 #include "walkthrough/load_cleartext_keyset.h"
 #include "tink/keyset_handle.h"
+#include "tink/util/status.h"
 
 namespace tink_walkthrough {
 

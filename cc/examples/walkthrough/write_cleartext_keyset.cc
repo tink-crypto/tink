@@ -25,6 +25,7 @@
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/json_keyset_writer.h"
 #include "tink/keyset_handle.h"
+#include "tink/util/status.h"
 
 namespace tink_walkthrough {
 

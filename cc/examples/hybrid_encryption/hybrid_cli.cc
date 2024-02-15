@@ -24,6 +24,7 @@
 #include "absl/flags/parse.h"
 #include "absl/log/check.h"
 #include "absl/strings/string_view.h"
+#include "tink/config/global_registry.h"
 #include "util/util.h"
 #ifndef TINK_EXAMPLES_EXCLUDE_HPKE
 #include "tink/hybrid/hpke_config.h"

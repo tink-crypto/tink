@@ -28,10 +28,13 @@
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/aead/aead_config.h"
+#include "tink/config/global_registry.h"
 #include "walkthrough/load_cleartext_keyset.h"
 #include "walkthrough/test_util.h"
+#include "tink/keyset_handle.h"
 #include "tink/kms_clients.h"
 #include "tink/registry.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 

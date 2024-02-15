@@ -16,13 +16,23 @@
 
 #include "tink/config/global_registry.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "tink/core/key_type_manager.h"
+#include "tink/core/template_util.h"
+#include "tink/input_stream.h"
 #include "tink/keyset_handle.h"
+#include "tink/primitive_set.h"
+#include "tink/primitive_wrapper.h"
+#include "tink/registry.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"

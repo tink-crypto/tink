@@ -29,6 +29,7 @@
 #include "tink/keyset_handle.h"
 #include "tink/kms_client.h"
 #include "tink/kms_clients.h"
+#include "tink/util/status.h"
 
 namespace tink_walkthrough {
 

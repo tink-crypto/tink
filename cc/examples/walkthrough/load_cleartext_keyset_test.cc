@@ -20,9 +20,13 @@
 #include <string>
 
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
+#include "tink/aead.h"
 #include "tink/aead/aead_config.h"
+#include "tink/config/global_registry.h"
+#include "tink/keyset_handle.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 

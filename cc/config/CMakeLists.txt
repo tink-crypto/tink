@@ -62,6 +62,7 @@ tink_cc_library(
     fips_140_2.h
   DEPS
     absl::check
+    absl::memory
     tink::core::configuration
     tink::aead::aead_wrapper
     tink::aead::aes_ctr_hmac_aead_key_manager
@@ -80,6 +81,7 @@ tink_cc_library(
     tink::signature::rsa_ssa_pkcs1_verify_key_manager
     tink::signature::rsa_ssa_pss_sign_key_manager
     tink::signature::rsa_ssa_pss_verify_key_manager
+    tink::util::status
     tink::signature::ecdsa_sign_key_manager
 )
 
@@ -90,6 +92,7 @@ tink_cc_library(
     key_gen_fips_140_2.h
   DEPS
     absl::check
+    absl::memory
     tink::core::key_gen_configuration
     tink::aead::aes_ctr_hmac_aead_key_manager
     tink::aead::aes_gcm_key_manager
@@ -102,6 +105,7 @@ tink_cc_library(
     tink::signature::rsa_ssa_pkcs1_verify_key_manager
     tink::signature::rsa_ssa_pss_sign_key_manager
     tink::signature::rsa_ssa_pss_verify_key_manager
+    tink::util::status
     tink::signature::ecdsa_sign_key_manager
 )
 
@@ -174,6 +178,7 @@ tink_cc_test(
   DEPS
     tink::config::config_util
     gmock
+    tink::proto::config_cc_proto
 )
 
 tink_cc_test(
@@ -199,8 +204,17 @@ tink_cc_test(
   DEPS
     tink::config::global_registry
     gmock
+    absl::memory
     absl::status
+    tink::core::key_type_manager
+    tink::core::template_util
+    tink::core::input_stream
     tink::core::keyset_handle
+    tink::core::primitive_set
+    tink::core::primitive_wrapper
+    tink::core::registry
+    tink::util::status
+    tink::util::statusor
     tink::util::test_matchers
     tink::proto::aes_gcm_cc_proto
     tink::proto::tink_cc_proto
@@ -214,6 +228,7 @@ tink_cc_test(
     tink::config::fips_140_2
     tink::config::key_gen_fips_140_2
     gmock
+    absl::status
     tink::core::aead
     tink::core::chunked_mac
     tink::core::keyset_handle
@@ -226,12 +241,15 @@ tink_cc_test(
     tink::internal::configuration_impl
     tink::internal::fips_utils
     tink::internal::key_type_info_store
+    tink::internal::keyset_wrapper_store
     tink::mac::aes_cmac_key_manager
     tink::mac::hmac_key_manager
     tink::prf::hmac_prf_key_manager
+    tink::prf::prf_set
     tink::signature::ecdsa_verify_key_manager
     tink::signature::rsa_ssa_pkcs1_verify_key_manager
     tink::signature::rsa_ssa_pss_verify_key_manager
+    tink::util::statusor
     tink::util::test_matchers
 )
 
@@ -242,18 +260,21 @@ tink_cc_test(
   DEPS
     tink::config::key_gen_fips_140_2
     gmock
+    absl::status
     tink::core::keyset_handle
     tink::aead::aead_key_templates
     tink::aead::aes_ctr_hmac_aead_key_manager
     tink::aead::aes_gcm_key_manager
     tink::internal::fips_utils
     tink::internal::key_gen_configuration_impl
+    tink::internal::key_type_info_store
     tink::mac::aes_cmac_key_manager
     tink::mac::hmac_key_manager
     tink::prf::hmac_prf_key_manager
     tink::signature::ecdsa_verify_key_manager
     tink::signature::rsa_ssa_pkcs1_verify_key_manager
     tink::signature::rsa_ssa_pss_verify_key_manager
+    tink::util::statusor
     tink::util::test_matchers
 )
 

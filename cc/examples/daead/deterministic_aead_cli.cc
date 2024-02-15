@@ -24,6 +24,7 @@
 #include "absl/flags/parse.h"
 #include "absl/log/check.h"
 #include "absl/strings/string_view.h"
+#include "tink/config/global_registry.h"
 #include "tink/daead/deterministic_aead_config.h"
 #include "tink/deterministic_aead.h"
 #include "util/util.h"
