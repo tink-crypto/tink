@@ -310,6 +310,12 @@ public final class PrimitiveSet<P> {
       return this;
     }
 
+    /**
+     * Adds a non-primary primitive.
+     *
+     * <p>The caller must make sure that the {@code fullPrimitive} is a full primitive constructed
+     * from key, and that {@code protoKey} contains the same key as {@code fullPrimitive}.
+     */
     @CanIgnoreReturnValue
     public Builder<P> addFullPrimitive(final P fullPrimitive, Key key, Keyset.Key protoKey)
         throws GeneralSecurityException {
@@ -317,8 +323,10 @@ public final class PrimitiveSet<P> {
     }
 
     /**
-     * Adds the primary primitive and full primitive. This or addPrimaryPrimitive should be called
-     * exactly once per PrimitiveSet.
+     * Adds the primary primitive. This should be called exactly once per PrimitiveSet.
+     *
+     * <p>The caller must make sure that the {@code fullPrimitive} is a full primitive constructed
+     * from key, and that {@code protoKey} contains the same key as {@code fullPrimitive}.
      */
     @CanIgnoreReturnValue
     public Builder<P> addPrimaryFullPrimitive(final P fullPrimitive, Key key, Keyset.Key protoKey)
