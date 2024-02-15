@@ -38,6 +38,7 @@ tink_cc_test(
     tink::prf::prf_key_templates
     tink::util::statusor
     tink::util::test_matchers
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_library(
@@ -51,6 +52,7 @@ tink_cc_library(
     tink::config::global_registry
     tink::keyderivation::internal::prf_based_deriver_key_manager
     tink::util::statusor
+    tink::proto::prf_based_deriver_cc_proto
     tink::proto::tink_cc_proto
   PUBLIC
 )

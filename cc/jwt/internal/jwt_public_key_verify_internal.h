@@ -18,10 +18,11 @@
 #define TINK_JWT_INTERNAL_JWT_PUBLIC_KEY_VERIFY_INTERNAL_H_
 
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
+#include "tink/jwt/jwt_validator.h"
+#include "tink/jwt/verified_jwt.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "tink/jwt/verified_jwt.h"
-#include "tink/jwt/jwt_validator.h"
 
 namespace crypto {
 namespace tink {

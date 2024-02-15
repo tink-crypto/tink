@@ -23,6 +23,7 @@
 #include "absl/strings/string_view.h"
 #include "tink/internal/ec_util.h"
 #include "tink/public_key_verify.h"
+#include "tink/subtle/common_enums.h"
 #include "tink/subtle/ecdsa_verify_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"

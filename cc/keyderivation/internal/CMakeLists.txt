@@ -40,6 +40,9 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::aes_gcm_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::hkdf_prf_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_library(
@@ -159,4 +162,7 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::aes_gcm_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::hkdf_prf_cc_proto
+    tink::proto::tink_cc_proto
 )

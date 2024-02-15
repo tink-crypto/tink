@@ -20,6 +20,7 @@
 #include <string>
 
 #include "google/protobuf/struct.pb.h"
+#include "absl/strings/string_view.h"
 #include "absl/strings/substitute.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"

@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "google/protobuf/struct.pb.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/util/statusor.h"

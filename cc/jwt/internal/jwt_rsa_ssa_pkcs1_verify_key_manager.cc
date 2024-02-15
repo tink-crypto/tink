@@ -15,11 +15,20 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/jwt/internal/jwt_rsa_ssa_pkcs1_verify_key_manager.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
 
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
+#include "tink/jwt/internal/jwt_public_key_verify_impl.h"
+#include "tink/jwt/internal/jwt_public_key_verify_internal.h"
+#include "tink/public_key_verify.h"
+#include "tink/util/status.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

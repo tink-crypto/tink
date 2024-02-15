@@ -21,18 +21,21 @@
 #include <tuple>
 #include <utility>
 
+#include "google/protobuf/struct.pb.h"
 #include "google/protobuf/util/message_differencer.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/string_view.h"
 #include "tink/cleartext_keyset_handle.h"
+#include "tink/config/global_registry.h"
 #include "tink/json_keyset_reader.h"
 #include "tink/jwt/internal/json_util.h"
 #include "tink/jwt/jwt_public_key_sign.h"
 #include "tink/jwt/jwt_public_key_verify.h"
 #include "tink/jwt/jwt_signature_config.h"
 #include "tink/jwt/jwt_validator.h"
+#include "tink/jwt/raw_jwt.h"
 #include "tink/jwt/verified_jwt.h"
 #include "tink/keyset_handle.h"
 #include "tink/keyset_reader.h"
@@ -42,6 +45,7 @@
 #include "proto/ecdsa.pb.h"
 #include "proto/jwt_ecdsa.pb.h"
 #include "proto/jwt_rsa_ssa_pkcs1.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

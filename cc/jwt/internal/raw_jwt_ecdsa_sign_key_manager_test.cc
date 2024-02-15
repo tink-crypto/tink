@@ -26,6 +26,7 @@
 #include "tink/jwt/internal/raw_jwt_ecdsa_verify_key_manager.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
+#include "tink/subtle/common_enums.h"
 #include "tink/subtle/ecdsa_verify_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/status.h"
@@ -33,6 +34,8 @@
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/ecdsa.pb.h"
+#include "proto/jwt_ecdsa.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

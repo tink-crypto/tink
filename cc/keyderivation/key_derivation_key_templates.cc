@@ -23,6 +23,7 @@
 #include "tink/keyderivation/keyset_deriver.h"
 #include "tink/keyset_handle.h"
 #include "tink/util/statusor.h"
+#include "proto/prf_based_deriver.pb.h"
 
 namespace crypto {
 namespace tink {

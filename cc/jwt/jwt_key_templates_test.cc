@@ -20,7 +20,9 @@
 #include <string>
 #include <utility>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "tink/config/global_registry.h"
 #include "tink/jwt/jwt_mac.h"
 #include "tink/jwt/jwt_mac_config.h"
 #include "tink/jwt/jwt_public_key_sign.h"
@@ -29,9 +31,12 @@
 #include "tink/jwt/jwt_validator.h"
 #include "tink/jwt/raw_jwt.h"
 #include "tink/jwt/verified_jwt.h"
+#include "tink/keyset_handle.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
+#include "proto/tink.pb.h"
 
 using ::crypto::tink::test::IsOk;
 using google::crypto::tink::KeyTemplate;

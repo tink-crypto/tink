@@ -23,6 +23,7 @@
 #include <string>
 #include <utility>
 
+#include "google/protobuf/struct.pb.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/escaping.h"

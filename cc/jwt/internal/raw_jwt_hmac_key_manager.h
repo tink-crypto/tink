@@ -16,6 +16,7 @@
 #ifndef TINK_JWT_INTERNAL_RAW_JWT_HMAC_KEY_MANAGER_H_
 #define TINK_JWT_INTERNAL_RAW_JWT_HMAC_KEY_MANAGER_H_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -23,6 +24,9 @@
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/core/key_type_manager.h"
+#include "tink/core/template_util.h"
+#include "tink/input_stream.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/mac.h"
 #include "tink/subtle/hmac_boringssl.h"
 #include "tink/util/constants.h"

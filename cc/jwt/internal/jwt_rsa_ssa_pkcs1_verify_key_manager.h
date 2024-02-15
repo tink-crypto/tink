@@ -16,17 +16,21 @@
 #ifndef TINK_JWT_INTERNAL_JWT_RSA_SSA_PKCS1_VERIFY_KEY_MANAGER_H_
 #define TINK_JWT_INTERNAL_JWT_RSA_SSA_PKCS1_VERIFY_KEY_MANAGER_H_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
 #include "absl/memory/memory.h"
 #include "tink/core/key_type_manager.h"
+#include "tink/core/template_util.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/jwt/internal/jwt_public_key_verify_impl.h"
 #include "tink/jwt/internal/jwt_public_key_verify_internal.h"
 #include "tink/jwt/internal/raw_jwt_rsa_ssa_pkcs1_verify_key_manager.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/jwt_rsa_ssa_pkcs1.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

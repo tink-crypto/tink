@@ -22,6 +22,7 @@
 #include "absl/strings/string_view.h"
 #include "google/protobuf/json/json.h"
 #include "google/protobuf/util/json_util.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

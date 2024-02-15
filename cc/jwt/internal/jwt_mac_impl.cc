@@ -16,15 +16,25 @@
 
 #include "tink/jwt/internal/jwt_mac_impl.h"
 
+#include <cstddef>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "google/protobuf/struct.pb.h"
 #include "absl/status/status.h"
 #include "absl/strings/escaping.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
+#include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 #include "tink/jwt/internal/json_util.h"
 #include "tink/jwt/internal/jwt_format.h"
+#include "tink/jwt/jwt_validator.h"
+#include "tink/jwt/raw_jwt.h"
+#include "tink/jwt/verified_jwt.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

@@ -37,6 +37,7 @@
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
+#include "proto/common.pb.h"
 #include "proto/jwt_rsa_ssa_pkcs1.pb.h"
 
 namespace crypto {

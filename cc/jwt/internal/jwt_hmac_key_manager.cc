@@ -16,10 +16,12 @@
 
 #include "tink/jwt/internal/jwt_hmac_key_manager.h"
 
+#include <cstdint>
 #include <map>
 #include <string>
 
 #include "absl/strings/string_view.h"
+#include "tink/input_stream.h"
 #include "tink/jwt/internal/raw_jwt_hmac_key_manager.h"
 #include "tink/mac.h"
 #include "tink/subtle/hmac_boringssl.h"

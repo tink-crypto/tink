@@ -13,6 +13,7 @@ tink_cc_library(
     absl::strings
     absl::str_format
     absl::time
+    absl::optional
     tink::jwt::internal::json_util
     tink::util::status
     tink::util::statusor
@@ -28,6 +29,7 @@ tink_cc_library(
     absl::status
     absl::strings
     absl::time
+    absl::optional
     tink::util::status
     tink::util::statusor
 )
@@ -59,6 +61,7 @@ tink_cc_test(
     gmock
     absl::strings
     absl::time
+    tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
 )
@@ -73,8 +76,12 @@ tink_cc_test(
     tink::jwt::raw_jwt
     tink::jwt::verified_jwt
     gmock
+    absl::memory
     absl::status
     absl::strings
+    absl::time
+    absl::optional
+    tink::core::mac
     tink::jwt::internal::jwt_mac_impl
     tink::jwt::internal::jwt_mac_internal
     tink::subtle::hmac_boringssl
@@ -83,8 +90,11 @@ tink_cc_test(
     tink::util::errors
     tink::util::protobuf_helper
     tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
+    tink::proto::common_cc_proto
 )
 
 tink_cc_test(
@@ -96,6 +106,8 @@ tink_cc_test(
     tink::jwt::raw_jwt
     gmock
     absl::strings
+    absl::time
+    tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
 )
@@ -142,6 +154,7 @@ tink_cc_library(
     jwk_set_converter.cc
     jwk_set_converter.h
   DEPS
+    protobuf::libprotobuf
     absl::memory
     absl::status
     absl::strings
@@ -236,9 +249,13 @@ tink_cc_test(
     tink::jwt::raw_jwt
     tink::jwt::verified_jwt
     gmock
+    tink::core::keyset_handle
+    tink::config::global_registry
     tink::util::status
+    tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -251,6 +268,7 @@ tink_cc_test(
     tink::jwt::jwt_public_key_verify
     tink::jwt::jwt_signature_config
     tink::jwt::jwt_validator
+    tink::jwt::raw_jwt
     tink::jwt::verified_jwt
     protobuf::libprotobuf
     gmock
@@ -260,6 +278,7 @@ tink_cc_test(
     tink::core::json_keyset_reader
     tink::core::keyset_handle
     tink::core::keyset_reader
+    tink::config::global_registry
     tink::jwt::internal::json_util
     tink::util::status
     tink::util::statusor
@@ -267,6 +286,7 @@ tink_cc_test(
     tink::proto::ecdsa_cc_proto
     tink::proto::jwt_ecdsa_cc_proto
     tink::proto::jwt_rsa_ssa_pkcs1_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -280,6 +300,7 @@ tink_cc_test(
     crypto
     tink::core::keyset_handle
     tink::core::registry
+    tink::config::global_registry
     tink::internal::fips_utils
     tink::util::test_matchers
 )
@@ -295,6 +316,7 @@ tink_cc_test(
     crypto
     tink::core::keyset_handle
     tink::core::registry
+    tink::config::global_registry
     tink::internal::fips_utils
     tink::util::test_matchers
 )

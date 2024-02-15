@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "tink/config/global_registry.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/jwt/jwt_key_templates.h"
 #include "tink/keyset_handle.h"

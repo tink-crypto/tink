@@ -17,9 +17,12 @@
 #ifndef TINK_JWT_INTERNAL_JWT_FORMAT_H_
 #define TINK_JWT_INTERNAL_JWT_FORMAT_H_
 
+#include <cstdint>
 #include <string>
 
 #include "google/protobuf/struct.pb.h"
+#include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 #include "tink/jwt/raw_jwt.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
