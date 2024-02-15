@@ -68,7 +68,7 @@ public final class PrimitiveSet<P> {
     private final OutputPrefixType outputPrefixType;
     // The id of the key.
     private final int keyId;
-    private final String keyType;
+    private final String keyTypeUrl;
     private final Key key;
 
     Entry(
@@ -77,14 +77,14 @@ public final class PrimitiveSet<P> {
         KeyStatusType status,
         OutputPrefixType outputPrefixType,
         int keyId,
-        String keyType,
+        String keyTypeUrl,
         Key key) {
       this.fullPrimitive = fullPrimitive;
       this.identifier = Arrays.copyOf(identifier, identifier.length);
       this.status = status;
       this.outputPrefixType = outputPrefixType;
       this.keyId = keyId;
-      this.keyType = keyType;
+      this.keyTypeUrl = keyTypeUrl;
       this.key = key;
     }
 
@@ -121,8 +121,8 @@ public final class PrimitiveSet<P> {
       return keyId;
     }
 
-    public String getKeyType() {
-      return keyType;
+    public String getKeyTypeUrl() {
+      return keyTypeUrl;
     }
 
     public Key getKey() {

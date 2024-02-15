@@ -22,9 +22,12 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.aead.AesGcmKey;
+import com.google.crypto.tink.aead.PredefinedAeadParameters;
 import com.google.crypto.tink.mac.HmacKey;
 import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
@@ -32,10 +35,13 @@ import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
+import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.subtle.AesGcmJce;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
@@ -98,6 +104,40 @@ public class PrimitiveSetTest {
                 key.getOutputPrefixType(),
                 idRequirement),
             InsecureSecretKeyAccess.get());
+  }
+
+  @Test
+  public void primitiveSetWithOneEntry_works() throws Exception {
+    byte[] keyMaterial = Hex.decode("000102030405060708090a0b0c0d0e0f");
+    AesGcmKey key =
+        AesGcmKey.builder()
+            .setParameters(PredefinedAeadParameters.AES128_GCM)
+            .setKeyBytes(SecretBytes.copyFrom(keyMaterial, InsecureSecretKeyAccess.get()))
+            .setIdRequirement(42)
+            .build();
+    Aead fullPrimitive = AesGcmJce.create(key);
+    Keyset.Key protoKey =
+        TestUtil.createKey(
+            TestUtil.createAesGcmKeyData(keyMaterial),
+            42,
+            KeyStatusType.ENABLED,
+            OutputPrefixType.TINK);
+    PrimitiveSet<Aead> pset =
+        PrimitiveSet.newBuilder(Aead.class)
+            .addPrimaryFullPrimitive(fullPrimitive, key, protoKey)
+            .build();
+    assertThat(pset.getAll()).hasSize(1);
+    List<PrimitiveSet.Entry<Aead>> entries =
+        pset.getPrimitive(CryptoFormat.getOutputPrefix(protoKey));
+    assertThat(entries).hasSize(1);
+    PrimitiveSet.Entry<Aead> entry = entries.get(0);
+    assertThat(entry.getFullPrimitive()).isEqualTo(fullPrimitive);
+    assertThat(entry.getIdentifier()).isEqualTo(CryptoFormat.getOutputPrefix(protoKey));
+    assertThat(entry.getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    assertThat(entry.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
+    assertThat(entry.getKeyId()).isEqualTo(42);
+    assertThat(entry.getKeyTypeUrl()).isEqualTo("type.googleapis.com/google.crypto.tink.AesGcmKey");
+    assertThat(entry.getKey()).isEqualTo(key);
   }
 
   @Test

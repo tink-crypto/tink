@@ -67,7 +67,7 @@ public final class MonitoringUtil {
         builder.addEntry(
             parseStatus(entry.getStatus()),
             entry.getKeyId(),
-            parseKeyTypeUrl(entry.getKeyType()),
+            parseKeyTypeUrl(entry.getKeyTypeUrl()),
             entry.getOutputPrefixType().name());
       }
     }
