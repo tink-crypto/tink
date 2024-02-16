@@ -129,3 +129,38 @@ tink_cc_test(
     tink::util::test_util
     tink::proto::tink_cc_proto
 )
+
+tink_cc_test(
+  NAME keyset_deriver_test
+  SRCS
+    keyset_deriver_test.cc
+  DEPS
+    tink::keyderivation::keyset_deriver
+    tink::keyderivation::keyset_deriver_wrapper
+    gmock
+    absl::memory
+    absl::string_view
+    absl::optional
+    tink::core::insecure_secret_key_access
+    tink::core::key
+    tink::core::keyset_handle
+    tink::core::partial_key_access
+    tink::core::partial_key_access_token
+    tink::core::primitive_set
+    tink::core::registry
+    tink::core::restricted_data
+    tink::aead::aes_gcm_key
+    tink::aead::aes_gcm_key_manager
+    tink::aead::aes_gcm_parameters
+    tink::aead::aes_gcm_proto_serialization
+    tink::internal::mutable_serialization_registry
+    tink::internal::proto_parameters_serialization
+    tink::internal::serialization
+    tink::keyderivation::internal::prf_based_deriver
+    tink::prf::hkdf_prf_key_manager
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::util::test_util
+    tink::proto::hkdf_prf_cc_proto
+    tink::proto::tink_cc_proto
+)
