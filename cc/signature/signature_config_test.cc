@@ -26,6 +26,11 @@
 #include "absl/log/check.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
+#include "tink/config/global_registry.h"
+#include "tink/crypto_format.h"
+#include "tink/primitive_set.h"
+#include "proto/rsa_ssa_pss.pb.h"
 #ifdef OPENSSL_IS_BORINGSSL
 #include "openssl/base.h"
 #endif

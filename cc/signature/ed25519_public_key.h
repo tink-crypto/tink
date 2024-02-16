@@ -19,7 +19,9 @@
 
 #include <string>
 
+#include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
+#include "tink/key.h"
 #include "tink/partial_key_access_token.h"
 #include "tink/signature/ed25519_parameters.h"
 #include "tink/signature/signature_public_key.h"

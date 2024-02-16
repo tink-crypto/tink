@@ -16,6 +16,10 @@
 
 #include "tink/signature/sig_util.h"
 
+#include "tink/public_key_sign.h"
+#include "tink/public_key_verify.h"
+#include "tink/util/status.h"
+
 namespace crypto {
 namespace tink {
 

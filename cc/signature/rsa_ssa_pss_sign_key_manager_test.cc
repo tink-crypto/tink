@@ -28,12 +28,14 @@
 #include "tink/public_key_sign.h"
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
 #include "tink/signature/signature_key_templates.h"
+#include "tink/subtle/common_enums.h"
 #include "tink/subtle/rsa_ssa_pss_verify_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/rsa_ssa_pss.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

@@ -20,7 +20,9 @@
 #include <string>
 #include <utility>
 
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "tink/crypto_format.h"
 #include "tink/internal/monitoring_util.h"
 #include "tink/internal/registry_impl.h"
@@ -28,6 +30,7 @@
 #include "tink/monitoring/monitoring.h"
 #include "tink/primitive_set.h"
 #include "tink/public_key_sign.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 

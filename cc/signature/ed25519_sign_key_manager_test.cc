@@ -22,8 +22,10 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/container/flat_hash_set.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "tink/public_key_sign.h"
+#include "tink/public_key_verify.h"
 #include "tink/registry.h"
 #include "tink/signature/ed25519_verify_key_manager.h"
 #include "tink/subtle/ed25519_verify_boringssl.h"
@@ -35,6 +37,7 @@
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/ed25519.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

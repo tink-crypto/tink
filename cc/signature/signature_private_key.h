@@ -18,6 +18,7 @@
 #define TINK_SIGNATURE_SIGNATURE_PRIVATE_KEY_H_
 
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 #include "tink/key.h"
 #include "tink/private_key.h"
 #include "tink/signature/signature_parameters.h"

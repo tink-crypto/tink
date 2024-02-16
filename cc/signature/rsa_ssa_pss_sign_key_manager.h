@@ -16,6 +16,7 @@
 #ifndef TINK_SIGNATURE_RSA_SSA_PSS_SIGN_KEY_MANAGER_H_
 #define TINK_SIGNATURE_RSA_SSA_PSS_SIGN_KEY_MANAGER_H_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -23,6 +24,8 @@
 #include "absl/strings/str_cat.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/core/private_key_type_manager.h"
+#include "tink/core/template_util.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/public_key_sign.h"
 #include "tink/util/constants.h"
 #include "tink/util/errors.h"

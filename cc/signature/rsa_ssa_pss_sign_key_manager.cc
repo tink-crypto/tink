@@ -27,6 +27,7 @@
 #include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_sign.h"
+#include "tink/public_key_verify.h"
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
 #include "tink/signature/sig_util.h"
 #include "tink/subtle/rsa_ssa_pss_sign_boringssl.h"

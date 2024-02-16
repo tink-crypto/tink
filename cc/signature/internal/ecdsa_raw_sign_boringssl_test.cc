@@ -16,14 +16,18 @@
 
 #include "tink/signature/internal/ecdsa_raw_sign_boringssl.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "tink/internal/ec_util.h"
 #include "tink/internal/fips_utils.h"
+#include "tink/internal/md_util.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/common_enums.h"

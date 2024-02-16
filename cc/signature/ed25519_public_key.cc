@@ -19,8 +19,12 @@
 #include <string>
 
 #include "absl/base/attributes.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
+#include "tink/key.h"
 #include "tink/partial_key_access_token.h"
 #include "tink/signature/ed25519_parameters.h"
 #include "tink/subtle/subtle_util.h"

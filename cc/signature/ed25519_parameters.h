@@ -17,6 +17,7 @@
 #ifndef TINK_SIGNATURE_ED25519_PARAMETERS_H_
 #define TINK_SIGNATURE_ED25519_PARAMETERS_H_
 
+#include "tink/parameters.h"
 #include "tink/signature/signature_parameters.h"
 #include "tink/util/statusor.h"
 

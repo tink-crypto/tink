@@ -18,6 +18,7 @@
 #define TINK_SIGNATURE_RSA_SSA_PKCS1_VERIFY_KEY_MANAGER_H_
 
 #include <algorithm>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
@@ -25,6 +26,8 @@
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "tink/core/key_type_manager.h"
+#include "tink/core/template_util.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/public_key_verify.h"
 #include "tink/util/constants.h"
 #include "tink/util/errors.h"
@@ -32,6 +35,7 @@
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/rsa_ssa_pkcs1.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

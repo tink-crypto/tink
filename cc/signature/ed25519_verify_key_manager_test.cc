@@ -20,6 +20,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/strings/str_cat.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/registry.h"
@@ -32,6 +33,7 @@
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/ed25519.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

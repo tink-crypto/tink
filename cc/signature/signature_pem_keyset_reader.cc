@@ -17,6 +17,7 @@
 #include "tink/signature/signature_pem_keyset_reader.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <random>
 #include <string>

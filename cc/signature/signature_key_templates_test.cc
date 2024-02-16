@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "openssl/bn.h"
 #include "openssl/rsa.h"
@@ -25,6 +26,7 @@
 #include "tink/core/private_key_manager_impl.h"
 #include "tink/internal/bn_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
+#include "tink/public_key_sign.h"
 #include "tink/signature/ecdsa_sign_key_manager.h"
 #include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/signature/ed25519_sign_key_manager.h"
@@ -35,6 +37,7 @@
 #include "tink/util/test_matchers.h"
 #include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"
+#include "proto/ed25519.pb.h"
 #include "proto/rsa_ssa_pkcs1.pb.h"
 #include "proto/rsa_ssa_pss.pb.h"
 #include "proto/tink.pb.h"

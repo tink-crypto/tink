@@ -21,9 +21,13 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
+#include "absl/types/optional.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/ec_util.h"
 #include "tink/partial_key_access.h"
+#include "tink/restricted_data.h"
+#include "tink/signature/ed25519_parameters.h"
 #include "tink/signature/ed25519_public_key.h"
 #include "tink/subtle/random.h"
 #include "tink/util/statusor.h"

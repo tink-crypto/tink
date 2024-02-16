@@ -17,6 +17,7 @@
 #ifndef TINK_SIGNATURE_ED25519_PRIVATE_KEY_H_
 #define TINK_SIGNATURE_ED25519_PRIVATE_KEY_H_
 
+#include "tink/key.h"
 #include "tink/partial_key_access_token.h"
 #include "tink/restricted_data.h"
 #include "tink/signature/ed25519_public_key.h"

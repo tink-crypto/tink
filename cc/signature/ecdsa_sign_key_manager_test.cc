@@ -23,6 +23,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/internal/ec_util.h"
@@ -38,6 +39,7 @@
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/ecdsa.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

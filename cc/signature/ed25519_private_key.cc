@@ -18,11 +18,18 @@
 
 #include <memory>
 
+#include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "openssl/crypto.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/ec_util.h"
+#include "tink/key.h"
 #include "tink/partial_key_access_token.h"
+#include "tink/restricted_data.h"
+#include "tink/signature/ed25519_public_key.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

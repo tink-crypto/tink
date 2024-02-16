@@ -24,6 +24,7 @@
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/config/tink_fips.h"
+#include "tink/input_stream.h"
 #include "tink/internal/ec_util.h"
 #include "tink/public_key_sign.h"
 #include "tink/signature/ecdsa_verify_key_manager.h"

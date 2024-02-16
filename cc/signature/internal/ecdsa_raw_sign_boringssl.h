@@ -24,6 +24,7 @@
 #include "absl/strings/string_view.h"
 #include "openssl/ec.h"
 #include "openssl/evp.h"
+#include "tink/internal/ec_util.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_sign.h"

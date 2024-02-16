@@ -6,6 +6,7 @@ tink_cc_library(
     ecdsa_raw_sign_boringssl.cc
     ecdsa_raw_sign_boringssl.h
   DEPS
+    absl::memory
     absl::status
     absl::strings
     crypto
@@ -20,6 +21,7 @@ tink_cc_library(
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
     tink::util::errors
+    tink::util::status
     tink::util::statusor
 )
 
@@ -97,10 +99,12 @@ tink_cc_test(
     tink::signature::internal::ecdsa_raw_sign_boringssl
     gmock
     absl::status
+    absl::string_view
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::internal::ec_util
     tink::internal::fips_utils
+    tink::internal::md_util
     tink::subtle::common_enums
     tink::subtle::ecdsa_verify_boringssl
     tink::subtle::subtle_util_boringssl

@@ -16,12 +16,15 @@
 #ifndef TINK_SIGNATURE_RSA_SSA_PKCS1_SIGN_KEY_MANAGER_H_
 #define TINK_SIGNATURE_RSA_SSA_PKCS1_SIGN_KEY_MANAGER_H_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "tink/core/private_key_type_manager.h"
+#include "tink/core/template_util.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/public_key_sign.h"
 #include "tink/util/constants.h"
 #include "tink/util/errors.h"
@@ -29,6 +32,7 @@
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/rsa_ssa_pkcs1.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

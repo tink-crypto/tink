@@ -16,24 +16,31 @@
 
 #include "tink/signature/public_key_sign_wrapper.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/container/flat_hash_map.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "tink/crypto_format.h"
 #include "tink/internal/registry_impl.h"
 #include "tink/monitoring/monitoring.h"
 #include "tink/monitoring/monitoring_client_mocks.h"
 #include "tink/primitive_set.h"
 #include "tink/public_key_sign.h"
+#include "tink/public_key_verify.h"
+#include "tink/registry.h"
 #include "tink/signature/failing_signature.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
+#include "proto/tink.pb.h"
 
 using ::crypto::tink::test::DummyPublicKeySign;
 using ::crypto::tink::test::DummyPublicKeyVerify;

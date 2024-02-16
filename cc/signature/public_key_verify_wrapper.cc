@@ -20,8 +20,10 @@
 #include <string>
 #include <utility>
 
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "tink/crypto_format.h"
 #include "tink/internal/monitoring_util.h"
 #include "tink/internal/registry_impl.h"
