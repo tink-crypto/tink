@@ -17,6 +17,8 @@
 #ifndef TINK_STREAMINGAEAD_SHARED_RANDOM_ACCESS_STREAM_H_
 #define TINK_STREAMINGAEAD_SHARED_RANDOM_ACCESS_STREAM_H_
 
+#include <cstdint>
+
 #include "tink/random_access_stream.h"
 #include "tink/util/buffer.h"
 #include "tink/util/status.h"

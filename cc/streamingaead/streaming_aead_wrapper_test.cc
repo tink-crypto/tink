@@ -16,12 +16,14 @@
 
 #include "tink/streamingaead/streaming_aead_wrapper.h"
 
+#include <cstdint>
 #include <memory>
 #include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
@@ -32,6 +34,7 @@
 #include "tink/input_stream.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/test_random_access_stream.h"
+#include "tink/keyset_handle.h"
 #include "tink/output_stream.h"
 #include "tink/primitive_set.h"
 #include "tink/proto_keyset_format.h"
@@ -46,6 +49,7 @@
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/ostream_output_stream.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/aes_gcm_hkdf_streaming.pb.h"

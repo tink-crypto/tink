@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/prf/failing_prfset.h"
 
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <string>
@@ -22,6 +23,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "tink/prf/prf_set.h"
 #include "tink/util/test_matchers.h"
 
 namespace crypto {

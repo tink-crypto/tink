@@ -17,6 +17,8 @@
 #ifndef TINK_STREAMINGAEAD_SHARED_INPUT_STREAM_H_
 #define TINK_STREAMINGAEAD_SHARED_INPUT_STREAM_H_
 
+#include <cstdint>
+
 #include "tink/input_stream.h"
 #include "tink/util/statusor.h"
 

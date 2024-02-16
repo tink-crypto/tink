@@ -16,12 +16,14 @@
 
 #include "tink/streamingaead/decrypting_input_stream.h"
 
+#include <cstdint>
 #include <memory>
 #include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"

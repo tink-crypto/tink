@@ -20,16 +20,19 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "tink/core/key_manager_impl.h"
 #include "tink/prf/prf_set.h"
 #include "tink/subtle/hmac_boringssl.h"
+#include "tink/util/enums.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/hmac_prf.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

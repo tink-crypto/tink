@@ -17,6 +17,7 @@
 #ifndef TINK_PRF_HKDF_PRF_KEY_MANAGER_H_
 #define TINK_PRF_HKDF_PRF_KEY_MANAGER_H_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
@@ -25,6 +26,7 @@
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/core/key_type_manager.h"
+#include "tink/core/template_util.h"
 #include "tink/input_stream.h"
 #include "tink/prf/prf_set.h"
 #include "tink/subtle/prf/hkdf_streaming_prf.h"

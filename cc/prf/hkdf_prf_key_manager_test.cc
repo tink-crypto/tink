@@ -23,15 +23,22 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "tink/input_stream.h"
+#include "tink/prf/prf_set.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/prf/hkdf_streaming_prf.h"
 #include "tink/subtle/prf/prf_set_util.h"
+#include "tink/subtle/prf/streaming_prf.h"
 #include "tink/util/input_stream_util.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/common.pb.h"
+#include "proto/hkdf_prf.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

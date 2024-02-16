@@ -17,6 +17,7 @@
 #ifndef TINK_STREAMINGAEAD_BUFFERED_INPUT_STREAM_H_
 #define TINK_STREAMINGAEAD_BUFFERED_INPUT_STREAM_H_
 
+#include <cstdint>
 #include <memory>
 #include <vector>
 

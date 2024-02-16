@@ -20,6 +20,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "tink/config/global_registry.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/keyset_handle.h"
 #include "tink/prf/hmac_prf_key_manager.h"
@@ -29,6 +30,7 @@
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

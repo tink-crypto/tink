@@ -17,6 +17,7 @@
 #include "tink/streamingaead/decrypting_input_stream.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <cstring>
 #include <memory>
 #include <string>
@@ -25,6 +26,7 @@
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
 #include "tink/primitive_set.h"
 #include "tink/streaming_aead.h"

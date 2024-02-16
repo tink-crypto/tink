@@ -15,10 +15,20 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/prf/failing_prfset.h"
 
+#include <cstddef>
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <string>
 #include <utility>
+
+#include "absl/memory/memory.h"
+#include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
+#include "tink/prf/prf_set.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

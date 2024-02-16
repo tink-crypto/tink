@@ -16,6 +16,7 @@
 #ifndef TINK_STREAMINGAEAD_AES_CTR_HMAC_STREAMING_KEY_MANAGER_H_
 #define TINK_STREAMINGAEAD_AES_CTR_HMAC_STREAMING_KEY_MANAGER_H_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
@@ -23,6 +24,8 @@
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "tink/core/key_type_manager.h"
+#include "tink/core/template_util.h"
+#include "tink/input_stream.h"
 #include "tink/streaming_aead.h"
 #include "tink/subtle/aes_ctr_hmac_streaming.h"
 #include "tink/util/constants.h"

@@ -24,8 +24,10 @@
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "tink/config/global_registry.h"
 #include "tink/config/tink_fips.h"
 #include "tink/keyset_handle.h"
+#include "tink/primitive_set.h"
 #include "tink/registry.h"
 #include "tink/streaming_aead.h"
 #include "tink/streamingaead/aes_ctr_hmac_streaming_key_manager.h"
@@ -34,6 +36,7 @@
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

@@ -16,6 +16,9 @@
 
 #include "tink/streamingaead/decrypting_random_access_stream.h"
 
+#include <algorithm>
+#include <cstdint>
+#include <cstring>
 #include <memory>
 #include <sstream>
 #include <string>

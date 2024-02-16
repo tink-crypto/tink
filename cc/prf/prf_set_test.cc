@@ -16,6 +16,8 @@
 
 #include "tink/prf/prf_set.h"
 
+#include <cstddef>
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <string>
@@ -27,6 +29,7 @@
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "tink/config/global_registry.h"
 #include "tink/keyset_handle.h"
 #include "tink/keyset_manager.h"
 #include "tink/prf/prf_config.h"

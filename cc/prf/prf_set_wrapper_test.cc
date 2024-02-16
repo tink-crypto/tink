@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/prf/prf_set_wrapper.h"
 
+#include <cstddef>
 #include <cstdint>
 #include <map>
 #include <memory>
@@ -23,9 +24,12 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/container/flat_hash_map.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
+#include "tink/internal/registry_impl.h"
+#include "tink/monitoring/monitoring.h"
 #include "tink/monitoring/monitoring_client_mocks.h"
 #include "tink/prf/prf_set.h"
 #include "tink/primitive_set.h"

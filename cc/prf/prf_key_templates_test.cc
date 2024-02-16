@@ -24,7 +24,9 @@
 #include "tink/prf/hmac_prf_key_manager.h"
 #include "tink/util/test_matchers.h"
 #include "proto/aes_cmac_prf.pb.h"
+#include "proto/hkdf_prf.pb.h"
 #include "proto/hmac_prf.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

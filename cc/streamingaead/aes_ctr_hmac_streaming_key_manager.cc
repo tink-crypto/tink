@@ -19,11 +19,14 @@
 #include <string>
 
 #include "absl/status/status.h"
+#include "tink/input_stream.h"
 #include "tink/subtle/aes_ctr_hmac_streaming.h"
 #include "tink/subtle/random.h"
 #include "tink/util/input_stream_util.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/validation.h"
+#include "proto/common.pb.h"
 
 namespace crypto {
 namespace tink {

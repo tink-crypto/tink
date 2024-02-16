@@ -17,10 +17,12 @@
 #ifndef TINK_STREAMINGAEAD_DECRYPTING_INPUT_STREAM_H_
 #define TINK_STREAMINGAEAD_DECRYPTING_INPUT_STREAM_H_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
 
+#include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
 #include "tink/primitive_set.h"
 #include "tink/streaming_aead.h"

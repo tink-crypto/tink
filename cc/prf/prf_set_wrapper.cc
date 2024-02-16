@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/prf/prf_set_wrapper.h"
 
+#include <cstddef>
 #include <cstdint>
 #include <map>
 #include <memory>
@@ -25,11 +26,14 @@
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
+#include "absl/strings/string_view.h"
 #include "tink/internal/monitoring_util.h"
 #include "tink/internal/registry_impl.h"
 #include "tink/monitoring/monitoring.h"
 #include "tink/prf/prf_set.h"
+#include "tink/primitive_set.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {

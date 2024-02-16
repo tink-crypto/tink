@@ -15,6 +15,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "tink/prf/prf_key_templates.h"
 
+#include <cstdint>
 #include <memory>
 
 #include "absl/memory/memory.h"

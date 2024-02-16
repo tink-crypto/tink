@@ -17,6 +17,8 @@
 #ifndef TINK_PRF_PRF_SET_H_
 #define TINK_PRF_PRF_SET_H_
 
+#include <cstddef>
+#include <cstdint>
 #include <map>
 #include <string>
 

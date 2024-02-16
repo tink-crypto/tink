@@ -19,11 +19,15 @@
 #include <string>
 
 #include "absl/status/status.h"
+#include "tink/input_stream.h"
 #include "tink/subtle/common_enums.h"
+#include "tink/subtle/random.h"
 #include "tink/util/enums.h"
+#include "tink/util/errors.h"
 #include "tink/util/input_stream_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/validation.h"
 #include "proto/hmac_prf.pb.h"
 
 namespace crypto {

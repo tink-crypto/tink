@@ -17,16 +17,21 @@
 #define TINK_PRF_HMAC_PRF_KEY_MANAGER_H_
 
 #include <algorithm>
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "absl/memory/memory.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/core/key_type_manager.h"
+#include "tink/core/template_util.h"
+#include "tink/input_stream.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/key_manager.h"
+#include "tink/prf/prf_set.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/prf/prf_set_util.h"
 #include "tink/subtle/random.h"

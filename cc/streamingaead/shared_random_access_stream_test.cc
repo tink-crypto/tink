@@ -21,6 +21,7 @@
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/internal/test_random_access_stream.h"
 #include "tink/random_access_stream.h"
