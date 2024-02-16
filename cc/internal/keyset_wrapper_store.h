@@ -18,14 +18,19 @@
 #define TINK_INTERNAL_KEYSET_WRAPPER_STORE_H_
 
 #include <memory>
+#include <type_traits>
 #include <typeindex>
 
+#include "absl/container/flat_hash_map.h"
 #include "absl/functional/any_invocable.h"
+#include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
 #include "tink/internal/keyset_wrapper.h"
 #include "tink/internal/keyset_wrapper_impl.h"
 #include "tink/primitive_wrapper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

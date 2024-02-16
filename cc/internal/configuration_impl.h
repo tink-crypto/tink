@@ -28,6 +28,7 @@
 #include "tink/key_manager.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

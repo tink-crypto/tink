@@ -32,6 +32,8 @@
 #include "tink/core/key_manager_impl.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/key_manager.h"
+#include "tink/public_key_sign.h"
+#include "tink/public_key_verify.h"
 #include "tink/signature/ecdsa_sign_key_manager.h"
 #include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/util/statusor.h"
@@ -39,6 +41,7 @@
 #include "proto/aes_gcm.pb.h"
 #include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

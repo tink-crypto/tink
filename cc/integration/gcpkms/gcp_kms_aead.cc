@@ -20,6 +20,8 @@
 #include <string>
 
 #include "google/cloud/kms/v1/service.grpc.pb.h"
+#include "grpcpp/client_context.h"
+#include "grpcpp/support/status.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"

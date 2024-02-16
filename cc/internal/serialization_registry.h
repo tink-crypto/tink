@@ -36,6 +36,7 @@
 #include "tink/internal/serializer_index.h"
 #include "tink/key.h"
 #include "tink/parameters.h"
+#include "tink/secret_key_access_token.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 

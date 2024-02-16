@@ -23,6 +23,7 @@
 
 #include "google/cloud/kms/v1/service.grpc.pb.h"
 #include "grpcpp/channel.h"
+#include "absl/base/attributes.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/kms_client.h"

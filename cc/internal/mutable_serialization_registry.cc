@@ -21,6 +21,7 @@
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/synchronization/mutex.h"
+#include "absl/types/optional.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/key_parser.h"
 #include "tink/internal/key_serializer.h"
