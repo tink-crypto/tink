@@ -29,6 +29,7 @@
 #include "tink/aead/kms_aead_key_manager.h"
 #include "tink/aead/kms_envelope_aead_key_manager.h"
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
+#include "tink/aead/xchacha20_poly1305_proto_serialization.h"
 #include "tink/config/tink_fips.h"
 #include "tink/mac/mac_config.h"
 #include "tink/registry.h"
@@ -110,6 +111,11 @@ util::Status AeadConfig::Register() {
   }
 
   status = RegisterAesEaxProtoSerialization();
+  if (!status.ok()) {
+    return status;
+  }
+
+  status = RegisterXChaCha20Poly1305ProtoSerialization();
   if (!status.ok()) {
     return status;
   }

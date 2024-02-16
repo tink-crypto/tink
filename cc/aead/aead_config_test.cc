@@ -18,8 +18,6 @@
 
 #include <list>
 #include <memory>
-#include <string>
-#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -33,16 +31,22 @@
 #include "tink/aead/aes_gcm_parameters.h"
 #include "tink/aead/aes_gcm_siv_key.h"
 #include "tink/aead/aes_gcm_siv_parameters.h"
+#include "tink/aead/key_gen_config_v0.h"
+#include "tink/aead/xchacha20_poly1305_key.h"
+#include "tink/aead/xchacha20_poly1305_parameters.h"
 #include "tink/config/global_registry.h"
 #include "tink/config/tink_fips.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/fips_utils.h"
+#include "tink/internal/legacy_proto_key.h"
 #include "tink/internal/mutable_serialization_registry.h"
 #include "tink/internal/proto_key_serialization.h"
 #include "tink/internal/proto_parameters_serialization.h"
 #include "tink/internal/serialization.h"
 #include "tink/key.h"
+#include "tink/key_status.h"
 #include "tink/keyset_handle.h"
+#include "tink/keyset_handle_builder.h"
 #include "tink/parameters.h"
 #include "tink/partial_key_access.h"
 #include "tink/registry.h"
@@ -54,6 +58,7 @@
 #include "proto/aes_gcm.pb.h"
 #include "proto/aes_gcm_siv.pb.h"
 #include "proto/tink.pb.h"
+#include "proto/xchacha20_poly1305.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -460,6 +465,93 @@ TEST_F(AeadConfigTest, AesEaxProtoKeySerializationRegistered) {
           .SerializeKey<internal::ProtoKeySerialization>(
               *key, InsecureSecretKeyAccess::Get());
   ASSERT_THAT(serialized_key2, IsOk());
+}
+
+TEST_F(AeadConfigTest, XChaCha20Poly1305ProtoParamsSerializationRegistered) {
+  if (IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
+  // TODO: b/325507124 - Rewrite tests using parameters proto format API.
+  util::StatusOr<internal::ProtoParametersSerialization>
+      proto_params_serialization =
+          internal::ProtoParametersSerialization::Create(
+              AeadKeyTemplates::XChaCha20Poly1305());
+  ASSERT_THAT(proto_params_serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Parameters>> parsed_params =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseParameters(
+          *proto_params_serialization);
+  ASSERT_THAT(parsed_params.status(), StatusIs(absl::StatusCode::kNotFound));
+
+  util::StatusOr<XChaCha20Poly1305Parameters> params =
+      XChaCha20Poly1305Parameters::Create(
+          XChaCha20Poly1305Parameters::Variant::kTink);
+  ASSERT_THAT(params, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialized_params =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeParameters<internal::ProtoParametersSerialization>(*params);
+  ASSERT_THAT(serialized_params.status(),
+              StatusIs(absl::StatusCode::kNotFound));
+
+  ASSERT_THAT(AeadConfig::Register(), IsOk());
+
+  util::StatusOr<std::unique_ptr<Parameters>> parsed_params2 =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseParameters(
+          *proto_params_serialization);
+  ASSERT_THAT(parsed_params2, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialized_params2 =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeParameters<internal::ProtoParametersSerialization>(*params);
+  ASSERT_THAT(serialized_params2, IsOk());
+}
+
+TEST_F(AeadConfigTest, XChaCha20Poly1305ProtoKeySerializationRegistered) {
+  if (IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      KeysetHandle::GenerateNew(AeadKeyTemplates::XChaCha20Poly1305(),
+                                KeyGenConfigAeadV0());
+  ASSERT_THAT(handle, IsOk());
+
+  // Fails to parse this key type, so falls back to legacy proto key.
+  const internal::LegacyProtoKey* legacy_proto_key_from_handle =
+      reinterpret_cast<const internal::LegacyProtoKey*>(
+          (*handle)->GetPrimary().GetKey().get());
+  EXPECT_THAT(legacy_proto_key_from_handle, Not(IsNull()));
+
+  util::StatusOr<XChaCha20Poly1305Key> key = XChaCha20Poly1305Key::Create(
+      XChaCha20Poly1305Parameters::Variant::kTink,
+      RestrictedData(subtle::Random::GetRandomBytes(32),
+                     InsecureSecretKeyAccess::Get()),
+      /*id_requirement=*/123, GetPartialKeyAccess());
+  ASSERT_THAT(key, IsOk());
+
+  // Fails to serialize this key type.
+  EXPECT_THAT(KeysetHandleBuilder()
+                  .AddEntry(KeysetHandleBuilder::Entry::CreateFromCopyableKey(
+                      *key, KeyStatus::kEnabled, /*is_primary=*/true))
+                  .Build()
+                  .status(),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       testing::HasSubstr("Failed to serialize")));
+
+  ASSERT_THAT(AeadConfig::Register(), IsOk());
+
+  const XChaCha20Poly1305Key* key_from_handle =
+      reinterpret_cast<const XChaCha20Poly1305Key*>(
+          (*handle)->GetPrimary().GetKey().get());
+  EXPECT_THAT(key_from_handle, Not(IsNull()));
+
+  EXPECT_THAT(KeysetHandleBuilder()
+                  .AddEntry(KeysetHandleBuilder::Entry::CreateFromCopyableKey(
+                      *key, KeyStatus::kEnabled, /*is_primary=*/true))
+                  .Build(),
+              IsOk());
 }
 
 }  // namespace
