@@ -586,6 +586,8 @@ cc_library(
         "//internal:proto_parameters_serialization",
         "//proto:aes_eax_cc_proto",
         "//proto:tink_cc_proto",
+        "//util:secret_data",
+        "//util:secret_proto",
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/base:core_headers",

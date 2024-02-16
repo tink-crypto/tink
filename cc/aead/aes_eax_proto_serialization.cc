@@ -35,6 +35,8 @@
 #include "tink/partial_key_access.h"
 #include "tink/restricted_data.h"
 #include "tink/secret_key_access_token.h"
+#include "tink/util/secret_data.h"
+#include "tink/util/secret_proto.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/aes_eax.pb.h"
@@ -44,6 +46,9 @@ namespace crypto {
 namespace tink {
 namespace {
 
+using ::crypto::tink::util::SecretData;
+using ::crypto::tink::util::SecretDataAsStringView;
+using ::crypto::tink::util::SecretProto;
 using ::google::crypto::tink::AesEaxKeyFormat;
 using ::google::crypto::tink::AesEaxParams;
 using ::google::crypto::tink::OutputPrefixType;
@@ -166,15 +171,13 @@ util::StatusOr<AesEaxKey> ParseKey(
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "SecretKeyAccess is required");
   }
-  google::crypto::tink::AesEaxKey proto_key;
+  SecretProto<google::crypto::tink::AesEaxKey> proto_key;
   RestrictedData restricted_data = serialization.SerializedKeyProto();
-  // OSS proto library complains if input is not converted to a string.
-  if (!proto_key.ParseFromString(
-          std::string(restricted_data.GetSecret(*token)))) {
+  if (!proto_key->ParseFromString(restricted_data.GetSecret(*token))) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Failed to parse AesEaxKey proto");
   }
-  if (proto_key.version() != 0) {
+  if (proto_key->version() != 0) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Only version 0 keys are accepted.");
   }
@@ -186,15 +189,15 @@ util::StatusOr<AesEaxKey> ParseKey(
   util::StatusOr<AesEaxParameters> parameters =
       AesEaxParameters::Builder()
           .SetVariant(*variant)
-          .SetKeySizeInBytes(proto_key.key_value().length())
-          .SetIvSizeInBytes(proto_key.params().iv_size())
+          .SetKeySizeInBytes(proto_key->key_value().length())
+          .SetIvSizeInBytes(proto_key->params().iv_size())
           // Legacy AES-EAX key proto format assumes 16-byte tags.
           .SetTagSizeInBytes(16)
           .Build();
   if (!parameters.ok()) return parameters.status();
 
   return AesEaxKey::Create(
-      *parameters, RestrictedData(proto_key.key_value(), *token),
+      *parameters, RestrictedData(proto_key->key_value(), *token),
       serialization.IdRequirement(), GetPartialKeyAccess());
 }
 
@@ -211,18 +214,19 @@ util::StatusOr<internal::ProtoKeySerialization> SerializeKey(
                         "SecretKeyAccess is required");
   }
 
-  google::crypto::tink::AesEaxKey proto_key;
-  proto_key.set_version(0);
-  // OSS proto library complains if input is not converted to a string.
-  proto_key.set_key_value(std::string(restricted_input->GetSecret(*token)));
-  *proto_key.mutable_params() = *params;
+  SecretProto<google::crypto::tink::AesEaxKey> proto_key;
+  proto_key->set_version(0);
+  proto_key->set_key_value(restricted_input->GetSecret(*token));
+  *proto_key->mutable_params() = *params;
 
   util::StatusOr<OutputPrefixType> output_prefix_type =
       ToOutputPrefixType(key.GetParameters().GetVariant());
   if (!output_prefix_type.ok()) return output_prefix_type.status();
-
+  util::StatusOr<SecretData> serialized_proto =
+      proto_key.SerializeAsSecretData();
+  if (!serialized_proto.ok()) return serialized_proto.status();
   RestrictedData restricted_output =
-      RestrictedData(proto_key.SerializeAsString(), *token);
+      RestrictedData(SecretDataAsStringView(*serialized_proto), *token);
   return internal::ProtoKeySerialization::Create(
       kTypeUrl, restricted_output, google::crypto::tink::KeyData::SYMMETRIC,
       *output_prefix_type, key.GetIdRequirement());

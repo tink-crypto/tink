@@ -554,6 +554,8 @@ tink_cc_library(
     tink::internal::parameters_serializer
     tink::internal::proto_key_serialization
     tink::internal::proto_parameters_serialization
+    tink::util::secret_data
+    tink::util::secret_proto
     tink::util::status
     tink::util::statusor
     tink::proto::aes_eax_cc_proto
