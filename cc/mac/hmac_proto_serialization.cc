@@ -19,6 +19,7 @@
 #include <string>
 
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "tink/internal/key_parser.h"
 #include "tink/internal/key_serializer.h"

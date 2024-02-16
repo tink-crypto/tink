@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "tink/mac/mac_parameters.h"
+#include "tink/parameters.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

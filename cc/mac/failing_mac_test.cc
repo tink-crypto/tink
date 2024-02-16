@@ -21,6 +21,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "tink/mac.h"
 #include "tink/util/test_matchers.h"
 
 namespace crypto {

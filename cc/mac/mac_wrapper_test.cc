@@ -16,12 +16,18 @@
 
 #include "tink/mac/mac_wrapper.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/container/flat_hash_map.h"
+#include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "tink/crypto_format.h"
 #include "tink/internal/registry_impl.h"
 #include "tink/mac.h"
@@ -29,7 +35,9 @@
 #include "tink/monitoring/monitoring.h"
 #include "tink/monitoring/monitoring_client_mocks.h"
 #include "tink/primitive_set.h"
+#include "tink/registry.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/tink.pb.h"

@@ -29,6 +29,7 @@
 #include "tink/mac/mac_key_templates.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

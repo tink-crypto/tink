@@ -17,9 +17,11 @@
 #define TINK_MONITORING_MONITORING_CLIENT_MOCKS_H_
 
 #include <cstdint>
+#include <memory>
 
 #include "gmock/gmock.h"
 #include "tink/monitoring/monitoring.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

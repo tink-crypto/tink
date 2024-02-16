@@ -6,9 +6,12 @@ tink_cc_library(
     chunked_mac_impl.cc
     chunked_mac_impl.h
   DEPS
+    absl::memory
+    absl::status
     absl::strings
     crypto
     tink::core::chunked_mac
+    tink::subtle::common_enums
     tink::subtle::stateful_cmac_boringssl
     tink::subtle::stateful_hmac_boringssl
     tink::subtle::mac::stateful_mac
@@ -26,6 +29,7 @@ tink_cc_library(
     chunked_mac_wrapper.cc
     chunked_mac_wrapper.h
   DEPS
+    absl::memory
     absl::status
     absl::strings
     tink::core::chunked_mac
@@ -77,6 +81,9 @@ tink_cc_test(
   DEPS
     tink::mac::internal::chunked_mac_impl
     gmock
+    absl::memory
+    absl::status
+    absl::string_view
     tink::core::chunked_mac
     tink::subtle::mac::stateful_mac
     tink::util::status
@@ -95,8 +102,11 @@ tink_cc_test(
     tink::mac::internal::chunked_mac_impl
     tink::mac::internal::chunked_mac_wrapper
     gmock
+    absl::memory
+    absl::status
     absl::strings
     tink::core::chunked_mac
+    tink::core::primitive_set
     tink::subtle::mac::stateful_mac
     tink::util::status
     tink::util::statusor
@@ -110,9 +120,11 @@ tink_cc_test(
     chunked_mac_test.cc
   DEPS
     gmock
+    absl::status
     tink::core::chunked_mac
     tink::core::keyset_handle
     tink::core::mac
+    tink::config::global_registry
     tink::mac::mac_config
     tink::mac::mac_key_templates
     tink::util::status
@@ -143,4 +155,5 @@ tink_cc_test(
     tink::mac::mac_key_templates
     tink::util::statusor
     tink::util::test_matchers
+    tink::proto::tink_cc_proto
 )

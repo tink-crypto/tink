@@ -22,10 +22,13 @@
 #include "gtest/gtest.h"
 #include "tink/chunked_mac.h"
 #include "tink/mac.h"
+#include "tink/subtle/aes_cmac_boringssl.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/aes_cmac.pb.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

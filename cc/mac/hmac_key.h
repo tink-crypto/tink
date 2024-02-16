@@ -21,7 +21,9 @@
 #include <string>
 #include <utility>
 
+#include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
+#include "tink/key.h"
 #include "tink/mac/hmac_parameters.h"
 #include "tink/mac/mac_key.h"
 #include "tink/partial_key_access_token.h"

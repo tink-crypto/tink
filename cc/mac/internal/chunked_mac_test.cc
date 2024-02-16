@@ -14,13 +14,16 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "tink/chunked_mac.h"
+
 #include <memory>
 #include <string>
 #include <tuple>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "tink/chunked_mac.h"
+#include "absl/status/status.h"
+#include "tink/config/global_registry.h"
 #include "tink/keyset_handle.h"
 #include "tink/mac.h"
 #include "tink/mac/mac_config.h"

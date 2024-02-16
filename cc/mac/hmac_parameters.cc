@@ -16,6 +16,7 @@
 
 #include "tink/mac/hmac_parameters.h"
 
+#include <cstdint>
 #include <cstdlib>
 #include <iostream>
 #include <map>
@@ -24,8 +25,11 @@
 #include <set>
 
 #include "absl/log/log.h"
+#include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
 #include "tink/crypto_format.h"
 #include "tink/internal/util.h"
+#include "tink/parameters.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 

@@ -19,6 +19,7 @@
 
 #include <string>
 
+#include "absl/strings/string_view.h"
 #include "tink/key.h"
 #include "tink/mac/mac_parameters.h"
 #include "tink/util/statusor.h"

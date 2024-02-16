@@ -22,6 +22,9 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
+#include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "tink/chunked_mac.h"
 #include "tink/subtle/mac/stateful_mac.h"
 #include "tink/util/status.h"

@@ -18,11 +18,15 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "absl/base/attributes.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "absl/types/optional.h"
+#include "tink/key.h"
 #include "tink/mac/hmac_parameters.h"
 #include "tink/partial_key_access_token.h"
 #include "tink/restricted_data.h"

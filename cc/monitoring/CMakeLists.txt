@@ -6,6 +6,7 @@ tink_cc_library(
     monitoring.h
   DEPS
     absl::flat_hash_map
+    absl::string_view
     tink::core::key_status
     tink::internal::key_status_util
     tink::util::statusor
@@ -18,5 +19,6 @@ tink_cc_library(
   DEPS
     tink::monitoring::monitoring
     gmock
+    tink::util::statusor
   TESTONLY
 )
