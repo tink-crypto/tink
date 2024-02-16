@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <istream>
+#include <iterator>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -27,8 +28,11 @@
 #include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "include/rapidjson/document.h"
 #include "include/rapidjson/error/en.h"
+#include "include/rapidjson/rapidjson.h"
+#include "tink/keyset_reader.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
@@ -39,14 +43,13 @@
 namespace crypto {
 namespace tink {
 
+using crypto::tink::util::Enums;
 using google::crypto::tink::EncryptedKeyset;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
 using google::crypto::tink::KeysetInfo;
-using crypto::tink::util::Enums;
 
 namespace {
-
 
 // Helpers for validating and parsing JSON strings with EncryptedKeyset-protos.
 util::Status ValidateEncryptedKeyset(const rapidjson::Document& json_doc) {
@@ -63,8 +66,7 @@ util::Status ValidateEncryptedKeyset(const rapidjson::Document& json_doc) {
 util::Status ValidateKeysetInfo(const rapidjson::Value& json_value) {
   if (!json_value.HasMember("primaryKeyId") ||
       !json_value["primaryKeyId"].IsUint() ||
-      !json_value.HasMember("keyInfo") ||
-      !json_value["keyInfo"].IsArray() ||
+      !json_value.HasMember("keyInfo") || !json_value["keyInfo"].IsArray() ||
       json_value["keyInfo"].Size() < 1) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid JSON KeysetInfo");
@@ -73,12 +75,9 @@ util::Status ValidateKeysetInfo(const rapidjson::Value& json_value) {
 }
 
 util::Status ValidateKeyInfo(const rapidjson::Value& json_value) {
-  if (!json_value.HasMember("typeUrl") ||
-      !json_value["typeUrl"].IsString() ||
-      !json_value.HasMember("status") ||
-      !json_value["status"].IsString() ||
-      !json_value.HasMember("keyId") ||
-      !json_value["keyId"].IsUint() ||
+  if (!json_value.HasMember("typeUrl") || !json_value["typeUrl"].IsString() ||
+      !json_value.HasMember("status") || !json_value["status"].IsString() ||
+      !json_value.HasMember("keyId") || !json_value["keyId"].IsUint() ||
       !json_value.HasMember("outputPrefixType") ||
       !json_value["outputPrefixType"].IsString()) {
     return util::Status(absl::StatusCode::kInvalidArgument,
@@ -87,8 +86,8 @@ util::Status ValidateKeyInfo(const rapidjson::Value& json_value) {
   return util::OkStatus();
 }
 
-util::StatusOr<std::unique_ptr<KeysetInfo::KeyInfo>>
-KeyInfoFromJson(const rapidjson::Value& json_value) {
+util::StatusOr<std::unique_ptr<KeysetInfo::KeyInfo>> KeyInfoFromJson(
+    const rapidjson::Value& json_value) {
   auto status = ValidateKeyInfo(json_value);
   if (!status.ok()) return status;
 
@@ -101,8 +100,8 @@ KeyInfoFromJson(const rapidjson::Value& json_value) {
   return std::move(key_info);
 }
 
-util::StatusOr<std::unique_ptr<KeysetInfo>>
-KeysetInfoFromJson(const rapidjson::Value& json_value) {
+util::StatusOr<std::unique_ptr<KeysetInfo>> KeysetInfoFromJson(
+    const rapidjson::Value& json_value) {
   auto status = ValidateKeysetInfo(json_value);
   if (!status.ok()) return status;
   auto keyset_info = absl::make_unique<KeysetInfo>();
@@ -115,21 +114,20 @@ KeysetInfoFromJson(const rapidjson::Value& json_value) {
   return std::move(keyset_info);
 }
 
-util::StatusOr<std::unique_ptr<EncryptedKeyset>>
-EncryptedKeysetFromJson(const rapidjson::Document& json_doc) {
+util::StatusOr<std::unique_ptr<EncryptedKeyset>> EncryptedKeysetFromJson(
+    const rapidjson::Document& json_doc) {
   auto status = ValidateEncryptedKeyset(json_doc);
   if (!status.ok()) return status;
   std::string enc_keyset;
-  if (!absl::Base64Unescape(
-          json_doc["encryptedKeyset"].GetString(), &enc_keyset)) {
+  if (!absl::Base64Unescape(json_doc["encryptedKeyset"].GetString(),
+                            &enc_keyset)) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid JSON EncryptedKeyset");
   }
   auto encrypted_keyset = absl::make_unique<EncryptedKeyset>();
   encrypted_keyset->set_encrypted_keyset(enc_keyset);
   if (json_doc.HasMember("keysetInfo")) {
-    auto keyset_info_result =
-        KeysetInfoFromJson(json_doc["keysetInfo"]);
+    auto keyset_info_result = KeysetInfoFromJson(json_doc["keysetInfo"]);
     if (!keyset_info_result.ok()) {
       return keyset_info_result.status();
     }
@@ -141,10 +139,8 @@ EncryptedKeysetFromJson(const rapidjson::Document& json_doc) {
 // Helpers for validating and parsing JSON strings with Keyset-protos.
 util::Status ValidateKeyset(const rapidjson::Document& json_doc) {
   if (!json_doc.HasMember("primaryKeyId") ||
-      !json_doc["primaryKeyId"].IsUint() ||
-      !json_doc.HasMember("key") ||
-      !json_doc["key"].IsArray() ||
-      json_doc["key"].Size() < 1) {
+      !json_doc["primaryKeyId"].IsUint() || !json_doc.HasMember("key") ||
+      !json_doc["key"].IsArray() || json_doc["key"].Size() < 1) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid JSON Keyset");
   }
@@ -152,12 +148,9 @@ util::Status ValidateKeyset(const rapidjson::Document& json_doc) {
 }
 
 util::Status ValidateKey(const rapidjson::Value& json_value) {
-  if (!json_value.HasMember("keyData") ||
-      !json_value["keyData"].IsObject() ||
-      !json_value.HasMember("status") ||
-      !json_value["status"].IsString() ||
-      !json_value.HasMember("keyId") ||
-      !json_value["keyId"].IsUint() ||
+  if (!json_value.HasMember("keyData") || !json_value["keyData"].IsObject() ||
+      !json_value.HasMember("status") || !json_value["status"].IsString() ||
+      !json_value.HasMember("keyId") || !json_value["keyId"].IsUint() ||
       !json_value.HasMember("outputPrefixType") ||
       !json_value["outputPrefixType"].IsString()) {
     return util::Status(absl::StatusCode::kInvalidArgument, "Invalid JSON Key");
@@ -166,10 +159,8 @@ util::Status ValidateKey(const rapidjson::Value& json_value) {
 }
 
 util::Status ValidateKeyData(const rapidjson::Value& json_value) {
-  if (!json_value.HasMember("typeUrl") ||
-      !json_value["typeUrl"].IsString() ||
-      !json_value.HasMember("value") ||
-      !json_value["value"].IsString() ||
+  if (!json_value.HasMember("typeUrl") || !json_value["typeUrl"].IsString() ||
+      !json_value.HasMember("value") || !json_value["value"].IsString() ||
       !json_value.HasMember("keyMaterialType") ||
       !json_value["keyMaterialType"].IsString()) {
     return util::Status(absl::StatusCode::kInvalidArgument,
@@ -178,8 +169,8 @@ util::Status ValidateKeyData(const rapidjson::Value& json_value) {
   return util::OkStatus();
 }
 
-util::StatusOr<std::unique_ptr<KeyData>>
-KeyDataFromJson(const rapidjson::Value& json_value) {
+util::StatusOr<std::unique_ptr<KeyData>> KeyDataFromJson(
+    const rapidjson::Value& json_value) {
   auto status = ValidateKeyData(json_value);
   if (!status.ok()) return status;
   std::string value_field;
@@ -195,8 +186,8 @@ KeyDataFromJson(const rapidjson::Value& json_value) {
   return std::move(key_data);
 }
 
-util::StatusOr<std::unique_ptr<Keyset::Key>>
-KeyFromJson(const rapidjson::Value& json_value) {
+util::StatusOr<std::unique_ptr<Keyset::Key>> KeyFromJson(
+    const rapidjson::Value& json_value) {
   auto status = ValidateKey(json_value);
   if (!status.ok()) return status;
   auto key_data_result = KeyDataFromJson(json_value["keyData"]);
@@ -211,8 +202,8 @@ KeyFromJson(const rapidjson::Value& json_value) {
   return std::move(key);
 }
 
-util::StatusOr<std::unique_ptr<Keyset>>
-KeysetFromJson(const rapidjson::Document& json_doc) {
+util::StatusOr<std::unique_ptr<Keyset>> KeysetFromJson(
+    const rapidjson::Document& json_doc) {
   auto status = ValidateKeyset(json_doc);
   if (!status.ok()) return status;
   auto keyset = absl::make_unique<Keyset>();
@@ -226,7 +217,6 @@ KeysetFromJson(const rapidjson::Document& json_doc) {
 }
 
 }  // namespace
-
 
 //  static
 util::StatusOr<std::unique_ptr<KeysetReader>> JsonKeysetReader::New(

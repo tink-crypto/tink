@@ -16,6 +16,7 @@
 
 #include "tink/util/secret_data.h"
 
+#include <cstddef>
 #include <string>
 #include <utility>
 

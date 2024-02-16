@@ -16,6 +16,8 @@
 
 #include "tink/util/validation.h"
 
+#include <cstdint>
+
 #include "absl/status/status.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"

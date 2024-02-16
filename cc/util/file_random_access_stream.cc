@@ -18,7 +18,10 @@
 
 #include <sys/stat.h>
 #include <unistd.h>
+
 #include <algorithm>
+#include <cerrno>
+#include <cstdint>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"

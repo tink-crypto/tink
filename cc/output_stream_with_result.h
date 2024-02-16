@@ -19,6 +19,7 @@
 
 #include <type_traits>
 
+#include "absl/status/status.h"
 #include "tink/output_stream.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"

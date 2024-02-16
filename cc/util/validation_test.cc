@@ -16,12 +16,14 @@
 
 #include "tink/util/validation.h"
 
+#include <cstdint>
 #include <limits>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "tink/util/test_matchers.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

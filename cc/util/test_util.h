@@ -17,6 +17,8 @@
 #ifndef TINK_UTIL_TEST_UTIL_H_
 #define TINK_UTIL_TEST_UTIL_H_
 
+#include <cstdint>
+#include <cstring>
 #include <memory>
 #include <ostream>
 #include <string>

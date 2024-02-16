@@ -16,6 +16,7 @@
 
 #include "tink/restricted_data.h"
 
+#include <cstdint>
 #include <iostream>
 
 #include "absl/log/check.h"

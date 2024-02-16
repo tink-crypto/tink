@@ -16,9 +16,13 @@
 
 #include "tink/util/enums.h"
 
+#include <string>
+
 #include "gtest/gtest.h"
 #include "tink/subtle/common_enums.h"
 #include "proto/common.pb.h"
+#include "proto/ecdsa.pb.h"
+#include "proto/tink.pb.h"
 
 using crypto::tink::util::Enums;
 

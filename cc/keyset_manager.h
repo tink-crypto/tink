@@ -16,6 +16,7 @@
 #ifndef TINK_KEYSET_MANAGER_H_
 #define TINK_KEYSET_MANAGER_H_
 
+#include <cstdint>
 #include <memory>
 
 #include "absl/base/thread_annotations.h"

@@ -21,15 +21,20 @@
 #include <utility>
 #include <vector>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "tink/aead.h"
 #include "tink/aead/aead_config.h"
 #include "tink/aead/aead_key_templates.h"
+#include "tink/config/global_registry.h"
+#include "tink/keyset_handle.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/kms_aead.pb.h"
 #include "proto/kms_envelope.pb.h"
+#include "proto/tink.pb.h"
 
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::KmsAeadKeyFormat;

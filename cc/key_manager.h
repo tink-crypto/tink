@@ -17,11 +17,13 @@
 #ifndef TINK_KEY_MANAGER_H_
 #define TINK_KEY_MANAGER_H_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"

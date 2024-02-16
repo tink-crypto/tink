@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <cerrno>
+#include <cstdint>
 #include <cstring>
 #include <memory>
 #include <ostream>

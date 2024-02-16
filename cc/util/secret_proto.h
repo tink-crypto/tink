@@ -17,11 +17,13 @@
 #ifndef TINK_UTIL_SECRET_PROTO_H_
 #define TINK_UTIL_SECRET_PROTO_H_
 
+#include <cstddef>
 #include <memory>
 #include <utility>
 
 #include "google/protobuf/arena.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"

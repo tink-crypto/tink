@@ -23,6 +23,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "tink/util/secret_data.h"
+#include "tink/util/statusor.h"
 #include "proto/test_proto.pb.h"
 
 namespace crypto {

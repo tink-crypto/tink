@@ -23,6 +23,7 @@
 #include "tink/keyset_handle.h"
 #include "tink/secret_key_access_token.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

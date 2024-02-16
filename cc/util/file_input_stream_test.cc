@@ -18,6 +18,7 @@
 #include <fcntl.h>
 
 #include <algorithm>
+#include <cerrno>
 #include <cstdint>
 #include <cstring>
 #include <iostream>
@@ -33,6 +34,7 @@
 #include "tink/internal/test_file_util.h"
 #include "tink/subtle/random.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 

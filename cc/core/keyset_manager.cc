@@ -16,11 +16,13 @@
 
 #include "tink/keyset_manager.h"
 
+#include <cstdint>
 #include <memory>
 #include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/synchronization/mutex.h"
 #include "tink/internal/key_gen_configuration_impl.h"
 #include "tink/key_gen_configuration.h"
 #include "tink/keyset_handle.h"

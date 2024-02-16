@@ -17,6 +17,7 @@
 #ifndef TINK_UTIL_FILE_RANDOM_ACCESS_STREAM_H_
 #define TINK_UTIL_FILE_RANDOM_ACCESS_STREAM_H_
 
+#include <cstdint>
 #include <memory>
 
 #include "tink/random_access_stream.h"

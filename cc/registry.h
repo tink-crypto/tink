@@ -22,8 +22,11 @@
 
 #include "absl/strings/string_view.h"
 #include "tink/internal/registry_impl.h"
+#include "tink/key_manager.h"
+#include "tink/primitive_set.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {

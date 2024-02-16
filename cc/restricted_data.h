@@ -17,6 +17,9 @@
 #ifndef TINK_RESTRICTED_DATA_H_
 #define TINK_RESTRICTED_DATA_H_
 
+#include <cstdint>
+
+#include "absl/strings/string_view.h"
 #include "tink/secret_key_access_token.h"
 #include "tink/util/secret_data.h"
 

@@ -176,6 +176,7 @@ cc_library(
         ":output_stream",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -404,8 +405,10 @@ cc_library(
     deps = [
         "//proto:tink_cc_proto",
         "//util:errors",
+        "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings:string_view",
     ],
 )
 
@@ -418,11 +421,13 @@ cc_library(
         ":crypto_format",
         "//proto:tink_cc_proto",
         "//util:errors",
+        "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings:string_view",
         "@com_google_absl//absl/synchronization",
     ],
 )
@@ -442,7 +447,10 @@ cc_library(
     hdrs = ["registry.h"],
     include_prefix = "tink",
     deps = [
+        ":key_manager",
+        ":primitive_set",
         "//internal:registry_impl",
+        "//proto:tink_cc_proto",
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/strings",
@@ -535,8 +543,10 @@ cc_library(
         "//util:statusor",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/log:check",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
         "@com_google_absl//absl/types:optional",
     ],
 )
@@ -550,12 +560,14 @@ cc_library(
     deps = [
         ":keyset_handle",
         ":keyset_reader",
+        ":keyset_writer",
         "//proto:tink_cc_proto",
         "//util:errors",
         "//util:secret_proto",
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
     ],
 )
@@ -767,6 +779,7 @@ cc_library(
         "//util:secret_data",
         "@boringssl//:crypto",
         "@com_google_absl//absl/log:check",
+        "@com_google_absl//absl/strings:string_view",
     ],
 )
 
@@ -1199,6 +1212,7 @@ cc_library(
         ":cleartext_keyset_handle",
         ":keyset_handle",
         ":secret_key_access_token",
+        "//proto:tink_cc_proto",
         "//util:secret_data",
         "//util:secret_proto",
         "//util:status",
@@ -1213,15 +1227,19 @@ cc_test(
     srcs = ["proto_keyset_format_test.cc"],
     deps = [
         ":insecure_secret_key_access",
+        ":key_status",
+        ":keyset_handle",
         ":keyset_handle_builder",
         ":mac",
         ":proto_keyset_format",
+        "//config:global_registry",
         "//config:tink_config",
         "//internal:legacy_proto_parameters",
         "//internal:proto_parameters_serialization",
         "//mac:mac_key_templates",
         "//signature:signature_key_templates",
         "//util:secret_data",
+        "//util:statusor",
         "//util:test_matchers",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",

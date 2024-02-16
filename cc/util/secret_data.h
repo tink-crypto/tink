@@ -17,6 +17,8 @@
 #ifndef TINK_UTIL_SECRET_DATA_H_
 #define TINK_UTIL_SECRET_DATA_H_
 
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <type_traits>

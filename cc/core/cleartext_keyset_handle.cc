@@ -23,9 +23,11 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "tink/keyset_handle.h"
 #include "tink/keyset_reader.h"
+#include "tink/keyset_writer.h"
 #include "tink/util/errors.h"
 #include "tink/util/secret_proto.h"
 #include "tink/util/status.h"

@@ -36,6 +36,7 @@
 #include "absl/strings/string_view.h"
 #include "tink/internal/test_file_util.h"
 #include "tink/subtle/random.h"
+#include "tink/util/status.h"
 #include "tink/util/test_util.h"
 
 namespace crypto {

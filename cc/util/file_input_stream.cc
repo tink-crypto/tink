@@ -17,7 +17,11 @@
 #include "tink/util/file_input_stream.h"
 
 #include <unistd.h>
+
 #include <algorithm>
+#include <cerrno>
+#include <cstddef>
+#include <cstdint>
 
 #include "absl/status/status.h"
 #include "tink/util/errors.h"

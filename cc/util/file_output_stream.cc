@@ -17,8 +17,11 @@
 #include "tink/util/file_output_stream.h"
 
 #include <unistd.h>
-#include <cstring>
+
 #include <algorithm>
+#include <cerrno>
+#include <cstdint>
+#include <cstring>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"

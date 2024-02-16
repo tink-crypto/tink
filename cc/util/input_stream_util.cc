@@ -23,6 +23,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/types/span.h"
 #include "tink/input_stream.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

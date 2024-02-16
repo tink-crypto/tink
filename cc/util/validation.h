@@ -17,6 +17,8 @@
 #ifndef TINK_UTIL_VALIDATION_H_
 #define TINK_UTIL_VALIDATION_H_
 
+#include <cstdint>
+
 #include "tink/util/status.h"
 #include "proto/tink.pb.h"
 

@@ -179,6 +179,7 @@ tink_cc_library(
     output_stream_with_result.h
   DEPS
     tink::core::output_stream
+    absl::status
     tink::util::status
     tink::util::statusor
 )
@@ -375,7 +376,9 @@ tink_cc_library(
     crypto_format.h
   DEPS
     absl::status
+    absl::string_view
     tink::util::errors
+    tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
 )
@@ -391,8 +394,10 @@ tink_cc_library(
     absl::flat_hash_map
     absl::memory
     absl::status
+    absl::string_view
     absl::synchronization
     tink::util::errors
+    tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
 )
@@ -411,10 +416,13 @@ tink_cc_library(
   SRCS
     registry.h
   DEPS
+    tink::core::key_manager
+    tink::core::primitive_set
     absl::strings
     tink::internal::registry_impl
     tink::util::status
     tink::util::statusor
+    tink::proto::tink_cc_proto
 )
 
 # Generate TINK_VERSION_H from version.h.templ. TINK_VERSION_LABEL is
@@ -489,8 +497,10 @@ tink_cc_library(
     tink::core::parameters
     absl::flat_hash_map
     absl::check
+    absl::memory
     absl::status
     absl::strings
+    absl::str_format
     absl::optional
     tink::internal::keyset_handle_builder_entry
     tink::subtle::random
@@ -508,7 +518,9 @@ tink_cc_library(
   DEPS
     tink::core::keyset_handle
     tink::core::keyset_reader
+    tink::core::keyset_writer
     absl::flat_hash_map
+    absl::memory
     absl::status
     tink::util::errors
     tink::util::secret_proto
@@ -716,6 +728,7 @@ tink_cc_library(
   DEPS
     tink::core::secret_key_access_token
     absl::check
+    absl::string_view
     crypto
     tink::subtle::random
     tink::util::secret_data
@@ -1139,6 +1152,7 @@ tink_cc_library(
     tink::util::secret_proto
     tink::util::status
     tink::util::statusor
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -1147,17 +1161,21 @@ tink_cc_test(
     proto_keyset_format_test.cc
   DEPS
     tink::core::insecure_secret_key_access
+    tink::core::key_status
+    tink::core::keyset_handle
     tink::core::keyset_handle_builder
     tink::core::mac
     tink::core::proto_keyset_format
     gmock
     absl::strings
+    tink::config::global_registry
     tink::config::tink_config
     tink::internal::legacy_proto_parameters
     tink::internal::proto_parameters_serialization
     tink::mac::mac_key_templates
     tink::signature::signature_key_templates
     tink::util::secret_data
+    tink::util::statusor
     tink::util::test_matchers
 )
 

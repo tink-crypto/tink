@@ -17,6 +17,8 @@
 #ifndef TINK_INPUT_STREAM_H_
 #define TINK_INPUT_STREAM_H_
 
+#include <cstdint>
+
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 

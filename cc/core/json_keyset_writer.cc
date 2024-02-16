@@ -25,8 +25,11 @@
 
 #include "absl/status/status.h"
 #include "absl/strings/escaping.h"
+#include "absl/strings/string_view.h"
 #include "include/rapidjson/document.h"
 #include "include/rapidjson/prettywriter.h"
+#include "include/rapidjson/rapidjson.h"
+#include "include/rapidjson/stringbuffer.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
