@@ -156,4 +156,4 @@ class AesCtrHmacAeadParameters : public AeadParameters {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // THIRD_PARTY_TINK_CC_AEAD_AES_CTR_AesCtrHmacAead_AEAD_PARAMETERS_H_
+#endif  // TINK_AEAD_AES_CTR_HMAC_AEAD_PARAMETERS_H_
