@@ -17,6 +17,7 @@
 #ifndef TINK_SUBTLE_RSA_SSA_PKCS1_VERIFY_BORINGSSL_H_
 #define TINK_SUBTLE_RSA_SSA_PKCS1_VERIFY_BORINGSSL_H_
 
+#include <cstddef>
 #include <memory>
 #include <utility>
 
@@ -29,6 +30,7 @@
 #include "tink/public_key_verify.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/subtle/pem_parser_boringssl.h"
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <utility>
@@ -36,6 +37,7 @@
 #include "tink/internal/ssl_util.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 

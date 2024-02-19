@@ -17,6 +17,7 @@
 #ifndef TINK_SUBTLE_AES_GCM_HKDF_STREAM_SEGMENT_ENCRYPTER_H_
 #define TINK_SUBTLE_AES_GCM_HKDF_STREAM_SEGMENT_ENCRYPTER_H_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
@@ -24,6 +25,7 @@
 #include "tink/aead/internal/ssl_aead.h"
 #include "tink/subtle/stream_segment_encrypter.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

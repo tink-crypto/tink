@@ -18,6 +18,8 @@
 #define TINK_SUBTLE_AES_EAX_BORINGSSL_H_
 
 #include <array>
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>

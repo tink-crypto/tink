@@ -17,6 +17,7 @@
 #ifndef TINK_SUBTLE_ECIES_HKDF_RECIPIENT_KEM_BORINGSSL_H_
 #define TINK_SUBTLE_ECIES_HKDF_RECIPIENT_KEM_BORINGSSL_H_
 
+#include <cstdint>
 #include <memory>
 
 #include "absl/strings/string_view.h"

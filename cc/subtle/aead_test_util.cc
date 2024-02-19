@@ -17,6 +17,11 @@
 
 #include <string>
 
+#include "absl/status/status.h"
+#include "absl/strings/cord.h"
+#include "absl/strings/string_view.h"
+#include "tink/aead.h"
+#include "tink/aead/cord_aead.h"
 #include "tink/subtle/test_util.h"
 #include "tink/util/status.h"
 

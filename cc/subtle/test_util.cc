@@ -17,9 +17,14 @@
 #include "tink/subtle/test_util.h"
 
 #include <algorithm>
+#include <cstring>
 #include <string>
 
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
+#include "tink/input_stream.h"
+#include "tink/output_stream.h"
+#include "tink/util/status.h"
 
 namespace crypto {
 namespace tink {

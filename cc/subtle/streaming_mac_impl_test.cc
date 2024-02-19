@@ -21,8 +21,12 @@
 #include <utility>
 #include <vector>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "tink/output_stream_with_result.h"
+#include "tink/subtle/mac/stateful_mac.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/test_util.h"
 #include "tink/util/status.h"

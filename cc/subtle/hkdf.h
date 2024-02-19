@@ -17,6 +17,7 @@
 #ifndef TINK_SUBTLE_HKDF_H_
 #define TINK_SUBTLE_HKDF_H_
 
+#include <cstddef>
 #include <string>
 
 #include "absl/strings/string_view.h"

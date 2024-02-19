@@ -17,6 +17,7 @@
 #include "tink/subtle/decrypting_random_access_stream.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <cstring>
 #include <limits>
 #include <memory>
@@ -25,6 +26,7 @@
 #include <utility>
 #include <vector>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
@@ -36,8 +38,10 @@
 #include "tink/streaming_aead.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/test_util.h"
+#include "tink/util/buffer.h"
 #include "tink/util/ostream_output_stream.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 
 namespace crypto {

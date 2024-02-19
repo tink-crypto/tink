@@ -16,6 +16,7 @@
 
 #include "tink/subtle/aes_ctr_hmac_streaming.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>

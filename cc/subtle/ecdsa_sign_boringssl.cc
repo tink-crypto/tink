@@ -16,18 +16,23 @@
 
 #include "tink/subtle/ecdsa_sign_boringssl.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "openssl/evp.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/internal/md_util.h"
 #include "tink/internal/util.h"
 #include "tink/signature/internal/ecdsa_raw_sign_boringssl.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

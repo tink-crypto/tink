@@ -17,6 +17,7 @@
 #include "tink/subtle/aes_siv_boringssl.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <iterator>
 #include <memory>
@@ -32,8 +33,10 @@
 #include "tink/aead/internal/aead_util.h"
 #include "tink/deterministic_aead.h"
 #include "tink/internal/aes_util.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/errors.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 

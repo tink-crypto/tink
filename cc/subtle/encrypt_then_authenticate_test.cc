@@ -16,6 +16,8 @@
 
 #include "tink/subtle/encrypt_then_authenticate.h"
 
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
@@ -23,6 +25,7 @@
 
 #include "gtest/gtest.h"
 #include "absl/strings/string_view.h"
+#include "tink/aead.h"
 #include "tink/subtle/aes_ctr_boringssl.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hmac_boringssl.h"

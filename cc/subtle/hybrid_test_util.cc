@@ -17,6 +17,10 @@
 #include "tink/subtle/hybrid_test_util.h"
 
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
+#include "tink/hybrid_decrypt.h"
+#include "tink/hybrid_encrypt.h"
+#include "tink/util/status.h"
 
 namespace crypto {
 namespace tink {

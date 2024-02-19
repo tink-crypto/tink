@@ -17,6 +17,8 @@
 #include "tink/subtle/aes_ctr_hmac_streaming.h"
 
 #include <algorithm>
+#include <cstdint>
+#include <cstring>
 #include <limits>
 #include <memory>
 #include <string>
@@ -30,6 +32,7 @@
 #include "openssl/err.h"
 #include "openssl/evp.h"
 #include "tink/internal/aes_util.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"

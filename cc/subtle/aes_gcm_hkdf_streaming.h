@@ -20,9 +20,12 @@
 #include <memory>
 #include <utility>
 
+#include "absl/strings/string_view.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/nonce_based_streaming_aead.h"
+#include "tink/subtle/stream_segment_decrypter.h"
+#include "tink/subtle/stream_segment_encrypter.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 

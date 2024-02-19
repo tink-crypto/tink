@@ -17,10 +17,13 @@
 #ifndef TINK_SUBTLE_STATEFUL_CMAC_BORINGSSL_H_
 #define TINK_SUBTLE_STATEFUL_CMAC_BORINGSSL_H_
 
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
 
+#include "absl/strings/string_view.h"
 #include "openssl/cmac.h"
 #include "openssl/evp.h"
 #include "tink/internal/ssl_unique_ptr.h"

@@ -17,6 +17,8 @@
 #ifndef TINK_SUBTLE_AES_SIV_BORINGSSL_H_
 #define TINK_SUBTLE_AES_SIV_BORINGSSL_H_
 
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>

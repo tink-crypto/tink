@@ -17,6 +17,8 @@
 #include "tink/subtle/ed25519_sign_boringssl.h"
 
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <iterator>
 #include <memory>
 #include <string>
@@ -28,9 +30,12 @@
 #include "absl/strings/string_view.h"
 #include "openssl/evp.h"
 #include "tink/internal/ec_util.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
 #include "tink/public_key_sign.h"
+#include "tink/util/secret_data.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

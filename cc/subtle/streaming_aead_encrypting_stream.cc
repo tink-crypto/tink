@@ -17,6 +17,7 @@
 #include "tink/subtle/streaming_aead_encrypting_stream.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <cstring>
 #include <memory>
 #include <utility>
@@ -26,6 +27,7 @@
 #include "absl/status/status.h"
 #include "tink/output_stream.h"
 #include "tink/subtle/stream_segment_encrypter.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 using crypto::tink::OutputStream;

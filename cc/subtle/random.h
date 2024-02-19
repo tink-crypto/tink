@@ -17,9 +17,12 @@
 #ifndef TINK_SUBTLE_RANDOM_H_
 #define TINK_SUBTLE_RANDOM_H_
 
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <string>
 
+#include "absl/types/span.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 

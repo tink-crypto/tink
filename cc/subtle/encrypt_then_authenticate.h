@@ -17,6 +17,7 @@
 #ifndef TINK_SUBTLE_ENCRYPT_THEN_AUTHENTICATE_H_
 #define TINK_SUBTLE_ENCRYPT_THEN_AUTHENTICATE_H_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>

@@ -17,14 +17,21 @@
 #include "tink/subtle/streaming_mac_impl.h"
 
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "openssl/crypto.h"
+#include "tink/output_stream_with_result.h"
+#include "tink/subtle/mac/stateful_mac.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

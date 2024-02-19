@@ -29,6 +29,7 @@
 #include "tink/public_key_verify.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

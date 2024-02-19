@@ -17,6 +17,7 @@
 #include "tink/subtle/streaming_aead_encrypting_stream.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -25,6 +26,7 @@
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/output_stream.h"

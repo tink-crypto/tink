@@ -22,8 +22,14 @@
 #include <string>
 #include <utility>
 
+#include "absl/memory/memory.h"
+#include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
+#include "tink/input_stream.h"
 #include "tink/internal/test_random_access_stream.h"
 #include "tink/random_access_stream.h"
+#include "tink/streaming_aead.h"
 #include "tink/subtle/test_util.h"
 #include "tink/util/buffer.h"
 #include "tink/util/istream_input_stream.h"

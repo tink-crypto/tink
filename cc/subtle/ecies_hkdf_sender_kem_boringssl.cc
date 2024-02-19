@@ -16,6 +16,7 @@
 
 #include "tink/subtle/ecies_hkdf_sender_kem_boringssl.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
@@ -26,10 +27,13 @@
 #include "openssl/bn.h"
 #include "openssl/evp.h"
 #include "tink/internal/ec_util.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

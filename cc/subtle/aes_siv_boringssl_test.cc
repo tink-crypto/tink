@@ -16,14 +16,18 @@
 
 #include "tink/subtle/aes_siv_boringssl.h"
 
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
+#include "include/rapidjson/document.h"
 #include "tink/config/tink_fips.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/secret_data.h"
@@ -117,7 +121,7 @@ TEST(AesSivBoringSslTest, testEncryptDecryptKeySizes) {
           "812731321de508761437195ff231765aa4913219873ac6918639816312130011"
           "abc900bba11400187984719827431246bbab1231eb4145215ff7141436616beb"
           "9817298148712fed3aab61000ff123313e"));
-  for (int keysize = 0; keysize < keymaterial.size(); ++keysize){
+  for (int keysize = 0; keysize < keymaterial.size(); ++keysize) {
     util::SecretData key(&keymaterial[0], &keymaterial[keysize]);
     auto cipher = AesSivBoringSsl::New(key);
     if (keysize == 64) {
@@ -148,7 +152,7 @@ TEST(AesSivBoringSslTest, testEncryptDecryptMessageSize) {
     EXPECT_TRUE(pt.ok()) << pt.status();
     EXPECT_EQ(pt.value(), message);
   }
-  for (int i = 1024; i < 100000; i+= 5000) {
+  for (int i = 1024; i < 100000; i += 5000) {
     std::string message = std::string(i, 'a');
     auto ct = cipher->EncryptDeterministically(message, associated_data);
     EXPECT_TRUE(ct.ok()) << ct.status();
@@ -201,17 +205,15 @@ TEST(AesSivBoringSslTest, testDecryptModification) {
         std::string modified = ciphertext;
         modified[b] ^= (1 << bit);
         auto pt = cipher->DecryptDeterministically(modified, associated_data);
-        EXPECT_FALSE(pt.ok())
-            << "Modified ciphertext decrypted."
-            << " byte:" << b
-            << " bit:" << bit;
+        EXPECT_FALSE(pt.ok()) << "Modified ciphertext decrypted."
+                              << " byte:" << b << " bit:" << bit;
       }
     }
   }
 }
 
 // Test with test vectors from project Wycheproof.
-void WycheproofTest(const rapidjson::Document &root) {
+void WycheproofTest(const rapidjson::Document& root) {
   for (const rapidjson::Value& test_group : root["testGroups"].GetArray()) {
     const size_t key_size = test_group["keySize"].GetInt();
     if (!AesSivBoringSsl::IsValidKeySizeInBytes(key_size / 8)) {

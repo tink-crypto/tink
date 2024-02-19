@@ -17,6 +17,7 @@
 #ifndef TINK_SUBTLE_HYBRID_TEST_UTIL_H_
 #define TINK_SUBTLE_HYBRID_TEST_UTIL_H_
 
+#include "absl/strings/string_view.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/util/status.h"

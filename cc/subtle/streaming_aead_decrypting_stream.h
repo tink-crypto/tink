@@ -17,11 +17,13 @@
 #ifndef TINK_SUBTLE_STREAMING_AEAD_DECRYPTING_STREAM_H_
 #define TINK_SUBTLE_STREAMING_AEAD_DECRYPTING_STREAM_H_
 
+#include <cstdint>
 #include <memory>
 #include <vector>
 
 #include "tink/input_stream.h"
 #include "tink/subtle/stream_segment_decrypter.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

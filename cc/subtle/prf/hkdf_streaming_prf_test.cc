@@ -17,6 +17,7 @@
 #include "tink/subtle/prf/hkdf_streaming_prf.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <iterator>
 #include <memory>
 #include <string>
@@ -25,12 +26,15 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "tink/config/tink_fips.h"
+#include "tink/input_stream.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/subtle/random.h"
 #include "tink/util/input_stream_util.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 

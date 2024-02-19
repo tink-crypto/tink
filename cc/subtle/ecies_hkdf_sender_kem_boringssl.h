@@ -17,6 +17,7 @@
 #ifndef TINK_SUBTLE_ECIES_HKDF_SENDER_KEM_BORINGSSL_H_
 #define TINK_SUBTLE_ECIES_HKDF_SENDER_KEM_BORINGSSL_H_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>

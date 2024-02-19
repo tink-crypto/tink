@@ -16,6 +16,7 @@
 
 #include "tink/subtle/hkdf.h"
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
 

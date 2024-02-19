@@ -70,6 +70,7 @@ cc_library(
         "//internal:ssl_unique_ptr",
         "//util:errors",
         "//util:secret_data",
+        "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
@@ -90,6 +91,7 @@ cc_library(
         "//internal:fips_utils",
         "//internal:ssl_unique_ptr",
         "//util:secret_data",
+        "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
@@ -122,9 +124,11 @@ cc_library(
         "//:public_key_sign",
         "//config:tink_fips",
         "//internal:ec_util",
+        "//internal:fips_utils",
         "//internal:ssl_unique_ptr",
         "//internal:util",
         "//util:secret_data",
+        "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
@@ -145,6 +149,7 @@ cc_library(
         "//internal:fips_utils",
         "//internal:ssl_unique_ptr",
         "//internal:util",
+        "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
@@ -194,6 +199,7 @@ cc_library(
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings:string_view",
     ],
 )
 
@@ -232,8 +238,10 @@ cc_library(
         "//internal:md_util",
         "//internal:util",
         "//signature/internal:ecdsa_raw_sign_boringssl",
+        "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
@@ -256,6 +264,7 @@ cc_library(
         "//internal:util",
         "//util:errors",
         "//util:status",
+        "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
@@ -349,6 +358,7 @@ cc_library(
         "//internal:rsa_util",
         "//internal:ssl_unique_ptr",
         "//internal:util",
+        "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
@@ -371,6 +381,7 @@ cc_library(
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
     ],
@@ -436,6 +447,8 @@ cc_library(
         ":hkdf",
         ":nonce_based_streaming_aead",
         ":random",
+        ":stream_segment_decrypter",
+        ":stream_segment_encrypter",
         "//internal:fips_utils",
         "//util:secret_data",
         "//util:status",
@@ -443,6 +456,7 @@ cc_library(
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings:string_view",
     ],
 )
 
@@ -538,6 +552,7 @@ cc_library(
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings:string_view",
     ],
 )
 
@@ -594,7 +609,6 @@ cc_library(
         "//aead/internal:aead_util",
         "//internal:aes_util",
         "//internal:fips_utils",
-        "//internal:ssl_unique_ptr",
         "//util:errors",
         "//util:secret_data",
         "//util:status",
@@ -723,6 +737,7 @@ cc_library(
     deps = [
         ":stream_segment_encrypter",
         "//:output_stream",
+        "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
@@ -780,7 +795,9 @@ cc_library(
         "//:aead",
         "//aead:cord_aead",
         "//util:status",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:cord",
     ],
 )
 
@@ -792,6 +809,7 @@ cc_library(
     include_prefix = "tink/subtle",
     deps = [
         ":test_util",
+        "//:input_stream",
         "//:random_access_stream",
         "//:streaming_aead",
         "//internal:test_random_access_stream",
@@ -799,6 +817,8 @@ cc_library(
         "//util:istream_input_stream",
         "//util:ostream_output_stream",
         "//util:status",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -814,6 +834,7 @@ cc_library(
         "//:hybrid_encrypt",
         "//util:status",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings:string_view",
     ],
 )
 
@@ -843,12 +864,16 @@ cc_library(
     hdrs = ["streaming_mac_impl.h"],
     include_prefix = "tink/subtle",
     deps = [
+        "//:output_stream_with_result",
         "//:streaming_mac",
         "//subtle/mac:stateful_mac",
         "//util:status",
+        "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:string_view",
     ],
 )
 
@@ -869,6 +894,7 @@ cc_library(
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings:string_view",
     ],
 )
 
@@ -889,6 +915,7 @@ cc_library(
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings:string_view",
     ],
 )
 
@@ -905,6 +932,7 @@ cc_library(
         "//internal:rsa_util",
         "//internal:ssl_unique_ptr",
         "//internal:ssl_util",
+        "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
@@ -1019,6 +1047,7 @@ cc_test(
     tags = ["fips"],
     deps = [
         ":aes_gcm_boringssl",
+        "//:aead",
         "//aead/internal:wycheproof_aead",
         "//internal:fips_utils",
         "//util:secret_data",
@@ -1041,9 +1070,11 @@ cc_test(
         ":hkdf",
         ":random",
         ":stream_segment_encrypter",
+        "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "//util:test_util",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
@@ -1139,6 +1170,7 @@ cc_test(
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
+        "@rapidjson",
     ],
 )
 
@@ -1151,8 +1183,8 @@ cc_test(
         ":encrypt_then_authenticate",
         ":hmac_boringssl",
         ":random",
+        "//:aead",
         "//util:secret_data",
-        "//util:status",
         "//util:statusor",
         "//util:test_util",
         "@com_google_absl//absl/strings",
@@ -1190,12 +1222,13 @@ cc_test(
         ":wycheproof_util",
         "//config:tink_fips",
         "//util:secret_data",
-        "//util:status",
         "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings:string_view",
         "@com_google_googletest//:gtest_main",
+        "@rapidjson",
     ],
 )
 
@@ -1217,6 +1250,7 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings:string_view",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -1294,6 +1328,7 @@ cc_test(
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
+        "@rapidjson",
     ],
 )
 
@@ -1329,6 +1364,7 @@ cc_test(
     srcs = ["rsa_ssa_pss_sign_boringssl_test.cc"],
     tags = ["fips"],
     deps = [
+        ":common_enums",
         ":rsa_ssa_pss_sign_boringssl",
         ":rsa_ssa_pss_verify_boringssl",
         "//internal:fips_utils",
@@ -1374,6 +1410,7 @@ cc_test(
     srcs = ["rsa_ssa_pkcs1_sign_boringssl_test.cc"],
     tags = ["fips"],
     deps = [
+        ":common_enums",
         ":rsa_ssa_pkcs1_sign_boringssl",
         ":rsa_ssa_pkcs1_verify_boringssl",
         "//internal:fips_utils",
@@ -1396,11 +1433,11 @@ cc_test(
     deps = [
         ":aes_gcm_siv_boringssl",
         ":subtle_util",
+        "//:aead",
         "//aead/internal:wycheproof_aead",
         "//config:tink_fips",
         "//internal:ssl_util",
         "//util:secret_data",
-        "//util:status",
         "//util:statusor",
         "//util:test_matchers",
         "@com_google_absl//absl/status",
@@ -1452,6 +1489,7 @@ cc_test(
     deps = [
         ":subtle_util",
         ":xchacha20_poly1305_boringssl",
+        "//:aead",
         "//aead/internal:wycheproof_aead",
         "//config:tink_fips",
         "//internal:ssl_util",
@@ -1478,6 +1516,7 @@ cc_test(
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
@@ -1496,6 +1535,7 @@ cc_test(
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
@@ -1547,8 +1587,10 @@ cc_test(
         "//:random_access_stream",
         "//:streaming_aead",
         "//internal:test_random_access_stream",
+        "//util:buffer",
         "//util:ostream_output_stream",
         "//util:status",
+        "//util:statusor",
         "//util:test_matchers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
@@ -1565,10 +1607,13 @@ cc_test(
         ":random",
         ":streaming_mac_impl",
         ":test_util",
+        "//:output_stream_with_result",
+        "//subtle/mac:stateful_mac",
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
@@ -1612,6 +1657,7 @@ cc_test(
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
+        "@rapidjson",
     ],
 )
 
@@ -1619,6 +1665,7 @@ cc_test(
     name = "pem_parser_boringssl_test",
     srcs = ["pem_parser_boringssl_test.cc"],
     deps = [
+        ":common_enums",
         ":pem_parser_boringssl",
         ":subtle_util_boringssl",
         "//internal:bn_util",

@@ -17,6 +17,9 @@
 #ifndef TINK_SUBTLE_EC_UTIL_H_
 #define TINK_SUBTLE_EC_UTIL_H_
 
+#include <cstdint>
+
+#include "absl/base/attributes.h"
 #include "absl/base/macros.h"
 #include "tink/internal/ec_util.h"
 #include "tink/subtle/common_enums.h"

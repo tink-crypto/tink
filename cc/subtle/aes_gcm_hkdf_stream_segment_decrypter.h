@@ -26,6 +26,7 @@
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/stream_segment_decrypter.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

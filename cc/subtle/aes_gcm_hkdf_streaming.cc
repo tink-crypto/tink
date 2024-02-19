@@ -22,12 +22,17 @@
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/subtle/aes_gcm_hkdf_stream_segment_decrypter.h"
 #include "tink/subtle/aes_gcm_hkdf_stream_segment_encrypter.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/subtle/random.h"
+#include "tink/subtle/stream_segment_decrypter.h"
+#include "tink/subtle/stream_segment_encrypter.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

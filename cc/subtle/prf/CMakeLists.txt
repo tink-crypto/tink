@@ -16,11 +16,15 @@ tink_cc_library(
     streaming_prf_wrapper.h
   DEPS
     tink::subtle::prf::streaming_prf
+    absl::memory
     absl::status
     absl::strings
+    tink::core::input_stream
     tink::core::primitive_set
     tink::core::primitive_wrapper
+    tink::util::status
     tink::util::statusor
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_library(
@@ -34,6 +38,7 @@ tink_cc_library(
     absl::status
     absl::strings
     crypto
+    tink::core::input_stream
     tink::internal::fips_utils
     tink::internal::md_util
     tink::internal::ssl_unique_ptr
@@ -69,10 +74,13 @@ tink_cc_test(
     tink::subtle::prf::hkdf_streaming_prf
     gmock
     absl::status
+    absl::string_view
+    tink::core::input_stream
     tink::config::tink_fips
     tink::subtle::subtle
     tink::util::input_stream_util
     tink::util::secret_data
+    tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
 )
@@ -82,10 +90,14 @@ tink_cc_test(
   SRCS
     streaming_prf_wrapper_test.cc
   DEPS
+    tink::subtle::prf::streaming_prf
     tink::subtle::prf::streaming_prf_wrapper
     gmock
+    absl::memory
     absl::status
     absl::strings
+    tink::core::input_stream
+    tink::core::primitive_set
     tink::util::input_stream_util
     tink::util::istream_input_stream
     tink::util::test_matchers
@@ -105,7 +117,10 @@ tink_cc_test(
     absl::status
     absl::strings
     tink::core::input_stream
+    tink::prf::prf_set
+    tink::subtle::mac::stateful_mac
     tink::util::istream_input_stream
     tink::util::status
+    tink::util::statusor
     tink::util::test_matchers
 )

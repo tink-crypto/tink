@@ -16,6 +16,7 @@
 
 #include "tink/subtle/random.h"
 
+#include <cstdint>
 #include <set>
 #include <string>
 #include <vector>

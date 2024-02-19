@@ -17,13 +17,16 @@
 #ifndef TINK_SUBTLE_AES_CMAC_BORINGSSL_H_
 #define TINK_SUBTLE_AES_CMAC_BORINGSSL_H_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
 
+#include "absl/strings/string_view.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/mac.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

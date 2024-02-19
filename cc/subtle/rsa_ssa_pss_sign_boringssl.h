@@ -17,6 +17,7 @@
 #ifndef TINK_SUBTLE_RSA_SSA_PSS_SIGN_BORINGSSL_H_
 #define TINK_SUBTLE_RSA_SSA_PSS_SIGN_BORINGSSL_H_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>

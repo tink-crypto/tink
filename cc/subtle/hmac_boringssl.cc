@@ -16,6 +16,7 @@
 
 #include "tink/subtle/hmac_boringssl.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
@@ -26,11 +27,13 @@
 #include "openssl/crypto.h"
 #include "openssl/evp.h"
 #include "openssl/hmac.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/internal/md_util.h"
 #include "tink/internal/util.h"
 #include "tink/mac.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/errors.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 

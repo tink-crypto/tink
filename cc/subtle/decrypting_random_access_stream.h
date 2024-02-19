@@ -17,12 +17,16 @@
 #ifndef TINK_SUBTLE_DECRYPTING_RANDOM_ACCESS_STREAM_H_
 #define TINK_SUBTLE_DECRYPTING_RANDOM_ACCESS_STREAM_H_
 
+#include <cstdint>
 #include <memory>
 #include <vector>
 
+#include "absl/base/thread_annotations.h"
 #include "absl/synchronization/mutex.h"
 #include "tink/random_access_stream.h"
 #include "tink/subtle/stream_segment_decrypter.h"
+#include "tink/util/buffer.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

@@ -21,8 +21,11 @@
 #include <string>
 #include <utility>
 
+#include "tink/output_stream_with_result.h"
 #include "tink/streaming_mac.h"
 #include "tink/subtle/mac/stateful_mac.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {

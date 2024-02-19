@@ -17,6 +17,7 @@
 #ifndef TINK_SUBTLE_SUBTLE_UTIL_H_
 #define TINK_SUBTLE_SUBTLE_UTIL_H_
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
 

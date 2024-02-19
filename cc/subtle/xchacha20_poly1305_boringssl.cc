@@ -30,10 +30,12 @@
 #include "absl/types/span.h"
 #include "tink/aead.h"
 #include "tink/aead/internal/ssl_aead.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/internal/util.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/errors.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 

@@ -16,15 +16,19 @@
 
 #include "tink/subtle/aes_eax_boringssl.h"
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "openssl/err.h"
+#include "include/rapidjson/document.h"
 #include "tink/config/tink_fips.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/secret_data.h"
@@ -255,7 +259,7 @@ static std::string GetError() {
 // Currently AesEaxBoringSsl is restricted to encryption with 12 byte
 // IVs and 16 byte tags. Therefore it is necessary to skip tests with
 // other parameter sizes.
-bool WycheproofTest(const rapidjson::Document &root) {
+bool WycheproofTest(const rapidjson::Document& root) {
   int errors = 0;
   for (const rapidjson::Value& test_group : root["testGroups"].GetArray()) {
     const size_t iv_size = test_group["ivSize"].GetInt();
@@ -298,12 +302,9 @@ bool WycheproofTest(const rapidjson::Document &root) {
         }
       } else {
         if (expected == "valid" || expected == "acceptable") {
-          ADD_FAILURE()
-              << "Could not decrypt test with tcId:" << id
-              << " iv_size:" << iv_size
-              << " tag_size:" << tag_size
-              << " key_size:" << key_size
-              << " error:" << GetError();
+          ADD_FAILURE() << "Could not decrypt test with tcId:" << id
+                        << " iv_size:" << iv_size << " tag_size:" << tag_size
+                        << " key_size:" << key_size << " error:" << GetError();
           errors++;
         }
       }
@@ -342,4 +343,3 @@ TEST(AesEaxBoringSslTest, TestFipsOnly) {
 }  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
-

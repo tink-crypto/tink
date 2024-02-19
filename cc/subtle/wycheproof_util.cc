@@ -16,6 +16,7 @@
 
 #include "tink/subtle/wycheproof_util.h"
 
+#include <cstddef>
 #include <fstream>
 #include <iostream>
 #include <memory>

@@ -15,6 +15,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "tink/subtle/prf/prf_set_util.h"
 
+#include <cstddef>
 #include <functional>
 #include <memory>
 #include <sstream>
@@ -27,9 +28,12 @@
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
+#include "tink/prf/prf_set.h"
+#include "tink/subtle/mac/stateful_mac.h"
 #include "tink/subtle/prf/streaming_prf.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 
 namespace crypto {

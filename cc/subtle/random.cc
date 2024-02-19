@@ -16,6 +16,7 @@
 
 #include "tink/subtle/random.h"
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
 
@@ -24,6 +25,7 @@
 #include "absl/types/span.h"
 #include "openssl/rand.h"
 #include "tink/subtle/subtle_util.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 
 namespace crypto {

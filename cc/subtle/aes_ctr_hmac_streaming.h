@@ -17,6 +17,7 @@
 #ifndef TINK_SUBTLE_AES_CTR_HMAC_STREAMING_H_
 #define TINK_SUBTLE_AES_CTR_HMAC_STREAMING_H_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>

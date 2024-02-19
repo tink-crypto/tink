@@ -16,6 +16,8 @@
 
 #include "tink/subtle/subtle_util.h"
 
+#include <cstddef>
+#include <cstdint>
 #include <string>
 // placeholder_subtle_util_cc
 
