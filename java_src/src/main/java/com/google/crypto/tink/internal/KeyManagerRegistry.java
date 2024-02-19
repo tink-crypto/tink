@@ -18,7 +18,6 @@ package com.google.crypto.tink.internal;
 
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.protobuf.MessageLite;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.Set;
@@ -27,14 +26,13 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 
 /**
- * An internal API to register KeyManagers and KeyTypeManagers.
+ * An internal API to register KeyManagers.
  *
- * <p>The KeyManagerRegistry provides an API to register Key(Type)Managers, ensuring FIPS
+ * <p>The KeyManagerRegistry provides an API to register KeyManagers, ensuring FIPS
  * compatibility. For registered managers, it gives access to the following operations:
  *
  * <ul>
- *   <li>Retrive KeyManagers (but not KeyTypeManagers)
- *   <li>Parsing keys (only if KeyTypeManagers have been registered)
+ *   <li>Retrive KeyManagers
  * </ul>
  */
 public final class KeyManagerRegistry {
@@ -68,10 +66,7 @@ public final class KeyManagerRegistry {
     newKeyAllowedMap = new ConcurrentHashMap<>();
   }
 
-  /**
-   * A container which either is constructed from a {@link KeyTypeManager} or from a {@link
-   * KeyManager}.
-   */
+  /** A container which is constructed from {@link KeyManager}. */
   private static interface KeyManagerContainer {
     /**
      * Returns the KeyManager for the given primitive or throws if the given primitive is not in
@@ -80,19 +75,18 @@ public final class KeyManagerRegistry {
     <P> KeyManager<P> getKeyManager(Class<P> primitiveClass) throws GeneralSecurityException;
 
     /**
-     * Returns a KeyManager from the given container. If a KeyTypeManager has been provided, creates
-     * a KeyManager for some primitive.
+     * Returns a KeyManager from the given container.
      */
     KeyManager<?> getUntypedKeyManager();
 
     /**
-     * The Class object corresponding to the actual KeyTypeManager/KeyManager used to build this
+     * The Class object corresponding to the actual KeyManager used to build this
      * object.
      */
     Class<?> getImplementingClass();
 
     /**
-     * The primitives supported by the underlying {@link KeyTypeManager} resp. {@link KeyManager}.
+     * The primitives supported by the underlying {@link KeyManager}.
      */
     Set<Class<?>> supportedPrimitives();
   }
@@ -124,77 +118,6 @@ public final class KeyManagerRegistry {
       @Override
       public Set<Class<?>> supportedPrimitives() {
         return Collections.<Class<?>>singleton(localKeyManager.getPrimitiveClass());
-      }
-    };
-  }
-
-  private static <KeyProtoT extends MessageLite> KeyManagerContainer createContainerFor(
-      KeyTypeManager<KeyProtoT> keyManager) {
-    final KeyTypeManager<KeyProtoT> localKeyManager = keyManager;
-    return new KeyManagerContainer() {
-      @Override
-      public <Q> KeyManager<Q> getKeyManager(Class<Q> primitiveClass)
-          throws GeneralSecurityException {
-        try {
-          return new KeyManagerImpl<>(localKeyManager, primitiveClass);
-        } catch (IllegalArgumentException e) {
-          throw new GeneralSecurityException("Primitive type not supported", e);
-        }
-      }
-
-      @Override
-      public KeyManager<?> getUntypedKeyManager() {
-        return new KeyManagerImpl<>(
-            localKeyManager, localKeyManager.firstSupportedPrimitiveClass());
-      }
-
-      @Override
-      public Class<?> getImplementingClass() {
-        return localKeyManager.getClass();
-      }
-
-      @Override
-      public Set<Class<?>> supportedPrimitives() {
-        return localKeyManager.supportedPrimitives();
-      }
-    };
-  }
-
-  private static <KeyProtoT extends MessageLite, PublicKeyProtoT extends MessageLite>
-      KeyManagerContainer createPrivateKeyContainerFor(
-          final PrivateKeyTypeManager<KeyProtoT, PublicKeyProtoT> privateKeyTypeManager,
-          final KeyTypeManager<PublicKeyProtoT> publicKeyTypeManager) {
-    final PrivateKeyTypeManager<KeyProtoT, PublicKeyProtoT> localPrivateKeyManager =
-        privateKeyTypeManager;
-    final KeyTypeManager<PublicKeyProtoT> localPublicKeyManager = publicKeyTypeManager;
-    return new KeyManagerContainer() {
-      @Override
-      public <Q> KeyManager<Q> getKeyManager(Class<Q> primitiveClass)
-          throws GeneralSecurityException {
-        try {
-          return new PrivateKeyManagerImpl<>(
-              localPrivateKeyManager, localPublicKeyManager, primitiveClass);
-        } catch (IllegalArgumentException e) {
-          throw new GeneralSecurityException("Primitive type not supported", e);
-        }
-      }
-
-      @Override
-      public KeyManager<?> getUntypedKeyManager() {
-        return new PrivateKeyManagerImpl<>(
-            localPrivateKeyManager,
-            localPublicKeyManager,
-            localPrivateKeyManager.firstSupportedPrimitiveClass());
-      }
-
-      @Override
-      public Class<?> getImplementingClass() {
-        return localPrivateKeyManager.getClass();
-      }
-
-      @Override
-      public Set<Class<?>> supportedPrimitives() {
-        return localPrivateKeyManager.supportedPrimitives();
       }
     };
   }
@@ -261,65 +184,6 @@ public final class KeyManagerRegistry {
     }
     registerKeyManagerContainer(
         createContainerFor(manager), /* forceOverwrite= */ false, newKeyAllowed);
-  }
-
-  public synchronized <KeyProtoT extends MessageLite> void registerKeyManager(
-      final KeyTypeManager<KeyProtoT> manager, boolean newKeyAllowed)
-      throws GeneralSecurityException {
-    if (!manager.fipsStatus().isCompatible()) {
-      throw new GeneralSecurityException(
-          "failed to register key manager "
-              + manager.getClass()
-              + " as it is not FIPS compatible.");
-    }
-    registerKeyManagerContainer(
-        createContainerFor(manager), /* forceOverwrite= */ false, newKeyAllowed);
-  }
-
-  /**
-   * Registers a private KeyTypeManager and a corresponding public KeyTypeManager.
-   *
-   * <p>On the generated Private KeyManager, when we create the public key from a private key, we
-   * also call "Validate" on the provided public KeyTypeManager.
-   *
-   * <p>A call to registerAsymmetricKeyManager takes precedence over other calls (i.e., if the above
-   * association is established once, it will stay established).
-   */
-  public synchronized <KeyProtoT extends MessageLite, PublicKeyProtoT extends MessageLite>
-      void registerAsymmetricKeyManagers(
-          final PrivateKeyTypeManager<KeyProtoT, PublicKeyProtoT> privateKeyTypeManager,
-          final KeyTypeManager<PublicKeyProtoT> publicKeyTypeManager,
-          boolean newKeyAllowed)
-          throws GeneralSecurityException {
-    TinkFipsUtil.AlgorithmFipsCompatibility fipsStatusPrivateKey =
-        privateKeyTypeManager.fipsStatus();
-    TinkFipsUtil.AlgorithmFipsCompatibility fipsStatusPublicKey = publicKeyTypeManager.fipsStatus();
-
-    if (!fipsStatusPrivateKey.isCompatible()) {
-      throw new GeneralSecurityException(
-          "failed to register key manager "
-              + privateKeyTypeManager.getClass()
-              + " as it is not FIPS compatible.");
-    }
-
-    if (!fipsStatusPublicKey.isCompatible()) {
-      throw new GeneralSecurityException(
-          "failed to register key manager "
-              + publicKeyTypeManager.getClass()
-              + " as it is not FIPS compatible.");
-    }
-
-
-    // We overwrite such that if we once register asymmetrically and once symmetrically, the
-    // asymmetric one takes precedence.
-    registerKeyManagerContainer(
-        createPrivateKeyContainerFor(privateKeyTypeManager, publicKeyTypeManager),
-        /* forceOverwrite= */ true,
-        newKeyAllowed);
-    registerKeyManagerContainer(
-        createContainerFor(publicKeyTypeManager),
-        /* forceOverwrite= */ false,
-        /* newKeyAllowed= */ false);
   }
 
   public boolean typeUrlExists(String typeUrl) {

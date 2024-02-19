@@ -20,16 +20,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static org.junit.Assert.assertNotNull;
 
-import com.google.crypto.tink.config.internal.TinkFipsUtil;
-import com.google.crypto.tink.internal.KeyTypeManager;
-import com.google.crypto.tink.internal.PrivateKeyTypeManager;
-import com.google.crypto.tink.proto.AesGcmKey;
-import com.google.crypto.tink.proto.Ed25519PrivateKey;
-import com.google.crypto.tink.proto.Ed25519PublicKey;
 import com.google.crypto.tink.proto.KeyData;
-import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,123 +63,6 @@ public final class RegistryMultithreadTest {
     }
   }
 
-  private static class TestKeyTypeManager extends KeyTypeManager<AesGcmKey> {
-    private final String typeUrl;
-
-    public TestKeyTypeManager(String typeUrl) {
-      super(AesGcmKey.class);
-      this.typeUrl = typeUrl;
-    }
-
-    @Override
-    public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
-      return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
-    }
-
-    @Override
-    public String getKeyType() {
-      return typeUrl;
-    }
-
-    @Override
-    public int getVersion() {
-      throw new UnsupportedOperationException("Not needed for test");
-    }
-
-    @Override
-    public KeyMaterialType keyMaterialType() {
-      throw new UnsupportedOperationException("Not needed for test");
-    }
-
-    @Override
-    public void validateKey(AesGcmKey keyProto) throws GeneralSecurityException {}
-
-    @Override
-    public AesGcmKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-      throw new UnsupportedOperationException("Not needed for test");
-    }
-  }
-
-  private static class TestPublicKeyTypeManager extends KeyTypeManager<Ed25519PublicKey> {
-    private final String typeUrl;
-
-    public TestPublicKeyTypeManager(String typeUrl) {
-      super(Ed25519PublicKey.class);
-      this.typeUrl = typeUrl;
-    }
-
-    @Override
-    public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
-      return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
-    }
-
-    @Override
-    public String getKeyType() {
-      return typeUrl;
-    }
-
-    @Override
-    public int getVersion() {
-      throw new UnsupportedOperationException("Not needed for test");
-    }
-
-    @Override
-    public KeyMaterialType keyMaterialType() {
-      throw new UnsupportedOperationException("Not needed for test");
-    }
-
-    @Override
-    public void validateKey(Ed25519PublicKey keyProto) throws GeneralSecurityException {}
-
-    @Override
-    public Ed25519PublicKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-      throw new UnsupportedOperationException("Not needed for test");
-    }
-  }
-
-  private static class TestPrivateKeyTypeManager
-      extends PrivateKeyTypeManager<Ed25519PrivateKey, Ed25519PublicKey> {
-    private final String typeUrl;
-
-    public TestPrivateKeyTypeManager(String typeUrl) {
-      super(Ed25519PrivateKey.class, Ed25519PublicKey.class);
-      this.typeUrl = typeUrl;
-    }
-
-    @Override
-    public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
-      return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
-    }
-
-    @Override
-    public String getKeyType() {
-      return typeUrl;
-    }
-
-    @Override
-    public int getVersion() {
-      throw new UnsupportedOperationException("Not needed for test");
-    }
-
-    @Override
-    public KeyMaterialType keyMaterialType() {
-      throw new UnsupportedOperationException("Not needed for test");
-    }
-
-    @Override
-    public void validateKey(Ed25519PrivateKey keyProto) throws GeneralSecurityException {}
-
-    @Override
-    public Ed25519PrivateKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
-      throw new UnsupportedOperationException("Not needed for test");
-    }
-
-    @Override
-    public Ed25519PublicKey getPublicKey(Ed25519PrivateKey privateKey) {
-      throw new UnsupportedOperationException("Not needed for test");
-    }
-  }
-
   private static final int REPETITIONS = 200;
 
   @Test
@@ -195,11 +70,6 @@ public final class RegistryMultithreadTest {
     ExecutorService threadPool = Executors.newFixedThreadPool(4);
     List<Future<?>> futures = new ArrayList<>();
     Registry.registerKeyManager(new TestKeyManager("KeyManagerStart"), false);
-    Registry.registerKeyManager(new TestKeyTypeManager("KeyTypeManagerStart"), false);
-    Registry.registerAsymmetricKeyManagers(
-        new TestPrivateKeyTypeManager("PrivateKeyTypeManagerStart"),
-        new TestPublicKeyTypeManager("PublicKeyTypeManagerStart"),
-        false);
     futures.add(
         threadPool.submit(
             () -> {
@@ -216,35 +86,7 @@ public final class RegistryMultithreadTest {
             () -> {
               try {
                 for (int i = 0; i < REPETITIONS; ++i) {
-                  Registry.registerKeyManager(new TestKeyTypeManager("KeyTypeManager" + i), false);
-                }
-              } catch (GeneralSecurityException e) {
-                throw new RuntimeException(e);
-              }
-            }));
-    futures.add(
-        threadPool.submit(
-            () -> {
-              try {
-                for (int i = 0; i < REPETITIONS; ++i) {
-                  Registry.registerAsymmetricKeyManagers(
-                      new TestPrivateKeyTypeManager("Private" + i),
-                      new TestPublicKeyTypeManager("Public" + i),
-                      false);
-                }
-              } catch (GeneralSecurityException e) {
-                throw new RuntimeException(e);
-              }
-            }));
-    futures.add(
-        threadPool.submit(
-            () -> {
-              try {
-                for (int i = 0; i < REPETITIONS; ++i) {
                   assertNotNull(Registry.getUntypedKeyManager("KeyManagerStart"));
-                  assertNotNull(Registry.getUntypedKeyManager("KeyTypeManagerStart"));
-                  assertNotNull(Registry.getUntypedKeyManager("PrivateKeyTypeManagerStart"));
-                  assertNotNull(Registry.getUntypedKeyManager("PublicKeyTypeManagerStart"));
                 }
               } catch (GeneralSecurityException e) {
                 throw new RuntimeException(e);

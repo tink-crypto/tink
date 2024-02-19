@@ -18,11 +18,9 @@ package com.google.crypto.tink;
 
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyManagerRegistry;
-import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveSet;
-import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.prf.Prf;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.protobuf.ByteString;
@@ -235,33 +233,6 @@ public final class Registry {
   }
 
   /**
-   * Tries to register {@code manager} for {@code manager.getKeyType()}. If {@code newKeyAllowed} is
-   * true, users can generate new keys with this manager using the {@link Registry#newKey} methods.
-   *
-   * <p>If there is an existing key manager, throws an exception if {@code manager} and the existing
-   * key manager aren't instances of the same class, or if {@code newKeyAllowed} is true while the
-   * existing key manager could not create new keys. Otherwise registration succeeds.
-   *
-   * <p>If {@code newKeyAllowed} is true, also tries to register the key templates supported by
-   * {@code manager}.
-   *
-   * @throws GeneralSecurityException if there's an existing key manager is not an instance of the
-   *     class of {@code manager}, or the registration tries to re-enable the generation of new
-   *     keys.
-   * @throws GeneralSecurityException if there's an existing key template.
-   * @throws GeneralSecurityException if the key manager is not compatible with the restrictions in
-   *     FIPS-mode.
-   */
-  public static synchronized <KeyProtoT extends MessageLite> void registerKeyManager(
-      final KeyTypeManager<KeyProtoT> manager, boolean newKeyAllowed)
-      throws GeneralSecurityException {
-    if (manager == null) {
-      throw new IllegalArgumentException("key manager must be non-null.");
-    }
-    KeyManagerRegistry.globalInstance().registerKeyManager(manager, newKeyAllowed);
-  }
-
-  /**
    * Tries to register {@code manager} for the given {@code typeUrl}. Users can generate new keys
    * with this manager using the {@link Registry#newKey} methods.
    *
@@ -301,35 +272,6 @@ public final class Registry {
       throw new GeneralSecurityException("Manager does not support key type " + typeUrl + ".");
     }
     registerKeyManager(manager, newKeyAllowed);
-  }
-
-  /**
-   * Tries to register {@code manager} for {@code manager.getKeyType()}. If {@code newKeyAllowed} is
-   * true, users can generate new keys with this manager using the {@link Registry#newKey} methods.
-   *
-   * <p>If {@code newKeyAllowed} is true, also tries to register the key templates supported by
-   * {@code manager}.
-   *
-   * <p>If there is an existing key manager, throws an exception if {@code manager} and the existing
-   * key manager aren't instances of the same class, or if {@code newKeyAllowed} is true while the
-   * existing key manager could not create new keys. Otherwise registration succeeds.
-   *
-   * @throws GeneralSecurityException if there's an existing key manager is not an instance of the
-   *     class of {@code manager}, or the registration tries to re-enable the generation of new
-   *     keys.
-   * @throws GeneralSecurityException if there's an existing key template.
-   */
-  public static synchronized <KeyProtoT extends MessageLite, PublicKeyProtoT extends MessageLite>
-      void registerAsymmetricKeyManagers(
-          final PrivateKeyTypeManager<KeyProtoT, PublicKeyProtoT> privateKeyTypeManager,
-          final KeyTypeManager<PublicKeyProtoT> publicKeyTypeManager,
-          boolean newKeyAllowed)
-          throws GeneralSecurityException {
-    if (privateKeyTypeManager == null || publicKeyTypeManager == null) {
-      throw new IllegalArgumentException("given key managers must be non-null.");
-    }
-    KeyManagerRegistry.globalInstance()
-        .registerAsymmetricKeyManagers(privateKeyTypeManager, publicKeyTypeManager, newKeyAllowed);
   }
 
   /**
