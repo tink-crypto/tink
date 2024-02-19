@@ -15,9 +15,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "tink/keyset_manager.h"
 
+#include <string>
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/aead/aead_config.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/keyset_handle.h"

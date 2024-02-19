@@ -16,6 +16,8 @@
 
 #include "tink/crypto_format.h"
 
+#include <cstdint>
+
 #include "gtest/gtest.h"
 #include "proto/tink.pb.h"
 

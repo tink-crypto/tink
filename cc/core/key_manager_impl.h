@@ -16,6 +16,7 @@
 #ifndef TINK_CORE_KEY_MANAGER_IMPL_H_
 #define TINK_CORE_KEY_MANAGER_IMPL_H_
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <string>
@@ -25,11 +26,16 @@
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "tink/core/key_type_manager.h"
+#include "tink/core/template_util.h"
+#include "tink/input_stream.h"
 #include "tink/key_manager.h"
 #include "tink/util/constants.h"
+#include "tink/util/errors.h"
 #include "tink/util/secret_proto.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {

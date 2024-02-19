@@ -20,10 +20,15 @@
 #include <string>
 #include <utility>
 
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "tink/core/key_manager_impl.h"
+#include "tink/core/key_type_manager.h"
 #include "tink/core/private_key_type_manager.h"
 #include "tink/key_manager.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/validation.h"
 namespace crypto {
 namespace tink {

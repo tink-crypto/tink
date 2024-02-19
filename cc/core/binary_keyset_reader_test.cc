@@ -25,6 +25,7 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
 

@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "tink/core/key_type_manager.h"
+#include "tink/core/template_util.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

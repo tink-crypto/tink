@@ -16,6 +16,7 @@
 
 #include "tink/core/key_type_manager.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -24,6 +25,7 @@
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "tink/aead.h"
+#include "tink/core/template_util.h"
 #include "tink/subtle/aes_gcm_boringssl.h"
 #include "tink/subtle/random.h"
 #include "tink/util/secret_data.h"

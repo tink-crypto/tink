@@ -17,8 +17,12 @@
 #ifndef TINK_CORE_KEY_TYPE_MANAGER_H_
 #define TINK_CORE_KEY_TYPE_MANAGER_H_
 
+#include <cstddef>
+#include <cstdint>
+#include <memory>
 #include <string>
 #include <tuple>
+#include <type_traits>
 #include <typeinfo>
 
 #include "absl/status/status.h"

@@ -15,14 +15,19 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/core/private_key_manager_impl.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "tink/core/key_manager_impl.h"
+#include "tink/core/key_type_manager.h"
 #include "tink/core/private_key_type_manager.h"
+#include "tink/core/template_util.h"
+#include "tink/key_manager.h"
 #include "tink/registry.h"
 #include "tink/subtle/aes_gcm_boringssl.h"
 #include "tink/subtle/random.h"

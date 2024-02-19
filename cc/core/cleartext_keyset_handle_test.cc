@@ -23,8 +23,10 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/keyset_handle.h"
+#include "tink/util/status.h"
 #include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_util.h"
 #include "proto/tink.pb.h"

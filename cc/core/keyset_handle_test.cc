@@ -16,6 +16,7 @@
 
 #include "tink/keyset_handle.h"
 
+#include <cstdint>
 #include <memory>
 #include <ostream>
 #include <sstream>
@@ -24,9 +25,13 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/container/flat_hash_map.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
+#include "tink/aead.h"
 #include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aead_wrapper.h"
 #include "tink/aead/aes_gcm_key_manager.h"
@@ -38,24 +43,34 @@
 #include "tink/config/global_registry.h"
 #include "tink/config/key_gen_fips_140_2.h"
 #include "tink/config/tink_config.h"
+#include "tink/configuration.h"
 #include "tink/core/key_manager_impl.h"
+#include "tink/core/key_type_manager.h"
+#include "tink/core/template_util.h"
+#include "tink/input_stream.h"
+#include "tink/internal/configuration_impl.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/internal/key_gen_configuration_impl.h"
 #include "tink/json_keyset_reader.h"
 #include "tink/json_keyset_writer.h"
 #include "tink/key_gen_configuration.h"
 #include "tink/key_status.h"
+#include "tink/keyset_reader.h"
 #include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"
+#include "tink/registry.h"
 #include "tink/signature/ecdsa_sign_key_manager.h"
 #include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/signature/signature_key_templates.h"
+#include "tink/subtle/random.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
+#include "proto/aes_gcm.pb.h"
 #include "proto/aes_gcm_siv.pb.h"
+#include "proto/ecdsa.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
