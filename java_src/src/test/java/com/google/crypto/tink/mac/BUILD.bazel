@@ -264,6 +264,7 @@ java_test(
     deps = [
         "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/internal:primitive_registry",
         "//src/main/java/com/google/crypto/tink/mac:aes_cmac_key",
         "//src/main/java/com/google/crypto/tink/mac:aes_cmac_parameters",
         "//src/main/java/com/google/crypto/tink/mac:aes_cmac_proto_serialization",
