@@ -103,7 +103,7 @@ class SecretProto {
  private:
   std::unique_ptr<google::protobuf::Arena> arena_ =
       absl::make_unique<google::protobuf::Arena>(internal::SecretArenaOptions());
-  T* value_ = google::protobuf::Arena::CreateMessage<T>(arena_.get());
+  T* value_ = google::protobuf::Arena::Create<T>(arena_.get());
 };
 
 }  // namespace util
