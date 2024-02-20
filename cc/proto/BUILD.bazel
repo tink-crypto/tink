@@ -315,6 +315,12 @@ cc_proto_library(
 )
 
 cc_proto_library(
+    name = "chacha20_poly1305_cc_proto",
+    visibility = ["//visibility:public"],
+    deps = [":chacha20_poly1305_proto"],
+)
+
+cc_proto_library(
     name = "rsa_ssa_pkcs1_cc_proto",
     deps = [":rsa_ssa_pkcs1_proto"],
 )
