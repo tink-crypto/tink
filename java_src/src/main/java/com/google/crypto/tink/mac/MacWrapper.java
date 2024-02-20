@@ -24,6 +24,7 @@ import com.google.crypto.tink.internal.MonitoringUtil;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
+import com.google.crypto.tink.internal.PrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveSet;
 import com.google.crypto.tink.mac.internal.LegacyFullMac;
 import com.google.crypto.tink.monitoring.MonitoringClient;
@@ -41,7 +42,7 @@ import java.util.List;
  * the right key in the set. If the keys associated with the prefix do not validate the tag, the
  * primitive tries all keys with {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
-class MacWrapper implements PrimitiveWrapper<Mac, Mac> {
+public class MacWrapper implements PrimitiveWrapper<Mac, Mac> {
 
   private static final MacWrapper WRAPPER = new MacWrapper();
   private static final PrimitiveConstructor<LegacyProtoKey, Mac>
@@ -134,9 +135,19 @@ class MacWrapper implements PrimitiveWrapper<Mac, Mac> {
     return Mac.class;
   }
 
-  public static void register() throws GeneralSecurityException {
+  static void register() throws GeneralSecurityException {
     MutablePrimitiveRegistry.globalInstance().registerPrimitiveWrapper(WRAPPER);
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(LEGACY_FULL_MAC_PRIMITIVE_CONSTRUCTOR);
+  }
+
+  /**
+   * registerToInternalPrimitiveRegistry is a non-public method (it takes an argument of an
+   * internal-only type) registering an instance of {@code MacWrapper} to the provided {@code
+   * PrimitiveRegistry.Builder}.
+   */
+  public static void registerToInternalPrimitiveRegistry(
+      PrimitiveRegistry.Builder primitiveRegistryBuilder) throws GeneralSecurityException {
+    primitiveRegistryBuilder.registerPrimitiveWrapper(WRAPPER);
   }
 }

@@ -120,7 +120,6 @@ java_library(
     name = "mac_wrapper",
     srcs = ["MacWrapper.java"],
     deps = [
-        ":mac_key",
         "//src/main/java/com/google/crypto/tink:crypto_format",
         "//src/main/java/com/google/crypto/tink:mac",
         "//src/main/java/com/google/crypto/tink:primitive_wrapper",
@@ -129,11 +128,11 @@ java_library(
         "//src/main/java/com/google/crypto/tink/internal:mutable_monitoring_registry",
         "//src/main/java/com/google/crypto/tink/internal:mutable_primitive_registry",
         "//src/main/java/com/google/crypto/tink/internal:primitive_constructor",
+        "//src/main/java/com/google/crypto/tink/internal:primitive_registry",
         "//src/main/java/com/google/crypto/tink/internal:primitive_set",
         "//src/main/java/com/google/crypto/tink/mac/internal:legacy_full_mac",
         "//src/main/java/com/google/crypto/tink/monitoring:monitoring_client",
         "//src/main/java/com/google/crypto/tink/monitoring:monitoring_keyset_info",
-        "//src/main/java/com/google/crypto/tink/util:bytes",
     ],
 )
 
@@ -141,7 +140,6 @@ android_library(
     name = "mac_wrapper-android",
     srcs = ["MacWrapper.java"],
     deps = [
-        ":mac_key-android",
         "//src/main/java/com/google/crypto/tink:crypto_format-android",
         "//src/main/java/com/google/crypto/tink:mac-android",
         "//src/main/java/com/google/crypto/tink:primitive_wrapper-android",
@@ -150,11 +148,11 @@ android_library(
         "//src/main/java/com/google/crypto/tink/internal:mutable_monitoring_registry-android",
         "//src/main/java/com/google/crypto/tink/internal:mutable_primitive_registry-android",
         "//src/main/java/com/google/crypto/tink/internal:primitive_constructor-android",
+        "//src/main/java/com/google/crypto/tink/internal:primitive_registry-android",
         "//src/main/java/com/google/crypto/tink/internal:primitive_set-android",
         "//src/main/java/com/google/crypto/tink/mac/internal:legacy_full_mac-android",
         "//src/main/java/com/google/crypto/tink/monitoring:monitoring_client-android",
         "//src/main/java/com/google/crypto/tink/monitoring:monitoring_keyset_info-android",
-        "//src/main/java/com/google/crypto/tink/util:bytes-android",
     ],
 )
 
