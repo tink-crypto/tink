@@ -19,8 +19,6 @@ package com.google.crypto.tink.internal;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
@@ -38,8 +36,8 @@ import java.util.logging.Logger;
 public final class KeyManagerRegistry {
   private static final Logger logger = Logger.getLogger(KeyManagerRegistry.class.getName());
 
-  // A map from the TypeUrl to the KeyManagerContainer.
-  private ConcurrentMap<String, KeyManagerContainer> keyManagerMap;
+  // A map from the TypeUrl to the KeyManager.
+  private ConcurrentMap<String, KeyManager<?>> keyManagerMap;
   // typeUrl -> newKeyAllowed mapping
   private ConcurrentMap<String, Boolean> newKeyAllowedMap;
 
@@ -66,63 +64,7 @@ public final class KeyManagerRegistry {
     newKeyAllowedMap = new ConcurrentHashMap<>();
   }
 
-  /** A container which is constructed from {@link KeyManager}. */
-  private static interface KeyManagerContainer {
-    /**
-     * Returns the KeyManager for the given primitive or throws if the given primitive is not in
-     * supportedPrimitives.
-     */
-    <P> KeyManager<P> getKeyManager(Class<P> primitiveClass) throws GeneralSecurityException;
-
-    /**
-     * Returns a KeyManager from the given container.
-     */
-    KeyManager<?> getUntypedKeyManager();
-
-    /**
-     * The Class object corresponding to the actual KeyManager used to build this
-     * object.
-     */
-    Class<?> getImplementingClass();
-
-    /**
-     * The primitives supported by the underlying {@link KeyManager}.
-     */
-    Set<Class<?>> supportedPrimitives();
-  }
-
-  private static <P> KeyManagerContainer createContainerFor(KeyManager<P> keyManager) {
-    final KeyManager<P> localKeyManager = keyManager;
-    return new KeyManagerContainer() {
-      @Override
-      public <Q> KeyManager<Q> getKeyManager(Class<Q> primitiveClass) {
-        if (!localKeyManager.getPrimitiveClass().equals(primitiveClass)) {
-          throw new InternalError(
-              "This should never be called, as we always first check supportedPrimitives.");
-        }
-        @SuppressWarnings("unchecked") // We checked equality of the primitiveClass objects.
-        KeyManager<Q> result = (KeyManager<Q>) localKeyManager;
-        return result;
-      }
-
-      @Override
-      public KeyManager<?> getUntypedKeyManager() {
-        return localKeyManager;
-      }
-
-      @Override
-      public Class<?> getImplementingClass() {
-        return localKeyManager.getClass();
-      }
-
-      @Override
-      public Set<Class<?>> supportedPrimitives() {
-        return Collections.<Class<?>>singleton(localKeyManager.getPrimitiveClass());
-      }
-    };
-  }
-
-  private synchronized KeyManagerContainer getKeyManagerContainerOrThrow(String typeUrl)
+  private synchronized KeyManager<?> getKeyManagerOrThrow(String typeUrl)
       throws GeneralSecurityException {
     if (!keyManagerMap.containsKey(typeUrl)) {
       throw new GeneralSecurityException("No key manager found for key type " + typeUrl);
@@ -130,28 +72,25 @@ public final class KeyManagerRegistry {
     return keyManagerMap.get(typeUrl);
   }
 
-  private synchronized void registerKeyManagerContainer(
-      final KeyManagerContainer containerToInsert, boolean forceOverwrite, boolean newKeyAllowed)
+  private synchronized void insertKeyManager(
+      final KeyManager<?> manager, boolean forceOverwrite, boolean newKeyAllowed)
       throws GeneralSecurityException {
-    String typeUrl = containerToInsert.getUntypedKeyManager().getKeyType();
+    String typeUrl = manager.getKeyType();
     if (newKeyAllowed && newKeyAllowedMap.containsKey(typeUrl) && !newKeyAllowedMap.get(typeUrl)) {
       throw new GeneralSecurityException("New keys are already disallowed for key type " + typeUrl);
     }
-    KeyManagerContainer container = keyManagerMap.get(typeUrl);
-    if (container != null
-        && !container.getImplementingClass().equals(containerToInsert.getImplementingClass())) {
+    KeyManager<?> existing = keyManagerMap.get(typeUrl);
+    if (existing != null && !existing.getClass().equals(manager.getClass())) {
       logger.warning("Attempted overwrite of a registered key manager for key type " + typeUrl);
       throw new GeneralSecurityException(
           String.format(
               "typeUrl (%s) is already registered with %s, cannot be re-registered with %s",
-              typeUrl,
-              container.getImplementingClass().getName(),
-              containerToInsert.getImplementingClass().getName()));
+              typeUrl, existing.getClass().getName(), manager.getClass().getName()));
     }
     if (!forceOverwrite) {
-      keyManagerMap.putIfAbsent(typeUrl, containerToInsert);
+      keyManagerMap.putIfAbsent(typeUrl, manager);
     } else {
-      keyManagerMap.put(typeUrl, containerToInsert);
+      keyManagerMap.put(typeUrl, manager);
     }
     newKeyAllowedMap.put(typeUrl, newKeyAllowed);
   }
@@ -182,52 +121,38 @@ public final class KeyManagerRegistry {
       throw new GeneralSecurityException(
           "Cannot register key manager: FIPS compatibility insufficient");
     }
-    registerKeyManagerContainer(
-        createContainerFor(manager), /* forceOverwrite= */ false, newKeyAllowed);
+    insertKeyManager(manager, /* forceOverwrite= */ false, newKeyAllowed);
   }
 
   public boolean typeUrlExists(String typeUrl) {
     return keyManagerMap.containsKey(typeUrl);
   }
 
-  private static String toCommaSeparatedString(Set<Class<?>> setOfClasses) {
-    StringBuilder b = new StringBuilder();
-    boolean first = true;
-    for (Class<?> clazz : setOfClasses) {
-      if (!first) {
-        b.append(", ");
-      }
-      b.append(clazz.getCanonicalName());
-      first = false;
-    }
-    return b.toString();
-  }
-
   /**
    * @return a {@link KeyManager} for the given {@code typeUrl} and {@code primitiveClass}(if found
    *     and this key type supports this primitive).
    */
+  @SuppressWarnings("unchecked") // We just checked equality above the cast.
   public <P> KeyManager<P> getKeyManager(String typeUrl, Class<P> primitiveClass)
       throws GeneralSecurityException {
-    KeyManagerContainer container = getKeyManagerContainerOrThrow(typeUrl);
-    if (container.supportedPrimitives().contains(primitiveClass)) {
-      return container.getKeyManager(primitiveClass);
+    KeyManager<?> manager = getKeyManagerOrThrow(typeUrl);
+    if (manager.getPrimitiveClass().equals(primitiveClass)) {
+      return (KeyManager<P>) manager;
     }
     throw new GeneralSecurityException(
         "Primitive type "
             + primitiveClass.getName()
             + " not supported by key manager of type "
-            + container.getImplementingClass()
-            + ", supported primitives: "
-            + toCommaSeparatedString(container.supportedPrimitives()));
+            + manager.getClass()
+            + ", which only supports: "
+            + manager.getPrimitiveClass());
   }
 
   /**
    * @return a {@link KeyManager} for the given {@code typeUrl} (if found).
    */
   public KeyManager<?> getUntypedKeyManager(String typeUrl) throws GeneralSecurityException {
-    KeyManagerContainer container = getKeyManagerContainerOrThrow(typeUrl);
-    return container.getUntypedKeyManager();
+    return getKeyManagerOrThrow(typeUrl);
   }
 
   public boolean isNewKeyAllowed(String typeUrl) {
