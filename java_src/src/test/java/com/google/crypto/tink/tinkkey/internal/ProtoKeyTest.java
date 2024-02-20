@@ -19,12 +19,16 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.internal.KeyTemplateProtoConverter.getOutputPrefixType;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
+import com.google.crypto.tink.PrivateKeyManager;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.signature.Ed25519PrivateKeyManager;
+import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +38,16 @@ import org.junit.runners.JUnit4;
 /** Tests for ProtoKey */
 @RunWith(JUnit4.class)
 public final class ProtoKeyTest {
+  private static KeyData getPublicKeyData(String typeUrl, ByteString serializedPrivateKey)
+      throws GeneralSecurityException {
+    KeyManager<?> manager = KeyManagerRegistry.globalInstance().getUntypedKeyManager(typeUrl);
+
+    if (!(manager instanceof PrivateKeyManager)) {
+      throw new GeneralSecurityException(
+          "manager for key type " + typeUrl + " is not a PrivateKeyManager");
+    }
+    return ((PrivateKeyManager) manager).getPublicKeyData(serializedPrivateKey);
+  }
 
   @Before
   public void setUp() throws GeneralSecurityException {
@@ -87,7 +101,7 @@ public final class ProtoKeyTest {
       throws GeneralSecurityException {
     KeyTemplate kt = KeyTemplates.get("ED25519");
     KeyData privateKeyData = Registry.newKeyData(kt);
-    KeyData kd = Registry.getPublicKeyData(privateKeyData.getTypeUrl(), privateKeyData.getValue());
+    KeyData kd = getPublicKeyData(privateKeyData.getTypeUrl(), privateKeyData.getValue());
 
     ProtoKey pk = new ProtoKey(kd, getOutputPrefixType(kt));
 

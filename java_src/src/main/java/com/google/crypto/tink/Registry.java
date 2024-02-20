@@ -389,8 +389,11 @@ public final class Registry {
    * <p>It looks up a {@link PrivateKeyManager} identified by {@code typeUrl}, and calls {@link
    * PrivateKeyManager#getPublicKeyData} with {@code serializedPrivateKey} as the parameter.
    *
-   * @return a new key
+   * @return the public key of the corresponding private key
+   * @deprecated Instead, users should have their keys in a {@link KeysetHandle} and call {@code
+   *     keysetHandle.getPublicKeysetHandle}.
    */
+  @Deprecated
   public static KeyData getPublicKeyData(String typeUrl, ByteString serializedPrivateKey)
       throws GeneralSecurityException {
     KeyManager<?> manager = getUntypedKeyManager(typeUrl);

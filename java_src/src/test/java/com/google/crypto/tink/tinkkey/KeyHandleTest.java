@@ -20,16 +20,20 @@ import static com.google.crypto.tink.internal.KeyTemplateProtoConverter.getOutpu
 import static org.junit.Assert.assertThrows;
 
 import com.google.common.truth.Expect;
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
+import com.google.crypto.tink.PrivateKeyManager;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
 import com.google.crypto.tink.aead.AesEaxParameters;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.signature.Ed25519PrivateKeyManager;
 import com.google.crypto.tink.tinkkey.internal.ProtoKey;
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import java.util.Set;
@@ -43,6 +47,16 @@ import org.junit.runners.JUnit4;
 /** Tests for KeyHandle * */
 @RunWith(JUnit4.class)
 public final class KeyHandleTest {
+  private static KeyData getPublicKeyData(String typeUrl, ByteString serializedPrivateKey)
+      throws GeneralSecurityException {
+    KeyManager<?> manager = KeyManagerRegistry.globalInstance().getUntypedKeyManager(typeUrl);
+
+    if (!(manager instanceof PrivateKeyManager)) {
+      throw new GeneralSecurityException(
+          "manager for key type " + typeUrl + " is not a PrivateKeyManager");
+    }
+    return ((PrivateKeyManager) manager).getPublicKeyData(serializedPrivateKey);
+  }
 
   @Rule public final Expect expect = Expect.create();
 
@@ -128,7 +142,8 @@ public final class KeyHandleTest {
   public void createFromKey_keyDataAsymmetricPublic_shouldNotHaveSecret() throws Exception {
     KeyTemplate kt = KeyTemplates.get("ED25519");
     KeyData privateKeyData = Registry.newKeyData(kt);
-    KeyData kd = Registry.getPublicKeyData(privateKeyData.getTypeUrl(), privateKeyData.getValue());
+
+    KeyData kd = getPublicKeyData(privateKeyData.getTypeUrl(), privateKeyData.getValue());
 
     KeyHandle kh = KeyHandle.createFromKey(kd, getOutputPrefixType(kt));
 
