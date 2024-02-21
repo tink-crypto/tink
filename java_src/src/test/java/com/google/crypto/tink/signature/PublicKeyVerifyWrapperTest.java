@@ -25,6 +25,7 @@ import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveRegistry;
 import com.google.crypto.tink.internal.testing.FakeMonitoringClient;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
@@ -444,5 +445,21 @@ public class PublicKeyVerifyWrapperTest {
     List<FakeMonitoringClient.LogFailureEntry> failures =
         fakeMonitoringClient.getLogFailureEntries();
     assertThat(failures).hasSize(0);
+  }
+
+  @Test
+  public void registerToInternalPrimitiveRegistry_works() throws Exception {
+    PrimitiveRegistry.Builder initialBuilder = PrimitiveRegistry.builder();
+    PrimitiveRegistry initialRegistry = initialBuilder.build();
+    PrimitiveRegistry.Builder processedBuilder = PrimitiveRegistry.builder(initialRegistry);
+
+    PublicKeyVerifyWrapper.registerToInternalPrimitiveRegistry(processedBuilder);
+    PrimitiveRegistry processedRegistry = processedBuilder.build();
+
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> initialRegistry.getInputPrimitiveClass(PublicKeyVerify.class));
+    assertThat(processedRegistry.getInputPrimitiveClass(PublicKeyVerify.class))
+        .isEqualTo(PublicKeyVerify.class);
   }
 }

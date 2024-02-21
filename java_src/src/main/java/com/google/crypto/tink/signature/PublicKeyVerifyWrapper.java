@@ -24,6 +24,7 @@ import com.google.crypto.tink.internal.MonitoringUtil;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
+import com.google.crypto.tink.internal.PrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveSet;
 import com.google.crypto.tink.monitoring.MonitoringClient;
 import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
@@ -42,7 +43,7 @@ import java.util.List;
  *
  * @since 1.0.0
  */
-class PublicKeyVerifyWrapper implements PrimitiveWrapper<PublicKeyVerify, PublicKeyVerify> {
+public class PublicKeyVerifyWrapper implements PrimitiveWrapper<PublicKeyVerify, PublicKeyVerify> {
 
   private static final PublicKeyVerifyWrapper WRAPPER = new PublicKeyVerifyWrapper();
   private static final PrimitiveConstructor<LegacyProtoKey, PublicKeyVerify>
@@ -126,9 +127,19 @@ class PublicKeyVerifyWrapper implements PrimitiveWrapper<PublicKeyVerify, Public
    * <p>This is required for calls to {@link Keyset.getPrimitive} with a {@link PublicKeyVerify}
    * argument.
    */
-  public static void register() throws GeneralSecurityException {
+  static void register() throws GeneralSecurityException {
     MutablePrimitiveRegistry.globalInstance().registerPrimitiveWrapper(WRAPPER);
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(LEGACY_PRIMITIVE_CONSTRUCTOR);
+  }
+
+  /**
+   * registerToInternalPrimitiveRegistry is a non-public method (it takes an argument of an
+   * internal-only type) registering an instance of {@code PublicKeyVerifyWrapper} to the provided
+   * {@code PrimitiveRegistry#Builder}.
+   */
+  public static void registerToInternalPrimitiveRegistry(
+      PrimitiveRegistry.Builder primitiveRegistryBuilder) throws GeneralSecurityException {
+    primitiveRegistryBuilder.registerPrimitiveWrapper(WRAPPER);
   }
 }
