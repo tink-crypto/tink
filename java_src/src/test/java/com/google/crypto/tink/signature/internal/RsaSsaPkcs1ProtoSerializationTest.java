@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.signature;
+package com.google.crypto.tink.signature.internal;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.internal.testing.Asserts.assertEqualWhenValueParsed;
@@ -31,6 +31,9 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.proto.RsaSsaPkcs1Params;
+import com.google.crypto.tink.signature.RsaSsaPkcs1Parameters;
+import com.google.crypto.tink.signature.RsaSsaPkcs1PrivateKey;
+import com.google.crypto.tink.signature.RsaSsaPkcs1PublicKey;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.util.SecretBigInteger;
