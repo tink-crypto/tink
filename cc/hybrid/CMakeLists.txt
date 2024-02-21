@@ -519,6 +519,31 @@ tink_cc_library(
     tink::util::statusor
 )
 
+tink_cc_library(
+  NAME ecies_proto_serialization
+  SRCS
+    ecies_proto_serialization.cc
+    ecies_proto_serialization.h
+  DEPS
+    tink::hybrid::ecies_parameters
+    absl::core_headers
+    absl::status
+    absl::strings
+    absl::optional
+    crypto
+    tink::internal::mutable_serialization_registry
+    tink::internal::parameters_parser
+    tink::internal::parameters_serializer
+    tink::internal::proto_parameters_serialization
+    tink::util::status
+    tink::util::statusor
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::aes_siv_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::ecies_aead_hkdf_cc_proto
+    tink::proto::tink_cc_proto
+)
+
 # tests
 
 tink_cc_test(
@@ -1033,4 +1058,29 @@ tink_cc_test(
     tink::util::secret_data
     tink::util::statusor
     tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME ecies_proto_serialization_test
+  SRCS
+    ecies_proto_serialization_test.cc
+  DEPS
+    tink::hybrid::ecies_parameters
+    tink::hybrid::ecies_proto_serialization
+    gmock
+    absl::status
+    absl::string_view
+    absl::optional
+    crypto
+    tink::core::parameters
+    tink::internal::mutable_serialization_registry
+    tink::internal::proto_parameters_serialization
+    tink::internal::serialization
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::aes_siv_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::ecies_aead_hkdf_cc_proto
+    tink::proto::tink_cc_proto
 )
