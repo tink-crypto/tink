@@ -94,7 +94,7 @@ public class BytesTest {
   @Test
   @SuppressWarnings("EqualsIncompatibleType")
   public void testEquals_differentObject() throws Exception {
-    assertThat(Bytes.copyFrom(new byte[] {}).equals(new Integer(0))).isFalse();
+    assertThat(Bytes.copyFrom(new byte[] {}).equals(Integer.valueOf(0))).isFalse();
   }
 
   @Test
