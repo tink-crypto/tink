@@ -22,11 +22,22 @@
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
+#include "tink/big_integer.h"
+#include "tink/ec_point.h"
 #include "tink/hybrid/ecies_parameters.h"
+#include "tink/hybrid/ecies_public_key.h"
+#include "tink/insecure_secret_key_access.h"
+#include "tink/internal/bn_encoding_util.h"
+#include "tink/internal/key_parser.h"
+#include "tink/internal/key_serializer.h"
 #include "tink/internal/mutable_serialization_registry.h"
 #include "tink/internal/parameters_parser.h"
 #include "tink/internal/parameters_serializer.h"
+#include "tink/internal/proto_key_serialization.h"
 #include "tink/internal/proto_parameters_serialization.h"
+#include "tink/partial_key_access.h"
+#include "tink/restricted_data.h"
+#include "tink/secret_key_access_token.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/aes_gcm.pb.h"
@@ -44,10 +55,12 @@ using ::google::crypto::tink::AesSivKeyFormat;
 using ::google::crypto::tink::EciesAeadDemParams;
 using ::google::crypto::tink::EciesAeadHkdfKeyFormat;
 using ::google::crypto::tink::EciesAeadHkdfParams;
+using ::google::crypto::tink::EciesAeadHkdfPublicKey;
 using ::google::crypto::tink::EciesHkdfKemParams;
 using ::google::crypto::tink::EcPointFormat;
 using ::google::crypto::tink::EllipticCurveType;
 using ::google::crypto::tink::HashType;
+using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::KeyTemplate;
 using ::google::crypto::tink::OutputPrefixType;
 
@@ -57,7 +70,14 @@ using EciesProtoParametersParserImpl =
 using EciesProtoParametersSerializerImpl =
     internal::ParametersSerializerImpl<EciesParameters,
                                        internal::ProtoParametersSerialization>;
+using EciesProtoPublicKeyParserImpl =
+    internal::KeyParserImpl<internal::ProtoKeySerialization, EciesPublicKey>;
+using EciesProtoPublicKeySerializerImpl =
+    internal::KeySerializerImpl<EciesPublicKey,
+                                internal::ProtoKeySerialization>;
 
+const absl::string_view kPublicTypeUrl =
+    "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey";
 const absl::string_view kPrivateTypeUrl =
     "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
 
@@ -375,6 +395,71 @@ util::StatusOr<EciesAeadHkdfParams> FromParameters(
   return params;
 }
 
+util::StatusOr<EciesPublicKey> ToPublicKey(
+    const EciesParameters& parameters, const EciesAeadHkdfPublicKey& proto_key,
+    absl::optional<int> id_requirement) {
+  if (IsNistCurve(parameters.GetCurveType())) {
+    EcPoint point(BigInteger(proto_key.x()), BigInteger(proto_key.y()));
+    return EciesPublicKey::CreateForNistCurve(parameters, point, id_requirement,
+                                              GetPartialKeyAccess());
+  }
+  return EciesPublicKey::CreateForCurveX25519(
+      parameters, proto_key.x(), id_requirement, GetPartialKeyAccess());
+}
+
+util::StatusOr<int> GetEncodingLength(EciesParameters::CurveType curve) {
+  // Encode EC points with extra leading zero byte for compatibility with Java
+  // BigInteger decoding (b/264525021).
+  switch (curve) {
+    case EciesParameters::CurveType::kNistP256:
+      return 33;
+    case EciesParameters::CurveType::kNistP384:
+      return 49;
+    case EciesParameters::CurveType::kNistP521:
+      return 67;
+    default:
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "Cannot determine encoding length for curve.");
+  }
+}
+
+util::StatusOr<EciesAeadHkdfPublicKey> FromPublicKey(
+    const EciesAeadHkdfParams& params, const EciesPublicKey& public_key) {
+  EciesAeadHkdfPublicKey proto_key;
+  proto_key.set_version(0);
+  *proto_key.mutable_params() = params;
+  if (public_key.GetNistCurvePoint(GetPartialKeyAccess()).has_value()) {
+    EcPoint point = *public_key.GetNistCurvePoint(GetPartialKeyAccess());
+    util::StatusOr<int> encoding_length =
+        GetEncodingLength(public_key.GetParameters().GetCurveType());
+    if (!encoding_length.ok()) {
+      return encoding_length.status();
+    }
+    util::StatusOr<std::string> x = internal::GetValueOfFixedLength(
+        point.GetX().GetValue(), *encoding_length);
+    if (!x.ok()) {
+      return x.status();
+    }
+    util::StatusOr<std::string> y = internal::GetValueOfFixedLength(
+        point.GetY().GetValue(), *encoding_length);
+    if (!y.ok()) {
+      return y.status();
+    }
+    proto_key.set_x(*x);
+    proto_key.set_y(*y);
+  } else {
+    if (!public_key.GetX25519CurvePointBytes(GetPartialKeyAccess())
+             .has_value()) {
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "X25519 public key missing point bytes.");
+    }
+    proto_key.set_x(
+        *public_key.GetX25519CurvePointBytes(GetPartialKeyAccess()));
+    proto_key.set_y("");
+  }
+  return proto_key;
+}
+
 util::StatusOr<EciesParameters> ParseParameters(
     const internal::ProtoParametersSerialization& serialization) {
   if (serialization.GetKeyTemplate().type_url() != kPrivateTypeUrl) {
@@ -398,6 +483,35 @@ util::StatusOr<EciesParameters> ParseParameters(
                       proto_key_format.params());
 }
 
+util::StatusOr<EciesPublicKey> ParsePublicKey(
+    const internal::ProtoKeySerialization& serialization,
+    absl::optional<SecretKeyAccessToken> token) {
+  if (serialization.TypeUrl() != kPublicTypeUrl) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Wrong type URL when parsing EciesAeadHkdfPublicKey.");
+  }
+
+  EciesAeadHkdfPublicKey proto_key;
+  RestrictedData restricted_data = serialization.SerializedKeyProto();
+  if (!proto_key.ParseFromString(
+          restricted_data.GetSecret(InsecureSecretKeyAccess::Get()))) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Failed to parse EciesAeadHkdfPublicKey proto");
+  }
+  if (proto_key.version() != 0) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Only version 0 keys are accepted.");
+  }
+
+  util::StatusOr<EciesParameters> parameters =
+      ToParameters(serialization.GetOutputPrefixType(), proto_key.params());
+  if (!parameters.ok()) {
+    return parameters.status();
+  }
+
+  return ToPublicKey(*parameters, proto_key, serialization.IdRequirement());
+}
+
 util::StatusOr<internal::ProtoParametersSerialization> SerializeParameters(
     const EciesParameters& parameters) {
   util::StatusOr<OutputPrefixType> output_prefix_type =
@@ -418,6 +532,33 @@ util::StatusOr<internal::ProtoParametersSerialization> SerializeParameters(
       proto_key_format.SerializeAsString());
 }
 
+util::StatusOr<internal::ProtoKeySerialization> SerializePublicKey(
+    const EciesPublicKey& key, absl::optional<SecretKeyAccessToken> token) {
+  util::StatusOr<EciesAeadHkdfParams> params =
+      FromParameters(key.GetParameters());
+  if (!params.ok()) {
+    return params.status();
+  }
+
+  util::StatusOr<EciesAeadHkdfPublicKey> proto_key =
+      FromPublicKey(*params, key);
+  if (!proto_key.ok()) {
+    return proto_key.status();
+  }
+
+  util::StatusOr<OutputPrefixType> output_prefix_type =
+      ToOutputPrefixType(key.GetParameters().GetVariant());
+  if (!output_prefix_type.ok()) {
+    return output_prefix_type.status();
+  }
+
+  RestrictedData restricted_output = RestrictedData(
+      proto_key->SerializeAsString(), InsecureSecretKeyAccess::Get());
+  return internal::ProtoKeySerialization::Create(
+      kPublicTypeUrl, restricted_output, KeyData::ASYMMETRIC_PUBLIC,
+      *output_prefix_type, key.GetIdRequirement());
+}
+
 EciesProtoParametersParserImpl* EciesProtoParametersParser() {
   static auto* parser =
       new EciesProtoParametersParserImpl(kPrivateTypeUrl, ParseParameters);
@@ -427,6 +568,18 @@ EciesProtoParametersParserImpl* EciesProtoParametersParser() {
 EciesProtoParametersSerializerImpl* EciesProtoParametersSerializer() {
   static auto* serializer = new EciesProtoParametersSerializerImpl(
       kPrivateTypeUrl, SerializeParameters);
+  return serializer;
+}
+
+EciesProtoPublicKeyParserImpl* EciesProtoPublicKeyParser() {
+  static auto* parser =
+      new EciesProtoPublicKeyParserImpl(kPublicTypeUrl, ParsePublicKey);
+  return parser;
+}
+
+EciesProtoPublicKeySerializerImpl* EciesProtoPublicKeySerializer() {
+  static auto* serializer =
+      new EciesProtoPublicKeySerializerImpl(SerializePublicKey);
   return serializer;
 }
 
@@ -440,8 +593,20 @@ util::Status RegisterEciesProtoSerialization() {
     return status;
   }
 
+  status = internal::MutableSerializationRegistry::GlobalInstance()
+               .RegisterParametersSerializer(EciesProtoParametersSerializer());
+  if (!status.ok()) {
+    return status;
+  }
+
+  status = internal::MutableSerializationRegistry::GlobalInstance()
+               .RegisterKeyParser(EciesProtoPublicKeyParser());
+  if (!status.ok()) {
+    return status;
+  }
+
   return internal::MutableSerializationRegistry::GlobalInstance()
-      .RegisterParametersSerializer(EciesProtoParametersSerializer());
+      .RegisterKeySerializer(EciesProtoPublicKeySerializer());
 }
 
 }  // namespace tink
