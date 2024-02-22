@@ -17,9 +17,18 @@
 package com.google.crypto.tink.aead; // instead of subtle, because it depends on KeyTemplate.
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.Key;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.TinkProtoParametersFormat;
+import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
+import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.MutableSerializationRegistry;
+import com.google.crypto.tink.internal.ProtoKeySerialization;
+import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.nio.BufferUnderflowException;
@@ -49,7 +58,9 @@ import java.util.Set;
  */
 public final class KmsEnvelopeAead implements Aead {
   private static final byte[] EMPTY_AAD = new byte[0];
-  private final KeyTemplate dekTemplate;
+  private final String typeUrlForParsing;
+  private final Parameters parametersForNewKeys;
+
   private final Aead remote;
   private static final int LENGTH_ENCRYPTED_DEK = 4;
 
@@ -70,6 +81,12 @@ public final class KmsEnvelopeAead implements Aead {
     return supportedDekKeyTypes.contains(dekKeyTypeUrl);
   }
 
+  private Parameters getRawParameters(KeyTemplate dekTemplate) throws GeneralSecurityException {
+    KeyTemplate rawTemplate =
+        KeyTemplate.newBuilder(dekTemplate).setOutputPrefixType(OutputPrefixType.RAW).build();
+    return TinkProtoParametersFormat.parse(rawTemplate.toByteArray());
+  }
+
   /**
    * Creates a new KmsEnvelopeAead.
    *
@@ -86,14 +103,16 @@ public final class KmsEnvelopeAead implements Aead {
    * @deprecated Instead, call {@code KmsEnvelopeAead.create} as explained above.
    */
   @Deprecated
-  public KmsEnvelopeAead(KeyTemplate dekTemplate, Aead remote) {
+  public KmsEnvelopeAead(KeyTemplate dekTemplate, Aead remote)
+      throws GeneralSecurityException {
     if (!isSupportedDekKeyType(dekTemplate.getTypeUrl())) {
       throw new IllegalArgumentException(
           "Unsupported DEK key type: "
               + dekTemplate.getTypeUrl()
               + ". Only Tink AEAD key types are supported.");
     }
-    this.dekTemplate = dekTemplate;
+    this.typeUrlForParsing = dekTemplate.getTypeUrl();
+    this.parametersForNewKeys = getRawParameters(dekTemplate);
     this.remote = remote;
   }
 
@@ -107,6 +126,9 @@ public final class KmsEnvelopeAead implements Aead {
    */
   public static Aead create(AeadParameters dekParameters, Aead remote)
       throws GeneralSecurityException {
+    // This serializes the parameters, changes output prefix to raw, and parses it again.
+    // It would be better to reject the parameters immediately if it was a non-raw object, but
+    // this might break someone, so we keep as is.
     KeyTemplate dekTemplate;
     try {
       dekTemplate =
@@ -122,12 +144,18 @@ public final class KmsEnvelopeAead implements Aead {
   @Override
   public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
       throws GeneralSecurityException {
-    // Generate a new DEK.
-    byte[] dek = Registry.newKeyData(dekTemplate).getValue().toByteArray();
+    Key key =
+        MutableKeyCreationRegistry.globalInstance()
+            .createKey(parametersForNewKeys, /* idRequirement= */ null);
+
+    ProtoKeySerialization serialization =
+        MutableSerializationRegistry.globalInstance()
+            .serializeKey(key, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
+    byte[] dek = serialization.getValue().toByteArray();
     // Wrap it with remote.
     byte[] encryptedDek = remote.encrypt(dek, EMPTY_AAD);
     // Use DEK to encrypt plaintext.
-    Aead aead = Registry.getPrimitive(dekTemplate.getTypeUrl(), dek, Aead.class);
+    Aead aead = MutablePrimitiveRegistry.globalInstance().getPrimitive(key, Aead.class);
     byte[] payload = aead.encrypt(plaintext, associatedData);
     // Build ciphertext protobuf and return result.
     return buildCiphertext(encryptedDek, payload);
@@ -149,7 +177,18 @@ public final class KmsEnvelopeAead implements Aead {
       // Use remote to decrypt encryptedDek.
       byte[] dek = remote.decrypt(encryptedDek, EMPTY_AAD);
       // Use DEK to decrypt payload.
-      Aead aead = Registry.getPrimitive(dekTemplate.getTypeUrl(), dek, Aead.class);
+      ProtoKeySerialization serialization =
+          ProtoKeySerialization.create(
+              typeUrlForParsing,
+              ByteString.copyFrom(dek),
+              KeyMaterialType.SYMMETRIC,
+              OutputPrefixType.RAW,
+              /* idRequirement= */ null);
+      Key key =
+          MutableSerializationRegistry.globalInstance()
+              .parseKey(serialization, InsecureSecretKeyAccess.get());
+
+      Aead aead = MutablePrimitiveRegistry.globalInstance().getPrimitive(key, Aead.class);
       return aead.decrypt(payload, associatedData);
     } catch (IndexOutOfBoundsException
              | BufferUnderflowException
