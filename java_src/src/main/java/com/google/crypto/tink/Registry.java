@@ -307,7 +307,11 @@ public final class Registry {
    * <p>This method should be used solely for key management.
    *
    * @return a new {@link KeyData}
+   * @deprecated Use {@code KeysetHandle.generateNew} with a Parameters object instead. To convert a
+   *     proto KeyTemplate to a parameters one can use {@code
+   *     TinkProtoParametersFormat.parse(t.toByteArray());}
    */
+  @Deprecated
   public static synchronized KeyData newKeyData(
       com.google.crypto.tink.proto.KeyTemplate keyTemplate) throws GeneralSecurityException {
     KeyManager<?> manager =
