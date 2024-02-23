@@ -24,7 +24,7 @@ import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.PrivateKeyManager;
-import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.TinkProtoParametersFormat;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
 import com.google.crypto.tink.aead.AesEaxParameters;
 import com.google.crypto.tink.internal.KeyManagerRegistry;
@@ -35,6 +35,7 @@ import com.google.crypto.tink.tinkkey.internal.ProtoKey;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
@@ -47,6 +48,27 @@ import org.junit.runners.JUnit4;
 /** Tests for KeyHandle * */
 @RunWith(JUnit4.class)
 public final class KeyHandleTest {
+  private static KeyData newKeyData(com.google.crypto.tink.KeyTemplate keyTemplate)
+      throws GeneralSecurityException {
+    try {
+      byte[] serializedKeyTemplate =
+          TinkProtoParametersFormat.serialize(keyTemplate.toParameters());
+      com.google.crypto.tink.proto.KeyTemplate protoTemplate =
+          com.google.crypto.tink.proto.KeyTemplate.parseFrom(
+              serializedKeyTemplate, ExtensionRegistryLite.getEmptyRegistry());
+      KeyManager<?> manager =
+          KeyManagerRegistry.globalInstance().getUntypedKeyManager(protoTemplate.getTypeUrl());
+      if (KeyManagerRegistry.globalInstance().isNewKeyAllowed(protoTemplate.getTypeUrl())) {
+        return manager.newKeyData(protoTemplate.getValue());
+      } else {
+        throw new GeneralSecurityException(
+            "newKey-operation not permitted for key type " + protoTemplate.getTypeUrl());
+      }
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("Failed to parse serialized parameters", e);
+    }
+  }
+
   private static KeyData getPublicKeyData(String typeUrl, ByteString serializedPrivateKey)
       throws GeneralSecurityException {
     KeyManager<?> manager = KeyManagerRegistry.globalInstance().getUntypedKeyManager(typeUrl);
@@ -107,7 +129,7 @@ public final class KeyHandleTest {
   @Test
   public void createFromKey_keyDataSymmetric_shouldHaveSecret() throws Exception {
     KeyTemplate kt = KeyTemplates.get("AES128_EAX");
-    KeyData kd = Registry.newKeyData(kt);
+    KeyData kd = newKeyData(kt);
 
     KeyHandle kh = KeyHandle.createFromKey(kd, getOutputPrefixType(kt));
 
@@ -117,7 +139,7 @@ public final class KeyHandleTest {
   @Test
   public void createFromKey_keyDataAsymmetricPrivate_shouldHaveSecret() throws Exception {
     KeyTemplate kt = KeyTemplates.get("ED25519");
-    KeyData kd = Registry.newKeyData(kt);
+    KeyData kd = newKeyData(kt);
 
     KeyHandle kh = KeyHandle.createFromKey(kd, getOutputPrefixType(kt));
 
@@ -128,8 +150,7 @@ public final class KeyHandleTest {
   public void createFromKey_keyDataUnknown_shouldHaveSecret() throws Exception {
     KeyTemplate kt = KeyTemplates.get("ED25519");
     KeyData kd =
-        KeyData.newBuilder()
-            .mergeFrom(Registry.newKeyData(kt))
+        newKeyData(kt).toBuilder()
             .setKeyMaterialType(KeyData.KeyMaterialType.UNKNOWN_KEYMATERIAL)
             .build();
 
@@ -141,7 +162,7 @@ public final class KeyHandleTest {
   @Test
   public void createFromKey_keyDataAsymmetricPublic_shouldNotHaveSecret() throws Exception {
     KeyTemplate kt = KeyTemplates.get("ED25519");
-    KeyData privateKeyData = Registry.newKeyData(kt);
+    KeyData privateKeyData = newKeyData(kt);
 
     KeyData kd = getPublicKeyData(privateKeyData.getTypeUrl(), privateKeyData.getValue());
 
@@ -154,10 +175,7 @@ public final class KeyHandleTest {
   public void createFromKey_keyDataRemote_shouldNotHaveSecret() throws Exception {
     KeyTemplate kt = KeyTemplates.get("ED25519");
     KeyData kd =
-        KeyData.newBuilder()
-            .mergeFrom(Registry.newKeyData(kt))
-            .setKeyMaterialType(KeyData.KeyMaterialType.REMOTE)
-            .build();
+        newKeyData(kt).toBuilder().setKeyMaterialType(KeyData.KeyMaterialType.REMOTE).build();
 
     KeyHandle kh = KeyHandle.createFromKey(kd, getOutputPrefixType(kt));
 
@@ -186,7 +204,7 @@ public final class KeyHandleTest {
   @Test
   public void generateNew_compareWith_createFromKeyViaProtoKey_shouldBeEqual() throws Exception {
     KeyTemplate template = KeyTemplates.get("AES128_EAX");
-    KeyData keyData = Registry.newKeyData(template);
+    KeyData keyData = newKeyData(template);
     ProtoKey protoKey = new ProtoKey(keyData, KeyTemplate.OutputPrefixType.TINK);
 
     KeyHandle handle1 = KeyHandle.generateNew(template);

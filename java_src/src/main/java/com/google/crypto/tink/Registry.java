@@ -333,9 +333,12 @@ public final class Registry {
    * <p>This method should be used solely for key management.
    *
    * @return a new {@link KeyData}
+   * @deprecated Use {@code KeysetHandle.generateNew(keyTemplate.toParameters())} instead and use
+   *     the Keyset Handle API.
    */
-  public static synchronized KeyData newKeyData(com.google.crypto.tink.KeyTemplate keyTemplate)
-      throws GeneralSecurityException {
+  @Deprecated
+  public static synchronized KeyData newKeyData(
+      com.google.crypto.tink.KeyTemplate keyTemplate) throws GeneralSecurityException {
     byte[] serializedKeyTemplate = TinkProtoParametersFormat.serialize(keyTemplate.toParameters());
     try {
       return newKeyData(

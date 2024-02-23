@@ -17,13 +17,17 @@ package com.google.crypto.tink.tinkkey;
 
 import static com.google.crypto.tink.internal.KeyTemplateProtoConverter.getOutputPrefixType;
 
+import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplate.OutputPrefixType;
-import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.TinkProtoParametersFormat;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.tinkkey.internal.ProtoKey;
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.ExtensionRegistryLite;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 
 /**
@@ -36,6 +40,26 @@ import java.security.GeneralSecurityException;
  */
 @Immutable
 public class KeyHandle {
+  private static KeyData newKeyData(com.google.crypto.tink.KeyTemplate keyTemplate)
+      throws GeneralSecurityException {
+    try {
+      byte[] serializedKeyTemplate =
+          TinkProtoParametersFormat.serialize(keyTemplate.toParameters());
+      com.google.crypto.tink.proto.KeyTemplate protoTemplate =
+          com.google.crypto.tink.proto.KeyTemplate.parseFrom(
+              serializedKeyTemplate, ExtensionRegistryLite.getEmptyRegistry());
+      KeyManager<?> manager =
+          KeyManagerRegistry.globalInstance().getUntypedKeyManager(protoTemplate.getTypeUrl());
+      if (KeyManagerRegistry.globalInstance().isNewKeyAllowed(protoTemplate.getTypeUrl())) {
+        return manager.newKeyData(protoTemplate.getValue());
+      } else {
+        throw new GeneralSecurityException(
+            "newKey-operation not permitted for key type " + protoTemplate.getTypeUrl());
+      }
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("Failed to parse serialized parameters", e);
+    }
+  }
 
   /**
    * KeyStatusType is metadata associated to a key which is only meaningful when the key is part of
@@ -106,8 +130,7 @@ public class KeyHandle {
    *     the {@link Registry}.
    */
   public static KeyHandle generateNew(KeyTemplate keyTemplate) throws GeneralSecurityException {
-    ProtoKey protoKey =
-        new ProtoKey(Registry.newKeyData(keyTemplate), getOutputPrefixType(keyTemplate));
+    ProtoKey protoKey = new ProtoKey(newKeyData(keyTemplate), getOutputPrefixType(keyTemplate));
     return new KeyHandle(protoKey);
   }
 
