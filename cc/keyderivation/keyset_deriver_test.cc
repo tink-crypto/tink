@@ -19,36 +19,39 @@
 #include <functional>
 #include <memory>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "tink/aead/aes_gcm_key.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead/aes_gcm_parameters.h"
 #include "tink/aead/aes_gcm_proto_serialization.h"
+#include "tink/config/global_registry.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/mutable_serialization_registry.h"
 #include "tink/internal/proto_parameters_serialization.h"
 #include "tink/internal/serialization.h"
 #include "tink/key.h"
-#include "tink/keyderivation/internal/prf_based_deriver.h"
+#include "tink/keyderivation/internal/prf_based_deriver_key_manager.h"
 #include "tink/keyderivation/keyset_deriver_wrapper.h"
 #include "tink/keyset_handle.h"
 #include "tink/partial_key_access.h"
 #include "tink/partial_key_access_token.h"
 #include "tink/prf/hkdf_prf_key_manager.h"
-#include "tink/primitive_set.h"
 #include "tink/registry.h"
 #include "tink/restricted_data.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/hkdf_prf.pb.h"
+#include "proto/prf_based_deriver.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -57,13 +60,11 @@ namespace {
 
 using ::crypto::tink::test::IsOk;
 using ::google::crypto::tink::HashType;
-using ::google::crypto::tink::HkdfPrfKey;
 using ::google::crypto::tink::KeyData;
-using ::google::crypto::tink::KeysetInfo;
+using ::google::crypto::tink::Keyset;
 using ::google::crypto::tink::KeyStatusType;
-using ::google::crypto::tink::OutputPrefixType;
+using ::google::crypto::tink::KeyTemplate;
 using ::testing::Eq;
-using ::testing::NotNull;
 using ::testing::TestWithParam;
 using ::testing::ValuesIn;
 
@@ -76,7 +77,7 @@ static constexpr absl::string_view kOutputKeyMaterialFromRfcVector =
     "cc30c58179ec3e87c14c01d5c1f3434f";
 
 KeyData PrfKeyFromRfcVector() {
-  HkdfPrfKey prf_key;
+  google::crypto::tink::HkdfPrfKey prf_key;
   prf_key.set_version(0);
   prf_key.mutable_params()->set_hash(HashType::SHA256);
   prf_key.mutable_params()->set_salt(
@@ -103,83 +104,109 @@ std::string SaltFromRfcVector() {
       "f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff");
 }
 
-KeysetInfo::KeyInfo PrfBasedDeriverKeyInfo(
-    OutputPrefixType output_prefix_type) {
-  KeysetInfo::KeyInfo key_info;
-  key_info.set_type_url(
-      "type.googleapis.com/google.crypto.tink.PrfBasedDeriverKey");
-  key_info.set_status(KeyStatusType::ENABLED);
-  if (output_prefix_type != OutputPrefixType::RAW) {
-    key_info.set_key_id(1010101);
-  }
-  key_info.set_output_prefix_type(output_prefix_type);
-  return key_info;
-}
-
 std::unique_ptr<AesGcmKey> CreateAesGcmKey(int key_size,
                                            AesGcmParameters::Variant variant,
-                                           absl::string_view secret) {
-  AesGcmParameters params = *AesGcmParameters::Builder()
-                                 .SetKeySizeInBytes(key_size)
-                                 .SetIvSizeInBytes(12)
-                                 .SetTagSizeInBytes(16)
-                                 .SetVariant(variant)
-                                 .Build();
-  absl::optional<int> id_requirement = 1010101;
-  if (variant == AesGcmParameters::Variant::kNoPrefix) {
-    id_requirement = absl::nullopt;
-  }
+                                           absl::string_view secret,
+                                           absl::optional<int> id_requirement) {
+  AesGcmParameters params = AesGcmParameters::Builder()
+                                .SetKeySizeInBytes(key_size)
+                                .SetIvSizeInBytes(12)
+                                .SetTagSizeInBytes(16)
+                                .SetVariant(variant)
+                                .Build()
+                                .value();
   return std::make_unique<AesGcmKey>(
-      *AesGcmKey::Create(params,
-                         RestrictedData(test::HexDecodeOrDie(secret),
-                                        InsecureSecretKeyAccess::Get()),
-                         id_requirement, GetPartialKeyAccess()));
+      AesGcmKey::Create(params,
+                        RestrictedData(test::HexDecodeOrDie(secret),
+                                       InsecureSecretKeyAccess::Get()),
+                        id_requirement, GetPartialKeyAccess())
+          .value());
 }
 
-struct TestVector {
-  KeysetInfo::KeyInfo keyset_deriver_key;
-  std::shared_ptr<Key> derived_key;
-};
-
-std::vector<TestVector> TestVectors() {
+std::vector<std::vector<std::shared_ptr<Key>>> TestVectors() {
   return {
-      {
-          PrfBasedDeriverKeyInfo(OutputPrefixType::TINK),
-          CreateAesGcmKey(
-              /*key_size=*/16,
-              /*variant=*/AesGcmParameters::Variant::kTink,
-              /*secret=*/kOutputKeyMaterialFromRfcVector.substr(0, 32)),
-      },
-      {
-          PrfBasedDeriverKeyInfo(OutputPrefixType::TINK),
-          CreateAesGcmKey(
-              /*key_size=*/32,
-              /*variant=*/AesGcmParameters::Variant::kTink,
-              /*secret=*/kOutputKeyMaterialFromRfcVector.substr(0, 64)),
-      },
-      {
-          PrfBasedDeriverKeyInfo(OutputPrefixType::CRUNCHY),
-          CreateAesGcmKey(
-              /*key_size=*/16,
-              /*variant=*/AesGcmParameters::Variant::kCrunchy,
-              /*secret=*/kOutputKeyMaterialFromRfcVector.substr(0, 32)),
-      },
-      {
-          PrfBasedDeriverKeyInfo(OutputPrefixType::RAW),
-          CreateAesGcmKey(
-              /*key_size=*/32,
-              /*variant=*/AesGcmParameters::Variant::kNoPrefix,
-              /*secret=*/kOutputKeyMaterialFromRfcVector.substr(0, 64)),
+      /*AesGcm KeysetHandle*/ {
+          {
+              CreateAesGcmKey(
+                  /*key_size=*/16,
+                  /*variant=*/AesGcmParameters::Variant::kTink,
+                  /*secret=*/kOutputKeyMaterialFromRfcVector.substr(0, 32),
+                  /*id_requirement=*/1010101),
+          },
+          {
+              CreateAesGcmKey(
+                  /*key_size=*/32,
+                  /*variant=*/AesGcmParameters::Variant::kCrunchy,
+                  /*secret=*/kOutputKeyMaterialFromRfcVector.substr(0, 64),
+                  /*id_requirement=*/2020202),
+          },
+          {
+              CreateAesGcmKey(
+                  /*key_size=*/16,
+                  /*variant=*/AesGcmParameters::Variant::kNoPrefix,
+                  /*secret=*/kOutputKeyMaterialFromRfcVector.substr(0, 32),
+                  /*id_requirement=*/absl::nullopt),
+          },
       },
   };
 }
 
-using KeysetDeriverTest = TestWithParam<TestVector>;
+util::StatusOr<std::unique_ptr<KeysetHandle>> CreatePrfBasedDeriverHandle(
+    std::vector<std::shared_ptr<Key>> derived_keys) {
+  Keyset keyset;
+  keyset.set_primary_key_id(derived_keys[0]->GetIdRequirement().value_or(0));
+
+  for (const auto& derived_key : derived_keys) {
+    // Get KeyTemplate from Parameters.
+    util::StatusOr<std::unique_ptr<Serialization>> serialization =
+        internal::MutableSerializationRegistry::GlobalInstance()
+            .SerializeParameters<internal::ProtoParametersSerialization>(
+                derived_key->GetParameters());
+    if (!serialization.ok()) {
+      return serialization.status();
+    }
+    const internal::ProtoParametersSerialization* proto_serialization =
+        dynamic_cast<const internal::ProtoParametersSerialization*>(
+            serialization->get());
+    if (proto_serialization == nullptr) {
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "Serialization is not ProtoParametersSerialization");
+    }
+    KeyTemplate derived_key_template = proto_serialization->GetKeyTemplate();
+
+    // Create PrfBasedDeriverKey.
+    google::crypto::tink::PrfBasedDeriverKey deriver_key;
+    deriver_key.set_version(0);
+    *deriver_key.mutable_prf_key() = PrfKeyFromRfcVector();
+    *deriver_key.mutable_params()->mutable_derived_key_template() =
+        derived_key_template;
+
+    // Add PrfBasedDeriverKey to Keyset.
+    Keyset::Key* keyset_key = keyset.add_key();
+    *(keyset_key->mutable_key_data()) =
+        test::AsKeyData(deriver_key, KeyData::SYMMETRIC);
+    keyset_key->set_status(KeyStatusType::ENABLED);
+    keyset_key->set_output_prefix_type(
+        derived_key_template.output_prefix_type());
+    keyset_key->set_key_id(derived_key->GetIdRequirement().value_or(0));
+  }
+
+  return TestKeysetHandle::GetKeysetHandle(keyset);
+}
+
+using KeysetDeriverTest = TestWithParam<std::vector<std::shared_ptr<Key>>>;
 
 INSTANTIATE_TEST_SUITE_P(KeysetDeriverTests, KeysetDeriverTest,
                          ValuesIn(TestVectors()));
 
 TEST_P(KeysetDeriverTest, DeriveKeyset) {
+  ASSERT_THAT(Registry::RegisterPrimitiveWrapper(
+                  absl::make_unique<KeysetDeriverWrapper>()),
+              IsOk());
+  ASSERT_THAT(
+      Registry::RegisterKeyTypeManager(
+          absl::make_unique<internal::PrfBasedDeriverKeyManager>(), true),
+      IsOk());
   ASSERT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<HkdfPrfKeyManager>(), true),
               IsOk());
@@ -188,42 +215,25 @@ TEST_P(KeysetDeriverTest, DeriveKeyset) {
               IsOk());
   ASSERT_THAT(RegisterAesGcmProtoSerialization(), IsOk());
 
-  TestVector vector = GetParam();
+  std::vector<std::shared_ptr<Key>> derived_keys = GetParam();
 
-  // Get KeyTemplate from Parameters for PrfBasedDeriver constructor.
-  util::StatusOr<std::unique_ptr<Serialization>> serialization =
-      internal::MutableSerializationRegistry::GlobalInstance()
-          .SerializeParameters<internal::ProtoParametersSerialization>(
-              vector.derived_key->GetParameters());
-  ASSERT_THAT(serialization, IsOk());
-  const internal::ProtoParametersSerialization* proto_serialization =
-      dynamic_cast<const internal::ProtoParametersSerialization*>(
-          serialization->get());
-  ASSERT_THAT(proto_serialization, NotNull());
-
-  // Construct wrapped KeysetDeriver.
-  util::StatusOr<std::unique_ptr<KeysetDeriver>> deriver =
-      internal::PrfBasedDeriver::New(PrfKeyFromRfcVector(),
-                                     proto_serialization->GetKeyTemplate());
-  ASSERT_THAT(deriver, IsOk());
-  util::StatusOr<PrimitiveSet<KeysetDeriver>> pset =
-      PrimitiveSet<KeysetDeriver>::Builder()
-          .AddPrimaryPrimitive(*std::move(deriver), vector.keyset_deriver_key)
-          .Build();
-  ASSERT_THAT(pset, IsOk());
-  util::StatusOr<std::unique_ptr<KeysetDeriver>> wrapped_deriver =
-      KeysetDeriverWrapper().Wrap(
-          std::make_unique<PrimitiveSet<KeysetDeriver>>(*std::move(pset)));
-  ASSERT_THAT(wrapped_deriver, IsOk());
-
-  // Derive KeysetHandle.
   util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
-      (*wrapped_deriver)->DeriveKeyset(SaltFromRfcVector());
+      CreatePrfBasedDeriverHandle(derived_keys);
   ASSERT_THAT(handle, IsOk());
-  ASSERT_THAT((*handle)->size(), Eq(1));
+  ASSERT_THAT((*handle)->size(), Eq(derived_keys.size()));
+  util::StatusOr<std::unique_ptr<KeysetDeriver>> deriver =
+      (*handle)->GetPrimitive<KeysetDeriver>(ConfigGlobalRegistry());
+  ASSERT_THAT(deriver, IsOk());
 
-  EXPECT_THAT(*(*handle)->GetPrimary().GetKey(),
-              Eq(std::ref(*vector.derived_key)));
+  util::StatusOr<std::unique_ptr<KeysetHandle>> derived_handle =
+      (*deriver)->DeriveKeyset(SaltFromRfcVector());
+  ASSERT_THAT(derived_handle, IsOk());
+  ASSERT_THAT((*derived_handle)->size(), Eq(derived_keys.size()));
+
+  for (int i = 0; i < derived_keys.size(); i++) {
+    EXPECT_THAT(*(**derived_handle)[i].GetKey(),
+                Eq(std::ref(*derived_keys[i])));
+  }
 }
 
 }  // namespace
