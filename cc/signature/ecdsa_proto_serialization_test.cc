@@ -24,11 +24,27 @@
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
+#ifdef OPENSSL_IS_BORINGSSL
+#include "openssl/base.h"
+#include "openssl/ec_key.h"
+#else
+#include "openssl/ec.h"
+#endif
+#include "tink/big_integer.h"
+#include "tink/ec_point.h"
+#include "tink/insecure_secret_key_access.h"
+#include "tink/internal/ec_util.h"
 #include "tink/internal/mutable_serialization_registry.h"
+#include "tink/internal/proto_key_serialization.h"
 #include "tink/internal/proto_parameters_serialization.h"
 #include "tink/internal/serialization.h"
+#include "tink/key.h"
 #include "tink/parameters.h"
+#include "tink/partial_key_access.h"
+#include "tink/restricted_data.h"
 #include "tink/signature/ecdsa_parameters.h"
+#include "tink/signature/ecdsa_public_key.h"
+#include "tink/subtle/common_enums.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/common.pb.h"
@@ -46,6 +62,7 @@ using ::google::crypto::tink::EcdsaParams;
 using ::google::crypto::tink::EcdsaSignatureEncoding;
 using ::google::crypto::tink::EllipticCurveType;
 using ::google::crypto::tink::HashType;
+using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::OutputPrefixType;
 using ::testing::Eq;
 using ::testing::HasSubstr;
@@ -54,6 +71,8 @@ using ::testing::NotNull;
 using ::testing::TestWithParam;
 using ::testing::Values;
 
+const absl::string_view kPublicTypeUrl =
+    "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
 const absl::string_view kPrivateTypeUrl =
     "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
 
@@ -67,6 +86,8 @@ struct TestCase {
   EllipticCurveType curve = EllipticCurveType::NIST_P256;
   HashType hash = HashType::SHA256;
   EcdsaSignatureEncoding encoding = EcdsaSignatureEncoding::DER;
+  subtle::EllipticCurveType subtle_curve =
+      subtle::EllipticCurveType::NIST_P256;
   absl::optional<int> id;
   std::string output_prefix;
 };
@@ -91,6 +112,7 @@ INSTANTIATE_TEST_SUITE_P(
                     EcdsaParameters::SignatureEncoding::kDer,
                     OutputPrefixType::TINK, EllipticCurveType::NIST_P256,
                     HashType::SHA256, EcdsaSignatureEncoding::DER,
+                    subtle::EllipticCurveType::NIST_P256,
                     /*id_requirement=*/0x02030400,
                     /*output_prefix=*/std::string("\x01\x02\x03\x04\x00", 5)},
            TestCase{EcdsaParameters::Variant::kCrunchy,
@@ -99,6 +121,7 @@ INSTANTIATE_TEST_SUITE_P(
                     EcdsaParameters::SignatureEncoding::kDer,
                     OutputPrefixType::CRUNCHY, EllipticCurveType::NIST_P384,
                     HashType::SHA384, EcdsaSignatureEncoding::DER,
+                    subtle::EllipticCurveType::NIST_P384,
                     /*id_requirement=*/0x01030005,
                     /*output_prefix=*/std::string("\x00\x01\x03\x00\x05", 5)},
            TestCase{EcdsaParameters::Variant::kLegacy,
@@ -107,6 +130,7 @@ INSTANTIATE_TEST_SUITE_P(
                     EcdsaParameters::SignatureEncoding::kIeeeP1363,
                     OutputPrefixType::LEGACY, EllipticCurveType::NIST_P256,
                     HashType::SHA256, EcdsaSignatureEncoding::IEEE_P1363,
+                    subtle::EllipticCurveType::NIST_P256,
                     /*id_requirement=*/0x07080910,
                     /*output_prefix=*/std::string("\x00\x07\x08\x09\x10", 5)},
            TestCase{EcdsaParameters::Variant::kNoPrefix,
@@ -115,6 +139,7 @@ INSTANTIATE_TEST_SUITE_P(
                     EcdsaParameters::SignatureEncoding::kIeeeP1363,
                     OutputPrefixType::RAW, EllipticCurveType::NIST_P521,
                     HashType::SHA512, EcdsaSignatureEncoding::IEEE_P1363,
+                    subtle::EllipticCurveType::NIST_P521,
                     /*id_requirement=*/absl::nullopt,
                     /*output_prefix=*/""}));
 
@@ -342,6 +367,173 @@ TEST_P(EcdsaProtoSerializationTest, SerializeParametersWorks) {
   EXPECT_THAT(key_format.params().curve(), Eq(test_case.curve));
   EXPECT_THAT(key_format.params().encoding(), Eq(test_case.encoding));
 }
+
+TEST_P(EcdsaProtoSerializationTest, ParsePublicKeyWorks) {
+  TestCase test_case = GetParam();
+  ASSERT_THAT(RegisterEcdsaProtoSerialization(), IsOk());
+
+  EcdsaParams params;
+  params.set_curve(test_case.curve);
+  params.set_hash_type(test_case.hash);
+  params.set_encoding(test_case.encoding);
+
+  util::StatusOr<internal::EcKey> ec_key =
+      internal::NewEcKey(test_case.subtle_curve);
+  ASSERT_THAT(ec_key, IsOk());
+
+  google::crypto::tink::EcdsaPublicKey key_proto;
+  key_proto.set_version(0);
+  key_proto.set_x(ec_key->pub_x);
+  key_proto.set_y(ec_key->pub_y);
+  *key_proto.mutable_params() = params;
+  RestrictedData serialized_key = RestrictedData(
+      key_proto.SerializeAsString(), InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(
+          kPublicTypeUrl, serialized_key, KeyData::ASYMMETRIC_PUBLIC,
+          test_case.output_prefix_type, test_case.id);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, /*token=*/absl::nullopt);
+  ASSERT_THAT(key, IsOk());
+  EXPECT_THAT((*key)->GetIdRequirement(), Eq(test_case.id));
+  EXPECT_THAT((*key)->GetParameters().HasIdRequirement(),
+              test_case.id.has_value());
+
+  util::StatusOr<EcdsaParameters> expected_parameters =
+      EcdsaParameters::Builder()
+          .SetVariant(test_case.variant)
+          .SetHashType(test_case.hash_type)
+          .SetCurveType(test_case.curve_type)
+          .SetSignatureEncoding(test_case.signature_encoding)
+          .Build();
+  ASSERT_THAT(expected_parameters, IsOk());
+
+  util::StatusOr<EcdsaPublicKey> expected_key = EcdsaPublicKey::Create(
+      *expected_parameters,
+      EcPoint(BigInteger(ec_key->pub_x), BigInteger(ec_key->pub_y)),
+      test_case.id, GetPartialKeyAccess());
+  ASSERT_THAT(expected_key, IsOk());
+
+  EXPECT_THAT(**key, Eq(*expected_key));
+}
+
+TEST_F(EcdsaProtoSerializationTest,
+       ParsePublicKeyWithInvalidSerializationFails) {
+  ASSERT_THAT(RegisterEcdsaProtoSerialization(), IsOk());
+
+  RestrictedData serialized_key =
+      RestrictedData("invalid_serialization", InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(kPublicTypeUrl, serialized_key,
+                                              KeyData::ASYMMETRIC_PUBLIC,
+                                              OutputPrefixType::TINK,
+                                              /*id_requirement=*/0x23456789);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, InsecureSecretKeyAccess::Get());
+  EXPECT_THAT(key.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("Failed to parse EcdsaPublicKey proto")));
+}
+
+TEST_F(EcdsaProtoSerializationTest, ParsePublicKeyWithInvalidVersionFails) {
+  ASSERT_THAT(RegisterEcdsaProtoSerialization(), IsOk());
+
+  EcdsaParams params;
+  params.set_curve(EllipticCurveType::NIST_P256);
+  params.set_hash_type(HashType::SHA256);
+  params.set_encoding(EcdsaSignatureEncoding::DER);
+
+  util::StatusOr<internal::EcKey> ec_key =
+      internal::NewEcKey(subtle::EllipticCurveType::NIST_P256);
+  ASSERT_THAT(ec_key, IsOk());
+  google::crypto::tink::EcdsaPublicKey key_proto;
+  key_proto.set_version(1);
+  key_proto.set_x(ec_key->pub_x);
+  key_proto.set_y(ec_key->pub_y);
+  *key_proto.mutable_params() = params;
+  RestrictedData serialized_key = RestrictedData(
+      key_proto.SerializeAsString(), InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(kPublicTypeUrl, serialized_key,
+                                              KeyData::ASYMMETRIC_PUBLIC,
+                                              OutputPrefixType::TINK,
+                                              /*id_requirement=*/0x23456789);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, /*token=*/absl::nullopt);
+  EXPECT_THAT(key.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("Only version 0 keys are accepted")));
+}
+
+TEST_P(EcdsaProtoSerializationTest, SerializePublicKeyWorks) {
+  TestCase test_case = GetParam();
+  ASSERT_THAT(RegisterEcdsaProtoSerialization(), IsOk());
+
+  util::StatusOr<EcdsaParameters> parameters =
+      EcdsaParameters::Builder()
+          .SetVariant(test_case.variant)
+          .SetHashType(test_case.hash_type)
+          .SetCurveType(test_case.curve_type)
+          .SetSignatureEncoding(test_case.signature_encoding)
+          .Build();
+  ASSERT_THAT(parameters, IsOk());
+
+  util::StatusOr<internal::EcKey> ec_key =
+      internal::NewEcKey(test_case.subtle_curve);
+  ASSERT_THAT(ec_key, IsOk());
+
+  util::StatusOr<EcdsaPublicKey> key = EcdsaPublicKey::Create(
+      *parameters,
+      EcPoint(BigInteger(ec_key->pub_x), BigInteger(ec_key->pub_y)),
+      test_case.id, GetPartialKeyAccess());
+  ASSERT_THAT(key, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialization =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeKey<internal::ProtoKeySerialization>(
+              *key, /*token=*/absl::nullopt);
+  ASSERT_THAT(serialization, IsOk());
+  EXPECT_THAT((*serialization)->ObjectIdentifier(), Eq(kPublicTypeUrl));
+
+  const internal::ProtoKeySerialization* proto_serialization =
+      dynamic_cast<const internal::ProtoKeySerialization*>(
+          serialization->get());
+  ASSERT_THAT(proto_serialization, NotNull());
+  EXPECT_THAT(proto_serialization->TypeUrl(), Eq(kPublicTypeUrl));
+  EXPECT_THAT(proto_serialization->KeyMaterialType(),
+              Eq(KeyData::ASYMMETRIC_PUBLIC));
+  EXPECT_THAT(proto_serialization->GetOutputPrefixType(),
+              Eq(test_case.output_prefix_type));
+  EXPECT_THAT(proto_serialization->IdRequirement(), Eq(test_case.id));
+
+  google::crypto::tink::EcdsaPublicKey proto_key;
+  ASSERT_THAT(proto_key.ParseFromString(
+                  proto_serialization->SerializedKeyProto().GetSecret(
+                      InsecureSecretKeyAccess::Get())),
+              IsTrue());
+  EXPECT_THAT(proto_key.version(), Eq(0));
+  // We currently encode with one extra 0 byte at the beginning, to make sure
+  // that parsing is correct. See also b/264525021.
+  EXPECT_THAT(proto_key.x(), Eq('\0' + ec_key->pub_x));
+  EXPECT_THAT(proto_key.y(), Eq('\0' + ec_key->pub_y));
+  EXPECT_THAT(proto_key.has_params(), IsTrue());
+  EXPECT_THAT(proto_key.params().curve(), Eq(test_case.curve));
+  EXPECT_THAT(proto_key.params().hash_type(), Eq(test_case.hash));
+  EXPECT_THAT(proto_key.params().encoding(), Eq(test_case.encoding));
+}
+
 }  // namespace
 }  // namespace tink
 }  // namespace crypto

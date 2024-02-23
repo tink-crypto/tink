@@ -15,15 +15,28 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "tink/signature/ecdsa_proto_serialization.h"
+#include <string>
 
 #include "absl/base/no_destructor.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
+#include "tink/big_integer.h"
+#include "tink/ec_point.h"
+#include "tink/insecure_secret_key_access.h"
+#include "tink/internal/bn_encoding_util.h"
+#include "tink/internal/key_parser.h"
+#include "tink/internal/key_serializer.h"
 #include "tink/internal/mutable_serialization_registry.h"
 #include "tink/internal/parameters_parser.h"
 #include "tink/internal/parameters_serializer.h"
+#include "tink/internal/proto_key_serialization.h"
 #include "tink/internal/proto_parameters_serialization.h"
+#include "tink/partial_key_access.h"
+#include "tink/restricted_data.h"
+#include "tink/secret_key_access_token.h"
 #include "tink/signature/ecdsa_parameters.h"
+#include "tink/signature/ecdsa_public_key.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/common.pb.h"
@@ -39,6 +52,7 @@ using ::google::crypto::tink::EcdsaParams;
 using ::google::crypto::tink::EcdsaSignatureEncoding;
 using ::google::crypto::tink::EllipticCurveType;
 using ::google::crypto::tink::HashType;
+using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::OutputPrefixType;
 
 using EcdsaProtoParametersParserImpl =
@@ -47,7 +61,14 @@ using EcdsaProtoParametersParserImpl =
 using EcdsaProtoParametersSerializerImpl =
     internal::ParametersSerializerImpl<EcdsaParameters,
                                        internal::ProtoParametersSerialization>;
+using EcdsaProtoPublicKeyParserImpl =
+    internal::KeyParserImpl<internal::ProtoKeySerialization, EcdsaPublicKey>;
+using EcdsaProtoPublicKeySerializerImpl =
+    internal::KeySerializerImpl<EcdsaPublicKey,
+                                internal::ProtoKeySerialization>;
 
+const absl::string_view kPublicTypeUrl =
+    "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
 const absl::string_view kPrivateTypeUrl =
     "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
 
@@ -170,6 +191,22 @@ util::StatusOr<EcdsaSignatureEncoding> ToProtoSignatureEncoding(
   }
 }
 
+util::StatusOr<int> getEncodingLength(EcdsaParameters::CurveType curveType) {
+  // We currently encode with one extra 0 byte at the beginning, to make sure
+  // that parsing is correct. See also b/264525021.
+  switch (curveType) {
+    case EcdsaParameters::CurveType::kNistP256:
+      return 33;
+    case EcdsaParameters::CurveType::kNistP384:
+      return 49;
+    case EcdsaParameters::CurveType::kNistP521:
+      return 67;
+    default:
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "Unable to serialize CurveType");
+  }
+}
+
 util::StatusOr<EcdsaParameters> ToParameters(
     OutputPrefixType output_prefix_type, const EcdsaParams& params) {
   util::StatusOr<EcdsaParameters::Variant> variant =
@@ -257,6 +294,38 @@ util::StatusOr<EcdsaParameters> ParseParameters(
                       proto_key_format.params());
 }
 
+util::StatusOr<EcdsaPublicKey> ParsePublicKey(
+    const internal::ProtoKeySerialization& serialization,
+    absl::optional<SecretKeyAccessToken> token) {
+  if (serialization.TypeUrl() != kPublicTypeUrl) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Wrong type URL when parsing EcdsaPublicKey.");
+  }
+
+  google::crypto::tink::EcdsaPublicKey proto_key;
+  RestrictedData restricted_data = serialization.SerializedKeyProto();
+  if (!proto_key.ParseFromString(
+          restricted_data.GetSecret(InsecureSecretKeyAccess::Get()))) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Failed to parse EcdsaPublicKey proto");
+  }
+  if (proto_key.version() != 0) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Only version 0 keys are accepted.");
+  }
+
+  util::StatusOr<EcdsaParameters> parameters =
+      ToParameters(serialization.GetOutputPrefixType(), proto_key.params());
+  if (!parameters.ok()) {
+    return parameters.status();
+  }
+
+  EcPoint public_point(BigInteger(proto_key.x()), BigInteger(proto_key.y()));
+  return EcdsaPublicKey::Create(*parameters, public_point,
+                                serialization.IdRequirement(),
+                                GetPartialKeyAccess());
+}
+
 util::StatusOr<internal::ProtoParametersSerialization> SerializeParameters(
     const EcdsaParameters& parameters) {
   util::StatusOr<OutputPrefixType> output_prefix_type =
@@ -278,6 +347,52 @@ util::StatusOr<internal::ProtoParametersSerialization> SerializeParameters(
       proto_key_format.SerializeAsString());
 }
 
+util::StatusOr<internal::ProtoKeySerialization> SerializePublicKey(
+    const EcdsaPublicKey& key, absl::optional<SecretKeyAccessToken> token) {
+  util::StatusOr<EcdsaParams> params = FromParameters(key.GetParameters());
+  if (!params.ok()) {
+    return params.status();
+  }
+
+  util::StatusOr<int> enc_length =
+      getEncodingLength(key.GetParameters().GetCurveType());
+  if (!enc_length.ok()) {
+    return enc_length.status();
+  }
+
+  util::StatusOr<std::string> x = internal::GetValueOfFixedLength(
+      key.GetPublicPoint(GetPartialKeyAccess()).GetX().GetValue(),
+      enc_length.value());
+  if (!x.ok()) {
+    return x.status();
+  }
+
+  util::StatusOr<std::string> y = internal::GetValueOfFixedLength(
+      key.GetPublicPoint(GetPartialKeyAccess()).GetY().GetValue(),
+      enc_length.value());
+  if (!y.ok()) {
+    return y.status();
+  }
+
+  google::crypto::tink::EcdsaPublicKey proto_key;
+  proto_key.set_version(0);
+  *proto_key.mutable_params() = *params;
+  proto_key.set_x(*x);
+  proto_key.set_y(*y);
+
+  util::StatusOr<OutputPrefixType> output_prefix_type =
+      ToOutputPrefixType(key.GetParameters().GetVariant());
+  if (!output_prefix_type.ok()) {
+    return output_prefix_type.status();
+  }
+
+  RestrictedData restricted_output = RestrictedData(
+      proto_key.SerializeAsString(), InsecureSecretKeyAccess::Get());
+  return internal::ProtoKeySerialization::Create(
+      kPublicTypeUrl, restricted_output, KeyData::ASYMMETRIC_PUBLIC,
+      *output_prefix_type, key.GetIdRequirement());
+}
+
 EcdsaProtoParametersParserImpl& EcdsaProtoParametersParser() {
   static absl::NoDestructor<EcdsaProtoParametersParserImpl> parser(
       kPrivateTypeUrl, ParseParameters);
@@ -290,6 +405,17 @@ EcdsaProtoParametersSerializerImpl& EcdsaProtoParametersSerializer() {
   return *serializer;
 }
 
+EcdsaProtoPublicKeyParserImpl& EcdsaProtoPublicKeyParser() {
+  static absl::NoDestructor<EcdsaProtoPublicKeyParserImpl> parser(
+      kPublicTypeUrl, ParsePublicKey);
+  return *parser;
+}
+
+EcdsaProtoPublicKeySerializerImpl& EcdsaProtoPublicKeySerializer() {
+  static absl::NoDestructor<EcdsaProtoPublicKeySerializerImpl> serializer(
+      SerializePublicKey);
+  return *serializer;
+}
 }  // namespace
 
 util::Status RegisterEcdsaProtoSerialization() {
@@ -300,8 +426,20 @@ util::Status RegisterEcdsaProtoSerialization() {
     return status;
   }
 
+  status = internal::MutableSerializationRegistry::GlobalInstance()
+               .RegisterParametersSerializer(&EcdsaProtoParametersSerializer());
+  if (!status.ok()) {
+    return status;
+  }
+
+  status = internal::MutableSerializationRegistry::GlobalInstance()
+               .RegisterKeyParser(&EcdsaProtoPublicKeyParser());
+  if (!status.ok()) {
+    return status;
+  }
+
   return internal::MutableSerializationRegistry::GlobalInstance()
-      .RegisterParametersSerializer(&EcdsaProtoParametersSerializer());
+      .RegisterKeySerializer(&EcdsaProtoPublicKeySerializer());
 }
 
 }  // namespace tink
