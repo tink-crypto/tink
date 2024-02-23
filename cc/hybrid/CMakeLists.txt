@@ -526,6 +526,7 @@ tink_cc_library(
     ecies_proto_serialization.h
   DEPS
     tink::hybrid::ecies_parameters
+    tink::hybrid::ecies_private_key
     tink::hybrid::ecies_public_key
     absl::core_headers
     absl::status
@@ -536,6 +537,7 @@ tink_cc_library(
     tink::core::ec_point
     tink::core::insecure_secret_key_access
     tink::core::partial_key_access
+    tink::core::restricted_big_integer
     tink::core::restricted_data
     tink::core::secret_key_access_token
     tink::internal::bn_encoding_util
@@ -1077,6 +1079,7 @@ tink_cc_test(
     ecies_proto_serialization_test.cc
   DEPS
     tink::hybrid::ecies_parameters
+    tink::hybrid::ecies_private_key
     tink::hybrid::ecies_proto_serialization
     tink::hybrid::ecies_public_key
     gmock
@@ -1091,6 +1094,7 @@ tink_cc_test(
     tink::core::key
     tink::core::parameters
     tink::core::partial_key_access
+    tink::core::restricted_big_integer
     tink::core::restricted_data
     tink::internal::ec_util
     tink::internal::mutable_serialization_registry

@@ -25,6 +25,7 @@
 #include "tink/big_integer.h"
 #include "tink/ec_point.h"
 #include "tink/hybrid/ecies_parameters.h"
+#include "tink/hybrid/ecies_private_key.h"
 #include "tink/hybrid/ecies_public_key.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/bn_encoding_util.h"
@@ -36,6 +37,7 @@
 #include "tink/internal/proto_key_serialization.h"
 #include "tink/internal/proto_parameters_serialization.h"
 #include "tink/partial_key_access.h"
+#include "tink/restricted_big_integer.h"
 #include "tink/restricted_data.h"
 #include "tink/secret_key_access_token.h"
 #include "tink/util/status.h"
@@ -55,6 +57,7 @@ using ::google::crypto::tink::AesSivKeyFormat;
 using ::google::crypto::tink::EciesAeadDemParams;
 using ::google::crypto::tink::EciesAeadHkdfKeyFormat;
 using ::google::crypto::tink::EciesAeadHkdfParams;
+using ::google::crypto::tink::EciesAeadHkdfPrivateKey;
 using ::google::crypto::tink::EciesAeadHkdfPublicKey;
 using ::google::crypto::tink::EciesHkdfKemParams;
 using ::google::crypto::tink::EcPointFormat;
@@ -74,6 +77,11 @@ using EciesProtoPublicKeyParserImpl =
     internal::KeyParserImpl<internal::ProtoKeySerialization, EciesPublicKey>;
 using EciesProtoPublicKeySerializerImpl =
     internal::KeySerializerImpl<EciesPublicKey,
+                                internal::ProtoKeySerialization>;
+using EciesProtoPrivateKeyParserImpl =
+    internal::KeyParserImpl<internal::ProtoKeySerialization, EciesPrivateKey>;
+using EciesProtoPrivateKeySerializerImpl =
+    internal::KeySerializerImpl<EciesPrivateKey,
                                 internal::ProtoKeySerialization>;
 
 const absl::string_view kPublicTypeUrl =
@@ -408,8 +416,8 @@ util::StatusOr<EciesPublicKey> ToPublicKey(
 }
 
 util::StatusOr<int> GetEncodingLength(EciesParameters::CurveType curve) {
-  // Encode EC points with extra leading zero byte for compatibility with Java
-  // BigInteger decoding (b/264525021).
+  // Encode EC field elements with extra leading zero byte for compatibility
+  // with Java BigInteger decoding (b/264525021).
   switch (curve) {
     case EciesParameters::CurveType::kNistP256:
       return 33;
@@ -499,8 +507,9 @@ util::StatusOr<EciesPublicKey> ParsePublicKey(
                         "Failed to parse EciesAeadHkdfPublicKey proto");
   }
   if (proto_key.version() != 0) {
-    return util::Status(absl::StatusCode::kInvalidArgument,
-                        "Only version 0 keys are accepted.");
+    return util::Status(
+        absl::StatusCode::kInvalidArgument,
+        "Only version 0 keys are accepted for EciesAeadHkdfPublicKey proto.");
   }
 
   util::StatusOr<EciesParameters> parameters =
@@ -510,6 +519,58 @@ util::StatusOr<EciesPublicKey> ParsePublicKey(
   }
 
   return ToPublicKey(*parameters, proto_key, serialization.IdRequirement());
+}
+
+util::StatusOr<EciesPrivateKey> ParsePrivateKey(
+    const internal::ProtoKeySerialization& serialization,
+    absl::optional<SecretKeyAccessToken> token) {
+  if (!token.has_value()) {
+    return util::Status(absl::StatusCode::kPermissionDenied,
+                        "SecretKeyAccess is required");
+  }
+  if (serialization.TypeUrl() != kPrivateTypeUrl) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Wrong type URL when parsing EciesAeadHkdfPrivateKey.");
+  }
+  EciesAeadHkdfPrivateKey proto_key;
+  RestrictedData restricted_data = serialization.SerializedKeyProto();
+  if (!proto_key.ParseFromString(restricted_data.GetSecret(*token))) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Failed to parse EciesAeadHkdfPrivateKey proto.");
+  }
+  if (proto_key.version() != 0) {
+    return util::Status(
+        absl::StatusCode::kInvalidArgument,
+        "Only version 0 keys are accepted for EciesAeadHkdfPrivateKey proto.");
+  }
+
+  util::StatusOr<EciesParameters::Variant> variant =
+      ToVariant(serialization.GetOutputPrefixType());
+  if (!variant.ok()) {
+    return variant.status();
+  }
+
+  util::StatusOr<EciesParameters> parameters = ToParameters(
+      serialization.GetOutputPrefixType(), proto_key.public_key().params());
+  if (!parameters.ok()) {
+    return parameters.status();
+  }
+
+  util::StatusOr<EciesPublicKey> public_key = ToPublicKey(
+      *parameters, proto_key.public_key(), serialization.IdRequirement());
+  if (!public_key.ok()) {
+    return public_key.status();
+  }
+
+  if (IsNistCurve(parameters->GetCurveType())) {
+    return EciesPrivateKey::CreateForNistCurve(
+        *public_key, RestrictedBigInteger(proto_key.key_value(), *token),
+        GetPartialKeyAccess());
+  }
+
+  return EciesPrivateKey::CreateForCurveX25519(
+      *public_key, RestrictedData(proto_key.key_value(), *token),
+      GetPartialKeyAccess());
 }
 
 util::StatusOr<internal::ProtoParametersSerialization> SerializeParameters(
@@ -559,6 +620,72 @@ util::StatusOr<internal::ProtoKeySerialization> SerializePublicKey(
       *output_prefix_type, key.GetIdRequirement());
 }
 
+util::StatusOr<internal::ProtoKeySerialization> SerializePrivateKey(
+    const EciesPrivateKey& key, absl::optional<SecretKeyAccessToken> token) {
+  if (!token.has_value()) {
+    return util::Status(absl::StatusCode::kPermissionDenied,
+                        "SecretKeyAccess is required");
+  }
+
+  util::StatusOr<EciesAeadHkdfParams> params =
+      FromParameters(key.GetPublicKey().GetParameters());
+  if (!params.ok()) {
+    return params.status();
+  }
+
+  util::StatusOr<EciesAeadHkdfPublicKey> proto_public_key =
+      FromPublicKey(*params, key.GetPublicKey());
+  if (!proto_public_key.ok()) {
+    return proto_public_key.status();
+  }
+
+  EciesAeadHkdfPrivateKey proto_private_key;
+  proto_private_key.set_version(0);
+  *proto_private_key.mutable_public_key() = *proto_public_key;
+  if (IsNistCurve(key.GetPublicKey().GetParameters().GetCurveType())) {
+    util::StatusOr<int> encoding_length =
+        GetEncodingLength(key.GetPublicKey().GetParameters().GetCurveType());
+    if (!encoding_length.ok()) {
+      return encoding_length.status();
+    }
+    absl::optional<RestrictedBigInteger> secret =
+        key.GetNistPrivateKeyValue(GetPartialKeyAccess());
+    if (!secret.has_value()) {
+      return util::Status(
+          absl::StatusCode::kInternal,
+          "NIST private key is missing NIST private key value.");
+    }
+    util::StatusOr<std::string> key_value = internal::GetValueOfFixedLength(
+        secret->GetSecret(InsecureSecretKeyAccess::Get()), *encoding_length);
+    if (!key_value.ok()) {
+      return key_value.status();
+    }
+    proto_private_key.set_key_value(*key_value);
+  } else {
+    absl::optional<RestrictedData> secret =
+        key.GetX25519PrivateKeyBytes(GetPartialKeyAccess());
+    if (!secret.has_value()) {
+      return util::Status(
+          absl::StatusCode::kInternal,
+          "X25519 private key is missing X25519 private key bytes.");
+    }
+    proto_private_key.set_key_value(
+        secret->GetSecret(InsecureSecretKeyAccess::Get()));
+  }
+
+  util::StatusOr<OutputPrefixType> output_prefix_type =
+      ToOutputPrefixType(key.GetPublicKey().GetParameters().GetVariant());
+  if (!output_prefix_type.ok()) {
+    return output_prefix_type.status();
+  }
+
+  RestrictedData restricted_output =
+      RestrictedData(proto_private_key.SerializeAsString(), *token);
+  return internal::ProtoKeySerialization::Create(
+      kPrivateTypeUrl, restricted_output, KeyData::ASYMMETRIC_PRIVATE,
+      *output_prefix_type, key.GetIdRequirement());
+}
+
 EciesProtoParametersParserImpl* EciesProtoParametersParser() {
   static auto* parser =
       new EciesProtoParametersParserImpl(kPrivateTypeUrl, ParseParameters);
@@ -580,6 +707,18 @@ EciesProtoPublicKeyParserImpl* EciesProtoPublicKeyParser() {
 EciesProtoPublicKeySerializerImpl* EciesProtoPublicKeySerializer() {
   static auto* serializer =
       new EciesProtoPublicKeySerializerImpl(SerializePublicKey);
+  return serializer;
+}
+
+EciesProtoPrivateKeyParserImpl* EciesProtoPrivateKeyParser() {
+  static auto* parser =
+      new EciesProtoPrivateKeyParserImpl(kPrivateTypeUrl, ParsePrivateKey);
+  return parser;
+}
+
+EciesProtoPrivateKeySerializerImpl* EciesProtoPrivateKeySerializer() {
+  static auto* serializer =
+      new EciesProtoPrivateKeySerializerImpl(SerializePrivateKey);
   return serializer;
 }
 
@@ -605,8 +744,20 @@ util::Status RegisterEciesProtoSerialization() {
     return status;
   }
 
+  status = internal::MutableSerializationRegistry::GlobalInstance()
+               .RegisterKeySerializer(EciesProtoPublicKeySerializer());
+  if (!status.ok()) {
+    return status;
+  }
+
+  status = internal::MutableSerializationRegistry::GlobalInstance()
+               .RegisterKeyParser(EciesProtoPrivateKeyParser());
+  if (!status.ok()) {
+    return status;
+  }
+
   return internal::MutableSerializationRegistry::GlobalInstance()
-      .RegisterKeySerializer(EciesProtoPublicKeySerializer());
+      .RegisterKeySerializer(EciesProtoPrivateKeySerializer());
 }
 
 }  // namespace tink

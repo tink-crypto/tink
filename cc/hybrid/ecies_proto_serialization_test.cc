@@ -28,6 +28,7 @@
 #include "tink/big_integer.h"
 #include "tink/ec_point.h"
 #include "tink/hybrid/ecies_parameters.h"
+#include "tink/hybrid/ecies_private_key.h"
 #include "tink/hybrid/ecies_public_key.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/ec_util.h"
@@ -38,6 +39,7 @@
 #include "tink/key.h"
 #include "tink/parameters.h"
 #include "tink/partial_key_access.h"
+#include "tink/restricted_big_integer.h"
 #include "tink/restricted_data.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/enums.h"
@@ -61,6 +63,7 @@ using ::google::crypto::tink::AesSivKeyFormat;
 using ::google::crypto::tink::EciesAeadDemParams;
 using ::google::crypto::tink::EciesAeadHkdfKeyFormat;
 using ::google::crypto::tink::EciesAeadHkdfParams;
+using ::google::crypto::tink::EciesAeadHkdfPrivateKey;
 using ::google::crypto::tink::EciesAeadHkdfPublicKey;
 using ::google::crypto::tink::EciesHkdfKemParams;
 using ::google::crypto::tink::EcPointFormat;
@@ -747,9 +750,12 @@ TEST_F(EciesProtoSerializationTest, ParsePublicKeyWithInvalidVersion) {
   util::StatusOr<std::unique_ptr<Key>> key =
       internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
           *serialization, /*token=*/absl::nullopt);
-  EXPECT_THAT(key.status(),
-              StatusIs(absl::StatusCode::kInvalidArgument,
-                       HasSubstr("Only version 0 keys are accepted")));
+  EXPECT_THAT(
+      key.status(),
+      StatusIs(
+          absl::StatusCode::kInvalidArgument,
+          HasSubstr(
+              "Only version 0 keys are accepted for EciesAeadHkdfPublicKey")));
 }
 
 TEST_P(EciesProtoSerializationTest, SerializePublicKey) {
@@ -836,6 +842,361 @@ TEST_P(EciesProtoSerializationTest, SerializePublicKey) {
               Eq(test_case.dem_params.aead_dem().output_prefix_type()));
   EXPECT_THAT(proto_key.params().dem_params().aead_dem().value(),
               Eq(test_case.dem_params.aead_dem().value()));
+}
+
+TEST_P(EciesProtoSerializationTest, ParsePrivateKey) {
+  TestCase test_case = GetParam();
+  ASSERT_THAT(RegisterEciesProtoSerialization(), IsOk());
+
+  EciesAeadHkdfParams params;
+  *params.mutable_kem_params() = test_case.kem_params;
+  *params.mutable_dem_params() = test_case.dem_params;
+  params.set_ec_point_format(test_case.ec_point_format);
+  EciesAeadHkdfKeyFormat key_format_proto;
+  *key_format_proto.mutable_params() = params;
+
+  util::StatusOr<KeyPair> key_pair = GenerateKeyPair(
+      util::Enums::ProtoToSubtle(test_case.kem_params.curve_type()));
+  ASSERT_THAT(key_pair, IsOk());
+
+  EciesAeadHkdfPublicKey public_key_proto;
+  public_key_proto.set_version(0);
+  public_key_proto.set_x(key_pair->x);
+  public_key_proto.set_y(key_pair->y);
+  *public_key_proto.mutable_params() = params;
+
+  EciesAeadHkdfPrivateKey private_key_proto;
+  private_key_proto.set_version(0);
+  *private_key_proto.mutable_public_key() = public_key_proto;
+  private_key_proto.set_key_value(key_pair->private_key);
+
+  RestrictedData serialized_key = RestrictedData(
+      private_key_proto.SerializeAsString(), InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(
+          kPrivateTypeUrl, serialized_key, KeyData::ASYMMETRIC_PRIVATE,
+          test_case.output_prefix_type, test_case.id);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(key, IsOk());
+  EXPECT_THAT((*key)->GetIdRequirement(), Eq(test_case.id));
+  EXPECT_THAT((*key)->GetParameters().HasIdRequirement(),
+              Eq(test_case.id.has_value()));
+
+  EciesParameters::Builder parameters_builder =
+      EciesParameters::Builder()
+          .SetCurveType(test_case.curve_type)
+          .SetHashType(test_case.hash_type)
+          .SetDemId(test_case.dem_id)
+          .SetVariant(test_case.variant);
+  if (test_case.point_format.has_value()) {
+    parameters_builder.SetNistCurvePointFormat(*test_case.point_format);
+  }
+  if (test_case.salt.has_value()) {
+    parameters_builder.SetSalt(*test_case.salt);
+  }
+  util::StatusOr<EciesParameters> expected_parameters =
+      parameters_builder.Build();
+  ASSERT_THAT(expected_parameters, IsOk());
+
+  util::StatusOr<EciesPublicKey> expected_public_key;
+  if (test_case.curve_type != EciesParameters::CurveType::kX25519) {
+    expected_public_key = EciesPublicKey::CreateForNistCurve(
+        *expected_parameters,
+        EcPoint(BigInteger(key_pair->x), BigInteger(key_pair->y)), test_case.id,
+        GetPartialKeyAccess());
+  } else {
+    expected_public_key = EciesPublicKey::CreateForCurveX25519(
+        *expected_parameters, key_pair->x, test_case.id, GetPartialKeyAccess());
+  }
+  ASSERT_THAT(expected_public_key, IsOk());
+
+  util::StatusOr<EciesPrivateKey> expected_private_key;
+  if (test_case.curve_type != EciesParameters::CurveType::kX25519) {
+    expected_private_key = EciesPrivateKey::CreateForNistCurve(
+        *expected_public_key,
+        RestrictedBigInteger(key_pair->private_key,
+                             InsecureSecretKeyAccess::Get()),
+        GetPartialKeyAccess());
+  } else {
+    expected_private_key = EciesPrivateKey::CreateForCurveX25519(
+        *expected_public_key,
+        RestrictedData(key_pair->private_key, InsecureSecretKeyAccess::Get()),
+        GetPartialKeyAccess());
+  }
+  ASSERT_THAT(expected_private_key, IsOk());
+
+  EXPECT_THAT(**key, Eq(*expected_private_key));
+}
+
+TEST_F(EciesProtoSerializationTest, ParsePrivateKeyWithInvalidSerialization) {
+  ASSERT_THAT(RegisterEciesProtoSerialization(), IsOk());
+
+  RestrictedData serialized_key =
+      RestrictedData("invalid_serialization", InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(kPrivateTypeUrl, serialized_key,
+                                              KeyData::ASYMMETRIC_PRIVATE,
+                                              OutputPrefixType::TINK,
+                                              /*id_requirement=*/0x23456789);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, InsecureSecretKeyAccess::Get());
+  EXPECT_THAT(
+      key.status(),
+      StatusIs(absl::StatusCode::kInvalidArgument,
+               HasSubstr("Failed to parse EciesAeadHkdfPrivateKey proto")));
+}
+
+TEST_F(EciesProtoSerializationTest, ParsePrivateKeyWithInvalidVersion) {
+  ASSERT_THAT(RegisterEciesProtoSerialization(), IsOk());
+
+  EciesAeadHkdfParams params;
+  *params.mutable_kem_params() =
+      CreateKemParams(EllipticCurveType::NIST_P256, HashType::SHA256, kSalt);
+  *params.mutable_dem_params() = CreateAesGcmDemParams(16);
+  params.set_ec_point_format(EcPointFormat::COMPRESSED);
+  EciesAeadHkdfKeyFormat key_format_proto;
+  *key_format_proto.mutable_params() = params;
+
+  util::StatusOr<KeyPair> key_pair =
+      GenerateKeyPair(subtle::EllipticCurveType::NIST_P256);
+  ASSERT_THAT(key_pair, IsOk());
+
+  EciesAeadHkdfPublicKey public_key_proto;
+  public_key_proto.set_version(0);
+  public_key_proto.set_x(key_pair->x);
+  public_key_proto.set_y(key_pair->y);
+  *public_key_proto.mutable_params() = params;
+
+  EciesAeadHkdfPrivateKey private_key_proto;
+  private_key_proto.set_version(1);
+  *private_key_proto.mutable_public_key() = public_key_proto;
+  private_key_proto.set_key_value(key_pair->private_key);
+
+  RestrictedData serialized_key = RestrictedData(
+      private_key_proto.SerializeAsString(), InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(kPrivateTypeUrl, serialized_key,
+                                              KeyData::ASYMMETRIC_PRIVATE,
+                                              OutputPrefixType::TINK,
+                                              /*id_requirement=*/0x23456789);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, InsecureSecretKeyAccess::Get());
+  EXPECT_THAT(
+      key.status(),
+      StatusIs(
+          absl::StatusCode::kInvalidArgument,
+          HasSubstr(
+              "Only version 0 keys are accepted for EciesAeadHkdfPrivateKey")));
+}
+
+TEST_F(EciesProtoSerializationTest, ParsePrivateKeyNoSecretKeyAccess) {
+  ASSERT_THAT(RegisterEciesProtoSerialization(), IsOk());
+
+  EciesAeadHkdfParams params;
+  *params.mutable_kem_params() =
+      CreateKemParams(EllipticCurveType::NIST_P256, HashType::SHA256, kSalt);
+  *params.mutable_dem_params() = CreateAesGcmDemParams(16);
+  params.set_ec_point_format(EcPointFormat::COMPRESSED);
+  EciesAeadHkdfKeyFormat key_format_proto;
+  *key_format_proto.mutable_params() = params;
+
+  util::StatusOr<KeyPair> key_pair =
+      GenerateKeyPair(subtle::EllipticCurveType::NIST_P256);
+  ASSERT_THAT(key_pair, IsOk());
+
+  EciesAeadHkdfPublicKey public_key_proto;
+  public_key_proto.set_version(0);
+  public_key_proto.set_x(key_pair->x);
+  public_key_proto.set_y(key_pair->y);
+  *public_key_proto.mutable_params() = params;
+
+  EciesAeadHkdfPrivateKey private_key_proto;
+  private_key_proto.set_version(0);
+  *private_key_proto.mutable_public_key() = public_key_proto;
+  private_key_proto.set_key_value(key_pair->private_key);
+
+  RestrictedData serialized_key = RestrictedData(
+      private_key_proto.SerializeAsString(), InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(kPrivateTypeUrl, serialized_key,
+                                              KeyData::ASYMMETRIC_PRIVATE,
+                                              OutputPrefixType::TINK,
+                                              /*id_requirement=*/0x23456789);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, /*token=*/absl::nullopt);
+  EXPECT_THAT(key.status(), StatusIs(absl::StatusCode::kPermissionDenied,
+                                     HasSubstr("SecretKeyAccess is required")));
+}
+
+TEST_P(EciesProtoSerializationTest, SerializePrivateKey) {
+  TestCase test_case = GetParam();
+  ASSERT_THAT(RegisterEciesProtoSerialization(), IsOk());
+
+  EciesParameters::Builder parameters_builder =
+      EciesParameters::Builder()
+          .SetCurveType(test_case.curve_type)
+          .SetHashType(test_case.hash_type)
+          .SetDemId(test_case.dem_id)
+          .SetVariant(test_case.variant);
+  if (test_case.point_format.has_value()) {
+    parameters_builder.SetNistCurvePointFormat(*test_case.point_format);
+  }
+  if (test_case.salt.has_value()) {
+    parameters_builder.SetSalt(*test_case.salt);
+  }
+  util::StatusOr<EciesParameters> parameters = parameters_builder.Build();
+  ASSERT_THAT(parameters, IsOk());
+
+  util::StatusOr<KeyPair> key_pair = GenerateKeyPair(
+      util::Enums::ProtoToSubtle(test_case.kem_params.curve_type()));
+  ASSERT_THAT(key_pair, IsOk());
+
+  util::StatusOr<EciesPublicKey> public_key;
+  if (test_case.curve_type != EciesParameters::CurveType::kX25519) {
+    public_key = EciesPublicKey::CreateForNistCurve(
+        *parameters, EcPoint(BigInteger(key_pair->x), BigInteger(key_pair->y)),
+        test_case.id, GetPartialKeyAccess());
+  } else {
+    public_key = EciesPublicKey::CreateForCurveX25519(
+        *parameters, key_pair->x, test_case.id, GetPartialKeyAccess());
+  }
+  ASSERT_THAT(public_key, IsOk());
+
+  util::StatusOr<EciesPrivateKey> private_key;
+  if (test_case.curve_type != EciesParameters::CurveType::kX25519) {
+    private_key = EciesPrivateKey::CreateForNistCurve(
+        *public_key,
+        RestrictedBigInteger(key_pair->private_key,
+                             InsecureSecretKeyAccess::Get()),
+        GetPartialKeyAccess());
+  } else {
+    private_key = EciesPrivateKey::CreateForCurveX25519(
+        *public_key,
+        RestrictedData(key_pair->private_key, InsecureSecretKeyAccess::Get()),
+        GetPartialKeyAccess());
+  }
+  ASSERT_THAT(private_key, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialization =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeKey<internal::ProtoKeySerialization>(
+              *private_key, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(serialization, IsOk());
+  EXPECT_THAT((*serialization)->ObjectIdentifier(), Eq(kPrivateTypeUrl));
+
+  const internal::ProtoKeySerialization* proto_serialization =
+      dynamic_cast<const internal::ProtoKeySerialization*>(
+          serialization->get());
+  ASSERT_THAT(proto_serialization, NotNull());
+  EXPECT_THAT(proto_serialization->TypeUrl(), Eq(kPrivateTypeUrl));
+  EXPECT_THAT(proto_serialization->KeyMaterialType(),
+              Eq(KeyData::ASYMMETRIC_PRIVATE));
+  EXPECT_THAT(proto_serialization->GetOutputPrefixType(),
+              Eq(test_case.output_prefix_type));
+  EXPECT_THAT(proto_serialization->IdRequirement(), Eq(test_case.id));
+
+  EciesAeadHkdfPrivateKey proto_key;
+  ASSERT_THAT(proto_key.ParseFromString(
+                  proto_serialization->SerializedKeyProto().GetSecret(
+                      InsecureSecretKeyAccess::Get())),
+              IsTrue());
+  const std::string prefix =
+      (test_case.curve_type == EciesParameters::CurveType::kX25519)
+          ? ""
+          : std::string("\x00", 1);
+  EXPECT_THAT(proto_key.version(), Eq(0));
+  EXPECT_THAT(proto_key.key_value(),
+              Eq(absl::StrCat(prefix, key_pair->private_key)));
+  EXPECT_THAT(proto_key.has_public_key(), IsTrue());
+  EXPECT_THAT(proto_key.public_key().version(), Eq(0));
+  EXPECT_THAT(proto_key.public_key().has_params(), IsTrue());
+
+  EXPECT_THAT(proto_key.version(), Eq(0));
+  EXPECT_THAT(proto_key.public_key().x(),
+              Eq(absl::StrCat(prefix, key_pair->x)));
+  EXPECT_THAT(proto_key.public_key().y(),
+              Eq(absl::StrCat(prefix, key_pair->y)));
+  EXPECT_THAT(proto_key.public_key().has_params(), IsTrue());
+
+  ASSERT_THAT(proto_key.public_key().params().has_kem_params(), IsTrue());
+  EXPECT_THAT(proto_key.public_key().params().kem_params().curve_type(),
+              Eq(test_case.kem_params.curve_type()));
+  EXPECT_THAT(proto_key.public_key().params().kem_params().hkdf_hash_type(),
+              Eq(test_case.kem_params.hkdf_hash_type()));
+  EXPECT_THAT(proto_key.public_key().params().kem_params().hkdf_salt(),
+              Eq(test_case.kem_params.hkdf_salt()));
+
+  ASSERT_THAT(proto_key.public_key().params().has_dem_params(), IsTrue());
+  ASSERT_THAT(proto_key.public_key().params().dem_params().has_aead_dem(),
+              IsTrue());
+  EXPECT_THAT(
+      proto_key.public_key().params().dem_params().aead_dem().type_url(),
+      Eq(test_case.dem_params.aead_dem().type_url()));
+  EXPECT_THAT(proto_key.public_key()
+                  .params()
+                  .dem_params()
+                  .aead_dem()
+                  .output_prefix_type(),
+              Eq(test_case.dem_params.aead_dem().output_prefix_type()));
+  EXPECT_THAT(proto_key.public_key().params().dem_params().aead_dem().value(),
+              Eq(test_case.dem_params.aead_dem().value()));
+  EXPECT_THAT(proto_key.public_key().params().ec_point_format(),
+              Eq(test_case.ec_point_format));
+}
+
+TEST_F(EciesProtoSerializationTest, SerializePrivateKeyNoSecretKeyAccess) {
+  ASSERT_THAT(RegisterEciesProtoSerialization(), IsOk());
+
+  util::StatusOr<EciesParameters> parameters =
+      EciesParameters::Builder()
+          .SetCurveType(EciesParameters::CurveType::kX25519)
+          .SetHashType(EciesParameters::HashType::kSha256)
+          .SetDemId(EciesParameters::DemId::kAes256SivRaw)
+          .SetVariant(EciesParameters::Variant::kNoPrefix)
+          .Build();
+  ASSERT_THAT(parameters, IsOk());
+
+  util::StatusOr<KeyPair> key_pair = GenerateKeyPair(
+      util::Enums::ProtoToSubtle(EllipticCurveType::CURVE25519));
+  ASSERT_THAT(key_pair, IsOk());
+
+  util::StatusOr<EciesPublicKey> public_key =
+      EciesPublicKey::CreateForCurveX25519(*parameters, key_pair->x,
+                                           /*id_requirement=*/absl::nullopt,
+                                           GetPartialKeyAccess());
+  ASSERT_THAT(public_key, IsOk());
+
+  util::StatusOr<EciesPrivateKey> private_key =
+      EciesPrivateKey::CreateForCurveX25519(
+          *public_key,
+          RestrictedData(key_pair->private_key, InsecureSecretKeyAccess::Get()),
+          GetPartialKeyAccess());
+  ASSERT_THAT(private_key, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialization =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeKey<internal::ProtoKeySerialization>(
+              *private_key, /*token=*/absl::nullopt);
+  ASSERT_THAT(serialization.status(),
+              StatusIs(absl::StatusCode::kPermissionDenied,
+                       HasSubstr("SecretKeyAccess is required")));
 }
 
 }  // namespace
