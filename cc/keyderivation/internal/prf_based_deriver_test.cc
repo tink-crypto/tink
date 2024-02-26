@@ -24,13 +24,23 @@
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 #include "tink/aead/aead_key_templates.h"
+#include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
+#include "tink/aead/aes_gcm_key.h"
 #include "tink/aead/aes_gcm_key_manager.h"
+#include "tink/aead/aes_gcm_parameters.h"
 #include "tink/cleartext_keyset_handle.h"
+#include "tink/insecure_secret_key_access.h"
+#include "tink/internal/registry_impl.h"
+#include "tink/key_status.h"
 #include "tink/keyderivation/keyset_deriver.h"
 #include "tink/keyset_handle.h"
+#include "tink/partial_key_access.h"
 #include "tink/prf/hkdf_prf_key_manager.h"
 #include "tink/registry.h"
+#include "tink/subtle/prf/streaming_prf.h"
 #include "tink/subtle/random.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -56,6 +66,7 @@ using ::google::crypto::tink::KeyTemplate;
 using ::google::crypto::tink::OutputPrefixType;
 using ::testing::Eq;
 using ::testing::Ne;
+using ::testing::NotNull;
 using ::testing::SizeIs;
 using ::testing::Test;
 using ::testing::TestWithParam;
@@ -87,18 +98,12 @@ class PrfBasedDeriverTest : public Test {
 };
 
 TEST_F(PrfBasedDeriverTest, New) {
-  ASSERT_THAT(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<AesGcmKeyManager>(), true),
-              IsOk());
   EXPECT_THAT(
       PrfBasedDeriver::New(valid_prf_key_data_, AeadKeyTemplates::Aes128Gcm()),
       IsOk());
 }
 
 TEST_F(PrfBasedDeriverTest, NewWithInvalidPrfKey) {
-  ASSERT_THAT(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<AesGcmKeyManager>(), true),
-              IsOk());
   HkdfPrfKey invalid_prf_key = valid_prf_key_;
   invalid_prf_key.mutable_params()->set_hash(HashType::UNKNOWN_HASH);
   EXPECT_THAT(
@@ -118,15 +123,7 @@ TEST_F(PrfBasedDeriverTest, NewWithInvalidDerivedKeyTemplate) {
               StatusIs(absl::StatusCode::kNotFound));
 }
 
-TEST_F(PrfBasedDeriverTest, DeriveKeysetWithGlobalRegistryPlaceholderValues) {
-  ASSERT_THAT(
-      PrfBasedDeriver::New(valid_prf_key_data_, AeadKeyTemplates::Aes128Gcm())
-          .status(),
-      StatusIs(absl::StatusCode::kNotFound));
-
-  ASSERT_THAT(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<AesGcmKeyManager>(), true),
-              IsOk());
+TEST_F(PrfBasedDeriverTest, DeriveKeysetPlaceholders) {
   util::StatusOr<std::unique_ptr<KeysetDeriver>> deriver =
       PrfBasedDeriver::New(valid_prf_key_data_, AeadKeyTemplates::Aes128Gcm());
   ASSERT_THAT(deriver, IsOk());
@@ -135,20 +132,51 @@ TEST_F(PrfBasedDeriverTest, DeriveKeysetWithGlobalRegistryPlaceholderValues) {
   ASSERT_THAT(handle, IsOk());
   ASSERT_THAT(**handle, SizeIs(1));
 
+  // Verify placeholders.
+  KeysetHandle::Entry primary = (*handle)->GetPrimary();
+  const AesGcmKey* key = dynamic_cast<const AesGcmKey*>(primary.GetKey().get());
+  ASSERT_THAT(key, NotNull());
+  EXPECT_THAT(key->GetParameters().GetVariant(),
+              Eq(AesGcmParameters::Variant::kNoPrefix));
+  EXPECT_THAT(primary.GetStatus(), Eq(KeyStatus::kEnabled));
+
+  // Verify derived key ID.
+  EXPECT_THAT(key->GetIdRequirement(), Eq(absl::nullopt));
+  // Verify primary key ID, which is generated when the KeysetHandle is built.
+  // http://google3/third_party/tink/cc/core/keyset_handle_builder.cc;l=163;rcl=604267117
+  EXPECT_THAT(CleartextKeysetHandle::GetKeyset(**handle).primary_key_id(),
+              Ne(0));
+}
+
+TEST_F(PrfBasedDeriverTest, DeriveKeysetPlaceholdersWithGlobalRegistry) {
+  ASSERT_THAT(PrfBasedDeriver::New(valid_prf_key_data_,
+                                   AeadKeyTemplates::Aes128CtrHmacSha256())
+                  .status(),
+              StatusIs(absl::StatusCode::kNotFound));
+
+  ASSERT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<AesCtrHmacAeadKeyManager>(), true),
+              IsOk());
+  util::StatusOr<std::unique_ptr<KeysetDeriver>> deriver = PrfBasedDeriver::New(
+      valid_prf_key_data_, AeadKeyTemplates::Aes128CtrHmacSha256());
+  ASSERT_THAT(deriver, IsOk());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      (*deriver)->DeriveKeyset("salt");
+  ASSERT_THAT(handle, IsOk());
+  ASSERT_THAT(**handle, SizeIs(1));
+
+  // Verify placeholders.
   Keyset keyset = CleartextKeysetHandle::GetKeyset(**handle);
-  ASSERT_THAT(keyset.key(), SizeIs(1));
-  EXPECT_THAT(keyset.primary_key_id(), Eq(0));
-  EXPECT_THAT(keyset.key(0).status(), Eq(KeyStatusType::UNKNOWN_STATUS));
-  EXPECT_THAT(keyset.key(0).key_id(), Eq(keyset.primary_key_id()));
   EXPECT_THAT(keyset.key(0).output_prefix_type(),
               Eq(OutputPrefixType::UNKNOWN_PREFIX));
+  EXPECT_THAT(keyset.key(0).status(), Eq(KeyStatusType::UNKNOWN_STATUS));
+
+  // Verify primary key ID and derived key ID are both 0.
+  EXPECT_THAT(keyset.primary_key_id(), Eq(0));
+  EXPECT_THAT(keyset.key(0).key_id(), Eq(0));
 }
 
 TEST_F(PrfBasedDeriverTest, DeriveKeysetWithDifferentPrfKeys) {
-  ASSERT_THAT(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<AesGcmKeyManager>(), true),
-              IsOk());
-
   google::crypto::tink::AesGcmKey derived_key_0;
   google::crypto::tink::AesGcmKey derived_key_1;
   KeyTemplate key_template = AeadKeyTemplates::Aes128Gcm();
@@ -185,9 +213,6 @@ TEST_F(PrfBasedDeriverTest, DeriveKeysetWithDifferentPrfKeys) {
 }
 
 TEST_F(PrfBasedDeriverTest, DeriveKeysetWithDifferentSalts) {
-  ASSERT_THAT(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<AesGcmKeyManager>(), true),
-              IsOk());
   util::StatusOr<std::unique_ptr<KeysetDeriver>> deriver =
       PrfBasedDeriver::New(valid_prf_key_data_, AeadKeyTemplates::Aes128Gcm());
   ASSERT_THAT(deriver, IsOk());
@@ -258,34 +283,41 @@ class PrfBasedDeriverRfcVectorTest : public Test {
   }
 };
 
-TEST_F(PrfBasedDeriverRfcVectorTest, DeriveKeysetWithGlobalRegistry) {
-  ASSERT_THAT(PrfBasedDeriver::New(prf_key_from_rfc_vector_,
-                                   AeadKeyTemplates::Aes256Gcm())
-                  .status(),
-              StatusIs(absl::StatusCode::kNotFound));
+TEST_F(PrfBasedDeriverRfcVectorTest, AesGcm) {
+  KeyTemplate key_template = AeadKeyTemplates::Aes256Gcm();
 
-  ASSERT_THAT(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<AesGcmKeyManager>(), true),
-              IsOk());
-  util::StatusOr<std::unique_ptr<KeysetDeriver>> deriver = PrfBasedDeriver::New(
-      prf_key_from_rfc_vector_, AeadKeyTemplates::Aes256Gcm());
+  // Derive key with hard-coded map.
+  util::StatusOr<std::unique_ptr<KeysetDeriver>> deriver =
+      PrfBasedDeriver::New(prf_key_from_rfc_vector_, key_template);
   ASSERT_THAT(deriver, IsOk());
-
   util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
       (*deriver)->DeriveKeyset(salt_);
   ASSERT_THAT(handle, IsOk());
+  const AesGcmKey* key =
+      dynamic_cast<const AesGcmKey*>((*handle)->GetPrimary().GetKey().get());
+  ASSERT_THAT(key, NotNull());
+  std::string key_bytes =
+      test::HexEncode(key->GetKeyBytes(GetPartialKeyAccess())
+                          .GetSecret(InsecureSecretKeyAccess::Get()));
+  ASSERT_THAT(key_bytes, Eq(derived_key_value_));
 
-  Keyset keyset = CleartextKeysetHandle::GetKeyset(**handle);
-  ASSERT_THAT(keyset.key(), SizeIs(1));
-  EXPECT_THAT(keyset.key(0).key_data().type_url(),
-              Eq(AesGcmKeyManager().get_key_type()));
-  EXPECT_THAT(keyset.key(0).key_data().key_material_type(),
-              Eq(AesGcmKeyManager().key_material_type()));
+  // Derive key with global registry.
+  util::StatusOr<std::unique_ptr<StreamingPrf>> streaming_prf =
+      Registry::GetPrimitive<StreamingPrf>(prf_key_from_rfc_vector_);
+  ASSERT_THAT(streaming_prf, IsOk());
+  ASSERT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<AesGcmKeyManager>(), true),
+              IsOk());
+  util::StatusOr<KeyData> proto_generic_key =
+      RegistryImpl::GlobalInstance().DeriveKey(
+          key_template, (*streaming_prf)->ComputePrf(salt_).get());
+  ASSERT_THAT(proto_generic_key, IsOk());
+  google::crypto::tink::AesGcmKey proto_key;
+  ASSERT_TRUE(proto_key.ParseFromString(proto_generic_key->value()));
+  std::string proto_key_bytes = test::HexEncode(proto_key.key_value());
+  ASSERT_THAT(proto_key_bytes, Eq(derived_key_value_));
 
-  google::crypto::tink::AesGcmKey derived_key;
-  ASSERT_TRUE(derived_key.ParseFromString(keyset.key(0).key_data().value()));
-  EXPECT_THAT(derived_key.version(), Eq(AesGcmKeyManager().get_version()));
-  EXPECT_THAT(test::HexEncode(derived_key.key_value()), Eq(derived_key_value_));
+  EXPECT_THAT(key_bytes, Eq(proto_key_bytes));
 }
 
 struct PrfBasedDeriverJavaVector {
@@ -328,7 +360,7 @@ INSTANTIATE_TEST_SUITE_P(PrfBasedDeriverJavaVectorsTests,
                          PrfBasedDeriverJavaVectorsTest,
                          ValuesIn(GetPrfBasedDeriverJavaVectors()));
 
-TEST_P(PrfBasedDeriverJavaVectorsTest, DeriveKeysetWithGlobalRegistry) {
+TEST_P(PrfBasedDeriverJavaVectorsTest, AesGcm) {
   Registry::Reset();
   PrfBasedDeriverJavaVector test_vector = GetParam();
   ASSERT_THAT(Registry::RegisterKeyTypeManager(
@@ -341,13 +373,6 @@ TEST_P(PrfBasedDeriverJavaVectorsTest, DeriveKeysetWithGlobalRegistry) {
   prf_key.set_key_value(test_vector.prf_key_value);
   KeyData key_data = test::AsKeyData(prf_key, KeyData::SYMMETRIC);
 
-  ASSERT_THAT(
-      PrfBasedDeriver::New(key_data, AeadKeyTemplates::Aes128Gcm()).status(),
-      StatusIs(absl::StatusCode::kNotFound));
-
-  ASSERT_THAT(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<AesGcmKeyManager>(), true),
-              IsOk());
   util::StatusOr<std::unique_ptr<KeysetDeriver>> deriver =
       PrfBasedDeriver::New(key_data, AeadKeyTemplates::Aes128Gcm());
   ASSERT_THAT(deriver, IsOk());

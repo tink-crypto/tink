@@ -21,13 +21,22 @@
 
 #include "absl/memory/memory.h"
 #include "absl/strings/string_view.h"
+#include "tink/aead/aes_gcm_proto_serialization.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/input_stream.h"
+#include "tink/internal/mutable_serialization_registry.h"
+#include "tink/internal/proto_parameters_serialization.h"
 #include "tink/internal/registry_impl.h"
+#include "tink/key.h"
+#include "tink/key_status.h"
+#include "tink/keyderivation/internal/key_derivers.h"
 #include "tink/keyderivation/keyset_deriver.h"
 #include "tink/keyset_handle.h"
+#include "tink/keyset_handle_builder.h"
+#include "tink/parameters.h"
 #include "tink/registry.h"
 #include "tink/subtle/prf/streaming_prf.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
@@ -41,22 +50,104 @@ using ::google::crypto::tink::KeyStatusType;
 using ::google::crypto::tink::KeyTemplate;
 using ::google::crypto::tink::OutputPrefixType;
 
+util::StatusOr<std::unique_ptr<KeysetHandle>> DeriveWithGlobalRegistry(
+    const KeyTemplate& key_template, InputStream& randomness) {
+  util::StatusOr<KeyData> key_data =
+      RegistryImpl::GlobalInstance().DeriveKey(key_template, &randomness);
+  if (!key_data.ok()) {
+    return key_data.status();
+  }
+
+  // Fill placeholders key ID 0, OutputPrefixType::UNKNOWN_PREFIX, and
+  // KeyStatusType::UNKNOWN_STATUS.
+  // Tink users interact with this keyset only after it has been processed by
+  // KeysetDeriverSetWrapper::DeriveKeyset, which uses
+  // google::crypto::tink::KeyData's value field (the serialized *Key proto) and
+  // nothing else.
+  // http://google3/third_party/tink/cc/keyderivation/keyset_deriver_wrapper.cc;l=88-91;rcl=592310815
+  Keyset::Key key;
+  *key.mutable_key_data() = *key_data;
+  key.set_key_id(0);
+  key.set_output_prefix_type(OutputPrefixType::UNKNOWN_PREFIX);
+  key.set_status(KeyStatusType::UNKNOWN_STATUS);
+  Keyset keyset;
+  *keyset.add_key() = key;
+  keyset.set_primary_key_id(0);
+
+  return CleartextKeysetHandle::GetKeysetHandle(keyset);
+}
+
+util::StatusOr<std::unique_ptr<KeysetHandle>> DeriveWithHardCodedMap(
+    const KeyTemplate& key_template, InputStream& randomness) {
+  // Fill placeholders OutputPrefixType::RAW and KeyStatus::kEnabled.
+  // Tink users interact with this keyset only after it has been processed by
+  // KeysetDeriverSetWrapper::DeriveKeyset, which uses
+  // google::crypto::tink::KeyData's value field (the serialized *Key proto) and
+  // nothing else.
+  // http://google3/third_party/tink/cc/keyderivation/keyset_deriver_wrapper.cc;l=88-91;rcl=592310815
+  util::StatusOr<ProtoParametersSerialization> serialization =
+      ProtoParametersSerialization::Create(
+          key_template.type_url(), OutputPrefixType::RAW, key_template.value());
+  if (!serialization.ok()) {
+    return serialization.status();
+  }
+  util::StatusOr<std::unique_ptr<Parameters>> params =
+      MutableSerializationRegistry::GlobalInstance().ParseParameters(
+          *serialization);
+  if (!params.ok()) {
+    return params.status();
+  }
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      DeriveKey(**std::move(params), &randomness);
+  if (!key.ok()) {
+    return key.status();
+  }
+
+  KeysetHandleBuilder::Entry entry = KeysetHandleBuilder::Entry::CreateFromKey(
+      *std::move(key), KeyStatus::kEnabled, /*is_primary=*/true);
+  util::StatusOr<KeysetHandle> handle =
+      KeysetHandleBuilder().AddEntry(std::move(entry)).Build();
+  if (!handle.ok()) {
+    return handle.status();
+  }
+  return absl::make_unique<KeysetHandle>(*handle);
+}
+
+util::StatusOr<std::unique_ptr<KeysetHandle>> DeriveKeysetHandle(
+    const KeyTemplate& key_template, InputStream& randomness) {
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      DeriveWithGlobalRegistry(key_template, randomness);
+  if (!handle.ok()) {
+    return DeriveWithHardCodedMap(key_template, randomness);
+  }
+  return *std::move(handle);
+}
+
+util::Status RegisterProtoSerializations() {
+  return RegisterAesGcmProtoSerialization();
+}
+
 util::StatusOr<std::unique_ptr<KeysetDeriver>> PrfBasedDeriver::New(
     const KeyData& prf_key, const KeyTemplate& key_template) {
-  // Validate `prf_key`.
+  // Create StreamingPrf primitive from `prf_key`.
   util::StatusOr<std::unique_ptr<StreamingPrf>> streaming_prf =
       Registry::GetPrimitive<StreamingPrf>(prf_key);
   if (!streaming_prf.ok()) {
     return streaming_prf.status();
   }
 
+  util::Status status = RegisterProtoSerializations();
+  if (!status.ok()) {
+    return status;
+  }
+
   // Validate `key_template`.
   std::unique_ptr<InputStream> randomness = (*streaming_prf)->ComputePrf("s");
-  util::StatusOr<KeyData> key_data =
-      internal::RegistryImpl::GlobalInstance().DeriveKey(key_template,
-                                                         randomness.get());
-  if (!key_data.ok()) {
-    return key_data.status();
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      DeriveKeysetHandle(key_template, *randomness);
+  if (!handle.ok()) {
+    return handle.status();
   }
 
   return {absl::WrapUnique<PrfBasedDeriver>(
@@ -66,29 +157,7 @@ util::StatusOr<std::unique_ptr<KeysetDeriver>> PrfBasedDeriver::New(
 util::StatusOr<std::unique_ptr<KeysetHandle>> PrfBasedDeriver::DeriveKeyset(
     absl::string_view salt) const {
   std::unique_ptr<InputStream> randomness = streaming_prf_->ComputePrf(salt);
-
-  util::StatusOr<KeyData> key_data =
-      crypto::tink::internal::RegistryImpl::GlobalInstance().DeriveKey(
-          key_template_, randomness.get());
-  if (!key_data.ok()) {
-    return key_data.status();
-  }
-
-  // Fill in placeholder values for key ID, status, and output prefix type.
-  // These will be populated with the correct values in the keyset deriver
-  // factory. This is acceptable because the keyset as-is will never leave Tink,
-  // and the user only interacts via the keyset deriver factory.
-  Keyset::Key key;
-  *key.mutable_key_data() = *key_data;
-  key.set_status(KeyStatusType::UNKNOWN_STATUS);
-  key.set_key_id(0);
-  key.set_output_prefix_type(OutputPrefixType::UNKNOWN_PREFIX);
-
-  Keyset keyset;
-  *keyset.add_key() = key;
-  keyset.set_primary_key_id(0);
-
-  return CleartextKeysetHandle::GetKeysetHandle(keyset);
+  return DeriveKeysetHandle(key_template_, *randomness);
 }
 
 }  // namespace internal

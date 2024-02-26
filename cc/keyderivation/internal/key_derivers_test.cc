@@ -25,6 +25,7 @@
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/types/optional.h"
 #include "tink/aead/aes_eax_parameters.h"
 #include "tink/aead/aes_eax_proto_serialization.h"
 #include "tink/aead/aes_gcm_key.h"
@@ -103,9 +104,11 @@ TEST_F(KeyDeriversTest, DeriveKey) {
   util::StatusOr<std::unique_ptr<Key>> generic_key =
       DeriveKey(*params, randomness_.get());
   ASSERT_THAT(generic_key, IsOk());
+
   const AesGcmKey* key =
       dynamic_cast<const AesGcmKey*>(&**std::move(generic_key));
   ASSERT_THAT(key, NotNull());
+  EXPECT_THAT(key->GetIdRequirement(), Eq(absl::nullopt));
   EXPECT_THAT(key->GetOutputPrefix(), Eq(""));
   EXPECT_THAT(key->GetKeyBytes(GetPartialKeyAccess()), SizeIs(key_size));
 
@@ -198,7 +201,7 @@ class KeyDeriversRfcVectorTest : public Test {
 };
 
 TEST_F(KeyDeriversRfcVectorTest, AesGcm) {
-  // Derive key with local map.
+  // Derive key with hard-coded map.
   util::StatusOr<AesGcmParameters> params =
       AesGcmParameters::Builder()
           .SetKeySizeInBytes(32)

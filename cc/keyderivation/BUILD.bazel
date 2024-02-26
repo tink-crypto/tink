@@ -150,7 +150,6 @@ cc_test(
         "//:registry",
         "//:restricted_data",
         "//aead:aes_gcm_key",
-        "//aead:aes_gcm_key_manager",
         "//aead:aes_gcm_parameters",
         "//aead:aes_gcm_proto_serialization",
         "//config:global_registry",

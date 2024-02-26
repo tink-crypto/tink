@@ -28,7 +28,6 @@
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "tink/aead/aes_gcm_key.h"
-#include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead/aes_gcm_parameters.h"
 #include "tink/aead/aes_gcm_proto_serialization.h"
 #include "tink/config/global_registry.h"
@@ -209,9 +208,6 @@ TEST_P(KeysetDeriverTest, DeriveKeyset) {
       IsOk());
   ASSERT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<HkdfPrfKeyManager>(), true),
-              IsOk());
-  ASSERT_THAT(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<AesGcmKeyManager>(), true),
               IsOk());
   ASSERT_THAT(RegisterAesGcmProtoSerialization(), IsOk());
 

@@ -138,10 +138,11 @@ TEST_F(KeyDerivationKeyTemplatesTest,
   util::StatusOr<KeyTemplate> derived_key_template =
       KeyDerivationKeyTemplates::CreatePrfBasedKeyTemplate(
           PrfKeyTemplates::HkdfSha256(), AeadKeyTemplates::Aes256Gcm());
+  ASSERT_THAT(derived_key_template, IsOk());
   EXPECT_THAT(KeyDerivationKeyTemplates::CreatePrfBasedKeyTemplate(
                   PrfKeyTemplates::HkdfSha256(), *derived_key_template)
                   .status(),
-              StatusIs(absl::StatusCode::kUnimplemented));
+              StatusIs(absl::StatusCode::kNotFound));
 }
 
 TEST_F(KeyDerivationKeyTemplatesTest,
@@ -174,25 +175,6 @@ TEST_F(KeyDerivationKeyTemplatesTest,
               IsOk());
   ASSERT_THAT(
       Registry::RegisterKeyTypeManager(absl::make_unique<AesGcmKeyManager>(),
-                                       /*new_key_allowed=*/true),
-      IsOk());
-
-  EXPECT_THAT(KeyDerivationKeyTemplates::CreatePrfBasedKeyTemplate(
-                  PrfKeyTemplates::HkdfSha256(), AeadKeyTemplates::Aes256Gcm()),
-              Not(IsOk()));
-}
-
-TEST_F(KeyDerivationKeyTemplatesTest,
-       CreatePrfBasedKeyTemplateNoAesGcmKeyManager) {
-  ASSERT_THAT(Registry::RegisterPrimitiveWrapper(
-                  absl::make_unique<KeysetDeriverWrapper>()),
-              IsOk());
-  ASSERT_THAT(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<internal::PrfBasedDeriverKeyManager>(),
-                  /*new_key_allowed=*/true),
-              IsOk());
-  ASSERT_THAT(
-      Registry::RegisterKeyTypeManager(absl::make_unique<HkdfPrfKeyManager>(),
                                        /*new_key_allowed=*/true),
       IsOk());
 
