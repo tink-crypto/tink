@@ -132,18 +132,6 @@ public final class PrimitiveSet<P> {
     }
   }
 
-  private static <P> Entry<P> createEntry(@Nullable P fullPrimitive, Key key, Keyset.Key protoKey)
-      throws GeneralSecurityException {
-    return new Entry<P>(
-        fullPrimitive,
-        Bytes.copyFrom(CryptoFormat.getOutputPrefix(protoKey)),
-        protoKey.getStatus(),
-        protoKey.getOutputPrefixType(),
-        protoKey.getKeyId(),
-        protoKey.getKeyData().getTypeUrl(),
-        key);
-  }
-
   private static <P> void storeEntryInPrimitiveSet(
       Entry<P> entry,
       Map<Bytes, List<Entry<P>>> primitives,
@@ -252,7 +240,15 @@ public final class PrimitiveSet<P> {
       if (protoKey.getStatus() != KeyStatusType.ENABLED) {
         throw new GeneralSecurityException("only ENABLED key is allowed");
       }
-      Entry<P> entry = createEntry(fullPrimitive, key, protoKey);
+      Entry<P> entry =
+          new Entry<P>(
+              fullPrimitive,
+              Bytes.copyFrom(CryptoFormat.getOutputPrefix(protoKey)),
+              protoKey.getStatus(),
+              protoKey.getOutputPrefixType(),
+              protoKey.getKeyId(),
+              protoKey.getKeyData().getTypeUrl(),
+              key);
       storeEntryInPrimitiveSet(entry, primitives, primitivesInKeysetOrder);
       if (asPrimary) {
         if (this.primary != null) {
