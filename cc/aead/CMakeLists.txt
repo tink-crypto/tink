@@ -720,6 +720,36 @@ tink_cc_library(
     tink::util::statusor
 )
 
+tink_cc_library(
+  NAME aes_ctr_hmac_aead_proto_serialization
+  SRCS
+    aes_ctr_hmac_aead_proto_serialization.cc
+    aes_ctr_hmac_aead_proto_serialization.h
+  DEPS
+    tink::aead::aes_ctr_hmac_aead_key
+    tink::aead::aes_ctr_hmac_aead_parameters
+    absl::core_headers
+    absl::no_destructor
+    absl::status
+    absl::strings
+    absl::string_view
+    tink::internal::key_parser
+    tink::internal::key_serializer
+    tink::internal::mutable_serialization_registry
+    tink::internal::parameters_parser
+    tink::internal::parameters_serializer
+    tink::internal::proto_key_serialization
+    tink::internal::proto_parameters_serialization
+    tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
+    tink::proto::aes_ctr_cc_proto
+    tink::proto::aes_ctr_hmac_aead_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::hmac_cc_proto
+    tink::proto::tink_cc_proto
+)
+
 # tests
 
 tink_cc_test(
@@ -1396,4 +1426,28 @@ tink_cc_test(
     tink::core::restricted_data
     tink::util::statusor
     tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME aes_ctr_hmac_aead_proto_serialization_test
+  SRCS
+    aes_ctr_hmac_aead_proto_serialization_test.cc
+  DEPS
+    tink::aead::aes_ctr_hmac_aead_parameters
+    tink::aead::aes_ctr_hmac_aead_proto_serialization
+    gmock
+    absl::status
+    absl::string_view
+    absl::optional
+    tink::core::parameters
+    tink::internal::mutable_serialization_registry
+    tink::internal::proto_parameters_serialization
+    tink::internal::serialization
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::proto::aes_ctr_cc_proto
+    tink::proto::aes_ctr_hmac_aead_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::hmac_cc_proto
+    tink::proto::tink_cc_proto
 )

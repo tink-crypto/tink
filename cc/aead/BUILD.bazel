@@ -764,6 +764,37 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "aes_ctr_hmac_aead_proto_serialization",
+    srcs = ["aes_ctr_hmac_aead_proto_serialization.cc"],
+    hdrs = ["aes_ctr_hmac_aead_proto_serialization.h"],
+    include_prefix = "tink/aead",
+    deps = [
+        ":aes_ctr_hmac_aead_key",
+        ":aes_ctr_hmac_aead_parameters",
+        "//internal:key_parser",
+        "//internal:key_serializer",
+        "//internal:mutable_serialization_registry",
+        "//internal:parameters_parser",
+        "//internal:parameters_serializer",
+        "//internal:proto_key_serialization",
+        "//internal:proto_parameters_serialization",
+        "//proto:aes_ctr_cc_proto",
+        "//proto:aes_ctr_hmac_aead_cc_proto",
+        "//proto:common_cc_proto",
+        "//proto:hmac_cc_proto",
+        "//proto:tink_cc_proto",
+        "//util:secret_data",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/base:no_destructor",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:string_view",
+    ],
+)
+
 # tests
 
 cc_test(
@@ -1454,6 +1485,30 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/types:optional",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "aes_ctr_hmac_aead_proto_serialization_test",
+    srcs = ["aes_ctr_hmac_aead_proto_serialization_test.cc"],
+    deps = [
+        ":aes_ctr_hmac_aead_parameters",
+        ":aes_ctr_hmac_aead_proto_serialization",
+        "//:parameters",
+        "//internal:mutable_serialization_registry",
+        "//internal:proto_parameters_serialization",
+        "//internal:serialization",
+        "//proto:aes_ctr_cc_proto",
+        "//proto:aes_ctr_hmac_aead_cc_proto",
+        "//proto:common_cc_proto",
+        "//proto:hmac_cc_proto",
+        "//proto:tink_cc_proto",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings:string_view",
         "@com_google_absl//absl/types:optional",
         "@com_google_googletest//:gtest_main",
     ],
