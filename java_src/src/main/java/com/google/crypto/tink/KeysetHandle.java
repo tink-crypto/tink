@@ -393,6 +393,7 @@ public final class KeysetHandle {
       }
       buildCalled = true;
       Keyset.Builder keysetBuilder = Keyset.newBuilder();
+      List<KeysetHandle.Entry> handleEntries = new ArrayList<>(entries.size());
       Integer primaryId = null;
 
       checkIdAssignments(entries);
@@ -407,6 +408,7 @@ public final class KeysetHandle {
         }
         idsSoFar.add(id);
 
+        // Create proto key and add it to keysetBuilder.
         Keyset.Key keysetKey = createKeysetKeyFromBuilderEntry(builderEntry, id);
         keysetBuilder.addKey(keysetKey);
         if (builderEntry.isPrimary) {
@@ -418,12 +420,26 @@ public final class KeysetHandle {
             throw new GeneralSecurityException("Primary key is not enabled");
           }
         }
+
+        // Create KeysetHandle.Entry and add it to handleEntries.
+        ProtoKeySerialization protoKeySerialization = toProtoKeySerialization(keysetKey);
+        try {
+          Key key =
+              MutableSerializationRegistry.globalInstance()
+                  .parseKeyWithLegacyFallback(protoKeySerialization, InsecureSecretKeyAccess.get());
+          handleEntries.add(
+              new KeysetHandle.Entry(key, builderEntry.keyStatus, id, builderEntry.isPrimary));
+        } catch (GeneralSecurityException e) {
+          handleEntries.add(null);
+        }
       }
       if (primaryId == null) {
         throw new GeneralSecurityException("No primary was set");
       }
       keysetBuilder.setPrimaryKeyId(primaryId);
-      return KeysetHandle.fromKeysetAndAnnotations(keysetBuilder.build(), annotations);
+      Keyset keyset = keysetBuilder.build();
+      assertEnoughKeyMaterial(keyset);
+      return new KeysetHandle(keyset, handleEntries, annotations);
     }
   }
 
@@ -940,7 +956,6 @@ public final class KeysetHandle {
       throws GeneralSecurityException, IOException {
     EncryptedKeyset encryptedKeyset = encrypt(keyset, masterKey, associatedData);
     keysetWriter.write(encryptedKeyset);
-    return;
   }
 
   /**
@@ -954,7 +969,6 @@ public final class KeysetHandle {
   public void writeNoSecret(KeysetWriter writer) throws GeneralSecurityException, IOException {
     assertNoSecretKeyMaterial(keyset);
     writer.write(keyset);
-    return;
   }
 
   /** Encrypts the keyset with the {@link Aead} master key. */
