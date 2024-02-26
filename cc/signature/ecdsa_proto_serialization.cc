@@ -33,9 +33,11 @@
 #include "tink/internal/proto_key_serialization.h"
 #include "tink/internal/proto_parameters_serialization.h"
 #include "tink/partial_key_access.h"
+#include "tink/restricted_big_integer.h"
 #include "tink/restricted_data.h"
 #include "tink/secret_key_access_token.h"
 #include "tink/signature/ecdsa_parameters.h"
+#include "tink/signature/ecdsa_private_key.h"
 #include "tink/signature/ecdsa_public_key.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -65,6 +67,11 @@ using EcdsaProtoPublicKeyParserImpl =
     internal::KeyParserImpl<internal::ProtoKeySerialization, EcdsaPublicKey>;
 using EcdsaProtoPublicKeySerializerImpl =
     internal::KeySerializerImpl<EcdsaPublicKey,
+                                internal::ProtoKeySerialization>;
+using EcdsaProtoPrivateKeyParserImpl =
+    internal::KeyParserImpl<internal::ProtoKeySerialization, EcdsaPrivateKey>;
+using EcdsaProtoPrivateKeySerializerImpl =
+    internal::KeySerializerImpl<EcdsaPrivateKey,
                                 internal::ProtoKeySerialization>;
 
 const absl::string_view kPublicTypeUrl =
@@ -326,6 +333,52 @@ util::StatusOr<EcdsaPublicKey> ParsePublicKey(
                                 GetPartialKeyAccess());
 }
 
+util::StatusOr<EcdsaPrivateKey> ParsePrivateKey(
+    const internal::ProtoKeySerialization& serialization,
+    absl::optional<SecretKeyAccessToken> token) {
+  if (serialization.TypeUrl() != kPrivateTypeUrl) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Wrong type URL when parsing EcdsaPrivateKey.");
+  }
+  if (!token.has_value()) {
+    return util::Status(absl::StatusCode::kPermissionDenied,
+                        "SecretKeyAccess is required");
+  }
+  google::crypto::tink::EcdsaPrivateKey proto_key;
+  RestrictedData restricted_data = serialization.SerializedKeyProto();
+  if (!proto_key.ParseFromString(restricted_data.GetSecret(*token))) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Failed to parse EcdsaPrivateKey proto");
+  }
+  if (proto_key.version() != 0) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Only version 0 keys are accepted.");
+  }
+
+  util::StatusOr<EcdsaParameters::Variant> variant =
+      ToVariant(serialization.GetOutputPrefixType());
+  if (!variant.ok()) {
+    return variant.status();
+  }
+
+  util::StatusOr<EcdsaParameters> parameters = ToParameters(
+      serialization.GetOutputPrefixType(), proto_key.public_key().params());
+  if (!parameters.ok()) {
+    return parameters.status();
+  }
+
+  EcPoint public_point(BigInteger(proto_key.public_key().x()),
+                       BigInteger(proto_key.public_key().y()));
+  util::StatusOr<EcdsaPublicKey> public_key = EcdsaPublicKey::Create(
+      *parameters, public_point, serialization.IdRequirement(),
+      GetPartialKeyAccess());
+
+  RestrictedBigInteger private_key_value =
+      RestrictedBigInteger(proto_key.key_value(), *token);
+  return EcdsaPrivateKey::Create(*public_key, private_key_value,
+                                 GetPartialKeyAccess());
+}
+
 util::StatusOr<internal::ProtoParametersSerialization> SerializeParameters(
     const EcdsaParameters& parameters) {
   util::StatusOr<OutputPrefixType> output_prefix_type =
@@ -393,6 +446,65 @@ util::StatusOr<internal::ProtoKeySerialization> SerializePublicKey(
       *output_prefix_type, key.GetIdRequirement());
 }
 
+util::StatusOr<internal::ProtoKeySerialization> SerializePrivateKey(
+    const EcdsaPrivateKey& key, absl::optional<SecretKeyAccessToken> token) {
+  util::StatusOr<RestrictedBigInteger> restricted_input =
+      key.GetPrivateKeyValue(GetPartialKeyAccess());
+  if (!restricted_input.ok()) {
+    return restricted_input.status();
+  }
+  if (!token.has_value()) {
+    return util::Status(absl::StatusCode::kPermissionDenied,
+                        "SecretKeyAccess is required");
+  }
+
+  util::StatusOr<EcdsaParams> params =
+      FromParameters(key.GetPublicKey().GetParameters());
+  if (!params.ok()) {
+    return params.status();
+  }
+
+  util::StatusOr<int> enc_length =
+      getEncodingLength(key.GetPublicKey().GetParameters().GetCurveType());
+  if (!enc_length.ok()) {
+    return enc_length.status();
+  }
+
+  google::crypto::tink::EcdsaPublicKey proto_public_key;
+  proto_public_key.set_version(0);
+  *proto_public_key.mutable_params() = *params;
+  proto_public_key.set_x(*internal::GetValueOfFixedLength(
+      key.GetPublicKey()
+          .GetPublicPoint(GetPartialKeyAccess())
+          .GetX()
+          .GetValue(),
+      enc_length.value()));
+  proto_public_key.set_y(*internal::GetValueOfFixedLength(
+      key.GetPublicKey()
+          .GetPublicPoint(GetPartialKeyAccess())
+          .GetY()
+          .GetValue(),
+      enc_length.value()));
+
+  google::crypto::tink::EcdsaPrivateKey proto_private_key;
+  proto_private_key.set_version(0);
+  *proto_private_key.mutable_public_key() = proto_public_key;
+  proto_private_key.set_key_value(*internal::GetValueOfFixedLength(
+      restricted_input->GetSecret(*token), *enc_length));
+
+  util::StatusOr<OutputPrefixType> output_prefix_type =
+      ToOutputPrefixType(key.GetPublicKey().GetParameters().GetVariant());
+  if (!output_prefix_type.ok()) {
+    return output_prefix_type.status();
+  }
+
+  RestrictedData restricted_output =
+      RestrictedData(proto_private_key.SerializeAsString(), *token);
+  return internal::ProtoKeySerialization::Create(
+      kPrivateTypeUrl, restricted_output, KeyData::ASYMMETRIC_PRIVATE,
+      *output_prefix_type, key.GetIdRequirement());
+}
+
 EcdsaProtoParametersParserImpl& EcdsaProtoParametersParser() {
   static absl::NoDestructor<EcdsaProtoParametersParserImpl> parser(
       kPrivateTypeUrl, ParseParameters);
@@ -414,6 +526,18 @@ EcdsaProtoPublicKeyParserImpl& EcdsaProtoPublicKeyParser() {
 EcdsaProtoPublicKeySerializerImpl& EcdsaProtoPublicKeySerializer() {
   static absl::NoDestructor<EcdsaProtoPublicKeySerializerImpl> serializer(
       SerializePublicKey);
+  return *serializer;
+}
+
+EcdsaProtoPrivateKeyParserImpl& EcdsaProtoPrivateKeyParser() {
+  static absl::NoDestructor<EcdsaProtoPrivateKeyParserImpl> parser(
+      kPrivateTypeUrl, ParsePrivateKey);
+  return *parser;
+}
+
+EcdsaProtoPrivateKeySerializerImpl& EcdsaProtoPrivateKeySerializer() {
+  static absl::NoDestructor<EcdsaProtoPrivateKeySerializerImpl> serializer(
+      SerializePrivateKey);
   return *serializer;
 }
 }  // namespace
@@ -438,8 +562,20 @@ util::Status RegisterEcdsaProtoSerialization() {
     return status;
   }
 
+  status = internal::MutableSerializationRegistry::GlobalInstance()
+               .RegisterKeySerializer(&EcdsaProtoPublicKeySerializer());
+  if (!status.ok()) {
+    return status;
+  }
+
+  status = internal::MutableSerializationRegistry::GlobalInstance()
+               .RegisterKeyParser(&EcdsaProtoPrivateKeyParser());
+  if (!status.ok()) {
+    return status;
+  }
+
   return internal::MutableSerializationRegistry::GlobalInstance()
-      .RegisterKeySerializer(&EcdsaProtoPublicKeySerializer());
+      .RegisterKeySerializer(&EcdsaProtoPrivateKeySerializer());
 }
 
 }  // namespace tink

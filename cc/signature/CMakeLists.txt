@@ -820,6 +820,7 @@ tink_cc_library(
     ecdsa_proto_serialization.h
   DEPS
     tink::signature::ecdsa_parameters
+    tink::signature::ecdsa_private_key
     tink::signature::ecdsa_public_key
     absl::no_destructor
     absl::status
@@ -829,6 +830,7 @@ tink_cc_library(
     tink::core::ec_point
     tink::core::insecure_secret_key_access
     tink::core::partial_key_access
+    tink::core::restricted_big_integer
     tink::core::restricted_data
     tink::core::secret_key_access_token
     tink::internal::bn_encoding_util
@@ -1609,6 +1611,7 @@ tink_cc_test(
     ecdsa_proto_serialization_test.cc
   DEPS
     tink::signature::ecdsa_parameters
+    tink::signature::ecdsa_private_key
     tink::signature::ecdsa_proto_serialization
     tink::signature::ecdsa_public_key
     gmock
@@ -1622,6 +1625,7 @@ tink_cc_test(
     tink::core::key
     tink::core::parameters
     tink::core::partial_key_access
+    tink::core::restricted_big_integer
     tink::core::restricted_data
     tink::internal::ec_util
     tink::internal::mutable_serialization_registry
@@ -1629,6 +1633,7 @@ tink_cc_test(
     tink::internal::proto_parameters_serialization
     tink::internal::serialization
     tink::subtle::common_enums
+    tink::util::secret_data
     tink::util::statusor
     tink::util::test_matchers
     tink::proto::common_cc_proto
