@@ -401,14 +401,28 @@ public final class KeysetHandle {
         }
         idsSoFar.add(id);
 
-        // Create proto key and add it to keysetBuilder.
         Keyset.Key keysetKey;
+        @Nullable KeysetHandle.Entry handleEntry;
+
         if (builderEntry.key != null) {
+          handleEntry =
+              new KeysetHandle.Entry(
+                  builderEntry.key, builderEntry.keyStatus, id, builderEntry.isPrimary);
           keysetKey = createKeysetKey(builderEntry.key, builderEntry.keyStatus, id);
         } else {
           keysetKey =
-              createNewKeysetKeyFromParameters(
-                  builderEntry.parameters, builderEntry.getStatus(), id);
+              createNewKeysetKeyFromParameters(builderEntry.parameters, builderEntry.keyStatus, id);
+          ProtoKeySerialization protoKeySerialization = toProtoKeySerialization(keysetKey);
+          try {
+            Key key =
+                MutableSerializationRegistry.globalInstance()
+                    .parseKeyWithLegacyFallback(
+                        protoKeySerialization, InsecureSecretKeyAccess.get());
+            handleEntry =
+                new KeysetHandle.Entry(key, builderEntry.keyStatus, id, builderEntry.isPrimary);
+          } catch (GeneralSecurityException e) {
+            handleEntry = null;
+          }
         }
         keysetBuilder.addKey(keysetKey);
         if (builderEntry.isPrimary) {
@@ -420,18 +434,7 @@ public final class KeysetHandle {
             throw new GeneralSecurityException("Primary key is not enabled");
           }
         }
-
-        // Create KeysetHandle.Entry and add it to handleEntries.
-        ProtoKeySerialization protoKeySerialization = toProtoKeySerialization(keysetKey);
-        try {
-          Key key =
-              MutableSerializationRegistry.globalInstance()
-                  .parseKeyWithLegacyFallback(protoKeySerialization, InsecureSecretKeyAccess.get());
-          handleEntries.add(
-              new KeysetHandle.Entry(key, builderEntry.keyStatus, id, builderEntry.isPrimary));
-        } catch (GeneralSecurityException e) {
-          handleEntries.add(null);
-        }
+        handleEntries.add(handleEntry);
       }
       if (primaryId == null) {
         throw new GeneralSecurityException("No primary was set");
