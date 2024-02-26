@@ -312,9 +312,8 @@ public final class KeysetHandle {
       return id;
     }
 
-    private static Keyset.Key createKeyFromParameters(
-        Parameters parameters, int id, KeyStatusType keyStatusType)
-        throws GeneralSecurityException {
+    private static Keyset.Key createNewKeysetKeyFromParameters(
+        Parameters parameters, KeyStatus status, int id) throws GeneralSecurityException {
       ProtoParametersSerialization serializedParameters;
       if (parameters instanceof LegacyProtoParameters) {
         serializedParameters = ((LegacyProtoParameters) parameters).getSerialization();
@@ -326,7 +325,7 @@ public final class KeysetHandle {
       KeyData keyData = Registry.newKeyData(serializedParameters.getKeyTemplate());
       return Keyset.Key.newBuilder()
           .setKeyId(id)
-          .setStatus(keyStatusType)
+          .setStatus(serializeStatus(status))
           .setKeyData(keyData)
           .setOutputPrefixType(serializedParameters.getKeyTemplate().getOutputPrefixType())
           .build();
@@ -347,22 +346,16 @@ public final class KeysetHandle {
       return id;
     }
 
-    private static Keyset.Key createKeysetKeyFromBuilderEntry(
-        KeysetHandle.Builder.Entry builderEntry, int id) throws GeneralSecurityException {
-      if (builderEntry.key == null) {
-        return createKeyFromParameters(
-            builderEntry.parameters, id, serializeStatus(builderEntry.getStatus()));
-      } else {
-        ProtoKeySerialization serializedKey =
-            MutableSerializationRegistry.globalInstance()
-                .serializeKey(
-                    builderEntry.key, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
-        @Nullable Integer idRequirement = serializedKey.getIdRequirementOrNull();
-        if (idRequirement != null && idRequirement != id) {
-          throw new GeneralSecurityException("Wrong ID set for key with ID requirement");
-        }
-        return toKeysetKey(id, serializeStatus(builderEntry.getStatus()), serializedKey);
+    private static Keyset.Key createKeysetKey(Key key, KeyStatus keyStatus, int id)
+        throws GeneralSecurityException {
+      ProtoKeySerialization serializedKey =
+          MutableSerializationRegistry.globalInstance()
+              .serializeKey(key, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
+      @Nullable Integer idRequirement = serializedKey.getIdRequirementOrNull();
+      if (idRequirement != null && idRequirement != id) {
+        throw new GeneralSecurityException("Wrong ID set for key with ID requirement");
       }
+      return toKeysetKey(id, serializeStatus(keyStatus), serializedKey);
     }
 
     /**
@@ -409,7 +402,14 @@ public final class KeysetHandle {
         idsSoFar.add(id);
 
         // Create proto key and add it to keysetBuilder.
-        Keyset.Key keysetKey = createKeysetKeyFromBuilderEntry(builderEntry, id);
+        Keyset.Key keysetKey;
+        if (builderEntry.key != null) {
+          keysetKey = createKeysetKey(builderEntry.key, builderEntry.keyStatus, id);
+        } else {
+          keysetKey =
+              createNewKeysetKeyFromParameters(
+                  builderEntry.parameters, builderEntry.getStatus(), id);
+        }
         keysetBuilder.addKey(keysetKey);
         if (builderEntry.isPrimary) {
           if (primaryId != null) {
