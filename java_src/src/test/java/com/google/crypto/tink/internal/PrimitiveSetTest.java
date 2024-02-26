@@ -18,7 +18,6 @@ package com.google.crypto.tink.internal;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
@@ -132,7 +131,6 @@ public class PrimitiveSetTest {
     assertThat(entries).hasSize(1);
     PrimitiveSet.Entry<Aead> entry = entries.get(0);
     assertThat(entry.getFullPrimitive()).isEqualTo(fullPrimitive);
-    assertThat(entry.getIdentifier()).isEqualTo(CryptoFormat.getOutputPrefix(protoKey));
     assertThat(entry.getStatus()).isEqualTo(KeyStatusType.ENABLED);
     assertThat(entry.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
     assertThat(entry.getKeyId()).isEqualTo(42);
@@ -176,8 +174,6 @@ public class PrimitiveSetTest {
         DummyMac1.class.getSimpleName(),
         new String(entry.getFullPrimitive().computeMac(null), UTF_8));
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
-    assertEquals(CryptoFormat.TINK_START_BYTE, entry.getIdentifier()[0]);
-    assertArrayEquals(CryptoFormat.getOutputPrefix(key1), entry.getIdentifier());
     assertEquals(1, entry.getKeyId());
 
     entries = pset.getPrimitive(CryptoFormat.getOutputPrefix(key2));
@@ -187,8 +183,6 @@ public class PrimitiveSetTest {
         DummyMac2.class.getSimpleName(),
         new String(entry.getFullPrimitive().computeMac(null), UTF_8));
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
-    assertThat(entry.getIdentifier()).isEmpty();
-    assertArrayEquals(CryptoFormat.getOutputPrefix(key2), entry.getIdentifier());
     assertEquals(2, entry.getKeyId());
 
     entries = pset.getPrimitive(CryptoFormat.getOutputPrefix(key3));
@@ -198,8 +192,6 @@ public class PrimitiveSetTest {
         DummyMac1.class.getSimpleName(),
         new String(entry.getFullPrimitive().computeMac(null), UTF_8));
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
-    assertEquals(CryptoFormat.LEGACY_START_BYTE, entry.getIdentifier()[0]);
-    assertArrayEquals(CryptoFormat.getOutputPrefix(key3), entry.getIdentifier());
     assertEquals(3, entry.getKeyId());
 
     entry = pset.getPrimary();
@@ -207,7 +199,6 @@ public class PrimitiveSetTest {
         DummyMac2.class.getSimpleName(),
         new String(entry.getFullPrimitive().computeMac(null), UTF_8));
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
-    assertArrayEquals(CryptoFormat.getOutputPrefix(key2), entry.getIdentifier());
     assertEquals(2, entry.getKeyId());
   }
 
@@ -330,22 +321,18 @@ public class PrimitiveSetTest {
 
     PrimitiveSet.Entry<Mac> entry = pset.getPrimitive(CryptoFormat.getOutputPrefix(key1)).get(0);
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
-    assertArrayEquals(CryptoFormat.getOutputPrefix(key1), entry.getIdentifier());
     assertEquals(1, entry.getKeyId());
 
     entry = pset.getPrimitive(CryptoFormat.getOutputPrefix(key2)).get(0);
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
-    assertArrayEquals(CryptoFormat.getOutputPrefix(key2), entry.getIdentifier());
     assertEquals(2, entry.getKeyId());
 
     entry = pset.getPrimitive(CryptoFormat.getOutputPrefix(key3)).get(0);
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
-    assertArrayEquals(CryptoFormat.getOutputPrefix(key3), entry.getIdentifier());
     assertEquals(3, entry.getKeyId());
 
     entry = pset.getPrimary();
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
-    assertArrayEquals(CryptoFormat.getOutputPrefix(key2), entry.getIdentifier());
     assertEquals(2, entry.getKeyId());
   }
 
@@ -548,8 +535,6 @@ public class PrimitiveSetTest {
         DummyMac1.class.getSimpleName(),
         new String(entry.getFullPrimitive().computeMac(null), UTF_8));
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
-    assertEquals(CryptoFormat.TINK_START_BYTE, entry.getIdentifier()[0]);
-    assertArrayEquals(CryptoFormat.getOutputPrefix(key1), entry.getIdentifier());
     assertEquals(1, entry.getKeyId());
 
     // raw keys
@@ -561,21 +546,18 @@ public class PrimitiveSetTest {
         DummyMac2.class.getSimpleName(),
         new String(entry.getFullPrimitive().computeMac(null), UTF_8));
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
-    assertThat(entry.getIdentifier()).isEmpty();
     ids.add(entry.getKeyId());
     entry = entries.get(1);
     assertEquals(
         DummyMac1.class.getSimpleName(),
         new String(entry.getFullPrimitive().computeMac(null), UTF_8));
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
-    assertThat(entry.getIdentifier()).isEmpty();
     ids.add(entry.getKeyId());
     entry = entries.get(2);
     assertEquals(
         DummyMac1.class.getSimpleName(),
         new String(entry.getFullPrimitive().computeMac(null), UTF_8));
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
-    assertThat(entry.getIdentifier()).isEmpty();
     ids.add(entry.getKeyId());
 
     assertThat(ids).containsExactly(1, 3, 3);
@@ -587,14 +569,12 @@ public class PrimitiveSetTest {
         DummyMac1.class.getSimpleName(),
         new String(entry.getFullPrimitive().computeMac(null), UTF_8));
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
-    assertArrayEquals(CryptoFormat.getOutputPrefix(key3), entry.getIdentifier());
     assertEquals(2, entry.getKeyId());
     entry = entries.get(1);
     assertEquals(
         DummyMac2.class.getSimpleName(),
         new String(entry.getFullPrimitive().computeMac(null), UTF_8));
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
-    assertArrayEquals(CryptoFormat.getOutputPrefix(key4), entry.getIdentifier());
     assertEquals(2, entry.getKeyId());
 
     entry = pset.getPrimary();
@@ -602,8 +582,6 @@ public class PrimitiveSetTest {
         DummyMac2.class.getSimpleName(),
         new String(entry.getFullPrimitive().computeMac(null), UTF_8));
     assertEquals(KeyStatusType.ENABLED, entry.getStatus());
-    assertThat(entry.getIdentifier()).isEmpty();
-    assertArrayEquals(CryptoFormat.getOutputPrefix(key2), entry.getIdentifier());
     assertEquals(1, entry.getKeyId());
   }
 

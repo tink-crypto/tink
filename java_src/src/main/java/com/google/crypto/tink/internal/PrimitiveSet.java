@@ -23,11 +23,10 @@ import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import com.google.crypto.tink.subtle.Hex;
+import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,7 +60,7 @@ public final class PrimitiveSet<P> {
     private final P fullPrimitive;
     // Identifies the primitive within the set.
     // It is the ciphertext prefix of the corresponding key.
-    private final byte[] identifier;
+    private final Bytes outputPrefix;
     // The status of the key represented by the primitive. Currently always equal to "ENABLED".
     private final KeyStatusType status;
     // The output prefix type of the key represented by the primitive.
@@ -71,16 +70,16 @@ public final class PrimitiveSet<P> {
     private final String keyTypeUrl;
     private final Key key;
 
-    Entry(
+    private Entry(
         P fullPrimitive,
-        final byte[] identifier,
+        final Bytes outputPrefix,
         KeyStatusType status,
         OutputPrefixType outputPrefixType,
         int keyId,
         String keyTypeUrl,
         Key key) {
       this.fullPrimitive = fullPrimitive;
-      this.identifier = Arrays.copyOf(identifier, identifier.length);
+      this.outputPrefix = outputPrefix;
       this.status = status;
       this.outputPrefixType = outputPrefixType;
       this.keyId = keyId;
@@ -108,13 +107,8 @@ public final class PrimitiveSet<P> {
       return outputPrefixType;
     }
 
-    @Nullable
-    public final byte[] getIdentifier() {
-      if (identifier == null) {
-        return null;
-      } else {
-        return Arrays.copyOf(identifier, identifier.length);
-      }
+    private final Bytes getOutputPrefix() {
+      return outputPrefix;
     }
 
     public int getKeyId() {
@@ -142,7 +136,7 @@ public final class PrimitiveSet<P> {
       throws GeneralSecurityException {
     return new Entry<P>(
         fullPrimitive,
-        CryptoFormat.getOutputPrefix(protoKey),
+        Bytes.copyFrom(CryptoFormat.getOutputPrefix(protoKey)),
         protoKey.getStatus(),
         protoKey.getOutputPrefixType(),
         protoKey.getKeyId(),
@@ -152,18 +146,17 @@ public final class PrimitiveSet<P> {
 
   private static <P> void storeEntryInPrimitiveSet(
       Entry<P> entry,
-      Map<Prefix, List<Entry<P>>> primitives,
+      Map<Bytes, List<Entry<P>>> primitives,
       List<Entry<P>> primitivesInKeysetOrder) {
     List<Entry<P>> list = new ArrayList<>();
     list.add(entry);
-    // Cannot use byte[] as keys in hash map, convert to Prefix wrapper class.
-    Prefix identifier = new Prefix(entry.getIdentifier());
-    List<Entry<P>> existing = primitives.put(identifier, Collections.unmodifiableList(list));
+    List<Entry<P>> existing =
+        primitives.put(entry.getOutputPrefix(), Collections.unmodifiableList(list));
     if (existing != null) {
       List<Entry<P>> newList = new ArrayList<>();
       newList.addAll(existing);
       newList.add(entry);
-      primitives.put(identifier, Collections.unmodifiableList(newList));
+      primitives.put(entry.getOutputPrefix(), Collections.unmodifiableList(newList));
     }
     primitivesInKeysetOrder.add(entry);
   }
@@ -189,7 +182,7 @@ public final class PrimitiveSet<P> {
 
   /** Returns the entries with primitive identifed by {@code identifier}. */
   public List<Entry<P>> getPrimitive(final byte[] identifier) {
-    List<Entry<P>> found = primitives.get(new Prefix(identifier));
+    List<Entry<P>> found = primitives.get(Bytes.copyFrom(identifier));
     return found != null ? found : Collections.<Entry<P>>emptyList();
   }
 
@@ -208,7 +201,7 @@ public final class PrimitiveSet<P> {
    * prefix). This allows quickly retrieving the list of primitives sharing some particular prefix.
    * Because all RAW keys are using an empty prefix, this also quickly allows retrieving them.
    */
-  private final Map<Prefix, List<Entry<P>>> primitives;
+  private final Map<Bytes, List<Entry<P>>> primitives;
 
   /** Stores entries in the original keyset key order. */
   private final List<Entry<P>> primitivesInKeysetOrder;
@@ -219,7 +212,7 @@ public final class PrimitiveSet<P> {
 
   /** Creates an immutable PrimitiveSet. It is used by the Builder. */
   private PrimitiveSet(
-      Map<Prefix, List<Entry<P>>> primitives,
+      Map<Bytes, List<Entry<P>>> primitives,
       List<Entry<P>> primitivesInKeysetOrder,
       Entry<P> primary,
       MonitoringAnnotations annotations,
@@ -235,53 +228,13 @@ public final class PrimitiveSet<P> {
     return primitiveClass;
   }
 
-  private static class Prefix implements Comparable<Prefix> {
-    private final byte[] prefix;
-
-    private Prefix(byte[] prefix) {
-      this.prefix = Arrays.copyOf(prefix, prefix.length);
-    }
-
-    @Override
-    public int hashCode() {
-      return Arrays.hashCode(prefix);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (!(o instanceof Prefix)) {
-        return false;
-      }
-      Prefix other = (Prefix) o;
-      return Arrays.equals(prefix, other.prefix);
-    }
-
-    @Override
-    public int compareTo(Prefix o) {
-      if (prefix.length != o.prefix.length) {
-        return prefix.length - o.prefix.length;
-      }
-      for (int i = 0; i < prefix.length; i++) {
-        if (prefix[i] != o.prefix[i]) {
-          return prefix[i] - o.prefix[i];
-        }
-      }
-      return 0;
-    }
-
-    @Override
-    public String toString() {
-      return Hex.encode(prefix);
-    }
-  }
-
   /** Builds an immutable PrimitiveSet. This is the prefered way to construct a PrimitiveSet. */
   public static class Builder<P> {
     private final Class<P> primitiveClass;
 
     // primitives == null indicates that build has been called and the builder can't be used
     // anymore.
-    private Map<Prefix, List<Entry<P>>> primitives = new HashMap<>();
+    private Map<Bytes, List<Entry<P>>> primitives = new HashMap<>();
     private final List<Entry<P>> primitivesInKeysetOrder = new ArrayList<>();
     private Entry<P> primary;
     private MonitoringAnnotations annotations;
