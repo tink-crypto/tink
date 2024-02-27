@@ -21,16 +21,22 @@ import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
+import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
 import com.google.crypto.tink.proto.AesCtrKey;
+import com.google.crypto.tink.proto.AesCtrKeyFormat;
 import com.google.crypto.tink.proto.AesCtrParams;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
+import com.google.crypto.tink.proto.HmacKeyFormat;
 import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.AesCtrJceCipher;
 import com.google.crypto.tink.subtle.EncryptThenAuthenticate;
 import com.google.crypto.tink.subtle.PrfHmacJce;
 import com.google.crypto.tink.subtle.PrfMac;
+import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
@@ -83,7 +89,7 @@ public class LegacyAesCtrHmacTestKeyManager implements KeyManager<Aead> {
   }
 
   private static void validateHmacKey(HmacKey key) throws GeneralSecurityException {
-    Validators.validateVersion(key.getVersion(), 0);
+    Validators.validateVersion(key.getVersion(), /* maxExpected= */ 0);
     if (key.getKeyValue().size() < 16) {
       throw new GeneralSecurityException("key too short");
     }
@@ -120,6 +126,7 @@ public class LegacyAesCtrHmacTestKeyManager implements KeyManager<Aead> {
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("failed to parse the key", e);
     }
+    validateKey(keyProto);
     return new EncryptThenAuthenticate(
         new AesCtrJceCipher(
             keyProto.getAesCtrKey().getKeyValue().toByteArray(),
@@ -128,9 +135,9 @@ public class LegacyAesCtrHmacTestKeyManager implements KeyManager<Aead> {
         keyProto.getHmacKey().getParams().getTagSize());
   }
 
-  public void validateKey(AesCtrHmacAeadKey key) throws GeneralSecurityException {
+  private void validateKey(AesCtrHmacAeadKey key) throws GeneralSecurityException {
     // Validate overall.
-    Validators.validateVersion(key.getVersion(), getVersion());
+    Validators.validateVersion(key.getVersion(), /* maxExpected= */ 0);
 
     // Validate AesCtrKey.
     AesCtrKey aesCtrKey = key.getAesCtrKey();
@@ -157,7 +164,74 @@ public class LegacyAesCtrHmacTestKeyManager implements KeyManager<Aead> {
 
   @Override
   public KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException {
-    throw new UnsupportedOperationException("not needed for tests");
+    AesCtrHmacAeadKeyFormat format;
+    try {
+      format =
+          AesCtrHmacAeadKeyFormat.parseFrom(
+              serializedKeyFormat, ExtensionRegistryLite.getEmptyRegistry());
+    } catch (InvalidProtocolBufferException e) {
+      throw new GeneralSecurityException("failed to parse the key format", e);
+    }
+    AesCtrKey aesCtrKey =
+        AesCtrKey.newBuilder()
+            .setParams(format.getAesCtrKeyFormat().getParams())
+            .setKeyValue(
+                ByteString.copyFrom(Random.randBytes(format.getAesCtrKeyFormat().getKeySize())))
+            .setVersion(0)
+            .build();
+    HmacKey hmacKey =
+        HmacKey.newBuilder()
+            .setVersion(0)
+            .setParams(format.getHmacKeyFormat().getParams())
+            .setKeyValue(
+                ByteString.copyFrom(Random.randBytes(format.getHmacKeyFormat().getKeySize())))
+            .build();
+    AesCtrHmacAeadKey key =
+        AesCtrHmacAeadKey.newBuilder()
+            .setAesCtrKey(aesCtrKey)
+            .setHmacKey(hmacKey)
+            .setVersion(0)
+            .build();
+    return KeyData.newBuilder()
+        .setTypeUrl(TYPE_URL)
+        .setValue(key.toByteString())
+        .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
+        .build();
+  }
+
+  public static final KeyTemplate templateWithTinkPrefix() {
+    return createKeyTemplate(OutputPrefixType.TINK);
+  }
+
+  public static final KeyTemplate templateWithoutPrefix() {
+    return createKeyTemplate(OutputPrefixType.RAW);
+  }
+
+  private static KeyTemplate createKeyTemplate(OutputPrefixType outputPrefixType) {
+    AesCtrHmacAeadKeyFormat format = createKeyFormat(32, 16, 32, 32, HashType.SHA256);
+    return KeyTemplate.newBuilder()
+        .setTypeUrl(TYPE_URL)
+        .setValue(format.toByteString())
+        .setOutputPrefixType(outputPrefixType)
+        .build();
+  }
+
+  private static AesCtrHmacAeadKeyFormat createKeyFormat(
+      int aesKeySize, int ivSize, int hmacKeySize, int tagSize, HashType hashType) {
+    AesCtrKeyFormat aesCtrKeyFormat =
+        AesCtrKeyFormat.newBuilder()
+            .setParams(AesCtrParams.newBuilder().setIvSize(ivSize).build())
+            .setKeySize(aesKeySize)
+            .build();
+    HmacKeyFormat hmacKeyFormat =
+        HmacKeyFormat.newBuilder()
+            .setParams(HmacParams.newBuilder().setHash(hashType).setTagSize(tagSize).build())
+            .setKeySize(hmacKeySize)
+            .build();
+    return AesCtrHmacAeadKeyFormat.newBuilder()
+        .setAesCtrKeyFormat(aesCtrKeyFormat)
+        .setHmacKeyFormat(hmacKeyFormat)
+        .build();
   }
 
   public static void register() throws GeneralSecurityException {

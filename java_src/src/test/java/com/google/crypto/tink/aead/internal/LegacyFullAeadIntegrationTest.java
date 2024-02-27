@@ -25,6 +25,7 @@ import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.TinkProtoParametersFormat;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesCtrKey;
@@ -35,6 +36,7 @@ import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyStatusType;
+import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Hex;
@@ -144,6 +146,25 @@ public class LegacyFullAeadIntegrationTest {
                 .build()
                 .toByteArray(),
             InsecureSecretKeyAccess.get());
+  }
+
+  @Test
+  public void generateNew_works() throws Exception {
+    KeyTemplate template = LegacyAesCtrHmacTestKeyManager.templateWithTinkPrefix();
+    KeysetHandle handle =
+        KeysetHandle.generateNew(TinkProtoParametersFormat.parse(template.toByteArray()));
+    Aead aead = handle.getPrimitive(Aead.class);
+
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] associatedData = "associatedData".getBytes(UTF_8);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+
+    assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+    assertThrows(
+        GeneralSecurityException.class, () -> aead.decrypt(ciphertext, "invalid".getBytes(UTF_8)));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> aead.decrypt("invalid".getBytes(UTF_8), associatedData));
   }
 
   @Test
