@@ -6,6 +6,7 @@ tink_cc_library(
     prf_based_deriver.cc
     prf_based_deriver.h
   DEPS
+    tink::keyderivation::internal::config_prf_for_deriver
     tink::keyderivation::internal::key_derivers
     absl::memory
     absl::string_view
@@ -16,8 +17,9 @@ tink_cc_library(
     tink::core::keyset_handle
     tink::core::keyset_handle_builder
     tink::core::parameters
-    tink::core::registry
     tink::aead::aes_gcm_proto_serialization
+    tink::internal::configuration_impl
+    tink::internal::key_type_info_store
     tink::internal::mutable_serialization_registry
     tink::internal::proto_parameters_serialization
     tink::internal::registry_impl
@@ -184,5 +186,35 @@ tink_cc_test(
     tink::proto::aes_gcm_cc_proto
     tink::proto::common_cc_proto
     tink::proto::hkdf_prf_cc_proto
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_library(
+  NAME config_prf_for_deriver
+  SRCS
+    config_prf_for_deriver.h
+  DEPS
+    absl::check
+    absl::memory
+    tink::core::configuration
+    tink::internal::configuration_impl
+    tink::prf::hkdf_prf_key_manager
+)
+
+tink_cc_test(
+  NAME config_prf_for_deriver_test
+  SRCS
+    config_prf_for_deriver_test.cc
+  DEPS
+    tink::keyderivation::internal::config_prf_for_deriver
+    gmock
+    tink::internal::configuration_impl
+    tink::internal::key_type_info_store
+    tink::prf::hkdf_prf_key_manager
+    tink::subtle::prf::streaming_prf
+    tink::util::input_stream_util
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::util::test_util
     tink::proto::tink_cc_proto
 )

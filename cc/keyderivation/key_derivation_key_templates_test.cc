@@ -114,7 +114,7 @@ TEST_F(KeyDerivationKeyTemplatesTest, CreatePrfBasedKeyTemplateInvalidPrfKey) {
   EXPECT_THAT(KeyDerivationKeyTemplates::CreatePrfBasedKeyTemplate(
                   AeadKeyTemplates::Aes256Gcm(), AeadKeyTemplates::Aes256Gcm())
                   .status(),
-              StatusIs(absl::StatusCode::kInvalidArgument));
+              StatusIs(absl::StatusCode::kNotFound));
 }
 
 TEST_F(KeyDerivationKeyTemplatesTest,

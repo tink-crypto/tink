@@ -74,13 +74,6 @@ using ::testing::ValuesIn;
 
 class PrfBasedDeriverTest : public Test {
  public:
-  void SetUp() override {
-    Registry::Reset();
-    ASSERT_THAT(Registry::RegisterKeyTypeManager(
-                    absl::make_unique<HkdfPrfKeyManager>(), true),
-                IsOk());
-  }
-
   KeyData valid_prf_key_data_ = PrfKeyData();
   HkdfPrfKey valid_prf_key_ = PrfKey();
 
@@ -149,6 +142,7 @@ TEST_F(PrfBasedDeriverTest, DeriveKeysetPlaceholders) {
 }
 
 TEST_F(PrfBasedDeriverTest, DeriveKeysetPlaceholdersWithGlobalRegistry) {
+  Registry::Reset();
   ASSERT_THAT(PrfBasedDeriver::New(valid_prf_key_data_,
                                    AeadKeyTemplates::Aes128CtrHmacSha256())
                   .status(),
@@ -243,13 +237,6 @@ TEST_F(PrfBasedDeriverTest, DeriveKeysetWithDifferentSalts) {
 // Test vector from https://tools.ietf.org/html/rfc5869#appendix-A.2.
 class PrfBasedDeriverRfcVectorTest : public Test {
  public:
-  static void SetUpTestSuite() {
-    Registry::Reset();
-    ASSERT_THAT(Registry::RegisterKeyTypeManager(
-                    absl::make_unique<HkdfPrfKeyManager>(), true),
-                IsOk());
-  }
-
   KeyData prf_key_from_rfc_vector_ = PrfKeyData();
   std::string salt_ = test::HexDecodeOrDie(
       "b0b1b2b3b4b5b6b7b8b9babbbcbdbebf"
@@ -302,6 +289,10 @@ TEST_F(PrfBasedDeriverRfcVectorTest, AesGcm) {
   ASSERT_THAT(key_bytes, Eq(derived_key_value_));
 
   // Derive key with global registry.
+  Registry::Reset();
+  ASSERT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<HkdfPrfKeyManager>(), true),
+              IsOk());
   util::StatusOr<std::unique_ptr<StreamingPrf>> streaming_prf =
       Registry::GetPrimitive<StreamingPrf>(prf_key_from_rfc_vector_);
   ASSERT_THAT(streaming_prf, IsOk());
@@ -361,11 +352,7 @@ INSTANTIATE_TEST_SUITE_P(PrfBasedDeriverJavaVectorsTests,
                          ValuesIn(GetPrfBasedDeriverJavaVectors()));
 
 TEST_P(PrfBasedDeriverJavaVectorsTest, AesGcm) {
-  Registry::Reset();
   PrfBasedDeriverJavaVector test_vector = GetParam();
-  ASSERT_THAT(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<HkdfPrfKeyManager>(), true),
-              IsOk());
 
   HkdfPrfKey prf_key;
   prf_key.set_version(0);

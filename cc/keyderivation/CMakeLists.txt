@@ -157,7 +157,6 @@ tink_cc_test(
     tink::internal::proto_parameters_serialization
     tink::internal::serialization
     tink::keyderivation::internal::prf_based_deriver_key_manager
-    tink::prf::hkdf_prf_key_manager
     tink::util::status
     tink::util::statusor
     tink::util::test_keyset_handle

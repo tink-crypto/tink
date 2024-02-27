@@ -41,7 +41,6 @@
 #include "tink/keyset_handle.h"
 #include "tink/partial_key_access.h"
 #include "tink/partial_key_access_token.h"
-#include "tink/prf/hkdf_prf_key_manager.h"
 #include "tink/registry.h"
 #include "tink/restricted_data.h"
 #include "tink/util/status.h"
@@ -206,9 +205,6 @@ TEST_P(KeysetDeriverTest, DeriveKeyset) {
       Registry::RegisterKeyTypeManager(
           absl::make_unique<internal::PrfBasedDeriverKeyManager>(), true),
       IsOk());
-  ASSERT_THAT(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<HkdfPrfKeyManager>(), true),
-              IsOk());
   ASSERT_THAT(RegisterAesGcmProtoSerialization(), IsOk());
 
   std::vector<std::shared_ptr<Key>> derived_keys = GetParam();

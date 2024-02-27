@@ -24,17 +24,19 @@
 #include "tink/aead/aes_gcm_proto_serialization.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/input_stream.h"
+#include "tink/internal/configuration_impl.h"
+#include "tink/internal/key_type_info_store.h"
 #include "tink/internal/mutable_serialization_registry.h"
 #include "tink/internal/proto_parameters_serialization.h"
 #include "tink/internal/registry_impl.h"
 #include "tink/key.h"
 #include "tink/key_status.h"
+#include "tink/keyderivation/internal/config_prf_for_deriver.h"
 #include "tink/keyderivation/internal/key_derivers.h"
 #include "tink/keyderivation/keyset_deriver.h"
 #include "tink/keyset_handle.h"
 #include "tink/keyset_handle_builder.h"
 #include "tink/parameters.h"
-#include "tink/registry.h"
 #include "tink/subtle/prf/streaming_prf.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -128,11 +130,26 @@ util::Status RegisterProtoSerializations() {
   return RegisterAesGcmProtoSerialization();
 }
 
+util::StatusOr<std::unique_ptr<StreamingPrf>> GetUnwrappedStreamingPrf(
+    const KeyData& prf_key) {
+  util::StatusOr<const KeyTypeInfoStore*> store =
+      ConfigurationImpl::GetKeyTypeInfoStore(ConfigPrfForDeriver());
+  if (!store.ok()) {
+    return store.status();
+  }
+  util::StatusOr<const KeyTypeInfoStore::Info*> info =
+      (*store)->Get(prf_key.type_url());
+  if (!info.ok()) {
+    return info.status();
+  }
+  return (*info)->GetPrimitive<StreamingPrf>(prf_key);
+}
+
 util::StatusOr<std::unique_ptr<KeysetDeriver>> PrfBasedDeriver::New(
     const KeyData& prf_key, const KeyTemplate& key_template) {
-  // Create StreamingPrf primitive from `prf_key`.
+  // Create unwrapped StreamingPrf primitive from `prf_key`.
   util::StatusOr<std::unique_ptr<StreamingPrf>> streaming_prf =
-      Registry::GetPrimitive<StreamingPrf>(prf_key);
+      GetUnwrappedStreamingPrf(prf_key);
   if (!streaming_prf.ok()) {
     return streaming_prf.status();
   }
