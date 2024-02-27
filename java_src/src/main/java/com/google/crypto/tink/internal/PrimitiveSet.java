@@ -133,20 +133,18 @@ public final class PrimitiveSet<P> {
   }
 
   private static <P> void storeEntryInPrimitiveSet(
-      Entry<P> entry,
-      Map<Bytes, List<Entry<P>>> primitives,
-      List<Entry<P>> primitivesInKeysetOrder) {
+      Entry<P> entry, Map<Bytes, List<Entry<P>>> entries, List<Entry<P>> entriesInKeysetOrder) {
     List<Entry<P>> list = new ArrayList<>();
     list.add(entry);
     List<Entry<P>> existing =
-        primitives.put(entry.getOutputPrefix(), Collections.unmodifiableList(list));
+        entries.put(entry.getOutputPrefix(), Collections.unmodifiableList(list));
     if (existing != null) {
       List<Entry<P>> newList = new ArrayList<>();
       newList.addAll(existing);
       newList.add(entry);
-      primitives.put(entry.getOutputPrefix(), Collections.unmodifiableList(newList));
+      entries.put(entry.getOutputPrefix(), Collections.unmodifiableList(newList));
     }
-    primitivesInKeysetOrder.add(entry);
+    entriesInKeysetOrder.add(entry);
   }
 
   /** Returns the entry with the primary primitive. */
@@ -170,18 +168,18 @@ public final class PrimitiveSet<P> {
 
   /** Returns the entries with primitive identifed by {@code identifier}. */
   public List<Entry<P>> getPrimitive(final byte[] identifier) {
-    List<Entry<P>> found = primitives.get(Bytes.copyFrom(identifier));
+    List<Entry<P>> found = entries.get(Bytes.copyFrom(identifier));
     return found != null ? found : Collections.<Entry<P>>emptyList();
   }
 
   /** Returns all primitives. */
   public Collection<List<Entry<P>>> getAll() {
-    return primitives.values();
+    return entries.values();
   }
 
   /** Returns all primitives in the original keyset key order. */
   public List<Entry<P>> getAllInKeysetOrder() {
-    return Collections.unmodifiableList(primitivesInKeysetOrder);
+    return Collections.unmodifiableList(entriesInKeysetOrder);
   }
 
   /**
@@ -189,10 +187,10 @@ public final class PrimitiveSet<P> {
    * prefix). This allows quickly retrieving the list of primitives sharing some particular prefix.
    * Because all RAW keys are using an empty prefix, this also quickly allows retrieving them.
    */
-  private final Map<Bytes, List<Entry<P>>> primitives;
+  private final Map<Bytes, List<Entry<P>>> entries;
 
   /** Stores entries in the original keyset key order. */
-  private final List<Entry<P>> primitivesInKeysetOrder;
+  private final List<Entry<P>> entriesInKeysetOrder;
 
   private final Entry<P> primary;
   private final Class<P> primitiveClass;
@@ -200,13 +198,13 @@ public final class PrimitiveSet<P> {
 
   /** Creates an immutable PrimitiveSet. It is used by the Builder. */
   private PrimitiveSet(
-      Map<Bytes, List<Entry<P>>> primitives,
-      List<Entry<P>> primitivesInKeysetOrder,
+      Map<Bytes, List<Entry<P>>> entries,
+      List<Entry<P>> entriesInKeysetOrder,
       Entry<P> primary,
       MonitoringAnnotations annotations,
       Class<P> primitiveClass) {
-    this.primitives = primitives;
-    this.primitivesInKeysetOrder = primitivesInKeysetOrder;
+    this.entries = entries;
+    this.entriesInKeysetOrder = entriesInKeysetOrder;
     this.primary = primary;
     this.primitiveClass = primitiveClass;
     this.annotations = annotations;
@@ -222,8 +220,8 @@ public final class PrimitiveSet<P> {
 
     // primitives == null indicates that build has been called and the builder can't be used
     // anymore.
-    private Map<Bytes, List<Entry<P>>> primitives = new HashMap<>();
-    private final List<Entry<P>> primitivesInKeysetOrder = new ArrayList<>();
+    private Map<Bytes, List<Entry<P>>> entries = new HashMap<>();
+    private final List<Entry<P>> entriesInKeysetOrder = new ArrayList<>();
     private Entry<P> primary;
     private MonitoringAnnotations annotations;
 
@@ -231,7 +229,7 @@ public final class PrimitiveSet<P> {
     private Builder<P> addEntry(
         final P fullPrimitive, Key key, Keyset.Key protoKey, boolean asPrimary)
         throws GeneralSecurityException {
-      if (primitives == null) {
+      if (entries == null) {
         throw new IllegalStateException("addEntry cannot be called after build");
       }
       if (fullPrimitive == null) {
@@ -249,7 +247,7 @@ public final class PrimitiveSet<P> {
               protoKey.getKeyId(),
               protoKey.getKeyData().getTypeUrl(),
               key);
-      storeEntryInPrimitiveSet(entry, primitives, primitivesInKeysetOrder);
+      storeEntryInPrimitiveSet(entry, entries, entriesInKeysetOrder);
       if (asPrimary) {
         if (this.primary != null) {
           throw new IllegalStateException("you cannot set two primary primitives");
@@ -285,7 +283,7 @@ public final class PrimitiveSet<P> {
 
     @CanIgnoreReturnValue
     public Builder<P> setAnnotations(MonitoringAnnotations annotations) {
-      if (primitives == null) {
+      if (entries == null) {
         throw new IllegalStateException("setAnnotations cannot be called after build");
       }
       this.annotations = annotations;
@@ -293,14 +291,13 @@ public final class PrimitiveSet<P> {
     }
 
     public PrimitiveSet<P> build() throws GeneralSecurityException {
-      if (primitives == null) {
+      if (entries == null) {
         throw new IllegalStateException("build cannot be called twice");
       }
       // Note that we currently don't enforce that primary must be set.
       PrimitiveSet<P> output =
-          new PrimitiveSet<P>(
-              primitives, primitivesInKeysetOrder, primary, annotations, primitiveClass);
-      this.primitives = null;
+          new PrimitiveSet<P>(entries, entriesInKeysetOrder, primary, annotations, primitiveClass);
+      this.entries = null;
       return output;
     }
 
