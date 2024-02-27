@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
+import com.google.crypto.tink.Key;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
@@ -29,6 +30,7 @@ import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.internal.KeyManagerRegistry;
+import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.signature.EcdsaParameters;
 import com.google.crypto.tink.signature.EcdsaPrivateKey;
 import com.google.crypto.tink.signature.EcdsaPublicKey;
@@ -157,6 +159,66 @@ public class JwtEcdsaSignKeyManagerTest {
     assertThat(h.size()).isEqualTo(1);
     assertThat(h.getAt(0).getKey().getParameters())
         .isEqualTo(KeyTemplates.get(templateName).toParameters());
+  }
+
+  @Test
+  public void ignoredKidStrategy_createKeyWithoutIdRequirement_works() throws Exception {
+    if (TestUtil.isTsan()) {
+      // createKey is too slow in Tsan.
+      return;
+    }
+    Parameters parameters =
+        JwtEcdsaParameters.builder()
+            .setAlgorithm(JwtEcdsaParameters.Algorithm.ES256)
+            .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
+            .build();
+    Key unused = MutableKeyCreationRegistry.globalInstance().createKey(parameters, null);
+  }
+
+  @Test
+  public void ignoredKidStrategy_createKeyWithIdRequirement_throws() throws Exception {
+    if (TestUtil.isTsan()) {
+      // createKey is too slow in Tsan.
+      return;
+    }
+    Parameters parameters =
+        JwtEcdsaParameters.builder()
+            .setAlgorithm(JwtEcdsaParameters.Algorithm.ES256)
+            .setKidStrategy(JwtEcdsaParameters.KidStrategy.IGNORED)
+            .build();
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> MutableKeyCreationRegistry.globalInstance().createKey(parameters, 123));
+  }
+
+  @Test
+  public void base64KidStrategy_createKeyWithIdRequirement_works() throws Exception {
+    if (TestUtil.isTsan()) {
+      // createKey is too slow in Tsan.
+      return;
+    }
+    Parameters parameters =
+        JwtEcdsaParameters.builder()
+            .setAlgorithm(JwtEcdsaParameters.Algorithm.ES256)
+            .setKidStrategy(JwtEcdsaParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+            .build();
+    Key unused = MutableKeyCreationRegistry.globalInstance().createKey(parameters, 123);
+  }
+
+  @Test
+  public void base64KidStrategy_createKeyWithoutIdRequirement_thows() throws Exception {
+    if (TestUtil.isTsan()) {
+      // createKey is too slow in Tsan.
+      return;
+    }
+    Parameters parameters =
+        JwtEcdsaParameters.builder()
+            .setAlgorithm(JwtEcdsaParameters.Algorithm.ES256)
+            .setKidStrategy(JwtEcdsaParameters.KidStrategy.BASE64_ENCODED_KEY_ID)
+            .build();
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> MutableKeyCreationRegistry.globalInstance().createKey(parameters, null));
   }
 
   // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.

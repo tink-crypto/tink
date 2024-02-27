@@ -103,11 +103,14 @@ public final class JwtEcdsaSignKeyManager {
     ECPublicKey pubKey = (ECPublicKey) keyPair.getPublic();
     ECPrivateKey privKey = (ECPrivateKey) keyPair.getPrivate();
 
-    JwtEcdsaPublicKey publicKey =
-        JwtEcdsaPublicKey.builder().setParameters(parameters).setPublicPoint(pubKey.getW()).build();
-
+    JwtEcdsaPublicKey.Builder publicKeyBuilder =
+        JwtEcdsaPublicKey.builder().setParameters(parameters).setPublicPoint(pubKey.getW());
+    if (idRequirement != null) {
+      publicKeyBuilder.setIdRequirement(idRequirement);
+    }
     return JwtEcdsaPrivateKey.create(
-        publicKey, SecretBigInteger.fromBigInteger(privKey.getS(), InsecureSecretKeyAccess.get()));
+        publicKeyBuilder.build(),
+        SecretBigInteger.fromBigInteger(privKey.getS(), InsecureSecretKeyAccess.get()));
   }
 
   @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.
