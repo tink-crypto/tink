@@ -24,6 +24,8 @@
 #include "absl/status/status.h"
 #include "tink/aead.h"
 #include "tink/aead/aead_key_templates.h"
+#include "tink/aead/aes_ctr_hmac_aead_key.h"
+#include "tink/aead/aes_ctr_hmac_aead_parameters.h"
 #include "tink/aead/aes_eax_key.h"
 #include "tink/aead/aes_eax_parameters.h"
 #include "tink/aead/aes_gcm_key.h"
@@ -70,6 +72,7 @@ using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::KeyTemplate;
 using ::google::crypto::tink::OutputPrefixType;
+using ::testing::HasSubstr;
 using ::testing::IsNull;
 using ::testing::Not;
 using ::testing::Test;
@@ -538,7 +541,7 @@ TEST_F(AeadConfigTest, XChaCha20Poly1305ProtoKeySerializationRegistered) {
                   .Build()
                   .status(),
               StatusIs(absl::StatusCode::kInvalidArgument,
-                       testing::HasSubstr("Failed to serialize")));
+                       HasSubstr("Failed to serialize")));
 
   ASSERT_THAT(AeadConfig::Register(), IsOk());
 
@@ -546,6 +549,118 @@ TEST_F(AeadConfigTest, XChaCha20Poly1305ProtoKeySerializationRegistered) {
       reinterpret_cast<const XChaCha20Poly1305Key*>(
           (*handle)->GetPrimary().GetKey().get());
   EXPECT_THAT(key_from_handle, Not(IsNull()));
+
+  EXPECT_THAT(KeysetHandleBuilder()
+                  .AddEntry(KeysetHandleBuilder::Entry::CreateFromCopyableKey(
+                      *key, KeyStatus::kEnabled, /*is_primary=*/true))
+                  .Build(),
+              IsOk());
+}
+
+TEST_F(AeadConfigTest, AesCtrHmacAeadProtoParamsSerializationRegistered) {
+  if (IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
+  // TODO: b/325507124 - Rewrite tests using parameters proto format API.
+  util::StatusOr<internal::ProtoParametersSerialization>
+      proto_params_serialization =
+          internal::ProtoParametersSerialization::Create(
+              AeadKeyTemplates::Aes256CtrHmacSha256());
+  ASSERT_THAT(proto_params_serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Parameters>> parsed_params =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseParameters(
+          *proto_params_serialization);
+  ASSERT_THAT(parsed_params.status(), StatusIs(absl::StatusCode::kNotFound));
+
+  util::StatusOr<AesCtrHmacAeadParameters> params =
+      AesCtrHmacAeadParameters::Builder()
+          .SetAesKeySizeInBytes(32)
+          .SetHmacKeySizeInBytes(32)
+          .SetIvSizeInBytes(16)
+          .SetTagSizeInBytes(16)
+          .SetVariant(AesCtrHmacAeadParameters::Variant::kTink)
+          .SetHashType(AesCtrHmacAeadParameters::HashType::kSha256)
+          .Build();
+  ASSERT_THAT(params, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialized_params =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeParameters<internal::ProtoParametersSerialization>(*params);
+  ASSERT_THAT(serialized_params.status(),
+              StatusIs(absl::StatusCode::kNotFound));
+
+  ASSERT_THAT(AeadConfig::Register(), IsOk());
+
+  util::StatusOr<std::unique_ptr<Parameters>> parsed_params2 =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseParameters(
+          *proto_params_serialization);
+  ASSERT_THAT(parsed_params2, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialized_params2 =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeParameters<internal::ProtoParametersSerialization>(*params);
+  ASSERT_THAT(serialized_params2, IsOk());
+}
+
+TEST_F(AeadConfigTest, AesCtrHmacAeadProtoKeySerializationRegistered) {
+  if (IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes256CtrHmacSha256(),
+                                KeyGenConfigAeadV0());
+  ASSERT_THAT(handle, IsOk());
+
+  // Failed to parse this key type, so fell back to legacy proto key.
+  EXPECT_THAT(dynamic_cast<const internal::LegacyProtoKey*>(
+                  (*handle)->GetPrimary().GetKey().get()),
+              Not(IsNull()));
+
+  util::StatusOr<AesCtrHmacAeadParameters> params =
+      AesCtrHmacAeadParameters::Builder()
+          .SetAesKeySizeInBytes(32)
+          .SetHmacKeySizeInBytes(32)
+          .SetIvSizeInBytes(16)
+          .SetTagSizeInBytes(16)
+          .SetVariant(AesCtrHmacAeadParameters::Variant::kTink)
+          .SetHashType(AesCtrHmacAeadParameters::HashType::kSha256)
+          .Build();
+  ASSERT_THAT(params, IsOk());
+
+  util::StatusOr<AesCtrHmacAeadKey> key =
+      AesCtrHmacAeadKey::Builder()
+          .SetParameters(*params)
+          .SetAesKeyBytes(RestrictedData(subtle::Random::GetRandomBytes(32),
+                                         InsecureSecretKeyAccess::Get()))
+          .SetHmacKeyBytes(RestrictedData(subtle::Random::GetRandomBytes(32),
+                                          InsecureSecretKeyAccess::Get()))
+          .SetIdRequirement(123)
+          .Build(GetPartialKeyAccess());
+  ASSERT_THAT(key, IsOk());
+
+  // Fails to serialize this key type.
+  EXPECT_THAT(KeysetHandleBuilder()
+                  .AddEntry(KeysetHandleBuilder::Entry::CreateFromCopyableKey(
+                      *key, KeyStatus::kEnabled, /*is_primary=*/true))
+                  .Build()
+                  .status(),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("Failed to serialize")));
+
+  ASSERT_THAT(AeadConfig::Register(), IsOk());
+
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle2 =
+      KeysetHandle::GenerateNew(AeadKeyTemplates::Aes256CtrHmacSha256(),
+                                KeyGenConfigAeadV0());
+  ASSERT_THAT(handle2, IsOk());
+
+  // Parsing now creates the right key type.
+  EXPECT_THAT(dynamic_cast<const AesCtrHmacAeadKey*>(
+                  (*handle2)->GetPrimary().GetKey().get()),
+              Not(IsNull()));
 
   EXPECT_THAT(KeysetHandleBuilder()
                   .AddEntry(KeysetHandleBuilder::Entry::CreateFromCopyableKey(

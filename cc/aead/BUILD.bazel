@@ -61,6 +61,7 @@ cc_library(
     deps = [
         ":aead_wrapper",
         ":aes_ctr_hmac_aead_key_manager",
+        ":aes_ctr_hmac_aead_proto_serialization",
         ":aes_eax_key_manager",
         ":aes_eax_proto_serialization",
         ":aes_gcm_key_manager",
@@ -838,6 +839,8 @@ cc_test(
     deps = [
         ":aead_config",
         ":aead_key_templates",
+        ":aes_ctr_hmac_aead_key",
+        ":aes_ctr_hmac_aead_parameters",
         ":aes_eax_key",
         ":aes_eax_parameters",
         ":aes_gcm_key",

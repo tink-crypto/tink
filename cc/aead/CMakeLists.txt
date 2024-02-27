@@ -56,6 +56,7 @@ tink_cc_library(
   DEPS
     tink::aead::aead_wrapper
     tink::aead::aes_ctr_hmac_aead_key_manager
+    tink::aead::aes_ctr_hmac_aead_proto_serialization
     tink::aead::aes_eax_key_manager
     tink::aead::aes_eax_proto_serialization
     tink::aead::aes_gcm_key_manager
@@ -791,6 +792,8 @@ tink_cc_test(
   DEPS
     tink::aead::aead_config
     tink::aead::aead_key_templates
+    tink::aead::aes_ctr_hmac_aead_key
+    tink::aead::aes_ctr_hmac_aead_parameters
     tink::aead::aes_eax_key
     tink::aead::aes_eax_parameters
     tink::aead::aes_gcm_key
