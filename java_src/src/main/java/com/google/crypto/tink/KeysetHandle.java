@@ -346,18 +346,6 @@ public final class KeysetHandle {
       return id;
     }
 
-    private static Keyset.Key createKeysetKey(Key key, KeyStatus keyStatus, int id)
-        throws GeneralSecurityException {
-      ProtoKeySerialization serializedKey =
-          MutableSerializationRegistry.globalInstance()
-              .serializeKey(key, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
-      @Nullable Integer idRequirement = serializedKey.getIdRequirementOrNull();
-      if (idRequirement != null && idRequirement != id) {
-        throw new GeneralSecurityException("Wrong ID set for key with ID requirement");
-      }
-      return toKeysetKey(id, serializeStatus(keyStatus), serializedKey);
-    }
-
     /**
      * Creates a new {@code KeysetHandle}.
      *
@@ -412,12 +400,8 @@ public final class KeysetHandle {
         } else {
           keysetKey =
               createNewKeysetKeyFromParameters(builderEntry.parameters, builderEntry.keyStatus, id);
-          ProtoKeySerialization protoKeySerialization = toProtoKeySerialization(keysetKey);
           try {
-            Key key =
-                MutableSerializationRegistry.globalInstance()
-                    .parseKeyWithLegacyFallback(
-                        protoKeySerialization, InsecureSecretKeyAccess.get());
+            Key key = toKey(keysetKey);
             handleEntry =
                 new KeysetHandle.Entry(key, builderEntry.keyStatus, id, builderEntry.isPrimary);
           } catch (GeneralSecurityException e) {
@@ -539,20 +523,6 @@ public final class KeysetHandle {
     throw new IllegalStateException("Unknown key status");
   }
 
-  private static Keyset.Key toKeysetKey(
-      int id, KeyStatusType status, ProtoKeySerialization protoKeySerialization) {
-    return Keyset.Key.newBuilder()
-        .setKeyData(
-            KeyData.newBuilder()
-                .setTypeUrl(protoKeySerialization.getTypeUrl())
-                .setValue(protoKeySerialization.getValue())
-                .setKeyMaterialType(protoKeySerialization.getKeyMaterialType()))
-        .setStatus(status)
-        .setKeyId(id)
-        .setOutputPrefixType(protoKeySerialization.getOutputPrefixType())
-        .build();
-  }
-
   /**
    * Returns an immutable list of key objects for this keyset.
    *
@@ -563,11 +533,8 @@ public final class KeysetHandle {
     List<Entry> result = new ArrayList<>(keyset.getKeyCount());
     for (Keyset.Key protoKey : keyset.getKeyList()) {
       int id = protoKey.getKeyId();
-      ProtoKeySerialization protoKeySerialization = toProtoKeySerialization(protoKey);
       try {
-        Key key =
-            MutableSerializationRegistry.globalInstance()
-                .parseKeyWithLegacyFallback(protoKeySerialization, InsecureSecretKeyAccess.get());
+        Key key = toKey(protoKey);
         result.add(
             new KeysetHandle.Entry(
                 key, parseStatus(protoKey.getStatus()), id, id == keyset.getPrimaryKeyId()));
@@ -576,23 +543,6 @@ public final class KeysetHandle {
       }
     }
     return Collections.unmodifiableList(result);
-  }
-
-  private static ProtoKeySerialization toProtoKeySerialization(Keyset.Key protoKey) {
-    int id = protoKey.getKeyId();
-    @Nullable
-    Integer idRequirement = protoKey.getOutputPrefixType() == OutputPrefixType.RAW ? null : id;
-    try {
-      return ProtoKeySerialization.create(
-          protoKey.getKeyData().getTypeUrl(),
-          protoKey.getKeyData().getValue(),
-          protoKey.getKeyData().getKeyMaterialType(),
-          protoKey.getOutputPrefixType(),
-          idRequirement);
-    } catch (GeneralSecurityException e) {
-      // Cannot happen -- this only happens if the idRequirement doesn't match OutputPrefixType
-      throw new TinkBugException("Creating a protokey serialization failed", e);
-    }
   }
 
   private KeysetHandle.Entry entryByIndex(int i) {
@@ -1233,5 +1183,54 @@ public final class KeysetHandle {
       return false;
     }
     return true;
+  }
+
+  private static ProtoKeySerialization toProtoKeySerialization(Keyset.Key protoKey) {
+    int id = protoKey.getKeyId();
+    @Nullable
+    Integer idRequirement = protoKey.getOutputPrefixType() == OutputPrefixType.RAW ? null : id;
+    try {
+      return ProtoKeySerialization.create(
+          protoKey.getKeyData().getTypeUrl(),
+          protoKey.getKeyData().getValue(),
+          protoKey.getKeyData().getKeyMaterialType(),
+          protoKey.getOutputPrefixType(),
+          idRequirement);
+    } catch (GeneralSecurityException e) {
+      // Cannot happen -- this only happens if the idRequirement doesn't match OutputPrefixType
+      throw new TinkBugException("Creating a protokey serialization failed", e);
+    }
+  }
+
+  private static Key toKey(Keyset.Key protoKey) throws GeneralSecurityException {
+    ProtoKeySerialization protoKeySerialization = toProtoKeySerialization(protoKey);
+    return MutableSerializationRegistry.globalInstance()
+        .parseKeyWithLegacyFallback(protoKeySerialization, InsecureSecretKeyAccess.get());
+  }
+
+  private static Keyset.Key toKeysetKey(
+      int id, KeyStatusType status, ProtoKeySerialization protoKeySerialization) {
+    return Keyset.Key.newBuilder()
+        .setKeyData(
+            KeyData.newBuilder()
+                .setTypeUrl(protoKeySerialization.getTypeUrl())
+                .setValue(protoKeySerialization.getValue())
+                .setKeyMaterialType(protoKeySerialization.getKeyMaterialType()))
+        .setStatus(status)
+        .setKeyId(id)
+        .setOutputPrefixType(protoKeySerialization.getOutputPrefixType())
+        .build();
+  }
+
+  private static Keyset.Key createKeysetKey(Key key, KeyStatus keyStatus, int id)
+      throws GeneralSecurityException {
+    ProtoKeySerialization serializedKey =
+        MutableSerializationRegistry.globalInstance()
+            .serializeKey(key, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
+    @Nullable Integer idRequirement = serializedKey.getIdRequirementOrNull();
+    if (idRequirement != null && idRequirement != id) {
+      throw new GeneralSecurityException("Wrong ID set for key with ID requirement");
+    }
+    return toKeysetKey(id, serializeStatus(keyStatus), serializedKey);
   }
 }
