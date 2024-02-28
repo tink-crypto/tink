@@ -56,6 +56,8 @@ import com.google.crypto.tink.monitoring.MonitoringClient;
 import com.google.crypto.tink.prf.PrfConfig;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
+import com.google.crypto.tink.proto.EcdsaSignatureEncoding;
+import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.HmacPrfKey;
@@ -2026,5 +2028,74 @@ public class KeysetHandleTest {
     // serializeKeysetWithoutSecret works, because it uses the unparsed proto keyset.
     String publicJsonKeyset2 = TinkJsonProtoKeysetFormat.serializeKeysetWithoutSecret(publicHandle);
     assertThat(publicJsonKeyset2).contains("JwtEcdsaPublicKey");
+  }
+
+  @Test
+  public void getPublicKeysetHandle_keysetWithUnknownStatus() throws Exception {
+    EcdsaPrivateKey privateKeyProto =
+        TestUtil.createEcdsaPrivKey(
+            TestUtil.createEcdsaPubKey(
+                HashType.SHA256,
+                EllipticCurveType.NIST_P256,
+                EcdsaSignatureEncoding.DER,
+                Hex.decode("d4ce489428982ef343186eb90e6a04adf41366359a508fe7ac66b283f06641ae"),
+                Hex.decode("1ff5d6f8cd044273923012b9f726d94b0c0c50f1f5d4a32f7d925b30044319fc")),
+            Hex.decode("00B8BB628605AF1045C13593F805BA7D93B35587BC66257F1EA4D93537CE26E58F"));
+    KeyData keyData =
+        TestUtil.createKeyData(
+            privateKeyProto,
+            SignatureConfig.ECDSA_PRIVATE_KEY_TYPE_URL,
+            KeyMaterialType.ASYMMETRIC_PRIVATE);
+    Keyset keyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                keyData,
+                123,
+                KeyStatusType.UNKNOWN_STATUS,
+                com.google.crypto.tink.proto.OutputPrefixType.RAW));
+    KeysetHandle privateHandle =
+        TinkProtoKeysetFormat.parseKeyset(keyset.toByteArray(), InsecureSecretKeyAccess.get());
+    assertThrows(IllegalStateException.class, () -> privateHandle.getAt(0));
+    // getPublicKeysetHandle work, because it uses the unparsed proto key.
+    KeysetHandle publicHandle = privateHandle.getPublicKeysetHandle();
+    // But also parsing of the public key fails.
+    assertThrows(IllegalStateException.class, () -> publicHandle.getAt(0));
+    // serializeKeysetWithoutSecret works, because it uses the unparsed proto keyset.
+    String publicJsonKeyset = TinkJsonProtoKeysetFormat.serializeKeysetWithoutSecret(publicHandle);
+    assertThat(publicJsonKeyset).contains("EcdsaPublicKey");
+  }
+
+  @Test
+  public void getPublicKeysetHandle_keysetWithoutPrimaryKey() throws Exception {
+    EcdsaPrivateKey privateKeyProto =
+        TestUtil.createEcdsaPrivKey(
+            TestUtil.createEcdsaPubKey(
+                HashType.SHA256,
+                EllipticCurveType.NIST_P256,
+                EcdsaSignatureEncoding.DER,
+                Hex.decode("d4ce489428982ef343186eb90e6a04adf41366359a508fe7ac66b283f06641ae"),
+                Hex.decode("1ff5d6f8cd044273923012b9f726d94b0c0c50f1f5d4a32f7d925b30044319fc")),
+            Hex.decode("00B8BB628605AF1045C13593F805BA7D93B35587BC66257F1EA4D93537CE26E58F"));
+    KeyData keyData =
+        TestUtil.createKeyData(
+            privateKeyProto,
+            SignatureConfig.ECDSA_PRIVATE_KEY_TYPE_URL,
+            KeyMaterialType.ASYMMETRIC_PRIVATE);
+    Keyset validKeyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                keyData,
+                123,
+                KeyStatusType.ENABLED,
+                com.google.crypto.tink.proto.OutputPrefixType.RAW));
+    KeysetHandle privateHandleWithoutPrimaryKey =
+        TinkProtoKeysetFormat.parseKeyset(
+            validKeyset.toBuilder().clearPrimaryKeyId().build().toByteArray(),
+            InsecureSecretKeyAccess.get());
+    assertThrows(IllegalStateException.class, privateHandleWithoutPrimaryKey::getPrimary);
+    KeysetHandle publicHandle = privateHandleWithoutPrimaryKey.getPublicKeysetHandle();
+    assertThrows(IllegalStateException.class, publicHandle::getPrimary);
+    String publicJsonKeyset = TinkJsonProtoKeysetFormat.serializeKeysetWithoutSecret(publicHandle);
+    assertThat(publicJsonKeyset).contains("EcdsaPublicKey");
   }
 }
