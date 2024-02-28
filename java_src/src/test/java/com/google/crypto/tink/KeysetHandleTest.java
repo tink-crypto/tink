@@ -42,6 +42,7 @@ import com.google.crypto.tink.internal.PrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveSet;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.testing.FakeMonitoringClient;
+import com.google.crypto.tink.jwt.JwtSignatureConfig;
 import com.google.crypto.tink.mac.AesCmacKey;
 import com.google.crypto.tink.mac.AesCmacParameters;
 import com.google.crypto.tink.mac.AesCmacParameters.Variant;
@@ -1978,5 +1979,52 @@ public class KeysetHandleTest {
     assertThat(ex)
         .hasMessageThat()
         .contains("https://developers.google.com/tink/registration_errors");
+  }
+
+  // This keyset contains a JwtEcdsaPrivateKey with an OutputPrefixType LEGACY. This
+  // OutputPrefixType is not valid for JwtEcdsaPrivateKey.
+  private static final String KEYSET_WITH_INVALID_JWT_KEY =
+      "{  \"primaryKeyId\": 1742360595,  \"key\": [    {      \"keyData\": {        \"typeUrl\":"
+          + " \"type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey\",        \"value\":"
+          + " \"GiBgVYdAPg3Fa2FVFymGDYrI1trHMzVjhVNEMpIxG7t0HRJGIiBeoDMF9LS5BDCh6YgqE3DjHwWwnEKE"
+          + "I3WpPf8izEx1rRogbjQTXrTcw/1HKiiZm2Hqv41w7Vd44M9koyY/+VsP+SAQAQ==\",       "
+          + " \"keyMaterialType\": \"ASYMMETRIC_PRIVATE\"      },      \"status\": \"ENABLED\",    "
+          + "  \"keyId\": 1742360595,      \"outputPrefixType\": \"LEGACY\"    }  ]}";
+
+  @Test
+  public void getPublicKeysetHandle_keysetWithInvalidKey() throws Exception {
+    // JwtSignatureConfig is not yet registered.
+
+    // Because there is no parser for JwtEcdsaPrivateKey, the entries of privateHandle
+    // contain one key of type LegacyProtoKey.
+    KeysetHandle privateHandle =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            KEYSET_WITH_INVALID_JWT_KEY, InsecureSecretKeyAccess.get());
+    Key key = privateHandle.getAt(0).getKey();
+    assertThat(key).isInstanceOf(LegacyProtoKey.class);
+    // getPublicKeysetHandle fails, because it requires a registered key manager.
+    assertThrows(GeneralSecurityException.class, privateHandle::getPublicKeysetHandle);
+
+    // JwtSignatureConfig registers parsers for JwtEcdsaPrivateKey and JwtEcdsaPublicKey,
+    // and a key manager for JwtEcdsaPrivateKey that can implements getPublicKeyData
+    JwtSignatureConfig.register();
+
+    // getPublicKeysetHandle now works, because the key manager is now registered.
+    KeysetHandle publicHandle = privateHandle.getPublicKeysetHandle();
+    // But the public key can't be parsed, so getAt fails.
+    assertThrows(IllegalStateException.class, () -> publicHandle.getAt(0));
+
+    // parseKeyset now uses the parser for JwtEcdsaPrivateKey, but parsing fails.
+    KeysetHandle privateHandle2 =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            KEYSET_WITH_INVALID_JWT_KEY, InsecureSecretKeyAccess.get());
+    assertThrows(IllegalStateException.class, () -> privateHandle2.getAt(0));
+    // getPublicKeysetHandle still work, because it uses the unparsed proto key.
+    KeysetHandle publicHandle2 = privateHandle2.getPublicKeysetHandle();
+    // But also parsing of the public key fails.
+    assertThrows(IllegalStateException.class, () -> publicHandle2.getAt(0));
+    // serializeKeysetWithoutSecret works, because it uses the unparsed proto keyset.
+    String publicJsonKeyset2 = TinkJsonProtoKeysetFormat.serializeKeysetWithoutSecret(publicHandle);
+    assertThat(publicJsonKeyset2).contains("JwtEcdsaPublicKey");
   }
 }
