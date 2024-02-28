@@ -977,16 +977,47 @@ public final class KeysetHandle {
     if (keyset == null) {
       throw new GeneralSecurityException("cleartext keyset is not available");
     }
-    Keyset.Builder keysetBuilder = Keyset.newBuilder();
-    for (Keyset.Key key : keyset.getKeyList()) {
-      KeyData keyData = createPublicKeyData(key.getKeyData());
-      keysetBuilder.addKey(key.toBuilder().setKeyData(keyData).build());
+
+    Keyset.Builder publicKeysetBuilder = Keyset.newBuilder();
+    List<KeysetHandle.Entry> publicEntries = new ArrayList<>(entries.size());
+
+    int i = 0;
+    for (KeysetHandle.Entry entry : entries) {
+      KeysetHandle.Entry publicEntry;
+      Keyset.Key publicProtoKey;
+
+      if (entry != null && entry.getKey() instanceof PrivateKey) {
+        Key publicKey = ((PrivateKey) entry.getKey()).getPublicKey();
+        publicEntry =
+            new KeysetHandle.Entry(publicKey, entry.getStatus(), entry.getId(), entry.isPrimary());
+        publicProtoKey = createKeysetKey(publicKey, entry.getStatus(), entry.getId());
+      } else {
+        Keyset.Key protoKey = keyset.getKey(i);
+        KeyData keyData = getPublicKeyDataFromRegistry(protoKey.getKeyData());
+        publicProtoKey = protoKey.toBuilder().setKeyData(keyData).build();
+        try {
+          Key publicKey = toKey(publicProtoKey);
+          int id = publicProtoKey.getKeyId();
+          publicEntry =
+              new KeysetHandle.Entry(
+                  publicKey,
+                  parseStatus(publicProtoKey.getStatus()),
+                  id,
+                  id == keyset.getPrimaryKeyId());
+        } catch (GeneralSecurityException e) {
+          publicEntry = null;
+        }
+      }
+
+      publicKeysetBuilder.addKey(publicProtoKey);
+      publicEntries.add(publicEntry);
+      i++;
     }
-    keysetBuilder.setPrimaryKeyId(keyset.getPrimaryKeyId());
-    return KeysetHandle.fromKeyset(keysetBuilder.build());
+    publicKeysetBuilder.setPrimaryKeyId(keyset.getPrimaryKeyId());
+    return new KeysetHandle(publicKeysetBuilder.build(), publicEntries, annotations);
   }
 
-  private static KeyData createPublicKeyData(KeyData privateKeyData)
+  private static KeyData getPublicKeyDataFromRegistry(KeyData privateKeyData)
       throws GeneralSecurityException {
     if (privateKeyData.getKeyMaterialType() != KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE) {
       throw new GeneralSecurityException("The keyset contains a non-private key");
