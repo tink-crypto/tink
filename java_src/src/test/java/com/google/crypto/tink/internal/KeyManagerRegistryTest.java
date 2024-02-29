@@ -99,15 +99,24 @@ public final class KeyManagerRegistryTest {
   }
 
   @Test
-  public void testRegisterKeyManager_differentManagersSameKeyType_fails() throws Exception {
+  public void testRegisterKeyManager_differentManagersSameKeyType_failsAndDoesnotChangeState()
+      throws Exception {
     assumeFalse("Unable to test KeyManagers in Fips mode", TinkFipsUtil.useOnlyFips());
     KeyManagerRegistry registry = new KeyManagerRegistry();
-    registry.registerKeyManager(new TestKeyManager("customTypeUrl"), true);
+    TestKeyManager testKeyManager = new TestKeyManager("customTypeUrl");
+    registry.registerKeyManager(testKeyManager, true);
+
+    assertThat(registry.isNewKeyAllowed("customTypeUrl")).isTrue();
+    assertThat(registry.getUntypedKeyManager("customTypeUrl")).isSameInstanceAs(testKeyManager);
+
     // Adding {} at the end makes this an anonymous subclass, hence a different class, so this
     // throws.
     assertThrows(
         GeneralSecurityException.class,
         () -> registry.registerKeyManager(new TestKeyManager("customTypeUrl") {}, true));
+
+    assertThat(registry.isNewKeyAllowed("customTypeUrl")).isTrue();
+    assertThat(registry.getUntypedKeyManager("customTypeUrl")).isSameInstanceAs(testKeyManager);
   }
 
   @Test
@@ -138,11 +147,15 @@ public final class KeyManagerRegistryTest {
         GeneralSecurityException.class, () -> registry.getUntypedKeyManager("customTypeUrl1"));
     registry.registerKeyManagerWithFipsCompatibility(
         manager, TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO, true);
-    assertThat(registry.getUntypedKeyManager("customTypeUrl1")).isNotNull();
+    assertThat(registry.isNewKeyAllowed("customTypeUrl1")).isTrue();
+    assertThat(registry.getKeyManager("customTypeUrl1", Primitive1.class))
+        .isSameInstanceAs(manager);
+    assertThat(registry.getUntypedKeyManager("customTypeUrl1")).isSameInstanceAs(manager);
   }
 
   @Test
-  public void testFipsCompatibleKeyManager_noFipsAvailable_fails() throws Exception {
+  public void testFipsCompatibleKeyManager_noFipsAvailable_failsAndDoesNotRegister()
+      throws Exception {
     assumeTrue(TinkFipsUtil.useOnlyFips());
     assumeFalse(TinkFipsUtil.fipsModuleAvailable());
 
@@ -155,6 +168,12 @@ public final class KeyManagerRegistryTest {
                 manager,
                 TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO,
                 true));
+    assertThat(registry.typeUrlExists("customTypeUrl1")).isFalse();
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> registry.getKeyManager("customTypeUrl1", Primitive1.class));
+    assertThrows(
+        GeneralSecurityException.class, () -> registry.getUntypedKeyManager("customTypeUrl1"));
   }
 
   @Test
@@ -202,27 +221,56 @@ public final class KeyManagerRegistryTest {
     KeyManagerRegistry registry = new KeyManagerRegistry();
     TestKeyManager manager = new TestKeyManager("customTypeUrl");
     registry.registerKeyManager(manager, false);
+
+    assertThat(registry.isNewKeyAllowed("customTypeUrl")).isFalse();
+    assertThat(registry.getKeyManager("customTypeUrl", Primitive1.class)).isSameInstanceAs(manager);
+    assertThat(registry.getUntypedKeyManager("customTypeUrl")).isSameInstanceAs(manager);
+
     registry.registerKeyManager(manager, false);
+
+    assertThat(registry.isNewKeyAllowed("customTypeUrl")).isFalse();
+    assertThat(registry.getKeyManager("customTypeUrl", Primitive1.class)).isSameInstanceAs(manager);
+    assertThat(registry.getUntypedKeyManager("customTypeUrl")).isSameInstanceAs(manager);
   }
 
   @Test
-  public void testRegisterKeyManager_moreRestrictedNewKeyAllowed_shouldWork() throws Exception {
-    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
-    assumeFalse("Unable to test KeyManagers in Fips mode", TinkFipsUtil.useOnlyFips());
-    KeyManagerRegistry registry = new KeyManagerRegistry();
-    TestKeyManager manager = new TestKeyManager("customTypeUrl");
-    registry.registerKeyManager(manager, true);
-    registry.registerKeyManager(manager, false);
-  }
-
-  @Test
-  public void testRegisterKeyManager_lessRestrictedNewKeyAllowed_shouldThrowException()
+  public void testRegisterKeyManager_moreRestrictedNewKeyAllowed_shouldWorkAndChangeState()
       throws Exception {
     // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
     assumeFalse("Unable to test KeyManagers in Fips mode", TinkFipsUtil.useOnlyFips());
     KeyManagerRegistry registry = new KeyManagerRegistry();
     TestKeyManager manager = new TestKeyManager("customTypeUrl");
+    registry.registerKeyManager(manager, true);
+
+    assertThat(registry.isNewKeyAllowed("customTypeUrl")).isTrue();
+    assertThat(registry.getKeyManager("customTypeUrl", Primitive1.class)).isSameInstanceAs(manager);
+    assertThat(registry.getUntypedKeyManager("customTypeUrl")).isSameInstanceAs(manager);
+
     registry.registerKeyManager(manager, false);
+
+    assertThat(registry.isNewKeyAllowed("customTypeUrl")).isFalse();
+    assertThat(registry.getKeyManager("customTypeUrl", Primitive1.class)).isSameInstanceAs(manager);
+    assertThat(registry.getUntypedKeyManager("customTypeUrl")).isSameInstanceAs(manager);
+  }
+
+  @Test
+  public void
+      testRegisterKeyManager_lessRestrictedNewKeyAllowed_shouldThrowExceptionAndNotChangeState()
+          throws Exception {
+    // Skip test if in FIPS mode, as registerKeyManager() is not allowed in FipsMode.
+    assumeFalse("Unable to test KeyManagers in Fips mode", TinkFipsUtil.useOnlyFips());
+    KeyManagerRegistry registry = new KeyManagerRegistry();
+    TestKeyManager manager = new TestKeyManager("customTypeUrl");
+    registry.registerKeyManager(manager, false);
+
+    assertThat(registry.isNewKeyAllowed("customTypeUrl")).isFalse();
+    assertThat(registry.getKeyManager("customTypeUrl", Primitive1.class)).isSameInstanceAs(manager);
+    assertThat(registry.getUntypedKeyManager("customTypeUrl")).isSameInstanceAs(manager);
+
     assertThrows(GeneralSecurityException.class, () -> registry.registerKeyManager(manager, true));
+
+    assertThat(registry.isNewKeyAllowed("customTypeUrl")).isFalse();
+    assertThat(registry.getKeyManager("customTypeUrl", Primitive1.class)).isSameInstanceAs(manager);
+    assertThat(registry.getUntypedKeyManager("customTypeUrl")).isSameInstanceAs(manager);
   }
 }

@@ -95,11 +95,7 @@ public final class KeyManagerRegistry {
     newKeyAllowedMap.put(typeUrl, newKeyAllowed);
   }
 
-  /**
-   * Attempts to insert the given KeyManager into the object.
-   *
-   * <p>If this fails, the KeyManagerRegistry is in an unspecified state and should be discarded.
-   */
+  /** Attempts to insert the given KeyManager into the object. */
   public synchronized <P> void registerKeyManager(
       final KeyManager<P> manager, boolean newKeyAllowed) throws GeneralSecurityException {
     registerKeyManagerWithFipsCompatibility(
@@ -109,8 +105,6 @@ public final class KeyManagerRegistry {
   /**
    * Attempts to insert the given KeyManager into the object; the caller guarantees that the given
    * key manager satisfies the given FIPS compatibility.
-   *
-   * <p>If this fails, the KeyManagerRegistry is in an unspecified state and should be discarded.
    */
   public synchronized <P> void registerKeyManagerWithFipsCompatibility(
       final KeyManager<P> manager,
