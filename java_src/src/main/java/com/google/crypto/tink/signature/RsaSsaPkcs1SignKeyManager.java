@@ -33,7 +33,6 @@ import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
-import com.google.crypto.tink.internal.TinkBugException;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.signature.internal.RsaSsaPkcs1ProtoSerialization;
 import com.google.crypto.tink.subtle.EngineFactory;
@@ -179,14 +178,10 @@ public final class RsaSsaPkcs1SignKeyManager {
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(PUBLIC_KEY_VERIFY_PRIMITIVE_CONSTRUCTOR);
     MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, RsaSsaPkcs1Parameters.class);
-    try {
-      KeyManagerRegistry.globalInstance()
-          .registerKeyManagerWithFipsCompatibility(legacyPrivateKeyManager, FIPS, newKeyAllowed);
-      KeyManagerRegistry.globalInstance()
-          .registerKeyManagerWithFipsCompatibility(legacyPublicKeyManager, FIPS, false);
-    } catch (GeneralSecurityException e) {
-      throw new TinkBugException("RsaSsaPkcs1KeyManager registration failed unexpectedly", e);
-    }
+    KeyManagerRegistry.globalInstance()
+        .registerKeyManagerWithFipsCompatibility(legacyPrivateKeyManager, FIPS, newKeyAllowed);
+    KeyManagerRegistry.globalInstance()
+        .registerKeyManagerWithFipsCompatibility(legacyPublicKeyManager, FIPS, false);
   }
 
   /**

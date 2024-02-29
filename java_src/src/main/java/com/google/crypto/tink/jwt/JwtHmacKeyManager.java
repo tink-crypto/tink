@@ -31,7 +31,6 @@ import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
-import com.google.crypto.tink.internal.TinkBugException;
 import com.google.crypto.tink.mac.HmacKey;
 import com.google.crypto.tink.mac.HmacParameters;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -172,6 +171,10 @@ public final class JwtHmacKeyManager {
             .setParameters(parameters)
             .setKeyBytes(SecretBytes.randomBytes(parameters.getKeySizeBytes()));
     if (parameters.hasIdRequirement()) {
+      if (idRequirement == null) {
+        throw new GeneralSecurityException(
+            "Cannot create key without ID requirement with parameters with ID requirement");
+      }
       builder.setIdRequirement(idRequirement);
     }
     return builder.build();
@@ -247,12 +250,8 @@ public final class JwtHmacKeyManager {
     MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, JwtHmacParameters.class);
     MutablePrimitiveRegistry.globalInstance().registerPrimitiveConstructor(PRIMITIVE_CONSTRUCTOR);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
-    try {
-      KeyManagerRegistry.globalInstance()
-          .registerKeyManagerWithFipsCompatibility(legacyKeyManager, FIPS, newKeyAllowed);
-    } catch (GeneralSecurityException e) {
-      throw new TinkBugException("JwtHmacKeyManager registration failed unexpectedly", e);
-    }
+    KeyManagerRegistry.globalInstance()
+        .registerKeyManagerWithFipsCompatibility(legacyKeyManager, FIPS, newKeyAllowed);
   }
 
   /** Returns a {@link KeyTemplate} that generates new instances of HS256 256-bit keys. */

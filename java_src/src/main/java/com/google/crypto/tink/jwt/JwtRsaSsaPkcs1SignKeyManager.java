@@ -30,7 +30,6 @@ import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
-import com.google.crypto.tink.internal.TinkBugException;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.signature.RsaSsaPkcs1PrivateKey;
 import com.google.crypto.tink.signature.RsaSsaPkcs1PublicKey;
@@ -246,15 +245,10 @@ public final class JwtRsaSsaPkcs1SignKeyManager {
     MutablePrimitiveRegistry.globalInstance().registerPrimitiveConstructor(PRIMITIVE_CONSTRUCTOR);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
     MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, JwtRsaSsaPkcs1Parameters.class);
-    try {
-      KeyManagerRegistry.globalInstance()
-          .registerKeyManagerWithFipsCompatibility(legacyPrivateKeyManager, FIPS, newKeyAllowed);
-      KeyManagerRegistry.globalInstance()
-          .registerKeyManagerWithFipsCompatibility(legacyPublicKeyManager, FIPS, false);
-    } catch (GeneralSecurityException e) {
-      throw new TinkBugException(
-          "JwtRsaSsaPkcs1SignKeyManager registration failed unexpectedly", e);
-    }
+    KeyManagerRegistry.globalInstance()
+        .registerKeyManagerWithFipsCompatibility(legacyPrivateKeyManager, FIPS, newKeyAllowed);
+    KeyManagerRegistry.globalInstance()
+        .registerKeyManagerWithFipsCompatibility(legacyPublicKeyManager, FIPS, false);
   }
 
   private JwtRsaSsaPkcs1SignKeyManager() {}

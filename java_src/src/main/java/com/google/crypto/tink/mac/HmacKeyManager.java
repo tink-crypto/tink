@@ -32,7 +32,6 @@ import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
-import com.google.crypto.tink.internal.TinkBugException;
 import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.mac.internal.ChunkedHmacImpl;
 import com.google.crypto.tink.mac.internal.HmacProtoSerialization;
@@ -187,12 +186,8 @@ public final class HmacKeyManager {
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
     MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, HmacParameters.class);
     MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, HmacParameters.class);
-    try {
-      KeyManagerRegistry.globalInstance()
-          .registerKeyManagerWithFipsCompatibility(legacyKeyManager, FIPS, newKeyAllowed);
-    } catch (GeneralSecurityException e) {
-      throw new TinkBugException("HmacKeyManager registration failed unexpectedly", e);
-    }
+    KeyManagerRegistry.globalInstance()
+        .registerKeyManagerWithFipsCompatibility(legacyKeyManager, FIPS, newKeyAllowed);
   }
 
   /**
