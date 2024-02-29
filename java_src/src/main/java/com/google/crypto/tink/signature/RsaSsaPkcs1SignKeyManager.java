@@ -33,6 +33,7 @@ import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
+import com.google.crypto.tink.internal.TinkBugException;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.signature.internal.RsaSsaPkcs1ProtoSerialization;
 import com.google.crypto.tink.subtle.EngineFactory;
@@ -159,11 +160,18 @@ public final class RsaSsaPkcs1SignKeyManager {
     return result;
   }
 
+  private static final TinkFipsUtil.AlgorithmFipsCompatibility FIPS =
+      TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
+
   /**
    * Registers the {@link RsaSsaPkcs1SignKeyManager} and the {@link RsaSsaPkcs1VerifyKeyManager}
    * with the registry, so that the the RsaSsaPkcs1-Keys can be used with Tink.
    */
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
+    if (!FIPS.isCompatible()) {
+      throw new GeneralSecurityException(
+          "Can not use RSA SSA PKCS1 in FIPS-mode, as BoringCrypto module is not available.");
+    }
     RsaSsaPkcs1ProtoSerialization.register();
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
     MutablePrimitiveRegistry.globalInstance()
@@ -171,16 +179,14 @@ public final class RsaSsaPkcs1SignKeyManager {
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(PUBLIC_KEY_VERIFY_PRIMITIVE_CONSTRUCTOR);
     MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, RsaSsaPkcs1Parameters.class);
-    KeyManagerRegistry.globalInstance()
-        .registerKeyManagerWithFipsCompatibility(
-            legacyPrivateKeyManager,
-            TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO,
-            newKeyAllowed);
-    KeyManagerRegistry.globalInstance()
-        .registerKeyManagerWithFipsCompatibility(
-            legacyPublicKeyManager,
-            TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO,
-            false);
+    try {
+      KeyManagerRegistry.globalInstance()
+          .registerKeyManagerWithFipsCompatibility(legacyPrivateKeyManager, FIPS, newKeyAllowed);
+      KeyManagerRegistry.globalInstance()
+          .registerKeyManagerWithFipsCompatibility(legacyPublicKeyManager, FIPS, false);
+    } catch (GeneralSecurityException e) {
+      throw new TinkBugException("RsaSsaPkcs1KeyManager registration failed unexpectedly", e);
+    }
   }
 
   /**

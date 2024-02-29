@@ -31,6 +31,7 @@ import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
+import com.google.crypto.tink.internal.TinkBugException;
 import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.prf.internal.HmacPrfProtoSerialization;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -105,18 +106,26 @@ public final class HmacPrfKeyManager {
     return Collections.unmodifiableMap(result);
   }
 
+  private static final TinkFipsUtil.AlgorithmFipsCompatibility FIPS =
+      TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
+
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
+    if (!FIPS.isCompatible()) {
+      throw new GeneralSecurityException(
+          "Can not use HMAC in FIPS-mode, as BoringCrypto module is not available.");
+    }
     HmacPrfProtoSerialization.register();
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(PRF_PRIMITIVE_CONSTRUCTOR);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
     MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, HmacPrfParameters.class);
     MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, HmacPrfParameters.class);
-    KeyManagerRegistry.globalInstance()
-        .registerKeyManagerWithFipsCompatibility(
-            legacyKeyManager,
-            TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO,
-            newKeyAllowed);
+    try {
+      KeyManagerRegistry.globalInstance()
+          .registerKeyManagerWithFipsCompatibility(legacyKeyManager, FIPS, newKeyAllowed);
+    } catch (GeneralSecurityException e) {
+      throw new TinkBugException("HmacPrfKeyManager registration failed unexpectedly", e);
+    }
   }
 
   /**

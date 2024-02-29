@@ -33,6 +33,7 @@ import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
+import com.google.crypto.tink.internal.TinkBugException;
 import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.AesGcmJce;
@@ -127,18 +128,26 @@ public final class AesGcmKeyManager {
         .build();
   }
 
+  private static final TinkFipsUtil.AlgorithmFipsCompatibility FIPS =
+      TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
+
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
+    if (!FIPS.isCompatible()) {
+      throw new GeneralSecurityException(
+          "Can not use AES-GCM in FIPS-mode, as BoringCrypto module is not available.");
+    }
     AesGcmProtoSerialization.register();
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(AES_GCM_PRIMITIVE_CONSTRUCTOR);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
     MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, AesGcmParameters.class);
     MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, AesGcmParameters.class);
-    KeyManagerRegistry.globalInstance()
-        .registerKeyManagerWithFipsCompatibility(
-            legacyKeyManager,
-            TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO,
-            newKeyAllowed);
+    try {
+      KeyManagerRegistry.globalInstance()
+          .registerKeyManagerWithFipsCompatibility(legacyKeyManager, FIPS, newKeyAllowed);
+    } catch (GeneralSecurityException e) {
+      throw new TinkBugException("AesGcmKeyManager registration failed unexpectedly", e);
+    }
   }
 
   /**

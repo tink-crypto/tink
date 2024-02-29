@@ -30,6 +30,7 @@ import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
+import com.google.crypto.tink.internal.TinkBugException;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.signature.EcdsaPrivateKey;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
@@ -168,21 +169,26 @@ public final class JwtEcdsaSignKeyManager {
     return Collections.unmodifiableMap(result);
   }
 
+  private static final TinkFipsUtil.AlgorithmFipsCompatibility FIPS =
+      TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
+
   /**
    * Registers the {@link EcdsaSignKeyManager} and the {@link EcdsaVerifyKeyManager} with the
    * registry, so that the the Ecdsa-Keys can be used with Tink.
    */
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
-    KeyManagerRegistry.globalInstance()
-        .registerKeyManagerWithFipsCompatibility(
-            legacyPrivateKeyManager,
-            TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO,
-            newKeyAllowed);
-    KeyManagerRegistry.globalInstance()
-        .registerKeyManagerWithFipsCompatibility(
-            legacyPublicKeyManager,
-            TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO,
-            false);
+    if (!FIPS.isCompatible()) {
+      throw new GeneralSecurityException(
+          "Can not use ECDSA in FIPS-mode, as BoringCrypto module is not available.");
+    }
+    try {
+      KeyManagerRegistry.globalInstance()
+          .registerKeyManagerWithFipsCompatibility(legacyPrivateKeyManager, FIPS, newKeyAllowed);
+      KeyManagerRegistry.globalInstance()
+          .registerKeyManagerWithFipsCompatibility(legacyPublicKeyManager, FIPS, false);
+    } catch (GeneralSecurityException e) {
+      throw new TinkBugException("JwtEcdsaSignKeyManager registration failed unexpectedly", e);
+    }
     MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, JwtEcdsaParameters.class);
     JwtEcdsaProtoSerialization.register();
     MutablePrimitiveRegistry.globalInstance()

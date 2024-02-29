@@ -32,6 +32,7 @@ import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
+import com.google.crypto.tink.internal.TinkBugException;
 import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.mac.internal.ChunkedHmacImpl;
 import com.google.crypto.tink.mac.internal.HmacProtoSerialization;
@@ -170,7 +171,14 @@ public final class HmacKeyManager {
         return Collections.unmodifiableMap(result);
   }
 
+  private static final TinkFipsUtil.AlgorithmFipsCompatibility FIPS =
+      TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
+
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
+    if (!FIPS.isCompatible()) {
+      throw new GeneralSecurityException(
+          "Can not use HMAC in FIPS-mode, as BoringCrypto module is not available.");
+    }
     HmacProtoSerialization.register();
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(CHUNKED_MAC_PRIMITIVE_CONSTRUCTOR);
@@ -179,11 +187,12 @@ public final class HmacKeyManager {
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
     MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, HmacParameters.class);
     MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, HmacParameters.class);
-    KeyManagerRegistry.globalInstance()
-        .registerKeyManagerWithFipsCompatibility(
-            legacyKeyManager,
-            TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO,
-            newKeyAllowed);
+    try {
+      KeyManagerRegistry.globalInstance()
+          .registerKeyManagerWithFipsCompatibility(legacyKeyManager, FIPS, newKeyAllowed);
+    } catch (GeneralSecurityException e) {
+      throw new TinkBugException("HmacKeyManager registration failed unexpectedly", e);
+    }
   }
 
   /**
