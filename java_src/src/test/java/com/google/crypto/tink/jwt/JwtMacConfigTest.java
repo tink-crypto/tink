@@ -21,8 +21,10 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import java.security.GeneralSecurityException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,15 +38,25 @@ public class JwtMacConfigTest {
   public void failIfAndOnlyIfInInvalidFipsState() throws Exception {
     boolean invalidFipsState = TinkFips.useOnlyFips() && !TinkFipsUtil.fipsModuleAvailable();
 
+    Parameters hs256Parameters =
+        JwtHmacParameters.builder()
+            .setKeySizeBytes(32)
+            .setAlgorithm(JwtHmacParameters.Algorithm.HS256)
+            .setKidStrategy(JwtHmacParameters.KidStrategy.IGNORED)
+            .build();
+
     if (invalidFipsState) {
       assertThrows(GeneralSecurityException.class, JwtMacConfig::register);
       assertThrows(
           GeneralSecurityException.class,
           () -> KeysetHandle.generateNew(KeyTemplates.get("JWT_HS256")));
-
+      assertThrows(
+          GeneralSecurityException.class,
+          () -> MutableKeyCreationRegistry.globalInstance().createKey(hs256Parameters, null));
     } else {
       JwtMacConfig.register();
       assertNotNull(KeysetHandle.generateNew(KeyTemplates.get("JWT_HS256")));
+      assertNotNull(MutableKeyCreationRegistry.globalInstance().createKey(hs256Parameters, null));
     }
   }
 }

@@ -643,9 +643,12 @@ java_test(
     tags = ["fips"],
     deps = [
         "//src/main/java/com/google/crypto/tink:key_templates",
+        "//src/main/java/com/google/crypto/tink:parameters",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/internal:mutable_key_creation_registry",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_hmac_parameters",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_mac_config",
         "@maven//:junit_junit",
     ],
