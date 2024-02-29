@@ -152,7 +152,6 @@ public final class RsaSsaPssSignKeyManager {
                 .build());
         // This is identical to RSA_SSA_PSS_3072_SHA256_F4. It is needed to maintain backward
         // compatibility with SignatureKeyTemplates.
-        // TODO(b/185475349): remove this in Tink 2.0.0.
         result.put(
             "RSA_SSA_PSS_3072_SHA256_SHA256_32_F4",
             PredefinedSignatureParameters.RSA_SSA_PSS_3072_SHA256_SHA256_32_F4);
@@ -178,7 +177,6 @@ public final class RsaSsaPssSignKeyManager {
                 .build());
         // This is identical to RSA_SSA_PSS_4096_SHA512_F4. It is needed to maintain backward
         // compatibility with SignatureKeyTemplates.
-        // TODO(b/185475349): remove this in Tink 2.0.0.
         result.put(
             "RSA_SSA_PSS_4096_SHA512_SHA512_64_F4",
             PredefinedSignatureParameters.RSA_SSA_PSS_4096_SHA512_SHA512_64_F4);

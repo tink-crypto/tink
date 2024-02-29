@@ -142,7 +142,6 @@ public final class RsaSsaPkcs1SignKeyManager {
             .build());
     // This is identical to RSA_SSA_PKCS1_3072_SHA256_F4_RAW. It is needed to maintain backward
     // compatibility with SignatureKeyTemplates.
-    // TODO(b/185475349): remove this in Tink 2.0.0.
     result.put(
         "RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX",
         PredefinedSignatureParameters.RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX);

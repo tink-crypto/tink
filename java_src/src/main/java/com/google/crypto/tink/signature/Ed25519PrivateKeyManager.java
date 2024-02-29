@@ -123,7 +123,6 @@ public final class Ed25519PrivateKeyManager {
         result.put("ED25519_RAW", Ed25519Parameters.create(Ed25519Parameters.Variant.NO_PREFIX));
         // This is identical to ED25519_RAW.
         // It is needed to maintain backward compatibility with SignatureKeyTemplates.
-        // TODO(b/185475349): remove this in 2.0.0.
         result.put(
             "ED25519WithRawOutput", Ed25519Parameters.create(Ed25519Parameters.Variant.NO_PREFIX));
         return Collections.unmodifiableMap(result);
