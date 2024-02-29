@@ -26,8 +26,9 @@ import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.PrivateKeyManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
-import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.SecretKeyAccess;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
 import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
@@ -133,6 +134,9 @@ public final class Ed25519PrivateKeyManager {
    * registry, so that the the Ed25519-Keys can be used with Tink.
    */
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
+    if (!TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()) {
+      throw new GeneralSecurityException("Registering AES GCM SIV is not supported in FIPS mode");
+    }
     Ed25519ProtoSerialization.register();
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
     MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, Ed25519Parameters.class);
@@ -141,8 +145,9 @@ public final class Ed25519PrivateKeyManager {
         .registerPrimitiveConstructor(PUBLIC_KEY_SIGN_PRIMITIVE_CONSTRUCTOR);
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(PUBLIC_KEY_VERIFY_PRIMITIVE_CONSTRUCTOR);
-    Registry.registerKeyManager(legacyPrivateKeyManager, newKeyAllowed);
-    Registry.registerKeyManager(legacyPublicKeyManager, /* newKeyAllowed= */ false);
+    KeyManagerRegistry.globalInstance().registerKeyManager(legacyPrivateKeyManager, newKeyAllowed);
+    KeyManagerRegistry.globalInstance()
+        .registerKeyManager(legacyPublicKeyManager, /* newKeyAllowed= */ false);
   }
 
   /**

@@ -23,7 +23,8 @@ import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Parameters;
-import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
 import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
@@ -93,6 +94,9 @@ public final class AesCmacKeyManager {
           com.google.crypto.tink.proto.AesCmacKey.parser());
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
+    if (!TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()) {
+      throw new GeneralSecurityException("Registering AES CMAC is not supported in FIPS mode");
+    }
     AesCmacProtoSerialization.register();
     MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, AesCmacParameters.class);
     MutablePrimitiveRegistry.globalInstance()
@@ -100,7 +104,7 @@ public final class AesCmacKeyManager {
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(MAC_PRIMITIVE_CONSTRUCTOR);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
-    Registry.registerKeyManager(legacyKeyManager, newKeyAllowed);
+    KeyManagerRegistry.globalInstance().registerKeyManager(legacyKeyManager, newKeyAllowed);
   }
 
   private static Map<String, Parameters> namedParameters() throws GeneralSecurityException {

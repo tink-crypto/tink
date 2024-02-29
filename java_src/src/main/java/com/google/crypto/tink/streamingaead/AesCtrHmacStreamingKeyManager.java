@@ -22,8 +22,9 @@ import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Parameters;
-import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.StreamingAead;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
 import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
@@ -94,13 +95,17 @@ public final class AesCtrHmacStreamingKeyManager {
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
+    if (!TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()) {
+      throw new GeneralSecurityException(
+          "Registering AES CTR HMAC Streaming AEAD is not supported in FIPS mode");
+    }
     AesCtrHmacStreamingProtoSerialization.register();
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
     MutableKeyCreationRegistry.globalInstance()
         .add(KEY_CREATOR, AesCtrHmacStreamingParameters.class);
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(AES_CTR_HMAC_STREAMING_AEAD_PRIMITIVE_CONSTRUCTOR);
-    Registry.registerKeyManager(legacyKeyManager, newKeyAllowed);
+    KeyManagerRegistry.globalInstance().registerKeyManager(legacyKeyManager, newKeyAllowed);
   }
 
   /**

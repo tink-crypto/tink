@@ -23,9 +23,10 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Parameters;
-import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.aead.subtle.AesGcmSiv;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
 import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableKeyDerivationRegistry;
@@ -136,6 +137,9 @@ public final class AesGcmSivKeyManager {
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
+    if (!TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()) {
+      throw new GeneralSecurityException("Registering AES GCM SIV is not supported in FIPS mode");
+    }
     // We want to register key proto serialization even when AES-GCM-SIV is unavailable via the
     // Java Cryptographic Extension framework (and thus via Tink) to enable operations that don't
     // depend on the actual cryptographic primitive - for example, exporting keys to key management
@@ -147,7 +151,7 @@ public final class AesGcmSivKeyManager {
       MutableParametersRegistry.globalInstance().putAll(namedParameters());
       MutableKeyDerivationRegistry.globalInstance().add(KEY_DERIVER, AesGcmSivParameters.class);
       MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, AesGcmSivParameters.class);
-      Registry.registerKeyManager(legacyKeyManager, newKeyAllowed);
+      KeyManagerRegistry.globalInstance().registerKeyManager(legacyKeyManager, newKeyAllowed);
     }
   }
 

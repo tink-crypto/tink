@@ -21,7 +21,8 @@ import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Parameters;
-import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
 import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
@@ -109,13 +110,16 @@ public class HkdfPrfKeyManager {
   private static final int MIN_KEY_SIZE = 32;
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
+    if (!TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()) {
+      throw new GeneralSecurityException("Registering HKDF PRF is not supported in FIPS mode");
+    }
     HkdfPrfProtoSerialization.register();
     MutablePrimitiveRegistry.globalInstance().registerPrimitiveConstructor(HKDF_PRF_CONSTRUCTOR);
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(STREAMING_HKDF_PRF_CONSTRUCTOR);
     MutableKeyCreationRegistry.globalInstance().add(KEY_CREATOR, HkdfPrfParameters.class);
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
-    Registry.registerKeyManager(legacyKeyManager, newKeyAllowed);
+    KeyManagerRegistry.globalInstance().registerKeyManager(legacyKeyManager, newKeyAllowed);
   }
 
   public static String staticKeyType() {

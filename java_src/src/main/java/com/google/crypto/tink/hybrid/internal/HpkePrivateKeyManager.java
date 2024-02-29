@@ -23,6 +23,7 @@ import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.PrivateKeyManager;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.hybrid.HpkeParameters;
 import com.google.crypto.tink.hybrid.HpkePrivateKey;
 import com.google.crypto.tink.hybrid.HpkeProtoSerialization;
@@ -117,6 +118,10 @@ public final class HpkePrivateKeyManager {
    * registry, so that HpkePrivateKey and HpkePublicKey key types can be used with Tink.
    */
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
+    if (!TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()) {
+      throw new GeneralSecurityException(
+          "Registering HPKE Hybrid Encryption is not supported in FIPS mode");
+    }
     HpkeProtoSerialization.register();
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
     MutablePrimitiveRegistry.globalInstance()

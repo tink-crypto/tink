@@ -22,8 +22,9 @@ import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.Parameters;
-import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.TinkProtoParametersFormat;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
 import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
@@ -235,12 +236,16 @@ public class KmsEnvelopeAeadKeyManager {
   }
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
+    if (!TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()) {
+      throw new GeneralSecurityException(
+          "Registering KMS Envelope AEAD is not supported in FIPS mode");
+    }
     LegacyKmsEnvelopeAeadProtoSerialization.register();
     MutableKeyCreationRegistry.globalInstance()
         .add(KEY_CREATOR, LegacyKmsEnvelopeAeadParameters.class);
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(LEGACY_KMS_ENVELOPE_AEAD_PRIMITIVE_CONSTRUCTOR);
-    Registry.registerKeyManager(legacyKeyManager, newKeyAllowed);
+    KeyManagerRegistry.globalInstance().registerKeyManager(legacyKeyManager, newKeyAllowed);
   }
 
   private KmsEnvelopeAeadKeyManager() {}

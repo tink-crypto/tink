@@ -28,6 +28,7 @@ import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.PrivateKeyManager;
 import com.google.crypto.tink.aead.AesCtrHmacAeadParameters;
 import com.google.crypto.tink.aead.AesGcmParameters;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.EllipticCurvesUtil;
 import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
@@ -270,6 +271,10 @@ public final class EciesAeadHkdfPrivateKeyManager {
    * with Tink.
    */
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
+    if (!TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()) {
+      throw new GeneralSecurityException(
+          "Registering ECIES Hybrid Encryption is not supported in FIPS mode");
+    }
     EciesProtoSerialization.register();
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
     MutablePrimitiveRegistry.globalInstance()

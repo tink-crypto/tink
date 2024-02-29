@@ -26,6 +26,7 @@ import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.PrivateKeyManager;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
 import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
@@ -188,6 +189,11 @@ public final class RsaSsaPssSignKeyManager {
    * the registry, so that the the RsaSsaPss-Keys can be used with Tink.
    */
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
+    // Tink's RSA SSA PSS algorithm in Java is currently not FIPS compatible, because it doesn't
+    // use BoringSSL.
+    if (!TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()) {
+      throw new GeneralSecurityException("Registering RSA SSA PSS is not supported in FIPS mode");
+    }
     RsaSsaPssProtoSerialization.register();
     MutableParametersRegistry.globalInstance().putAll(namedParameters());
     MutablePrimitiveRegistry.globalInstance()
