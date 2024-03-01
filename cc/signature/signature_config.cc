@@ -20,6 +20,7 @@
 #include "tink/config/config_util.h"
 #include "tink/config/tink_fips.h"
 #include "tink/registry.h"
+#include "tink/signature/ecdsa_proto_serialization.h"
 #include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/signature/ed25519_sign_key_manager.h"
 #include "tink/signature/ed25519_verify_key_manager.h"
@@ -55,6 +56,11 @@ util::Status SignatureConfig::Register() {
       absl::make_unique<EcdsaSignKeyManager>(),
       absl::make_unique<EcdsaVerifyKeyManager>(), true);
   if (!status.ok()) return status;
+
+  status = RegisterEcdsaProtoSerialization();
+  if (!status.ok()) {
+    return status;
+  }
 
   // RSA SSA PSS
   status = Registry::RegisterAsymmetricKeyManagers(

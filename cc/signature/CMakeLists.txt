@@ -350,6 +350,7 @@ tink_cc_library(
     signature_config.cc
     signature_config.h
   DEPS
+    tink::signature::ecdsa_proto_serialization
     tink::signature::ecdsa_verify_key_manager
     tink::signature::ed25519_sign_key_manager
     tink::signature::ed25519_verify_key_manager
@@ -1149,6 +1150,10 @@ tink_cc_test(
   SRCS
     signature_config_test.cc
   DEPS
+    tink::signature::ecdsa_parameters
+    tink::signature::ecdsa_private_key
+    tink::signature::ecdsa_public_key
+    tink::signature::key_gen_config_v0
     tink::signature::rsa_ssa_pkcs1_parameters
     tink::signature::rsa_ssa_pkcs1_private_key
     tink::signature::rsa_ssa_pkcs1_public_key
@@ -1167,9 +1172,12 @@ tink_cc_test(
     crypto
     tink::core::big_integer
     tink::core::crypto_format
+    tink::core::ec_point
     tink::core::insecure_secret_key_access
     tink::core::key
+    tink::core::key_status
     tink::core::keyset_handle
+    tink::core::keyset_handle_builder
     tink::core::parameters
     tink::core::partial_key_access
     tink::core::primitive_set
@@ -1180,12 +1188,16 @@ tink_cc_test(
     tink::core::restricted_data
     tink::config::global_registry
     tink::internal::bn_util
+    tink::internal::ec_util
     tink::internal::fips_utils
+    tink::internal::legacy_proto_key
     tink::internal::mutable_serialization_registry
     tink::internal::proto_key_serialization
     tink::internal::proto_parameters_serialization
     tink::internal::serialization
     tink::internal::ssl_unique_ptr
+    tink::subtle::common_enums
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
