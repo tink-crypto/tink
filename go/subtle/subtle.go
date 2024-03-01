@@ -124,12 +124,7 @@ func ComputeHash(hashFunc func() hash.Hash, data []byte) ([]byte, error) {
 		return nil, errNilHashFunc
 	}
 	h := hashFunc()
-
-	_, err := h.Write(data)
-	if err != nil {
-		return nil, err
-	}
-
+	h.Write(data)
 	return h.Sum(nil), nil
 }
 

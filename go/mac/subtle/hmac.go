@@ -82,10 +82,11 @@ func ValidateHMACParams(hash string, keySize uint32, tagSize uint32) error {
 
 // ComputeMAC computes message authentication code (MAC) for the given data.
 func (h *HMAC) ComputeMAC(data []byte) ([]byte, error) {
-	mac := hmac.New(h.HashFunc, h.Key)
-	if _, err := mac.Write(data); err != nil {
-		return nil, err
+	if h.HashFunc == nil {
+		return nil, fmt.Errorf("hmac: invalid hash algorithm")
 	}
+	mac := hmac.New(h.HashFunc, h.Key)
+	mac.Write(data)
 	tag := mac.Sum(nil)
 	return tag[:h.TagSize], nil
 }

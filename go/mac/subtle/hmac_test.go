@@ -116,6 +116,20 @@ func TestNewHMACWithInvalidInput(t *testing.T) {
 	}
 }
 
+func TestHMACWithNilHashFunc(t *testing.T) {
+	cipher, err := subtle.NewHMAC("SHA256", random.GetRandomBytes(32), 32)
+	if err != nil {
+		t.Fatalf("subtle.NewHMAC() err = %v", err)
+	}
+
+	// Modify exported field.
+	cipher.HashFunc = nil
+
+	if _, err := cipher.ComputeMAC([]byte{}); err == nil {
+		t.Errorf("cipher.ComputerMAC() err = nil, want not nil")
+	}
+}
+
 func TestHMAComputeVerifyWithNilInput(t *testing.T) {
 	cipher, err := subtle.NewHMAC("SHA256", random.GetRandomBytes(16), 32)
 	if err != nil {
