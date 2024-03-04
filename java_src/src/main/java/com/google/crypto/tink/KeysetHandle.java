@@ -18,12 +18,11 @@ package com.google.crypto.tink;
 
 import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.internal.InternalConfiguration;
-import com.google.crypto.tink.internal.LegacyProtoParameters;
+import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.PrimitiveSet;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
-import com.google.crypto.tink.internal.ProtoParametersSerialization;
 import com.google.crypto.tink.internal.RegistryConfiguration;
 import com.google.crypto.tink.internal.TinkBugException;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
@@ -312,25 +311,6 @@ public final class KeysetHandle {
       return id;
     }
 
-    private static Keyset.Key createNewKeysetKeyFromParameters(
-        Parameters parameters, KeyStatus status, int id) throws GeneralSecurityException {
-      ProtoParametersSerialization serializedParameters;
-      if (parameters instanceof LegacyProtoParameters) {
-        serializedParameters = ((LegacyProtoParameters) parameters).getSerialization();
-      } else {
-        serializedParameters =
-            MutableSerializationRegistry.globalInstance()
-                .serializeParameters(parameters, ProtoParametersSerialization.class);
-      }
-      KeyData keyData = Registry.newKeyData(serializedParameters.getKeyTemplate());
-      return Keyset.Key.newBuilder()
-          .setKeyId(id)
-          .setStatus(serializeStatus(status))
-          .setKeyData(keyData)
-          .setOutputPrefixType(serializedParameters.getKeyTemplate().getOutputPrefixType())
-          .build();
-    }
-
     private static int getNextIdFromBuilderEntry(
         KeysetHandle.Builder.Entry builderEntry, Set<Integer> idsSoFar)
         throws GeneralSecurityException {
@@ -398,15 +378,13 @@ public final class KeysetHandle {
                   builderEntry.key, builderEntry.keyStatus, id, builderEntry.isPrimary);
           keysetKey = createKeysetKey(builderEntry.key, builderEntry.keyStatus, id);
         } else {
-          keysetKey =
-              createNewKeysetKeyFromParameters(builderEntry.parameters, builderEntry.keyStatus, id);
-          try {
-            Key key = toKey(keysetKey);
-            handleEntry =
-                new KeysetHandle.Entry(key, builderEntry.keyStatus, id, builderEntry.isPrimary);
-          } catch (GeneralSecurityException e) {
-            handleEntry = null;
-          }
+          Integer idRequirement = builderEntry.parameters.hasIdRequirement() ? id : null;
+          Key key =
+              MutableKeyCreationRegistry.globalInstance()
+                  .createKey(builderEntry.parameters, idRequirement);
+          handleEntry =
+              new KeysetHandle.Entry(key, builderEntry.keyStatus, id, builderEntry.isPrimary);
+          keysetKey = createKeysetKey(key, builderEntry.keyStatus, id);
         }
         keysetBuilder.addKey(keysetKey);
         if (builderEntry.isPrimary) {

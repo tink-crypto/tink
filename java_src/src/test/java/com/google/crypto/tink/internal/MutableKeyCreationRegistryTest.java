@@ -21,17 +21,21 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Key;
+import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.TinkProtoParametersFormat;
 import com.google.crypto.tink.aead.AesEaxKey;
 import com.google.crypto.tink.aead.AesEaxParameters;
 import com.google.crypto.tink.aead.AesGcmKey;
 import com.google.crypto.tink.aead.AesGcmParameters;
 import com.google.crypto.tink.aead.PredefinedAeadParameters;
+import com.google.crypto.tink.aead.internal.LegacyAesCtrHmacTestKeyManager;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
 import java.security.GeneralSecurityException;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nullable;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -79,6 +83,11 @@ public final class MutableKeyCreationRegistryTest {
 
   private static final MutableKeyCreationRegistry.KeyCreator<AesEaxParameters> AES_EAX_CREATOR =
       MutableKeyCreationRegistryTest::createAesEaxKey;
+
+  @BeforeClass
+  public static void setUp() throws GeneralSecurityException {
+    LegacyAesCtrHmacTestKeyManager.register();
+  }
 
   @Test
   public void testBasic_setThenCall() throws Exception {
@@ -145,5 +154,16 @@ public final class MutableKeyCreationRegistryTest {
       keyMaterialSet.add(secretBytesAsBytes);
     }
     assertThat(keyMaterialSet).hasSize(numCalls);
+  }
+
+  @Test
+  public void globalInstanceCanCreateLegacyKeyManagerKeys() throws Exception {
+    Parameters legacyAesCtrHmacParameters =
+        TinkProtoParametersFormat.parse(
+            LegacyAesCtrHmacTestKeyManager.templateWithTinkPrefix().toByteArray());
+    Key key =
+        MutableKeyCreationRegistry.globalInstance().createKey(legacyAesCtrHmacParameters, 123);
+    assertThat(key.getIdRequirementOrNull()).isEqualTo(123);
+    assertThat(key.getParameters().toString()).isEqualTo(legacyAesCtrHmacParameters.toString());
   }
 }
