@@ -27,6 +27,7 @@
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "tink/aead/aes_gcm_parameters.h"
+#include "tink/aead/xchacha20_poly1305_parameters.h"
 #include "tink/daead/aes_siv_parameters.h"
 #include "tink/parameters.h"
 #include "tink/util/statusor.h"
@@ -72,7 +73,8 @@ INSTANTIATE_TEST_SUITE_P(
                    EciesParameters::PointFormat::kLegacyUncompressed),
             Values(EciesParameters::DemId::kAes128GcmRaw,
                    EciesParameters::DemId::kAes256GcmRaw,
-                   EciesParameters::DemId::kAes256SivRaw),
+                   EciesParameters::DemId::kAes256SivRaw,
+                   EciesParameters::DemId::kXChaCha20Poly1305Raw),
             Values(VariantWithIdRequirement{EciesParameters::Variant::kTink,
                                             /*has_id_requirement=*/true},
                    VariantWithIdRequirement{EciesParameters::Variant::kCrunchy,
@@ -676,6 +678,30 @@ TEST(EciesParametersTest, CreateAes256SivRawDemParameters) {
   EXPECT_THAT(aes_256_siv_parameters->KeySizeInBytes(), Eq(64));
   EXPECT_THAT(aes_256_siv_parameters->GetVariant(),
               Eq(AesSivParameters::Variant::kNoPrefix));
+}
+
+TEST(EciesParametersTest, CreateXChaCha20Poly1305RawDemParameters) {
+  util::StatusOr<EciesParameters> ecies_parameters =
+      EciesParameters::Builder()
+          .SetCurveType(EciesParameters::CurveType::kNistP256)
+          .SetHashType(EciesParameters::HashType::kSha256)
+          .SetNistCurvePointFormat(EciesParameters::PointFormat::kUncompressed)
+          .SetDemId(EciesParameters::DemId::kXChaCha20Poly1305Raw)
+          .SetSalt(absl::HexStringToBytes(kSalt))
+          .SetVariant(EciesParameters::Variant::kNoPrefix)
+          .Build();
+  ASSERT_THAT(ecies_parameters, IsOk());
+
+  util::StatusOr<std::unique_ptr<Parameters>> dem_parameters =
+      ecies_parameters->CreateDemParameters();
+  ASSERT_THAT(dem_parameters, IsOk());
+
+  const XChaCha20Poly1305Parameters* xchacha20_poly1305_parameters =
+      reinterpret_cast<const XChaCha20Poly1305Parameters*>(
+          (dem_parameters)->get());
+  ASSERT_THAT(xchacha20_poly1305_parameters, NotNull());
+  EXPECT_THAT(xchacha20_poly1305_parameters->GetVariant(),
+              Eq(XChaCha20Poly1305Parameters::Variant::kNoPrefix));
 }
 
 }  // namespace

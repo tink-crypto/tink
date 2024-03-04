@@ -25,6 +25,7 @@
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "tink/aead/aes_gcm_parameters.h"
+#include "tink/aead/xchacha20_poly1305_parameters.h"
 #include "tink/daead/aes_siv_parameters.h"
 #include "tink/parameters.h"
 #include "tink/util/status.h"
@@ -109,8 +110,9 @@ util::StatusOr<EciesParameters> EciesParameters::Builder::Build() {
         "Cannot create ECIES parameters with unknown point format.");
   }
 
-  static const std::set<DemId>* kSupportedDemIds = new std::set<DemId>(
-      {DemId::kAes128GcmRaw, DemId::kAes256GcmRaw, DemId::kAes256SivRaw});
+  static const std::set<DemId>* kSupportedDemIds =
+      new std::set<DemId>({DemId::kAes128GcmRaw, DemId::kAes256GcmRaw,
+                           DemId::kAes256SivRaw, DemId::kXChaCha20Poly1305Raw});
   if (kSupportedDemIds->find(dem_id_) == kSupportedDemIds->end()) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Cannot create ECIES parameters with unknown DEM.");
@@ -178,6 +180,17 @@ EciesParameters::CreateDemParameters() const {
         return aes_256_siv_raw.status();
       }
       return std::make_unique<AesSivParameters>(*aes_256_siv_raw);
+    }
+
+    case DemId::kXChaCha20Poly1305Raw: {
+      util::StatusOr<XChaCha20Poly1305Parameters> xchacha20_poly1305_raw =
+          XChaCha20Poly1305Parameters::Create(
+              XChaCha20Poly1305Parameters::Variant::kNoPrefix);
+      if (!xchacha20_poly1305_raw.ok()) {
+        return xchacha20_poly1305_raw.status();
+      }
+      return std::make_unique<XChaCha20Poly1305Parameters>(
+          *xchacha20_poly1305_raw);
     }
 
     default:

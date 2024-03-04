@@ -51,6 +51,7 @@
 #include "proto/common.pb.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
+#include "proto/xchacha20_poly1305.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -72,6 +73,7 @@ using ::google::crypto::tink::HashType;
 using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::KeyTemplate;
 using ::google::crypto::tink::OutputPrefixType;
+using ::google::crypto::tink::XChaCha20Poly1305KeyFormat;
 using ::testing::Eq;
 using ::testing::HasSubstr;
 using ::testing::IsTrue;
@@ -151,6 +153,21 @@ EciesAeadDemParams CreateAes256SivDemParams() {
   return dem_params;
 }
 
+EciesAeadDemParams CreateXChaCha20Poly1305DemParams() {
+  XChaCha20Poly1305KeyFormat format;
+  format.set_version(0);
+
+  KeyTemplate key_template;
+  key_template.set_type_url(
+      "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key");
+  key_template.set_output_prefix_type(OutputPrefixType::TINK);
+  format.SerializeToString(key_template.mutable_value());
+
+  EciesAeadDemParams dem_params;
+  *dem_params.mutable_aead_dem() = key_template;
+  return dem_params;
+}
+
 INSTANTIATE_TEST_SUITE_P(
     EciesProtoSerializationTestSuite, EciesProtoSerializationTest,
     Values(TestCase{EciesParameters::Variant::kTink,
@@ -190,12 +207,13 @@ INSTANTIATE_TEST_SUITE_P(
            TestCase{EciesParameters::Variant::kNoPrefix,
                     EciesParameters::CurveType::kX25519,
                     EciesParameters::HashType::kSha256,
-                    EciesParameters::DemId::kAes128GcmRaw,
+                    EciesParameters::DemId::kXChaCha20Poly1305Raw,
                     /*point_format=*/absl::nullopt,
                     /*salt=*/kSalt.data(), OutputPrefixType::RAW,
                     CreateKemParams(EllipticCurveType::CURVE25519,
                                     HashType::SHA256, /*salt=*/kSalt),
-                    CreateAesGcmDemParams(16), EcPointFormat::COMPRESSED,
+                    CreateXChaCha20Poly1305DemParams(),
+                    EcPointFormat::COMPRESSED,
                     /*id=*/absl::nullopt, /*output_prefix=*/""}));
 
 TEST_P(EciesProtoSerializationTest, ParseParametersSucceeds) {

@@ -80,7 +80,7 @@ class EciesParameters : public HybridParameters {
     kAes128GcmRaw = 1,
     kAes256GcmRaw = 2,
     kAes256SivRaw = 3,
-    // TODO: b/319155153 - Add DEM id for XChaCha20-Poly1305.
+    kXChaCha20Poly1305Raw = 4,
     // TODO: b/319156273 - Add DEM ids for AES-CTR-HMAC.
     kDoNotUseInsteadUseDefaultWhenWritingSwitchStatements = 20,
   };

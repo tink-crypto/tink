@@ -454,12 +454,12 @@ tink_cc_library(
     ecies_parameters.h
   DEPS
     tink::hybrid::hybrid_parameters
-    absl::memory
     absl::status
     absl::strings
     absl::optional
     tink::core::parameters
     tink::aead::aes_gcm_parameters
+    tink::aead::xchacha20_poly1305_parameters
     tink::daead::aes_siv_parameters
     tink::util::status
     tink::util::statusor
@@ -555,6 +555,7 @@ tink_cc_library(
     tink::proto::common_cc_proto
     tink::proto::ecies_aead_hkdf_cc_proto
     tink::proto::tink_cc_proto
+    tink::proto::xchacha20_poly1305_cc_proto
 )
 
 # tests
@@ -1014,6 +1015,7 @@ tink_cc_test(
     absl::optional
     tink::core::parameters
     tink::aead::aes_gcm_parameters
+    tink::aead::xchacha20_poly1305_parameters
     tink::daead::aes_siv_parameters
     tink::util::statusor
     tink::util::test_matchers
@@ -1111,4 +1113,5 @@ tink_cc_test(
     tink::proto::common_cc_proto
     tink::proto::ecies_aead_hkdf_cc_proto
     tink::proto::tink_cc_proto
+    tink::proto::xchacha20_poly1305_cc_proto
 )

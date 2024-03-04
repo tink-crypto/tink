@@ -47,6 +47,7 @@
 #include "proto/common.pb.h"
 #include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
+#include "proto/xchacha20_poly1305.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -66,6 +67,7 @@ using ::google::crypto::tink::HashType;
 using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::KeyTemplate;
 using ::google::crypto::tink::OutputPrefixType;
+using ::google::crypto::tink::XChaCha20Poly1305KeyFormat;
 
 using EciesProtoParametersParserImpl =
     internal::ParametersParserImpl<internal::ProtoParametersSerialization,
@@ -264,6 +266,16 @@ util::StatusOr<EciesParameters::DemId> FromProtoDemParams(
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid AES-SIV key length for DEM.");
   }
+  if (proto_dem_params.aead_dem().type_url() ==
+      "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key") {
+    XChaCha20Poly1305KeyFormat xchacha20_poly1305_key_format;
+    if (!xchacha20_poly1305_key_format.ParseFromString(
+            proto_dem_params.aead_dem().value())) {
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "Invalid XChaCha20-Poly1305 key format.");
+    }
+    return EciesParameters::DemId::kXChaCha20Poly1305Raw;
+  }
   return util::Status(absl::StatusCode::kInvalidArgument,
                       "Unable to convert proto DEM params to DEM id.");
 }
@@ -297,6 +309,13 @@ util::StatusOr<EciesAeadDemParams> ToProtoDemParams(
     format.set_key_size(64);
     return CreateEciesAeadDemParams(
         "type.googleapis.com/google.crypto.tink.AesSivKey",
+        format.SerializeAsString());
+  }
+  if (dem_id == EciesParameters::DemId::kXChaCha20Poly1305Raw) {
+    XChaCha20Poly1305KeyFormat format;
+    format.set_version(0);
+    return CreateEciesAeadDemParams(
+        "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key",
         format.SerializeAsString());
   }
   return util::Status(absl::StatusCode::kInvalidArgument,
