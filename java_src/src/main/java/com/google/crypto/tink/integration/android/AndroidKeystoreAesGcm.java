@@ -54,14 +54,6 @@ public final class AndroidKeystoreAesGcm implements Aead {
     }
   }
 
-  /** This is for testing only */
-  AndroidKeystoreAesGcm(String keyId, KeyStore keyStore) throws GeneralSecurityException {
-    key = (SecretKey) keyStore.getKey(keyId, null /* password */);
-    if (key == null) {
-      throw new InvalidKeyException("Keystore cannot load the key with ID: " + keyId);
-    }
-  }
-
   @Override
   public byte[] encrypt(final byte[] plaintext, final byte[] associatedData)
       throws GeneralSecurityException {
