@@ -26,6 +26,7 @@
 #include "absl/strings/escaping.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
+#include "tink/aead/aes_ctr_hmac_aead_parameters.h"
 #include "tink/aead/aes_gcm_parameters.h"
 #include "tink/aead/xchacha20_poly1305_parameters.h"
 #include "tink/daead/aes_siv_parameters.h"
@@ -74,7 +75,9 @@ INSTANTIATE_TEST_SUITE_P(
             Values(EciesParameters::DemId::kAes128GcmRaw,
                    EciesParameters::DemId::kAes256GcmRaw,
                    EciesParameters::DemId::kAes256SivRaw,
-                   EciesParameters::DemId::kXChaCha20Poly1305Raw),
+                   EciesParameters::DemId::kXChaCha20Poly1305Raw,
+                   EciesParameters::DemId::kAes128CtrHmacSha256Raw,
+                   EciesParameters::DemId::kAes256CtrHmacSha256Raw),
             Values(VariantWithIdRequirement{EciesParameters::Variant::kTink,
                                             /*has_id_requirement=*/true},
                    VariantWithIdRequirement{EciesParameters::Variant::kCrunchy,
@@ -604,13 +607,29 @@ TEST(EciesParametersTest, VariantNotEqual) {
   EXPECT_FALSE(*parameters == *other_parameters);
 }
 
-TEST(EciesParametersTest, CreateAes128GcmRawDemParameters) {
+struct AesGcmDemTestCase {
+  EciesParameters::DemId dem_id;
+  int key_size_in_bytes;
+};
+
+using AesGcmDemTest = TestWithParam<AesGcmDemTestCase>;
+
+INSTANTIATE_TEST_SUITE_P(
+    AesGcmDemTestSuite, AesGcmDemTest,
+    Values(AesGcmDemTestCase{EciesParameters::DemId::kAes128GcmRaw,
+                             /*key_size_in_bytes=*/16},
+           AesGcmDemTestCase{EciesParameters::DemId::kAes256GcmRaw,
+                             /*key_size_in_bytes=*/32}));
+
+TEST_P(AesGcmDemTest, CreateAesGcmRawDemParameters) {
+  AesGcmDemTestCase test_case = GetParam();
+
   util::StatusOr<EciesParameters> ecies_parameters =
       EciesParameters::Builder()
           .SetCurveType(EciesParameters::CurveType::kNistP256)
           .SetHashType(EciesParameters::HashType::kSha256)
           .SetNistCurvePointFormat(EciesParameters::PointFormat::kUncompressed)
-          .SetDemId(EciesParameters::DemId::kAes128GcmRaw)
+          .SetDemId(test_case.dem_id)
           .SetSalt(absl::HexStringToBytes(kSalt))
           .SetVariant(EciesParameters::Variant::kNoPrefix)
           .Build();
@@ -623,36 +642,11 @@ TEST(EciesParametersTest, CreateAes128GcmRawDemParameters) {
   const AesGcmParameters* aes_128_gcm_parameters =
       reinterpret_cast<const AesGcmParameters*>((dem_parameters)->get());
   ASSERT_THAT(aes_128_gcm_parameters, NotNull());
-  EXPECT_THAT(aes_128_gcm_parameters->KeySizeInBytes(), Eq(16));
+  EXPECT_THAT(aes_128_gcm_parameters->KeySizeInBytes(),
+              Eq(test_case.key_size_in_bytes));
   EXPECT_THAT(aes_128_gcm_parameters->IvSizeInBytes(), Eq(12));
   EXPECT_THAT(aes_128_gcm_parameters->TagSizeInBytes(), Eq(16));
   EXPECT_THAT(aes_128_gcm_parameters->GetVariant(),
-              Eq(AesGcmParameters::Variant::kNoPrefix));
-}
-
-TEST(EciesParametersTest, CreateAes256GcmRawDemParameters) {
-  util::StatusOr<EciesParameters> ecies_parameters =
-      EciesParameters::Builder()
-          .SetCurveType(EciesParameters::CurveType::kNistP256)
-          .SetHashType(EciesParameters::HashType::kSha256)
-          .SetNistCurvePointFormat(EciesParameters::PointFormat::kUncompressed)
-          .SetDemId(EciesParameters::DemId::kAes256GcmRaw)
-          .SetSalt(absl::HexStringToBytes(kSalt))
-          .SetVariant(EciesParameters::Variant::kNoPrefix)
-          .Build();
-  ASSERT_THAT(ecies_parameters, IsOk());
-
-  util::StatusOr<std::unique_ptr<Parameters>> dem_parameters =
-      ecies_parameters->CreateDemParameters();
-  ASSERT_THAT(dem_parameters, IsOk());
-
-  const AesGcmParameters* aes_256_gcm_parameters =
-      reinterpret_cast<const AesGcmParameters*>((dem_parameters)->get());
-  ASSERT_THAT(aes_256_gcm_parameters, NotNull());
-  EXPECT_THAT(aes_256_gcm_parameters->KeySizeInBytes(), Eq(32));
-  EXPECT_THAT(aes_256_gcm_parameters->IvSizeInBytes(), Eq(12));
-  EXPECT_THAT(aes_256_gcm_parameters->TagSizeInBytes(), Eq(16));
-  EXPECT_THAT(aes_256_gcm_parameters->GetVariant(),
               Eq(AesGcmParameters::Variant::kNoPrefix));
 }
 
@@ -702,6 +696,58 @@ TEST(EciesParametersTest, CreateXChaCha20Poly1305RawDemParameters) {
   ASSERT_THAT(xchacha20_poly1305_parameters, NotNull());
   EXPECT_THAT(xchacha20_poly1305_parameters->GetVariant(),
               Eq(XChaCha20Poly1305Parameters::Variant::kNoPrefix));
+}
+
+struct AesCtrHmacDemTestCase {
+  EciesParameters::DemId dem_id;
+  int aes_key_size_in_bytes;
+  int tag_size_in_bytes;
+};
+
+using AesCtrHmacDemTest = TestWithParam<AesCtrHmacDemTestCase>;
+
+INSTANTIATE_TEST_SUITE_P(
+    AesCtrHmacDemTestSuite, AesCtrHmacDemTest,
+    Values(
+        AesCtrHmacDemTestCase{EciesParameters::DemId::kAes128CtrHmacSha256Raw,
+                              /*aes_key_size_in_bytes=*/16,
+                              /*tag_size_in_bytes=*/16},
+        AesCtrHmacDemTestCase{EciesParameters::DemId::kAes256CtrHmacSha256Raw,
+                              /*aes_key_size_in_bytes=*/32,
+                              /*tag_size_in_bytes=*/32}));
+
+TEST_P(AesCtrHmacDemTest, CreateAesCtrHmacSha256RawDemParameters) {
+  AesCtrHmacDemTestCase test_case = GetParam();
+
+  util::StatusOr<EciesParameters> ecies_parameters =
+      EciesParameters::Builder()
+          .SetCurveType(EciesParameters::CurveType::kNistP256)
+          .SetHashType(EciesParameters::HashType::kSha256)
+          .SetNistCurvePointFormat(EciesParameters::PointFormat::kUncompressed)
+          .SetDemId(test_case.dem_id)
+          .SetSalt(absl::HexStringToBytes(kSalt))
+          .SetVariant(EciesParameters::Variant::kNoPrefix)
+          .Build();
+  ASSERT_THAT(ecies_parameters, IsOk());
+
+  util::StatusOr<std::unique_ptr<Parameters>> dem_parameters =
+      ecies_parameters->CreateDemParameters();
+  ASSERT_THAT(dem_parameters, IsOk());
+
+  const AesCtrHmacAeadParameters* aes_ctr_hmac_aead_parameters =
+      reinterpret_cast<const AesCtrHmacAeadParameters*>(
+          (dem_parameters)->get());
+  ASSERT_THAT(aes_ctr_hmac_aead_parameters, NotNull());
+  EXPECT_THAT(aes_ctr_hmac_aead_parameters->GetAesKeySizeInBytes(),
+              Eq(test_case.aes_key_size_in_bytes));
+  EXPECT_THAT(aes_ctr_hmac_aead_parameters->GetHmacKeySizeInBytes(), Eq(32));
+  EXPECT_THAT(aes_ctr_hmac_aead_parameters->GetIvSizeInBytes(), Eq(16));
+  EXPECT_THAT(aes_ctr_hmac_aead_parameters->GetTagSizeInBytes(),
+              Eq(test_case.tag_size_in_bytes));
+  EXPECT_THAT(aes_ctr_hmac_aead_parameters->GetHashType(),
+              Eq(AesCtrHmacAeadParameters::HashType::kSha256));
+  EXPECT_THAT(aes_ctr_hmac_aead_parameters->GetVariant(),
+              Eq(AesCtrHmacAeadParameters::Variant::kNoPrefix));
 }
 
 }  // namespace

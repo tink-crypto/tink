@@ -20,10 +20,12 @@
 #include <set>
 #include <string>
 
+#include "absl/base/attributes.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
+#include "tink/aead/aes_ctr_hmac_aead_parameters.h"
 #include "tink/aead/aes_gcm_parameters.h"
 #include "tink/aead/xchacha20_poly1305_parameters.h"
 #include "tink/daead/aes_siv_parameters.h"
@@ -110,9 +112,10 @@ util::StatusOr<EciesParameters> EciesParameters::Builder::Build() {
         "Cannot create ECIES parameters with unknown point format.");
   }
 
-  static const std::set<DemId>* kSupportedDemIds =
-      new std::set<DemId>({DemId::kAes128GcmRaw, DemId::kAes256GcmRaw,
-                           DemId::kAes256SivRaw, DemId::kXChaCha20Poly1305Raw});
+  static const std::set<DemId>* kSupportedDemIds = new std::set<DemId>(
+      {DemId::kAes128GcmRaw, DemId::kAes256GcmRaw, DemId::kAes256SivRaw,
+       DemId::kXChaCha20Poly1305Raw, DemId::kAes128CtrHmacSha256Raw,
+       DemId::kAes256CtrHmacSha256Raw});
   if (kSupportedDemIds->find(dem_id_) == kSupportedDemIds->end()) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Cannot create ECIES parameters with unknown DEM.");
@@ -144,32 +147,22 @@ util::StatusOr<EciesParameters> EciesParameters::Builder::Build() {
 util::StatusOr<std::unique_ptr<Parameters>>
 EciesParameters::CreateDemParameters() const {
   switch (dem_id_) {
-    case DemId::kAes128GcmRaw: {
-      util::StatusOr<AesGcmParameters> aes_128_gcm_raw =
-          AesGcmParameters::Builder()
-              .SetKeySizeInBytes(16)
-              .SetIvSizeInBytes(12)
-              .SetTagSizeInBytes(16)
-              .SetVariant(AesGcmParameters::Variant::kNoPrefix)
-              .Build();
-      if (!aes_128_gcm_raw.ok()) {
-        return aes_128_gcm_raw.status();
-      }
-      return std::make_unique<AesGcmParameters>(*aes_128_gcm_raw);
-    }
-
+    case DemId::kAes128GcmRaw:
+      ABSL_FALLTHROUGH_INTENDED;
     case DemId::kAes256GcmRaw: {
-      util::StatusOr<AesGcmParameters> aes_256_gcm_raw =
+      int key_size =
+          (dem_id_ == EciesParameters::DemId::kAes128GcmRaw) ? 16 : 32;
+      util::StatusOr<AesGcmParameters> aes_gcm_raw =
           AesGcmParameters::Builder()
-              .SetKeySizeInBytes(32)
+              .SetKeySizeInBytes(key_size)
               .SetIvSizeInBytes(12)
               .SetTagSizeInBytes(16)
               .SetVariant(AesGcmParameters::Variant::kNoPrefix)
               .Build();
-      if (!aes_256_gcm_raw.ok()) {
-        return aes_256_gcm_raw.status();
+      if (!aes_gcm_raw.ok()) {
+        return aes_gcm_raw.status();
       }
-      return std::make_unique<AesGcmParameters>(*aes_256_gcm_raw);
+      return std::make_unique<AesGcmParameters>(*aes_gcm_raw);
     }
 
     case DemId::kAes256SivRaw: {
@@ -191,6 +184,28 @@ EciesParameters::CreateDemParameters() const {
       }
       return std::make_unique<XChaCha20Poly1305Parameters>(
           *xchacha20_poly1305_raw);
+    }
+
+    case DemId::kAes128CtrHmacSha256Raw:
+      ABSL_FALLTHROUGH_INTENDED;
+    case DemId::kAes256CtrHmacSha256Raw: {
+      // Allowed AES-CTR-HMAC DEMs have matching AES key and tag sizes.
+      int size = (dem_id_ == EciesParameters::DemId::kAes128CtrHmacSha256Raw)
+                     ? 16
+                     : 32;
+      util::StatusOr<AesCtrHmacAeadParameters> aes_ctr_hmac_aead_raw =
+          AesCtrHmacAeadParameters::Builder()
+              .SetAesKeySizeInBytes(size)
+              .SetHmacKeySizeInBytes(32)
+              .SetIvSizeInBytes(16)
+              .SetTagSizeInBytes(size)
+              .SetHashType(AesCtrHmacAeadParameters::HashType::kSha256)
+              .SetVariant(AesCtrHmacAeadParameters::Variant::kNoPrefix)
+              .Build();
+      if (!aes_ctr_hmac_aead_raw.ok()) {
+        return aes_ctr_hmac_aead_raw.status();
+      }
+      return std::make_unique<AesCtrHmacAeadParameters>(*aes_ctr_hmac_aead_raw);
     }
 
     default:

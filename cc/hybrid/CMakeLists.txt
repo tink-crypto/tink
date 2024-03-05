@@ -454,10 +454,12 @@ tink_cc_library(
     ecies_parameters.h
   DEPS
     tink::hybrid::hybrid_parameters
+    absl::core_headers
     absl::status
     absl::strings
     absl::optional
     tink::core::parameters
+    tink::aead::aes_ctr_hmac_aead_parameters
     tink::aead::aes_gcm_parameters
     tink::aead::xchacha20_poly1305_parameters
     tink::daead::aes_siv_parameters
@@ -550,10 +552,13 @@ tink_cc_library(
     tink::internal::proto_parameters_serialization
     tink::util::status
     tink::util::statusor
+    tink::proto::aes_ctr_cc_proto
+    tink::proto::aes_ctr_hmac_aead_cc_proto
     tink::proto::aes_gcm_cc_proto
     tink::proto::aes_siv_cc_proto
     tink::proto::common_cc_proto
     tink::proto::ecies_aead_hkdf_cc_proto
+    tink::proto::hmac_cc_proto
     tink::proto::tink_cc_proto
     tink::proto::xchacha20_poly1305_cc_proto
 )
@@ -1014,6 +1019,7 @@ tink_cc_test(
     absl::string_view
     absl::optional
     tink::core::parameters
+    tink::aead::aes_ctr_hmac_aead_parameters
     tink::aead::aes_gcm_parameters
     tink::aead::xchacha20_poly1305_parameters
     tink::daead::aes_siv_parameters
@@ -1108,10 +1114,13 @@ tink_cc_test(
     tink::util::secret_data
     tink::util::statusor
     tink::util::test_matchers
+    tink::proto::aes_ctr_cc_proto
+    tink::proto::aes_ctr_hmac_aead_cc_proto
     tink::proto::aes_gcm_cc_proto
     tink::proto::aes_siv_cc_proto
     tink::proto::common_cc_proto
     tink::proto::ecies_aead_hkdf_cc_proto
+    tink::proto::hmac_cc_proto
     tink::proto::tink_cc_proto
     tink::proto::xchacha20_poly1305_cc_proto
 )

@@ -42,10 +42,13 @@
 #include "tink/secret_key_access_token.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "proto/aes_ctr.pb.h"
+#include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/aes_siv.pb.h"
 #include "proto/common.pb.h"
 #include "proto/ecies_aead_hkdf.pb.h"
+#include "proto/hmac.pb.h"
 #include "proto/tink.pb.h"
 #include "proto/xchacha20_poly1305.pb.h"
 
@@ -53,6 +56,8 @@ namespace crypto {
 namespace tink {
 namespace {
 
+using ::google::crypto::tink::AesCtrHmacAeadKeyFormat;
+using ::google::crypto::tink::AesCtrKeyFormat;
 using ::google::crypto::tink::AesGcmKeyFormat;
 using ::google::crypto::tink::AesSivKeyFormat;
 using ::google::crypto::tink::EciesAeadDemParams;
@@ -64,6 +69,8 @@ using ::google::crypto::tink::EciesHkdfKemParams;
 using ::google::crypto::tink::EcPointFormat;
 using ::google::crypto::tink::EllipticCurveType;
 using ::google::crypto::tink::HashType;
+using ::google::crypto::tink::HmacKeyFormat;
+using ::google::crypto::tink::HmacParams;
 using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::KeyTemplate;
 using ::google::crypto::tink::OutputPrefixType;
@@ -229,6 +236,49 @@ util::StatusOr<EcPointFormat> ToProtoPointFormat(
   }
 }
 
+absl::Status ValidateAesCtrHmacAeadKeyFormat(
+    const AesCtrHmacAeadKeyFormat& format) {
+  if (!format.has_aes_ctr_key_format()) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Missing aes_ctr_key_format.");
+  }
+  if (!format.aes_ctr_key_format().has_params()) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Missing aes_ctr_key_format.params.");
+  }
+  if (format.aes_ctr_key_format().params().iv_size() != 16) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "IV size must by 16 bytes.");
+  }
+  if (!format.has_hmac_key_format()) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Missing hmac_key_format.");
+  }
+  if (format.hmac_key_format().version() != 0) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "HMAC key format version must be 0.");
+  }
+  if (format.hmac_key_format().key_size() != 32) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "HMAC key size must be 32 bytes.");
+  }
+  if (!format.hmac_key_format().has_params()) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Missing hmac_key_format.params.");
+  }
+  if (format.hmac_key_format().params().hash() != HashType::SHA256) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Hash type must be SHA256.");
+  }
+  if (format.aes_ctr_key_format().key_size() !=
+      format.hmac_key_format().params().tag_size()) {
+    return util::Status(
+        absl::StatusCode::kInvalidArgument,
+        "Allowed AES-CTR-HMAC DEMs must have matching key and tag sizes.");
+  }
+  return util::OkStatus();
+}
+
 util::StatusOr<EciesParameters::DemId> FromProtoDemParams(
     EciesAeadDemParams proto_dem_params) {
   if (!proto_dem_params.has_aead_dem()) {
@@ -241,7 +291,7 @@ util::StatusOr<EciesParameters::DemId> FromProtoDemParams(
     if (!aes_gcm_key_format.ParseFromString(
             proto_dem_params.aead_dem().value())) {
       return util::Status(absl::StatusCode::kInvalidArgument,
-                          "Invalid AES-GCM key format.");
+                          "Failed to parse AES-GCM key format.");
     }
     if (aes_gcm_key_format.key_size() == 16) {
       return EciesParameters::DemId::kAes128GcmRaw;
@@ -258,7 +308,7 @@ util::StatusOr<EciesParameters::DemId> FromProtoDemParams(
     if (!aes_siv_key_format.ParseFromString(
             proto_dem_params.aead_dem().value())) {
       return util::Status(absl::StatusCode::kInvalidArgument,
-                          "Invalid AES-SIV key format.");
+                          "Failed to parse AES-SIV key format.");
     }
     if (aes_siv_key_format.key_size() == 64) {
       return EciesParameters::DemId::kAes256SivRaw;
@@ -272,9 +322,31 @@ util::StatusOr<EciesParameters::DemId> FromProtoDemParams(
     if (!xchacha20_poly1305_key_format.ParseFromString(
             proto_dem_params.aead_dem().value())) {
       return util::Status(absl::StatusCode::kInvalidArgument,
-                          "Invalid XChaCha20-Poly1305 key format.");
+                          "Failed to parse XChaCha20-Poly1305 key format.");
     }
     return EciesParameters::DemId::kXChaCha20Poly1305Raw;
+  }
+  if (proto_dem_params.aead_dem().type_url() ==
+      "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey") {
+    AesCtrHmacAeadKeyFormat aes_ctr_hmac_aead_key_format;
+    if (!aes_ctr_hmac_aead_key_format.ParseFromString(
+            proto_dem_params.aead_dem().value())) {
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "Failed to parse AES-CTR-HMAC key format.");
+    }
+    util::Status format_validation =
+        ValidateAesCtrHmacAeadKeyFormat(aes_ctr_hmac_aead_key_format);
+    if (!format_validation.ok()) {
+      return format_validation;
+    }
+    if (aes_ctr_hmac_aead_key_format.aes_ctr_key_format().key_size() == 16) {
+      return EciesParameters::DemId::kAes128CtrHmacSha256Raw;
+    }
+    if (aes_ctr_hmac_aead_key_format.aes_ctr_key_format().key_size() == 32) {
+      return EciesParameters::DemId::kAes256CtrHmacSha256Raw;
+    }
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Invalid AES-CTR-HMAC key length for DEM.");
   }
   return util::Status(absl::StatusCode::kInvalidArgument,
                       "Unable to convert proto DEM params to DEM id.");
@@ -316,6 +388,25 @@ util::StatusOr<EciesAeadDemParams> ToProtoDemParams(
     format.set_version(0);
     return CreateEciesAeadDemParams(
         "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key",
+        format.SerializeAsString());
+  }
+  if (dem_id == EciesParameters::DemId::kAes128CtrHmacSha256Raw ||
+      dem_id == EciesParameters::DemId::kAes256CtrHmacSha256Raw) {
+    int key_size =
+        (dem_id == EciesParameters::DemId::kAes128CtrHmacSha256Raw) ? 16 : 32;
+    int tag_size = key_size;  // Allowed DEMs have matching key/tag sizes.
+    AesCtrHmacAeadKeyFormat format;
+    AesCtrKeyFormat* aes_ctr_key_format = format.mutable_aes_ctr_key_format();
+    aes_ctr_key_format->set_key_size(key_size);
+    aes_ctr_key_format->mutable_params()->set_iv_size(16);
+    HmacKeyFormat* hmac_key_format = format.mutable_hmac_key_format();
+    hmac_key_format->set_version(0);
+    hmac_key_format->set_key_size(32);
+    HmacParams* hmac_params = hmac_key_format->mutable_params();
+    hmac_params->set_tag_size(tag_size);
+    hmac_params->set_hash(HashType::SHA256);
+    return CreateEciesAeadDemParams(
+        "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
         format.SerializeAsString());
   }
   return util::Status(absl::StatusCode::kInvalidArgument,
