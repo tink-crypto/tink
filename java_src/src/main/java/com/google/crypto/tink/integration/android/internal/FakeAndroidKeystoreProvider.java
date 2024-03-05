@@ -44,6 +44,11 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * Fake implementations of AndroidKeystore that provide all the function needed by Tink's android
  * integration package.
+ *
+ * <pre>Example usage: {@code
+ * java.security.Security.removeProvider("AndroidKeyStore");
+ * java.security.Security.addProvider(FakeAndroidKeystoreProvider.newProvider());
+ * }</pre>
  */
 public final class FakeAndroidKeystoreProvider {
 

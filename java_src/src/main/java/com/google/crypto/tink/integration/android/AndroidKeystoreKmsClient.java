@@ -109,17 +109,6 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
       return this;
     }
 
-    /** This is for testing only */
-    @CanIgnoreReturnValue
-    @RequiresApi(23)
-    public Builder setKeyStore(KeyStore val) {
-      if (val == null) {
-        throw new IllegalArgumentException("val cannot be null");
-      }
-      this.keyStore = val;
-      return this;
-    }
-
     public AndroidKeystoreKmsClient build() {
       return new AndroidKeystoreKmsClient(this);
     }
