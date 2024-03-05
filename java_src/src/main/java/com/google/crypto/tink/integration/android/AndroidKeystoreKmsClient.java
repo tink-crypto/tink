@@ -245,7 +245,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
    * <p>This function does not check if the key already exists, and will overwrite any existing key.
    */
   @RequiresApi(Build.VERSION_CODES.M)
-  static void generateNewAesGcmKeyWithoutExistenceCheck(String keyUri)
+  private static void generateNewAesGcmKeyWithoutExistenceCheck(String keyUri)
       throws GeneralSecurityException {
     String keyId = Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, keyUri);
     KeyGenerator keyGenerator =
