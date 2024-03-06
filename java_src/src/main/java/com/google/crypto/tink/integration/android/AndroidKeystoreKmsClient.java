@@ -44,7 +44,7 @@ import javax.crypto.KeyGenerator;
  * @since 1.0.0
  */
 public final class AndroidKeystoreKmsClient implements KmsClient {
-  private static final Object keyCreationLock = new Object();
+  private static final Object keystoreLock = new Object();
 
   private static final String TAG = AndroidKeystoreKmsClient.class.getSimpleName();
   private static final int MAX_WAIT_TIME_MILLISECONDS_BEFORE_RETRY = 40;
@@ -108,7 +108,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
    */
   @Override
   @RequiresApi(23)
-  public synchronized boolean doesSupport(String uri) {
+  public boolean doesSupport(String uri) {
     if (this.keyUri != null && this.keyUri.equals(uri)) {
       return true;
     }
@@ -144,16 +144,18 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
    * will incur a small performance penalty.
    */
   @Override
-  public synchronized Aead getAead(String uri) throws GeneralSecurityException {
+  public Aead getAead(String uri) throws GeneralSecurityException {
     if (this.keyUri != null && !this.keyUri.equals(uri)) {
       throw new GeneralSecurityException(
           String.format(
               "this client is bound to %s, cannot load keys bound to %s", this.keyUri, uri));
     }
     try {
-      Aead aead =
-          new AndroidKeystoreAesGcm(Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, uri));
-      return validateAead(aead);
+      synchronized (keystoreLock) {
+        Aead aead =
+            new AndroidKeystoreAesGcm(Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, uri));
+        return validateAead(aead);
+      }
     } catch (IOException ex) {
       throw new GeneralSecurityException(ex);
     }
@@ -170,20 +172,26 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
   }
 
   /** Deletes a key in Android Keystore. */
-  public synchronized void deleteKey(String keyUri) throws GeneralSecurityException {
+  public void deleteKey(String keyUri) throws GeneralSecurityException {
     String keyId = Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, keyUri);
-    getAndroidKeyStore().deleteEntry(keyId);
+    synchronized (keystoreLock) {
+      getAndroidKeyStore().deleteEntry(keyId);
+    }
   }
 
   /** Returns whether a key exists in Android Keystore. */
-  synchronized boolean hasKey(String keyUri) throws GeneralSecurityException {
+  boolean hasKey(String keyUri) throws GeneralSecurityException {
     String keyId = Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, keyUri);
     try {
-      return getAndroidKeyStore().containsAlias(keyId);
+      synchronized (keystoreLock) {
+        return getAndroidKeyStore().containsAlias(keyId);
+      }
     } catch (NullPointerException ex1) {
       Log.w(TAG, "Keystore is temporarily unavailable, wait, reinitialize Keystore and try again.");
       sleepRandomAmount();
-      return getAndroidKeyStore().containsAlias(keyId);
+      synchronized (keystoreLock) {
+        return getAndroidKeyStore().containsAlias(keyId);
+      }
     }
   }
 
@@ -205,12 +213,12 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
   public static Aead getOrGenerateNewAeadKey(String keyUri)
       throws GeneralSecurityException, IOException {
     AndroidKeystoreKmsClient client = new AndroidKeystoreKmsClient();
-    synchronized (keyCreationLock) {
+    synchronized (keystoreLock) {
       if (!client.hasKey(keyUri)) {
         generateNewAesGcmKeyWithoutExistenceCheck(keyUri);
       }
+      return client.getAead(keyUri);
     }
-    return client.getAead(keyUri);
   }
 
   /**
@@ -221,7 +229,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
   @RequiresApi(Build.VERSION_CODES.M)
   public static void generateNewAeadKey(String keyUri) throws GeneralSecurityException {
     AndroidKeystoreKmsClient client = new AndroidKeystoreKmsClient();
-    synchronized (keyCreationLock) {
+    synchronized (keystoreLock) {
       if (client.hasKey(keyUri)) {
         throw new IllegalArgumentException(
             String.format(
@@ -263,7 +271,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
   @RequiresApi(Build.VERSION_CODES.M)
   static boolean generateKeyIfNotExist(String keyUri) throws GeneralSecurityException {
     AndroidKeystoreKmsClient client = new AndroidKeystoreKmsClient();
-    synchronized (keyCreationLock) {
+    synchronized (keystoreLock) {
       if (!client.hasKey(keyUri)) {
         generateNewAesGcmKeyWithoutExistenceCheck(keyUri);
         return true;
