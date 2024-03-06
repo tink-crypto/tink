@@ -96,6 +96,12 @@ class KeysetHandle {
     bool is_primary_;
   };
 
+  KeysetHandle() = default;
+  KeysetHandle(const KeysetHandle&) = default;
+  KeysetHandle(KeysetHandle&&) = default;
+  KeysetHandle& operator=(const KeysetHandle&) = default;
+  KeysetHandle& operator=(KeysetHandle&&) = default;
+
   // Returns the number of entries in this keyset.
   int size() const { return keyset_->key_size(); }
   // Validates single `KeysetHandle::Entry` at `index` by making sure that the

@@ -99,6 +99,7 @@ using ::testing::Eq;
 using ::testing::IsFalse;
 using ::testing::IsTrue;
 using ::testing::Not;
+using ::testing::NotNull;
 using ::testing::SizeIs;
 
 namespace {
@@ -199,6 +200,67 @@ Keyset GetPublicTestKeyset() {
             KeyData::REMOTE, &keyset);
   keyset.set_primary_key_id(42);
   return keyset;
+}
+
+TEST_F(KeysetHandleTest, DefaultCtor) {
+  KeysetHandle keyset_handle;
+  EXPECT_THAT(keyset_handle.size(), Eq(0));
+  EXPECT_THAT(keyset_handle.Validate(), Not(IsOk()));
+  EXPECT_THAT(
+      keyset_handle.GetPrimitive<crypto::tink::Aead>(ConfigGlobalRegistry()),
+      Not(IsOk()));
+}
+
+TEST_F(KeysetHandleTest, CopyCtorAndAssignment) {
+  util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
+      KeysetHandle::ReadNoSecret(GetPublicTestKeyset().SerializeAsString());
+  ASSERT_THAT(keyset_handle, IsOk());
+  ASSERT_THAT(*keyset_handle, NotNull());
+  ASSERT_THAT((*keyset_handle)->Validate(), IsOk());
+  EXPECT_THAT((*keyset_handle)->size(), Eq(2));
+  EXPECT_THAT((*keyset_handle)->GetPrimary().GetId(), Eq(42));
+  KeysetHandle keyset_handle_copy = **keyset_handle;
+  EXPECT_THAT(keyset_handle_copy.Validate(), IsOk());
+  EXPECT_EQ(keyset_handle_copy.size(), (*keyset_handle)->size());
+  EXPECT_THAT(keyset_handle_copy.GetPrimary().GetId(),
+              Eq((*keyset_handle)->GetPrimary().GetId()));
+  KeysetHandle keyset_handle_copy2;
+  EXPECT_THAT(keyset_handle_copy2.Validate(), Not(IsOk()));
+  EXPECT_THAT(keyset_handle_copy2.size(), Eq(0));
+  keyset_handle_copy2 = keyset_handle_copy;
+  EXPECT_THAT(keyset_handle_copy2.Validate(), IsOk());
+  EXPECT_EQ(keyset_handle_copy2.size(), (*keyset_handle)->size());
+  EXPECT_THAT(keyset_handle_copy2.GetPrimary().GetId(),
+              Eq((*keyset_handle)->GetPrimary().GetId()));
+}
+
+TEST_F(KeysetHandleTest, MoveCtorAndAssignment) {
+  util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
+      KeysetHandle::ReadNoSecret(GetPublicTestKeyset().SerializeAsString());
+  ASSERT_THAT(keyset_handle, IsOk());
+  ASSERT_THAT(*keyset_handle, NotNull());
+  ASSERT_THAT((*keyset_handle)->Validate(), IsOk());
+  EXPECT_THAT((*keyset_handle)->size(), Eq(2));
+  EXPECT_THAT((*keyset_handle)->GetPrimary().GetId(), Eq(42));
+  KeysetHandle keyset_handle_moved = std::move(**keyset_handle);
+  // Moved out handle becomes empty
+  EXPECT_THAT((*keyset_handle)->Validate(), Not(IsOk()));
+  EXPECT_THAT((*keyset_handle)->size(), Eq(0));
+  // Moved to handle is valid and contains expected values
+  EXPECT_THAT(keyset_handle_moved.Validate(), IsOk());
+  EXPECT_THAT(keyset_handle_moved.size(), Eq(2));
+  EXPECT_THAT(keyset_handle_moved.GetPrimary().GetId(), Eq(42));
+  KeysetHandle keyset_handle_moved2;
+  EXPECT_THAT(keyset_handle_moved2.Validate(), Not(IsOk()));
+  EXPECT_THAT(keyset_handle_moved2.size(), Eq(0));
+  keyset_handle_moved2 = std::move(keyset_handle_moved);
+  // Moved out handle becomes empty
+  EXPECT_THAT(keyset_handle_moved.Validate(), Not(IsOk()));
+  EXPECT_THAT(keyset_handle_moved.size(), Eq(0));
+  // Moved to handle is valid and contains expected values
+  EXPECT_THAT(keyset_handle_moved2.Validate(), IsOk());
+  EXPECT_THAT(keyset_handle_moved2.size(), Eq(2));
+  EXPECT_THAT(keyset_handle_moved2.GetPrimary().GetId(), Eq(42));
 }
 
 TEST_F(KeysetHandleTest, ReadEncryptedKeysetBinary) {
