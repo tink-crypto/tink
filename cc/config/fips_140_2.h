@@ -22,8 +22,9 @@
 namespace crypto {
 namespace tink {
 
-// Configuration used to generate primitives using FIPS 140-2-compliant key
-// types. Importing this Configuration restricts Tink to FIPS globally and
+// Configuration used to generate primitives for key types that are compliant
+// with FIPS 140-2, https://csrc.nist.gov/pubs/fips/140-2/upd2/final.
+// Importing this Configuration restricts Tink to FIPS globally and
 // requires BoringSSL to be built with the BoringCrypto module.
 const Configuration& ConfigFips140_2();
 

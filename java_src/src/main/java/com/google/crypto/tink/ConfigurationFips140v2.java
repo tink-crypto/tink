@@ -48,11 +48,14 @@ import com.google.crypto.tink.subtle.RsaSsaPkcs1SignJce;
 import com.google.crypto.tink.subtle.RsaSsaPkcs1VerifyJce;
 import java.security.GeneralSecurityException;
 
-/** ConfigurationFips140v2 contains FIPS-compliant Tink primitives. */
+/**
+ * ConfigurationFips140v2 contains Tink primitives that are compliant with <a
+ * href="https://csrc.nist.gov/pubs/fips/140-2/upd2/final">FIPS 140-2</a>.
+ */
 public class ConfigurationFips140v2 {
   private ConfigurationFips140v2() {}
 
-  /** get returns a Configuration containing Tink's FIPS-compliant primitives. */
+  /** get returns a Configuration containing primitives that are FIPS 140-2 compiant. */
   public static Configuration get() throws GeneralSecurityException {
     // First, check that we've got Conscrypt built with the BoringCrypto module.
     if (!TinkFipsUtil.fipsModuleAvailable()) {
