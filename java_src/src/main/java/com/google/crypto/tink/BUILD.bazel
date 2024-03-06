@@ -968,3 +968,21 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pkcs1_verify_jce",
     ],
 )
+
+android_library(
+    name = "registry_configuration-android",
+    srcs = ["RegistryConfiguration.java"],
+    deps = [
+        ":configuration-android",
+        "//src/main/java/com/google/crypto/tink/internal:registry_configuration-android",
+    ],
+)
+
+java_library(
+    name = "registry_configuration",
+    srcs = ["RegistryConfiguration.java"],
+    deps = [
+        ":configuration",
+        "//src/main/java/com/google/crypto/tink/internal:registry_configuration",
+    ],
+)
