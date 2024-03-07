@@ -17,7 +17,6 @@
 #include "tink/aead/aes_ctr_hmac_aead_proto_serialization.h"
 
 #include "absl/base/attributes.h"
-#include "absl/base/no_destructor.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
@@ -357,27 +356,27 @@ util::StatusOr<internal::ProtoKeySerialization> SerializeKey(
 }
 
 AesCtrHmacAeadProtoParametersParserImpl& AesCtrHmacAeadProtoParametersParser() {
-  static absl::NoDestructor<AesCtrHmacAeadProtoParametersParserImpl> parser(
-      kTypeUrl, ParseParameters);
+  static auto* parser =
+      new AesCtrHmacAeadProtoParametersParserImpl(kTypeUrl, ParseParameters);
   return *parser;
 }
 
 AesCtrHmacAeadProtoParametersSerializerImpl&
 AesCtrHmacAeadProtoParametersSerializer() {
-  static absl::NoDestructor<AesCtrHmacAeadProtoParametersSerializerImpl>
-      serializer(kTypeUrl, SerializeParameters);
+  static auto* serializer = new AesCtrHmacAeadProtoParametersSerializerImpl(
+      kTypeUrl, SerializeParameters);
   return *serializer;
 }
 
 AesCtrHmacAeadProtoKeyParserImpl& AesCtrHmacAeadProtoKeyParser() {
-  static absl::NoDestructor<AesCtrHmacAeadProtoKeyParserImpl> parser(kTypeUrl,
-                                                                     ParseKey);
+  static auto* parser =
+      new AesCtrHmacAeadProtoKeyParserImpl(kTypeUrl, ParseKey);
   return *parser;
 }
 
 AesCtrHmacAeadProtoKeySerializerImpl& AesCtrHmacAeadProtoKeySerializer() {
-  static absl::NoDestructor<AesCtrHmacAeadProtoKeySerializerImpl> serializer(
-      SerializeKey);
+  static auto* serializer =
+      new AesCtrHmacAeadProtoKeySerializerImpl(SerializeKey);
   return *serializer;
 }
 

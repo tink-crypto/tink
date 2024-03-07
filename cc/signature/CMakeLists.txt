@@ -823,7 +823,6 @@ tink_cc_library(
     tink::signature::ecdsa_parameters
     tink::signature::ecdsa_private_key
     tink::signature::ecdsa_public_key
-    absl::no_destructor
     absl::status
     absl::string_view
     absl::optional

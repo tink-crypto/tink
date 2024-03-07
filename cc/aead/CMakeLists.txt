@@ -730,7 +730,6 @@ tink_cc_library(
     tink::aead::aes_ctr_hmac_aead_key
     tink::aead::aes_ctr_hmac_aead_parameters
     absl::core_headers
-    absl::no_destructor
     absl::status
     absl::strings
     absl::string_view

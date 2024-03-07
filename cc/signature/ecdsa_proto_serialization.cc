@@ -17,7 +17,6 @@
 #include "tink/signature/ecdsa_proto_serialization.h"
 #include <string>
 
-#include "absl/base/no_destructor.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
@@ -506,38 +505,38 @@ util::StatusOr<internal::ProtoKeySerialization> SerializePrivateKey(
 }
 
 EcdsaProtoParametersParserImpl& EcdsaProtoParametersParser() {
-  static absl::NoDestructor<EcdsaProtoParametersParserImpl> parser(
-      kPrivateTypeUrl, ParseParameters);
+  static auto* parser =
+      new EcdsaProtoParametersParserImpl(kPrivateTypeUrl, ParseParameters);
   return *parser;
 }
 
 EcdsaProtoParametersSerializerImpl& EcdsaProtoParametersSerializer() {
-  static absl::NoDestructor<EcdsaProtoParametersSerializerImpl> serializer(
+  static auto* serializer = new EcdsaProtoParametersSerializerImpl(
       kPrivateTypeUrl, SerializeParameters);
   return *serializer;
 }
 
 EcdsaProtoPublicKeyParserImpl& EcdsaProtoPublicKeyParser() {
-  static absl::NoDestructor<EcdsaProtoPublicKeyParserImpl> parser(
-      kPublicTypeUrl, ParsePublicKey);
+  static auto* parser =
+      new EcdsaProtoPublicKeyParserImpl(kPublicTypeUrl, ParsePublicKey);
   return *parser;
 }
 
 EcdsaProtoPublicKeySerializerImpl& EcdsaProtoPublicKeySerializer() {
-  static absl::NoDestructor<EcdsaProtoPublicKeySerializerImpl> serializer(
-      SerializePublicKey);
+  static auto* serializer =
+      new EcdsaProtoPublicKeySerializerImpl(SerializePublicKey);
   return *serializer;
 }
 
 EcdsaProtoPrivateKeyParserImpl& EcdsaProtoPrivateKeyParser() {
-  static absl::NoDestructor<EcdsaProtoPrivateKeyParserImpl> parser(
-      kPrivateTypeUrl, ParsePrivateKey);
+  static auto* parser =
+      new EcdsaProtoPrivateKeyParserImpl(kPrivateTypeUrl, ParsePrivateKey);
   return *parser;
 }
 
 EcdsaProtoPrivateKeySerializerImpl& EcdsaProtoPrivateKeySerializer() {
-  static absl::NoDestructor<EcdsaProtoPrivateKeySerializerImpl> serializer(
-      SerializePrivateKey);
+  static auto* serializer =
+      new EcdsaProtoPrivateKeySerializerImpl(SerializePrivateKey);
   return *serializer;
 }
 }  // namespace
