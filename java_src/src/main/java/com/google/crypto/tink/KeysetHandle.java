@@ -37,6 +37,7 @@ import com.google.crypto.tink.tinkkey.internal.InternalKeyHandle;
 import com.google.crypto.tink.tinkkey.internal.ProtoKey;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
+import com.google.errorprone.annotations.InlineMe;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -1119,6 +1120,9 @@ public final class KeysetHandle {
    * Returns a primitive from this keyset, using the global registry to create resources creating
    * the primitive.
    */
+  @InlineMe(
+      replacement = "this.getPrimitive(RegistryConfiguration.get(), targetClassObject)",
+      imports = {"com.google.crypto.tink.RegistryConfiguration"})
   public <P> P getPrimitive(Class<P> targetClassObject) throws GeneralSecurityException {
     return getPrimitive(RegistryConfiguration.get(), targetClassObject);
   }
