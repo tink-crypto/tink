@@ -144,8 +144,7 @@ util::StatusOr<AesSivKey> ParseKey(
   google::crypto::tink::AesSivKey proto_key;
   RestrictedData restricted_data = serialization.SerializedKeyProto();
   // OSS proto library complains if input is not converted to a string.
-  if (!proto_key.ParseFromString(
-          std::string(restricted_data.GetSecret(*token)))) {
+  if (!proto_key.ParseFromString(restricted_data.GetSecret(*token))) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Failed to parse AesSivKey proto");
   }
