@@ -134,7 +134,7 @@ class TestKeyFactory : public KeyFactory {
       absl::string_view serialized_key_format) const override {
     auto key_data = absl::make_unique<KeyData>();
     key_data->set_type_url(key_type_);
-    key_data->set_value(std::string(serialized_key_format));
+    key_data->set_value(serialized_key_format);
     return std::move(key_data);
   }
 
