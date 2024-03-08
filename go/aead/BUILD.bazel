@@ -51,6 +51,7 @@ go_library(
 go_test(
     name = "aead_test",
     srcs = [
+        "aead_benchmark_test.go",
         "aead_factory_test.go",
         "aead_init_test.go",
         "aead_key_templates_test.go",
