@@ -16,12 +16,14 @@
 
 package com.google.crypto.tink.streamingaead;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
+import com.google.crypto.tink.internal.PrimitiveRegistry;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -33,6 +35,7 @@ import com.google.crypto.tink.testing.StreamingTestUtil;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -285,5 +288,21 @@ public class StreamingAeadWrapperTest {
     StreamingAead streamingAead = keysetHandle.getPrimitive(StreamingAead.class);
 
     StreamingTestUtil.testEncryptionAndDecryption(streamingAead, streamingAead);
+  }
+
+  @Test
+  public void registerToInternalPrimitiveRegistry_works() throws Exception {
+    PrimitiveRegistry.Builder initialBuilder = PrimitiveRegistry.builder();
+    PrimitiveRegistry initialRegistry = initialBuilder.build();
+    PrimitiveRegistry.Builder processedBuilder = PrimitiveRegistry.builder(initialRegistry);
+
+    StreamingAeadWrapper.registerToInternalPrimitiveRegistry(processedBuilder);
+    PrimitiveRegistry processedRegistry = processedBuilder.build();
+
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> initialRegistry.getInputPrimitiveClass(StreamingAead.class));
+    assertThat(processedRegistry.getInputPrimitiveClass(StreamingAead.class))
+        .isEqualTo(StreamingAead.class);
   }
 }

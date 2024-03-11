@@ -21,6 +21,7 @@ import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.internal.LegacyProtoKey;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
+import com.google.crypto.tink.internal.PrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveSet;
 import com.google.crypto.tink.streamingaead.internal.LegacyFullStreamingAead;
 import java.security.GeneralSecurityException;
@@ -85,5 +86,15 @@ public class StreamingAeadWrapper implements PrimitiveWrapper<StreamingAead, Str
     MutablePrimitiveRegistry.globalInstance().registerPrimitiveWrapper(WRAPPER);
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(LEGACY_FULL_STREAMING_AEAD_PRIMITIVE_CONSTRUCTOR);
+  }
+
+  /**
+   * registerToInternalPrimitiveRegistry is a non-public method (it takes an argument of an
+   * internal-only type) registering an instance of {@code StreamingAeadWrapper} to the provided
+   * {@code PrimitiveRegistry.Builder}.
+   */
+  public static void registerToInternalPrimitiveRegistry(
+      PrimitiveRegistry.Builder primitiveRegistryBuilder) throws GeneralSecurityException {
+    primitiveRegistryBuilder.registerPrimitiveWrapper(WRAPPER);
   }
 }
