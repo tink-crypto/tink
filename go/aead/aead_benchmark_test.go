@@ -27,11 +27,13 @@ import (
 
 // Benchmarks for AEAD algorithms.
 
-const plaintextSize = 16 * 1024
-const associatedDataSize = 256
-
 func BenchmarkEncryptDecrypt(b *testing.B) {
-	var testCases = []struct {
+	const (
+		plaintextSize      = 16 * 1024
+		associatedDataSize = 256
+	)
+
+	testCases := []struct {
 		name     string
 		template *tinkpb.KeyTemplate
 	}{
@@ -63,6 +65,8 @@ func BenchmarkEncryptDecrypt(b *testing.B) {
 	}
 	for _, tc := range testCases {
 		b.Run(tc.name, func(b *testing.B) {
+			b.ReportAllocs()
+
 			handle, err := keyset.NewHandle(tc.template)
 			if err != nil {
 				b.Fatal(err)
