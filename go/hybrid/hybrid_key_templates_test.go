@@ -18,12 +18,56 @@ package hybrid_test
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
 
+	"google.golang.org/protobuf/proto"
+	"github.com/google/tink/go/aead"
+	"github.com/google/tink/go/daead"
 	"github.com/google/tink/go/hybrid"
+	"github.com/google/tink/go/internal/tinkerror"
 	"github.com/google/tink/go/keyset"
+	commonpb "github.com/google/tink/go/proto/common_go_proto"
+	eciespb "github.com/google/tink/go/proto/ecies_aead_hkdf_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
+
+func createECIESKeyTemplate(curveType commonpb.EllipticCurveType, hashType commonpb.HashType, dekTemplate *tinkpb.KeyTemplate) *tinkpb.KeyTemplate {
+	format := &eciespb.EciesAeadHkdfKeyFormat{
+		Params: &eciespb.EciesAeadHkdfParams{
+			KemParams: &eciespb.EciesHkdfKemParams{
+				CurveType:    curveType,
+				HkdfHashType: hashType,
+				HkdfSalt:     []byte{},
+			},
+			DemParams: &eciespb.EciesAeadDemParams{
+				AeadDem: dekTemplate,
+			},
+			EcPointFormat: commonpb.EcPointFormat_UNCOMPRESSED,
+		},
+	}
+	serializedFormat, err := proto.Marshal(format)
+	if err != nil {
+		tinkerror.Fail(fmt.Sprintf("failed to marshal key format: %s", err))
+	}
+	return &tinkpb.KeyTemplate{
+		TypeUrl:          eciesAEADHKDFPrivateKeyTypeURL,
+		Value:            serializedFormat,
+		OutputPrefixType: tinkpb.OutputPrefixType_TINK,
+	}
+}
+
+func eciesP384AES256GCMKeyTemplate() *tinkpb.KeyTemplate {
+	return createECIESKeyTemplate(commonpb.EllipticCurveType_NIST_P384, commonpb.HashType_SHA384, aead.AES256GCMKeyTemplate())
+}
+
+func eciesP521AES256GCMKeyTemplate() *tinkpb.KeyTemplate {
+	return createECIESKeyTemplate(commonpb.EllipticCurveType_NIST_P521, commonpb.HashType_SHA512, aead.AES256GCMKeyTemplate())
+}
+
+func eciesP256AESSIVKeyTemplate() *tinkpb.KeyTemplate {
+	return createECIESKeyTemplate(commonpb.EllipticCurveType_NIST_P256, commonpb.HashType_SHA256, daead.AESSIVKeyTemplate())
+}
 
 func TestKeyTemplates(t *testing.T) {
 	var testCases = []struct {
@@ -33,6 +77,18 @@ func TestKeyTemplates(t *testing.T) {
 		{
 			name:     "ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM",
 			template: hybrid.ECIESHKDFAES128GCMKeyTemplate(),
+		},
+		{
+			name:     "ECIES_P384_HKDF_HMAC_SHA384_AES256_GCM",
+			template: eciesP384AES256GCMKeyTemplate(),
+		},
+		{
+			name:     "ECIES_P521_HKDF_HMAC_SHA512_AES256_GCM",
+			template: eciesP521AES256GCMKeyTemplate(),
+		},
+		{
+			name:     "ECIES_P256_AESSIV",
+			template: eciesP256AESSIVKeyTemplate(),
 		},
 		{
 			name:     "ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256",
