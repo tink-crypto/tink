@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.aead;
+package com.google.crypto.tink.aead.internal;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.internal.testing.Asserts.assertEqualWhenValueParsed;
@@ -23,9 +23,12 @@ import static org.junit.Assert.assertThrows;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.Parameters;
+import com.google.crypto.tink.aead.AesEaxKey;
+import com.google.crypto.tink.aead.AesEaxParameters;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.ProtoParametersSerialization;
+import com.google.crypto.tink.proto.AesEaxParams;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.util.SecretBytes;
@@ -39,11 +42,11 @@ import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
-/** Test for AesGcmSivSerialization. */
+/** Test for AesEaxProtoSerialization. */
 @RunWith(Theories.class)
 @SuppressWarnings("UnnecessarilyFullyQualified") // Fully specifying proto types is more readable
-public final class AesGcmSivProtoSerializationTest {
-  private static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.AesGcmSivKey";
+public final class AesEaxProtoSerializationTest {
+  private static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.AesEaxKey";
 
   private static final SecretBytes KEY_BYTES_16 = SecretBytes.randomBytes(16);
   private static final ByteString KEY_BYTES_16_AS_BYTE_STRING =
@@ -53,34 +56,39 @@ public final class AesGcmSivProtoSerializationTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
-    AesGcmSivProtoSerialization.register(registry);
+    AesEaxProtoSerialization.register(registry);
   }
 
   @Test
   public void registerTwice() throws Exception {
     MutableSerializationRegistry registry = new MutableSerializationRegistry();
-    AesGcmSivProtoSerialization.register(registry);
-    AesGcmSivProtoSerialization.register(registry);
+    AesEaxProtoSerialization.register(registry);
+    AesEaxProtoSerialization.register(registry);
   }
 
   @Test
   public void serializeParseParameters_noPrefix() throws Exception {
-    AesGcmSivParameters parameters =
-        AesGcmSivParameters.builder()
+    AesEaxParameters parameters =
+        AesEaxParameters.builder()
             .setKeySizeBytes(16)
-            .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+            .setTagSizeBytes(16)
+            .setIvSizeBytes(16)
+            .setVariant(AesEaxParameters.Variant.NO_PREFIX)
             .build();
 
     ProtoParametersSerialization serialization =
         ProtoParametersSerialization.create(
-            "type.googleapis.com/google.crypto.tink.AesGcmSivKey",
+            "type.googleapis.com/google.crypto.tink.AesEaxKey",
             OutputPrefixType.RAW,
-            com.google.crypto.tink.proto.AesGcmSivKeyFormat.newBuilder().setKeySize(16).build());
+            com.google.crypto.tink.proto.AesEaxKeyFormat.newBuilder()
+                .setKeySize(16)
+                .setParams(AesEaxParams.newBuilder().setIvSize(16))
+                .build());
 
     ProtoParametersSerialization serialized =
         registry.serializeParameters(parameters, ProtoParametersSerialization.class);
     assertEqualWhenValueParsed(
-        com.google.crypto.tink.proto.AesGcmSivKeyFormat.parser(), serialized, serialization);
+        com.google.crypto.tink.proto.AesEaxKeyFormat.parser(), serialized, serialization);
 
     Parameters parsed = registry.parseParameters(serialization);
     assertThat(parsed).isEqualTo(parameters);
@@ -88,22 +96,27 @@ public final class AesGcmSivProtoSerializationTest {
 
   @Test
   public void serializeParseParameters_tink() throws Exception {
-    AesGcmSivParameters parameters =
-        AesGcmSivParameters.builder()
-            .setKeySizeBytes(32)
-            .setVariant(AesGcmSivParameters.Variant.TINK)
+    AesEaxParameters parameters =
+        AesEaxParameters.builder()
+            .setKeySizeBytes(24)
+            .setTagSizeBytes(16)
+            .setIvSizeBytes(12)
+            .setVariant(AesEaxParameters.Variant.TINK)
             .build();
 
     ProtoParametersSerialization serialization =
         ProtoParametersSerialization.create(
-            "type.googleapis.com/google.crypto.tink.AesGcmSivKey",
+            "type.googleapis.com/google.crypto.tink.AesEaxKey",
             OutputPrefixType.TINK,
-            com.google.crypto.tink.proto.AesGcmSivKeyFormat.newBuilder().setKeySize(32).build());
+            com.google.crypto.tink.proto.AesEaxKeyFormat.newBuilder()
+                .setKeySize(24)
+                .setParams(AesEaxParams.newBuilder().setIvSize(12))
+                .build());
 
     ProtoParametersSerialization serialized =
         registry.serializeParameters(parameters, ProtoParametersSerialization.class);
     assertEqualWhenValueParsed(
-        com.google.crypto.tink.proto.AesGcmSivKeyFormat.parser(), serialized, serialization);
+        com.google.crypto.tink.proto.AesEaxKeyFormat.parser(), serialized, serialization);
 
     Parameters parsed = registry.parseParameters(serialization);
     assertThat(parsed).isEqualTo(parameters);
@@ -111,48 +124,70 @@ public final class AesGcmSivProtoSerializationTest {
 
   @Test
   public void serializeParseParameters_crunchy() throws Exception {
-    AesGcmSivParameters parameters =
-        AesGcmSivParameters.builder()
+    AesEaxParameters parameters =
+        AesEaxParameters.builder()
             .setKeySizeBytes(32)
-            .setVariant(AesGcmSivParameters.Variant.CRUNCHY)
+            .setTagSizeBytes(16)
+            .setIvSizeBytes(16)
+            .setVariant(AesEaxParameters.Variant.CRUNCHY)
             .build();
 
     ProtoParametersSerialization serialization =
         ProtoParametersSerialization.create(
-            "type.googleapis.com/google.crypto.tink.AesGcmSivKey",
+            "type.googleapis.com/google.crypto.tink.AesEaxKey",
             OutputPrefixType.CRUNCHY,
-            com.google.crypto.tink.proto.AesGcmSivKeyFormat.newBuilder().setKeySize(32).build());
+            com.google.crypto.tink.proto.AesEaxKeyFormat.newBuilder()
+                .setKeySize(32)
+                .setParams(AesEaxParams.newBuilder().setIvSize(16))
+                .build());
 
     ProtoParametersSerialization serialized =
         registry.serializeParameters(parameters, ProtoParametersSerialization.class);
     assertEqualWhenValueParsed(
-        com.google.crypto.tink.proto.AesGcmSivKeyFormat.parser(), serialized, serialization);
+        com.google.crypto.tink.proto.AesEaxKeyFormat.parser(), serialized, serialization);
 
     Parameters parsed = registry.parseParameters(serialization);
     assertThat(parsed).isEqualTo(parameters);
   }
 
   @Test
-  public void serializeParseKey_noPrefix() throws Exception {
-    AesGcmSivParameters parameters =
-        AesGcmSivParameters.builder()
+  public void serializeParameters_badTagSize_fails() throws Exception {
+    AesEaxParameters parameters =
+        AesEaxParameters.builder()
             .setKeySizeBytes(16)
-            .setVariant(AesGcmSivParameters.Variant.NO_PREFIX)
+            .setTagSizeBytes(12)
+            .setIvSizeBytes(16)
+            .setVariant(AesEaxParameters.Variant.NO_PREFIX)
             .build();
 
-    AesGcmSivKey key =
-        AesGcmSivKey.builder().setParameters(parameters).setKeyBytes(KEY_BYTES_16).build();
+    // Fails when tag size is not a 16-byte value
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> registry.serializeParameters(parameters, ProtoParametersSerialization.class));
+  }
 
-    com.google.crypto.tink.proto.AesGcmSivKey protoAesGcmSivKey =
-        com.google.crypto.tink.proto.AesGcmSivKey.newBuilder()
-            .setVersion(0)
+  @Test
+  public void serializeParseKey_noPrefix() throws Exception {
+    AesEaxParameters parameters =
+        AesEaxParameters.builder()
+            .setKeySizeBytes(16)
+            .setTagSizeBytes(16)
+            .setIvSizeBytes(16)
+            .setVariant(AesEaxParameters.Variant.NO_PREFIX)
+            .build();
+
+    AesEaxKey key = AesEaxKey.builder().setParameters(parameters).setKeyBytes(KEY_BYTES_16).build();
+
+    com.google.crypto.tink.proto.AesEaxKey protoAesEaxKey =
+        com.google.crypto.tink.proto.AesEaxKey.newBuilder()
             .setKeyValue(KEY_BYTES_16_AS_BYTE_STRING)
+            .setParams(AesEaxParams.newBuilder().setIvSize(16))
             .build();
 
     ProtoKeySerialization serialization =
         ProtoKeySerialization.create(
-            "type.googleapis.com/google.crypto.tink.AesGcmSivKey",
-            protoAesGcmSivKey.toByteString(),
+            "type.googleapis.com/google.crypto.tink.AesEaxKey",
+            protoAesEaxKey.toByteString(),
             KeyMaterialType.SYMMETRIC,
             OutputPrefixType.RAW,
             /* idRequirement= */ null);
@@ -160,7 +195,7 @@ public final class AesGcmSivProtoSerializationTest {
     ProtoKeySerialization serialized =
         registry.serializeKey(key, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
     assertEqualWhenValueParsed(
-        com.google.crypto.tink.proto.AesGcmSivKey.parser(), serialized, serialization);
+        com.google.crypto.tink.proto.AesEaxKey.parser(), serialized, serialization);
 
     Key parsed = registry.parseKey(serialization, InsecureSecretKeyAccess.get());
     assertThat(parsed.equalsKey(key)).isTrue();
@@ -168,29 +203,32 @@ public final class AesGcmSivProtoSerializationTest {
 
   @Test
   public void serializeParseKey_tink() throws Exception {
-    AesGcmSivParameters parameters =
-        AesGcmSivParameters.builder()
+    AesEaxParameters parameters =
+        AesEaxParameters.builder()
             .setKeySizeBytes(16)
-            .setVariant(AesGcmSivParameters.Variant.TINK)
+            .setTagSizeBytes(16)
+            .setIvSizeBytes(12)
+            .setVariant(AesEaxParameters.Variant.TINK)
             .build();
 
-    AesGcmSivKey key =
-        AesGcmSivKey.builder()
+    AesEaxKey key =
+        AesEaxKey.builder()
             .setParameters(parameters)
             .setKeyBytes(KEY_BYTES_16)
             .setIdRequirement(123)
             .build();
 
-    com.google.crypto.tink.proto.AesGcmSivKey protoAesGcmSivKey =
-        com.google.crypto.tink.proto.AesGcmSivKey.newBuilder()
+    com.google.crypto.tink.proto.AesEaxKey protoAesEaxKey =
+        com.google.crypto.tink.proto.AesEaxKey.newBuilder()
             .setVersion(0)
             .setKeyValue(KEY_BYTES_16_AS_BYTE_STRING)
+            .setParams(AesEaxParams.newBuilder().setIvSize(12))
             .build();
 
     ProtoKeySerialization serialization =
         ProtoKeySerialization.create(
-            "type.googleapis.com/google.crypto.tink.AesGcmSivKey",
-            protoAesGcmSivKey.toByteString(),
+            "type.googleapis.com/google.crypto.tink.AesEaxKey",
+            protoAesEaxKey.toByteString(),
             KeyMaterialType.SYMMETRIC,
             OutputPrefixType.TINK,
             /* idRequirement= */ 123);
@@ -198,7 +236,7 @@ public final class AesGcmSivProtoSerializationTest {
     ProtoKeySerialization serialized =
         registry.serializeKey(key, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
     assertEqualWhenValueParsed(
-        com.google.crypto.tink.proto.AesGcmSivKey.parser(), serialized, serialization);
+        com.google.crypto.tink.proto.AesEaxKey.parser(), serialized, serialization);
 
     Key parsed = registry.parseKey(serialization, InsecureSecretKeyAccess.get());
     assertThat(parsed.equalsKey(key)).isTrue();
@@ -206,29 +244,32 @@ public final class AesGcmSivProtoSerializationTest {
 
   @Test
   public void serializeParseKey_crunchy() throws Exception {
-    AesGcmSivParameters parameters =
-        AesGcmSivParameters.builder()
+    AesEaxParameters parameters =
+        AesEaxParameters.builder()
             .setKeySizeBytes(16)
-            .setVariant(AesGcmSivParameters.Variant.CRUNCHY)
+            .setTagSizeBytes(16)
+            .setIvSizeBytes(16)
+            .setVariant(AesEaxParameters.Variant.CRUNCHY)
             .build();
 
-    AesGcmSivKey key =
-        AesGcmSivKey.builder()
+    AesEaxKey key =
+        AesEaxKey.builder()
             .setParameters(parameters)
             .setKeyBytes(KEY_BYTES_16)
             .setIdRequirement(123)
             .build();
 
-    com.google.crypto.tink.proto.AesGcmSivKey protoAesGcmSivKey =
-        com.google.crypto.tink.proto.AesGcmSivKey.newBuilder()
+    com.google.crypto.tink.proto.AesEaxKey protoAesEaxKey =
+        com.google.crypto.tink.proto.AesEaxKey.newBuilder()
             .setVersion(0)
             .setKeyValue(KEY_BYTES_16_AS_BYTE_STRING)
+            .setParams(AesEaxParams.newBuilder().setIvSize(16))
             .build();
 
     ProtoKeySerialization serialization =
         ProtoKeySerialization.create(
-            "type.googleapis.com/google.crypto.tink.AesGcmSivKey",
-            protoAesGcmSivKey.toByteString(),
+            "type.googleapis.com/google.crypto.tink.AesEaxKey",
+            protoAesEaxKey.toByteString(),
             KeyMaterialType.SYMMETRIC,
             OutputPrefixType.CRUNCHY,
             /* idRequirement= */ 123);
@@ -236,7 +277,7 @@ public final class AesGcmSivProtoSerializationTest {
     ProtoKeySerialization serialized =
         registry.serializeKey(key, ProtoKeySerialization.class, InsecureSecretKeyAccess.get());
     assertEqualWhenValueParsed(
-        com.google.crypto.tink.proto.AesGcmSivKey.parser(), serialized, serialization);
+        com.google.crypto.tink.proto.AesEaxKey.parser(), serialized, serialization);
 
     Key parsed = registry.parseKey(serialization, InsecureSecretKeyAccess.get());
     assertThat(parsed.equalsKey(key)).isTrue();
@@ -244,15 +285,16 @@ public final class AesGcmSivProtoSerializationTest {
 
   @Test
   public void testParseKeys_noAccess_throws() throws Exception {
-    com.google.crypto.tink.proto.AesGcmSivKey protoAesGcmSivKey =
-        com.google.crypto.tink.proto.AesGcmSivKey.newBuilder()
+    com.google.crypto.tink.proto.AesEaxKey protoAesEaxKey =
+        com.google.crypto.tink.proto.AesEaxKey.newBuilder()
             .setVersion(0)
             .setKeyValue(KEY_BYTES_16_AS_BYTE_STRING)
+            .setParams(AesEaxParams.newBuilder().setIvSize(16))
             .build();
     ProtoKeySerialization serialization =
         ProtoKeySerialization.create(
-            "type.googleapis.com/google.crypto.tink.AesGcmSivKey",
-            protoAesGcmSivKey.toByteString(),
+            "type.googleapis.com/google.crypto.tink.AesEaxKey",
+            protoAesEaxKey.toByteString(),
             KeyMaterialType.SYMMETRIC,
             OutputPrefixType.TINK,
             /* idRequirement= */ 123);
@@ -264,9 +306,10 @@ public final class AesGcmSivProtoSerializationTest {
     ProtoKeySerialization serialization =
         ProtoKeySerialization.create(
             TYPE_URL,
-            com.google.crypto.tink.proto.AesGcmSivKey.newBuilder()
+            com.google.crypto.tink.proto.AesEaxKey.newBuilder()
                 .setVersion(0)
                 .setKeyValue(KEY_BYTES_16_AS_BYTE_STRING)
+                .setParams(AesEaxParams.newBuilder().setIvSize(16))
                 .build()
                 .toByteString(),
             KeyMaterialType.SYMMETRIC,
@@ -274,19 +317,21 @@ public final class AesGcmSivProtoSerializationTest {
             1479);
     // Legacy keys are parsed to crunchy
     Key parsed = registry.parseKey(serialization, InsecureSecretKeyAccess.get());
-    assertThat(((AesGcmSivParameters) parsed.getParameters()).getVariant())
-        .isEqualTo(AesGcmSivParameters.Variant.CRUNCHY);
+    assertThat(((AesEaxParameters) parsed.getParameters()).getVariant())
+        .isEqualTo(AesEaxParameters.Variant.CRUNCHY);
   }
 
   @Test
   public void testSerializeKeys_noAccess_throws() throws Exception {
-    AesGcmSivParameters parameters =
-        AesGcmSivParameters.builder()
+    AesEaxParameters parameters =
+        AesEaxParameters.builder()
             .setKeySizeBytes(16)
-            .setVariant(AesGcmSivParameters.Variant.TINK)
+            .setIvSizeBytes(16)
+            .setTagSizeBytes(16)
+            .setVariant(AesEaxParameters.Variant.TINK)
             .build();
-    AesGcmSivKey key =
-        AesGcmSivKey.builder()
+    AesEaxKey key =
+        AesEaxKey.builder()
             .setParameters(parameters)
             .setKeyBytes(KEY_BYTES_16)
             .setIdRequirement(123)
@@ -299,24 +344,30 @@ public final class AesGcmSivProtoSerializationTest {
   @DataPoints("invalidParametersSerializations")
   public static final ProtoParametersSerialization[] INVALID_PARAMETERS_SERIALIZATIONS =
       new ProtoParametersSerialization[] {
+        // Bad IV size: only 12 or 16 bytes values accepted
+        ProtoParametersSerialization.create(
+            TYPE_URL,
+            OutputPrefixType.RAW,
+            com.google.crypto.tink.proto.AesEaxKeyFormat.newBuilder()
+                .setKeySize(16)
+                .setParams(AesEaxParams.newBuilder().setIvSize(10))
+                .build()),
         // Bad key size
         ProtoParametersSerialization.create(
             TYPE_URL,
             OutputPrefixType.RAW,
-            com.google.crypto.tink.proto.AesGcmSivKeyFormat.newBuilder().setKeySize(10).build()),
-        // Bad version
-        ProtoParametersSerialization.create(
-            TYPE_URL,
-            OutputPrefixType.RAW,
-            com.google.crypto.tink.proto.AesGcmSivKeyFormat.newBuilder()
-                .setKeySize(16)
-                .setVersion(1)
+            com.google.crypto.tink.proto.AesEaxKeyFormat.newBuilder()
+                .setKeySize(10)
+                .setParams(AesEaxParams.newBuilder().setIvSize(12))
                 .build()),
         // Unknown output prefix
         ProtoParametersSerialization.create(
             TYPE_URL,
             OutputPrefixType.UNKNOWN_PREFIX,
-            com.google.crypto.tink.proto.AesGcmSivKeyFormat.newBuilder().setKeySize(16).build()),
+            com.google.crypto.tink.proto.AesEaxKeyFormat.newBuilder()
+                .setKeySize(16)
+                .setParams(AesEaxParams.newBuilder().setIvSize(12))
+                .build()),
       };
 
   @Theory
@@ -334,9 +385,10 @@ public final class AesGcmSivProtoSerializationTest {
         // Bad Version Number (1)
         ProtoKeySerialization.create(
             TYPE_URL,
-            com.google.crypto.tink.proto.AesGcmSivKey.newBuilder()
+            com.google.crypto.tink.proto.AesEaxKey.newBuilder()
                 .setVersion(1)
                 .setKeyValue(KEY_BYTES_16_AS_BYTE_STRING)
+                .setParams(AesEaxParams.newBuilder().setIvSize(16))
                 .build()
                 .toByteString(),
             KeyMaterialType.SYMMETRIC,
@@ -345,20 +397,34 @@ public final class AesGcmSivProtoSerializationTest {
         // Unknown prefix
         ProtoKeySerialization.create(
             TYPE_URL,
-            com.google.crypto.tink.proto.AesGcmSivKey.newBuilder()
+            com.google.crypto.tink.proto.AesEaxKey.newBuilder()
                 .setVersion(0)
                 .setKeyValue(KEY_BYTES_16_AS_BYTE_STRING)
+                .setParams(AesEaxParams.newBuilder().setIvSize(16))
                 .build()
                 .toByteString(),
             KeyMaterialType.SYMMETRIC,
             OutputPrefixType.UNKNOWN_PREFIX,
             1479),
+        // Bad IV Size
+        ProtoKeySerialization.create(
+            TYPE_URL,
+            com.google.crypto.tink.proto.AesEaxKey.newBuilder()
+                .setVersion(0)
+                .setKeyValue(KEY_BYTES_16_AS_BYTE_STRING)
+                .setParams(AesEaxParams.newBuilder().setIvSize(10))
+                .build()
+                .toByteString(),
+            KeyMaterialType.SYMMETRIC,
+            OutputPrefixType.TINK,
+            1479),
         // Bad Key Length
         ProtoKeySerialization.create(
             TYPE_URL,
-            com.google.crypto.tink.proto.AesGcmSivKey.newBuilder()
+            com.google.crypto.tink.proto.AesEaxKey.newBuilder()
                 .setVersion(0)
                 .setKeyValue(ByteString.copyFrom(new byte[8]))
+                .setParams(AesEaxParams.newBuilder().setIvSize(16))
                 .build()
                 .toByteString(),
             KeyMaterialType.SYMMETRIC,

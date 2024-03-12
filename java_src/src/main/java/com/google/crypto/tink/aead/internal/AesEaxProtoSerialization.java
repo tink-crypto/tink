@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,12 +14,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.aead;
+package com.google.crypto.tink.aead.internal;
 
 import static com.google.crypto.tink.internal.Util.toBytesFromPrintableAscii;
 
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.SecretKeyAccess;
+import com.google.crypto.tink.aead.AesEaxKey;
+import com.google.crypto.tink.aead.AesEaxParameters;
 import com.google.crypto.tink.internal.KeyParser;
 import com.google.crypto.tink.internal.KeySerializer;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
@@ -38,77 +40,88 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import javax.annotation.Nullable;
 
-/**
- * Methods to serialize and parse {@link AesGcmSivKey} objects and {@link AesGcmSivParameters}
- * objects
- */
+/** Methods to serialize and parse {@link AesEaxKey} objects and {@link AesEaxParameters} objects */
 @AccessesPartialKey
 @SuppressWarnings("UnnecessarilyFullyQualified") // Fully specifying proto types is more readable
-final class AesGcmSivProtoSerialization {
-  private static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.AesGcmSivKey";
+public final class AesEaxProtoSerialization {
+  private static final String TYPE_URL = "type.googleapis.com/google.crypto.tink.AesEaxKey";
   private static final Bytes TYPE_URL_BYTES = toBytesFromPrintableAscii(TYPE_URL);
 
-  private static final ParametersSerializer<AesGcmSivParameters, ProtoParametersSerialization>
+  private static final ParametersSerializer<AesEaxParameters, ProtoParametersSerialization>
       PARAMETERS_SERIALIZER =
           ParametersSerializer.create(
-              AesGcmSivProtoSerialization::serializeParameters,
-              AesGcmSivParameters.class,
+              AesEaxProtoSerialization::serializeParameters,
+              AesEaxParameters.class,
               ProtoParametersSerialization.class);
 
   private static final ParametersParser<ProtoParametersSerialization> PARAMETERS_PARSER =
       ParametersParser.create(
-          AesGcmSivProtoSerialization::parseParameters,
+          AesEaxProtoSerialization::parseParameters,
           TYPE_URL_BYTES,
           ProtoParametersSerialization.class);
 
-  private static final KeySerializer<AesGcmSivKey, ProtoKeySerialization> KEY_SERIALIZER =
+  private static final KeySerializer<AesEaxKey, ProtoKeySerialization> KEY_SERIALIZER =
       KeySerializer.create(
-          AesGcmSivProtoSerialization::serializeKey,
-          AesGcmSivKey.class,
-          ProtoKeySerialization.class);
+          AesEaxProtoSerialization::serializeKey, AesEaxKey.class, ProtoKeySerialization.class);
 
   private static final KeyParser<ProtoKeySerialization> KEY_PARSER =
       KeyParser.create(
-          AesGcmSivProtoSerialization::parseKey, TYPE_URL_BYTES, ProtoKeySerialization.class);
+          AesEaxProtoSerialization::parseKey, TYPE_URL_BYTES, ProtoKeySerialization.class);
 
-  private static OutputPrefixType toProtoOutputPrefixType(AesGcmSivParameters.Variant variant)
+  private static OutputPrefixType toProtoOutputPrefixType(AesEaxParameters.Variant variant)
       throws GeneralSecurityException {
-    if (AesGcmSivParameters.Variant.TINK.equals(variant)) {
+    if (AesEaxParameters.Variant.TINK.equals(variant)) {
       return OutputPrefixType.TINK;
     }
-    if (AesGcmSivParameters.Variant.CRUNCHY.equals(variant)) {
+    if (AesEaxParameters.Variant.CRUNCHY.equals(variant)) {
       return OutputPrefixType.CRUNCHY;
     }
-    if (AesGcmSivParameters.Variant.NO_PREFIX.equals(variant)) {
+    if (AesEaxParameters.Variant.NO_PREFIX.equals(variant)) {
       return OutputPrefixType.RAW;
     }
     throw new GeneralSecurityException("Unable to serialize variant: " + variant);
   }
 
-  private static AesGcmSivParameters.Variant toVariant(OutputPrefixType outputPrefixType)
+  private static AesEaxParameters.Variant toVariant(OutputPrefixType outputPrefixType)
       throws GeneralSecurityException {
     switch (outputPrefixType) {
       case TINK:
-        return AesGcmSivParameters.Variant.TINK;
+        return AesEaxParameters.Variant.TINK;
         /** Parse LEGACY prefix to CRUNCHY, since they act the same for this type of key */
       case CRUNCHY:
       case LEGACY:
-        return AesGcmSivParameters.Variant.CRUNCHY;
+        return AesEaxParameters.Variant.CRUNCHY;
       case RAW:
-        return AesGcmSivParameters.Variant.NO_PREFIX;
+        return AesEaxParameters.Variant.NO_PREFIX;
       default:
         throw new GeneralSecurityException(
             "Unable to parse OutputPrefixType: " + outputPrefixType.getNumber());
     }
   }
 
-  private static ProtoParametersSerialization serializeParameters(AesGcmSivParameters parameters)
+  private static com.google.crypto.tink.proto.AesEaxParams getProtoParams(
+      AesEaxParameters parameters) throws GeneralSecurityException {
+    /** Current implementation restricts to 16-byte tag value */
+    if (parameters.getTagSizeBytes() != 16) {
+      throw new GeneralSecurityException(
+          String.format(
+              "Invalid tag size in bytes %d. Currently Tink only supports aes eax keys with tag"
+                  + " size equal to 16 bytes.",
+              parameters.getTagSizeBytes()));
+    }
+    return com.google.crypto.tink.proto.AesEaxParams.newBuilder()
+        .setIvSize(parameters.getIvSizeBytes())
+        .build();
+  }
+
+  private static ProtoParametersSerialization serializeParameters(AesEaxParameters parameters)
       throws GeneralSecurityException {
     return ProtoParametersSerialization.create(
         KeyTemplate.newBuilder()
             .setTypeUrl(TYPE_URL)
             .setValue(
-                com.google.crypto.tink.proto.AesGcmSivKeyFormat.newBuilder()
+                com.google.crypto.tink.proto.AesEaxKeyFormat.newBuilder()
+                    .setParams(getProtoParams(parameters))
                     .setKeySize(parameters.getKeySizeBytes())
                     .build()
                     .toByteString())
@@ -116,11 +129,12 @@ final class AesGcmSivProtoSerialization {
             .build());
   }
 
-  private static ProtoKeySerialization serializeKey(
-      AesGcmSivKey key, @Nullable SecretKeyAccess access) throws GeneralSecurityException {
+  private static ProtoKeySerialization serializeKey(AesEaxKey key, @Nullable SecretKeyAccess access)
+      throws GeneralSecurityException {
     return ProtoKeySerialization.create(
         TYPE_URL,
-        com.google.crypto.tink.proto.AesGcmSivKey.newBuilder()
+        com.google.crypto.tink.proto.AesEaxKey.newBuilder()
+            .setParams(getProtoParams(key.getParameters()))
             .setKeyValue(
                 ByteString.copyFrom(
                     key.getKeyBytes().toByteArray(SecretKeyAccess.requireAccess(access))))
@@ -131,51 +145,53 @@ final class AesGcmSivProtoSerialization {
         key.getIdRequirementOrNull());
   }
 
-  private static AesGcmSivParameters parseParameters(ProtoParametersSerialization serialization)
+  private static AesEaxParameters parseParameters(ProtoParametersSerialization serialization)
       throws GeneralSecurityException {
     if (!serialization.getKeyTemplate().getTypeUrl().equals(TYPE_URL)) {
       throw new IllegalArgumentException(
-          "Wrong type URL in call to AesGcmSivProtoSerialization.parseParameters: "
+          "Wrong type URL in call to AesEaxProtoSerialization.parseParameters: "
               + serialization.getKeyTemplate().getTypeUrl());
     }
-    com.google.crypto.tink.proto.AesGcmSivKeyFormat format;
+    com.google.crypto.tink.proto.AesEaxKeyFormat format;
     try {
       format =
-          com.google.crypto.tink.proto.AesGcmSivKeyFormat.parseFrom(
+          com.google.crypto.tink.proto.AesEaxKeyFormat.parseFrom(
               serialization.getKeyTemplate().getValue(), ExtensionRegistryLite.getEmptyRegistry());
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("Parsing AesGcmSivParameters failed: ", e);
+      throw new GeneralSecurityException("Parsing AesEaxParameters failed: ", e);
     }
-    if (format.getVersion() != 0) {
-      throw new GeneralSecurityException("Only version 0 parameters are accepted");
-    }
-    return AesGcmSivParameters.builder()
+    return AesEaxParameters.builder()
         .setKeySizeBytes(format.getKeySize())
+        .setIvSizeBytes(format.getParams().getIvSize())
+        /** Subtle implementation currently restricts tag size to 16 bytes. */
+        .setTagSizeBytes(16)
         .setVariant(toVariant(serialization.getKeyTemplate().getOutputPrefixType()))
         .build();
   }
 
   @SuppressWarnings("UnusedException")
-  private static AesGcmSivKey parseKey(
+  private static AesEaxKey parseKey(
       ProtoKeySerialization serialization, @Nullable SecretKeyAccess access)
       throws GeneralSecurityException {
     if (!serialization.getTypeUrl().equals(TYPE_URL)) {
       throw new IllegalArgumentException(
-          "Wrong type URL in call to AesGcmSivProtoSerialization.parseKey");
+          "Wrong type URL in call to AesEaxProtoSerialization.parseKey");
     }
     try {
-      com.google.crypto.tink.proto.AesGcmSivKey protoKey =
-          com.google.crypto.tink.proto.AesGcmSivKey.parseFrom(
+      com.google.crypto.tink.proto.AesEaxKey protoKey =
+          com.google.crypto.tink.proto.AesEaxKey.parseFrom(
               serialization.getValue(), ExtensionRegistryLite.getEmptyRegistry());
       if (protoKey.getVersion() != 0) {
         throw new GeneralSecurityException("Only version 0 keys are accepted");
       }
-      AesGcmSivParameters parameters =
-          AesGcmSivParameters.builder()
+      AesEaxParameters parameters =
+          AesEaxParameters.builder()
               .setKeySizeBytes(protoKey.getKeyValue().size())
+              .setIvSizeBytes(protoKey.getParams().getIvSize())
+              .setTagSizeBytes(16)
               .setVariant(toVariant(serialization.getOutputPrefixType()))
               .build();
-      return AesGcmSivKey.builder()
+      return AesEaxKey.builder()
           .setParameters(parameters)
           .setKeyBytes(
               SecretBytes.copyFrom(
@@ -183,7 +199,7 @@ final class AesGcmSivProtoSerialization {
           .setIdRequirement(serialization.getIdRequirementOrNull())
           .build();
     } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("Parsing AesGcmSivKey failed");
+      throw new GeneralSecurityException("Parsing AesEaxcKey failed");
     }
   }
 
@@ -199,5 +215,5 @@ final class AesGcmSivProtoSerialization {
     registry.registerKeyParser(KEY_PARSER);
   }
 
-  private AesGcmSivProtoSerialization() {}
+  private AesEaxProtoSerialization() {}
 }
