@@ -24,6 +24,7 @@ import com.google.crypto.tink.internal.MonitoringUtil;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
+import com.google.crypto.tink.internal.PrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveSet;
 import com.google.crypto.tink.monitoring.MonitoringClient;
 import com.google.crypto.tink.monitoring.MonitoringKeysetInfo;
@@ -123,5 +124,15 @@ public class HybridDecryptWrapper implements PrimitiveWrapper<HybridDecrypt, Hyb
     MutablePrimitiveRegistry.globalInstance().registerPrimitiveWrapper(WRAPPER);
     MutablePrimitiveRegistry.globalInstance()
         .registerPrimitiveConstructor(LEGACY_PRIMITIVE_CONSTRUCTOR);
+  }
+
+  /**
+   * registerToInternalPrimitiveRegistry is a non-public method (it takes an argument of an
+   * internal-only type) registering an instance of {@code HybridDecryptWrapper} to the provided
+   * {@code PrimitiveRegistry.Builder}.
+   */
+  public static void registerToInternalPrimitiveRegistry(
+      PrimitiveRegistry.Builder primitiveRegistryBuilder) throws GeneralSecurityException {
+    primitiveRegistryBuilder.registerPrimitiveWrapper(WRAPPER);
   }
 }

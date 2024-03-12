@@ -19,6 +19,7 @@ package com.google.crypto.tink.hybrid;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.internal.Util.isPrefix;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
@@ -28,12 +29,14 @@ import com.google.crypto.tink.aead.AesGcmParameters;
 import com.google.crypto.tink.hybrid.internal.HpkeEncrypt;
 import com.google.crypto.tink.internal.MutableMonitoringRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
+import com.google.crypto.tink.internal.PrimitiveRegistry;
 import com.google.crypto.tink.internal.testing.FakeMonitoringClient;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridDecrypt;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.util.SecretBigInteger;
 import java.math.BigInteger;
+import java.security.GeneralSecurityException;
 import java.security.spec.ECPoint;
 import java.util.List;
 import org.junit.Before;
@@ -349,5 +352,21 @@ public class HybridDecryptWrapperTest {
     assertThat(signEntry1.getApi()).isEqualTo("decrypt");
     assertThat(signEntry1.getNumBytesAsInput()).isEqualTo(ciphertext1.length);
     assertThat(signEntry1.getKeysetInfo().getAnnotations()).isEqualTo(annotations);
+  }
+
+  @Test
+  public void registerToInternalPrimitiveRegistry_works() throws Exception {
+    PrimitiveRegistry.Builder initialBuilder = PrimitiveRegistry.builder();
+    PrimitiveRegistry initialRegistry = initialBuilder.build();
+    PrimitiveRegistry.Builder processedBuilder = PrimitiveRegistry.builder(initialRegistry);
+
+    HybridDecryptWrapper.registerToInternalPrimitiveRegistry(processedBuilder);
+    PrimitiveRegistry processedRegistry = processedBuilder.build();
+
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> initialRegistry.getInputPrimitiveClass(HybridDecrypt.class));
+    assertThat(processedRegistry.getInputPrimitiveClass(HybridDecrypt.class))
+        .isEqualTo(HybridDecrypt.class);
   }
 }
