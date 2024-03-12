@@ -480,6 +480,7 @@ tink_cc_library(
     crypto
     tink::core::aead
     tink::internal::aes_util
+    tink::internal::call_with_core_dump_protection
     tink::internal::fips_utils
     tink::internal::util
     tink::util::errors

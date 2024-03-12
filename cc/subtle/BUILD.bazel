@@ -499,6 +499,7 @@ cc_library(
         ":subtle_util",
         "//:aead",
         "//internal:aes_util",
+        "//internal:call_with_core_dump_protection",
         "//internal:fips_utils",
         "//internal:util",
         "//util:errors",
