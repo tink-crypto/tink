@@ -35,16 +35,15 @@ vault write -f transit/keys/key-1
 
 ./kokoro/testutils/install_tink_via_pip.sh -a "${PWD}/python"
 
-cd python
+# Get root certificates for gRPC
+curl -OLsS https://raw.githubusercontent.com/grpc/grpc/master/etc/roots.pem
+export GRPC_DEFAULT_SSL_ROOTS_FILE_PATH="${PWD}/roots.pem"
 
 # Set path to the Tink Python folder
-export TINK_PYTHON_ROOT_PATH="${PWD}"
+export TINK_PYTHON_ROOT_PATH="${PWD}/python"
 
 # Run Python tests directly so the package is used.
 # We exclude tests in tink/cc/pybind: they are implementation details and may
 # depend on a testonly shared object.
-find tink/ -not -path "*cc/pybind*" -type f -name "*_test.py" -print0 \
+find python/tink/ -not -path "*cc/pybind*" -type f -name "*_test.py" -print0 \
   | xargs -0 -n1 python3
-
-# Generate release of the pip package and test it
-./tools/distribution/create_release.sh
