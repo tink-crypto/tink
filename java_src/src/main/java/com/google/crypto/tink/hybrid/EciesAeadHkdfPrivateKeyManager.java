@@ -29,6 +29,7 @@ import com.google.crypto.tink.PrivateKeyManager;
 import com.google.crypto.tink.aead.AesCtrHmacAeadParameters;
 import com.google.crypto.tink.aead.AesGcmParameters;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.hybrid.internal.EciesProtoSerialization;
 import com.google.crypto.tink.internal.EllipticCurvesUtil;
 import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.LegacyKeyManagerImpl;

@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.hybrid;
+package com.google.crypto.tink.hybrid.internal;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.internal.TinkBugException.exceptionIsBug;
@@ -26,6 +26,10 @@ import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.XChaCha20Poly1305Parameters;
+import com.google.crypto.tink.hybrid.EciesParameters;
+import com.google.crypto.tink.hybrid.EciesParameters.Variant;
+import com.google.crypto.tink.hybrid.EciesPrivateKey;
+import com.google.crypto.tink.hybrid.EciesPublicKey;
 import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
@@ -76,10 +80,10 @@ public final class EciesProtoSerializationTest {
   private static final MutableSerializationRegistry registry = new MutableSerializationRegistry();
 
   private static final class VariantTuple {
-    final EciesParameters.Variant variant;
+    final Variant variant;
     final OutputPrefixType outputPrefixType;
 
-    VariantTuple(EciesParameters.Variant variant, OutputPrefixType outputPrefixType) {
+    VariantTuple(Variant variant, OutputPrefixType outputPrefixType) {
       this.variant = variant;
       this.outputPrefixType = outputPrefixType;
     }

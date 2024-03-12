@@ -14,13 +14,16 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.hybrid;
+package com.google.crypto.tink.hybrid.internal;
 
 import static com.google.crypto.tink.internal.Util.toBytesFromPrintableAscii;
 
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.SecretKeyAccess;
 import com.google.crypto.tink.TinkProtoParametersFormat;
+import com.google.crypto.tink.hybrid.EciesParameters;
+import com.google.crypto.tink.hybrid.EciesPrivateKey;
+import com.google.crypto.tink.hybrid.EciesPublicKey;
 import com.google.crypto.tink.internal.BigIntegerEncoding;
 import com.google.crypto.tink.internal.EnumTypeProtoConverter;
 import com.google.crypto.tink.internal.KeyParser;
@@ -51,7 +54,7 @@ import javax.annotation.Nullable;
 /** Methods to serialize and parse {@link EciesParameters} objects. */
 @AccessesPartialKey
 @SuppressWarnings("UnnecessarilyFullyQualified") // Fully specifying proto types is more readable
-final class EciesProtoSerialization {
+public final class EciesProtoSerialization {
   private static final String PRIVATE_TYPE_URL =
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
   private static final Bytes PRIVATE_TYPE_URL_BYTES = toBytesFromPrintableAscii(PRIVATE_TYPE_URL);
