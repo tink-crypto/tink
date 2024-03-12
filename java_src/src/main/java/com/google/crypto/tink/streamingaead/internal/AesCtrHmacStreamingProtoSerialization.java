@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.streamingaead;
+package com.google.crypto.tink.streamingaead.internal;
 
 import static com.google.crypto.tink.internal.Util.toBytesFromPrintableAscii;
 
@@ -32,6 +32,8 @@ import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.streamingaead.AesCtrHmacStreamingKey;
+import com.google.crypto.tink.streamingaead.AesCtrHmacStreamingParameters;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.protobuf.ByteString;
@@ -46,7 +48,7 @@ import javax.annotation.Nullable;
  */
 @AccessesPartialKey
 @SuppressWarnings("UnnecessarilyFullyQualified") // Fully specifying proto types is more readable
-final class AesCtrHmacStreamingProtoSerialization {
+public final class AesCtrHmacStreamingProtoSerialization {
   private static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey";
   private static final Bytes TYPE_URL_BYTES = toBytesFromPrintableAscii(TYPE_URL);

@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.signature;
+package com.google.crypto.tink.signature.internal;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.internal.testing.Asserts.assertEqualWhenValueParsed;
@@ -30,6 +30,10 @@ import com.google.crypto.tink.proto.Ed25519KeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.signature.Ed25519Parameters;
+import com.google.crypto.tink.signature.Ed25519Parameters.Variant;
+import com.google.crypto.tink.signature.Ed25519PrivateKey;
+import com.google.crypto.tink.signature.Ed25519PublicKey;
 import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
@@ -72,8 +76,8 @@ public final class Ed25519ProtoSerializationTest {
       ByteString.copyFrom(PUBLIC_KEY_BYTES.toByteArray());
 
   // Creates a helper map with the output prefix types which have id requieremts.
-  private static Map<Ed25519Parameters.Variant, OutputPrefixType> createVariantsMap() {
-    Map<Ed25519Parameters.Variant, OutputPrefixType> result = new HashMap<>();
+  private static Map<Variant, OutputPrefixType> createVariantsMap() {
+    Map<Variant, OutputPrefixType> result = new HashMap<>();
     result.put(Ed25519Parameters.Variant.TINK, OutputPrefixType.TINK);
     result.put(Ed25519Parameters.Variant.CRUNCHY, OutputPrefixType.CRUNCHY);
     result.put(Ed25519Parameters.Variant.LEGACY, OutputPrefixType.LEGACY);
