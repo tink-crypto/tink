@@ -8,7 +8,7 @@ require (
 	github.com/hashicorp/vault/api v1.9.1
 	golang.org/x/crypto v0.17.0
 	google.golang.org/api v0.123.0
-	google.golang.org/protobuf v1.30.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
