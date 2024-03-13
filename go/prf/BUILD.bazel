@@ -41,6 +41,7 @@ go_test(
         "aes_cmac_prf_key_manager_test.go",
         "hkdf_prf_key_manager_test.go",
         "hmac_prf_key_manager_test.go",
+        "prf_benchmark_test.go",
         "prf_key_templates_test.go",
         "prf_set_factory_test.go",
         "prf_test.go",
