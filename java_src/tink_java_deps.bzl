@@ -2,6 +2,8 @@
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 
+_GRPC_VERSION = "1.59.1"
+
 TINK_MAVEN_ARTIFACTS = [
     "com.google.protobuf:protobuf-java:3.25.1",
     "com.google.protobuf:protobuf-javalite:3.25.1",
@@ -26,6 +28,10 @@ TINK_MAVEN_ARTIFACTS = [
     "com.google.oauth-client:google-oauth-client:1.34.1",
     "com.google.truth:truth:0.44",
     "io.github.jopenlibs:vault-java-driver:5.4.0",
+    "io.grpc:grpc-api:%s" % _GRPC_VERSION,
+    "io.grpc:grpc-inprocess:%s" % _GRPC_VERSION,
+    "io.grpc:grpc-stub:%s" % _GRPC_VERSION,
+    "io.grpc:grpc-testing:%s" % _GRPC_VERSION,
     "junit:junit:4.13.2",
     "org.conscrypt:conscrypt-openjdk-uber:2.5.2",
     "org.ow2.asm:asm:7.0",
@@ -67,12 +73,12 @@ def tink_java_deps():
     #   * @com_google_protobuf//:java_toolchain
     # This statement defines the @com_google_protobuf repo.
     if not native.existing_rule("com_google_protobuf"):
-        # Release X.21.9 from 2022-10-26.
+        # Release from Feb 16, 2024.
         http_archive(
             name = "com_google_protobuf",
-            strip_prefix = "protobuf-21.9",
-            urls = ["https://github.com/protocolbuffers/protobuf/archive/refs/tags/v21.9.zip"],
-            sha256 = "5babb8571f1cceafe0c18e13ddb3be556e87e12ceea3463d6b0d0064e6cc1ac3",
+            strip_prefix = "protobuf-25.3",
+            urls = ["https://github.com/protocolbuffers/protobuf/archive/refs/tags/v25.3.zip"],
+            sha256 = "5156b22536feaa88cf95503153a6b2cd67cc80f20f1218f154b84a12c288a220",
         )
 
     # -------------------------------------------------------------------------
