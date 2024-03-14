@@ -91,7 +91,7 @@ class _HcVaultKmsAead(aead.Aead):
         )
       response = self.client.secrets.transit.encrypt_data(
           name=self.key_name,
-          plaintext=base64.urlsafe_b64encode(plaintext).decode(),
+          plaintext=base64.b64encode(plaintext).decode(),
           context='',  # Always empty. Tink assumes derived=false.
           mount_point=self.mount_point,
       )
@@ -113,6 +113,6 @@ class _HcVaultKmsAead(aead.Aead):
           context='',  # Always empty. Tink assumes derived=false.
           mount_point=self.mount_point,
       )
-      return base64.urlsafe_b64decode(response['data']['plaintext'])
+      return base64.b64decode(response['data']['plaintext'])
     except Exception as e:
       raise tink.TinkError(e)

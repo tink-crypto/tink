@@ -16,6 +16,7 @@
 import base64
 import http.server
 import json
+import random
 import re
 import threading
 from absl.testing import absltest
@@ -114,7 +115,7 @@ class HcVaultKmsAeadTest(parameterized.TestCase):
   def test_encrypt_decrypt_with_empty_associated_data(self):
     client = hvac.Client(url=_VAULT_URI, token=_TOKEN, verify=False)
     vaultaead = hcvault.new_aead(_KEY_PATH, client)
-    plaintext = b'hello'
+    plaintext = random.randbytes(129)
     ciphertext = vaultaead.encrypt(plaintext, associated_data=b'')
     self.assertEqual(
         plaintext, vaultaead.decrypt(ciphertext, associated_data=b'')
