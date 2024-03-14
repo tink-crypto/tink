@@ -54,7 +54,7 @@ class HcVaultAeadTest(absltest.TestCase):
   def test_encrypt_decrypt(self):
     vaultaead = hcvault.new_aead(_KEY_PATH, self.client)
 
-    plaintext = b'hello'
+    plaintext = bytes(i for i in range(256))
     ciphertext = vaultaead.encrypt(plaintext, associated_data=b'')
     self.assertEqual(
         plaintext, vaultaead.decrypt(ciphertext, associated_data=b'')
@@ -88,9 +88,9 @@ class HcVaultAeadTest(absltest.TestCase):
 
     # Corrupt the ciphertext.
     # In this case we corrupt the decoded string, then encode back to Base64.
-    iv_and_ciphertext = base64.urlsafe_b64decode(iv_and_ciphertext.encode())
+    iv_and_ciphertext = base64.b64decode(iv_and_ciphertext.encode())
     for i in range(len(iv_and_ciphertext)):
-      corrupted_iv_and_ciphertext = base64.urlsafe_b64encode(
+      corrupted_iv_and_ciphertext = base64.b64encode(
           _corrupt(iv_and_ciphertext, i)
       )
       with self.assertRaises(tink.TinkError):
