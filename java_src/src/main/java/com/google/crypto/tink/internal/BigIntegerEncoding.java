@@ -43,6 +43,23 @@ public final class BigIntegerEncoding {
   }
 
   /**
+   * Encodes a non-negative {@link java.math.BigInteger} into the minimal unsigned representation in
+   * big-endian byte-order.
+   *
+   * <p>In the output, the first byte is never zero. BigInteger.ZERO is encoded as empty string.
+   */
+  public static byte[] toUnsignedBigEndianBytes(BigInteger n) {
+    if (n.signum() == -1) {
+      throw new IllegalArgumentException("n must not be negative");
+    }
+    byte[] twosComplement = n.toByteArray();
+    if (twosComplement[0] == 0) {
+      return Arrays.copyOfRange(twosComplement, 1, twosComplement.length);
+    }
+    return twosComplement;
+  }
+
+  /**
    * Encodes a non-negative {@link java.math.BigInteger} into a byte array of a specified length,
    * using big-endian byte-order.
    *

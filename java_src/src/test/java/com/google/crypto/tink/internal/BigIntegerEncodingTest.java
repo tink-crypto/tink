@@ -37,7 +37,7 @@ public final class BigIntegerEncodingTest {
     assertThat(BigIntegerEncoding.toBigEndianBytes(BigInteger.valueOf(127)))
         .isEqualTo(new byte[] {(byte) 0x7F});
     // The most significant bit of the first byte is used to encode the sign of the number.
-    // Therfore, 128 needs to be encoded with two bytes.
+    // Therefore, 128 needs to be encoded with two bytes.
     assertThat(BigIntegerEncoding.toBigEndianBytes(BigInteger.valueOf(128)))
         .isEqualTo(new byte[] {(byte) 0x00, (byte) 0x80});
     assertThat(BigIntegerEncoding.toBigEndianBytes(BigInteger.valueOf(255)))
@@ -45,6 +45,25 @@ public final class BigIntegerEncodingTest {
     assertThat(BigIntegerEncoding.toBigEndianBytes(BigInteger.valueOf(256)))
         .isEqualTo(new byte[] {(byte) 0x01, (byte) 0x00});
     assertThat(BigIntegerEncoding.toBigEndianBytes(BigInteger.valueOf(258)))
+        .isEqualTo(new byte[] {(byte) 0x01, (byte) 0x02});
+  }
+
+  @Test
+  public void toUnsignedBigEndianBytes() throws Exception {
+    // The first byte is always zero.
+    assertThat(BigIntegerEncoding.toUnsignedBigEndianBytes(BigInteger.ZERO))
+        .isEqualTo(new byte[] {});
+    assertThat(BigIntegerEncoding.toUnsignedBigEndianBytes(BigInteger.ONE))
+        .isEqualTo(new byte[] {(byte) 0x01});
+    assertThat(BigIntegerEncoding.toUnsignedBigEndianBytes(BigInteger.valueOf(127)))
+        .isEqualTo(new byte[] {(byte) 0x7F});
+    assertThat(BigIntegerEncoding.toUnsignedBigEndianBytes(BigInteger.valueOf(128)))
+        .isEqualTo(new byte[] {(byte) 0x80});
+    assertThat(BigIntegerEncoding.toUnsignedBigEndianBytes(BigInteger.valueOf(255)))
+        .isEqualTo(new byte[] {(byte) 0xFF});
+    assertThat(BigIntegerEncoding.toUnsignedBigEndianBytes(BigInteger.valueOf(256)))
+        .isEqualTo(new byte[] {(byte) 0x01, (byte) 0x00});
+    assertThat(BigIntegerEncoding.toUnsignedBigEndianBytes(BigInteger.valueOf(258)))
         .isEqualTo(new byte[] {(byte) 0x01, (byte) 0x02});
   }
 
@@ -173,6 +192,28 @@ public final class BigIntegerEncodingTest {
     assertThrows(
         IllegalArgumentException.class,
         () -> BigIntegerEncoding.toBigEndianBytes(BigInteger.valueOf(-1)));
+  }
+
+  @Test
+  public void toUnsignedBigEndianBytes_failWhenIntegerIsNegative() throws Exception {
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> BigIntegerEncoding.toBigEndianBytes(BigInteger.valueOf(-1)));
+  }
+
+  @Test
+  public void fromUnsignedBigEndianBytes_canParseByteEncodedBigInteger() throws Exception {
+    for (int i = 0; i < 1000; i = i + 37) {
+      BigInteger bigInt = BigInteger.valueOf(i);
+      assertThat(
+              BigIntegerEncoding.fromUnsignedBigEndianBytes(
+                  BigIntegerEncoding.toUnsignedBigEndianBytes(bigInt)))
+          .isEqualTo(bigInt);
+      assertThat(
+              BigIntegerEncoding.fromUnsignedBigEndianBytes(
+                  BigIntegerEncoding.toBigEndianBytes(bigInt)))
+          .isEqualTo(bigInt);
+    }
   }
 
   private BigInteger fromSignedBigEndianBytes(byte[] bytes) {

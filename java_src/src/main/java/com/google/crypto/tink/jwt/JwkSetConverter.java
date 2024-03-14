@@ -163,18 +163,23 @@ public final class JwkSetConverter {
     return jsonKey;
   }
 
+  // Base64urlUInt as defined in https://datatracker.ietf.org/doc/html/rfc7518#section-2
+  private static byte[] base64urlUInt(BigInteger n) {
+    if (n.equals(BigInteger.ZERO)) {
+      return new byte[] {0};
+    }
+    return BigIntegerEncoding.toUnsignedBigEndianBytes(n);
+  }
+
   @AccessesPartialKey
   private static JsonObject convertJwtRsaSsaPkcs1Key(JwtRsaSsaPkcs1PublicKey key)
       throws GeneralSecurityException {
     String alg = key.getParameters().getAlgorithm().getStandardName();
     JsonObject jsonKey = new JsonObject();
     jsonKey.addProperty("kty", "RSA");
+    jsonKey.addProperty("n", Base64.urlSafeEncode(base64urlUInt(key.getModulus())));
     jsonKey.addProperty(
-        "n", Base64.urlSafeEncode(BigIntegerEncoding.toBigEndianBytes(key.getModulus())));
-    jsonKey.addProperty(
-        "e",
-        Base64.urlSafeEncode(
-            BigIntegerEncoding.toBigEndianBytes(key.getParameters().getPublicExponent())));
+        "e", Base64.urlSafeEncode(base64urlUInt(key.getParameters().getPublicExponent())));
     jsonKey.addProperty("use", "sig");
     jsonKey.addProperty("alg", alg);
     JsonArray keyOps = new JsonArray();
@@ -193,12 +198,9 @@ public final class JwkSetConverter {
     String alg = key.getParameters().getAlgorithm().getStandardName();
     JsonObject jsonKey = new JsonObject();
     jsonKey.addProperty("kty", "RSA");
+    jsonKey.addProperty("n", Base64.urlSafeEncode(base64urlUInt(key.getModulus())));
     jsonKey.addProperty(
-        "n", Base64.urlSafeEncode(BigIntegerEncoding.toBigEndianBytes(key.getModulus())));
-    jsonKey.addProperty(
-        "e",
-        Base64.urlSafeEncode(
-            BigIntegerEncoding.toBigEndianBytes(key.getParameters().getPublicExponent())));
+        "e", Base64.urlSafeEncode(base64urlUInt(key.getParameters().getPublicExponent())));
     jsonKey.addProperty("use", "sig");
     jsonKey.addProperty("alg", alg);
     JsonArray keyOps = new JsonArray();

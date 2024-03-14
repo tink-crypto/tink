@@ -128,13 +128,14 @@ public final class JwkSetConverterTest {
           + "G90ABjggQqDGW+zXzyIDAQAB\","
           + "\"keyMaterialType\":\"ASYMMETRIC_PUBLIC\""
           + "},\"status\":\"ENABLED\",\"keyId\":482168993,\"outputPrefixType\":\"RAW\"}]}";
+  //
   private static final String RS256_JWK_SET =
       "{\"keys\":[{\"kty\":\"RSA\","
-          + "\"n\":\"AJLKZN-5Rgal5jz6tgi-SnQ3kce8RYk2naS943OJ12qn7QraTOqhMX63NiS2iLJ8KcHxjApX3v2pSL"
-          + "Nhq0_X6TPKA3gnHLwt_Q82YbEhZwBC4IIt4Z1jSkS30ldFCcwSPuYWeon1LL_FvJkhypbFTJrznwtj-fpe9qk8"
-          + "Dei3t4cugsRaebPacNNdQeydz1OubLcuhiPbHoQdgf5-534lsPWDefvqX8MqIrc6DKFSjjqY-3xavPH_AK6Qu5"
-          + "EdUgU3ttAbdQJqWQ09g5n5pW_0NVBY4_xdwu-zQjUN-OGXABCONh2ProoIcuRnSkERzKE09Ts8gxvdAAY4IEKg"
-          + "xlvs188\","
+          + "\"n\":\"kspk37lGBqXmPPq2CL5KdDeRx7xFiTadpL3jc4nXaqftCtpM6qExfrc2JLaIsnwpwfGMClfe_alIs2"
+          + "GrT9fpM8oDeCccvC39DzZhsSFnAELggi3hnWNKRLfSV0UJzBI-5hZ6ifUsv8W8mSHKlsVMmvOfC2P5-l72qTwN"
+          + "6Le3hy6CxFp5s9pw011B7J3PU65sty6GI9sehB2B_n7nfiWw9YN5--pfwyoitzoMoVKOOpj7fFq88f8ArpC7kR"
+          + "1SBTe20Bt1AmpZDT2Dmfmlb_Q1UFjj_F3C77NCNQ344ZcAEI42HY-uighy5GdKQRHMoTT1OzyDG90ABjggQqDG"
+          + "W-zXzw\","
           + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS256\",\"key_ops\":[\"verify\"]}]}";
 
   private static final String RS256_KEYSET_TINK =
@@ -149,11 +150,11 @@ public final class JwkSetConverterTest {
           + "},\"status\":\"ENABLED\",\"keyId\":482168993,\"outputPrefixType\":\"TINK\"}]}";
   private static final String RS256_JWK_SET_KID =
       "{\"keys\":[{\"kty\":\"RSA\","
-          + "\"n\":\"AJLKZN-5Rgal5jz6tgi-SnQ3kce8RYk2naS943OJ12qn7QraTOqhMX63NiS2iLJ8KcHxjApX3v2pSL"
-          + "Nhq0_X6TPKA3gnHLwt_Q82YbEhZwBC4IIt4Z1jSkS30ldFCcwSPuYWeon1LL_FvJkhypbFTJrznwtj-fpe9qk8"
-          + "Dei3t4cugsRaebPacNNdQeydz1OubLcuhiPbHoQdgf5-534lsPWDefvqX8MqIrc6DKFSjjqY-3xavPH_AK6Qu5"
-          + "EdUgU3ttAbdQJqWQ09g5n5pW_0NVBY4_xdwu-zQjUN-OGXABCONh2ProoIcuRnSkERzKE09Ts8gxvdAAY4IEKg"
-          + "xlvs188\","
+          + "\"n\":\"kspk37lGBqXmPPq2CL5KdDeRx7xFiTadpL3jc4nXaqftCtpM6qExfrc2JLaIsnwpwfGMClfe_alIs2"
+          + "GrT9fpM8oDeCccvC39DzZhsSFnAELggi3hnWNKRLfSV0UJzBI-5hZ6ifUsv8W8mSHKlsVMmvOfC2P5-l72qTwN"
+          + "6Le3hy6CxFp5s9pw011B7J3PU65sty6GI9sehB2B_n7nfiWw9YN5--pfwyoitzoMoVKOOpj7fFq88f8ArpC7kR"
+          + "1SBTe20Bt1AmpZDT2Dmfmlb_Q1UFjj_F3C77NCNQ344ZcAEI42HY-uighy5GdKQRHMoTT1OzyDG90ABjggQqDG"
+          + "W-zXzw\","
           + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS256\",\"key_ops\":[\"verify\"],"
           + "\"kid\":\"HL1QoQ\"}]}";
   private static final String RS256_JWK_SET_KID_TINK =
@@ -181,13 +182,13 @@ public final class JwkSetConverterTest {
           + "},\"status\":\"ENABLED\",\"keyId\":333504275,\"outputPrefixType\":\"RAW\"}]}";
   private static final String RS384_JWK_SET =
       "{\"keys\":[{\"kty\":\"RSA\","
-          + "\"n\":\"AJ5QWOVg-4FUIzSr60tsISys7dBKpe9geoWmde3ionzZ-EuPXhnQcvUS4_5rx1wG2nK54LfX84tIr_"
-          + "1kOe41JrTtW_8C7eS2JPQD7AWI8sAwiHvrvVKLopD-3N0gao40Io2edI4GGzGOnC-7NhseZSNb5Rl92RMS1WGz"
-          + "aCPVQRQFo0g3n3ehroBEsV0BZ5zt6dhhziq8mS3gx_ys1WnE6tv6VVylR__fxEM3CwdKGFJY2eL2EOBwgHMJ1G"
-          + "W4q7EcANN-dA89DJY_t_vbEgBfBTwPhf8JSAZD6oydum_NFeRVOJgU872KFxk45A-_m8R_advIbiUlPej-FnRu"
-          + "T2FcCNVRGMBoqZFCKTFoye3VwLZpbR8zPb5FLdm7AXvb8iY5kV8qAuph0iW0sjpvQ3fARDaG3FC_YfmgaMa7mP"
-          + "plOPZAB883gJ7Z_AvryK8Tfl-jdhFPTfLfQRfpsGIgRLGOeMMffUW0a2PciAnzwZkCRsF0sTQlwUa2ycsZCFbq"
-          + "rwAj-Q\","
+          + "\"n\":\"nlBY5WD7gVQjNKvrS2whLKzt0Eql72B6haZ17eKifNn4S49eGdBy9RLj_mvHXAbacrngt9fzi0iv_W"
+          + "Q57jUmtO1b_wLt5LYk9APsBYjywDCIe-u9UouikP7c3SBqjjQijZ50jgYbMY6cL7s2Gx5lI1vlGX3ZExLVYbNo"
+          + "I9VBFAWjSDefd6GugESxXQFnnO3p2GHOKryZLeDH_KzVacTq2_pVXKVH_9_EQzcLB0oYUljZ4vYQ4HCAcwnUZb"
+          + "irsRwA0350Dz0Mlj-3-9sSAF8FPA-F_wlIBkPqjJ26b80V5FU4mBTzvYoXGTjkD7-bxH9p28huJSU96P4WdG5P"
+          + "YVwI1VEYwGipkUIpMWjJ7dXAtmltHzM9vkUt2bsBe9vyJjmRXyoC6mHSJbSyOm9Dd8BENobcUL9h-aBoxruY-m"
+          + "U49kAHzzeAntn8C-vIrxN-X6N2EU9N8t9BF-mwYiBEsY54wx99RbRrY9yICfPBmQJGwXSxNCXBRrbJyxkIVuqv"
+          + "ACP5\","
           + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS384\",\"key_ops\":[\"verify\"]}]}";
 
   private static final String RS512_KEYSET =
@@ -206,15 +207,15 @@ public final class JwkSetConverterTest {
           + "},\"status\":\"ENABLED\",\"keyId\":705596479,\"outputPrefixType\":\"RAW\"}]}";
   private static final String RS512_JWK_SET =
       "{\"keys\":[{\"kty\":\"RSA\","
-          + "\"n\":\"AJCsWfSEcxeeoIeO0Vyyc0OpX33JwZkEsL8VAydMB6Smc3wGsDp9bonW4BKEN11joLTb4u0HiixOBo"
-          + "0GuW2NMXUZ7vJyoxXLLx_nrtbFfKFaGffOCeZk9ZocFOp7duqeMSsnmqTIc2GDbyrnUI0CfEm6VThaRIie49BA"
-          + "jFHeEPJglKlrK12BPPtQnB46a7CMXaLfoWggEXO9kQY_XC7gSISTc5RVzZrGIfMqEohGK_2rkb4P5CJTZZ5Tiv"
-          + "6yTP4zF2wehblnXj67amfnHtk1cgEao2SdBtL2XD7rzoYEuCzO_wHmpfOGYSHB5WnUqP4PKStXlIZ0akVyabJb"
-          + "cLsftV1SXoNmtBUNATdxbdubruY4X7xll3k5EDkey26W8SkyPr7pksvXZmOFK4ABt-zfF4-fzXqgU-dS96hOrZ"
-          + "NmS6Du8o0Y4QAyuZZ22-ImFlr1nd5Ksr9CVZcXw84wGmLYnbhFCHQnuOTBpPA6Qp_S545bp4ZuEMkLnyvJPFD4"
-          + "gW1jRDgyPKY00hI7NMMjKoXoASgL7VRIa9NvW4Ny7-2IzfRQ78eLrLlhnNem15E6jYAiuCszxuz8FddtK-iFRn"
-          + "5X6UpHea65Mw2NNX7D9Jlue0AhwOu28ai1BAq9nQHzc8-nXUvaal0Ml2VgslinL0xbBq69aBAsAzplvp1CBxpJ"
-          + "a_UN\","
+          + "\"n\":\"kKxZ9IRzF56gh47RXLJzQ6lffcnBmQSwvxUDJ0wHpKZzfAawOn1uidbgEoQ3XWOgtNvi7QeKLE4GjQ"
+          + "a5bY0xdRnu8nKjFcsvH-eu1sV8oVoZ984J5mT1mhwU6nt26p4xKyeapMhzYYNvKudQjQJ8SbpVOFpEiJ7j0ECM"
+          + "Ud4Q8mCUqWsrXYE8-1CcHjprsIxdot-haCARc72RBj9cLuBIhJNzlFXNmsYh8yoSiEYr_auRvg_kIlNlnlOK_r"
+          + "JM_jMXbB6FuWdePrtqZ-ce2TVyARqjZJ0G0vZcPuvOhgS4LM7_Aeal84ZhIcHladSo_g8pK1eUhnRqRXJpsltw"
+          + "ux-1XVJeg2a0FQ0BN3Ft25uu5jhfvGWXeTkQOR7LbpbxKTI-vumSy9dmY4UrgAG37N8Xj5_NeqBT51L3qE6tk2"
+          + "ZLoO7yjRjhADK5lnbb4iYWWvWd3kqyv0JVlxfDzjAaYtiduEUIdCe45MGk8DpCn9Lnjlunhm4QyQufK8k8UPiB"
+          + "bWNEODI8pjTSEjs0wyMqhegBKAvtVEhr029bg3Lv7YjN9FDvx4usuWGc16bXkTqNgCK4KzPG7PwV120r6IVGfl"
+          + "fpSkd5rrkzDY01fsP0mW57QCHA67bxqLUECr2dAfNzz6ddS9pqXQyXZWCyWKcvTFsGrr1oECwDOmW-nUIHGklr"
+          + "9Q0\","
           + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS512\",\"key_ops\":[\"verify\"]}]}";
 
   private static final String PS256_KEYSET =
@@ -232,13 +233,13 @@ public final class JwkSetConverterTest {
 
   private static final String PS256_JWK_SET =
       "{\"keys\":[{\"kty\":\"RSA\","
-          + "\"n\":\"AI-xLndp-RtdarHbY6YBlo1uHACmpUhNWrZu3fgqfG4kV_cG5iyUTFL6Dto-0qfUs8dUzJpLGNlIH_"
-          + "-_jb_X2O7wW5sTogUFU74pFp9BYD8IRU108_vX4RozOhOrHUjlM4zOp7D7pSqjkPAHnfkyyJYL8LkkxeAeXekJ"
-          + "GVgcpquzMur1fnqc1p6C6VQ8wh4fnN-a_NT8q4-rYkz0MzyzdosXmp3JTI8fHXjcJWpN78AXTA4MEOt61QqNnl"
-          + "g0vwWCuKxttpbkkw1X0FR1NTV5cFxJ2_3jjRUhemWw-iVxTE97h0-KJEzq1-Cnd-LLWzyFLWRVMt14knghrYIQ"
-          + "VyzH_4Htdd0PVgyfkTdV2uL4ByQjtPlTvnALoFZIrvVILDz_KP6-7QNmj_z7PBB2GtSGmYO-b56zGT77Ex-1ht"
-          + "ko0oFvRiy7GzSSxRaixTMD7mT3vAW4L4pj3UrV2rF_zzegyyqCtj2k9CPoiyvZkYtWeDoxW5fSgGV1xJYQEE86"
-          + "xCNmnQ\","
+          + "\"n\":\"j7Eud2n5G11qsdtjpgGWjW4cAKalSE1atm7d-Cp8biRX9wbmLJRMUvoO2j7Sp9Szx1TMmksY2Ugf_7"
+          + "-Nv9fY7vBbmxOiBQVTvikWn0FgPwhFTXTz-9fhGjM6E6sdSOUzjM6nsPulKqOQ8Aed-TLIlgvwuSTF4B5d6QkZ"
+          + "WBymq7My6vV-epzWnoLpVDzCHh-c35r81Pyrj6tiTPQzPLN2ixeanclMjx8deNwlak3vwBdMDgwQ63rVCo2eWD"
+          + "S_BYK4rG22luSTDVfQVHU1NXlwXEnb_eONFSF6ZbD6JXFMT3uHT4okTOrX4Kd34stbPIUtZFUy3XiSeCGtghBX"
+          + "LMf_ge113Q9WDJ-RN1Xa4vgHJCO0-VO-cAugVkiu9UgsPP8o_r7tA2aP_Ps8EHYa1IaZg75vnrMZPvsTH7WG2S"
+          + "jSgW9GLLsbNJLFFqLFMwPuZPe8BbgvimPdStXasX_PN6DLKoK2PaT0I-iLK9mRi1Z4OjFbl9KAZXXElhAQTzrE"
+          + "I2ad\","
           + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"PS256\",\"key_ops\":[\"verify\"]}]}";
 
   private static final String PS256_KEYSET_TINK =
@@ -255,13 +256,13 @@ public final class JwkSetConverterTest {
           + "},\"status\":\"ENABLED\",\"keyId\":1508587714,\"outputPrefixType\":\"TINK\"}]}";
   private static final String PS256_JWK_SET_KID =
       "{\"keys\":[{\"kty\":\"RSA\","
-          + "\"n\":\"AI-xLndp-RtdarHbY6YBlo1uHACmpUhNWrZu3fgqfG4kV_cG5iyUTFL6Dto-0qfUs8dUzJpLGNlIH_"
-          + "-_jb_X2O7wW5sTogUFU74pFp9BYD8IRU108_vX4RozOhOrHUjlM4zOp7D7pSqjkPAHnfkyyJYL8LkkxeAeXekJ"
-          + "GVgcpquzMur1fnqc1p6C6VQ8wh4fnN-a_NT8q4-rYkz0MzyzdosXmp3JTI8fHXjcJWpN78AXTA4MEOt61QqNnl"
-          + "g0vwWCuKxttpbkkw1X0FR1NTV5cFxJ2_3jjRUhemWw-iVxTE97h0-KJEzq1-Cnd-LLWzyFLWRVMt14knghrYIQ"
-          + "VyzH_4Htdd0PVgyfkTdV2uL4ByQjtPlTvnALoFZIrvVILDz_KP6-7QNmj_z7PBB2GtSGmYO-b56zGT77Ex-1ht"
-          + "ko0oFvRiy7GzSSxRaixTMD7mT3vAW4L4pj3UrV2rF_zzegyyqCtj2k9CPoiyvZkYtWeDoxW5fSgGV1xJYQEE86"
-          + "xCNmnQ\","
+          + "\"n\":\"j7Eud2n5G11qsdtjpgGWjW4cAKalSE1atm7d-Cp8biRX9wbmLJRMUvoO2j7Sp9Szx1TMmksY2Ugf_7"
+          + "-Nv9fY7vBbmxOiBQVTvikWn0FgPwhFTXTz-9fhGjM6E6sdSOUzjM6nsPulKqOQ8Aed-TLIlgvwuSTF4B5d6QkZ"
+          + "WBymq7My6vV-epzWnoLpVDzCHh-c35r81Pyrj6tiTPQzPLN2ixeanclMjx8deNwlak3vwBdMDgwQ63rVCo2eWD"
+          + "S_BYK4rG22luSTDVfQVHU1NXlwXEnb_eONFSF6ZbD6JXFMT3uHT4okTOrX4Kd34stbPIUtZFUy3XiSeCGtghBX"
+          + "LMf_ge113Q9WDJ-RN1Xa4vgHJCO0-VO-cAugVkiu9UgsPP8o_r7tA2aP_Ps8EHYa1IaZg75vnrMZPvsTH7WG2S"
+          + "jSgW9GLLsbNJLFFqLFMwPuZPe8BbgvimPdStXasX_PN6DLKoK2PaT0I-iLK9mRi1Z4OjFbl9KAZXXElhAQTzrE"
+          + "I2ad\","
           + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"PS256\",\"key_ops\":[\"verify\"],"
           + "\"kid\":\"Wes4wg\"}]}";
   private static final String PS256_JWK_SET_KID_TINK =
@@ -292,13 +293,13 @@ public final class JwkSetConverterTest {
 
   private static final String PS384_JWK_SET =
       "{\"keys\":[{\"kty\":\"RSA\","
-          + "\"n\":\"AL-mtDnq4FmJmNZOper8ejn-fkcQnnkPYzE10MrztBgoDAxMcbalUvEtuXoWeSzQyIho4RN79vvg-0"
-          + "BI58zguVKiNWcD8VAUqzmn-aA2yfbwXNnO8A8iYUVfFKG0Eqc7pw-JF8qVYcrY8EXYj-tbxtAv3i9Mfi4o7TP1"
-          + "1XntWPuZlq8qVawehByrXZDMdliGDabBThaKxa6-icy21nw0VqKmwlymIr58PgkhN_HXVtV7KwE--hNlX_sKJr"
-          + "sMgW5Iy2olrzcTRQU2qdiGgSygJ4use6amAnrtZ_XjFIuNaM_UDPMXzr6R_sLm3Nj48Mk7G9RQ0y54Vd-rUC01"
-          + "RnUHQgzBdmfAIK54qN59UhY0m2IBclbaQsBSjNmdM3zu5PY1W2GJM4Jc5CX6f5UK7LlqnuAlSYxRNR-AcXFOy9"
-          + "I_O-eZBiSNPIdW-yz4KiXD4LR43Km8RxVNsjn-5jRpVu2E56EATtErc0FJO5BMN19Pp4hMF_y_I6luGDG8axnQ"
-          + "H5E5zw\","
+          + "\"n\":\"v6a0OergWYmY1k6l6vx6Of5-RxCeeQ9jMTXQyvO0GCgMDExxtqVS8S25ehZ5LNDIiGjhE3v2--D7QE"
+          + "jnzOC5UqI1ZwPxUBSrOaf5oDbJ9vBc2c7wDyJhRV8UobQSpzunD4kXypVhytjwRdiP61vG0C_eL0x-LijtM_XV"
+          + "ee1Y-5mWrypVrB6EHKtdkMx2WIYNpsFOForFrr6JzLbWfDRWoqbCXKYivnw-CSE38ddW1XsrAT76E2Vf-womuw"
+          + "yBbkjLaiWvNxNFBTap2IaBLKAni6x7pqYCeu1n9eMUi41oz9QM8xfOvpH-wubc2PjwyTsb1FDTLnhV36tQLTVG"
+          + "dQdCDMF2Z8Agrnio3n1SFjSbYgFyVtpCwFKM2Z0zfO7k9jVbYYkzglzkJfp_lQrsuWqe4CVJjFE1H4BxcU7L0j"
+          + "8755kGJI08h1b7LPgqJcPgtHjcqbxHFU2yOf7mNGlW7YTnoQBO0StzQUk7kEw3X0-niEwX_L8jqW4YMbxrGdAf"
+          + "kTnP\","
           + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"PS384\",\"key_ops\":[\"verify\"]}]}";
 
   private static final String PS512_KEYSET =
@@ -318,15 +319,15 @@ public final class JwkSetConverterTest {
 
   private static final String PS512_JWK_SET =
       "{\"keys\":[{\"kty\":\"RSA\","
-          + "\"n\":\"AJzlELwcDUYHiN85cyIVaODcxVQrEJ_YXdhCHJc-nFgUTBa-BF-ZVyytErUiAexED-HIh2vr6-fbDo"
-          + "DBTAtpIl0VFzbZffUIRsB9GI21ngwudDyhAIx9YYYT4EsNnRXFFbOI20nA68DZ9bEPK5IEjXM70DaVdTLQYUvw"
-          + "gtT8VRfPCWnoxts6_rp6BZcO8Z6sQVjMzazB2R8KoGtry94p0m7wP0RkI5xNg80EsGZF7YRksGAYzmGxmsDDeK"
-          + "J5AMf5shzMk4P0ywKhvRlMgdA1Xpb1aBmRv0CQWNhadhZaTkESnga-qQuy5PM2S-BiZNuuCqDqRvL9bez73jfk"
-          + "kyHUxNg-ePCvhgzr7L6zuGYaH0v4qjfcS7nLlNR5KilKsi7zMbFrpvGYae84pxXQZwzoHoXjh1IDf4sI7qZOrt"
-          + "Ur7fkVjSbH29pdI67839HETGz3i2UZqQ8AcQb11qOtburmgRFW_qKGeiufocd0ZXe8F5LY2CGcx6lK9_T-ck8N"
-          + "vG_GNnTxVkeL8K9v9MwcXA5k0UbUO7zzrWTw9Py1SF5IGwYiyC6cnJ7nFrfS6vR3OtihYk0DgLrjsc-zmwXoF4"
-          + "5xbqYmWfT8szuVoE_ZUaR-1O7cxiwI1fgFKYx-hwNaOm0SyjhxQT0viPSKgGG_0aRejP-oQpgtkc-uMmM0d8uL"
-          + "xyhj\","
+          + "\"n\":\"nOUQvBwNRgeI3zlzIhVo4NzFVCsQn9hd2EIclz6cWBRMFr4EX5lXLK0StSIB7EQP4ciHa-vr59sOgM"
+          + "FMC2kiXRUXNtl99QhGwH0YjbWeDC50PKEAjH1hhhPgSw2dFcUVs4jbScDrwNn1sQ8rkgSNczvQNpV1MtBhS_CC"
+          + "1PxVF88JaejG2zr-unoFlw7xnqxBWMzNrMHZHwqga2vL3inSbvA_RGQjnE2DzQSwZkXthGSwYBjOYbGawMN4on"
+          + "kAx_myHMyTg_TLAqG9GUyB0DVelvVoGZG_QJBY2Fp2FlpOQRKeBr6pC7Lk8zZL4GJk264KoOpG8v1t7PveN-ST"
+          + "IdTE2D548K-GDOvsvrO4ZhofS_iqN9xLucuU1HkqKUqyLvMxsWum8Zhp7zinFdBnDOgeheOHUgN_iwjupk6u1S"
+          + "vt-RWNJsfb2l0jrvzf0cRMbPeLZRmpDwBxBvXWo61u6uaBEVb-ooZ6K5-hx3Rld7wXktjYIZzHqUr39P5yTw28"
+          + "b8Y2dPFWR4vwr2_0zBxcDmTRRtQ7vPOtZPD0_LVIXkgbBiLILpycnucWt9Lq9Hc62KFiTQOAuuOxz7ObBegXjn"
+          + "FupiZZ9PyzO5WgT9lRpH7U7tzGLAjV-AUpjH6HA1o6bRLKOHFBPS-I9IqAYb_RpF6M_6hCmC2Rz64yYzR3y4vH"
+          + "KGM\","
           + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"PS512\",\"key_ops\":[\"verify\"]}]}";
 
   private static final String P256_PUBLIC_KEYSET_SMALL_COORDINATES =
@@ -383,11 +384,11 @@ public final class JwkSetConverterTest {
           + "\"y\":\"UxCtK0wAqQG_e5vpr7SSgJNKt5h4z3FGZtAuBLng1uE\","
           + "\"use\":\"sig\",\"alg\":\"ES256\",\"key_ops\":[\"verify\"]},"
           + "{\"kty\":\"RSA\","
-          + "\"n\":\"AJLKZN-5Rgal5jz6tgi-SnQ3kce8RYk2naS943OJ12qn7QraTOqhMX63NiS2iLJ8KcHxjApX3v2pSL"
-          + "Nhq0_X6TPKA3gnHLwt_Q82YbEhZwBC4IIt4Z1jSkS30ldFCcwSPuYWeon1LL_FvJkhypbFTJrznwtj-fpe9qk8"
-          + "Dei3t4cugsRaebPacNNdQeydz1OubLcuhiPbHoQdgf5-534lsPWDefvqX8MqIrc6DKFSjjqY-3xavPH_AK6Qu5"
-          + "EdUgU3ttAbdQJqWQ09g5n5pW_0NVBY4_xdwu-zQjUN-OGXABCONh2ProoIcuRnSkERzKE09Ts8gxvdAAY4IEKg"
-          + "xlvs188\","
+          + "\"n\":\"kspk37lGBqXmPPq2CL5KdDeRx7xFiTadpL3jc4nXaqftCtpM6qExfrc2JLaIsnwpwfGMClfe_alIs2"
+          + "GrT9fpM8oDeCccvC39DzZhsSFnAELggi3hnWNKRLfSV0UJzBI-5hZ6ifUsv8W8mSHKlsVMmvOfC2P5-l72qTwN"
+          + "6Le3hy6CxFp5s9pw011B7J3PU65sty6GI9sehB2B_n7nfiWw9YN5--pfwyoitzoMoVKOOpj7fFq88f8ArpC7kR"
+          + "1SBTe20Bt1AmpZDT2Dmfmlb_Q1UFjj_F3C77NCNQ344ZcAEI42HY-uighy5GdKQRHMoTT1OzyDG90ABjggQqDG"
+          + "W-zXzw\","
           + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS256\",\"key_ops\":[\"verify\"]}]}";
 
   private static void assertEqualJwkSets(String jwkSet1, String jwkSet2) throws Exception {
