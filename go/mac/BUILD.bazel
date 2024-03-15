@@ -61,7 +61,6 @@ go_test(
         "//proto/hmac_go_proto",
         "//proto/tink_go_proto",
         "//signature",
-        "//subtle",
         "//subtle/random",
         "//testing/fakemonitoring",
         "//testkeyset",
