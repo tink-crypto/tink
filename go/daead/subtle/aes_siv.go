@@ -77,7 +77,7 @@ func NewAESSIV(key []byte) (*AESSIV, error) {
 	k2 := key[32:]
 	c, err := aes.NewCipher(k1)
 	if err != nil {
-		return nil, fmt.Errorf("aes_siv: aes.NewCipher(%s) failed, %v", k1, err)
+		return nil, fmt.Errorf("aes_siv: aes.NewCipher() failed: %v", err)
 	}
 
 	block := make([]byte, aes.BlockSize)
@@ -161,7 +161,7 @@ func (asc *AESSIV) ctrCrypt(siv, in, out []byte) error {
 
 	c, err := aes.NewCipher(asc.K2)
 	if err != nil {
-		return fmt.Errorf("aes_siv: aes.NewCipher(%s) failed, %v", asc.K2, err)
+		return fmt.Errorf("aes_siv: aes.NewCipher() failed: %v", err)
 	}
 
 	steam := cipher.NewCTR(c, iv)
