@@ -115,6 +115,14 @@ func TestChaCha20Poly1305NewKeyData(t *testing.T) {
 	if err := validateChaCha20Poly1305Key(key); err != nil {
 		t.Errorf("validateChaCha20Poly1305Key(%v) = %v; want nil", key, err)
 	}
+	p, err := registry.PrimitiveFromKeyData(kd)
+	if err != nil {
+		t.Errorf("registry.PrimitiveFromKeyData(kd) err = %v, want nil", err)
+	}
+	_, ok := p.(*subtle.ChaCha20Poly1305)
+	if !ok {
+		t.Error("registry.PrimitiveFromKeyData(kd) did not return a ChaCha20Poly1305 primitive")
+	}
 }
 
 func TestChaCha20Poly1305DoesSupport(t *testing.T) {

@@ -198,6 +198,14 @@ func TestAESGCMSIVNewKeyDataBasic(t *testing.T) {
 		if err := validateAESGCMSIVKey(key, format); err != nil {
 			t.Errorf("validateAESGCMSIVKey(key=%v): Failed to validate key for keySize=%d; err=%v", key, keySize, err)
 		}
+		p, err := registry.PrimitiveFromKeyData(keyData)
+		if err != nil {
+			t.Errorf("registry.PrimitiveFromKeyData(keyData) err = %v, want nil", err)
+		}
+		_, ok := p.(*subtle.AESGCMSIV)
+		if !ok {
+			t.Error("registry.PrimitiveFromKeyData(keyData) did not return a AESGCMSIV primitive")
+		}
 	}
 }
 
@@ -289,7 +297,7 @@ func validateAESGCMSIVKey(key *gcmsivpb.AesGcmSivKey, format *gcmsivpb.AesGcmSiv
 	return validateAESGCMSIVPrimitive(p, key)
 }
 
-func validateAESGCMSIVPrimitive(p interface{}, key *gcmsivpb.AesGcmSivKey) error {
+func validateAESGCMSIVPrimitive(p any, key *gcmsivpb.AesGcmSivKey) error {
 	cipher := p.(*subtle.AESGCMSIV)
 	if !bytes.Equal(cipher.Key, key.KeyValue) {
 		return fmt.Errorf("Inputted key and primitive key don't match; input=%v, primitive=%v", key.KeyValue, cipher.Key)

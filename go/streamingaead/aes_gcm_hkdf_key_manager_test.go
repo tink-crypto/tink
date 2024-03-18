@@ -222,6 +222,14 @@ func TestAESGCMHKDFNewKeyDataBasic(t *testing.T) {
 		if err := validateAESGCMHKDFKey(key, format); err != nil {
 			t.Errorf("%s", err)
 		}
+		p, err := registry.PrimitiveFromKeyData(keyData)
+		if err != nil {
+			t.Errorf("registry.PrimitiveFromKeyData(keyData) err = %v, want nil", err)
+		}
+		_, ok := p.(*subtle.AESGCMHKDF)
+		if !ok {
+			t.Error("registry.PrimitiveFromKeyData(keyData) did not return a AESGCMHKDF primitive")
+		}
 	}
 }
 
@@ -581,7 +589,7 @@ func validateAESGCMHKDFKey(key *gcmhkdfpb.AesGcmHkdfStreamingKey, format *gcmhkd
 	return validatePrimitive(p, key)
 }
 
-func validatePrimitive(p interface{}, key *gcmhkdfpb.AesGcmHkdfStreamingKey) error {
+func validatePrimitive(p any, key *gcmhkdfpb.AesGcmHkdfStreamingKey) error {
 	cipher := p.(*subtle.AESGCMHKDF)
 	if !bytes.Equal(cipher.MainKey, key.KeyValue) {
 		return fmt.Errorf("main key and primitive don't match")

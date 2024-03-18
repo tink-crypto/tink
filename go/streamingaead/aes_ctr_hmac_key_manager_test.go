@@ -209,6 +209,14 @@ func TestAESCTRHMACNewKeyDataBasic(t *testing.T) {
 		if err := validateAESCTRHMACKey(key, format); err != nil {
 			t.Errorf("%s", err)
 		}
+		p, err := registry.PrimitiveFromKeyData(keyData)
+		if err != nil {
+			t.Errorf("registry.PrimitiveFromKeyData(kd) err = %v, want nil", err)
+		}
+		_, ok := p.(*subtle.AESCTRHMAC)
+		if !ok {
+			t.Error("registry.PrimitiveFromKeyData(kd) did not return a AESCTRHMAC primitive")
+		}
 	}
 }
 
@@ -330,7 +338,7 @@ func validateAESCTRHMACKey(key *ctrhmacpb.AesCtrHmacStreamingKey, format *ctrhma
 	return validateAESCTRHMACPrimitive(p, key)
 }
 
-func validateAESCTRHMACPrimitive(p interface{}, key *ctrhmacpb.AesCtrHmacStreamingKey) error {
+func validateAESCTRHMACPrimitive(p any, key *ctrhmacpb.AesCtrHmacStreamingKey) error {
 	cipher := p.(*subtle.AESCTRHMAC)
 	if !bytes.Equal(cipher.MainKey, key.KeyValue) {
 		return fmt.Errorf("main key and primitive don't match")
