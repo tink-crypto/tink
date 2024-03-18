@@ -210,14 +210,14 @@ public class KmsEnvelopeAeadKeyManager {
    * <p>The second argument of the passed in template is ignoring the Variant, and assuming
    * NO_PREFIX instead.
    *
-   * @deprecated Instead of registring a {@code KmsClient}, and creating an {@code Aead} using
-   *     {@code KeysetHandle.generateNew(KmsEnvelopeAeadKeyManager.createKeyTemplate(keyUri,
-   *     KeyTemplates.get("AES128_GCM"))).getPrimitive(Aead.class)}, create the {@code Aead}
-   *     directly using {@code KmsEnvelopeAead.create(PredefinedAeadParameters.AES256_GCM,
-   *     kmsClient.getAead(keyUri))}, without registering any {@code KmsClient}.
+   * <p>It is often not necessary to use this function. Instead of registering a {@code KmsClient},
+   * and creating an {@code Aead} using {@code
+   * KeysetHandle.generateNew(KmsEnvelopeAeadKeyManager.createKeyTemplate(keyUri,
+   * KeyTemplates.get("AES128_GCM"))).getPrimitive(Aead.class)}, create the {@code Aead} directly
+   * using {@code KmsEnvelopeAead.create(PredefinedAeadParameters.AES256_GCM,
+   * kmsClient.getAead(keyUri))}, without registering any {@code KmsClient}.
    */
   @AccessesPartialKey
-  @Deprecated // We do not recommend using this API, but there are no plans to remove it.
   public static KeyTemplate createKeyTemplate(String kekUri, KeyTemplate dekTemplate) {
     try {
       Parameters parameters = dekTemplate.toParameters();

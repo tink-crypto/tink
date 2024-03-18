@@ -30,13 +30,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * <p>This class consists exclusively of static methods that register and load {@link
  * KmsClient}-objects.
  *
- * @deprecated Registering KmsClient is discouraged. Instead call {@link KmsClient#getAead} to get a
- *     remote {@link Aead}. Use this {@link Aead} to encrypt a keyset with {@link
- *     TinkProtoKeysetFormat#serializeEncryptedKeyset}, or to create an envelope {@link Aead} using
- *     {@link com.google.crypto.tink.aead.KmsEnvelopeAead#create}.
  * @since 1.0.0
  */
-@Deprecated // We do not recommend using this API, but there are no plans to remove it.
 public final class KmsClients {
   // The list of KmsClients loaded automatically using ServiceLoader.
   private static List<KmsClient> autoClients;
@@ -47,14 +42,13 @@ public final class KmsClients {
    * Adds a client to the list of known {@link KmsClient}-objects.
    *
    * <p>This function will always add the {@code client} to a global list. So this function should
-   * only be called on startup and not on every operation. Otherwise this list may keep growing.
+   * only be called on startup and not on every operation.
    *
-   * @deprecated Registering KmsClient is discouraged. Instead call {@link KmsClient#getAead} to get
-   *     a remote {@link Aead}. Use this {@link Aead} to encrypt a keyset with {@link
-   *     TinkProtoKeysetFormat#serializeEncryptedKeyset}, or to create an envelope {@link Aead}
-   *     using {@link com.google.crypto.tink.aead.KmsEnvelopeAead#create}.
+   * <p>It is often not necessary to use this function. For example, you can call {@link
+   * KmsClient#getAead} to get a remote {@link Aead}. Use this {@link Aead} to encrypt a keyset with
+   * {@link TinkProtoKeysetFormat#serializeEncryptedKeyset}, or to create an envelope {@link Aead}
+   * using {@link com.google.crypto.tink.aead.KmsEnvelopeAead#create}.
    */
-  @Deprecated // We do not recommend using this API, but there are no plans to remove it.
   public static void add(KmsClient client) {
     clients.add(client);
   }
@@ -63,10 +57,8 @@ public final class KmsClients {
    * Returns the first {@link KmsClient} registered with {@link KmsClients#add} that supports {@code
    * keyUri}.
    *
-   * @deprecated Instead, keep your own instance or list of {@link KmsClient}.
-   * @throws GeneralSecurityException if cannot found any KMS clients that support {@code keyUri}
+   * @throws GeneralSecurityException if no KMS clients can be found that support {@code keyUri}
    */
-  @Deprecated // We do not recommend using this API, but there are no plans to remove it.
   public static KmsClient get(String keyUri) throws GeneralSecurityException {
     for (KmsClient client : clients) {
       if (client.doesSupport(keyUri)) {

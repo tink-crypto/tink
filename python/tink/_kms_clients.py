@@ -16,7 +16,6 @@
 
 import abc
 from typing import List
-import warnings
 
 from tink.aead import _aead
 from tink.core import _tink_error
@@ -36,28 +35,28 @@ class KmsClient(metaclass=abc.ABCMeta):
 _kms_clients: List[KmsClient] = []
 
 
-# Deprecated. It is preferable to not register KMS clients. Instead, get the
+# Adds client to a global list of KmsClients.
+#
+# This function should only be called on startup and not on every operation.
+#
+# In many cases, registering a KMS client is not needed. Instead, get the
 # KMS AEAD with kms_aead = client.get_aead(key_uri) and then use it to encrypt
 # a keyset with KeysetHandle.write, or to create an envelope AEAD using
 # aead.KmsEnvelopeAead.
 def register_kms_client(client: KmsClient) -> None:
-  """Adds a KMS client to a global list."""
-  warnings.warn(
-      'The "register_kms_client" function is deprecated.',
-      DeprecationWarning,
-      2,
-  )
+  """Adds a KMS client to a global list.
+
+  This function should only be called on startup and not on every operation.
+  Avoid registering the same client more than once.
+
+  Args:
+      client: KmsClient to be registered
+  """
   _kms_clients.append(client)
 
 
-# Deprecated. It is preferable to not register KMS clients.
 def kms_client_from_uri(key_uri: str) -> KmsClient:
   """Returns the first KMS client that supports key_uri."""
-  warnings.warn(
-      'The "tink.kms_client_from_uri" function is deprecated.',
-      DeprecationWarning,
-      2,
-  )
   for client in _kms_clients:
     if client.does_support(key_uri):
       return client

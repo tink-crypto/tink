@@ -190,12 +190,12 @@ public final class AwsKmsClient implements KmsClient {
    * <p>If {@code credentialPath} is present, load the credentials from that. Otherwise use the
    * default credentials.
    *
-   * @deprecated It is preferable to not register KMS clients. Instead, create the AwsKmsClient
-   *     yourself and call {@link getAead} to get a remote {@code Aead}. Use this {@code Aead} to
-   *     encrypt a keyset for with {@code TinkProtoKeysetFormat.serializeEncryptedKeyset}, or to
-   *     create an envelope {@code Aead} using {@code KmsEnvelopeAead.create}.
+   * <p>In many cases, it is not necessary to register the client. For example, you can create the
+   * AwsKmsClient yourself and call {@link AwsKmsClient#getAead} to get a remote {@code Aead}. Use
+   * this {@code Aead} to encrypt a keyset for with {@code
+   * TinkProtoKeysetFormat.serializeEncryptedKeyset}, or to create an envelope {@code Aead} using
+   * {@code KmsEnvelopeAead.create}.
    */
-  @Deprecated
   public static void register(Optional<String> keyUri, Optional<String> credentialPath)
       throws GeneralSecurityException {
     registerWithAwsKms(keyUri, credentialPath, null);

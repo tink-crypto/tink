@@ -15,7 +15,6 @@
 
 import re
 from typing import Optional
-import warnings
 
 from google.api_core import exceptions as core_exceptions
 from google.cloud import kms_v1
@@ -148,19 +147,25 @@ class GcpKmsClient(tink.KmsClient):
     key_id = key_uri[len(GCP_KEYURI_PREFIX) :]
     return _GcpKmsAead(self._client, key_id)
 
-  # Deprecated. It is preferable to not register KMS clients. Instead, create
-  # a KMS AEAD with
-  # kms_aead = gcpkms.GcpKmsClient(key_uri, credentials_path).get_aead(key_uri)
-  # and then use it to encrypt a keyset with KeysetHandle.write, or to create
-  # an envelope AEAD using aead.KmsEnvelopeAead.
   @classmethod
   def register_client(
       cls, key_uri: Optional[str], credentials_path: Optional[str]
   ) -> None:
-    """Registers the KMS client internally."""
-    warnings.warn(
-        'The "gcpkms.GcpKmsClient.register_client" function is deprecated.',
-        DeprecationWarning,
-        2,
-    )
+    """Add a new KMS client to the global list of KMS clients.
+
+    This function should only be called on startup and not on every operation.
+
+    In many cases, it is not necessary to register the client. For example,
+    you can create a KMS AEAD with
+    kms_aead = gcpkms.GcpKmsClient(key_uri, credentials_path).get_aead(key_uri)
+    and then use it to encrypt a keyset with KeysetHandle.write, or to create
+    an envelope AEAD using aead.KmsEnvelopeAead.
+
+    Args:
+        key_uri: Optional key URI. If set, the registered client will only
+          handle that key URI. If not set, then the client will handle all AWS
+          KMS key URIs.
+        credentials_path: Optional path to the credentials file. If it is not
+          set, the default credentials are used.
+    """
     tink.register_kms_client(GcpKmsClient(key_uri, credentials_path))
