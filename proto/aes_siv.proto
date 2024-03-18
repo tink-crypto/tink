@@ -20,7 +20,7 @@ package google.crypto.tink;
 
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
-option go_package = "github.com/google/tink/go/proto/aes_siv_go_proto";
+option go_package = "github.com/tink-crypto/tink-go/v2/proto/aes_siv_go_proto";
 
 // Tink implements RFC 5297 (https://www.rfc-editor.org/rfc/rfc5297) for
 // AES-SIV, putting the SIV/Tag at the beginning of the ciphertext.

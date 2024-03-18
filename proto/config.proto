@@ -21,7 +21,7 @@ package google.crypto.tink;
 
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
-option go_package = "github.com/google/tink/go/proto/config_go_proto";
+option go_package = "github.com/tink-crypto/tink-go/v2/proto/config_go_proto";
 
 // An entry that describes a key type to be used with Tink library,
 // specifying the corresponding primitive, key manager, and deprecation status.

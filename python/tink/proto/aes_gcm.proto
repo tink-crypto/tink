@@ -20,7 +20,7 @@ package google.crypto.tink;
 
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
-option go_package = "github.com/google/tink/go/proto/aes_gcm_go_proto";
+option go_package = "github.com/tink-crypto/tink-go/v2/aes_gcm_go_proto";
 option objc_class_prefix = "TINKPB";
 
 message AesGcmKeyFormat {
