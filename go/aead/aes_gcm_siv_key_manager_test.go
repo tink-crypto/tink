@@ -299,9 +299,6 @@ func validateAESGCMSIVKey(key *gcmsivpb.AesGcmSivKey, format *gcmsivpb.AesGcmSiv
 
 func validateAESGCMSIVPrimitive(p any, key *gcmsivpb.AesGcmSivKey) error {
 	cipher := p.(*subtle.AESGCMSIV)
-	if !bytes.Equal(cipher.Key, key.KeyValue) {
-		return fmt.Errorf("Inputted key and primitive key don't match; input=%v, primitive=%v", key.KeyValue, cipher.Key)
-	}
 	// Try to encrypt and decrypt random data.
 	pt := random.GetRandomBytes(32)
 	aad := random.GetRandomBytes(32)

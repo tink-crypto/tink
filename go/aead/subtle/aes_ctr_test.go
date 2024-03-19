@@ -43,10 +43,6 @@ func TestNewAESCTR(t *testing.T) {
 			if err != nil {
 				t.Errorf("want: valid cipher (key size=%d), got: error %v", len(k), err)
 			}
-			// Verify that the struct contents are correctly set.
-			if len(c.Key) != len(k) {
-				t.Errorf("want: key size=%d, got: key size=%d", len(k), len(c.Key))
-			}
 			if c.IVSize != subtle.AESCTRMinIVSize {
 				t.Errorf("want: IV size=%d, got: IV size=%d", subtle.AESCTRMinIVSize, c.IVSize)
 			}
@@ -65,9 +61,6 @@ func TestNewAESCTR(t *testing.T) {
 		if i >= subtle.AESCTRMinIVSize && i <= aes.BlockSize {
 			if err != nil {
 				t.Errorf("want: valid cipher (IV size=%d), got: error %v", i, err)
-			}
-			if len(c.Key) != len(k) {
-				t.Errorf("want: key size=%d, got: key size=%d", len(k), len(c.Key))
 			}
 			if c.IVSize != i {
 				t.Errorf("want: IV size=%d, got: IV size=%d", i, c.IVSize)

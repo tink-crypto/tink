@@ -48,7 +48,7 @@ const (
 // HKDF and are derived from the key derivation key, a randomly chosen salt of
 // the same size as the key and a nonce prefix.
 type AESCTRHMAC struct {
-	MainKey                      []byte
+	mainKey                      []byte
 	hkdfAlg                      string
 	keySizeInBytes               int
 	tagAlg                       string
@@ -102,7 +102,7 @@ func NewAESCTRHMAC(mainKey []byte, hkdfAlg string, keySizeInBytes int, tagAlg st
 	copy(keyClone, mainKey)
 
 	return &AESCTRHMAC{
-		MainKey:                      keyClone,
+		mainKey:                      keyClone,
 		hkdfAlg:                      hkdfAlg,
 		keySizeInBytes:               keySizeInBytes,
 		tagAlg:                       tagAlg,
@@ -123,7 +123,7 @@ func (a *AESCTRHMAC) HeaderLength() int {
 // They are derived from the main key using salt and aad as parameters.
 func (a *AESCTRHMAC) deriveKeys(salt, aad []byte) ([]byte, []byte, error) {
 	keyMaterialSize := a.keySizeInBytes + AESCTRHMACKeySizeInBytes
-	km, err := subtle.ComputeHKDF(a.hkdfAlg, a.MainKey, salt, aad, uint32(keyMaterialSize))
+	km, err := subtle.ComputeHKDF(a.hkdfAlg, a.mainKey, salt, aad, uint32(keyMaterialSize))
 	if err != nil {
 		return nil, nil, err
 	}

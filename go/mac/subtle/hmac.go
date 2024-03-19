@@ -39,7 +39,7 @@ var errHMACInvalidInput = errors.New("HMAC: invalid input")
 // HMAC implementation of interface tink.MAC
 type HMAC struct {
 	HashFunc func() hash.Hash
-	Key      []byte
+	key      []byte
 	TagSize  uint32
 }
 
@@ -55,7 +55,7 @@ func NewHMAC(hashAlg string, key []byte, tagSize uint32) (*HMAC, error) {
 	}
 	return &HMAC{
 		HashFunc: hashFunc,
-		Key:      key,
+		key:      key,
 		TagSize:  tagSize,
 	}, nil
 }
@@ -85,7 +85,7 @@ func (h *HMAC) ComputeMAC(data []byte) ([]byte, error) {
 	if h.HashFunc == nil {
 		return nil, fmt.Errorf("hmac: invalid hash algorithm")
 	}
-	mac := hmac.New(h.HashFunc, h.Key)
+	mac := hmac.New(h.HashFunc, h.key)
 	mac.Write(data)
 	tag := mac.Sum(nil)
 	return tag[:h.TagSize], nil

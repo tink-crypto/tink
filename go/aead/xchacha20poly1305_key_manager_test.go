@@ -305,9 +305,6 @@ func TestXChaCha20Poly1305DeriveKeyFailsWithInsufficientRandomness(t *testing.T)
 
 func validateXChaCha20Poly1305Primitive(p any, key *xpb.XChaCha20Poly1305Key) error {
 	cipher := p.(*subtle.XChaCha20Poly1305)
-	if !bytes.Equal(cipher.Key, key.KeyValue) {
-		return fmt.Errorf("key and primitive don't match")
-	}
 
 	// Try to encrypt and decrypt.
 	pt := random.GetRandomBytes(32)

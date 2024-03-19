@@ -64,8 +64,3 @@ func (a *AESGCM) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
 	iv := ciphertext[:AESGCMIVSize]
 	return a.aesGCMInsecureIV.Decrypt(iv, ciphertext, associatedData)
 }
-
-// Key returns the AES key.
-func (a *AESGCM) Key() []byte {
-	return a.aesGCMInsecureIV.Key
-}

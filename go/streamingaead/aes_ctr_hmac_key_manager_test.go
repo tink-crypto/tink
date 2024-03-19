@@ -17,7 +17,6 @@
 package streamingaead_test
 
 import (
-	"bytes"
 	"fmt"
 	"testing"
 
@@ -340,8 +339,5 @@ func validateAESCTRHMACKey(key *ctrhmacpb.AesCtrHmacStreamingKey, format *ctrhma
 
 func validateAESCTRHMACPrimitive(p any, key *ctrhmacpb.AesCtrHmacStreamingKey) error {
 	cipher := p.(*subtle.AESCTRHMAC)
-	if !bytes.Equal(cipher.MainKey, key.KeyValue) {
-		return fmt.Errorf("main key and primitive don't match")
-	}
 	return encryptDecrypt(cipher, cipher, 32, 32)
 }

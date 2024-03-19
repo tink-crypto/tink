@@ -48,7 +48,7 @@ const (
 
 // AESGCMSIV is an implementation of AEAD interface.
 type AESGCMSIV struct {
-	Key []byte
+	key []byte
 }
 
 // NewAESGCMSIV returns an AESGCMSIV instance.
@@ -59,7 +59,7 @@ func NewAESGCMSIV(key []byte) (*AESGCMSIV, error) {
 	if err := ValidateAESKeySize(keySize); err != nil {
 		return nil, fmt.Errorf("aes_gcm_siv: %s", err)
 	}
-	return &AESGCMSIV{Key: key}, nil
+	return &AESGCMSIV{key: key}, nil
 }
 
 // Encrypt encrypts plaintext with associatedData.
@@ -155,7 +155,7 @@ func (a *AESGCMSIV) deriveKeys(nonce []byte) ([]byte, []byte, error) {
 	}
 	nonceBlock := make([]byte, aesgcmsivBlockSize)
 	copy(nonceBlock[aesgcmsivBlockSize-AESGCMSIVNonceSize:], nonce)
-	block, err := aes.NewCipher(a.Key)
+	block, err := aes.NewCipher(a.key)
 	if err != nil {
 		return nil, nil, fmt.Errorf("aes_gcm_siv: failed to create block cipher, error: %v", err)
 	}
@@ -171,11 +171,11 @@ func (a *AESGCMSIV) deriveKeys(nonce []byte) ([]byte, []byte, error) {
 	kdfAes(0, authKey[0:8])
 	kdfAes(1, authKey[8:16])
 
-	encKey := make([]byte, len(a.Key))
+	encKey := make([]byte, len(a.key))
 	kdfAes(2, encKey[0:8])
 	kdfAes(3, encKey[8:16])
 
-	if len(a.Key) == 32 {
+	if len(a.key) == 32 {
 		kdfAes(4, encKey[16:24])
 		kdfAes(5, encKey[24:32])
 	}

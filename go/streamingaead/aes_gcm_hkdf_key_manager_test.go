@@ -591,8 +591,5 @@ func validateAESGCMHKDFKey(key *gcmhkdfpb.AesGcmHkdfStreamingKey, format *gcmhkd
 
 func validatePrimitive(p any, key *gcmhkdfpb.AesGcmHkdfStreamingKey) error {
 	cipher := p.(*subtle.AESGCMHKDF)
-	if !bytes.Equal(cipher.MainKey, key.KeyValue) {
-		return fmt.Errorf("main key and primitive don't match")
-	}
 	return encryptDecrypt(cipher, cipher, 32, 32)
 }

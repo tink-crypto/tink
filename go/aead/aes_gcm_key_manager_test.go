@@ -445,9 +445,6 @@ func validateAESGCMKey(key *gcmpb.AesGcmKey, format *gcmpb.AesGcmKeyFormat) erro
 
 func validateAESGCMPrimitive(p any, key *gcmpb.AesGcmKey) error {
 	cipher := p.(*subtle.AESGCM)
-	if !bytes.Equal(cipher.Key(), key.KeyValue) {
-		return fmt.Errorf("key and primitive don't match")
-	}
 	// try to encrypt and decrypt
 	pt := random.GetRandomBytes(32)
 	aad := random.GetRandomBytes(32)
