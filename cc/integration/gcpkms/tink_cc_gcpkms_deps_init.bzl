@@ -55,7 +55,7 @@ def tink_cc_gcpkms_deps_init(
 
     if register_go:
         go_rules_dependencies()
-        go_register_toolchains(version = "1.20")
+        go_register_toolchains(version = "1.21.8")
 
     gazelle_dependencies()
 
