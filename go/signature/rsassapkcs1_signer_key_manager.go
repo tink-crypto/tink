@@ -45,7 +45,7 @@ type rsaSSAPKCS1SignerKeyManager struct{}
 
 var _ registry.PrivateKeyManager = (*rsaSSAPKCS1SignerKeyManager)(nil)
 
-func (km *rsaSSAPKCS1SignerKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *rsaSSAPKCS1SignerKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if false {
 		return nil, errInvalidRSASSAPKCS1SignKey
 	}

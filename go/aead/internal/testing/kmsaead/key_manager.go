@@ -35,7 +35,7 @@ const kmsAEADTypeURL = "type.googleapis.com/google.crypto.tink.KmsAeadKey"
 
 type keyManager struct{}
 
-func (km *keyManager) Primitive(protoSerializedKey []byte) (interface{}, error) {
+func (km *keyManager) Primitive(protoSerializedKey []byte) (any, error) {
 	if len(protoSerializedKey) == 0 {
 		return nil, errors.New("kmsaead.keyManager: invalid key")
 	}

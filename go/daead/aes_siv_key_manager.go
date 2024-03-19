@@ -48,7 +48,7 @@ type aesSIVKeyManager struct{}
 var _ registry.KeyManager = (*aesSIVKeyManager)(nil)
 
 // Primitive constructs an AES-SIV for the given serialized AesSivKey.
-func (km *aesSIVKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *aesSIVKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if len(serializedKey) == 0 {
 		return nil, errors.New("aes_siv_key_manager: invalid key")
 	}

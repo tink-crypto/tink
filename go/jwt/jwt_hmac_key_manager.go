@@ -52,7 +52,7 @@ var hsAlgToMinKeySizeBytes = map[jwtmacpb.JwtHmacAlgorithm]int{
 	jwtmacpb.JwtHmacAlgorithm_HS512: 64,
 }
 
-func (km *jwtHMACKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *jwtHMACKeyManager) Primitive(serializedKey []byte) (any, error) {
 	key := &jwtmacpb.JwtHmacKey{}
 	if err := proto.Unmarshal(serializedKey, key); err != nil {
 		return nil, err

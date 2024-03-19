@@ -45,7 +45,7 @@ type aesGCMSIVKeyManager struct{}
 var _ registry.KeyManager = (*aesGCMSIVKeyManager)(nil)
 
 // Primitive creates an AESGCMSIV subtle for the given serialized AESGCMSIVKey proto.
-func (km *aesGCMSIVKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *aesGCMSIVKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidAESGCMSIVKey
 	}

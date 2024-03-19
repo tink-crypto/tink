@@ -40,7 +40,7 @@ var errECDSAVerifierNotImplemented = fmt.Errorf("ecdsa_verifier_key_manager: not
 type ecdsaVerifierKeyManager struct{}
 
 // Primitive creates an ECDSAVerifier subtle for the given serialized ECDSAPublicKey proto.
-func (km *ecdsaVerifierKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *ecdsaVerifierKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidECDSAVerifierKey
 	}

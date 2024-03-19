@@ -23,5 +23,5 @@ type EciesAEADHKDFDEMHelper interface {
 	GetSymmetricKeySize() uint32
 
 	// GetAEADOrDAEAD returns the newly created AEAD or Deterministic Aead primitive.
-	GetAEADOrDAEAD(symmetricKeyValue []byte) (interface{}, error)
+	GetAEADOrDAEAD(symmetricKeyValue []byte) (any, error)
 }

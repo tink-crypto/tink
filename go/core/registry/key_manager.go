@@ -28,7 +28,7 @@ import (
 type KeyManager interface {
 	// Primitive constructs a primitive instance for the key given in serializedKey, which must be a
 	// serialized key protocol buffer handled by this manager.
-	Primitive(serializedKey []byte) (interface{}, error)
+	Primitive(serializedKey []byte) (any, error)
 
 	// NewKey generates a new key according to specification in serializedKeyFormat, which must be
 	// supported by this manager.

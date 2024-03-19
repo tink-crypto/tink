@@ -20,7 +20,7 @@
 package internal
 
 // KeysetHandle is a raw constructor of keyset.Handle.
-var KeysetHandle interface{}
+var KeysetHandle any
 
 // KeysetMaterial returns the key material contained in a keyset.Handle.
-var KeysetMaterial interface{}
+var KeysetMaterial any

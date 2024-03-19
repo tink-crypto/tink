@@ -56,7 +56,7 @@ var esAlgToParams = map[jepb.JwtEcdsaAlgorithm]ecdsaParams{
 	jepb.JwtEcdsaAlgorithm_ES512: {Curve: "NIST_P521", Hash: "SHA512"},
 }
 
-func (km *jwtECDSAVerifierKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *jwtECDSAVerifierKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if serializedKey == nil || len(serializedKey) == 0 {
 		return nil, fmt.Errorf("invalid key")
 	}

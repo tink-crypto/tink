@@ -285,7 +285,7 @@ func validateCMACKey(format *cmacpb.AesCmacPrfKeyFormat, key *cmacpb.AesCmacPrfK
 }
 
 // validateCMACPrimitive checks whether the given primitive matches the given AESCMACPRFKey
-func validateCMACPrimitive(p interface{}, key *cmacpb.AesCmacPrfKey) error {
+func validateCMACPrimitive(p any, key *cmacpb.AesCmacPrfKey) error {
 	cmacPrimitive := p.(prf.PRF)
 	prfPrimitive, err := subtle.NewAESCMACPRF(key.KeyValue)
 	if err != nil {

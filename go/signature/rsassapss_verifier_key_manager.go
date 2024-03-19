@@ -44,7 +44,7 @@ type rsaSSAPSSVerifierKeyManager struct{}
 
 var _ (registry.KeyManager) = (*rsaSSAPSSVerifierKeyManager)(nil)
 
-func (km *rsaSSAPSSVerifierKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *rsaSSAPSSVerifierKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidRSASSAPSSVerifierKey
 	}

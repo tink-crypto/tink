@@ -48,7 +48,7 @@ var errInvalidAESCTRHMACAEADKeyFormat = fmt.Errorf("aes_ctr_hmac_aead_key_manage
 type aesCTRHMACAEADKeyManager struct{}
 
 // Primitive creates an AEAD for the given serialized AESCTRHMACAEADKey proto.
-func (km *aesCTRHMACAEADKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *aesCTRHMACAEADKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidAESCTRHMACAEADKey
 	}

@@ -53,7 +53,7 @@ type RawJWTOptions struct {
 	IssuedAt     *time.Time
 	ExpiresAt    *time.Time
 	NotBefore    *time.Time
-	CustomClaims map[string]interface{}
+	CustomClaims map[string]any
 
 	TypeHeader        *string
 	WithoutExpiration bool
@@ -256,7 +256,7 @@ func (r *RawJWT) HasArrayClaim(name string) bool {
 }
 
 // ArrayClaim returns a slice representing a JSON array for a claim or an error if the claim is empty.
-func (r *RawJWT) ArrayClaim(name string) ([]interface{}, error) {
+func (r *RawJWT) ArrayClaim(name string) ([]any, error) {
 	val, err := r.customClaim(name)
 	if err != nil {
 		return nil, err
@@ -273,7 +273,7 @@ func (r *RawJWT) HasObjectClaim(name string) bool {
 }
 
 // ObjectClaim returns a map representing a JSON object for a claim or an error if the claim is empty.
-func (r *RawJWT) ObjectClaim(name string) (map[string]interface{}, error) {
+func (r *RawJWT) ObjectClaim(name string) (map[string]any, error) {
 	val, err := r.customClaim(name)
 	if err != nil {
 		return nil, err
@@ -485,7 +485,7 @@ func validateAudienceClaim(val *spb.Value) error {
 	return nil
 }
 
-func validateCustomClaims(cc map[string]interface{}) error {
+func validateCustomClaims(cc map[string]any) error {
 	if cc == nil {
 		return nil
 	}

@@ -40,7 +40,7 @@ var errInvalidAESCMACPRFKeyFormat = errors.New("aes_cmac_prf_key_manager: invali
 type aescmacprfKeyManager struct{}
 
 // Primitive constructs a AES-CMAC instance for the given serialized AESCMACPRFKey.
-func (km *aescmacprfKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *aescmacprfKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidAESCMACPRFKey
 	}

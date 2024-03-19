@@ -42,7 +42,7 @@ var errInvalidHMACKeyFormat = errors.New("hmac_key_manager: invalid key format")
 type hmacKeyManager struct{}
 
 // Primitive constructs a HMAC instance for the given serialized HMACKey.
-func (km *hmacKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *hmacKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidHMACKey
 	}

@@ -49,7 +49,7 @@ type aesCTRHMACKeyManager struct{}
 
 // Primitive creates an AESCTRHMAC subtle for the given serialized
 // AESCTRHMACKey proto.
-func (km *aesCTRHMACKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *aesCTRHMACKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidAESCTRHMACKey
 	}

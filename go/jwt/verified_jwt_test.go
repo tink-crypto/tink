@@ -196,13 +196,13 @@ func TestGetAudiencesClaim(t *testing.T) {
 func TestGetCustomClaims(t *testing.T) {
 	opts := &jwt.RawJWTOptions{
 		WithoutExpiration: true,
-		CustomClaims: map[string]interface{}{
+		CustomClaims: map[string]any{
 			"cc-null":   nil,
 			"cc-num":    1.67,
 			"cc-bool":   true,
 			"cc-string": "goo",
-			"cc-array":  []interface{}{"1", "2", "3"},
-			"cc-object": map[string]interface{}{"cc-nested-num": 5.99},
+			"cc-array":  []any{"1", "2", "3"},
+			"cc-object": map[string]any{"cc-nested-num": 5.99},
 		},
 	}
 	rawJWT, err := jwt.NewRawJWT(opts)
@@ -275,13 +275,13 @@ func TestGetCustomClaims(t *testing.T) {
 func TestCustomClaimIsFalseForWrongType(t *testing.T) {
 	opts := &jwt.RawJWTOptions{
 		WithoutExpiration: true,
-		CustomClaims: map[string]interface{}{
+		CustomClaims: map[string]any{
 			"cc-null":   nil,
 			"cc-num":    1.67,
 			"cc-bool":   true,
 			"cc-string": "goo",
-			"cc-array":  []interface{}{"1", "2", "3"},
-			"cc-object": map[string]interface{}{"cc-nested-num": 5.99},
+			"cc-array":  []any{"1", "2", "3"},
+			"cc-object": map[string]any{"cc-nested-num": 5.99},
 		},
 	}
 	rawJWT, err := jwt.NewRawJWT(opts)

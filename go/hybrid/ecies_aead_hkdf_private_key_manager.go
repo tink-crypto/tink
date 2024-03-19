@@ -46,7 +46,7 @@ type eciesAEADHKDFPrivateKeyKeyManager struct{}
 var _ registry.PrivateKeyManager = (*eciesAEADHKDFPrivateKeyKeyManager)(nil)
 
 // Primitive creates an ECIESAEADHKDFPrivateKey subtle for the given serialized ECIESAEADHKDFPrivateKey proto.
-func (km *eciesAEADHKDFPrivateKeyKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *eciesAEADHKDFPrivateKeyKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidECIESAEADHKDFPrivateKeyKey
 	}

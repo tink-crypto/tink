@@ -46,7 +46,7 @@ var (
 type aesGCMHKDFKeyManager struct{}
 
 // Primitive creates an AESGCMHKDF subtle for the given serialized AESGCMHKDFKey proto.
-func (km *aesGCMHKDFKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *aesGCMHKDFKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidAESGCMHKDFKey
 	}

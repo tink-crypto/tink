@@ -47,7 +47,7 @@ type jwtECDSASignerKeyManager struct{}
 
 var _ registry.PrivateKeyManager = (*jwtECDSASignerKeyManager)(nil)
 
-func (km *jwtECDSASignerKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *jwtECDSASignerKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if serializedKey == nil {
 		return nil, errECDSAInvalidKey
 	}

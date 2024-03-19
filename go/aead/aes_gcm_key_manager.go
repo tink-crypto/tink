@@ -46,7 +46,7 @@ type aesGCMKeyManager struct{}
 var _ registry.KeyManager = (*aesGCMKeyManager)(nil)
 
 // Primitive creates an AESGCM subtle for the given serialized AESGCMKey proto.
-func (km *aesGCMKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *aesGCMKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidAESGCMKey
 	}

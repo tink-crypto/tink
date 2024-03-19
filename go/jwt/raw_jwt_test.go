@@ -72,13 +72,13 @@ func TestCreatingRawJWTWithAllClaims(t *testing.T) {
 		ExpiresAt:  refTime(457888),
 		NotBefore:  refTime(450888),
 		IssuedAt:   refTime(400888),
-		CustomClaims: map[string]interface{}{
+		CustomClaims: map[string]any{
 			"cc-num":    1.67,
 			"cc-bool":   true,
 			"cc-null":   nil,
 			"cc-string": "cc-val",
-			"cc-array":  []interface{}{1.0, 2.0, 3.0},
-			"cc-object": map[string]interface{}{"nested-cc-num": 5.5},
+			"cc-array":  []any{1.0, 2.0, 3.0},
+			"cc-object": map[string]any{"nested-cc-num": 5.5},
 		},
 	}
 	fromJSON, err := jwt.NewRawJWTFromJSON(refString("typeHeader"), []byte(json))
@@ -427,7 +427,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 			opts: &jwt.RawJWTOptions{
 				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(validExpiration),
-				CustomClaims: map[string]interface{}{
+				CustomClaims: map[string]any{
 					"sub": "overwrite",
 				},
 			},
@@ -437,7 +437,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 			opts: &jwt.RawJWTOptions{
 				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(validExpiration),
-				CustomClaims: map[string]interface{}{
+				CustomClaims: map[string]any{
 					"iss": "overwrite",
 				},
 			},
@@ -447,7 +447,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 			opts: &jwt.RawJWTOptions{
 				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(validExpiration),
-				CustomClaims: map[string]interface{}{
+				CustomClaims: map[string]any{
 					"jti": "overwrite",
 				},
 			},
@@ -457,7 +457,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 			opts: &jwt.RawJWTOptions{
 				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(validExpiration),
-				CustomClaims: map[string]interface{}{
+				CustomClaims: map[string]any{
 					"exp": "overwrite",
 				},
 			},
@@ -467,8 +467,8 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 			opts: &jwt.RawJWTOptions{
 				Audiences:         []string{"tink-foo"},
 				WithoutExpiration: true,
-				CustomClaims: map[string]interface{}{
-					"aud": []interface{}{"overwrite"},
+				CustomClaims: map[string]any{
+					"aud": []any{"overwrite"},
 				},
 			},
 		},
@@ -477,7 +477,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 			opts: &jwt.RawJWTOptions{
 				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(validExpiration),
-				CustomClaims: map[string]interface{}{
+				CustomClaims: map[string]any{
 					"complex": time.Time{},
 				},
 			},
@@ -512,7 +512,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 				Audiences: []string{"tink-foo"},
 				Issuer:    refString("ise-testing"),
 				ExpiresAt: refTime(validExpiration),
-				CustomClaims: map[string]interface{}{
+				CustomClaims: map[string]any{
 					"esoteric": invalidUTF8,
 				},
 			},
@@ -620,7 +620,7 @@ func TestJSONPayload(t *testing.T) {
 			tag: "integer",
 			opts: &jwt.RawJWTOptions{
 				WithoutExpiration: true,
-				CustomClaims: map[string]interface{}{
+				CustomClaims: map[string]any{
 					"num": 1,
 				},
 			},
@@ -630,8 +630,8 @@ func TestJSONPayload(t *testing.T) {
 			tag: "custom-claim",
 			opts: &jwt.RawJWTOptions{
 				WithoutExpiration: true,
-				CustomClaims: map[string]interface{}{
-					"cust": []interface{}{map[string]interface{}{"key": "val"}},
+				CustomClaims: map[string]any{
+					"cust": []any{map[string]any{"key": "val"}},
 				},
 			},
 			json: `{"cust":[{"key":"val"}]}`,
@@ -741,13 +741,13 @@ func TestHasCustomClaimsOfKind(t *testing.T) {
 	opts := &jwt.RawJWTOptions{
 		TypeHeader:        refString("typeHeader"),
 		WithoutExpiration: true,
-		CustomClaims: map[string]interface{}{
+		CustomClaims: map[string]any{
 			"cc-num":    1.67,
 			"cc-bool":   false,
 			"cc-nil":    nil,
-			"cc-list":   []interface{}{1.0, 2.0, 3.0},
+			"cc-list":   []any{1.0, 2.0, 3.0},
 			"cc-string": "cc-val",
-			"cc-object": map[string]interface{}{
+			"cc-object": map[string]any{
 				"nested-cc-num": 5.5,
 			},
 		},

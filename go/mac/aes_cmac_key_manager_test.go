@@ -302,7 +302,7 @@ func validateCMACKey(format *cmacpb.AesCmacKeyFormat, key *cmacpb.AesCmacKey) er
 }
 
 // validateCMACPrimitive checks whether the given primitive matches the given AESCMACKey
-func validateCMACPrimitive(p interface{}, key *cmacpb.AesCmacKey) error {
+func validateCMACPrimitive(p any, key *cmacpb.AesCmacKey) error {
 	cmacPrimitive := p.(*subtleMac.AESCMAC)
 	keyPrimitive, err := subtleMac.NewAESCMAC(key.KeyValue, key.Params.TagSize)
 	if err != nil {

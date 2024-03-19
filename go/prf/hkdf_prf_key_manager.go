@@ -46,7 +46,7 @@ type hkdfprfKeyManager struct{}
 var _ registry.KeyManager = (*hkdfprfKeyManager)(nil)
 
 // Primitive constructs a HKDF instance for the given serialized HKDFKey.
-func (km *hkdfprfKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *hkdfprfKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidHKDFPRFKey
 	}

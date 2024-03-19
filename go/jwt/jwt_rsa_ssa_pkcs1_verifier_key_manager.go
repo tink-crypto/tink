@@ -53,7 +53,7 @@ var validRSAlgToHash = map[jrsppb.JwtRsaSsaPkcs1Algorithm]string{
 	jrsppb.JwtRsaSsaPkcs1Algorithm_RS512: "SHA512",
 }
 
-func (km *jwtRSVerifierKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *jwtRSVerifierKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if serializedKey == nil || len(serializedKey) == 0 {
 		return nil, fmt.Errorf("invalid key")
 	}

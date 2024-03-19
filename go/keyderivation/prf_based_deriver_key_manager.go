@@ -41,7 +41,7 @@ type prfBasedDeriverKeyManager struct{}
 
 var _ registry.KeyManager = (*prfBasedDeriverKeyManager)(nil)
 
-func (km *prfBasedDeriverKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *prfBasedDeriverKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidPRFBasedDeriverKey
 	}

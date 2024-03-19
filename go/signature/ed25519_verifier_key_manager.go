@@ -41,7 +41,7 @@ var errED25519VerifierNotImplemented = fmt.Errorf("ed25519_verifier_key_manager:
 type ed25519VerifierKeyManager struct{}
 
 // Primitive creates an ED25519Verifier subtle for the given serialized ED25519PublicKey proto.
-func (km *ed25519VerifierKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *ed25519VerifierKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidED25519VerifierKey
 	}

@@ -42,7 +42,7 @@ type rsaSSAPKCS1VerifierKeyManager struct{}
 
 var _ registry.KeyManager = (*rsaSSAPKCS1VerifierKeyManager)(nil)
 
-func (km *rsaSSAPKCS1VerifierKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *rsaSSAPKCS1VerifierKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if len(serializedKey) == 0 {
 		return nil, fmt.Errorf("rsassapkcs1_verifier_key_manager: invalid serialized public key")
 	}

@@ -40,7 +40,7 @@ var errInvalidCMACKeyFormat = errors.New("aes_cmac_key_manager: invalid key form
 type aescmacKeyManager struct{}
 
 // Primitive constructs a AES-CMAC instance for the given serialized CMACKey.
-func (km *aescmacKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *aescmacKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidCMACKey
 	}

@@ -44,7 +44,7 @@ type hpkePublicKeyManager struct{}
 
 var _ registry.KeyManager = (*hpkePublicKeyManager)(nil)
 
-func (p *hpkePublicKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (p *hpkePublicKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if len(serializedKey) == 0 {
 		return nil, errInvalidHPKEPublicKey
 	}

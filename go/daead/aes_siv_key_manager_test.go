@@ -364,7 +364,7 @@ func TestAESSIVDeriveKeyFailsWithInsufficientRandomness(t *testing.T) {
 	}
 }
 
-func validateAESSIVPrimitive(p interface{}, key *aspb.AesSivKey) error {
+func validateAESSIVPrimitive(p any, key *aspb.AesSivKey) error {
 	cipher := p.(*subtle.AESSIV)
 	// try to encrypt and decrypt
 	pt := random.GetRandomBytes(32)

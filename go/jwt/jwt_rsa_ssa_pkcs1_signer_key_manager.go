@@ -51,7 +51,7 @@ func bytesToBigInt(v []byte) *big.Int {
 	return new(big.Int).SetBytes(v)
 }
 
-func (km *jwtRSSignerKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *jwtRSSignerKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if serializedKey == nil {
 		return nil, fmt.Errorf("invalid JwtRsaSsaPkcs1PrivateKey")
 	}

@@ -47,7 +47,7 @@ type jwtPSSignerKeyManager struct{}
 
 var _ registry.PrivateKeyManager = (*jwtPSSignerKeyManager)(nil)
 
-func (km *jwtPSSignerKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *jwtPSSignerKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if serializedKey == nil {
 		return nil, fmt.Errorf("invalid JwtRsaSsaPSSPrivateKey")
 	}

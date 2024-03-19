@@ -261,7 +261,7 @@ func (h *Handle) primitives(km registry.KeyManager, opts ...PrimitivesOption) (*
 		if key.Status != tinkpb.KeyStatusType_ENABLED {
 			continue
 		}
-		var primitive interface{}
+		var primitive any
 		var err error
 		if km != nil && km.DoesSupport(key.KeyData.TypeUrl) {
 			primitive, err = km.Primitive(key.KeyData.Value)

@@ -37,7 +37,7 @@ const (
 type kmsEnvelopeAEADKeyManager struct{}
 
 // Primitive creates an KMSEnvelopeAEAD subtle for the given serialized KMSEnvelopeAEADKey proto.
-func (km *kmsEnvelopeAEADKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *kmsEnvelopeAEADKeyManager) Primitive(serializedKey []byte) (any, error) {
 	if len(serializedKey) == 0 {
 		return nil, errors.New("kms_envelope_aead_key_manager: invalid key")
 	}

@@ -44,7 +44,7 @@ type customKeyManager struct{}
 // Assert that customKeyManager implements the KeyManager interface.
 var _ registry.KeyManager = (*customKeyManager)(nil)
 
-func (km *customKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
+func (km *customKeyManager) Primitive(serializedKey []byte) (any, error) {
 	key := new(wrapperspb.BytesValue)
 	if err := proto.Unmarshal(serializedKey, key); err != nil {
 		return nil, fmt.Errorf("invalid key")
