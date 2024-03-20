@@ -1980,7 +1980,7 @@ public class KeysetHandleTest {
         assertThrows(GeneralSecurityException.class, () -> handle.getPrimitive(Mac.class));
     assertThat(ex)
         .hasMessageThat()
-        .contains("https://developers.google.com/tink/registration_errors");
+        .contains("https://developers.google.com/tink/faq/registration_errors");
   }
 
   // This keyset contains a JwtEcdsaPrivateKey with an OutputPrefixType LEGACY. This
