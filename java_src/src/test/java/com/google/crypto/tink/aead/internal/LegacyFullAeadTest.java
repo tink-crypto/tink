@@ -19,6 +19,7 @@ package com.google.crypto.tink.aead.internal;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.internal.Util.isPrefix;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import com.google.crypto.tink.Aead;
@@ -33,7 +34,9 @@ import com.google.crypto.tink.proto.HmacKey;
 import com.google.crypto.tink.proto.HmacParams;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.subtle.AesGcmJce;
 import com.google.crypto.tink.subtle.Hex;
+import com.google.crypto.tink.util.Bytes;
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
 import javax.annotation.Nullable;
@@ -133,6 +136,35 @@ public class LegacyFullAeadTest {
     Aead aead = LegacyFullAead.create(t.key);
 
     assertThat(aead.decrypt(t.ciphertext, t.aad)).isEqualTo(t.plaintext);
+  }
+
+  private Aead rawAead() throws Exception {
+    return new AesGcmJce(Hex.decode("abcdefabcdefabcdefabcdefabcdefab"));
+  }
+
+  @Theory
+  public void createWithOutputPrefix_works() throws Exception {
+    Aead rawAead = rawAead();
+    byte[] outputPrefix = Hex.decode("01aabbccdd");
+
+    Aead aead = LegacyFullAead.create(rawAead, Bytes.copyFrom(outputPrefix));
+
+    byte[] plaintext = Hex.decode("11ff");
+    byte[] associatedData = Hex.decode("22ee");
+
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    assertTrue(isPrefix(outputPrefix, ciphertext));
+    assertThat(aead.decrypt(ciphertext, associatedData)).isEqualTo(plaintext);
+  }
+
+  @Theory
+  public void createWithInvalidOutputPrefix_fails() throws Exception {
+    Aead rawAead = rawAead();
+    byte[] tooShortOutputPrefix = Hex.decode("01aa");
+
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> LegacyFullAead.create(rawAead, Bytes.copyFrom(tooShortOutputPrefix)));
   }
 
   /** Represents a single LegacyAead test vector. */

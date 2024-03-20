@@ -39,7 +39,6 @@ import java.util.Arrays;
 public class LegacyFullAead implements Aead {
 
   private final Aead rawAead;
-  private final OutputPrefixType outputPrefixType;
   private final byte[] identifier;
 
   /** This method covers the cases where users created their own aead/key classes. */
@@ -79,18 +78,24 @@ public class LegacyFullAead implements Aead {
         throw new GeneralSecurityException("unknown output prefix type " + outputPrefixType);
     }
 
-    return new LegacyFullAead(rawPrimitive, outputPrefixType, identifier);
+    return new LegacyFullAead(rawPrimitive, identifier);
   }
 
-  private LegacyFullAead(Aead rawAead, OutputPrefixType outputPrefixType, byte[] identifier) {
+  public static Aead create(Aead rawAead, com.google.crypto.tink.util.Bytes outputPrefix) {
+    return new LegacyFullAead(rawAead, outputPrefix.toByteArray());
+  }
+
+  private LegacyFullAead(Aead rawAead, byte[] identifier) {
     this.rawAead = rawAead;
-    this.outputPrefixType = outputPrefixType;
+    if ((identifier.length != 0) && identifier.length != CryptoFormat.NON_RAW_PREFIX_SIZE) {
+      throw new IllegalArgumentException("identifier has an invalid length");
+    }
     this.identifier = identifier;
   }
 
   @Override
   public byte[] encrypt(byte[] plaintext, byte[] associatedData) throws GeneralSecurityException {
-    if (outputPrefixType == OutputPrefixType.RAW) {
+    if (identifier.length == 0) {
       return rawAead.encrypt(plaintext, associatedData);
     }
     return Bytes.concat(identifier, rawAead.encrypt(plaintext, associatedData));
@@ -98,7 +103,7 @@ public class LegacyFullAead implements Aead {
 
   @Override
   public byte[] decrypt(byte[] ciphertext, byte[] associatedData) throws GeneralSecurityException {
-    if (outputPrefixType == OutputPrefixType.RAW) {
+    if (identifier.length == 0) {
       return rawAead.decrypt(ciphertext, associatedData);
     }
 

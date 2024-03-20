@@ -331,6 +331,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/internal:registry_configuration",
         "//src/main/java/com/google/crypto/tink/internal:util",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
     ],
 )
 
@@ -347,6 +348,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink/internal:registry_configuration-android",
         "//src/main/java/com/google/crypto/tink/internal:util-android",
         "//src/main/java/com/google/crypto/tink/subtle:bytes-android",
+        "//src/main/java/com/google/crypto/tink/util:bytes-android",
     ],
 )
 
