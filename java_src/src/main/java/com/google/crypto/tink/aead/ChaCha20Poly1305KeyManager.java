@@ -24,6 +24,7 @@ import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Parameters;
 import com.google.crypto.tink.aead.internal.ChaCha20Poly1305Jce;
+import com.google.crypto.tink.aead.internal.ChaCha20Poly1305ProtoSerialization;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.LegacyKeyManagerImpl;

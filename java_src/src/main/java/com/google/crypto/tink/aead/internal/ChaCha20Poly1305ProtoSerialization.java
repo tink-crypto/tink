@@ -14,12 +14,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.aead;
+package com.google.crypto.tink.aead.internal;
 
 import static com.google.crypto.tink.internal.Util.toBytesFromPrintableAscii;
 
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.SecretKeyAccess;
+import com.google.crypto.tink.aead.ChaCha20Poly1305Key;
+import com.google.crypto.tink.aead.ChaCha20Poly1305Parameters;
 import com.google.crypto.tink.internal.KeyParser;
 import com.google.crypto.tink.internal.KeySerializer;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
@@ -44,7 +46,7 @@ import javax.annotation.Nullable;
  */
 @AccessesPartialKey
 @SuppressWarnings("UnnecessarilyFullyQualified") // Fully specifying proto types is more readable
-final class ChaCha20Poly1305ProtoSerialization {
+public final class ChaCha20Poly1305ProtoSerialization {
   private static final String TYPE_URL =
       "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key";
   private static final Bytes TYPE_URL_BYTES = toBytesFromPrintableAscii(TYPE_URL);
