@@ -131,10 +131,10 @@ public final class JwtHmacKeyManager {
     throw new GeneralSecurityException("Unsupported algorithm: " + algorithm);
   }
 
-  private static final KeyManager<JwtMac> legacyKeyManager =
+  private static final KeyManager<Void> legacyKeyManager =
       LegacyKeyManagerImpl.create(
           "type.googleapis.com/google.crypto.tink.JwtHmacKey",
-          JwtMac.class,
+          Void.class,
           KeyMaterialType.SYMMETRIC,
           com.google.crypto.tink.proto.JwtHmacKey.parser());
 
