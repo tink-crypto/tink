@@ -16,8 +16,8 @@
 
 package com.google.crypto.tink;
 
+import com.google.crypto.tink.internal.OutputPrefixUtil;
 import com.google.crypto.tink.proto.Keyset.Key;
-import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 
 /**
@@ -28,17 +28,17 @@ import java.security.GeneralSecurityException;
 public final class CryptoFormat {
 
   /** Prefix size of Tink, Legacy and Crunchy output prefix types. */
-  public static final int NON_RAW_PREFIX_SIZE = 5;
+  public static final int NON_RAW_PREFIX_SIZE = OutputPrefixUtil.NON_EMPTY_PREFIX_SIZE;
 
   /** Legacy or Crunchy prefix starts with \x00 and followed by a 4-byte key id. */
-  public static final int LEGACY_PREFIX_SIZE = NON_RAW_PREFIX_SIZE;
+  public static final int LEGACY_PREFIX_SIZE = OutputPrefixUtil.NON_EMPTY_PREFIX_SIZE;
 
-  public static final byte LEGACY_START_BYTE = (byte) 0;
+  public static final byte LEGACY_START_BYTE = OutputPrefixUtil.LEGACY_START_BYTE;
 
   /** Tink prefix starts with \x01 and followed by a 4-byte key id. */
-  public static final int TINK_PREFIX_SIZE = NON_RAW_PREFIX_SIZE;
+  public static final int TINK_PREFIX_SIZE = OutputPrefixUtil.NON_EMPTY_PREFIX_SIZE;
 
-  public static final byte TINK_START_BYTE = (byte) 1;
+  public static final byte TINK_START_BYTE = OutputPrefixUtil.TINK_START_BYTE;
 
   /** Raw prefix is empty. */
   public static final int RAW_PREFIX_SIZE = 0;
@@ -58,15 +58,9 @@ public final class CryptoFormat {
     switch (key.getOutputPrefixType()) {
       case LEGACY: // fall through
       case CRUNCHY:
-        return ByteBuffer.allocate(LEGACY_PREFIX_SIZE) // BIG_ENDIAN by default
-            .put(LEGACY_START_BYTE)
-            .putInt(key.getKeyId())
-            .array();
+        return OutputPrefixUtil.getLegacyOutputPrefix(key.getKeyId()).toByteArray();
       case TINK:
-        return ByteBuffer.allocate(TINK_PREFIX_SIZE) // BIG_ENDIAN by default
-            .put(TINK_START_BYTE)
-            .putInt(key.getKeyId())
-            .array();
+        return OutputPrefixUtil.getTinkOutputPrefix(key.getKeyId()).toByteArray();
       case RAW:
         return RAW_PREFIX;
       default:

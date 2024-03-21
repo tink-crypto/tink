@@ -58,13 +58,19 @@ java_library(
 java_library(
     name = "crypto_format",
     srcs = ["CryptoFormat.java"],
-    deps = ["//proto:tink_java_proto"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink/internal:output_prefix_util",
+    ],
 )
 
 android_library(
     name = "crypto_format-android",
     srcs = ["CryptoFormat.java"],
-    deps = ["//proto:tink_java_proto_lite"],
+    deps = [
+        "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink/internal:output_prefix_util-android",
+    ],
 )
 
 java_library(

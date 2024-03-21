@@ -873,3 +873,15 @@ java_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
+
+android_library(
+    name = "output_prefix_util-android",
+    srcs = ["OutputPrefixUtil.java"],
+    deps = ["//src/main/java/com/google/crypto/tink/util:bytes-android"],
+)
+
+java_library(
+    name = "output_prefix_util",
+    srcs = ["OutputPrefixUtil.java"],
+    deps = ["//src/main/java/com/google/crypto/tink/util:bytes"],
+)

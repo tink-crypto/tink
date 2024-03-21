@@ -677,3 +677,15 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "OutputPrefixUtilTest",
+    size = "small",
+    srcs = ["OutputPrefixUtilTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/internal:output_prefix_util",
+        "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
