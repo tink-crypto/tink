@@ -317,7 +317,10 @@ util::StatusOr<EciesParameters::DemId> FromProtoDemParams(
                         "Invalid AES-SIV key length for DEM.");
   }
   if (proto_dem_params.aead_dem().type_url() ==
-      "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key") {
+          "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key" ||
+      // TODO: b/330508549 - Remove type URL exception for an existing key.
+      proto_dem_params.aead_dem().type_url() ==
+          "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305KeyFormat") {
     XChaCha20Poly1305KeyFormat xchacha20_poly1305_key_format;
     if (!xchacha20_poly1305_key_format.ParseFromString(
             proto_dem_params.aead_dem().value())) {

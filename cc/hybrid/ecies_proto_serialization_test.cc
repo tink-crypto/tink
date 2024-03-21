@@ -1551,6 +1551,67 @@ TEST_F(EciesProtoSerializationTest, SerializePrivateKeyNoSecretKeyAccess) {
                        HasSubstr("SecretKeyAccess is required")));
 }
 
+// TODO: b/330508549 - Remove test after existing keys are updated/removed.
+TEST(AeadDemTypeUrlExceptionTest, ParseWithInvalidUrl) {
+  const std::string invalid_aead_dem_type_url =
+      "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305KeyFormat";
+  XChaCha20Poly1305KeyFormat format;
+  format.set_version(0);
+  KeyTemplate key_template;
+  key_template.set_type_url(invalid_aead_dem_type_url);
+  key_template.set_output_prefix_type(OutputPrefixType::TINK);
+  format.SerializeToString(key_template.mutable_value());
+  EciesAeadDemParams dem_params;
+  *dem_params.mutable_aead_dem() = key_template;
+
+  EciesAeadHkdfParams params;
+  *params.mutable_dem_params() = dem_params;
+  *params.mutable_kem_params() = CreateKemParams(EllipticCurveType::CURVE25519,
+                                                 HashType::SHA256, /*salt=*/"");
+  params.set_ec_point_format(EcPointFormat::COMPRESSED);
+  EciesAeadHkdfKeyFormat key_format_proto;
+  *key_format_proto.mutable_params() = params;
+
+  util::StatusOr<KeyPair> key_pair = GenerateKeyPair(
+      util::Enums::ProtoToSubtle(params.kem_params().curve_type()));
+  ASSERT_THAT(key_pair, IsOk());
+
+  EciesAeadHkdfPublicKey public_key_proto;
+  public_key_proto.set_version(0);
+  public_key_proto.set_x(key_pair->x);
+  public_key_proto.set_y(key_pair->y);
+  *public_key_proto.mutable_params() = params;
+
+  EciesAeadHkdfPrivateKey private_key_proto;
+  private_key_proto.set_version(0);
+  *private_key_proto.mutable_public_key() = public_key_proto;
+  private_key_proto.set_key_value(key_pair->private_key);
+
+  RestrictedData serialized_key = RestrictedData(
+      private_key_proto.SerializeAsString(), InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(
+          kPrivateTypeUrl, serialized_key, KeyData::ASYMMETRIC_PRIVATE,
+          OutputPrefixType::TINK, /*id_requirement=*/123);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> private_key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(private_key, IsOk());
+
+  util::StatusOr<EciesParameters> expected_parameters =
+      EciesParameters::Builder()
+          .SetCurveType(EciesParameters::CurveType::kX25519)
+          .SetHashType(EciesParameters::HashType::kSha256)
+          .SetDemId(EciesParameters::DemId::kXChaCha20Poly1305Raw)
+          .SetVariant(EciesParameters::Variant::kTink)
+          .Build();
+  ASSERT_THAT(expected_parameters, IsOk());
+  EXPECT_THAT((*private_key)->GetParameters(), Eq(*expected_parameters));
+}
+
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
