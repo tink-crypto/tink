@@ -780,3 +780,25 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "LateRegistrationTest",
+    size = "small",
+    srcs = ["LateRegistrationTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink:registry_configuration",
+        "//src/main/java/com/google/crypto/tink:tink_json_proto_keyset_format",
+        "//src/main/java/com/google/crypto/tink:tink_proto_keyset_format",
+        "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_mac",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_mac_config",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_validator",
+        "//src/main/java/com/google/crypto/tink/jwt:raw_jwt",
+        "//src/main/java/com/google/crypto/tink/jwt:verified_jwt",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
