@@ -52,7 +52,5 @@ template_rule = rule(
         "substitutions": attr.string_dict(mandatory = True),
         "out": attr.output(mandatory = True),
     },
-    # output_to_genfiles is required for header files.
-    output_to_genfiles = True,
     implementation = _template_rule_impl,
 )
