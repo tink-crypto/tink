@@ -18,10 +18,10 @@
 
 #include "absl/memory/memory.h"
 #include "tink/aead/aead_config.h"
-#include "tink/config/config_util.h"
 #include "tink/config/tink_fips.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
+#include "tink/hybrid/ecies_proto_serialization.h"
 #include "tink/hybrid/hybrid_decrypt_wrapper.h"
 #include "tink/hybrid/hybrid_encrypt_wrapper.h"
 #include "tink/registry.h"
@@ -34,15 +34,22 @@ namespace tink {
 // static
 util::Status HybridConfig::Register() {
   auto status = AeadConfig::Register();
-  if (!status.ok()) return status;
+  if (!status.ok()) {
+    return status;
+  }
 
   // Register primitive wrappers.
   status = Registry::RegisterPrimitiveWrapper(
       absl::make_unique<HybridEncryptWrapper>());
-  if (!status.ok()) return status;
+  if (!status.ok()) {
+    return status;
+  }
+
   status = Registry::RegisterPrimitiveWrapper(
       absl::make_unique<HybridDecryptWrapper>());
-  if (!status.ok()) return status;
+  if (!status.ok()) {
+    return status;
+  }
 
   // Currently there are no hybrid encryption key managers which only use
   // FIPS-validated implementations, therefore none will be registered in
@@ -55,9 +62,11 @@ util::Status HybridConfig::Register() {
   status = Registry::RegisterAsymmetricKeyManagers(
       absl::make_unique<EciesAeadHkdfPrivateKeyManager>(),
       absl::make_unique<EciesAeadHkdfPublicKeyManager>(), true);
-  if (!status.ok()) return status;
+  if (!status.ok()) {
+    return status;
+  }
 
-  return util::OkStatus();
+  return RegisterEciesProtoSerialization();
 }
 
 }  // namespace tink
