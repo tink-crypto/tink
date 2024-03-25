@@ -23,9 +23,13 @@ import static org.junit.Assert.assertThrows;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.jwt.JwtMac;
 import com.google.crypto.tink.jwt.JwtMacConfig;
+import com.google.crypto.tink.jwt.JwtPublicKeySign;
+import com.google.crypto.tink.jwt.JwtPublicKeyVerify;
+import com.google.crypto.tink.jwt.JwtSignatureConfig;
 import com.google.crypto.tink.jwt.JwtValidator;
 import com.google.crypto.tink.jwt.RawJwt;
 import com.google.crypto.tink.jwt.VerifiedJwt;
+import com.google.crypto.tink.signature.SignatureConfig;
 import java.security.GeneralSecurityException;
 import java.time.Clock;
 import java.time.Instant;
@@ -160,5 +164,218 @@ public final class LateRegistrationTest {
         JwtValidator.newBuilder().expectIssuer("issuer").expectAudience("audience").build();
     VerifiedJwt verifiedJwt = jwtMac.verifyMacAndDecode(token, validator);
     assertThat(verifiedJwt.getSubject()).isEqualTo("subject");
+  }
+
+  private static final String JSON_ECDSA_PRIVATE_KEYSET =
+      ""
+          + "{"
+          + "  \"primaryKeyId\": 775870498,"
+          + "  \"key\": ["
+          + "    {"
+          + "      \"keyData\": {"
+          + "        \"typeUrl\": \"type.googleapis.com/google.crypto.tink.EcdsaPrivateKey\","
+          + "        \"value\": \"GiA/E6s6KksNXrEd9hLdStvhsmdsONgpSODH/rZsBbBDehJMIiApA+NmYiv"
+          + "xRfhMuvTKZAwqETmn+WagBP/reucEjEvXkRog1AJ5GBzf+n27xnj9KcoGllF9NIFfQrDEP99FNH+Cne4"
+          + "SBhgCEAIIAw==\","
+          + "        \"keyMaterialType\": \"ASYMMETRIC_PRIVATE\""
+          + "      },"
+          + "      \"status\": \"ENABLED\","
+          + "      \"keyId\": 775870498,"
+          + "      \"outputPrefixType\": \"TINK\""
+          + "    }"
+          + "  ]"
+          + "}";
+
+  private static final String JSON_ECDSA_PUBLIC_KEYSET =
+      ""
+          + "{"
+          + "  \"primaryKeyId\": 775870498,"
+          + "  \"key\": ["
+          + "    {"
+          + "      \"keyData\": {"
+          + "        \"typeUrl\": \"type.googleapis.com/google.crypto.tink.EcdsaPublicKey\","
+          + "        \"value\": \"IiApA+NmYivxRfhMuvTKZAwqETmn+WagBP/reucEjEvXkRog1AJ5GBzf+n2"
+          + "7xnj9KcoGllF9NIFfQrDEP99FNH+Cne4SBhgCEAIIAw==\","
+          + "        \"keyMaterialType\": \"ASYMMETRIC_PUBLIC\""
+          + "      },"
+          + "      \"status\": \"ENABLED\","
+          + "      \"keyId\": 775870498,"
+          + "      \"outputPrefixType\": \"TINK\""
+          + "    }"
+          + "  ]"
+          + "}";
+
+  @Test
+  public void serializeAndParseSignatureKeysetBeforeRegistering() throws Exception {
+    KeysetHandle privateHandle =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            JSON_ECDSA_PRIVATE_KEYSET, InsecureSecretKeyAccess.get());
+    KeysetHandle publicHandle =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            JSON_ECDSA_PUBLIC_KEYSET, InsecureSecretKeyAccess.get());
+
+    // serializing and parsing keysets should work without registration.
+    byte[] binarySerializedKeyset =
+        TinkProtoKeysetFormat.serializeKeyset(privateHandle, InsecureSecretKeyAccess.get());
+    KeysetHandle binaryParsedHandle =
+        TinkProtoKeysetFormat.parseKeyset(binarySerializedKeyset, InsecureSecretKeyAccess.get());
+    assertThat(binaryParsedHandle.equalsKeyset(privateHandle)).isTrue();
+
+    String jsonSerializedKeyset =
+        TinkJsonProtoKeysetFormat.serializeKeyset(privateHandle, InsecureSecretKeyAccess.get());
+    KeysetHandle jsonParsedHandle =
+        TinkJsonProtoKeysetFormat.parseKeyset(jsonSerializedKeyset, InsecureSecretKeyAccess.get());
+    assertThat(jsonParsedHandle.equalsKeyset(privateHandle)).isTrue();
+
+    byte[] binarySerializedPublicKeyset =
+        TinkProtoKeysetFormat.serializeKeyset(publicHandle, InsecureSecretKeyAccess.get());
+    KeysetHandle binaryParsedPublicHandle =
+        TinkProtoKeysetFormat.parseKeyset(
+            binarySerializedPublicKeyset, InsecureSecretKeyAccess.get());
+    assertThat(binaryParsedPublicHandle.equalsKeyset(publicHandle)).isTrue();
+
+    String jsonSerializedPublicKeyset =
+        TinkJsonProtoKeysetFormat.serializeKeyset(publicHandle, InsecureSecretKeyAccess.get());
+    KeysetHandle jsonParsedPublicHandle =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            jsonSerializedPublicKeyset, InsecureSecretKeyAccess.get());
+    assertThat(jsonParsedPublicHandle.equalsKeyset(publicHandle)).isTrue();
+
+    // Before registration, this should fail.
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> privateHandle.getPrimitive(RegistryConfiguration.get(), PublicKeySign.class));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> publicHandle.getPrimitive(RegistryConfiguration.get(), PublicKeyVerify.class));
+    assertThrows(GeneralSecurityException.class, privateHandle::getPublicKeysetHandle);
+
+    SignatureConfig.register();
+
+    // After registration, the KeysetHandle that was parsed before should work.
+    PublicKeySign signer =
+        privateHandle.getPrimitive(RegistryConfiguration.get(), PublicKeySign.class);
+    PublicKeyVerify verifier =
+        publicHandle.getPrimitive(RegistryConfiguration.get(), PublicKeyVerify.class);
+    PublicKeyVerify verifierFromPrivateKey =
+        privateHandle
+            .getPublicKeysetHandle()
+            .getPrimitive(RegistryConfiguration.get(), PublicKeyVerify.class);
+
+    byte[] data = "data".getBytes(UTF_8);
+    byte[] sig = signer.sign(data);
+    verifier.verify(sig, data);
+    verifierFromPrivateKey.verify(sig, data);
+  }
+
+  // A keyset with one JWT public key sign keyset, serialized in Tink's JSON format.
+  private static final String JSON_JWT_PUBLIC_KEY_SIGN_KEYSET =
+      "{\"primaryKeyId\": 1742360595, \"key\": [{\"keyData\": {\"typeUrl\":"
+          + "\"type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey\", \"value\":"
+          + "\"GiBgVYdAPg3Fa2FVFymGDYrI1trHMzVjhVNEMpIxG7t0HRJGIiBeoDMF9LS5BDCh6Ygq"
+          + "E3DjHwWwnEKEI3WpPf8izEx1rRogbjQTXrTcw/1HKiiZm2Hqv41w7Vd44M9koyY/+VsP+SAQAQ==\","
+          + "\"keyMaterialType\": \"ASYMMETRIC_PRIVATE\"}, \"status\": \"ENABLED\", \"keyId\":"
+          + "1742360595, \"outputPrefixType\": \"TINK\"    }  ]}";
+
+  // A keyset with one JWT public key verify keyset, serialized in Tink's JSON format.
+  private static final String JSON_JWT_PUBLIC_KEY_VERIFY_KEYSET =
+      "{\"primaryKeyId\": 1742360595, \"key\": [{ \"keyData\": {\"typeUrl\":"
+          + "\"type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey\", \"value\":"
+          + "\"EAEaIG40E1603MP9RyoomZth6r+NcO1XeODPZKMmP/lbD/kgIiBeoDMF9LS5BDCh6Ygq"
+          + "E3DjHwWwnEKEI3WpPf8izEx1rQ==\","
+          + "\"keyMaterialType\": \"ASYMMETRIC_PUBLIC\"}, \"status\": \"ENABLED\", \"keyId\":"
+          + "1742360595, \"outputPrefixType\": \"TINK\"}]}";
+
+  @Test
+  public void readKeysetSignVerifyJwt_success() throws Exception {
+    KeysetHandle privateHandle =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            JSON_JWT_PUBLIC_KEY_SIGN_KEYSET, InsecureSecretKeyAccess.get());
+    KeysetHandle publicHandle =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            JSON_JWT_PUBLIC_KEY_VERIFY_KEYSET, InsecureSecretKeyAccess.get());
+
+    // serializing and parsing keysets should work without registration.
+    byte[] binarySerializedKeyset =
+        TinkProtoKeysetFormat.serializeKeyset(privateHandle, InsecureSecretKeyAccess.get());
+    KeysetHandle binaryParsedHandle =
+        TinkProtoKeysetFormat.parseKeyset(binarySerializedKeyset, InsecureSecretKeyAccess.get());
+    assertThat(binaryParsedHandle.equalsKeyset(privateHandle)).isTrue();
+
+    String jsonSerializedKeyset =
+        TinkJsonProtoKeysetFormat.serializeKeyset(privateHandle, InsecureSecretKeyAccess.get());
+    KeysetHandle jsonParsedHandle =
+        TinkJsonProtoKeysetFormat.parseKeyset(jsonSerializedKeyset, InsecureSecretKeyAccess.get());
+    assertThat(jsonParsedHandle.equalsKeyset(privateHandle)).isTrue();
+
+    byte[] binarySerializedPublicKeyset =
+        TinkProtoKeysetFormat.serializeKeyset(publicHandle, InsecureSecretKeyAccess.get());
+    KeysetHandle binaryParsedPublicHandle =
+        TinkProtoKeysetFormat.parseKeyset(
+            binarySerializedPublicKeyset, InsecureSecretKeyAccess.get());
+    assertThat(binaryParsedPublicHandle.equalsKeyset(publicHandle)).isTrue();
+
+    String jsonSerializedPublicKeyset =
+        TinkJsonProtoKeysetFormat.serializeKeyset(publicHandle, InsecureSecretKeyAccess.get());
+    KeysetHandle jsonParsedPublicHandle =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            jsonSerializedPublicKeyset, InsecureSecretKeyAccess.get());
+    assertThat(jsonParsedPublicHandle.equalsKeyset(publicHandle)).isTrue();
+
+    // Before registration, this should fail.
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> privateHandle.getPrimitive(RegistryConfiguration.get(), JwtPublicKeySign.class));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> publicHandle.getPrimitive(RegistryConfiguration.get(), JwtPublicKeyVerify.class));
+    assertThrows(GeneralSecurityException.class, privateHandle::getPublicKeysetHandle);
+
+    JwtSignatureConfig.register();
+
+    // Calling getPrimitive on KeysetHandles parsed before register was called still fails.
+    // Because JWT wrappers requires full primitives but we can't construct them from legacy key.
+    GeneralSecurityException thrown =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> privateHandle.getPrimitive(RegistryConfiguration.get(), JwtPublicKeySign.class));
+    assertThat(thrown).hasMessageThat().contains("registration_errors");
+    GeneralSecurityException thrown2 =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> publicHandle.getPrimitive(RegistryConfiguration.get(), JwtPublicKeyVerify.class));
+    assertThat(thrown2).hasMessageThat().contains("registration_errors");
+
+    // But parsing and then calling getPrimitive works.
+    KeysetHandle privateHandle2 =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            JSON_JWT_PUBLIC_KEY_SIGN_KEYSET, InsecureSecretKeyAccess.get());
+    KeysetHandle publicHandle2 =
+        TinkJsonProtoKeysetFormat.parseKeyset(
+            JSON_JWT_PUBLIC_KEY_VERIFY_KEYSET, InsecureSecretKeyAccess.get());
+    JwtPublicKeySign jwtPublicKeySign =
+        privateHandle2.getPrimitive(RegistryConfiguration.get(), JwtPublicKeySign.class);
+    JwtPublicKeyVerify jwtVerifier =
+        publicHandle2.getPrimitive(RegistryConfiguration.get(), JwtPublicKeyVerify.class);
+    JwtPublicKeyVerify jwtVerifierFromPrivateKey =
+        privateHandle2
+            .getPublicKeysetHandle()
+            .getPrimitive(RegistryConfiguration.get(), JwtPublicKeyVerify.class);
+
+    Instant now = Clock.systemUTC().instant();
+    RawJwt rawJwt =
+        RawJwt.newBuilder()
+            .setIssuer("issuer")
+            .addAudience("audience")
+            .setSubject("subject")
+            .setExpiration(now.plusSeconds(100))
+            .build();
+    String token = jwtPublicKeySign.signAndEncode(rawJwt);
+    JwtValidator validator =
+        JwtValidator.newBuilder().expectIssuer("issuer").expectAudience("audience").build();
+    VerifiedJwt verifiedJwt = jwtVerifier.verifyAndDecode(token, validator);
+    assertThat(verifiedJwt.getSubject()).isEqualTo("subject");
+    VerifiedJwt verifiedJwt2 = jwtVerifierFromPrivateKey.verifyAndDecode(token, validator);
+    assertThat(verifiedJwt2.getSubject()).isEqualTo("subject");
   }
 }
