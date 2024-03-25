@@ -1077,15 +1077,17 @@ public final class KeysetHandle {
                   + " failed, unable to get primitive");
         }
         Key key = entry.getKey();
-        // TODO(tholenst) Pass the exception from getFullPrimitiveOrNull.
-        @Nullable B fullPrimitive = getFullPrimitiveOrNull(config, key, inputPrimitiveClassObject);
-        if (fullPrimitive == null) {
+        B fullPrimitive;
+        try {
+          fullPrimitive = config.getPrimitive(key, inputPrimitiveClassObject);
+        } catch (GeneralSecurityException e) {
           throw new GeneralSecurityException(
               "Unable to get primitive "
                   + inputPrimitiveClassObject
                   + " for key of type "
                   + protoKey.getKeyData().getTypeUrl()
-                  + ", see https://developers.google.com/tink/faq/registration_errors");
+                  + ", see https://developers.google.com/tink/faq/registration_errors",
+              e);
         }
         if (protoKey.getKeyId() == keyset.getPrimaryKeyId()) {
           builder.addPrimaryFullPrimitive(fullPrimitive, key, protoKey);
@@ -1147,19 +1149,6 @@ public final class KeysetHandle {
       }
     }
     throw new GeneralSecurityException("No primary key found in keyset.");
-  }
-
-  @Nullable
-  private <B> B getFullPrimitiveOrNull(
-      InternalConfiguration config, Key key, Class<B> inputPrimitiveClassObject)
-      throws GeneralSecurityException {
-    try {
-      return config.getPrimitive(key, inputPrimitiveClassObject);
-    } catch (GeneralSecurityException e) {
-      // Ignoring because the key may not yet have a corresponding class.
-      // TODO(lizatretyakova): stop ignoring when all key classes are migrated from protos.
-      return null;
-    }
   }
 
   /**
