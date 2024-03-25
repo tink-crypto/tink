@@ -19,11 +19,11 @@ package com.google.crypto.tink.hybrid;
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Key;
 import com.google.crypto.tink.internal.EllipticCurvesUtil;
+import com.google.crypto.tink.internal.OutputPrefixUtil;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.RestrictedApi;
-import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.spec.ECPoint;
 import java.security.spec.EllipticCurve;
@@ -140,17 +140,17 @@ public final class HpkePublicKey extends HybridPublicKey {
   private static Bytes createOutputPrefix(
       HpkeParameters.Variant variant, @Nullable Integer idRequirement) {
     if (variant == HpkeParameters.Variant.NO_PREFIX) {
-      return Bytes.copyFrom(new byte[] {});
+      return OutputPrefixUtil.EMPTY_PREFIX;
     }
     if (idRequirement == null) {
       throw new IllegalStateException(
           "idRequirement must be non-null for HpkeParameters.Variant " + variant);
     }
     if (variant == HpkeParameters.Variant.CRUNCHY) {
-      return Bytes.copyFrom(ByteBuffer.allocate(5).put((byte) 0).putInt(idRequirement).array());
+      return OutputPrefixUtil.getLegacyOutputPrefix(idRequirement);
     }
     if (variant == HpkeParameters.Variant.TINK) {
-      return Bytes.copyFrom(ByteBuffer.allocate(5).put((byte) 1).putInt(idRequirement).array());
+      return OutputPrefixUtil.getTinkOutputPrefix(idRequirement);
     }
     throw new IllegalStateException("Unknown HpkeParameters.Variant: " + variant);
   }

@@ -18,10 +18,10 @@ package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Key;
+import com.google.crypto.tink.internal.OutputPrefixUtil;
 import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.RestrictedApi;
-import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.Objects;
 import javax.annotation.Nullable;
@@ -48,16 +48,14 @@ public final class Ed25519PublicKey extends SignaturePublicKey {
   private static Bytes createOutputPrefix(
       Ed25519Parameters parameters, @Nullable Integer idRequirement) {
     if (parameters.getVariant() == Ed25519Parameters.Variant.NO_PREFIX) {
-      return Bytes.copyFrom(new byte[] {});
+      return OutputPrefixUtil.EMPTY_PREFIX;
     }
     if (parameters.getVariant() == Ed25519Parameters.Variant.CRUNCHY
         || parameters.getVariant() == Ed25519Parameters.Variant.LEGACY) {
-      return Bytes.copyFrom(
-          ByteBuffer.allocate(5).put((byte) 0).putInt(idRequirement.intValue()).array());
+      return OutputPrefixUtil.getLegacyOutputPrefix(idRequirement);
     }
     if (parameters.getVariant() == Ed25519Parameters.Variant.TINK) {
-      return Bytes.copyFrom(
-          ByteBuffer.allocate(5).put((byte) 1).putInt(idRequirement.intValue()).array());
+      return OutputPrefixUtil.getTinkOutputPrefix(idRequirement);
     }
     throw new IllegalStateException("Unknown Variant: " + parameters.getVariant());
   }

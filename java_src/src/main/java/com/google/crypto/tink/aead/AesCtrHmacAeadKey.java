@@ -18,11 +18,11 @@ package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Key;
+import com.google.crypto.tink.internal.OutputPrefixUtil;
 import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.RestrictedApi;
-import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.Objects;
 import javax.annotation.Nullable;
@@ -70,13 +70,13 @@ public final class AesCtrHmacAeadKey extends AeadKey {
 
     private Bytes getOutputPrefix() {
       if (parameters.getVariant() == AesCtrHmacAeadParameters.Variant.NO_PREFIX) {
-        return Bytes.copyFrom(new byte[] {});
+        return OutputPrefixUtil.EMPTY_PREFIX;
       }
       if (parameters.getVariant() == AesCtrHmacAeadParameters.Variant.CRUNCHY) {
-        return Bytes.copyFrom(ByteBuffer.allocate(5).put((byte) 0).putInt(idRequirement).array());
+        return OutputPrefixUtil.getLegacyOutputPrefix(idRequirement);
       }
       if (parameters.getVariant() == AesCtrHmacAeadParameters.Variant.TINK) {
-        return Bytes.copyFrom(ByteBuffer.allocate(5).put((byte) 1).putInt(idRequirement).array());
+        return OutputPrefixUtil.getTinkOutputPrefix(idRequirement);
       }
       throw new IllegalStateException(
           "Unknown AesCtrHmacAeadParameters.Variant: " + parameters.getVariant());

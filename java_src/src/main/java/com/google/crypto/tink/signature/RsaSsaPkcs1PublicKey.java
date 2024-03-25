@@ -18,11 +18,11 @@ package com.google.crypto.tink.signature;
 
 import com.google.crypto.tink.AccessesPartialKey;
 import com.google.crypto.tink.Key;
+import com.google.crypto.tink.internal.OutputPrefixUtil;
 import com.google.crypto.tink.util.Bytes;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.RestrictedApi;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.Objects;
 import javax.annotation.Nullable;
@@ -66,14 +66,14 @@ public final class RsaSsaPkcs1PublicKey extends SignaturePublicKey {
 
     private Bytes getOutputPrefix() {
       if (parameters.getVariant() == RsaSsaPkcs1Parameters.Variant.NO_PREFIX) {
-        return Bytes.copyFrom(new byte[] {});
+        return OutputPrefixUtil.EMPTY_PREFIX;
       }
       if (parameters.getVariant() == RsaSsaPkcs1Parameters.Variant.LEGACY
           || parameters.getVariant() == RsaSsaPkcs1Parameters.Variant.CRUNCHY) {
-        return Bytes.copyFrom(ByteBuffer.allocate(5).put((byte) 0).putInt(idRequirement).array());
+        return OutputPrefixUtil.getLegacyOutputPrefix(idRequirement);
       }
       if (parameters.getVariant() == RsaSsaPkcs1Parameters.Variant.TINK) {
-        return Bytes.copyFrom(ByteBuffer.allocate(5).put((byte) 1).putInt(idRequirement).array());
+        return OutputPrefixUtil.getTinkOutputPrefix(idRequirement);
       }
       throw new IllegalStateException(
           "Unknown RsaSsaPkcs1Parameters.Variant: " + parameters.getVariant());
