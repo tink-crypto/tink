@@ -95,54 +95,60 @@ import java.security.GeneralSecurityException;
  * ConfigurationV0 contains the following primitives and algorithms:
  *
  * <p>MAC/ChunkedMAC:
+ *
  * <ul>
- *   <li>AesCmac</li>
- *   <li>Hmac</li>
+ *   <li>AesCmac
+ *   <li>Hmac
  * </ul>
  *
  * <p>AEAD:
+ *
  * <ul>
- *   <li>AesCtrHmac</li>
- *   <li>AesEax</li>
- *   <li>AesGcm</li>
- *   <li>AesGcmSiv</li>
- *   <li>ChaCha20Poly1305</li>
- *   <li>XChaCha20Poly1305</li>
+ *   <li>AesCtrHmac
+ *   <li>AesEax
+ *   <li>AesGcm
+ *   <li>AesGcmSiv
+ *   <li>ChaCha20Poly1305
+ *   <li>XChaCha20Poly1305
  * </ul>
  *
  * <p>DAEAD:
+ *
  * <ul>
- *   <li>AesSiv</li>
+ *   <li>AesSiv
  * </ul>
  *
  * <p>StreamingAEAD:
+ *
  * <ul>
- *   <li>AesCtrHmac</li>
- *   <li>AesGcmHkdf</li>
+ *   <li>AesCtrHmac
+ *   <li>AesGcmHkdf
  * </ul>
  *
  * <p>Hybrid:
+ *
  * <ul>
- *   <li>Ecies</li>
- *   <li>Hpke</li>
+ *   <li>Ecies
+ *   <li>Hpke
  * </ul>
  *
  * <p>PRF:
+ *
  * <ul>
- *   <li>AesCmac</li>
- *   <li>Hkdf</li>
- *   <li>Hmac</li>
+ *   <li>AesCmac
+ *   <li>Hkdf
+ *   <li>Hmac
  * </ul>
  *
  * <p>Signatures:
+ *
  * <ul>
- *   <li>Ed25519</li>
- *   <li>Esdsa</li>
- *   <li>RsaSsaPkcs1</li>
- *   <li>RsaSsaPss</li>
+ *   <li>Ed25519
+ *   <li>Esdsa
+ *   <li>RsaSsaPkcs1
+ *   <li>RsaSsaPss
  * </ul>
  */
-// TODO(b/265864709): add cross-language tests for this class.
 public class ConfigurationV0 {
   private ConfigurationV0() {}
 
