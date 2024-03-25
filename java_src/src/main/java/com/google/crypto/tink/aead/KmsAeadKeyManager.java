@@ -21,6 +21,7 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KmsClients;
+import com.google.crypto.tink.aead.internal.LegacyFullAead;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
@@ -38,7 +39,10 @@ import javax.annotation.Nullable;
  */
 public final class KmsAeadKeyManager {
   private static Aead create(LegacyKmsAeadKey key) throws GeneralSecurityException {
-    return KmsClients.get(key.getParameters().keyUri()).getAead(key.getParameters().keyUri());
+
+    Aead rawAead =
+        KmsClients.get(key.getParameters().keyUri()).getAead(key.getParameters().keyUri());
+    return LegacyFullAead.create(rawAead, key.getOutputPrefix());
   }
 
   private static final PrimitiveConstructor<LegacyKmsAeadKey, Aead>
@@ -66,11 +70,7 @@ public final class KmsAeadKeyManager {
   private static LegacyKmsAeadKey newKey(
       LegacyKmsAeadParameters parameters, @Nullable Integer idRequirement)
       throws GeneralSecurityException {
-    if (idRequirement != null) {
-      throw new GeneralSecurityException(
-          "Id Requirement is not supported for LegacyKmsEnvelopeAeadKey");
-    }
-    return LegacyKmsAeadKey.create(parameters);
+    return LegacyKmsAeadKey.create(parameters, idRequirement);
   }
 
   @SuppressWarnings("InlineLambdaConstant") // We need a correct Object#equals in registration.

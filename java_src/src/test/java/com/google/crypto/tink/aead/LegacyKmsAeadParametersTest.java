@@ -28,20 +28,42 @@ public final class LegacyKmsAeadParametersTest {
   public void testCreateValue() throws Exception {
     LegacyKmsAeadParameters parameters = LegacyKmsAeadParameters.create("someArbitrarykeyUri223");
     assertThat(parameters.keyUri()).isEqualTo("someArbitrarykeyUri223");
+    assertThat(parameters.variant()).isEqualTo(LegacyKmsAeadParameters.Variant.NO_PREFIX);
     assertThat(parameters.hasIdRequirement()).isFalse();
   }
 
   @Test
+  public void testCreateNoPrefixValue() throws Exception {
+    LegacyKmsAeadParameters parametersNoPrefix =
+        LegacyKmsAeadParameters.create("keyUri", LegacyKmsAeadParameters.Variant.NO_PREFIX);
+    assertThat(parametersNoPrefix.keyUri()).isEqualTo("keyUri");
+    assertThat(parametersNoPrefix.variant()).isEqualTo(LegacyKmsAeadParameters.Variant.NO_PREFIX);
+    assertThat(parametersNoPrefix.hasIdRequirement()).isFalse();
+  }
+
+  @Test
+  public void testCreateTinkValue() throws Exception {
+    LegacyKmsAeadParameters parametersTink =
+        LegacyKmsAeadParameters.create("keyUri2", LegacyKmsAeadParameters.Variant.TINK);
+    assertThat(parametersTink.keyUri()).isEqualTo("keyUri2");
+    assertThat(parametersTink.variant()).isEqualTo(LegacyKmsAeadParameters.Variant.TINK);
+    assertThat(parametersTink.hasIdRequirement()).isTrue();
+  }
+
+  @Test
   public void testEqualsAndHashCode() throws Exception {
-    LegacyKmsAeadParameters parameters1 = LegacyKmsAeadParameters.create("someArbitrarykeyUri223");
-    LegacyKmsAeadParameters parameters1Copy =
-        LegacyKmsAeadParameters.create("someArbitrarykeyUri223");
-    LegacyKmsAeadParameters parameters2 = LegacyKmsAeadParameters.create("someArbitrarykeyUri112");
+    LegacyKmsAeadParameters parameters1 = LegacyKmsAeadParameters.create("keyUri1");
+    LegacyKmsAeadParameters parameters1Copy = LegacyKmsAeadParameters.create("keyUri1");
+    LegacyKmsAeadParameters parameters2 = LegacyKmsAeadParameters.create("keyUri2");
+    LegacyKmsAeadParameters parameters1Tink =
+        LegacyKmsAeadParameters.create("keyUri1", LegacyKmsAeadParameters.Variant.TINK);
 
     assertThat(parameters1).isEqualTo(parameters1Copy);
     assertThat(parameters1).isNotEqualTo(parameters2);
+    assertThat(parameters1).isNotEqualTo(parameters1Tink);
 
     assertThat(parameters1.hashCode()).isEqualTo(parameters1Copy.hashCode());
     assertThat(parameters1.hashCode()).isNotEqualTo(parameters2.hashCode());
+    assertThat(parameters1.hashCode()).isNotEqualTo(parameters1Tink.hashCode());
   }
 }

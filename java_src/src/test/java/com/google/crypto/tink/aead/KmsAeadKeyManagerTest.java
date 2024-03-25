@@ -17,17 +17,20 @@
 package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.crypto.tink.internal.Util.isPrefix;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClients;
+import com.google.crypto.tink.RegistryConfiguration;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.FakeKmsClient;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,15 +63,53 @@ public class KmsAeadKeyManagerTest {
 
   @Test
   public void createAeadFromLegacyKmsAeadKey_works() throws Exception {
-    LegacyKmsAeadParameters parameters =
-        LegacyKmsAeadParameters.create(FakeKmsClient.createFakeKeyUri());
+    String keyUri = FakeKmsClient.createFakeKeyUri();
+    LegacyKmsAeadParameters parameters = LegacyKmsAeadParameters.create(keyUri);
     LegacyKmsAeadKey key = LegacyKmsAeadKey.create(parameters);
     KeysetHandle keysetHandle =
         KeysetHandle.newBuilder()
             .addEntry(KeysetHandle.importKey(key).withRandomId().makePrimary())
             .build();
 
-    TestUtil.runBasicAeadTests(keysetHandle.getPrimitive(Aead.class));
+    Aead aead = keysetHandle.getPrimitive(RegistryConfiguration.get(), Aead.class);
+    TestUtil.runBasicAeadTests(aead);
+
+    Aead clientAead = new FakeKmsClient().getAead(keyUri);
+    byte[] plaintext = Random.randBytes(20);
+    byte[] associatedData = Random.randBytes(20);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    byte[] decrypted = clientAead.decrypt(ciphertext, associatedData);
+    assertThat(decrypted).isEqualTo(plaintext);
+  }
+
+  @Test
+  public void createAeadFromLegacyKmsAeadKeyWithTinkPrefix_works() throws Exception {
+    String keyUri = FakeKmsClient.createFakeKeyUri();
+    LegacyKmsAeadParameters parameters =
+        LegacyKmsAeadParameters.create(keyUri, LegacyKmsAeadParameters.Variant.TINK);
+    LegacyKmsAeadKey key = LegacyKmsAeadKey.create(parameters, 0x11223344);
+    KeysetHandle keysetHandle =
+        KeysetHandle.newBuilder()
+            .addEntry(KeysetHandle.importKey(key).withFixedId(0x11223344).makePrimary())
+            .build();
+
+    Aead aead = keysetHandle.getPrimitive(RegistryConfiguration.get(), Aead.class);
+    TestUtil.runBasicAeadTests(aead);
+
+    byte[] plaintext = Random.randBytes(20);
+    byte[] associatedData = Random.randBytes(20);
+    byte[] ciphertext = aead.encrypt(plaintext, associatedData);
+    assertThat(
+            isPrefix(
+                new byte[] {(byte) 0x01, (byte) 0x11, (byte) 0x22, (byte) 0x33, (byte) 0x44},
+                ciphertext))
+        .isTrue();
+
+    Aead clientAead = new FakeKmsClient().getAead(keyUri);
+    // test that clientAead can decrypt ciphertext if the 5 byte prefix is removed.
+    byte[] ciphertextWithoutPrefix = Arrays.copyOfRange(ciphertext, 5, ciphertext.length);
+    byte[] decrypted = clientAead.decrypt(ciphertextWithoutPrefix, associatedData);
+    assertThat(decrypted).isEqualTo(plaintext);
   }
 
   @Test

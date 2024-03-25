@@ -73,11 +73,34 @@ public final class LegacyKmsAeadProtoSerializationTest {
   }
 
   @Test
+  public void serializeParseParametersWithTinkPrefix_works() throws Exception {
+    LegacyKmsAeadParameters parameters =
+        LegacyKmsAeadParameters.create(
+            "someArbitrarykeyUri723", LegacyKmsAeadParameters.Variant.TINK);
+
+    ProtoParametersSerialization serialization =
+        ProtoParametersSerialization.create(
+            TYPE_URL,
+            OutputPrefixType.TINK,
+            com.google.crypto.tink.proto.KmsAeadKeyFormat.newBuilder()
+                .setKeyUri("someArbitrarykeyUri723")
+                .build());
+
+    ProtoParametersSerialization serialized =
+        registry.serializeParameters(parameters, ProtoParametersSerialization.class);
+    assertEqualWhenValueParsed(
+        com.google.crypto.tink.proto.KmsAeadKeyFormat.parser(), serialized, serialization);
+
+    Parameters parsed = registry.parseParameters(serialization);
+    assertThat(parsed).isEqualTo(parameters);
+  }
+
+  @Test
   public void paramsWithInvalidOutputPrefixType_parsingFails() throws Exception {
     ProtoParametersSerialization serialization =
         ProtoParametersSerialization.create(
             "type.googleapis.com/google.crypto.tink.KmsAeadKey",
-            OutputPrefixType.TINK,
+            OutputPrefixType.LEGACY,
             com.google.crypto.tink.proto.KmsAeadKeyFormat.newBuilder()
                 .setKeyUri("someArbitrarykeyUri723")
                 .build());
@@ -113,6 +136,35 @@ public final class LegacyKmsAeadProtoSerializationTest {
   }
 
   @Test
+  public void serializeParseKeyWithTinkPrefix_works() throws Exception {
+    LegacyKmsAeadParameters parameters =
+        LegacyKmsAeadParameters.create(
+            "someArbitraryKeyUri443", LegacyKmsAeadParameters.Variant.TINK);
+    LegacyKmsAeadKey key = LegacyKmsAeadKey.create(parameters, /* idRequirement= */ 123);
+
+    ProtoKeySerialization serialization =
+        ProtoKeySerialization.create(
+            TYPE_URL,
+            com.google.crypto.tink.proto.KmsAeadKey.newBuilder()
+                .setParams(
+                    com.google.crypto.tink.proto.KmsAeadKeyFormat.newBuilder()
+                        .setKeyUri("someArbitraryKeyUri443"))
+                .build()
+                .toByteString(),
+            KeyMaterialType.REMOTE,
+            OutputPrefixType.TINK,
+            /* idRequirement= */ 123);
+
+    ProtoKeySerialization serialized =
+        registry.serializeKey(key, ProtoKeySerialization.class, null);
+    assertEqualWhenValueParsed(
+        com.google.crypto.tink.proto.KmsAeadKey.parser(), serialized, serialization);
+
+    Key parsed = registry.parseKey(serialization, null);
+    assertThat(parsed.equalsKey(key)).isTrue();
+  }
+
+  @Test
   public void parseKey_invalidVersion_throws() throws Exception {
     ProtoKeySerialization serialization =
         ProtoKeySerialization.create(
@@ -132,6 +184,27 @@ public final class LegacyKmsAeadProtoSerializationTest {
   }
 
   @Test
+  public void parseKeyIgnoresKeyMaterialType() throws Exception {
+    ProtoKeySerialization serialization =
+        ProtoKeySerialization.create(
+            TYPE_URL,
+            com.google.crypto.tink.proto.KmsAeadKey.newBuilder()
+                .setParams(
+                    com.google.crypto.tink.proto.KmsAeadKeyFormat.newBuilder()
+                        .setKeyUri("someArbitraryKeyUri443"))
+                .build()
+                .toByteString(),
+            KeyMaterialType.UNKNOWN_KEYMATERIAL,
+            OutputPrefixType.RAW,
+            null);
+    Key parsed = registry.parseKey(serialization, null);
+
+    LegacyKmsAeadKey expected = LegacyKmsAeadKey.create(
+        LegacyKmsAeadParameters.create("someArbitraryKeyUri443"));
+    assertThat(parsed.equalsKey(expected)).isTrue();
+  }
+
+  @Test
   public void parseKey_invalidOutputPrefixType_throws() throws Exception {
     ProtoKeySerialization serialization =
         ProtoKeySerialization.create(
@@ -143,7 +216,7 @@ public final class LegacyKmsAeadProtoSerializationTest {
                 .build()
                 .toByteString(),
             KeyMaterialType.REMOTE,
-            OutputPrefixType.TINK,
+            OutputPrefixType.LEGACY,
             1234);
 
     assertThrows(GeneralSecurityException.class, () -> registry.parseKey(serialization, null));

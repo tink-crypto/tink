@@ -16,29 +16,61 @@
 
 package com.google.crypto.tink.aead;
 
+import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.util.Objects;
 
 /** Describes the parameters of an {@link KmsAeadKey} */
 public final class LegacyKmsAeadParameters extends AeadParameters {
 
-  private final String keyUri;
+  /**
+   * Describes how the prefix is computed. There are two main possibilities: NO_PREFIX (empty
+   * prefix) and TINK (prefix the ciphertext with 0x01 followed by a 4-byte key id in big endian).
+   */
+  @Immutable
+  public static final class Variant {
+    public static final Variant TINK = new Variant("TINK");
+    public static final Variant NO_PREFIX = new Variant("NO_PREFIX");
 
-  private LegacyKmsAeadParameters(String keyUri) {
+    private final String name;
+
+    private Variant(String name) {
+      this.name = name;
+    }
+
+    @Override
+    public String toString() {
+      return name;
+    }
+  }
+
+  private final String keyUri;
+  private final Variant variant;
+
+  private LegacyKmsAeadParameters(String keyUri, Variant variant) {
     this.keyUri = keyUri;
+    this.variant = variant;
   }
 
   public static LegacyKmsAeadParameters create(String keyUri) throws GeneralSecurityException {
-    return new LegacyKmsAeadParameters(keyUri);
+    return new LegacyKmsAeadParameters(keyUri, Variant.NO_PREFIX);
+  }
+
+  public static LegacyKmsAeadParameters create(String keyUri, Variant variant) {
+    return new LegacyKmsAeadParameters(keyUri, variant);
   }
 
   public String keyUri() {
     return keyUri;
   }
 
+  public Variant variant() {
+    return variant;
+  }
+
   @Override
   public boolean hasIdRequirement() {
-    return false;
+    return variant != Variant.NO_PREFIX;
   }
 
   @Override
@@ -47,16 +79,16 @@ public final class LegacyKmsAeadParameters extends AeadParameters {
       return false;
     }
     LegacyKmsAeadParameters that = (LegacyKmsAeadParameters) o;
-    return that.keyUri.equals(keyUri);
+    return that.keyUri.equals(keyUri) && that.variant.equals(variant);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(LegacyKmsAeadParameters.class, keyUri);
+    return Objects.hash(LegacyKmsAeadParameters.class, keyUri, variant);
   }
 
   @Override
   public String toString() {
-    return "LegacyKmsAead Parameters (keyUri: " + keyUri + ")";
+    return "LegacyKmsAead Parameters (keyUri: " + keyUri + ", variant: " + variant + ")";
   }
 }

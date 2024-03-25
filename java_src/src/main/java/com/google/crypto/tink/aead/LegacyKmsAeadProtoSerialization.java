@@ -64,6 +64,30 @@ final class LegacyKmsAeadProtoSerialization {
       KeyParser.create(
           LegacyKmsAeadProtoSerialization::parseKey, TYPE_URL_BYTES, ProtoKeySerialization.class);
 
+  private static OutputPrefixType toProtoOutputPrefixType(LegacyKmsAeadParameters.Variant variant)
+      throws GeneralSecurityException {
+    if (LegacyKmsAeadParameters.Variant.TINK.equals(variant)) {
+      return OutputPrefixType.TINK;
+    }
+    if (LegacyKmsAeadParameters.Variant.NO_PREFIX.equals(variant)) {
+      return OutputPrefixType.RAW;
+    }
+    throw new GeneralSecurityException("Unable to serialize variant: " + variant);
+  }
+
+  private static LegacyKmsAeadParameters.Variant toVariant(OutputPrefixType outputPrefixType)
+      throws GeneralSecurityException {
+    switch (outputPrefixType) {
+      case TINK:
+        return LegacyKmsAeadParameters.Variant.TINK;
+      case RAW:
+        return LegacyKmsAeadParameters.Variant.NO_PREFIX;
+      default:
+        throw new GeneralSecurityException(
+            "Unable to parse OutputPrefixType: " + outputPrefixType.getNumber());
+    }
+  }
+
   private static ProtoParametersSerialization serializeParameters(
       LegacyKmsAeadParameters parameters) throws GeneralSecurityException {
     return ProtoParametersSerialization.create(
@@ -71,7 +95,7 @@ final class LegacyKmsAeadProtoSerialization {
             .setTypeUrl(TYPE_URL)
             .setValue(
                 KmsAeadKeyFormat.newBuilder().setKeyUri(parameters.keyUri()).build().toByteString())
-            .setOutputPrefixType(OutputPrefixType.RAW)
+            .setOutputPrefixType(toProtoOutputPrefixType(parameters.variant()))
             .build());
   }
 
@@ -90,14 +114,8 @@ final class LegacyKmsAeadProtoSerialization {
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("Parsing KmsAeadKeyFormat failed: ", e);
     }
-    if (serialization.getKeyTemplate().getOutputPrefixType() != OutputPrefixType.RAW) {
-      throw new GeneralSecurityException(
-          "Only key templates with RAW are accepted, but got "
-              + serialization.getKeyTemplate().getOutputPrefixType()
-              + " with format "
-              + format);
-    }
-    return LegacyKmsAeadParameters.create(format.getKeyUri());
+    return LegacyKmsAeadParameters.create(
+        format.getKeyUri(), toVariant(serialization.getKeyTemplate().getOutputPrefixType()));
   }
 
   private static ProtoKeySerialization serializeKey(
@@ -110,7 +128,7 @@ final class LegacyKmsAeadProtoSerialization {
             .build()
             .toByteString(),
         KeyMaterialType.REMOTE,
-        OutputPrefixType.RAW,
+        toProtoOutputPrefixType(key.getParameters().variant()),
         key.getIdRequirementOrNull());
   }
 
@@ -121,10 +139,6 @@ final class LegacyKmsAeadProtoSerialization {
       throw new IllegalArgumentException(
           "Wrong type URL in call to LegacyKmsAeadProtoSerialization.parseKey");
     }
-    if (serialization.getOutputPrefixType() != OutputPrefixType.RAW) {
-      throw new GeneralSecurityException(
-          "KmsAeadKey are only accepted with RAW, got " + serialization.getOutputPrefixType());
-    }
     try {
       com.google.crypto.tink.proto.KmsAeadKey protoKey =
           com.google.crypto.tink.proto.KmsAeadKey.parseFrom(
@@ -134,8 +148,9 @@ final class LegacyKmsAeadProtoSerialization {
             "KmsAeadKey are only accepted with version 0, got " + protoKey);
       }
       LegacyKmsAeadParameters parameters =
-          LegacyKmsAeadParameters.create(protoKey.getParams().getKeyUri());
-      return LegacyKmsAeadKey.create(parameters);
+          LegacyKmsAeadParameters.create(
+              protoKey.getParams().getKeyUri(), toVariant(serialization.getOutputPrefixType()));
+      return LegacyKmsAeadKey.create(parameters, serialization.getIdRequirementOrNull());
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("Parsing KmsAeadKey failed: ", e);
     }
