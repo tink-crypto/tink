@@ -199,7 +199,7 @@ util::StatusOr<RsaSsaPkcs1PublicKey> ParsePublicKey(
   }
 
   google::crypto::tink::RsaSsaPkcs1PublicKey proto_key;
-  RestrictedData restricted_data = serialization.SerializedKeyProto();
+  const RestrictedData& restricted_data = serialization.SerializedKeyProto();
   // OSS proto library complains if input is not converted to a string.
   if (!proto_key.ParseFromString(std::string(
           restricted_data.GetSecret(InsecureSecretKeyAccess::Get())))) {
@@ -237,7 +237,7 @@ util::StatusOr<RsaSsaPkcs1PrivateKey> ParsePrivateKey(
                         "SecretKeyAccess is required");
   }
   google::crypto::tink::RsaSsaPkcs1PrivateKey proto_key;
-  RestrictedData restricted_data = serialization.SerializedKeyProto();
+  const RestrictedData& restricted_data = serialization.SerializedKeyProto();
   // OSS proto library complains if input is not converted to a string.
   if (!proto_key.ParseFromString(
           std::string(restricted_data.GetSecret(*token)))) {
