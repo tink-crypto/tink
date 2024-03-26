@@ -22,7 +22,6 @@ import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.Parameters;
-import com.google.crypto.tink.TinkProtoParametersFormat;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.internal.KeyManagerRegistry;
 import com.google.crypto.tink.internal.LegacyKeyManagerImpl;
@@ -30,8 +29,6 @@ import com.google.crypto.tink.internal.MutableKeyCreationRegistry;
 import com.google.crypto.tink.internal.MutablePrimitiveRegistry;
 import com.google.crypto.tink.internal.PrimitiveConstructor;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import javax.annotation.Nullable;
 
@@ -79,18 +76,9 @@ public class KmsEnvelopeAeadKeyManager {
 
   @AccessesPartialKey
   private static Aead create(LegacyKmsEnvelopeAeadKey key) throws GeneralSecurityException {
-    byte[] serializedDekParameters =
-        TinkProtoParametersFormat.serialize(key.getParameters().getDekParametersForNewKeys());
-    com.google.crypto.tink.proto.KeyTemplate dekKeyTemplate;
-    try {
-      dekKeyTemplate =
-          com.google.crypto.tink.proto.KeyTemplate.parseFrom(
-              serializedDekParameters, ExtensionRegistryLite.getEmptyRegistry());
-    } catch (InvalidProtocolBufferException e) {
-      throw new GeneralSecurityException("Parsing of DEK key template failed: ", e);
-    }
     String kekUri = key.getParameters().getKekUri();
-    return new KmsEnvelopeAead(dekKeyTemplate, KmsClients.get(kekUri).getAead(kekUri));
+    return KmsEnvelopeAead.create(
+        key.getParameters().getDekParametersForNewKeys(), KmsClients.get(kekUri).getAead(kekUri));
   }
 
   private static final PrimitiveConstructor<LegacyKmsEnvelopeAeadKey, Aead>

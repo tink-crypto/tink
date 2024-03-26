@@ -249,7 +249,6 @@ java_library(
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:kms_clients",
         "//src/main/java/com/google/crypto/tink:parameters",
-        "//src/main/java/com/google/crypto/tink:tink_proto_parameters_format",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/internal:key_manager_registry",
         "//src/main/java/com/google/crypto/tink/internal:legacy_key_manager_impl",
@@ -257,7 +256,6 @@ java_library(
         "//src/main/java/com/google/crypto/tink/internal:mutable_primitive_registry",
         "//src/main/java/com/google/crypto/tink/internal:primitive_constructor",
         "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:com_google_protobuf_protobuf_java",
     ],
 )
 
@@ -682,7 +680,6 @@ android_library(
         "//src/main/java/com/google/crypto/tink:key_template-android",
         "//src/main/java/com/google/crypto/tink:kms_clients-android",
         "//src/main/java/com/google/crypto/tink:parameters-android",
-        "//src/main/java/com/google/crypto/tink:tink_proto_parameters_format-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
         "//src/main/java/com/google/crypto/tink/internal:key_manager_registry-android",
         "//src/main/java/com/google/crypto/tink/internal:legacy_key_manager_impl-android",
@@ -690,7 +687,6 @@ android_library(
         "//src/main/java/com/google/crypto/tink/internal:mutable_primitive_registry-android",
         "//src/main/java/com/google/crypto/tink/internal:primitive_constructor-android",
         "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:com_google_protobuf_protobuf_javalite",
     ],
 )
 
