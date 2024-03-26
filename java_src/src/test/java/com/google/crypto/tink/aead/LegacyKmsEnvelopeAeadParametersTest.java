@@ -83,11 +83,31 @@ public final class LegacyKmsEnvelopeAeadParametersTest {
                 LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_AES_GCM)
             .setDekParametersForNewKeys(AES_GCM_PARAMETERS)
             .build();
+    assertThat(parameters.getVariant())
+        .isEqualTo(LegacyKmsEnvelopeAeadParameters.Variant.NO_PREFIX);
     assertThat(parameters.getKekUri()).isEqualTo("SomeKekUri");
     assertThat(parameters.getDekParsingStrategy())
         .isEqualTo(LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_AES_GCM);
     assertThat(parameters.getDekParametersForNewKeys()).isEqualTo(AES_GCM_PARAMETERS);
     assertThat(parameters.hasIdRequirement()).isFalse();
+  }
+
+  @Test
+  public void createWithTinkPrefix_checkValues_works() throws Exception {
+    LegacyKmsEnvelopeAeadParameters parameters =
+        LegacyKmsEnvelopeAeadParameters.builder()
+            .setVariant(LegacyKmsEnvelopeAeadParameters.Variant.TINK)
+            .setKekUri("SomeKekUri")
+            .setDekParsingStrategy(
+                LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_AES_GCM)
+            .setDekParametersForNewKeys(AES_GCM_PARAMETERS)
+            .build();
+    assertThat(parameters.getVariant()).isEqualTo(LegacyKmsEnvelopeAeadParameters.Variant.TINK);
+    assertThat(parameters.getKekUri()).isEqualTo("SomeKekUri");
+    assertThat(parameters.getDekParsingStrategy())
+        .isEqualTo(LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_AES_GCM);
+    assertThat(parameters.getDekParametersForNewKeys()).isEqualTo(AES_GCM_PARAMETERS);
+    assertThat(parameters.hasIdRequirement()).isTrue();
   }
 
   @Test
@@ -99,6 +119,8 @@ public final class LegacyKmsEnvelopeAeadParametersTest {
                 LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_CHACHA20POLY1305)
             .setDekParametersForNewKeys(CHACHA20POLY1305_PARAMETERS)
             .build();
+    assertThat(parameters.getVariant())
+        .isEqualTo(LegacyKmsEnvelopeAeadParameters.Variant.NO_PREFIX);
     assertThat(parameters.getKekUri()).isEqualTo("SomeOtherKekUri");
     assertThat(parameters.getDekParsingStrategy())
         .isEqualTo(LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_CHACHA20POLY1305);
@@ -115,6 +137,8 @@ public final class LegacyKmsEnvelopeAeadParametersTest {
                 LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_XCHACHA20POLY1305)
             .setDekParametersForNewKeys(XCHACHA20POLY1305_PARAMETERS)
             .build();
+    assertThat(parameters.getVariant())
+        .isEqualTo(LegacyKmsEnvelopeAeadParameters.Variant.NO_PREFIX);
     assertThat(parameters.getKekUri()).isEqualTo("SomeOtherKekUri");
     assertThat(parameters.getDekParsingStrategy())
         .isEqualTo(LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_XCHACHA20POLY1305);
@@ -131,6 +155,8 @@ public final class LegacyKmsEnvelopeAeadParametersTest {
                 LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_AES_EAX)
             .setDekParametersForNewKeys(AES_EAX_PARAMETERS)
             .build();
+    assertThat(parameters.getVariant())
+        .isEqualTo(LegacyKmsEnvelopeAeadParameters.Variant.NO_PREFIX);
     assertThat(parameters.getKekUri()).isEqualTo("SomeOtherKekUri");
     assertThat(parameters.getDekParsingStrategy())
         .isEqualTo(LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_AES_EAX);
@@ -147,6 +173,8 @@ public final class LegacyKmsEnvelopeAeadParametersTest {
                 LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_AES_EAX)
             .setDekParametersForNewKeys(AES_EAX_PARAMETERS)
             .build();
+    assertThat(parameters.getVariant())
+        .isEqualTo(LegacyKmsEnvelopeAeadParameters.Variant.NO_PREFIX);
     assertThat(parameters.getKekUri()).isEqualTo("SomeOtherKekUri");
     assertThat(parameters.getDekParsingStrategy())
         .isEqualTo(LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_AES_EAX);

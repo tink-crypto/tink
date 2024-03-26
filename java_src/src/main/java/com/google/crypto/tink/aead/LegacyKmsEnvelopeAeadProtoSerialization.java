@@ -76,6 +76,30 @@ public final class LegacyKmsEnvelopeAeadProtoSerialization {
           TYPE_URL_BYTES,
           ProtoKeySerialization.class);
 
+  private static OutputPrefixType toProtoOutputPrefixType(
+      LegacyKmsEnvelopeAeadParameters.Variant variant) throws GeneralSecurityException {
+    if (LegacyKmsEnvelopeAeadParameters.Variant.TINK.equals(variant)) {
+      return OutputPrefixType.TINK;
+    }
+    if (LegacyKmsEnvelopeAeadParameters.Variant.NO_PREFIX.equals(variant)) {
+      return OutputPrefixType.RAW;
+    }
+    throw new GeneralSecurityException("Unable to serialize variant: " + variant);
+  }
+
+  private static LegacyKmsEnvelopeAeadParameters.Variant toVariant(
+      OutputPrefixType outputPrefixType) throws GeneralSecurityException {
+    switch (outputPrefixType) {
+      case TINK:
+        return LegacyKmsEnvelopeAeadParameters.Variant.TINK;
+      case RAW:
+        return LegacyKmsEnvelopeAeadParameters.Variant.NO_PREFIX;
+      default:
+        throw new GeneralSecurityException(
+            "Unable to parse OutputPrefixType: " + outputPrefixType.getNumber());
+    }
+  }
+
   @AccessesPartialKey
   private static ProtoParametersSerialization serializeParameters(
       LegacyKmsEnvelopeAeadParameters parameters) throws GeneralSecurityException {
@@ -83,7 +107,7 @@ public final class LegacyKmsEnvelopeAeadProtoSerialization {
         KeyTemplate.newBuilder()
             .setTypeUrl(TYPE_URL)
             .setValue(serializeParametersToKmsEnvelopeAeadKeyFormat(parameters).toByteString())
-            .setOutputPrefixType(OutputPrefixType.RAW)
+            .setOutputPrefixType(toProtoOutputPrefixType(parameters.getVariant()))
             .build());
   }
 
@@ -115,7 +139,7 @@ public final class LegacyKmsEnvelopeAeadProtoSerialization {
             .build()
             .toByteString(),
         KeyMaterialType.REMOTE,
-        OutputPrefixType.RAW,
+        toProtoOutputPrefixType(key.getParameters().getVariant()),
         key.getIdRequirementOrNull());
   }
 
@@ -135,11 +159,12 @@ public final class LegacyKmsEnvelopeAeadProtoSerialization {
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("Parsing KmsEnvelopeAeadKeyFormat failed: ", e);
     }
-    return parseParameters(format);
+    return parseParameters(format, serialization.getKeyTemplate().getOutputPrefixType());
   }
 
   @AccessesPartialKey
-  private static LegacyKmsEnvelopeAeadParameters parseParameters(KmsEnvelopeAeadKeyFormat format)
+  private static LegacyKmsEnvelopeAeadParameters parseParameters(
+      KmsEnvelopeAeadKeyFormat format, OutputPrefixType outputPrefixType)
       throws GeneralSecurityException {
     Parameters aeadParameters =
         TinkProtoParametersFormat.parse(
@@ -169,6 +194,7 @@ public final class LegacyKmsEnvelopeAeadProtoSerialization {
           "Unsupported DEK parameters when parsing " + aeadParameters);
     }
     return LegacyKmsEnvelopeAeadParameters.builder()
+        .setVariant(toVariant(outputPrefixType))
         .setKekUri(format.getKekUri())
         .setDekParametersForNewKeys((AeadParameters) aeadParameters)
         .setDekParsingStrategy(strategy)
@@ -187,17 +213,14 @@ public final class LegacyKmsEnvelopeAeadProtoSerialization {
       KmsEnvelopeAeadKey protoKey =
           KmsEnvelopeAeadKey.parseFrom(
               serialization.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-      if (serialization.getOutputPrefixType() != OutputPrefixType.RAW) {
-        throw new GeneralSecurityException(
-            "KmsEnvelopeAeadKeys are only accepted with OutputPrefixType RAW, got " + protoKey);
-      }
       if (protoKey.getVersion() != 0) {
         throw new GeneralSecurityException(
             "KmsEnvelopeAeadKeys are only accepted with version 0, got " + protoKey);
       }
 
-      LegacyKmsEnvelopeAeadParameters parameters = parseParameters(protoKey.getParams());
-      return LegacyKmsEnvelopeAeadKey.create(parameters);
+      LegacyKmsEnvelopeAeadParameters parameters =
+          parseParameters(protoKey.getParams(), serialization.getOutputPrefixType());
+      return LegacyKmsEnvelopeAeadKey.create(parameters, serialization.getIdRequirementOrNull());
     } catch (InvalidProtocolBufferException e) {
       throw new GeneralSecurityException("Parsing KmsEnvelopeAeadKey failed: ", e);
     }

@@ -316,6 +316,46 @@ public final class LegacyKmsEnvelopeAeadProtoSerializationTest {
   }
 
   @Test
+  public void serializeParseParameters_withTinkPrefix_works() throws Exception {
+    LegacyKmsEnvelopeAeadParameters parameters =
+        LegacyKmsEnvelopeAeadParameters.builder()
+            .setVariant(LegacyKmsEnvelopeAeadParameters.Variant.TINK)
+            .setKekUri("kekUri")
+            .setDekParsingStrategy(
+                LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_AES_GCM)
+            .setDekParametersForNewKeys(
+                AesGcmParameters.builder()
+                    .setIvSizeBytes(12)
+                    .setKeySizeBytes(16)
+                    .setTagSizeBytes(16)
+                    .setVariant(AesGcmParameters.Variant.NO_PREFIX)
+                    .build())
+            .build();
+
+    ProtoParametersSerialization serialization =
+        ProtoParametersSerialization.create(
+            TYPE_URL,
+            OutputPrefixType.TINK,
+            KmsEnvelopeAeadKeyFormat.newBuilder()
+                .setKekUri("kekUri")
+                .setDekTemplate(
+                    KeyTemplate.newBuilder()
+                        .setTypeUrl("type.googleapis.com/google.crypto.tink.AesGcmKey")
+                        .setValue(
+                            AesGcmKeyFormat.newBuilder().setKeySize(16).build().toByteString())
+                        .setOutputPrefixType(OutputPrefixType.RAW)
+                        .build())
+                .build());
+
+    ProtoParametersSerialization serialized =
+        registry.serializeParameters(parameters, ProtoParametersSerialization.class);
+    assertEqualWhenValueParsed(KmsEnvelopeAeadKeyFormat.parser(), serialized, serialization);
+
+    Parameters parsed = registry.parseParameters(serialization);
+    assertThat(parsed).isEqualTo(parameters);
+  }
+
+  @Test
   public void parseParameters_macTypeUrl_throws() throws Exception {
     ProtoParametersSerialization serialization =
         ProtoParametersSerialization.create(
@@ -348,7 +388,7 @@ public final class LegacyKmsEnvelopeAeadProtoSerializationTest {
    * RAW is used instead.
    */
   @Test
-  public void parseParameters_outputPrefixUnknown_isIgnored() throws Exception {
+  public void parseParameters_dekOutputPrefixUnknown_isIgnored() throws Exception {
     LegacyKmsEnvelopeAeadParameters parameters =
         LegacyKmsEnvelopeAeadParameters.builder()
             .setKekUri("someEaxOtherKeyUri")
@@ -379,7 +419,7 @@ public final class LegacyKmsEnvelopeAeadProtoSerializationTest {
    * RAW is used instead.
    */
   @Test
-  public void parseParameters_outputPrefixTink_isIgnored() throws Exception {
+  public void parseParameters_dekOutputPrefixTink_isIgnored() throws Exception {
     LegacyKmsEnvelopeAeadParameters parameters =
         LegacyKmsEnvelopeAeadParameters.builder()
             .setKekUri("someEaxOtherKeyUri")
@@ -406,7 +446,7 @@ public final class LegacyKmsEnvelopeAeadProtoSerializationTest {
   }
 
   @Test
-  public void serializeParseKey_aesGcm_works() throws Exception {
+  public void serializeParseKey_works() throws Exception {
     LegacyKmsEnvelopeAeadParameters parameters =
         LegacyKmsEnvelopeAeadParameters.builder()
             .setKekUri("someKeyUriForKeyTests")
@@ -442,6 +482,44 @@ public final class LegacyKmsEnvelopeAeadProtoSerializationTest {
   }
 
   @Test
+  public void serializeParseKeyWithTinkPrefix_works() throws Exception {
+    LegacyKmsEnvelopeAeadParameters parameters =
+        LegacyKmsEnvelopeAeadParameters.builder()
+            .setVariant(LegacyKmsEnvelopeAeadParameters.Variant.TINK)
+            .setKekUri("someKeyUriForKeyTests")
+            .setDekParsingStrategy(
+                LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_XCHACHA20POLY1305)
+            .setDekParametersForNewKeys(XChaCha20Poly1305Parameters.create())
+            .build();
+    LegacyKmsEnvelopeAeadKey key =
+        LegacyKmsEnvelopeAeadKey.create(parameters, /* idRequirement= */ 0x11223344);
+
+    KmsEnvelopeAeadKeyFormat format =
+        KmsEnvelopeAeadKeyFormat.newBuilder()
+            .setKekUri("someKeyUriForKeyTests")
+            .setDekTemplate(
+                KeyTemplate.newBuilder()
+                    .setTypeUrl("type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key")
+                    .setOutputPrefixType(OutputPrefixType.RAW))
+            .build();
+
+    ProtoKeySerialization serialization =
+        ProtoKeySerialization.create(
+            TYPE_URL,
+            KmsEnvelopeAeadKey.newBuilder().setParams(format).build().toByteString(),
+            KeyMaterialType.REMOTE,
+            OutputPrefixType.TINK,
+            /* idRequirement= */ 0x11223344);
+
+    ProtoKeySerialization serialized =
+        registry.serializeKey(key, ProtoKeySerialization.class, /* access= */ null);
+    assertEqualWhenValueParsed(KmsEnvelopeAeadKey.parser(), serialized, serialization);
+
+    Key parsed = registry.parseKey(serialization, /* access= */ null);
+    assertThat(parsed.equalsKey(key)).isTrue();
+  }
+
+  @Test
   public void parseKey_wrongVersion_throws() throws Exception {
     KmsEnvelopeAeadKeyFormat format =
         KmsEnvelopeAeadKeyFormat.newBuilder()
@@ -465,7 +543,7 @@ public final class LegacyKmsEnvelopeAeadProtoSerializationTest {
   }
 
   @Test
-  public void parseKey_notRaw_throws() throws Exception {
+  public void parseKey_invalidOutputPrefixType_throws() throws Exception {
     KmsEnvelopeAeadKeyFormat format =
         KmsEnvelopeAeadKeyFormat.newBuilder()
             .setKekUri("someKeyUriForKeyTests")
@@ -480,7 +558,7 @@ public final class LegacyKmsEnvelopeAeadProtoSerializationTest {
             TYPE_URL,
             KmsEnvelopeAeadKey.newBuilder().setParams(format).build().toByteString(),
             KeyMaterialType.REMOTE,
-            OutputPrefixType.TINK,
+            OutputPrefixType.LEGACY,
             /* idRequirement= */ 123);
 
     assertThrows(

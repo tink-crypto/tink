@@ -17,6 +17,7 @@
 package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.AccessesPartialKey;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.RestrictedApi;
 import java.security.GeneralSecurityException;
@@ -65,6 +66,27 @@ import javax.annotation.Nullable;
 public final class LegacyKmsEnvelopeAeadParameters extends AeadParameters {
 
   /**
+   * Describes how the prefix is computed. There are two main possibilities: NO_PREFIX (empty
+   * prefix) and TINK (prefix the ciphertext with 0x01 followed by a 4-byte key id in big endian.
+   */
+  @Immutable
+  public static final class Variant {
+    public static final Variant TINK = new Variant("TINK");
+    public static final Variant NO_PREFIX = new Variant("NO_PREFIX");
+
+    private final String name;
+
+    private Variant(String name) {
+      this.name = name;
+    }
+
+    @Override
+    public String toString() {
+      return name;
+    }
+  }
+
+  /**
    * Specifies how the DEK in received ciphertexts are parsed.
    *
    * <p>See section "Ciphertext format" above for a discussion of this.
@@ -107,14 +129,17 @@ public final class LegacyKmsEnvelopeAeadParameters extends AeadParameters {
     }
   }
 
+  private final Variant variant;
   private final String kekUri;
   private final DekParsingStrategy dekParsingStrategy;
   private final AeadParameters dekParametersForNewKeys;
 
   private LegacyKmsEnvelopeAeadParameters(
+      Variant variant,
       String kekUri,
       DekParsingStrategy dekParsingStrategy,
       AeadParameters dekParametersForNewKeys) {
+    this.variant = variant;
     this.kekUri = kekUri;
     this.dekParsingStrategy = dekParsingStrategy;
     this.dekParametersForNewKeys = dekParametersForNewKeys;
@@ -122,27 +147,37 @@ public final class LegacyKmsEnvelopeAeadParameters extends AeadParameters {
 
   /** Builder for {@link LegacyKmsEnvelopeAeadParameters}. */
   public static class Builder {
+    @Nullable private Variant variant;
     @Nullable private String kekUri;
     @Nullable private DekParsingStrategy dekParsingStrategy;
     @Nullable private AeadParameters dekParametersForNewKeys;
 
     private Builder() {}
 
+    @CanIgnoreReturnValue
+    public Builder setVariant(Variant variant) {
+      this.variant = variant;
+      return this;
+    }
+
     /**
      * Sets the URI of the KMS to be used.
      *
      * <p>The KMS will be used to encrypt the DEK key as an AEAD.
      */
+    @CanIgnoreReturnValue
     public Builder setKekUri(String kekUri) {
       this.kekUri = kekUri;
       return this;
     }
 
+    @CanIgnoreReturnValue
     public Builder setDekParsingStrategy(DekParsingStrategy dekParsingStrategy) {
       this.dekParsingStrategy = dekParsingStrategy;
       return this;
     }
 
+    @CanIgnoreReturnValue
     public Builder setDekParametersForNewKeys(AeadParameters aeadParameters) {
       this.dekParametersForNewKeys = aeadParameters;
       return this;
@@ -179,6 +214,10 @@ public final class LegacyKmsEnvelopeAeadParameters extends AeadParameters {
 
     /** Builds the LegacyKmsEnvelopeAeadParameters. */
     public LegacyKmsEnvelopeAeadParameters build() throws GeneralSecurityException {
+      if (variant == null) {
+        // Use NO_PREFIX as default prefix.
+        variant = Variant.NO_PREFIX;
+      }
       if (kekUri == null) {
         throw new GeneralSecurityException("kekUri must be set");
       }
@@ -189,8 +228,7 @@ public final class LegacyKmsEnvelopeAeadParameters extends AeadParameters {
         throw new GeneralSecurityException("dekParametersForNewKeys must be set");
       }
       if (dekParametersForNewKeys.hasIdRequirement()) {
-        throw new GeneralSecurityException(
-            "dekParametersForNewKeys must note have ID Requirements");
+        throw new GeneralSecurityException("dekParametersForNewKeys must not have ID Requirements");
       }
       if (!parsingStrategyAllowed(dekParsingStrategy, dekParametersForNewKeys)) {
         throw new GeneralSecurityException(
@@ -202,7 +240,7 @@ public final class LegacyKmsEnvelopeAeadParameters extends AeadParameters {
       }
 
       return new LegacyKmsEnvelopeAeadParameters(
-          kekUri, dekParsingStrategy, dekParametersForNewKeys);
+          variant, kekUri, dekParsingStrategy, dekParametersForNewKeys);
     }
   }
 
@@ -225,9 +263,13 @@ public final class LegacyKmsEnvelopeAeadParameters extends AeadParameters {
     return kekUri;
   }
 
+  public Variant getVariant() {
+    return variant;
+  }
+
   @Override
   public boolean hasIdRequirement() {
-    return false;
+    return variant != Variant.NO_PREFIX;
   }
 
   /**
@@ -252,13 +294,18 @@ public final class LegacyKmsEnvelopeAeadParameters extends AeadParameters {
     LegacyKmsEnvelopeAeadParameters that = (LegacyKmsEnvelopeAeadParameters) o;
     return that.dekParsingStrategy.equals(dekParsingStrategy)
         && that.dekParametersForNewKeys.equals(dekParametersForNewKeys)
-        && that.kekUri.equals(kekUri);
+        && that.kekUri.equals(kekUri)
+        && that.variant.equals(variant);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(
-        LegacyKmsEnvelopeAeadParameters.class, kekUri, dekParsingStrategy, dekParametersForNewKeys);
+        LegacyKmsEnvelopeAeadParameters.class,
+        kekUri,
+        dekParsingStrategy,
+        dekParametersForNewKeys,
+        variant);
   }
 
   @Override
@@ -271,6 +318,9 @@ public final class LegacyKmsEnvelopeAeadParameters extends AeadParameters {
         + ", "
         + "dekParametersForNewKeys: "
         + dekParametersForNewKeys
+        + ", "
+        + "variant: "
+        + variant
         + ")";
   }
 }

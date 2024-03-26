@@ -249,6 +249,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:kms_clients",
         "//src/main/java/com/google/crypto/tink:parameters",
+        "//src/main/java/com/google/crypto/tink/aead/internal:legacy_full_aead",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/internal:key_manager_registry",
         "//src/main/java/com/google/crypto/tink/internal:legacy_key_manager_impl",
@@ -680,6 +681,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink:key_template-android",
         "//src/main/java/com/google/crypto/tink:kms_clients-android",
         "//src/main/java/com/google/crypto/tink:parameters-android",
+        "//src/main/java/com/google/crypto/tink/aead/internal:legacy_full_aead-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
         "//src/main/java/com/google/crypto/tink/internal:key_manager_registry-android",
         "//src/main/java/com/google/crypto/tink/internal:legacy_key_manager_impl-android",
@@ -1125,7 +1127,9 @@ android_library(
         ":aead_key-android",
         ":legacy_kms_envelope_aead_parameters-android",
         "//src/main/java/com/google/crypto/tink:key-android",
+        "//src/main/java/com/google/crypto/tink/internal:output_prefix_util-android",
         "//src/main/java/com/google/crypto/tink/util:bytes-android",
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
 
@@ -1136,7 +1140,9 @@ java_library(
         ":aead_key",
         ":legacy_kms_envelope_aead_parameters",
         "//src/main/java/com/google/crypto/tink:key",
+        "//src/main/java/com/google/crypto/tink/internal:output_prefix_util",
         "//src/main/java/com/google/crypto/tink/util:bytes",
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
 

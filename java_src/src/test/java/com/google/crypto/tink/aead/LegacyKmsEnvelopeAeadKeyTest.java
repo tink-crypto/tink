@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.google.crypto.tink.util.Bytes;
 import com.google.crypto.tink.util.SecretBytes;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,6 +46,45 @@ public final class LegacyKmsEnvelopeAeadKeyTest {
     assertThat(key.getOutputPrefix().size()).isEqualTo(0);
     assertThat(key.getParameters()).isEqualTo(parameters);
     assertThat(key.getIdRequirementOrNull()).isNull();
+  }
+
+  @Test
+  public void createKeyWithNullIdRequirementAndGetProperties() throws Exception {
+    LegacyKmsEnvelopeAeadParameters parameters =
+        LegacyKmsEnvelopeAeadParameters.builder()
+            .setKekUri("SomeKekUri")
+            .setDekParsingStrategy(
+                LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_CHACHA20POLY1305)
+            .setDekParametersForNewKeys(CHACHA20POLY1305_PARAMETERS)
+            .build();
+
+    LegacyKmsEnvelopeAeadKey key =
+        LegacyKmsEnvelopeAeadKey.create(parameters, /* idRequirement= */ null);
+
+    assertThat(key.getOutputPrefix().size()).isEqualTo(0);
+    assertThat(key.getParameters()).isEqualTo(parameters);
+    assertThat(key.getIdRequirementOrNull()).isNull();
+  }
+
+  @Test
+  public void createKeyWithTinkOutptPrefixAndGetProperties() throws Exception {
+    LegacyKmsEnvelopeAeadParameters parameters =
+        LegacyKmsEnvelopeAeadParameters.builder()
+            .setVariant(LegacyKmsEnvelopeAeadParameters.Variant.TINK)
+            .setKekUri("SomeKekUri")
+            .setDekParsingStrategy(
+                LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_CHACHA20POLY1305)
+            .setDekParametersForNewKeys(CHACHA20POLY1305_PARAMETERS)
+            .build();
+
+    LegacyKmsEnvelopeAeadKey key = LegacyKmsEnvelopeAeadKey.create(parameters, 0xaabbccdd);
+
+    assertThat(key.getOutputPrefix())
+        .isEqualTo(
+            Bytes.copyFrom(
+                new byte[] {(byte) 0x01, (byte) 0xaa, (byte) 0xbb, (byte) 0xcc, (byte) 0xdd}));
+    assertThat(key.getParameters()).isEqualTo(parameters);
+    assertThat(key.getIdRequirementOrNull()).isEqualTo(0xaabbccdd);
   }
 
   @Test
@@ -77,6 +117,47 @@ public final class LegacyKmsEnvelopeAeadKeyTest {
 
     assertTrue(key1.equalsKey(key1Copy));
     assertFalse(key1.equalsKey(key2));
+  }
+
+  @Test
+  public void testTinkEqualKey() throws Exception {
+    LegacyKmsEnvelopeAeadParameters parametersTink =
+        LegacyKmsEnvelopeAeadParameters.builder()
+            .setVariant(LegacyKmsEnvelopeAeadParameters.Variant.TINK)
+            .setKekUri("kekUri")
+            .setDekParsingStrategy(
+                LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_CHACHA20POLY1305)
+            .setDekParametersForNewKeys(CHACHA20POLY1305_PARAMETERS)
+            .build();
+    LegacyKmsEnvelopeAeadParameters parametersTinkCopy =
+        LegacyKmsEnvelopeAeadParameters.builder()
+            .setVariant(LegacyKmsEnvelopeAeadParameters.Variant.TINK)
+            .setKekUri("kekUri")
+            .setDekParsingStrategy(
+                LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_CHACHA20POLY1305)
+            .setDekParametersForNewKeys(CHACHA20POLY1305_PARAMETERS)
+            .build();
+    LegacyKmsEnvelopeAeadParameters parametersNoPrefix =
+        LegacyKmsEnvelopeAeadParameters.builder()
+            .setVariant(LegacyKmsEnvelopeAeadParameters.Variant.NO_PREFIX)
+            .setKekUri("kekUri")
+            .setDekParsingStrategy(
+                LegacyKmsEnvelopeAeadParameters.DekParsingStrategy.ASSUME_CHACHA20POLY1305)
+            .setDekParametersForNewKeys(CHACHA20POLY1305_PARAMETERS)
+            .build();
+
+    LegacyKmsEnvelopeAeadKey keyTink =
+        LegacyKmsEnvelopeAeadKey.create(parametersTink, /* idRequirement= */ 123);
+    LegacyKmsEnvelopeAeadKey keyTinkCopy =
+        LegacyKmsEnvelopeAeadKey.create(parametersTinkCopy, /* idRequirement= */ 123);
+    LegacyKmsEnvelopeAeadKey keyTink2 =
+        LegacyKmsEnvelopeAeadKey.create(parametersTink, /* idRequirement= */ 234);
+    LegacyKmsEnvelopeAeadKey keyNoPrefix =
+        LegacyKmsEnvelopeAeadKey.create(parametersNoPrefix, /* idRequirement= */ null);
+
+    assertTrue(keyTink.equalsKey(keyTinkCopy));
+    assertFalse(keyTink.equalsKey(keyTink2));
+    assertFalse(keyTink.equalsKey(keyNoPrefix));
   }
 
   @Test
