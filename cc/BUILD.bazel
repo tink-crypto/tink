@@ -346,7 +346,6 @@ cc_library(
     deps = [
         ":keyset_writer",
         "//proto:tink_cc_proto",
-        "//util:errors",
         "//util:protobuf_helper",
         "//util:status",
         "//util:statusor",

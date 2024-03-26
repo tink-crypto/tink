@@ -325,7 +325,6 @@ tink_cc_library(
     absl::memory
     absl::status
     absl::strings
-    tink::util::errors
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
