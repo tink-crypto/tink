@@ -145,6 +145,9 @@ public final class LateRegistrationTest {
             GeneralSecurityException.class,
             () -> handle.getPrimitive(RegistryConfiguration.get(), JwtMac.class));
     assertThat(thrown).hasMessageThat().contains("registration_errors");
+    assertThat(thrown)
+        .hasMessageThat()
+        .contains("Unable to get primitive interface com.google.crypto.tink.jwt.JwtMac");
 
     // but this now works.
     KeysetHandle handle2 =
@@ -340,11 +343,18 @@ public final class LateRegistrationTest {
             GeneralSecurityException.class,
             () -> privateHandle.getPrimitive(RegistryConfiguration.get(), JwtPublicKeySign.class));
     assertThat(thrown).hasMessageThat().contains("registration_errors");
+    assertThat(thrown)
+        .hasMessageThat()
+        .contains("Unable to get primitive interface com.google.crypto.tink.jwt.JwtPublicKeySign");
     GeneralSecurityException thrown2 =
         assertThrows(
             GeneralSecurityException.class,
             () -> publicHandle.getPrimitive(RegistryConfiguration.get(), JwtPublicKeyVerify.class));
     assertThat(thrown2).hasMessageThat().contains("registration_errors");
+    assertThat(thrown2)
+        .hasMessageThat()
+        .contains(
+            "Unable to get primitive interface com.google.crypto.tink.jwt.JwtPublicKeyVerify");
 
     // But parsing and then calling getPrimitive works.
     KeysetHandle privateHandle2 =
