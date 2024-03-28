@@ -301,6 +301,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink:insecure_secret_key_access",
         "//src/main/java/com/google/crypto/tink:key_templates",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink:registry_configuration",
         "//src/main/java/com/google/crypto/tink:tink_json_proto_keyset_format",
         "//src/main/java/com/google/crypto/tink:tink_proto_keyset_format",
         "//src/main/java/com/google/crypto/tink/jwt:jwk_set_converter",

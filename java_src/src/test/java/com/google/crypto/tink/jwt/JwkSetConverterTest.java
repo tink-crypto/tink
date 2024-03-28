@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.RegistryConfiguration;
 import com.google.crypto.tink.TinkJsonProtoKeysetFormat;
 import com.google.crypto.tink.TinkProtoKeysetFormat;
 import com.google.crypto.tink.proto.KeyData;
@@ -41,11 +42,14 @@ import java.security.GeneralSecurityException;
 import java.util.HashSet;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Unit tests for JwkSetConverter */
-@RunWith(JUnit4.class)
+@RunWith(Theories.class)
 public final class JwkSetConverterTest {
 
   @Before
@@ -551,12 +555,10 @@ public final class JwkSetConverterTest {
     KeysetHandle expected =
         TinkJsonProtoKeysetFormat.parseKeyset(
             PS256_JWK_SET_KID_TINK, InsecureSecretKeyAccess.get());
-    System.out.println(
-        TinkJsonProtoKeysetFormat.serializeKeyset(converted, InsecureSecretKeyAccess.get()));
     // The KeyID is picked at random, hence we just compare the keys.
     assertTrue(converted.getAt(0).getKey().equalsKey(expected.getAt(0).getKey()));
   }
-  
+
   @Test
   public void jwkWithEmptyKid_kidIsPreserved() throws Exception {
     String esWithEmptyKid = ES256_JWK_SET_KID.replace("\"ENgjPA\"", "\"\"");
@@ -589,46 +591,49 @@ public final class JwkSetConverterTest {
     assertThat(ketsetInfo.getPrimaryKeyId()).isIn(keyIdSet);
   }
 
-  @Test
-  public void convertTinkToJwksTokenVerification_success() throws Exception {
+  @DataPoints("templatesNames")
+  public static final String[] TEMPLATE_NAMES =
+      new String[] {
+        "JWT_ES256",
+        "JWT_ES384",
+        "JWT_ES512",
+        "JWT_ES256_RAW",
+        "JWT_RS256_2048_F4",
+        "JWT_RS256_3072_F4",
+        "JWT_RS384_3072_F4",
+        "JWT_RS512_4096_F4",
+        "JWT_RS256_2048_F4_RAW",
+        "JWT_PS256_2048_F4",
+        "JWT_PS256_3072_F4",
+        "JWT_PS384_3072_F4",
+        "JWT_PS512_4096_F4",
+        "JWT_PS256_2048_F4_RAW",
+      };
+
+  @Theory
+  public void convertTinkToJwksTokenVerification_success(
+      @FromDataPoints("templatesNames") String templateName) throws Exception {
     if (TestUtil.isTsan()) {
       // KeysetHandle.generateNew is too slow in Tsan.
       return;
     }
-    // TODO(juerg): Use parametrized tests once b/26110951 is resolved.
-    String[] templateNames = new String[] {
-      "JWT_ES256",
-      "JWT_ES384",
-      "JWT_ES512",
-      "JWT_ES256_RAW",
-      "JWT_RS256_2048_F4",
-      "JWT_RS256_3072_F4",
-      "JWT_RS384_3072_F4",
-      "JWT_RS512_4096_F4",
-      "JWT_RS256_2048_F4_RAW",
-      "JWT_PS256_2048_F4",
-      "JWT_PS256_3072_F4",
-      "JWT_PS384_3072_F4",
-      "JWT_PS512_4096_F4",
-      "JWT_PS256_2048_F4_RAW",
-    };
-    for (String templateName : templateNames) {
-      KeysetHandle keysetHandle = KeysetHandle.generateNew(KeyTemplates.get(templateName));
+    KeysetHandle keysetHandle = KeysetHandle.generateNew(KeyTemplates.get(templateName));
 
-      String jwksString =
-          JwkSetConverter.fromPublicKeysetHandle(keysetHandle.getPublicKeysetHandle());
+    String jwksString =
+        JwkSetConverter.fromPublicKeysetHandle(keysetHandle.getPublicKeysetHandle());
 
-      KeysetHandle publicKeysetHandle = JwkSetConverter.toPublicKeysetHandle(jwksString);
+    KeysetHandle publicKeysetHandle = JwkSetConverter.toPublicKeysetHandle(jwksString);
 
-      JwtPublicKeySign signer = keysetHandle.getPrimitive(JwtPublicKeySign.class);
-      JwtPublicKeyVerify verifier = publicKeysetHandle.getPrimitive(JwtPublicKeyVerify.class);
+    JwtPublicKeySign signer =
+        keysetHandle.getPrimitive(RegistryConfiguration.get(), JwtPublicKeySign.class);
+    JwtPublicKeyVerify verifier =
+        publicKeysetHandle.getPrimitive(RegistryConfiguration.get(), JwtPublicKeyVerify.class);
 
-      RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
-      String signedCompact = signer.signAndEncode(rawToken);
-      JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
-      VerifiedJwt verifiedToken = verifier.verifyAndDecode(signedCompact, validator);
-      assertThat(verifiedToken.getJwtId()).isEqualTo("jwtId");
-    }
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
+    String signedCompact = signer.signAndEncode(rawToken);
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
+    VerifiedJwt verifiedToken = verifier.verifyAndDecode(signedCompact, validator);
+    assertThat(verifiedToken.getJwtId()).isEqualTo("jwtId");
   }
 
   @Test
