@@ -322,3 +322,14 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "HpkeUtilTest",
+    size = "small",
+    srcs = ["HpkeUtilTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

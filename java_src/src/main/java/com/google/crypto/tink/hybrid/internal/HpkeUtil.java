@@ -64,6 +64,14 @@ public final class HpkeUtil {
    * @param value that should be represented as a byte array
    */
   public static byte[] intToByteArray(int capacity, int value) {
+    if ((capacity > 4) || (capacity < 0)) {
+      throw new IllegalArgumentException("capacity must be between 0 and 4");
+    }
+    // Check that 0 <= value < 256^capacity.
+    // For capacity == 4, all positive values are valid.
+    if (value < 0 || (capacity < 4 && (value >= 1 << (8 * capacity)))) {
+      throw new IllegalArgumentException("value too large");
+    }
     final byte[] result = new byte[capacity];
     for (int i = 0; i < capacity; i++) {
       result[i] = (byte) ((value >> (8 * (capacity - i - 1))) & 0xFF);
