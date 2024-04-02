@@ -143,16 +143,6 @@ java_test(
 )
 
 java_test(
-    name = "EcdsaProtoTest",
-    size = "small",
-    srcs = ["EcdsaProtoTest.java"],
-    deps = [
-        "//proto:ecdsa_java_proto",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
     name = "CryptoFormatTest",
     size = "small",
     srcs = ["CryptoFormatTest.java"],
