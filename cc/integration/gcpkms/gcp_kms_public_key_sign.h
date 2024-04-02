@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_INTEGRATION_GCPKMS_GCP_KMS_SIGN_H_
-#define TINK_INTEGRATION_GCPKMS_GCP_KMS_SIGN_H_
+#ifndef TINK_INTEGRATION_GCPKMS_GCP_KMS_PUBLIC_KEY_SIGN_H_
+#define TINK_INTEGRATION_GCPKMS_GCP_KMS_PUBLIC_KEY_SIGN_H_
 
 #include <memory>
 
@@ -48,4 +48,4 @@ CreateGcpKmsPublicKeySign(
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_INTEGRATION_GCPKMS_GCP_KMS_SIGN_H_
+#endif  // TINK_INTEGRATION_GCPKMS_GCP_KMS_PUBLIC_KEY_SIGN_H_
