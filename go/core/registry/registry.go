@@ -11,8 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-////////////////////////////////////////////////////////////////////////////////
 
 // Package registry provides a container that for each supported key type holds
 // a corresponding KeyManager object, which can generate new keys or
