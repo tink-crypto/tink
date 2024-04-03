@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
@@ -135,14 +136,113 @@ public class BytesTest {
     ByteBuffer x = ByteBuffer.allocate(10);
     ByteBuffer y = ByteBuffer.allocate(10);
     for (int i = 0; i < 10; i++) {
-      x.put((byte) (i));
+      x.put((byte) i);
       y.put((byte) (i + 1));
     }
     x.flip();
     y.flip();
     Bytes.xor(output, x, y, 10);
     for (int i = 0; i < 10; i++) {
-      assertEquals(output.get(i), (i) ^ (i + 1));
+      assertEquals(output.get(i), i ^ (i + 1));
     }
+  }
+
+  @Test
+  public void intToByteArray_works() {
+    assertThat(Bytes.intToByteArray(0, 0)).isEqualTo(new byte[] {});
+    assertThat(Bytes.intToByteArray(1, 42)).isEqualTo(new byte[] {(byte) 42});
+    assertThat(Bytes.intToByteArray(2, 0x0102)).isEqualTo(new byte[] {(byte) 02, (byte) 0x01});
+
+    assertThat(Bytes.intToByteArray(1, 0xdd)).isEqualTo(new byte[] {(byte) 0xdd});
+    assertThat(Bytes.intToByteArray(2, 0xccdd)).isEqualTo(new byte[] {(byte) 0xdd, (byte) 0xcc});
+    assertThat(Bytes.intToByteArray(3, 0xbbccdd))
+        .isEqualTo(new byte[] {(byte) 0xdd, (byte) 0xcc, (byte) 0xbb});
+    assertThat(Bytes.intToByteArray(4, 0x0abbccdd))
+        .isEqualTo(new byte[] {(byte) 0xdd, (byte) 0xcc, (byte) 0xbb, (byte) 0x0a});
+    assertThat(Bytes.intToByteArray(4, Integer.MAX_VALUE))
+        .isEqualTo(new byte[] {(byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0x7f});
+  }
+
+  @Test
+  public void intToByteArray_failsWithInvalidCapacity() {
+    assertThrows(IllegalArgumentException.class, () -> Bytes.intToByteArray(5, 42));
+    assertThrows(IllegalArgumentException.class, () -> Bytes.intToByteArray(-1, 42));
+  }
+
+  @Test
+  public void intToByteArray_valueTooLong_fails() {
+    assertThrows(IllegalArgumentException.class, () -> Bytes.intToByteArray(0, 1));
+    assertThrows(IllegalArgumentException.class, () -> Bytes.intToByteArray(0, -1));
+    assertThrows(IllegalArgumentException.class, () -> Bytes.intToByteArray(1, 256));
+    assertThrows(IllegalArgumentException.class, () -> Bytes.intToByteArray(1, -1));
+    assertThrows(IllegalArgumentException.class, () -> Bytes.intToByteArray(2, 256 * 256));
+    assertThrows(IllegalArgumentException.class, () -> Bytes.intToByteArray(2, -1));
+    assertThrows(IllegalArgumentException.class, () -> Bytes.intToByteArray(3, 256 * 256 * 256));
+    assertThrows(IllegalArgumentException.class, () -> Bytes.intToByteArray(3, -1));
+    assertThrows(IllegalArgumentException.class, () -> Bytes.intToByteArray(4, -1));
+    assertThrows(IllegalArgumentException.class, () -> Bytes.intToByteArray(4, Integer.MIN_VALUE));
+  }
+
+  @Test
+  public void intToByteArrayToInt_works() {
+    assertThat(Bytes.byteArrayToInt(Bytes.intToByteArray(0, 0))).isEqualTo(0);
+    assertThat(Bytes.byteArrayToInt(Bytes.intToByteArray(1, 42))).isEqualTo(42);
+    assertThat(Bytes.byteArrayToInt(Bytes.intToByteArray(2, 0x0102))).isEqualTo(0x0102);
+    assertThat(Bytes.byteArrayToInt(Bytes.intToByteArray(4, 0x0abbccdd))).isEqualTo(0x0abbccdd);
+    assertThat(Bytes.byteArrayToInt(Bytes.intToByteArray(4, Integer.MAX_VALUE)))
+        .isEqualTo(Integer.MAX_VALUE);
+  }
+
+  @Test
+  public void byteArrayToInt_works() {
+    assertThat(Bytes.byteArrayToInt(new byte[] {})).isEqualTo(0);
+    assertThat(Bytes.byteArrayToInt(new byte[] {(byte) 1})).isEqualTo(1);
+    assertThat(Bytes.byteArrayToInt(new byte[] {(byte) 0x02, (byte) 0x01})).isEqualTo(0x0102);
+    assertThat(Bytes.byteArrayToInt(new byte[] {(byte) 0x02, (byte) 0x01}, /* length= */ 2))
+        .isEqualTo(0x0102);
+    assertThat(
+            Bytes.byteArrayToInt(
+                new byte[] {(byte) 0x02, (byte) 0x01}, /* offset= */ 0, /* length= */ 2))
+        .isEqualTo(0x0102);
+    assertThat(
+            Bytes.byteArrayToInt(
+                new byte[] {(byte) 0x02, (byte) 0x01}, /* offset= */ 1, /* length= */ 1))
+        .isEqualTo(0x01);
+    assertThat(Bytes.byteArrayToInt(new byte[] {(byte) 0x02, (byte) 0x01}, /* length= */ 1))
+        .isEqualTo(0x02);
+    assertThat(
+            Bytes.byteArrayToInt(
+                new byte[] {(byte) 0x05, (byte) 0x04, (byte) 0x03, (byte) 0x02, (byte) 0x01},
+                /* offset= */ 2,
+                /* length= */ 1))
+        .isEqualTo(3);
+  }
+
+  @Test
+  public void byteArrayToInt_failsWithInvalidLength() {
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            Bytes.byteArrayToInt(
+                new byte[] {(byte) 0x02, (byte) 0x01, (byte) 0x00, (byte) 0x00, (byte) 0x01}));
+    assertThrows(
+        IllegalArgumentException.class, () -> Bytes.byteArrayToInt(new byte[] {(byte) 0x01}, -1));
+  }
+
+  @Test
+  public void byteArrayToInt_outOfBounds_fails() {
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> Bytes.byteArrayToInt(new byte[] {(byte) 0x05, (byte) 0x04}, /* length= */ 3));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            Bytes.byteArrayToInt(
+                new byte[] {(byte) 0x05, (byte) 0x04}, /* offset= */ 1, /* length= */ 2));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            Bytes.byteArrayToInt(
+                new byte[] {(byte) 0x05, (byte) 0x04}, /* offset= */ -1, /* length= */ 1));
   }
 }

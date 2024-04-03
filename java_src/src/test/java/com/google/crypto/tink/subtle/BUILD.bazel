@@ -93,6 +93,7 @@ java_test(
     srcs = ["BytesTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
 )
