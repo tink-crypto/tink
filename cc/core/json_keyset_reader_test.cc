@@ -195,6 +195,15 @@ TEST_F(JsonKeysetReaderTest, testReadFromString) {
     EXPECT_FALSE(read_result.ok());
     EXPECT_EQ(absl::StatusCode::kInvalidArgument, read_result.status().code());
   }
+
+  {  // A valid JSON value, but not a JSON object.
+    auto reader_result = JsonKeysetReader::New("124");
+    EXPECT_TRUE(reader_result.ok()) << reader_result.status();
+    auto reader = std::move(reader_result.value());
+    auto read_result = reader->Read();
+    EXPECT_FALSE(read_result.ok());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument, read_result.status().code());
+  }
 }
 
 TEST_F(JsonKeysetReaderTest, testReadFromStream) {
