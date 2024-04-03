@@ -516,7 +516,6 @@ TEST_P(RsaSsaPssProtoSerializationTest, SerializePublicKeySucceeds) {
   EXPECT_THAT(proto_serialization->IdRequirement(), Eq(test_case.id));
 
   google::crypto::tink::RsaSsaPssPublicKey proto_key;
-  // OSS proto library complains if input is not converted to a string.
   ASSERT_THAT(proto_key.ParseFromString(
                   proto_serialization->SerializedKeyProto().GetSecret(
                       InsecureSecretKeyAccess::Get())),
@@ -776,7 +775,6 @@ TEST_P(RsaSsaPssProtoSerializationTest, SerializePrivateKeySucceeds) {
   EXPECT_THAT(proto_serialization->IdRequirement(), Eq(test_case.id));
 
   google::crypto::tink::RsaSsaPssPrivateKey proto_key;
-  // OSS proto library complains if input is not converted to a string.
   ASSERT_THAT(proto_key.ParseFromString(
                   proto_serialization->SerializedKeyProto().GetSecret(
                       InsecureSecretKeyAccess::Get())),
