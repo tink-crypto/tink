@@ -201,8 +201,8 @@ util::StatusOr<RsaSsaPkcs1PublicKey> ParsePublicKey(
   google::crypto::tink::RsaSsaPkcs1PublicKey proto_key;
   const RestrictedData& restricted_data = serialization.SerializedKeyProto();
   // OSS proto library complains if input is not converted to a string.
-  if (!proto_key.ParseFromString(std::string(
-          restricted_data.GetSecret(InsecureSecretKeyAccess::Get())))) {
+  if (!proto_key.ParseFromString(
+          restricted_data.GetSecret(InsecureSecretKeyAccess::Get()))) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Failed to parse RsaSsaPkcs1PublicKey proto");
   }
@@ -239,8 +239,7 @@ util::StatusOr<RsaSsaPkcs1PrivateKey> ParsePrivateKey(
   google::crypto::tink::RsaSsaPkcs1PrivateKey proto_key;
   const RestrictedData& restricted_data = serialization.SerializedKeyProto();
   // OSS proto library complains if input is not converted to a string.
-  if (!proto_key.ParseFromString(
-          std::string(restricted_data.GetSecret(*token)))) {
+  if (!proto_key.ParseFromString(restricted_data.GetSecret(*token))) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Failed to parse RsaSsaPkcs1PrivateKey proto");
   }
