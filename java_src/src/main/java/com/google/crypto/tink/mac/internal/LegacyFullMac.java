@@ -20,12 +20,12 @@ import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.internal.LegacyProtoKey;
+import com.google.crypto.tink.internal.OutputPrefixUtil;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.RegistryConfiguration;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Bytes;
-import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
@@ -60,16 +60,16 @@ public final class LegacyFullMac implements Mac {
     byte[] outputPrefix;
     switch (outputPrefixType) {
       case RAW:
-        outputPrefix = new byte[] {};
+        outputPrefix = OutputPrefixUtil.EMPTY_PREFIX.toByteArray();
         break;
       case LEGACY:
       case CRUNCHY:
         outputPrefix =
-            ByteBuffer.allocate(5).put((byte) 0).putInt(key.getIdRequirementOrNull()).array();
+            OutputPrefixUtil.getLegacyOutputPrefix(key.getIdRequirementOrNull()).toByteArray();
         break;
       case TINK:
         outputPrefix =
-            ByteBuffer.allocate(5).put((byte) 1).putInt(key.getIdRequirementOrNull()).array();
+            OutputPrefixUtil.getTinkOutputPrefix(key.getIdRequirementOrNull()).toByteArray();
         break;
       default:
         throw new GeneralSecurityException("unknown output prefix type");

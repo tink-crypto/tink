@@ -22,12 +22,12 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.internal.LegacyProtoKey;
+import com.google.crypto.tink.internal.OutputPrefixUtil;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.internal.RegistryConfiguration;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Bytes;
-import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
@@ -57,22 +57,16 @@ public class LegacyFullAead implements Aead {
     byte[] identifier;
     switch (outputPrefixType) {
       case RAW:
-        identifier = new byte[] {};
+        identifier = OutputPrefixUtil.EMPTY_PREFIX.toByteArray();
         break;
       case LEGACY:
       case CRUNCHY:
         identifier =
-            ByteBuffer.allocate(CryptoFormat.NON_RAW_PREFIX_SIZE)
-                .put((byte) 0)
-                .putInt(key.getIdRequirementOrNull())
-                .array();
+            OutputPrefixUtil.getLegacyOutputPrefix(key.getIdRequirementOrNull()).toByteArray();
         break;
       case TINK:
         identifier =
-            ByteBuffer.allocate(CryptoFormat.NON_RAW_PREFIX_SIZE)
-                .put((byte) 1)
-                .putInt(key.getIdRequirementOrNull())
-                .array();
+            OutputPrefixUtil.getTinkOutputPrefix(key.getIdRequirementOrNull()).toByteArray();
         break;
       default:
         throw new GeneralSecurityException("unknown output prefix type " + outputPrefixType);

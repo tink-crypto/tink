@@ -22,12 +22,12 @@ import com.google.crypto.tink.InsecureSecretKeyAccess;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.LegacyProtoKey;
+import com.google.crypto.tink.internal.OutputPrefixUtil;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.errorprone.annotations.Immutable;
-import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
@@ -58,11 +58,11 @@ public final class LegacyFullVerify implements PublicKeyVerify {
     switch (key.getOutputPrefixType()) {
       case LEGACY: // fall through
       case CRUNCHY:
-        return ByteBuffer.allocate(5).put((byte) 0).putInt(key.getIdRequirementOrNull()).array();
+        return OutputPrefixUtil.getLegacyOutputPrefix(key.getIdRequirementOrNull()).toByteArray();
       case TINK:
-        return ByteBuffer.allocate(5).put((byte) 1).putInt(key.getIdRequirementOrNull()).array();
+        return OutputPrefixUtil.getTinkOutputPrefix(key.getIdRequirementOrNull()).toByteArray();
       case RAW:
-        return new byte[0];
+        return OutputPrefixUtil.EMPTY_PREFIX.toByteArray();
       default:
         throw new GeneralSecurityException("unknown output prefix type");
     }
