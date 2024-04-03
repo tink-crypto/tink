@@ -227,7 +227,10 @@ java_test(
     deps = [
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:util",
+        "//src/main/java/com/google/crypto/tink/internal:slow_input_stream",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
 )
