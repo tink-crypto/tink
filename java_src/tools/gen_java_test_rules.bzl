@@ -13,7 +13,6 @@
 # limitations under the License.
 #
 ################################################################################
-
 """Generate Java test rules from given test_files.
 
 Instead of having to create one test rule per test in the BUILD file, this rule
@@ -21,6 +20,8 @@ provides a handy way to create a bunch of test rules for the specified test
 files.
 
 """
+
+load("//third_party/bazel_rules/rules_java/java:java_test.bzl", "java_test")
 
 def gen_java_test_rules(
         test_files,
@@ -70,7 +71,7 @@ def gen_java_test_rules(
         java_class = _package_from_path(
             native.package_name() + "/" + _strip_right(test, ".java"),
         )
-        native.java_test(
+        java_test(
             name = prefix + test,
             runtime_deps = deps,
             data = data,
