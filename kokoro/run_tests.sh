@@ -147,9 +147,10 @@ main() {
     # Install protoc.
     source ./kokoro/testutils/install_protoc.sh
 
+    # Sourcing required to update callers environment.
+    source ./kokoro/testutils/install_python3.sh
+
     if [[ "${PLATFORM}" == 'linux' ]]; then
-      # Sourcing required to update callers environment.
-      source ./kokoro/testutils/install_python3.sh
       ./kokoro/testutils/upgrade_gcc.sh
     fi
 
