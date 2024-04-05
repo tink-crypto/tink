@@ -39,7 +39,8 @@ install_python3() {
   python_version="${1:-${DEFAULT_PYTHON_VERSION}}"
   # Update the list of Python versions.
   (
-    cd /home/kbuilder/.pyenv/plugins/python-build/../..
+    # The macOS image exports a PYENV_ROOT env variable.
+    cd "${PYENV_ROOT:-"${HOME}/.pyenv"}"
     git pull
   )
   # Install Python.
