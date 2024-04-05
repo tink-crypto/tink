@@ -142,7 +142,7 @@ util::StatusOr<AesSivKey> ParseKey(
                         "SecretKeyAccess is required");
   }
   google::crypto::tink::AesSivKey proto_key;
-  RestrictedData restricted_data = serialization.SerializedKeyProto();
+  const RestrictedData& restricted_data = serialization.SerializedKeyProto();
   if (!proto_key.ParseFromString(restricted_data.GetSecret(*token))) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Failed to parse AesSivKey proto");

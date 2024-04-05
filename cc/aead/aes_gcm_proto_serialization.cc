@@ -172,7 +172,7 @@ util::StatusOr<AesGcmKey> ParseKey(
                         "SecretKeyAccess is required");
   }
   SecretProto<google::crypto::tink::AesGcmKey> proto_key;
-  RestrictedData restricted_data = serialization.SerializedKeyProto();
+  const RestrictedData& restricted_data = serialization.SerializedKeyProto();
   if (!proto_key->ParseFromString(restricted_data.GetSecret(*token))) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Failed to parse AesGcmKey proto");

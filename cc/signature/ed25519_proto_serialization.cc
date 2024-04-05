@@ -140,7 +140,7 @@ util::StatusOr<Ed25519PublicKey> ParsePublicKey(
   }
 
   google::crypto::tink::Ed25519PublicKey proto_key;
-  RestrictedData restricted_data = serialization.SerializedKeyProto();
+  const RestrictedData& restricted_data = serialization.SerializedKeyProto();
   if (!proto_key.ParseFromString(
           restricted_data.GetSecret(InsecureSecretKeyAccess::Get()))) {
     return util::Status(absl::StatusCode::kInvalidArgument,
@@ -180,7 +180,7 @@ util::StatusOr<Ed25519PrivateKey> ParsePrivateKey(
                         "SecretKeyAccess is required");
   }
   google::crypto::tink::Ed25519PrivateKey proto_key;
-  RestrictedData restricted_data = serialization.SerializedKeyProto();
+  const RestrictedData& restricted_data = serialization.SerializedKeyProto();
   if (!proto_key.ParseFromString(restricted_data.GetSecret(*token))) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Failed to parse Ed25519PrivateKey proto");
