@@ -151,11 +151,12 @@ def tink_cc_gcpkms_deps():
         )
 
     if not native.existing_rule("tink_cc"):
+        # Release from 2024-04-05.
         http_archive(
             name = "tink_cc",
-            sha256 = "3080600b6c38421ebaca5bfc460aa965afc88c877695c080019a8905f0f1c1b8",
-            strip_prefix = "tink-cc-2.1.1",
-            urls = ["https://github.com/tink-crypto/tink-cc/releases/download/v2.1.1/tink-cc-2.1.1.zip"],
+            sha256 = "d0fefc61e3bde758c8773f1348e6a64fc4fd6ecafe62c4adc0df8957ce800757",
+            strip_prefix = "tink-cc-2.1.2",
+            urls = ["https://github.com/tink-crypto/tink-cc/releases/download/v2.1.2/tink-cc-2.1.2.zip"],
         )
 
     if not native.existing_rule("com_googlesource_code_re2"):
