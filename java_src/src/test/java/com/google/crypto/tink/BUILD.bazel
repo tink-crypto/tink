@@ -427,6 +427,7 @@ java_test(
     size = "small",
     srcs = ["TinkProtoKeysetFormatTest.java"],
     deps = [
+        "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:aead",
         "//src/main/java/com/google/crypto/tink:binary_keyset_reader",
         "//src/main/java/com/google/crypto/tink:binary_keyset_writer",
@@ -441,6 +442,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/mac:mac_config",
         "//src/main/java/com/google/crypto/tink/signature:signature_config",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "@maven//:com_google_protobuf_protobuf_java",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],

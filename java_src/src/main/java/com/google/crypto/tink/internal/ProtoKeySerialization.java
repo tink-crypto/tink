@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.internal;
 
-import static com.google.crypto.tink.internal.Util.toBytesFromPrintableAscii;
+import static com.google.crypto.tink.internal.Util.checkedToBytesFromPrintableAscii;
 
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.OutputPrefixType;
@@ -43,12 +43,13 @@ public final class ProtoKeySerialization implements Serialization {
 
   private ProtoKeySerialization(
       String typeUrl,
+      Bytes objectIdentifier,
       ByteString value,
       KeyMaterialType keyMaterialType,
       OutputPrefixType outputPrefixType,
       @Nullable Integer idRequirement) {
     this.typeUrl = typeUrl;
-    this.objectIdentifier = toBytesFromPrintableAscii(typeUrl);
+    this.objectIdentifier = objectIdentifier;
     this.value = value;
     this.keyMaterialType = keyMaterialType;
     this.outputPrefixType = outputPrefixType;
@@ -73,8 +74,9 @@ public final class ProtoKeySerialization implements Serialization {
             "Keys with output prefix type different from raw should have an id requirement.");
       }
     }
+    Bytes objectIdentifier = checkedToBytesFromPrintableAscii(typeUrl);
     return new ProtoKeySerialization(
-        typeUrl, value, keyMaterialType, outputPrefixType, idRequirement);
+        typeUrl, objectIdentifier, value, keyMaterialType, outputPrefixType, idRequirement);
   }
 
   /** The contents of the field value in the message com.google.crypto.tink.proto.KeyData. */

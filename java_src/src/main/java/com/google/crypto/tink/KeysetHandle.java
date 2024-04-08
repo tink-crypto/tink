@@ -23,7 +23,6 @@ import com.google.crypto.tink.internal.MutableParametersRegistry;
 import com.google.crypto.tink.internal.MutableSerializationRegistry;
 import com.google.crypto.tink.internal.PrimitiveSet;
 import com.google.crypto.tink.internal.ProtoKeySerialization;
-import com.google.crypto.tink.internal.TinkBugException;
 import com.google.crypto.tink.monitoring.MonitoringAnnotations;
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyData;
@@ -1186,21 +1185,17 @@ public final class KeysetHandle {
     return true;
   }
 
-  private static ProtoKeySerialization toProtoKeySerialization(Keyset.Key protoKey) {
+  private static ProtoKeySerialization toProtoKeySerialization(Keyset.Key protoKey)
+      throws GeneralSecurityException {
     int id = protoKey.getKeyId();
     @Nullable
     Integer idRequirement = protoKey.getOutputPrefixType() == OutputPrefixType.RAW ? null : id;
-    try {
-      return ProtoKeySerialization.create(
-          protoKey.getKeyData().getTypeUrl(),
-          protoKey.getKeyData().getValue(),
-          protoKey.getKeyData().getKeyMaterialType(),
-          protoKey.getOutputPrefixType(),
-          idRequirement);
-    } catch (GeneralSecurityException e) {
-      // Cannot happen -- this only happens if the idRequirement doesn't match OutputPrefixType
-      throw new TinkBugException("Creating a protokey serialization failed", e);
-    }
+    return ProtoKeySerialization.create(
+        protoKey.getKeyData().getTypeUrl(),
+        protoKey.getKeyData().getValue(),
+        protoKey.getKeyData().getKeyMaterialType(),
+        protoKey.getOutputPrefixType(),
+        idRequirement);
   }
 
   private static Key toKey(Keyset.Key protoKey) throws GeneralSecurityException {

@@ -982,6 +982,34 @@ public class KeysetHandleTest {
     KeysetHandle handle = KeysetHandle.fromKeyset(TestUtil.createKeyset(key1));
 
     assertThrows(IllegalStateException.class, () -> handle.getAt(0));
+
+    // re-parse the KeysetHandle, as suggested in documentation of getAt.
+    assertThrows(GeneralSecurityException.class, () -> KeysetHandle.newBuilder(handle).build());
+  }
+
+  @Test
+  public void keysetWithNonAsciiTypeUrl_fromKeysetDoesNotThrowButGetAtThrows() throws Exception {
+    Keyset keyset =
+        Keyset.newBuilder()
+            .addKey(
+                Keyset.Key.newBuilder()
+                    .setKeyData(
+                        KeyData.newBuilder()
+                            .setValue(ByteString.copyFromUtf8("value"))
+                            .setTypeUrl("\t")
+                            .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
+                            .build())
+                    .setStatus(KeyStatusType.ENABLED)
+                    .setKeyId(123)
+                    .setOutputPrefixType(OutputPrefixType.TINK)
+                    .build())
+            .setPrimaryKeyId(123)
+            .build();
+    KeysetHandle handle = KeysetHandle.fromKeyset(keyset);
+    assertThrows(IllegalStateException.class, () -> handle.getAt(0));
+
+    // re-parse the KeysetHandle, as suggested in documentation of getAt.
+    assertThrows(GeneralSecurityException.class, () -> KeysetHandle.newBuilder(handle).build());
   }
 
   @Immutable
