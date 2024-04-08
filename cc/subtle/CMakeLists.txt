@@ -1540,13 +1540,15 @@ tink_cc_test(
     wycheproof::testvectors
   DEPS
     tink::subtle::common_enums
+    tink::subtle::random
     tink::subtle::stateful_hmac_boringssl
-    tink::subtle::wycheproof_util
     gmock
+    absl::log
     absl::memory
     absl::status
+    absl::string_view
+    tink::subtle::mac::stateful_mac
     tink::util::secret_data
-    tink::util::status
     tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
