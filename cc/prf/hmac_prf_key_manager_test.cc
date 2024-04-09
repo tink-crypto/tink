@@ -16,6 +16,7 @@
 
 #include "tink/prf/hmac_prf_key_manager.h"
 
+#include <memory>
 #include <sstream>
 
 #include "gmock/gmock.h"
@@ -38,6 +39,7 @@ namespace crypto {
 namespace tink {
 
 using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::IsOkAndHolds;
 using ::crypto::tink::test::StatusIs;
 using ::crypto::tink::util::IstreamInputStream;
 using ::crypto::tink::util::StatusOr;
@@ -177,6 +179,33 @@ TEST(HmacPrfKeyManagerTest, GetPrimitive) {
       direct_prf_or.value()->ComputeMac("some plaintext");
   ASSERT_THAT(direct_prf_value_or, IsOk());
   EXPECT_THAT(direct_prf_value_or.value(), StartsWith(prf_value_or.value()));
+}
+
+TEST(HmacPrfKeyManagerTest, GetPrimitiveAllHashTypes) {
+  for (HashType hash : {HashType::SHA1, HashType::SHA224, HashType::SHA256,
+                        HashType::SHA384, HashType::SHA512}) {
+    SCOPED_TRACE(absl::StrCat("HashType: " + HashType_Name(hash)));
+    HmacPrfKeyFormat key_format;
+    key_format.mutable_params()->set_hash(HashType::SHA256);
+    key_format.set_key_size(16);
+    HmacPrfKey key = HmacPrfKeyManager().CreateKey(key_format).value();
+    auto manager_mac_or = HmacPrfKeyManager().GetPrimitive<Prf>(key);
+    ASSERT_THAT(manager_mac_or, IsOk());
+    EXPECT_THAT(manager_mac_or.value()->Compute("some plaintext", 16),
+                IsOkAndHolds(SizeIs(16)));
+  }
+}
+
+TEST(HmacPrfKeyManagerTest, GetPrimitiveUnknownHash) {
+  HmacPrfKey key;
+  key.set_version(0);
+  key.mutable_params()->set_hash(HashType::UNKNOWN_HASH);
+  key.set_key_value("0123456789abcdef");
+  util::StatusOr<std::unique_ptr<Prf>> prf =
+      HmacPrfKeyManager().GetPrimitive<Prf>(key);
+  EXPECT_THAT(prf.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("Unknown hash when constructing HMAC PRF")));
 }
 
 }  // namespace

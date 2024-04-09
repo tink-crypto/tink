@@ -24,8 +24,10 @@
 #include <vector>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/core/template_util.h"
 #include "tink/input_stream.h"
@@ -57,10 +59,18 @@ class HmacPrfKeyManager
   class PrfFactory : public PrimitiveFactory<Prf> {
     crypto::tink::util::StatusOr<std::unique_ptr<Prf>> Create(
         const google::crypto::tink::HmacPrfKey& key) const override {
+      crypto::tink::subtle::HashType hash =
+          util::Enums::ProtoToSubtle(key.params().hash());
+      absl::optional<uint64_t> max_output_length = MaxOutputLength(hash);
+      if (!max_output_length.has_value()) {
+        return util::Status(
+            absl::StatusCode::kInvalidArgument,
+            absl::StrCat("Unknown hash when constructing HMAC PRF ",
+                         HashType_Name(key.params().hash())));
+      }
       return subtle::CreatePrfFromStatefulMacFactory(
           absl::make_unique<subtle::StatefulHmacBoringSslFactory>(
-              util::Enums::ProtoToSubtle(key.params().hash()),
-              MaxOutputLength(util::Enums::ProtoToSubtle(key.params().hash())),
+              hash, *max_output_length,
               util::SecretDataFromStringView(key.key_value())));
     }
   };
@@ -73,19 +83,6 @@ class HmacPrfKeyManager
   google::crypto::tink::KeyData::KeyMaterialType key_material_type()
       const override {
     return google::crypto::tink::KeyData::SYMMETRIC;
-  }
-
-  static uint64_t MaxOutputLength(subtle::HashType hash_type) {
-    static std::map<subtle::HashType, uint64_t>* max_output_length =
-        new std::map<subtle::HashType, uint64_t>(
-            {{subtle::HashType::SHA1, 20},
-             {subtle::HashType::SHA256, 32},
-             {subtle::HashType::SHA512, 64}});
-    auto length_it = max_output_length->find(hash_type);
-    if (length_it == max_output_length->end()) {
-      return 0;
-    }
-    return length_it->second;
   }
 
   const std::string& get_key_type() const override { return key_type_; }
@@ -108,6 +105,8 @@ class HmacPrfKeyManager
   }
 
  private:
+  static absl::optional<uint64_t> MaxOutputLength(subtle::HashType hash_type);
+
   util::Status ValidateParams(
       const google::crypto::tink::HmacPrfParams& params) const;
 

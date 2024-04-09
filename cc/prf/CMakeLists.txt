@@ -134,6 +134,7 @@ tink_cc_library(
     absl::memory
     absl::status
     absl::strings
+    absl::optional
     tink::core::key_type_manager
     tink::core::template_util
     tink::core::input_stream

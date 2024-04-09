@@ -15,10 +15,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/prf/hmac_prf_key_manager.h"
 
+#include <cstdint>
+#include <map>
 #include <set>
 #include <string>
 
 #include "absl/status/status.h"
+#include "absl/types/optional.h"
 #include "tink/input_stream.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/random.h"
@@ -105,6 +108,22 @@ Status HmacPrfKeyManager::ValidateParams(const HmacPrfParams& params) const {
                      Enums::HashName(params.hash()));
   }
   return util::OkStatus();
+}
+
+absl::optional<uint64_t> HmacPrfKeyManager::MaxOutputLength(
+    subtle::HashType hash_type) {
+  static std::map<subtle::HashType, uint64_t>* max_output_length =
+      new std::map<subtle::HashType, uint64_t>(
+          {{subtle::HashType::SHA1, 20},
+           {subtle::HashType::SHA224, 28},
+           {subtle::HashType::SHA256, 32},
+           {subtle::HashType::SHA384, 48},
+           {subtle::HashType::SHA512, 64}});
+  auto length_it = max_output_length->find(hash_type);
+  if (length_it == max_output_length->end()) {
+    return absl::nullopt;
+  }
+  return length_it->second;
 }
 
 }  // namespace tink
