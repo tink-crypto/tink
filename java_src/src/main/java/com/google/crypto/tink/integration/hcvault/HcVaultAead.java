@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  * A {@link Aead} that forwards encryption/decryption requests to a key in <a
  * href="https://www.vaultproject.io/">Hashicorp Vault</a>.
  */
-final class HcVaultAead implements Aead {
+public final class HcVaultAead implements Aead {
   private final String encPath;
   private final String decPath;
   private final Logical vaultApi;
