@@ -50,68 +50,6 @@ tink_cc_library(
     tink::util::statusor
 )
 
-# tests
-
-tink_cc_test(
-  NAME raw_jwt_test
-  SRCS
-    raw_jwt_test.cc
-  DEPS
-    tink::jwt::raw_jwt
-    gmock
-    absl::strings
-    absl::time
-    tink::util::statusor
-    tink::util::test_matchers
-    tink::util::test_util
-)
-
-tink_cc_test(
-  NAME verified_jwt_test
-  SRCS
-    verified_jwt_test.cc
-  DEPS
-    tink::jwt::jwt_mac
-    tink::jwt::jwt_validator
-    tink::jwt::raw_jwt
-    tink::jwt::verified_jwt
-    gmock
-    absl::memory
-    absl::status
-    absl::strings
-    absl::time
-    absl::optional
-    tink::core::mac
-    tink::jwt::internal::jwt_mac_impl
-    tink::jwt::internal::jwt_mac_internal
-    tink::subtle::hmac_boringssl
-    tink::util::constants
-    tink::util::enums
-    tink::util::errors
-    tink::util::protobuf_helper
-    tink::util::secret_data
-    tink::util::status
-    tink::util::statusor
-    tink::util::test_matchers
-    tink::util::test_util
-    tink::proto::common_cc_proto
-)
-
-tink_cc_test(
-  NAME jwt_validator_test
-  SRCS
-    jwt_validator_test.cc
-  DEPS
-    tink::jwt::jwt_validator
-    tink::jwt::raw_jwt
-    gmock
-    absl::strings
-    absl::time
-    tink::util::statusor
-    tink::util::test_matchers
-    tink::util::test_util
-)
-
 tink_cc_library(
   NAME jwt_mac
   SRCS
@@ -232,6 +170,86 @@ tink_cc_library(
     tink::proto::jwt_rsa_ssa_pkcs1_cc_proto
     tink::proto::jwt_rsa_ssa_pss_cc_proto
     tink::proto::tink_cc_proto
+)
+
+tink_cc_library(
+  NAME jwt_mac_parameters
+  SRCS
+    jwt_mac_parameters.h
+  DEPS
+    tink::core::parameters
+)
+
+tink_cc_library(
+  NAME jwt_mac_key
+  SRCS
+    jwt_mac_key.h
+  DEPS
+    tink::jwt::jwt_mac_parameters
+    absl::optional
+    tink::core::key
+)
+
+# tests
+
+tink_cc_test(
+  NAME raw_jwt_test
+  SRCS
+    raw_jwt_test.cc
+  DEPS
+    tink::jwt::raw_jwt
+    gmock
+    absl::strings
+    absl::time
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::util::test_util
+)
+
+tink_cc_test(
+  NAME verified_jwt_test
+  SRCS
+    verified_jwt_test.cc
+  DEPS
+    tink::jwt::jwt_mac
+    tink::jwt::jwt_validator
+    tink::jwt::raw_jwt
+    tink::jwt::verified_jwt
+    gmock
+    absl::memory
+    absl::status
+    absl::strings
+    absl::time
+    absl::optional
+    tink::core::mac
+    tink::jwt::internal::jwt_mac_impl
+    tink::jwt::internal::jwt_mac_internal
+    tink::subtle::hmac_boringssl
+    tink::util::constants
+    tink::util::enums
+    tink::util::errors
+    tink::util::protobuf_helper
+    tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::util::test_util
+    tink::proto::common_cc_proto
+)
+
+tink_cc_test(
+  NAME jwt_validator_test
+  SRCS
+    jwt_validator_test.cc
+  DEPS
+    tink::jwt::jwt_validator
+    tink::jwt::raw_jwt
+    gmock
+    absl::strings
+    absl::time
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::util::test_util
 )
 
 tink_cc_test(

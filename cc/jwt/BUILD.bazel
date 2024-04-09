@@ -192,6 +192,24 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "jwt_mac_parameters",
+    hdrs = ["jwt_mac_parameters.h"],
+    include_prefix = "tink/jwt",
+    deps = ["//:parameters"],
+)
+
+cc_library(
+    name = "jwt_mac_key",
+    hdrs = ["jwt_mac_key.h"],
+    include_prefix = "tink/jwt",
+    deps = [
+        ":jwt_mac_parameters",
+        "//:key",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
 # tests
 
 cc_test(
