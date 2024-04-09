@@ -98,7 +98,8 @@ ECDSA_P256 = _create_ecdsa_key_template(common_pb2.SHA256, common_pb2.NIST_P256,
 ECDSA_P256_RAW = _create_ecdsa_key_template(common_pb2.SHA256,
                                             common_pb2.NIST_P256,
                                             ecdsa_pb2.IEEE_P1363, tink_pb2.RAW)
-# TODO(b/140101381): This template is confusing and will be removed.
+# Don't use this template, because it's name is confusing.
+# Use ECDSA_P384_SHA512 instead, which is the same template.
 ECDSA_P384 = _create_ecdsa_key_template(common_pb2.SHA512, common_pb2.NIST_P384,
                                         ecdsa_pb2.DER)
 ECDSA_P384_SHA384 = _create_ecdsa_key_template(common_pb2.SHA384,
