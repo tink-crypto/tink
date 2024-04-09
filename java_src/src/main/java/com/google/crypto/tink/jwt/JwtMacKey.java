@@ -36,7 +36,7 @@ public abstract class JwtMacKey extends Key {
    * needs to match the return value of this function.
    *
    * <p>Note that {@code getParameters.allowKidAbsent()} specifies if omitting the {@code kid}
-   * header is allowed. Of course, if {@code getParameters.allowKidAbsent()} is true, then {@code
+   * header is allowed. Of course, if {@code getParameters.allowKidAbsent()} is false, then {@code
    * getKid} must not return an empty {@link Optional}.
    */
   public abstract Optional<String> getKid();
