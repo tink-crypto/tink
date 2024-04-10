@@ -20,14 +20,19 @@ import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 
 /**
- * The PRF interface is an abstraction for an element of a pseudo random function family, selected
- * by a key. It has the following properties:
+ * The Prf interface is an abstraction for an element of a pseudo random function family, selected
+ * by a key.
  *
- * <p>- It is deterministic: PRF.compute(input, length) will always return the same output if the
- * same key is used. PRF.compute(input, length1) will be a prefix of PRF.compute(input, length2) if
- * length1 < length2 and the same key is used. - It is indistinguishable from a random function:
- * Given the evaluation of n different inputs, an attacker cannot distinguish between the PRF and
- * random bytes on an input different from the n that are known.
+ * <p>It has the following properties:
+ *
+ * <ul>
+ *   <li>It is deterministic: {@link #compute(input, outputLength)} will always return the same
+ *       output if the same key is used. {@code compute(input, length1)} will be a prefix of {@code
+ *       compute(input, length2)} if {@code length1 < length2} and the same key is used.
+ *   <li>It is indistinguishable from a random function: Given the evaluation of n different inputs,
+ *       an attacker cannot distinguish between the PRF and random bytes on an input different from
+ *       the n that are known.
+ * </ul>
  *
  * <p>Use cases for PRF are deterministic redaction of PII, keyed hash functions, creating sub IDs
  * that do not allow joining with the original dataset without knowing the key. While PRFs can be
