@@ -1,17 +1,14 @@
 # Tink
 
-> **NOTE**: **Tink moved to github.com/tink-crypto and this repository will be archived**
+> **NOTE**: **Tink moved to github.com/tink-crypto and this repo is no longer
+> active!**
 >
 > As planned, we have split Tink into
 > [multiple GitHub repositories][split_repo_roadmap_url] that are hosted at
-> [github.com/tink-crypto](https://github.com/tink-crypto). This repository is
-> going to be archived by the end of Q1 2024 (March 31st, 2024).
+> [github.com/tink-crypto](https://github.com/tink-crypto). As a consequence, we
+> made this repository read-only and it is not going to be maintained moving
+> forward.
 >
-> All future releases will be made from repositories in
-> https://github.com/tink-crypto, which are independently versioned.
->
-> Please use our [mailing list][tink_mailing_list_url] if you have any questions
-> or concerns.
 
 *A multi-language, cross-platform library that provides cryptographic APIs that
 are secure, easy to use correctly, and hard(er) to misuse. See also:
