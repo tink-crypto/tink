@@ -24,7 +24,7 @@ import "proto/common.proto";
 
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
-option go_package = "github.com/tink-crypto/tink-go/v2/aes_gcm_hkdf_streaming_go_proto";
+option go_package = "github.com/tink-crypto/tink-go/v2/proto/aes_gcm_hkdf_streaming_go_proto";
 
 message AesGcmHkdfStreamingParams {
   uint32 ciphertext_segment_size = 1;

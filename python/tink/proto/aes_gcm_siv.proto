@@ -20,7 +20,7 @@ package google.crypto.tink;
 
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
-option go_package = "github.com/tink-crypto/tink-go/v2/aes_gcm_siv_go_proto";
+option go_package = "github.com/tink-crypto/tink-go/v2/proto/aes_gcm_siv_go_proto";
 
 // The only allowed IV size is 12 bytes and tag size is 16 bytes.
 // Thus, accept no params.
