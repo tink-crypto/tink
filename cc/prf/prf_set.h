@@ -29,7 +29,7 @@ namespace crypto {
 namespace tink {
 
 // The PRF interface is an abstraction for an element of a pseudo random
-// function family, selected by a key. It has the following property:
+// function family, selected by a key. It has the following properties:
 //   * It is deterministic. PRF.compute(input, length) will always return the
 //     same output if the same key is used. PRF.compute(input, length1) will be
 //     a prefix of PRF.compute(input, length2) if length1 < length2 and the same
