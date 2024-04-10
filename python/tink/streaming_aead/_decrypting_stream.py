@@ -131,5 +131,5 @@ class RawDecryptingStream(io.RawIOBase):
     """Return True if the stream can be read from."""
     return True
 
-  def write(self, b: bytes) -> int:
+  def write(self, b: bytes) -> int:  # pytype: disable=signature-mismatch
     raise io.UnsupportedOperation()
