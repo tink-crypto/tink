@@ -180,6 +180,7 @@ tink_cc_library(
     crypto
     tink::core::mac
     tink::internal::aes_util
+    tink::internal::call_with_core_dump_protection
     tink::internal::fips_utils
     tink::internal::ssl_unique_ptr
     tink::internal::util

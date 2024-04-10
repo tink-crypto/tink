@@ -28,6 +28,7 @@
 #include "openssl/cmac.h"
 #include "openssl/evp.h"
 #include "tink/internal/aes_util.h"
+#include "tink/internal/call_with_core_dump_protection.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
@@ -84,16 +85,21 @@ util::StatusOr<std::string> AesCmacBoringSsl::ComputeMac(
     return cipher.status();
   }
   size_t len = 0;
-  const uint8_t* key_ptr = reinterpret_cast<const uint8_t*>(&key_[0]);
   const uint8_t* data_ptr = reinterpret_cast<const uint8_t*>(data.data());
   uint8_t* result_ptr = reinterpret_cast<uint8_t*>(&result[0]);
-  if (CMAC_Init(context.get(), key_ptr, key_.size(), *cipher, nullptr) <= 0 ||
-      CMAC_Update(context.get(), data_ptr, data.size()) <= 0 ||
-      CMAC_Final(context.get(), result_ptr, &len) == 0) {
+  bool res = internal::CallWithCoreDumpProtection([&]() {
+    if (CMAC_Init(context.get(), key_.data(), key_.size(), *cipher, nullptr) <=
+            0 ||
+        CMAC_Update(context.get(), data_ptr, data.size()) <= 0 ||
+        CMAC_Final(context.get(), result_ptr, &len) == 0) {
+      return false;
+    }
+    result.resize(tag_size_);
+    return true;
+  });
+  if (!res) {
     return util::Status(absl::StatusCode::kInternal, "Failed to compute CMAC");
   }
-
-  result.resize(tag_size_);
   return result;
 }
 
@@ -104,13 +110,15 @@ util::Status AesCmacBoringSsl::VerifyMac(absl::string_view mac,
                      "Incorrect tag size: expected %d, found %d", tag_size_,
                      mac.size());
   }
-  util::StatusOr<std::string> computed_mac = ComputeMac(data);
-  if (!computed_mac.ok()) return computed_mac.status();
-  if (CRYPTO_memcmp(computed_mac->data(), mac.data(), tag_size_) != 0) {
-    return util::Status(absl::StatusCode::kInvalidArgument,
-                        "CMAC verification failed");
-  }
-  return util::OkStatus();
+  return internal::CallWithCoreDumpProtection([&]() {
+    util::StatusOr<std::string> computed_mac = ComputeMac(data);
+    if (!computed_mac.ok()) return computed_mac.status();
+    if (CRYPTO_memcmp(computed_mac->data(), mac.data(), tag_size_) != 0) {
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "CMAC verification failed");
+    }
+    return util::OkStatus();
+  });
 }
 
 }  // namespace subtle
