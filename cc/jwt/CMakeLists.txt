@@ -190,6 +190,20 @@ tink_cc_library(
     tink::core::key
 )
 
+tink_cc_library(
+  NAME jwt_hmac_parameters
+  SRCS
+    jwt_hmac_parameters.cc
+    jwt_hmac_parameters.h
+  DEPS
+    tink::jwt::jwt_mac_parameters
+    absl::status
+    absl::strings
+    tink::core::parameters
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -336,5 +350,17 @@ tink_cc_test(
     tink::core::registry
     tink::config::global_registry
     tink::internal::fips_utils
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME jwt_hmac_parameters_test
+  SRCS
+    jwt_hmac_parameters_test.cc
+  DEPS
+    tink::jwt::jwt_hmac_parameters
+    gmock
+    absl::status
+    tink::util::statusor
     tink::util::test_matchers
 )
