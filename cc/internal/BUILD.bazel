@@ -1297,6 +1297,25 @@ cc_test(
 )
 
 cc_library(
+    name = "safe_stringops",
+    hdrs = ["safe_stringops.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        ":call_with_core_dump_protection",
+        "@boringssl//:crypto",
+    ],
+)
+
+cc_test(
+    name = "safe_stringops_test",
+    srcs = ["safe_stringops_test.cc"],
+    deps = [
+        ":safe_stringops",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "bn_encoding_util",
     srcs = ["bn_encoding_util.cc"],
     hdrs = ["bn_encoding_util.h"],

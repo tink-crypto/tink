@@ -1244,6 +1244,24 @@ tink_cc_test(
 )
 
 tink_cc_library(
+  NAME safe_stringops
+  SRCS
+    safe_stringops.h
+  DEPS
+    crypto
+    tink::internal::call_with_core_dump_protection
+)
+
+tink_cc_test(
+  NAME safe_stringops_test
+  SRCS
+    safe_stringops_test.cc
+  DEPS
+    tink::internal::safe_stringops
+    gmock
+)
+
+tink_cc_library(
   NAME bn_encoding_util
   SRCS
     bn_encoding_util.cc
