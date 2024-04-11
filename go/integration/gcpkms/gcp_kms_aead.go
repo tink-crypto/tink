@@ -59,7 +59,6 @@ func (a *gcpAEAD) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	// TODO(b/330729827): Add unit tests to check that when the response does not pass integrity verification, the appropriate error is returned.
 	if !resp.VerifiedPlaintextCrc32c {
 		return nil, fmt.Errorf("KMS request for %q is missing the checksum field plaintext_crc32c, and other information may be missing from the response. Please retry a limited number of times in case the error is transient", a.keyName)
 	}
@@ -100,7 +99,6 @@ func (a *gcpAEAD) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	// TODO(b/330729827): Add unit tests to check that when the response does not pass integrity verification, the appropriate error is returned.
 	if resp.PlaintextCrc32c != computeChecksum(plaintext) {
 		return nil, fmt.Errorf("KMS response corrupted in transit for %q: the checksum in field plaintext_crc32c did not match the data in field plaintext. Please retry in case this is a transient error", a.keyName)
 	}
