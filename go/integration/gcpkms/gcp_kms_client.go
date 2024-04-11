@@ -77,6 +77,6 @@ func (c *gcpClient) GetAEAD(keyURI string) (tink.AEAD, error) {
 		return nil, errors.New("unsupported keyURI")
 	}
 
-	uri := strings.TrimPrefix(keyURI, gcpPrefix)
-	return newGCPAEAD(uri, c.kms), nil
+	keyName := strings.TrimPrefix(keyURI, gcpPrefix)
+	return newGCPAEAD(keyName, c.kms), nil
 }

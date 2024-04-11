@@ -16,6 +16,8 @@ package gcpkms
 
 import (
 	"encoding/base64"
+	"fmt"
+	"hash/crc32"
 
 	"google.golang.org/api/cloudkms/v1"
 
@@ -24,45 +26,92 @@ import (
 
 // gcpAEAD represents a GCP KMS service to a particular URI.
 type gcpAEAD struct {
-	keyURI string
-	kms    cloudkms.Service
+	keyName string
+	kms     cloudkms.Service
 }
 
 var _ tink.AEAD = (*gcpAEAD)(nil)
 
 // newGCPAEAD returns a new GCP KMS service.
-func newGCPAEAD(keyURI string, kms *cloudkms.Service) tink.AEAD {
+func newGCPAEAD(keyName string, kms *cloudkms.Service) tink.AEAD {
 	return &gcpAEAD{
-		keyURI: keyURI,
-		kms:    *kms,
+		keyName: keyName,
+		kms:     *kms,
 	}
 }
 
-// Encrypt encrypts the plaintext with associatedData.
+// Encrypt calls GCP KMS to encrypt the plaintext with associatedData and returns the resulting ciphertext.
+// It returns an error if the call to KMS fails or if the response returned by KMS does not pass integrity verification
+// (http://cloud.google.com/kms/docs/data-integrity-guidelines#calculating_and_verifying_checksums).
 func (a *gcpAEAD) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
 
 	req := &cloudkms.EncryptRequest{
-		Plaintext:                   base64.URLEncoding.EncodeToString(plaintext),
-		AdditionalAuthenticatedData: base64.URLEncoding.EncodeToString(associatedData),
+		Plaintext:                         base64.URLEncoding.EncodeToString(plaintext),
+		PlaintextCrc32c:                   computeChecksum(plaintext),
+		AdditionalAuthenticatedData:       base64.URLEncoding.EncodeToString(associatedData),
+		AdditionalAuthenticatedDataCrc32c: computeChecksum(associatedData),
+		// Send the integrity verification fields even if their value is 0.
+		ForceSendFields: []string{"PlaintextCrc32c", "AdditionalAuthenticatedDataCrc32c"},
 	}
-	resp, err := a.kms.Projects.Locations.KeyRings.CryptoKeys.Encrypt(a.keyURI, req).Do()
+
+	resp, err := a.kms.Projects.Locations.KeyRings.CryptoKeys.Encrypt(a.keyName, req).Do()
 	if err != nil {
 		return nil, err
 	}
 
-	return base64.StdEncoding.DecodeString(resp.Ciphertext)
+	// TODO(b/330729827): Add unit tests to check that when the response does not pass integrity verification, the appropriate error is returned.
+	if !resp.VerifiedPlaintextCrc32c {
+		return nil, fmt.Errorf("KMS request for %q is missing the checksum field plaintext_crc32c, and other information may be missing from the response. Please retry a limited number of times in case the error is transient", a.keyName)
+	}
+	if !resp.VerifiedAdditionalAuthenticatedDataCrc32c {
+		return nil, fmt.Errorf("KMS request for %q is missing the checksum field additional_authenticated_data_crc32c, and other information may be missing from the response. Please retry a limited number of times in case the error is transient", a.keyName)
+	}
+	ciphertext, err := base64.StdEncoding.DecodeString(resp.Ciphertext)
+	if err != nil {
+		return nil, err
+	}
+	if resp.CiphertextCrc32c != computeChecksum(ciphertext) {
+		return nil, fmt.Errorf("KMS response corrupted in transit for %q: the checksum in field ciphertext_crc32c did not match the data in field ciphertext. Please retry in case this is a transient error", a.keyName)
+	}
+
+	return ciphertext, nil
 }
 
-// Decrypt decrypts ciphertext with with associatedData.
+// Decrypt calls GCP KMS to decrypt the ciphertext with with associatedData and returns the resulting plaintext.
+// It returns an error if the call to KMS fails or if the response returned by KMS does not pass integrity verification
+// (http://cloud.google.com/kms/docs/data-integrity-guidelines#calculating_and_verifying_checksums).
 func (a *gcpAEAD) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
 
 	req := &cloudkms.DecryptRequest{
-		Ciphertext:                  base64.URLEncoding.EncodeToString(ciphertext),
-		AdditionalAuthenticatedData: base64.URLEncoding.EncodeToString(associatedData),
+		Ciphertext:                        base64.URLEncoding.EncodeToString(ciphertext),
+		CiphertextCrc32c:                  computeChecksum(ciphertext),
+		AdditionalAuthenticatedData:       base64.URLEncoding.EncodeToString(associatedData),
+		AdditionalAuthenticatedDataCrc32c: computeChecksum(associatedData),
+		// Send the integrity verification fields even if their value is 0.
+		ForceSendFields: []string{"CiphertextCrc32c", "AdditionalAuthenticatedDataCrc32c"},
 	}
-	resp, err := a.kms.Projects.Locations.KeyRings.CryptoKeys.Decrypt(a.keyURI, req).Do()
+
+	resp, err := a.kms.Projects.Locations.KeyRings.CryptoKeys.Decrypt(a.keyName, req).Do()
 	if err != nil {
 		return nil, err
 	}
-	return base64.StdEncoding.DecodeString(resp.Plaintext)
+
+	plaintext, err := base64.StdEncoding.DecodeString(resp.Plaintext)
+	if err != nil {
+		return nil, err
+	}
+	// TODO(b/330729827): Add unit tests to check that when the response does not pass integrity verification, the appropriate error is returned.
+	if resp.PlaintextCrc32c != computeChecksum(plaintext) {
+		return nil, fmt.Errorf("KMS response corrupted in transit for %q: the checksum in field plaintext_crc32c did not match the data in field plaintext. Please retry in case this is a transient error", a.keyName)
+	}
+	return plaintext, nil
+}
+
+// crc32cTable is used to compute checksums. It is defined as a package level variable to avoid
+// re-computation on every CRC calculation.
+var crc32cTable = crc32.MakeTable(crc32.Castagnoli)
+
+// computeChecksum returns the checksum that corresponds to the input value as an int64.
+func computeChecksum(value []byte) int64 {
+	return int64(crc32.Checksum(value, crc32cTable))
 }
