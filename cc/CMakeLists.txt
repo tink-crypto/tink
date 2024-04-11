@@ -343,8 +343,6 @@ tink_cc_library(
     absl::strings
     rapidjson
     tink::util::enums
-    tink::util::errors
-    tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
@@ -847,9 +845,11 @@ tink_cc_test(
     core/json_keyset_reader_test.cc
   DEPS
     tink::core::json_keyset_reader
+    tink::core::keyset_reader
     gmock
     absl::status
     absl::strings
+    tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::aes_eax_cc_proto
