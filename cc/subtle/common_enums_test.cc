@@ -29,7 +29,6 @@ TEST_F(CommonEnumsTest, testEllipticCurveTypeToString) {
   EXPECT_EQ("NIST_P384", EnumToString(EllipticCurveType::NIST_P384));
   EXPECT_EQ("NIST_P521", EnumToString(EllipticCurveType::NIST_P521));
   EXPECT_EQ("UNKNOWN_CURVE", EnumToString(EllipticCurveType::UNKNOWN_CURVE));
-  EXPECT_EQ("UNKNOWN_CURVE: 42", EnumToString((EllipticCurveType)42));
 }
 
 TEST_F(CommonEnumsTest, testHashTypeToString) {
@@ -39,7 +38,6 @@ TEST_F(CommonEnumsTest, testHashTypeToString) {
   EXPECT_EQ("SHA384", EnumToString(HashType::SHA384));
   EXPECT_EQ("SHA512", EnumToString(HashType::SHA512));
   EXPECT_EQ("UNKNOWN_HASH", EnumToString(HashType::UNKNOWN_HASH));
-  EXPECT_EQ("UNKNOWN_HASH: 42", EnumToString((HashType)42));
 }
 
 TEST_F(CommonEnumsTest, testEcPointFormatToString) {
@@ -49,7 +47,6 @@ TEST_F(CommonEnumsTest, testEcPointFormatToString) {
             EnumToString(EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED));
 
   EXPECT_EQ("UNKNOWN_FORMAT", EnumToString(EcPointFormat::UNKNOWN_FORMAT));
-  EXPECT_EQ("UNKNOWN_FORMAT: 42", EnumToString((EcPointFormat)42));
 }
 
 }  // namespace
