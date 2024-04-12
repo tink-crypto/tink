@@ -204,6 +204,26 @@ tink_cc_library(
     tink::util::statusor
 )
 
+tink_cc_library(
+  NAME jwt_hmac_key
+  SRCS
+    jwt_hmac_key.cc
+    jwt_hmac_key.h
+  DEPS
+    tink::jwt::jwt_hmac_parameters
+    tink::jwt::jwt_mac_key
+    absl::endian
+    absl::status
+    absl::strings
+    absl::string_view
+    absl::optional
+    tink::core::key
+    tink::core::partial_key_access_token
+    tink::core::restricted_data
+    tink::util::status
+    tink::util::statusor
+)
+
 # tests
 
 tink_cc_test(
@@ -361,6 +381,22 @@ tink_cc_test(
     tink::jwt::jwt_hmac_parameters
     gmock
     absl::status
+    tink::util::statusor
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME jwt_hmac_key_test
+  SRCS
+    jwt_hmac_key_test.cc
+  DEPS
+    tink::jwt::jwt_hmac_key
+    tink::jwt::jwt_hmac_parameters
+    gmock
+    absl::status
+    absl::optional
+    tink::core::partial_key_access
+    tink::core::restricted_data
     tink::util::statusor
     tink::util::test_matchers
 )
