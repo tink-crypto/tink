@@ -14,6 +14,8 @@
 
 """ Definition of java_single_jar. """
 
+load("@rules_java//java:defs.bzl", "JavaInfo")
+
 def _check_non_empty(value, name):
     if not value:
         fail("%s must be non-empty" % name)

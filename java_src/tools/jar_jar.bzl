@@ -14,6 +14,8 @@
 """starlark rules for jarjar. See https://github.com/pantsbuild/jarjar
 """
 
+load("@rules_java//java:defs.bzl", "JavaInfo")
+
 def _jar_jar_impl(ctx):
     ctx.actions.run(
         inputs = [ctx.file.rules, ctx.file.input_jar],

@@ -30,6 +30,8 @@ Arguments:
   external_javadoc_links: a list of URLs that are passed to Javadoc's `-linkoffline` flag
 """
 
+load("@rules_java//java:defs.bzl", "JavaInfo", "java_common")
+
 def _check_non_empty(value, name):
     if not value:
         fail("%s must be non-empty" % name)

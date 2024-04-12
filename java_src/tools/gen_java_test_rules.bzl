@@ -21,7 +21,7 @@ files.
 
 """
 
-load("//third_party/bazel_rules/rules_java/java:java_test.bzl", "java_test")
+load("@rules_java//java:defs.bzl", "java_test")
 
 def gen_java_test_rules(
         test_files,
