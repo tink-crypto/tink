@@ -53,7 +53,6 @@ using ::crypto::tink::test::StatusIs;
 using ::testing::Eq;
 using ::testing::HasSubstr;
 using ::testing::SizeIs;
-using ::testing::StrEq;
 
 struct TestVector {
   TestVector(std::string test_name, std::string hex_key, HashType hash_type,
