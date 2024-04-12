@@ -617,6 +617,45 @@ TEST_F(KeysetHandleBuilderTest, CreateBuilderEntryFromKey) {
   ASSERT_THAT(handle.status(), IsOk());
 }
 
+TEST_F(KeysetHandleBuilderTest,
+       MergeTwoKeysetsWithTheSameIdButNoIdRequirementWorks) {
+  util::StatusOr<AesCmacParameters> params = AesCmacParameters::Create(
+      /*key_size_in_bytes=*/32, /*cryptographic_tag_size_in_bytes=*/16,
+      AesCmacParameters::Variant::kNoPrefix);
+  ASSERT_THAT(params, IsOk());
+
+  KeysetHandleBuilder::Entry entry1 =
+      KeysetHandleBuilder::Entry::CreateFromParams(
+          absl::make_unique<AesCmacParameters>(std::move(*params)),
+          KeyStatus::kEnabled, /*is_primary=*/true);
+  entry1.SetFixedId(123);
+  util::StatusOr<KeysetHandle> handle1 =
+      KeysetHandleBuilder().AddEntry(std::move(entry1)).Build();
+  ASSERT_THAT(handle1.status(), IsOk());
+
+  KeysetHandleBuilder::Entry entry2 =
+      KeysetHandleBuilder::Entry::CreateFromParams(
+          absl::make_unique<AesCmacParameters>(std::move(*params)),
+          KeyStatus::kEnabled, /*is_primary=*/true);
+  entry2.SetFixedId(123);
+  util::StatusOr<KeysetHandle> handle2 =
+      KeysetHandleBuilder().AddEntry(std::move(entry2)).Build();
+  ASSERT_THAT(handle2.status(), IsOk());
+
+  // handle1 and handle2 each contain one key with the same ID, but no ID
+  // requirement. We can add them to a new keyset because they will get new,
+  // random and distinct IDs.
+  util::StatusOr<KeysetHandle> handle12 =
+      KeysetHandleBuilder()
+          .AddEntry(KeysetHandleBuilder::Entry::CreateFromKey(
+              (*handle1)[0].GetKey(), KeyStatus::kEnabled, /*is_primary=*/true))
+          .AddEntry(KeysetHandleBuilder::Entry::CreateFromKey(
+              (*handle2)[0].GetKey(), KeyStatus::kEnabled,
+              /*is_primary=*/false))
+          .Build();
+  ASSERT_THAT(handle12.status(), IsOk());
+}
+
 TEST_F(KeysetHandleBuilderTest, CreateBuilderEntryFromCopyableKey) {
   Keyset keyset;
   Keyset::Key key;
