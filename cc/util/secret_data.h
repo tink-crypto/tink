@@ -18,11 +18,11 @@
 #define TINK_UTIL_SECRET_DATA_H_
 
 #include <cstddef>
-#include <cstdint>
+#include <cstdint>  // IWYU pragma: keep
 #include <memory>
 #include <string>
 #include <type_traits>
-#include <vector>
+#include <vector>  // IWYU pragma: keep
 
 #include "absl/strings/string_view.h"
 #include "tink/util/secret_data_internal.h"
