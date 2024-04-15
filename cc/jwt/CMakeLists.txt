@@ -230,12 +230,20 @@ tink_cc_library(
     jwt_hmac_proto_serialization.cc
     jwt_hmac_proto_serialization.h
   DEPS
+    tink::jwt::jwt_hmac_key
     tink::jwt::jwt_hmac_parameters
     absl::status
     absl::string_view
+    absl::optional
+    tink::core::partial_key_access
+    tink::core::restricted_data
+    tink::core::secret_key_access_token
+    tink::internal::key_parser
+    tink::internal::key_serializer
     tink::internal::mutable_serialization_registry
     tink::internal::parameters_parser
     tink::internal::parameters_serializer
+    tink::internal::proto_key_serialization
     tink::internal::proto_parameters_serialization
     tink::util::status
     tink::util::statusor
@@ -426,16 +434,23 @@ tink_cc_test(
   SRCS
     jwt_hmac_proto_serialization_test.cc
   DEPS
+    tink::jwt::jwt_hmac_key
     tink::jwt::jwt_hmac_parameters
     tink::jwt::jwt_hmac_proto_serialization
     gmock
     absl::status
     absl::string_view
     absl::optional
+    tink::core::insecure_secret_key_access
+    tink::core::key
     tink::core::parameters
+    tink::core::partial_key_access
+    tink::core::restricted_data
     tink::internal::mutable_serialization_registry
+    tink::internal::proto_key_serialization
     tink::internal::proto_parameters_serialization
     tink::internal::serialization
+    tink::subtle::random
     tink::util::statusor
     tink::util::test_matchers
     tink::proto::common_cc_proto

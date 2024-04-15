@@ -16,13 +16,23 @@
 
 #include "tink/jwt/jwt_hmac_proto_serialization.h"
 
+#include <string>
+
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
+#include "tink/internal/key_parser.h"
+#include "tink/internal/key_serializer.h"
 #include "tink/internal/mutable_serialization_registry.h"
 #include "tink/internal/parameters_parser.h"
 #include "tink/internal/parameters_serializer.h"
+#include "tink/internal/proto_key_serialization.h"
 #include "tink/internal/proto_parameters_serialization.h"
+#include "tink/jwt/jwt_hmac_key.h"
 #include "tink/jwt/jwt_hmac_parameters.h"
+#include "tink/partial_key_access.h"
+#include "tink/restricted_data.h"
+#include "tink/secret_key_access_token.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/common.pb.h"
@@ -43,6 +53,10 @@ using JwtHmacProtoParametersParserImpl =
 using JwtHmacProtoParametersSerializerImpl =
     internal::ParametersSerializerImpl<JwtHmacParameters,
                                        internal::ProtoParametersSerialization>;
+using JwtHmacProtoKeyParserImpl =
+    internal::KeyParserImpl<internal::ProtoKeySerialization, JwtHmacKey>;
+using JwtHmacProtoKeySerializerImpl =
+    internal::KeySerializerImpl<JwtHmacKey, internal::ProtoKeySerialization>;
 
 const absl::string_view kTypeUrl =
     "type.googleapis.com/google.crypto.tink.JwtHmacKey";
@@ -176,6 +190,89 @@ util::StatusOr<internal::ProtoParametersSerialization> SerializeParameters(
       kTypeUrl, *output_prefix_type, format.SerializeAsString());
 }
 
+util::StatusOr<JwtHmacKey> ParseKey(
+    const internal::ProtoKeySerialization& serialization,
+    absl::optional<SecretKeyAccessToken> token) {
+  if (!token.has_value()) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "SecretKeyAccess is required.");
+  }
+  if (serialization.TypeUrl() != kTypeUrl) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Wrong type URL when parsing JwtHmacKey.");
+  }
+
+  google::crypto::tink::JwtHmacKey proto_key;
+  const RestrictedData& restricted_data = serialization.SerializedKeyProto();
+  if (!proto_key.ParseFromString(restricted_data.GetSecret(*token))) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Failed to parse JwtHmacKey proto.");
+  }
+  if (proto_key.version() != 0) {
+    return util::Status(
+        absl::StatusCode::kInvalidArgument,
+        "Parsing JwtHmacKey failed: only version 0 is accepted.");
+  }
+
+  util::StatusOr<JwtHmacParameters> parameters = ToParameters(
+      proto_key.key_value().length(), serialization.GetOutputPrefixType(),
+      proto_key.algorithm(), proto_key.has_custom_kid());
+  if (!parameters.ok()) {
+    return parameters.status();
+  }
+
+  JwtHmacKey::Builder builder =
+      JwtHmacKey::Builder()
+          .SetParameters(*parameters)
+          .SetKeyBytes(RestrictedData(proto_key.key_value(), *token));
+  if (serialization.IdRequirement().has_value()) {
+    builder.SetIdRequirement(*serialization.IdRequirement());
+  }
+  if (proto_key.has_custom_kid()) {
+    builder.SetCustomKid(proto_key.custom_kid().value());
+  }
+  return builder.Build(GetPartialKeyAccess());
+}
+
+util::StatusOr<internal::ProtoKeySerialization> SerializeKey(
+    const JwtHmacKey& key, absl::optional<SecretKeyAccessToken> token) {
+  if (!token.has_value()) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "SecretKeyAccess is required.");
+  }
+  util::StatusOr<RestrictedData> restricted_input =
+      key.GetKeyBytes(GetPartialKeyAccess());
+  if (!restricted_input.ok()) {
+    return restricted_input.status();
+  }
+  util::StatusOr<JwtHmacAlgorithm> proto_algorithm =
+      ToProtoAlgorithm(key.GetParameters().GetAlgorithm());
+  if (!proto_algorithm.ok()) {
+    return proto_algorithm.status();
+  }
+
+  google::crypto::tink::JwtHmacKey proto_key;
+  proto_key.set_version(0);
+  proto_key.set_key_value(restricted_input->GetSecret(*token));
+  proto_key.set_algorithm(*proto_algorithm);
+  if (key.GetParameters().GetKidStrategy() ==
+      JwtHmacParameters::KidStrategy::kCustom) {
+    proto_key.mutable_custom_kid()->set_value(*key.GetKid());
+  }
+
+  util::StatusOr<OutputPrefixType> output_prefix_type =
+      ToOutputPrefixType(key.GetParameters().GetKidStrategy());
+  if (!output_prefix_type.ok()) {
+    return output_prefix_type.status();
+  }
+
+  RestrictedData restricted_output =
+      RestrictedData(proto_key.SerializeAsString(), *token);
+  return internal::ProtoKeySerialization::Create(
+      kTypeUrl, restricted_output, google::crypto::tink::KeyData::SYMMETRIC,
+      *output_prefix_type, key.GetIdRequirement());
+}
+
 JwtHmacProtoParametersParserImpl* JwtHmacProtoParametersParser() {
   static auto* parser =
       new JwtHmacProtoParametersParserImpl(kTypeUrl, ParseParameters);
@@ -185,6 +282,16 @@ JwtHmacProtoParametersParserImpl* JwtHmacProtoParametersParser() {
 JwtHmacProtoParametersSerializerImpl* JwtHmacProtoParametersSerializer() {
   static auto* serializer =
       new JwtHmacProtoParametersSerializerImpl(kTypeUrl, SerializeParameters);
+  return serializer;
+}
+
+JwtHmacProtoKeyParserImpl* JwtHmacProtoKeyParser() {
+  static auto* parser = new JwtHmacProtoKeyParserImpl(kTypeUrl, ParseKey);
+  return parser;
+}
+
+JwtHmacProtoKeySerializerImpl* JwtHmacProtoKeySerializer() {
+  static auto* serializer = new JwtHmacProtoKeySerializerImpl(SerializeKey);
   return serializer;
 }
 
@@ -198,8 +305,21 @@ util::Status RegisterJwtHmacProtoSerialization() {
     return status;
   }
 
+  status =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .RegisterParametersSerializer(JwtHmacProtoParametersSerializer());
+  if (!status.ok()) {
+    return status;
+  }
+
+  status = internal::MutableSerializationRegistry::GlobalInstance()
+               .RegisterKeyParser(JwtHmacProtoKeyParser());
+  if (!status.ok()) {
+    return status;
+  }
+
   return internal::MutableSerializationRegistry::GlobalInstance()
-      .RegisterParametersSerializer(JwtHmacProtoParametersSerializer());
+      .RegisterKeySerializer(JwtHmacProtoKeySerializer());
 }
 
 }  // namespace tink
