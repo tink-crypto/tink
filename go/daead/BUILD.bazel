@@ -36,6 +36,7 @@ go_test(
     name = "daead_test",
     srcs = [
         "aes_siv_key_manager_test.go",
+        "daead_benchmark_test.go",
         "daead_factory_test.go",
         "daead_init_test.go",
         "daead_key_templates_test.go",
