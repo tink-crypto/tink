@@ -275,6 +275,37 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "jwt_signature_parameters",
+    hdrs = ["jwt_signature_parameters.h"],
+    include_prefix = "tink/jwt",
+    deps = ["//:parameters"],
+)
+
+cc_library(
+    name = "jwt_signature_public_key",
+    hdrs = ["jwt_signature_public_key.h"],
+    include_prefix = "tink/jwt",
+    deps = [
+        ":jwt_signature_parameters",
+        "//:key",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
+cc_library(
+    name = "jwt_signature_private_key",
+    hdrs = ["jwt_signature_private_key.h"],
+    include_prefix = "tink/jwt",
+    deps = [
+        ":jwt_signature_parameters",
+        ":jwt_signature_public_key",
+        "//:key",
+        "//:private_key",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
 # tests
 
 cc_test(

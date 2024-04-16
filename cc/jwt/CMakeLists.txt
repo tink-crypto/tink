@@ -252,6 +252,36 @@ tink_cc_library(
     tink::proto::tink_cc_proto
 )
 
+tink_cc_library(
+  NAME jwt_signature_parameters
+  SRCS
+    jwt_signature_parameters.h
+  DEPS
+    tink::core::parameters
+)
+
+tink_cc_library(
+  NAME jwt_signature_public_key
+  SRCS
+    jwt_signature_public_key.h
+  DEPS
+    tink::jwt::jwt_signature_parameters
+    absl::optional
+    tink::core::key
+)
+
+tink_cc_library(
+  NAME jwt_signature_private_key
+  SRCS
+    jwt_signature_private_key.h
+  DEPS
+    tink::jwt::jwt_signature_parameters
+    tink::jwt::jwt_signature_public_key
+    absl::optional
+    tink::core::key
+    tink::core::private_key
+)
+
 # tests
 
 tink_cc_test(
