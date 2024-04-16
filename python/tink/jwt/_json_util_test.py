@@ -14,6 +14,7 @@
 """Tests for tink.python.tink.jwt._json_util."""
 
 from absl.testing import absltest
+
 from tink.jwt import _json_util
 from tink.jwt import _jwt_error
 
@@ -37,7 +38,10 @@ class JwtFormatTest(absltest.TestCase):
       _json_util.json_loads('{"a":"a1", "a":"a2"}')
 
   def test_json_loads_recursion(self):
-    num_recursions = 1000
+    # NOTE: Python 3.12 has raised the maximum C recursion limit to 1500 [1].
+    #
+    # [1] https://github.com/python/cpython/pull/107618
+    num_recursions = 2000
     recursive_json = ('{"a":' * num_recursions) + '""' + ('}' * num_recursions)
     with self.assertRaises(_jwt_error.JwtInvalidError):
       _json_util.json_loads(recursive_json)
