@@ -18,11 +18,20 @@
 
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 #include "tink/experimental/pqcrypto/signature/slh_dsa_parameters.h"
+#include "tink/experimental/pqcrypto/signature/slh_dsa_public_key.h"
+#include "tink/insecure_secret_key_access.h"
+#include "tink/internal/key_parser.h"
+#include "tink/internal/key_serializer.h"
 #include "tink/internal/mutable_serialization_registry.h"
 #include "tink/internal/parameters_parser.h"
 #include "tink/internal/parameters_serializer.h"
+#include "tink/internal/proto_key_serialization.h"
 #include "tink/internal/proto_parameters_serialization.h"
+#include "tink/partial_key_access.h"
+#include "tink/restricted_data.h"
+#include "tink/secret_key_access_token.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/experimental/pqcrypto/slh_dsa.pb.h"
@@ -32,6 +41,7 @@ namespace crypto {
 namespace tink {
 namespace {
 
+using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::OutputPrefixType;
 using ::google::crypto::tink::SlhDsaHashType;
 using ::google::crypto::tink::SlhDsaKeyFormat;
@@ -44,9 +54,16 @@ using SlhDsaProtoParametersParserImpl =
 using SlhDsaProtoParametersSerializerImpl =
     internal::ParametersSerializerImpl<SlhDsaParameters,
                                        internal::ProtoParametersSerialization>;
+using SlhDsaProtoPublicKeyParserImpl =
+    internal::KeyParserImpl<internal::ProtoKeySerialization, SlhDsaPublicKey>;
+using SlhDsaProtoPublicKeySerializerImpl =
+    internal::KeySerializerImpl<SlhDsaPublicKey,
+                                internal::ProtoKeySerialization>;
 
 const absl::string_view kPrivateTypeUrl =
     "type.googleapis.com/google.crypto.tink.SlhDsaPrivateKey";
+const absl::string_view kPublicTypeUrl =
+    "type.googleapis.com/google.crypto.tink.SlhDsaPublicKey";
 
 util::StatusOr<SlhDsaParameters::Variant> ToVariant(
     OutputPrefixType output_prefix_type) {
@@ -201,6 +218,37 @@ util::StatusOr<SlhDsaParameters> ParseParameters(
                       proto_key_format.params());
 }
 
+util::StatusOr<SlhDsaPublicKey> ParsePublicKey(
+    const internal::ProtoKeySerialization& serialization,
+    absl::optional<SecretKeyAccessToken> token) {
+  if (serialization.TypeUrl() != kPublicTypeUrl) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Wrong type URL when parsing SlhDsaPublicKey.");
+  }
+
+  google::crypto::tink::SlhDsaPublicKey proto_key;
+  const RestrictedData& restricted_data = serialization.SerializedKeyProto();
+  if (!proto_key.ParseFromString(
+          restricted_data.GetSecret(InsecureSecretKeyAccess::Get()))) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Failed to parse SlhDsaPublicKey proto");
+  }
+  if (proto_key.version() != 0) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Only version 0 keys are accepted.");
+  }
+
+  util::StatusOr<SlhDsaParameters> parameters =
+      ToParameters(serialization.GetOutputPrefixType(), proto_key.params());
+  if (!parameters.ok()) {
+    return parameters.status();
+  }
+
+  return SlhDsaPublicKey::Create(*parameters, proto_key.key_value(),
+                                 serialization.IdRequirement(),
+                                 GetPartialKeyAccess());
+}
+
 util::StatusOr<internal::ProtoParametersSerialization> SerializeParameters(
     const SlhDsaParameters& parameters) {
   util::StatusOr<OutputPrefixType> output_prefix_type =
@@ -222,16 +270,53 @@ util::StatusOr<internal::ProtoParametersSerialization> SerializeParameters(
       proto_key_format.SerializeAsString());
 }
 
-SlhDsaProtoParametersParserImpl* SlhDsaProtoParametersParser() {
-  static auto* parser =
-      new SlhDsaProtoParametersParserImpl(kPrivateTypeUrl, ParseParameters);
-  return parser;
+util::StatusOr<internal::ProtoKeySerialization> SerializePublicKey(
+    const SlhDsaPublicKey& key, absl::optional<SecretKeyAccessToken> token) {
+  util::StatusOr<SlhDsaParams> params = FromParameters(key.GetParameters());
+  if (!params.ok()) {
+    return params.status();
+  }
+
+  google::crypto::tink::SlhDsaPublicKey proto_key;
+  proto_key.set_version(0);
+  *proto_key.mutable_params() = *params;
+  proto_key.set_key_value(key.GetPublicKeyBytes(GetPartialKeyAccess()));
+
+  util::StatusOr<OutputPrefixType> output_prefix_type =
+      ToOutputPrefixType(key.GetParameters().GetVariant());
+  if (!output_prefix_type.ok()) {
+    return output_prefix_type.status();
+  }
+
+  RestrictedData restricted_output = RestrictedData(
+      proto_key.SerializeAsString(), InsecureSecretKeyAccess::Get());
+  return internal::ProtoKeySerialization::Create(
+      kPublicTypeUrl, restricted_output, KeyData::ASYMMETRIC_PUBLIC,
+      *output_prefix_type, key.GetIdRequirement());
 }
 
-SlhDsaProtoParametersSerializerImpl* SlhDsaProtoParametersSerializer() {
-  static auto* serializer = new SlhDsaProtoParametersSerializerImpl(
+SlhDsaProtoParametersParserImpl& SlhDsaProtoParametersParser() {
+  static auto parser =
+      new SlhDsaProtoParametersParserImpl(kPrivateTypeUrl, ParseParameters);
+  return *parser;
+}
+
+SlhDsaProtoParametersSerializerImpl& SlhDsaProtoParametersSerializer() {
+  static auto serializer = new SlhDsaProtoParametersSerializerImpl(
       kPrivateTypeUrl, SerializeParameters);
-  return serializer;
+  return *serializer;
+}
+
+SlhDsaProtoPublicKeyParserImpl& SlhDsaProtoPublicKeyParser() {
+  static auto* parser =
+      new SlhDsaProtoPublicKeyParserImpl(kPublicTypeUrl, ParsePublicKey);
+  return *parser;
+}
+
+SlhDsaProtoPublicKeySerializerImpl& SlhDsaProtoPublicKeySerializer() {
+  static auto* serializer =
+      new SlhDsaProtoPublicKeySerializerImpl(SerializePublicKey);
+  return *serializer;
 }
 
 }  // namespace
@@ -239,13 +324,26 @@ SlhDsaProtoParametersSerializerImpl* SlhDsaProtoParametersSerializer() {
 util::Status RegisterSlhDsaProtoSerialization() {
   util::Status status =
       internal::MutableSerializationRegistry::GlobalInstance()
-          .RegisterParametersParser(SlhDsaProtoParametersParser());
+          .RegisterParametersParser(&SlhDsaProtoParametersParser());
+  if (!status.ok()) {
+    return status;
+  }
+
+  status =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .RegisterParametersSerializer(&SlhDsaProtoParametersSerializer());
+  if (!status.ok()) {
+    return status;
+  }
+
+  status = internal::MutableSerializationRegistry::GlobalInstance()
+               .RegisterKeyParser(&SlhDsaProtoPublicKeyParser());
   if (!status.ok()) {
     return status;
   }
 
   return internal::MutableSerializationRegistry::GlobalInstance()
-      .RegisterParametersSerializer(SlhDsaProtoParametersSerializer());
+      .RegisterKeySerializer(&SlhDsaProtoPublicKeySerializer());
 }
 
 }  // namespace tink
