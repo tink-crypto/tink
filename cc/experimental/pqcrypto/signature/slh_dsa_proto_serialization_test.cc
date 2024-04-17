@@ -16,6 +16,7 @@
 
 #include "tink/experimental/pqcrypto/signature/slh_dsa_proto_serialization.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -24,7 +25,11 @@
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
+#define OPENSSL_UNSTABLE_EXPERIMENTAL_SPX
+#include "openssl/experimental/spx.h"
+#undef OPENSSL_UNSTABLE_EXPERIMENTAL_SPX
 #include "tink/experimental/pqcrypto/signature/slh_dsa_parameters.h"
+#include "tink/experimental/pqcrypto/signature/slh_dsa_private_key.h"
 #include "tink/experimental/pqcrypto/signature/slh_dsa_public_key.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/mutable_serialization_registry.h"
@@ -444,6 +449,281 @@ TEST_P(SlhDsaProtoSerializationTest, SerializePublicKeyWorks) {
   EXPECT_THAT(proto_key.params().hash_type(), Eq(SlhDsaHashType::SHA2));
   EXPECT_THAT(proto_key.params().sig_type(),
               Eq(SlhDsaSignatureType::SMALL_SIGNATURE));
+}
+
+TEST_P(SlhDsaProtoSerializationTest, ParsePrivateKeyWorks) {
+  TestCase test_case = GetParam();
+  ASSERT_THAT(RegisterSlhDsaProtoSerialization(), IsOk());
+
+  std::string public_key_bytes;
+  public_key_bytes.resize(SPX_PUBLIC_KEY_BYTES);
+  std::string private_key_bytes;
+  private_key_bytes.resize(SPX_SECRET_KEY_BYTES);
+
+  SPX_generate_key(reinterpret_cast<uint8_t*>(public_key_bytes.data()),
+                   reinterpret_cast<uint8_t*>(private_key_bytes.data()));
+
+  SlhDsaParams params;
+  params.set_sig_type(SlhDsaSignatureType::SMALL_SIGNATURE);
+  params.set_hash_type(SlhDsaHashType::SHA2);
+  params.set_key_size(64);
+
+  google::crypto::tink::SlhDsaPublicKey public_key_proto;
+  public_key_proto.set_version(0);
+  public_key_proto.set_key_value(public_key_bytes);
+  *public_key_proto.mutable_params() = params;
+
+  google::crypto::tink::SlhDsaPrivateKey private_key_proto;
+  private_key_proto.set_version(0);
+  *private_key_proto.mutable_public_key() = public_key_proto;
+  private_key_proto.set_key_value(private_key_bytes);
+
+  RestrictedData serialized_key = RestrictedData(
+      private_key_proto.SerializeAsString(), InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(
+          kPrivateTypeUrl, serialized_key, KeyData::ASYMMETRIC_PRIVATE,
+          test_case.output_prefix_type, test_case.id_requirement);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> private_key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(private_key, IsOk());
+
+  EXPECT_THAT((*private_key)->GetIdRequirement(), Eq(test_case.id_requirement));
+  EXPECT_THAT((*private_key)->GetParameters().HasIdRequirement(),
+              test_case.id_requirement.has_value());
+
+  util::StatusOr<SlhDsaParameters> expected_parameters =
+      SlhDsaParameters::Create(
+          SlhDsaParameters::HashType::kSha2, /*private_key_size_in_bytes=*/64,
+          SlhDsaParameters::SignatureType::kSmallSignature, test_case.variant);
+  ASSERT_THAT(expected_parameters, IsOk());
+
+  util::StatusOr<SlhDsaPublicKey> expected_public_key =
+      SlhDsaPublicKey::Create(*expected_parameters, public_key_bytes,
+                              test_case.id_requirement, GetPartialKeyAccess());
+  ASSERT_THAT(expected_public_key, IsOk());
+
+  util::StatusOr<SlhDsaPrivateKey> expected_private_key =
+      SlhDsaPrivateKey::Create(
+          *expected_public_key,
+          RestrictedData(private_key_bytes, InsecureSecretKeyAccess::Get()),
+          GetPartialKeyAccess());
+  ASSERT_THAT(expected_private_key, IsOk());
+
+  EXPECT_THAT(**private_key, Eq(*expected_private_key));
+}
+
+TEST_F(SlhDsaProtoSerializationTest, ParsePrivateKeyWithInvalidSerialization) {
+  ASSERT_THAT(RegisterSlhDsaProtoSerialization(), IsOk());
+
+  RestrictedData serialized_key =
+      RestrictedData("invalid_serialization", InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(kPrivateTypeUrl, serialized_key,
+                                              KeyData::ASYMMETRIC_PRIVATE,
+                                              OutputPrefixType::TINK,
+                                              /*id_requirement=*/0x23456789);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, InsecureSecretKeyAccess::Get());
+  EXPECT_THAT(key.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("Failed to parse SlhDsaPrivateKey proto")));
+}
+
+TEST_F(SlhDsaProtoSerializationTest, ParsePrivateKeyWithInvalidVersion) {
+  ASSERT_THAT(RegisterSlhDsaProtoSerialization(), IsOk());
+
+  std::string public_key_bytes;
+  public_key_bytes.resize(SPX_PUBLIC_KEY_BYTES);
+  std::string private_key_bytes;
+  private_key_bytes.resize(SPX_SECRET_KEY_BYTES);
+
+  SPX_generate_key(reinterpret_cast<uint8_t*>(public_key_bytes.data()),
+                   reinterpret_cast<uint8_t*>(private_key_bytes.data()));
+
+  SlhDsaParams params;
+  params.set_sig_type(SlhDsaSignatureType::SMALL_SIGNATURE);
+  params.set_hash_type(SlhDsaHashType::SHA2);
+  params.set_key_size(64);
+
+  google::crypto::tink::SlhDsaPublicKey public_key_proto;
+  public_key_proto.set_version(0);
+  public_key_proto.set_key_value(public_key_bytes);
+  *public_key_proto.mutable_params() = params;
+
+  google::crypto::tink::SlhDsaPrivateKey private_key_proto;
+  private_key_proto.set_version(1);
+  *private_key_proto.mutable_public_key() = public_key_proto;
+  private_key_proto.set_key_value(private_key_bytes);
+
+  RestrictedData serialized_key = RestrictedData(
+      private_key_proto.SerializeAsString(), InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(kPrivateTypeUrl, serialized_key,
+                                              KeyData::ASYMMETRIC_PRIVATE,
+                                              OutputPrefixType::TINK,
+                                              /*id_requirement=*/0x23456789);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, InsecureSecretKeyAccess::Get());
+  EXPECT_THAT(key.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("Only version 0 keys are accepted")));
+}
+
+TEST_F(SlhDsaProtoSerializationTest, ParsePrivateKeyNoSecretKeyAccess) {
+  ASSERT_THAT(RegisterSlhDsaProtoSerialization(), IsOk());
+
+  std::string public_key_bytes;
+  public_key_bytes.resize(SPX_PUBLIC_KEY_BYTES);
+  std::string private_key_bytes;
+  private_key_bytes.resize(SPX_SECRET_KEY_BYTES);
+
+  SPX_generate_key(reinterpret_cast<uint8_t*>(public_key_bytes.data()),
+                   reinterpret_cast<uint8_t*>(private_key_bytes.data()));
+
+  SlhDsaParams params;
+  params.set_sig_type(SlhDsaSignatureType::SMALL_SIGNATURE);
+  params.set_hash_type(SlhDsaHashType::SHA2);
+  params.set_key_size(64);
+
+  google::crypto::tink::SlhDsaPublicKey public_key_proto;
+  public_key_proto.set_version(0);
+  public_key_proto.set_key_value(public_key_bytes);
+  *public_key_proto.mutable_params() = params;
+
+  google::crypto::tink::SlhDsaPrivateKey private_key_proto;
+  private_key_proto.set_version(0);
+  *private_key_proto.mutable_public_key() = public_key_proto;
+  private_key_proto.set_key_value(private_key_bytes);
+
+  RestrictedData serialized_key = RestrictedData(
+      private_key_proto.SerializeAsString(), InsecureSecretKeyAccess::Get());
+
+  util::StatusOr<internal::ProtoKeySerialization> serialization =
+      internal::ProtoKeySerialization::Create(kPrivateTypeUrl, serialized_key,
+                                              KeyData::ASYMMETRIC_PRIVATE,
+                                              OutputPrefixType::TINK,
+                                              /*id_requirement=*/0x23456789);
+  ASSERT_THAT(serialization, IsOk());
+
+  util::StatusOr<std::unique_ptr<Key>> key =
+      internal::MutableSerializationRegistry::GlobalInstance().ParseKey(
+          *serialization, /*token=*/absl::nullopt);
+  EXPECT_THAT(key.status(), StatusIs(absl::StatusCode::kPermissionDenied));
+}
+
+TEST_P(SlhDsaProtoSerializationTest, SerializePrivateKey) {
+  TestCase test_case = GetParam();
+  ASSERT_THAT(RegisterSlhDsaProtoSerialization(), IsOk());
+
+  std::string public_key_bytes;
+  public_key_bytes.resize(SPX_PUBLIC_KEY_BYTES);
+  std::string private_key_bytes;
+  private_key_bytes.resize(SPX_SECRET_KEY_BYTES);
+
+  SPX_generate_key(reinterpret_cast<uint8_t*>(public_key_bytes.data()),
+                   reinterpret_cast<uint8_t*>(private_key_bytes.data()));
+
+  util::StatusOr<SlhDsaParameters> parameters = SlhDsaParameters::Create(
+      SlhDsaParameters::HashType::kSha2, /*private_key_size_in_bytes=*/64,
+      SlhDsaParameters::SignatureType::kSmallSignature, test_case.variant);
+  ASSERT_THAT(parameters, IsOk());
+
+  util::StatusOr<SlhDsaPublicKey> public_key =
+      SlhDsaPublicKey::Create(*parameters, public_key_bytes,
+                              test_case.id_requirement, GetPartialKeyAccess());
+  ASSERT_THAT(public_key, IsOk());
+
+  util::StatusOr<SlhDsaPrivateKey> private_key = SlhDsaPrivateKey::Create(
+      *public_key,
+      RestrictedData(private_key_bytes, InsecureSecretKeyAccess::Get()),
+      GetPartialKeyAccess());
+  ASSERT_THAT(private_key, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialization =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeKey<internal::ProtoKeySerialization>(
+              *private_key, InsecureSecretKeyAccess::Get());
+  ASSERT_THAT(serialization, IsOk());
+  EXPECT_THAT((*serialization)->ObjectIdentifier(), Eq(kPrivateTypeUrl));
+
+  const internal::ProtoKeySerialization* proto_serialization =
+      dynamic_cast<const internal::ProtoKeySerialization*>(
+          serialization->get());
+  ASSERT_THAT(proto_serialization, NotNull());
+  EXPECT_THAT(proto_serialization->TypeUrl(), Eq(kPrivateTypeUrl));
+  EXPECT_THAT(proto_serialization->KeyMaterialType(),
+              Eq(KeyData::ASYMMETRIC_PRIVATE));
+  EXPECT_THAT(proto_serialization->GetOutputPrefixType(),
+              Eq(test_case.output_prefix_type));
+  EXPECT_THAT(proto_serialization->IdRequirement(),
+              Eq(test_case.id_requirement));
+
+  google::crypto::tink::SlhDsaPrivateKey proto_key;
+  ASSERT_THAT(proto_key.ParseFromString(
+                  proto_serialization->SerializedKeyProto().GetSecret(
+                      InsecureSecretKeyAccess::Get())),
+              IsTrue());
+  EXPECT_THAT(proto_key.version(), Eq(0));
+  EXPECT_THAT(proto_key.key_value(), Eq(private_key_bytes));
+  EXPECT_THAT(proto_key.has_public_key(), IsTrue());
+  EXPECT_THAT(proto_key.public_key().version(), Eq(0));
+  EXPECT_THAT(proto_key.public_key().key_value(), Eq(public_key_bytes));
+  EXPECT_THAT(proto_key.public_key().has_params(), IsTrue());
+  EXPECT_THAT(proto_key.public_key().params().key_size(), Eq(64));
+  EXPECT_THAT(proto_key.public_key().params().hash_type(),
+              Eq(SlhDsaHashType::SHA2));
+  EXPECT_THAT(proto_key.public_key().params().sig_type(),
+              Eq(SlhDsaSignatureType::SMALL_SIGNATURE));
+}
+
+TEST_F(SlhDsaProtoSerializationTest, SerializePrivateKeyNoSecretKeyAccess) {
+  ASSERT_THAT(RegisterSlhDsaProtoSerialization(), IsOk());
+
+  std::string public_key_bytes;
+  public_key_bytes.resize(SPX_PUBLIC_KEY_BYTES);
+  std::string private_key_bytes;
+  private_key_bytes.resize(SPX_SECRET_KEY_BYTES);
+
+  SPX_generate_key(reinterpret_cast<uint8_t*>(public_key_bytes.data()),
+                   reinterpret_cast<uint8_t*>(private_key_bytes.data()));
+
+  util::StatusOr<SlhDsaParameters> parameters = SlhDsaParameters::Create(
+      SlhDsaParameters::HashType::kSha2, /*private_key_size_in_bytes=*/64,
+      SlhDsaParameters::SignatureType::kSmallSignature,
+      SlhDsaParameters::Variant::kTink);
+  ASSERT_THAT(parameters, IsOk());
+
+  util::StatusOr<SlhDsaPublicKey> public_key =
+      SlhDsaPublicKey::Create(*parameters, public_key_bytes,
+                              /*id_requirement=*/123, GetPartialKeyAccess());
+  ASSERT_THAT(public_key, IsOk());
+
+  util::StatusOr<SlhDsaPrivateKey> private_key = SlhDsaPrivateKey::Create(
+      *public_key,
+      RestrictedData(private_key_bytes, InsecureSecretKeyAccess::Get()),
+      GetPartialKeyAccess());
+  ASSERT_THAT(private_key, IsOk());
+
+  util::StatusOr<std::unique_ptr<Serialization>> serialization =
+      internal::MutableSerializationRegistry::GlobalInstance()
+          .SerializeKey<internal::ProtoKeySerialization>(
+              *private_key, /*token=*/absl::nullopt);
+  ASSERT_THAT(serialization.status(),
+              StatusIs(absl::StatusCode::kPermissionDenied,
+                       HasSubstr("SecretKeyAccess is required")));
 }
 
 }  // namespace

@@ -20,6 +20,7 @@
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "tink/experimental/pqcrypto/signature/slh_dsa_parameters.h"
+#include "tink/experimental/pqcrypto/signature/slh_dsa_private_key.h"
 #include "tink/experimental/pqcrypto/signature/slh_dsa_public_key.h"
 #include "tink/insecure_secret_key_access.h"
 #include "tink/internal/key_parser.h"
@@ -58,6 +59,11 @@ using SlhDsaProtoPublicKeyParserImpl =
     internal::KeyParserImpl<internal::ProtoKeySerialization, SlhDsaPublicKey>;
 using SlhDsaProtoPublicKeySerializerImpl =
     internal::KeySerializerImpl<SlhDsaPublicKey,
+                                internal::ProtoKeySerialization>;
+using SlhDsaProtoPrivateKeyParserImpl =
+    internal::KeyParserImpl<internal::ProtoKeySerialization, SlhDsaPrivateKey>;
+using SlhDsaProtoPrivateKeySerializerImpl =
+    internal::KeySerializerImpl<SlhDsaPrivateKey,
                                 internal::ProtoKeySerialization>;
 
 const absl::string_view kPrivateTypeUrl =
@@ -249,6 +255,46 @@ util::StatusOr<SlhDsaPublicKey> ParsePublicKey(
                                  GetPartialKeyAccess());
 }
 
+util::StatusOr<SlhDsaPrivateKey> ParsePrivateKey(
+    const internal::ProtoKeySerialization& serialization,
+    absl::optional<SecretKeyAccessToken> token) {
+  if (serialization.TypeUrl() != kPrivateTypeUrl) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Wrong type URL when parsing SlhDsaPrivateKey.");
+  }
+  if (!token.has_value()) {
+    return util::Status(absl::StatusCode::kPermissionDenied,
+                        "SecretKeyAccess is required");
+  }
+  google::crypto::tink::SlhDsaPrivateKey proto_key;
+  const RestrictedData& restricted_data = serialization.SerializedKeyProto();
+  if (!proto_key.ParseFromString(restricted_data.GetSecret(*token))) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Failed to parse SlhDsaPrivateKey proto");
+  }
+  if (proto_key.version() != 0) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Only version 0 keys are accepted.");
+  }
+
+  util::StatusOr<SlhDsaParameters> parameters = ToParameters(
+      serialization.GetOutputPrefixType(), proto_key.public_key().params());
+  if (!parameters.ok()) {
+    return parameters.status();
+  }
+
+  util::StatusOr<SlhDsaPublicKey> public_key = SlhDsaPublicKey::Create(
+      *parameters, proto_key.public_key().key_value(),
+      serialization.IdRequirement(), GetPartialKeyAccess());
+  if (!public_key.ok()) {
+    return public_key.status();
+  }
+
+  return SlhDsaPrivateKey::Create(*public_key,
+                                  RestrictedData(proto_key.key_value(), *token),
+                                  GetPartialKeyAccess());
+}
+
 util::StatusOr<internal::ProtoParametersSerialization> SerializeParameters(
     const SlhDsaParameters& parameters) {
   util::StatusOr<OutputPrefixType> output_prefix_type =
@@ -295,6 +341,48 @@ util::StatusOr<internal::ProtoKeySerialization> SerializePublicKey(
       *output_prefix_type, key.GetIdRequirement());
 }
 
+util::StatusOr<internal::ProtoKeySerialization> SerializePrivateKey(
+    const SlhDsaPrivateKey& key, absl::optional<SecretKeyAccessToken> token) {
+  if (!token.has_value()) {
+    return util::Status(absl::StatusCode::kPermissionDenied,
+                        "SecretKeyAccess is required");
+  }
+  util::StatusOr<RestrictedData> restricted_input =
+      key.GetPrivateKeyBytes(GetPartialKeyAccess());
+  if (!restricted_input.ok()) {
+    return restricted_input.status();
+  }
+
+  util::StatusOr<SlhDsaParams> params =
+      FromParameters(key.GetPublicKey().GetParameters());
+  if (!params.ok()) {
+    return params.status();
+  }
+
+  google::crypto::tink::SlhDsaPublicKey proto_public_key;
+  proto_public_key.set_version(0);
+  *proto_public_key.mutable_params() = *params;
+  proto_public_key.set_key_value(
+      key.GetPublicKey().GetPublicKeyBytes(GetPartialKeyAccess()));
+
+  google::crypto::tink::SlhDsaPrivateKey proto_private_key;
+  proto_private_key.set_version(0);
+  *proto_private_key.mutable_public_key() = proto_public_key;
+  proto_private_key.set_key_value(restricted_input->GetSecret(*token));
+
+  util::StatusOr<OutputPrefixType> output_prefix_type =
+      ToOutputPrefixType(key.GetPublicKey().GetParameters().GetVariant());
+  if (!output_prefix_type.ok()) {
+    return output_prefix_type.status();
+  }
+
+  RestrictedData restricted_output =
+      RestrictedData(proto_private_key.SerializeAsString(), *token);
+  return internal::ProtoKeySerialization::Create(
+      kPrivateTypeUrl, restricted_output, KeyData::ASYMMETRIC_PRIVATE,
+      *output_prefix_type, key.GetIdRequirement());
+}
+
 SlhDsaProtoParametersParserImpl& SlhDsaProtoParametersParser() {
   static auto parser =
       new SlhDsaProtoParametersParserImpl(kPrivateTypeUrl, ParseParameters);
@@ -316,6 +404,18 @@ SlhDsaProtoPublicKeyParserImpl& SlhDsaProtoPublicKeyParser() {
 SlhDsaProtoPublicKeySerializerImpl& SlhDsaProtoPublicKeySerializer() {
   static auto* serializer =
       new SlhDsaProtoPublicKeySerializerImpl(SerializePublicKey);
+  return *serializer;
+}
+
+SlhDsaProtoPrivateKeyParserImpl& SlhDsaProtoPrivateKeyParser() {
+  static auto* parser =
+      new SlhDsaProtoPrivateKeyParserImpl(kPrivateTypeUrl, ParsePrivateKey);
+  return *parser;
+}
+
+SlhDsaProtoPrivateKeySerializerImpl& SlhDsaProtoPrivateKeySerializer() {
+  static auto* serializer =
+      new SlhDsaProtoPrivateKeySerializerImpl(SerializePrivateKey);
   return *serializer;
 }
 
@@ -342,8 +442,20 @@ util::Status RegisterSlhDsaProtoSerialization() {
     return status;
   }
 
+  status = internal::MutableSerializationRegistry::GlobalInstance()
+               .RegisterKeySerializer(&SlhDsaProtoPublicKeySerializer());
+  if (!status.ok()) {
+    return status;
+  }
+
+  status = internal::MutableSerializationRegistry::GlobalInstance()
+               .RegisterKeyParser(&SlhDsaProtoPrivateKeyParser());
+  if (!status.ok()) {
+    return status;
+  }
+
   return internal::MutableSerializationRegistry::GlobalInstance()
-      .RegisterKeySerializer(&SlhDsaProtoPublicKeySerializer());
+      .RegisterKeySerializer(&SlhDsaProtoPrivateKeySerializer());
 }
 
 }  // namespace tink
